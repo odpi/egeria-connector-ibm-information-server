@@ -17,7 +17,7 @@ on events received from other members of the cohort.
 
 The IBM IGC Repository Connector works through a combination of the following:
 
-- IBM IGC's REST API, itself abstracted through the [IGC REST Client Library](ibm-igc-rest-client-library/)
+- IBM IGC's REST API, itself abstracted through the [IGC REST Client Library](ibm-igc-rest-client-library)
 - IBM InfoSphere Information Server's embedded Apache Kafka event bus
     - specifically the `InfosphereEvents` topic (hence the need to enable events in the setup)
 - Some [IGC extensions](docs/ibm-igc-extensions.md) that implement specific additional functionality
@@ -39,7 +39,7 @@ There should not be any need to restart the environment after enabling the event
 ### Configure this Egeria connector
 
 You will need to configure the OMAG Server Platform as follows (order is important) to make use of this Egeria connector.
-For example payloads and endpoints, see the [Postman samples](samples/README.md).
+For example payloads and endpoints, see the [Postman samples](samples).
 
 1. Configure your event bus for Egeria, by POSTing a payload like the following:
 
