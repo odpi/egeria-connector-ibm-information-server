@@ -253,10 +253,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"igcBaseURL\": \"https://{{igc_host}}:{{igc_port}}\",\n\t\"igcAuthorization\": \"{{igc_basic_auth}}\"\n}"
+					"raw": "{\n\t\"ibm.igc.services.host\": \"{{igc_host}}\",\n\t\"ibm.igc.services.port\": \"{{igc_port}}\",\n\t\"ibm.igc.username\": \"{{igc_user}}\",\n\t\"ibm.igc.password\": \"{{igc_password}}\"\n}"
 				},
 				"url": {
-					"raw": "{{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/{{server}}/local-repository/mode/ibm-igc/details",
+					"raw": "{{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/{{server}}/local-repository/mode/repository-proxy/details?connectorProvider=org.odpi.openmetadata.adapters.repositoryservices.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider",
 					"host": [
 						"{{baseURL}}"
 					],
@@ -269,8 +269,14 @@
 						"{{server}}",
 						"local-repository",
 						"mode",
-						"ibm-igc",
+						"repository-proxy",
 						"details"
+					],
+					"query": [
+						{
+							"key": "connectorProvider",
+							"value": "org.odpi.openmetadata.adapters.repositoryservices.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider"
+						}
 					]
 				}
 			},
@@ -397,8 +403,8 @@
 							"});",
 							"pm.test(\"IGC endpoint configured\", function () {",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.omagserverConfig.repositoryServicesConfig.localRepositoryConfig.localRepositoryLocalConnection.qualifiedName).to.equal(\"IBMIGCRepository.Connection.\" + environment.server);",
-							"    pm.expect(jsonData.omagserverConfig.repositoryServicesConfig.localRepositoryConfig.localRepositoryLocalConnection.additionalProperties.igcBaseURL).to.equal(\"https://\" + environment.igc_host + \":\" + environment.igc_port);",
+							"    pm.expect(jsonData.omagserverConfig.repositoryServicesConfig.localRepositoryConfig.localRepositoryLocalConnection.qualifiedName).to.equal(\"MetadataRepositoryNative.Connection.\" + environment.server);",
+							"    pm.expect(jsonData.omagserverConfig.repositoryServicesConfig.localRepositoryConfig.localRepositoryLocalConnection.configurationProperties[\"ibm.igc.services.host\"]).to.equal(environment.igc_host);",
 							"});"
 						],
 						"type": "text/javascript"

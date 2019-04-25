@@ -70,19 +70,24 @@ For example payloads and endpoints, see the [Postman samples](samples).
 
     ```json
     {
-        "igcBaseURL": "https://my.igc.services.host.com:9445",
-        "igcAuthorization": "aXNhZG1pbjppc2FkbWlu"
+        "ibm.igc.services.host": "{{igc_host}}",
+        "ibm.igc.services.port": "{{igc_port}}",
+        "ibm.igc.username": "{{igc_user}}",
+        "ibm.igc.password": "{{igc_password}}"
     }
     ```
 
     to:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{server}}/local-repository/mode/ibm-igc/details
+    {{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/{{server}}/local-repository/mode/repository-proxy/details?connectorProvider=org.odpi.openmetadata.adapters.repositoryservices.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider
     ```
 
-    The payload should include the URL (including hostname and port) of your IGC environment's domain (services) tier,
-    and the `igcAuthorization` should be set to a basic-encoded authorization string (`username:password`).
+    The payload should include the hostname and port of your IGC environment's domain (services) tier,
+    and a `username` and `password` through which the REST API can be accessed.
+
+    Note that you also need to provide the `connectorProvider` parameter, set to the name of the IGC
+    connectorProvider class (value as given above).
 
 1. Configure the event mapper for IGC, by POSTing something like the following:
 
