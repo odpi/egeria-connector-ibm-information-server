@@ -76,7 +76,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>ibm-igc-rest-client-library</module>
+        <module>clientlibrary</module>
         <module>adapter</module>
         <module>distribution</module>
     </modules>
