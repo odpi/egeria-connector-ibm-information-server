@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Copyright Contributors to the ODPi Egeria project. -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>Egeria Connector for IBM Information Governance Catalog</name>
+    <description>
+        An OCF OMRS Repository Connector for IBM Information Governance Catalog (IGC) (using its REST API to call into the IGC metadata repository).
+    </description>
+
+    <groupId>org.odpi.egeria</groupId>
+    <artifactId>egeria-connector-ibm-igc</artifactId>
+    <version>1.1-SNAPSHOT</version>
+
+    <url>https://odpi.github.io/Egeria</url>
+
+    <!-- The Apache license is used for code and the creative commons license is used for documentation -->
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+        <license>
+            <name>Creative Commons Attribution 4.0 International (CC BY 4.0)</name>
+            <url>https://creativecommons.org/licenses/by/4.0</url>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>ODPi</name>
+        <url>http://www.odpi.org</url>
+    </organization>
+
+    <scm>
+        <connection>scm:git:git://github.com/odpi/egeria-connector-ibm-igc.git</connection>
+        <developerConnection>scm:git:ssh://github.com:odpi/egeria-connector-ibm-igc.git</developerConnection>
+        <url>http://github.com/odpi/egeria-connector-ibm-igc/tree/master</url>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/odpi/egeria-connector-ibm-igc/issues</url>
+    </issueManagement>
+
+    <inceptionYear>2018</inceptionYear>
+
+    <mailingLists>
+        <mailingList>
+            <name>odpi-egeria</name>
+            <subscribe>https://lists.odpi.org/g/odpi-project-egeria</subscribe>
+            <unsubscribe>odpi-project-egeria+unsubscribe@lists.odpi.org</unsubscribe>
+            <post>odpi-project-egeria@lists.odpi.org</post>
+        </mailingList>
+    </mailingLists>
+
+    <developers>
+        <developer>
+            <id>cmgrote</id>
+            <name>Christopher Grote</name>
+            <email>chris@thegrotes.net</email>
+            <timezone>Europe/London</timezone>
+            <roles>
+                <role>maintainer</role>
+            </roles>
+            <organization>IBM Corporation</organization>
+        </developer>
+    </developers>
+
+    <!-- POM packaging means that this module has sub-modules -->
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>ibm-igc-rest-client-library</module>
+        <module>adapter</module>
+        <module>distribution</module>
+    </modules>
+
+    <properties>
+        <open-metadata.version>1.1-SNAPSHOT</open-metadata.version>
+        <!-- Level of Java  -->
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <!-- Platform encoding  -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- Versions of dependent libraries -->
+        <spring-web.version>5.1.5.RELEASE</spring-web.version>
+        <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
+        <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
+        <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
+        <maven-download.version>1.4.1</maven-download.version>
+        <maven-antrun.version>1.8</maven-antrun.version>
+        <maven-install.version>3.0.0-M1</maven-install.version>
+        <maven-shade.version>3.2.1</maven-shade.version>
+        <maven-compiler.version>3.8.0</maven-compiler.version>
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <!--suppress UnresolvedMavenProperty -->
+        <sonar.jacoco.reportPaths>${maven.multiModuleProjectDirectory}/target/jacoco.exec</sonar.jacoco.reportPaths>
+        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+                <version>${spring-web.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.odpi.egeria</groupId>
+            <artifactId>open-metadata-adapter-package</artifactId>
+            <version>${open-metadata.version}</version>
+            <!-- TODO: temporary exclusion while code is migrated to this separate repo -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.odpi.egeria</groupId>
+                    <artifactId>igc-repository-connector</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+    <!-- TODO: temporarily pull from ODPi snapshot repo for Maven, until snapshots are available in Maven Central -->
+    <repositories>
+        <repository>
+            <id>odpi-snapshots</id>
+            <name>ODPi Snapshots</name>
+            <url>https://nexus.odpi.org/content/groups/public/</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+
+    <build>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.0.0-M1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.3</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <!-- Should be default, but needed to keep IntelliJ happy -->
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+        </testResources>
+
+    	<!-- Default compiler options - enable deprecation information -->
+    	<plugins>
+    	    <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler.version}</version>
+                <configuration>
+                    <compilerArgument>-Xlint:deprecation</compilerArgument>
+                    <failOnWarning>false</failOnWarning>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin.version}</version>
+            </plugin>
+            <!-- Validates maven & java versions -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-versions</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.5.0,)</version>
+                                    <message>** MAVEN VERSION ERROR ** Maven 3.5.0 or above is required. See
+                                            https://maven.apache.org/install.html
+                                    </message>
+                                </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <level>ERROR</level>
+                                    <version>[1.8,)</version>
+                                    <message>** JAVA VERSION ERROR ** Java 8 (Update 151) or above is required.</message>
+                                </requireJavaVersion>
+                                <requireJavaVersion>
+                                    <level>WARN</level>
+                                    <version>(,1.9]</version>
+                                    <message>** JAVA VERSION WARNING ** Java 9 and above has not been tested.</message>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
+                <version>0.12</version>
+                <configuration>
+                    <useDefaultExcludes>true</useDefaultExcludes>
+                    <useMavenDefaultExcludes>true</useMavenDefaultExcludes>
+                    <useIdeaDefaultExcludes>true</useIdeaDefaultExcludes>
+                    <useEclipseDefaultExcludes>true</useEclipseDefaultExcludes>
+                    <excludeSubProjects>true</excludeSubProjects>
+                    <excludes>
+                        <exclude>/CNAME</exclude>
+                        <exclude>**/banner.txt</exclude>
+                        <exclude>**/*.json</exclude>
+                        <exclude>**/*.patch</exclude>
+                        <exclude>**/*.drawio</exclude>
+                        <exclude>**/*.log</exclude>
+                        <exclude>**/*.csv</exclude>
+                        <exclude>**/*.iml</exclude>
+                        <exclude>**/target/**</exclude>
+                        <exclude>**/.repository/**</exclude>
+                        <exclude>**/log</exclude>
+                        <exclude>**/*.lock</exclude>
+                        <exclude>**/m2repo*/**</exclude>
+                        <exclude>**/venv/**</exclude>
+                        <exclude>**/dependency-reduced-pom.xml</exclude>
+                        <exclude>**/.classpath</exclude>
+                        <exclude>**/.project</exclude>
+                        <exclude>**/.settings/**</exclude>
+                    </excludes>
+                    <licenseFamilies>
+                        <licenseFamily implementation="org.apache.rat.license.SimpleLicenseFamily">
+                            <familyName>SPDX-License-Identifier: Apache-2.0</familyName>
+                        </licenseFamily>
+                        <licenseFamily implementation="org.apache.rat.license.SimpleLicenseFamily">
+                            <familyName>SPDX-License-Identifier: CC-BY-4.0</familyName>
+                        </licenseFamily>
+                    </licenseFamilies>
+                    <licenses>
+                        <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
+                            <licenseFamilyCategory>SPDX</licenseFamilyCategory>
+                            <licenseFamilyName>SPDX-License-Identifier: Apache-2.0</licenseFamilyName>
+                            <notes></notes>
+                            <patterns>
+                                <pattern>SPDX-License-Identifier: Apache-2.0</pattern>
+                            </patterns>
+                        </license>
+                        <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
+                            <licenseFamilyCategory>SPDX</licenseFamilyCategory>
+                            <licenseFamilyName>SPDX-License-Identifier: CC-BY-4.0</licenseFamilyName>
+                            <notes></notes>
+                            <patterns>
+                                <pattern>SPDX-License-Identifier: CC-BY-4.0</pattern>
+                            </patterns>
+                        </license>
+                        <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
+                            <patterns>
+                                <pattern>Copyright Contributors to the ODPi Egeria project.</pattern>
+                            </patterns>
+                        </license>
+                    </licenses>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>rat-check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>validate</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Sonar-JaCoCo integration plugin -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <destFile>${sonar.jacoco.reportPaths}</destFile>
+                    <append>true</append>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <properties>
+                <gpg.executable>gpg2</gpg.executable>
+            </properties>
+            <build>
+                <plugins>
+
+                    <!-- Generate and attach source to Maven Central distributions -->
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${maven-source-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- Generate and attach javadoc to Maven Central distributions -->
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${maven-javadoc-plugin.version}</version>
+                        <configuration>
+                            <additionalOptions>
+                                <additionalOption>-encoding utf8</additionalOption>
+                                <additionalOption>-docencoding utf8</additionalOption>
+                                <additionalOption>-charset utf8</additionalOption>
+                            </additionalOptions>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- Request that distributed artifacts are signed before flowing to Maven Central distributions -->
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+
+                    <!-- Request that the artifacts are pushed to Maven Central's staging area -->
+
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.7</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>
