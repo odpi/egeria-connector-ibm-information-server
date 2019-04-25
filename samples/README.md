@@ -19,8 +19,9 @@ Variables:
 - `kafkaep` kafka endpoint for the cohort
 - `igc_host` the hostname (or IP address) of the existing IGC environment (domain / servics tier)
 - `igc_port` the port number of the domain tier console of the existing IGC environment
+- `igc_user` the username of a user to access IGC's REST API
+- `igc_password` the password of the user to access IGC's REST API
 - `igc_kafka` the hostname (or IP address) and port of IGC's internal Kafka bus (`domain_host:59092` for non-UG environments; `ug_host:9092` for UG environments)
-- `igc_basic_auth` the basic-encoded authorisation details for the IGC environment (base64-encoded `username:password`)
 
 Each step is sequentially numbered so that they can be executed in-order as part of a Postman "Runner", if desired.
 
