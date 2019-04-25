@@ -28,7 +28,7 @@ public class IGCRestModelGenerator {
 
     private static final Logger log = LoggerFactory.getLogger(IGCRestModelGenerator.class);
     private static final String DIRECTORY = ""
-            + "ibm-igc-rest-client-library" + File.separator
+            + "clientlibrary" + File.separator
             + "src" + File.separator
             + "main" + File.separator
             + "java" + File.separator
