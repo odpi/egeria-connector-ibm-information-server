@@ -36,6 +36,27 @@ notification in your IGC environment:
 
 There should not be any need to restart the environment after enabling the event notification.
 
+### Build connector and copy to OMAG Server Platform
+
+After building the connector project (`mvn clean install`) the connector is available as:
+
+```text
+distribution/target/egeria-connector-ibm-igc-package-VERSION-dist.jar
+```
+
+Simply copy this file to a location where it can be run alongside the OMAG Server
+Platform from the Egeria core (in the example below, the file would be copied to
+`/lib/egeria-connector-ibm-igc-package-VERSION-dist.jar`), and you can startup
+the OMAG Server Platform with this connector ready-to-be-configured by running:
+
+```bash
+$ java -Dloader.path=/lib -jar server-chassis-spring-VERSION.jar
+```
+
+(This command will startup the OMAG Server Platform, including all libraries
+in the `/lib` directory as part of the classpath of the OMAG Server Platform.)
+
+
 ### Configure this Egeria connector
 
 You will need to configure the OMAG Server Platform as follows (order is important) to make use of this Egeria connector.
@@ -115,9 +136,9 @@ automatically being communicated out to the rest of the cohort.
 
 If you have a completely empty IGC environment, you may want to load some sample metadata to further explore.
 
-Samples are provided under [open-metadata-resources/open-metadata-deployment/sample-data/](../../open-metadata-deployment/sample-data/README.md).
+Samples are provided under [egeria/open-metadata-resources/open-metadata-deployment/sample-data/](https://github.com/odpi/egeria/tree/master/open-metadata-resources/open-metadata-deployment/sample-data).
 
-For example, there you will find a [Coco Pharmaceuticals](../../open-metadata-deployment/sample-data/coco-pharmaceuticals/README.md)
+For example, there you will find a [Coco Pharmaceuticals](https://github.com/odpi/egeria/tree/master/open-metadata-resources/open-metadata-deployment/sample-data/coco-pharmaceuticals)
 set of samples. These samples are provided as a set of content that can be automatically loaded to IGC using Ansible,
 and a number of publicly-available Ansible roles. (See instructions via the link itself.)
 
