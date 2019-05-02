@@ -868,11 +868,13 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             // fully-support the TypeDef or not
             if (bVerified) {
                 List<TypeDefAttribute> properties = typeDef.getPropertiesDefinition();
-                for (TypeDefAttribute typeDefAttribute : properties) {
-                    String omrsPropertyName = typeDefAttribute.getAttributeName();
-                    if (!mappedProperties.contains(omrsPropertyName)) {
-                        bVerified = false;
-                        issues.add("list of mapped properties does not match");
+                if (properties != null) {
+                    for (TypeDefAttribute typeDefAttribute : properties) {
+                        String omrsPropertyName = typeDefAttribute.getAttributeName();
+                        if (!mappedProperties.contains(omrsPropertyName)) {
+                            bVerified = false;
+                            issues.add("list of mapped properties does not match");
+                        }
                     }
                 }
             } else {
@@ -1709,7 +1711,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
      * @param entityTypeGUID GUID of the type of entity to search for. Null means all types will
      *                       be searched (could be slow so not recommended).
      * @param searchCriteria String expression contained in any of the property values within the entities
-     *                       of the supplied type.
+     *                       of the supplied type. (Retrieve all entities of the supplied type if this is either null
+     *                       or an empty string.)
      * @param fromEntityElement the starting element number of the entities to return.
      *                                This is used when retrieving elements
      *                                beyond the first page of results. Zero means start from the first element.
@@ -1754,7 +1757,6 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             UserNotAuthorizedException
     {
         final String  methodName = "findEntitiesByPropertyValue";
-        final String  searchCriteriaParameterName = "searchCriteria";
         final String  typeGUIDParameter = "entityTypeGUID";
         final String  asOfTimeParameter = "asOfTime";
         final String  pageSizeParameter = "pageSize";
@@ -1766,7 +1768,6 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         parentConnector.validateRepositoryIsActive(methodName);
 
         repositoryValidator.validateUserId(repositoryName, userId, methodName);
-        repositoryValidator.validateSearchCriteria(repositoryName, searchCriteriaParameterName, searchCriteria, methodName);
         repositoryValidator.validateOptionalTypeGUID(repositoryName, typeGUIDParameter, entityTypeGUID, methodName);
         repositoryValidator.validateAsOfTime(repositoryName, asOfTimeParameter, asOfTime, methodName);
         repositoryValidator.validatePageSize(repositoryName, pageSizeParameter, pageSize, methodName);
@@ -1818,40 +1819,47 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         log.info("Classification limiters were specified, but none apply to thie asset type {}, so excluding this asset type from search.", igcAssetType);
                     } else {
 
-                        List<String> properties = Reference.getStringPropertiesFromPOJO(pojo);
-                        // POST'd search to IGC doesn't work on v11.7.0.2 using long_description
-                        // Using "searchText" requires using "searchProperties" (no "where" conditions) -- but does not
-                        // work with 'main_object', must be used with a specific asset type
-                        // Therefore for v11.7.0.2 we will simply drop long_description from the fields we search
-                        if (igcRestClient.getIgcVersion().isEqualTo(IGCVersionEnum.V11702)) {
-                            ArrayList<String> propertiesWithoutLongDescription = new ArrayList<>();
-                            for (String property : properties) {
-                                if (!property.equals("long_description")) {
-                                    propertiesWithoutLongDescription.add(property);
+                        IGCSearchConditionSet outerConditions = new IGCSearchConditionSet();
+
+                        // If the searchCriteria is empty, retrieve all entities of the type (no conditions)
+                        if (searchCriteria != null && !searchCriteria.equals("")) {
+
+                            List<String> properties = Reference.getStringPropertiesFromPOJO(pojo);
+                            // POST'd search to IGC doesn't work on v11.7.0.2 using long_description
+                            // Using "searchText" requires using "searchProperties" (no "where" conditions) -- but does not
+                            // work with 'main_object', must be used with a specific asset type
+                            // Therefore for v11.7.0.2 we will simply drop long_description from the fields we search
+                            if (igcRestClient.getIgcVersion().isEqualTo(IGCVersionEnum.V11702)) {
+                                ArrayList<String> propertiesWithoutLongDescription = new ArrayList<>();
+                                for (String property : properties) {
+                                    if (!property.equals("long_description")) {
+                                        propertiesWithoutLongDescription.add(property);
+                                    }
                                 }
+                                properties = propertiesWithoutLongDescription;
                             }
-                            properties = propertiesWithoutLongDescription;
+
+                            IGCSearchConditionSet innerConditions = new IGCSearchConditionSet();
+                            innerConditions.setMatchAnyCondition(true);
+                            for (String property : properties) {
+                                innerConditions.addCondition(new IGCSearchCondition(
+                                        property,
+                                        "like %{0}%",
+                                        searchCriteria
+                                ));
+                            }
+                            outerConditions.addNestedConditionSet(innerConditions);
+
+                        }
+
+                        if (classificationLimiters != null) {
+                            outerConditions.addNestedConditionSet(classificationLimiters);
+                            outerConditions.setMatchAnyCondition(false);
                         }
 
                         IGCSearchSorting igcSearchSorting = null;
                         if (sequencingProperty == null && sequencingOrder != null) {
                             igcSearchSorting = IGCOMRSMetadataCollection.sortFromNonPropertySequencingOrder(sequencingOrder);
-                        }
-
-                        IGCSearchConditionSet outerConditions = new IGCSearchConditionSet();
-                        IGCSearchConditionSet innerConditions = new IGCSearchConditionSet();
-                        innerConditions.setMatchAnyCondition(true);
-                        for (String property : properties) {
-                            innerConditions.addCondition(new IGCSearchCondition(
-                                    property,
-                                    "like %{0}%",
-                                    searchCriteria
-                            ));
-                        }
-                        outerConditions.addNestedConditionSet(innerConditions);
-                        if (classificationLimiters != null) {
-                            outerConditions.addNestedConditionSet(classificationLimiters);
-                            outerConditions.setMatchAnyCondition(false);
                         }
 
                         igcSearch.addConditions(outerConditions);
