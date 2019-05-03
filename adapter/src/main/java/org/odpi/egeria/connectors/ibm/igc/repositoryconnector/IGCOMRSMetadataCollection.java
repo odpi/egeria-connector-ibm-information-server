@@ -869,7 +869,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         String omrsPropertyName = typeDefAttribute.getAttributeName();
                         if (!mappedProperties.contains(omrsPropertyName)) {
                             bVerified = false;
-                            issues.add("list of mapped properties does not match");
+                            issues.add("property '" + omrsPropertyName + "' is not mapped");
                         }
                     }
                 }
@@ -883,7 +883,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         404,
                         IGCOMRSMetadataCollection.class.getName(),
                         methodName,
-                        typeDef.getName() + " is not supported: " + String.join(",", issues),
+                        typeDef.getName() + " is not supported: " + String.join(", ", issues),
                         "",
                         "Request support through Egeria GitHub issue.");
             } else {
