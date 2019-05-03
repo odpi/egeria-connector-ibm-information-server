@@ -1810,7 +1810,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     );
 
                     if (limitResultsByClassification != null && !limitResultsByClassification.isEmpty() && classificationLimiters == null) {
-                        log.info("Classification limiters were specified, but none apply to thie asset type {}, so excluding this asset type from search.", igcAssetType);
+                        log.info("Classification limiters were specified, but none apply to the asset type {}, so excluding this asset type from search.", igcAssetType);
                     } else {
 
                         IGCSearchConditionSet outerConditions = new IGCSearchConditionSet();
