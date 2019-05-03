@@ -7,7 +7,12 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.InstanceMapping;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDefCategory;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefAttribute;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.OMRSErrorCode;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.EntityNotKnownException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
@@ -20,12 +25,13 @@ import java.util.*;
 /**
  * The base class for all mappings between OMRS Classification TypeDefs and IGC assets.
  */
-public abstract class ClassificationMapping {
+public abstract class ClassificationMapping extends InstanceMapping {
 
     private static final Logger log = LoggerFactory.getLogger(ClassificationMapping.class);
 
     private String igcAssetType;
     private List<String> igcRelationshipProperties;
+    private String omrsEntityType;
     private String omrsClassificationType;
     private Set<String> excludeIgcAssetType;
     private List<InstanceStatus> omrsSupportedStatuses;
@@ -33,10 +39,12 @@ public abstract class ClassificationMapping {
 
     public ClassificationMapping(String igcAssetType,
                                  String igcRelationshipProperty,
+                                 String omrsEntityType,
                                  String omrsClassificationType) {
         this.igcAssetType = igcAssetType;
         this.igcRelationshipProperties = new ArrayList<>();
         this.igcRelationshipProperties.add(igcRelationshipProperty);
+        this.omrsEntityType = omrsEntityType;
         this.omrsClassificationType = omrsClassificationType;
         this.excludeIgcAssetType = new HashSet<>();
         this.omrsSupportedStatuses = new ArrayList<>();
@@ -173,22 +181,48 @@ public abstract class ClassificationMapping {
     /**
      * Retrieve a Classification instance based on the provided information.
      *
-     * @param omrsClassificationType the type name of the OMRS classification
-     * @param omrsEntityType the OMRS type of entity the OMRS classification is being linked against
+     * @param igcomrsRepositoryConnector connector to the IGC repository
      * @param classificationProperties the properties to setup on the classification
+     * @param fromIgcObject the IGC object against which the classification applies
+     * @param userId the user through which the classification should be done
      * @return Classification
      * @throws RepositoryErrorException
      */
-    protected static Classification getMappedClassification(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                            String omrsClassificationType,
-                                                            String omrsEntityType,
-                                                            InstanceProperties classificationProperties,
-                                                            Reference fromIgcObject,
-                                                            String userId) throws RepositoryErrorException {
+    protected Classification getMappedClassification(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                     InstanceProperties classificationProperties,
+                                                     Reference fromIgcObject,
+                                                     String userId) throws RepositoryErrorException {
 
         final String methodName = "getMappedClassification";
 
         Classification classification = null;
+        IGCOMRSMetadataCollection igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
+        OMRSRepositoryHelper omrsRepositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
+        String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
+
+        // Set any fixed (literal) relationship property values
+        Map<String, TypeDefAttribute> omrsAttributeMap = igcomrsMetadataCollection.getTypeDefAttributesForType(omrsClassificationType);
+        for (String omrsPropertyName : getLiteralPropertyMappings()) {
+            if (omrsAttributeMap.containsKey(omrsPropertyName)) {
+                Object value = getOmrsPropertyLiteralValue(omrsPropertyName);
+                if (value != null) {
+                    TypeDefAttribute typeDefAttribute = omrsAttributeMap.get(omrsPropertyName);
+                    AttributeTypeDefCategory attributeTypeDefCategory = typeDefAttribute.getAttributeType().getCategory();
+                    if (attributeTypeDefCategory == AttributeTypeDefCategory.PRIMITIVE) {
+                        classificationProperties = AttributeMapping.addPrimitivePropertyToInstance(
+                                omrsRepositoryHelper,
+                                repositoryName,
+                                classificationProperties,
+                                typeDefAttribute,
+                                value,
+                                methodName
+                        );
+                    } else {
+                        classificationProperties.setProperty(omrsPropertyName, (InstancePropertyValue)value);
+                    }
+                }
+            }
+        }
 
         try {
             // Try to instantiate a new classification from the repository connector

@@ -10,9 +10,8 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.PropertyMappingSet;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.ReferenceableMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.OMRSStub;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.stores.*;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
@@ -81,7 +80,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         this.igcomrsRepositoryConnector = parentConnector;
         this.xmlOutputFactory = XMLOutputFactory.newInstance();
         this.typeDefStore = new TypeDefStore();
-        this.entityMappingStore = new EntityMappingStore();
+        this.entityMappingStore = new EntityMappingStore(parentConnector);
         this.relationshipMappingStore = new RelationshipMappingStore();
         this.classificationMappingStore = new ClassificationMappingStore();
         this.attributeMappingStore = new AttributeMappingStore();
@@ -701,10 +700,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     success = classificationMappingStore.addMapping(newTypeDef, mappingClass);
                     break;
                 case ENTITY_DEF:
-                    success = entityMappingStore.addMapping(newTypeDef,
-                            mappingClass,
-                            igcomrsRepositoryConnector,
-                            userId);
+                    success = entityMappingStore.addMapping(newTypeDef, mappingClass, igcomrsRepositoryConnector);
                     break;
             }
 
@@ -843,7 +839,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 case ENTITY_DEF:
                     EntityMapping entityMapping = entityMappingStore.getMappingByOmrsTypeGUID(guid);
                     if (entityMapping != null) {
-                        mappedProperties = entityMapping.getPropertyMappings().getAllMappedOmrsProperties();
+                        mappedProperties = entityMapping.getAllMappedOmrsProperties();
                         implementedStatuses = new HashSet<>(entityMapping.getSupportedStatuses());
                     }
                     break;
@@ -1075,11 +1071,11 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         } else {
 
             // Otherwise, retrieve the mapping dynamically based on the type of asset
-            ReferenceableMapper referenceMapper = getMapperForParameters(asset, prefix, userId);
+            EntityMappingInstance entityMap = getMappingInstanceForParameters(asset, prefix, userId);
 
-            if (referenceMapper != null) {
+            if (entityMap != null) {
                 // 2. Apply the mapping to the object, and retrieve the resulting EntityDetail
-                summary = referenceMapper.getOMRSEntitySummary();
+                summary = EntityMapping.getEntitySummary(entityMap);
             } else {
                 OMRSErrorCode errorCode = OMRSErrorCode.TYPEDEF_NOT_KNOWN_FOR_INSTANCE;
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
@@ -1270,12 +1266,13 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         errorCode.getUserAction());
             } else {
 
-                ReferenceableMapper referenceMapper = getMapperForParameters(asset, prefix, userId);
+                EntityMappingInstance entityMap = getMappingInstanceForParameters(asset, prefix, userId);
 
-                if (referenceMapper != null) {
+                if (entityMap != null) {
                     // 2. Apply the mapping to the object, and retrieve the resulting relationships
                     alRelationships.addAll(
-                            referenceMapper.getOMRSRelationships(
+                            EntityMapping.getMappedRelationships(
+                                    entityMap,
                                     relationshipTypeGUID,
                                     fromRelationshipElement,
                                     sequencingOrder,
@@ -1416,15 +1413,11 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 );
 
                 if (limitResultsByClassification != null && !limitResultsByClassification.isEmpty() && classificationLimiters == null) {
-                    log.info("Classification limiters were specified, but none apply to thie asset type {}, so excluding this asset type from search.", igcAssetType);
+                    log.info("Classification limiters were specified, but none apply to the asset type {}, so excluding this asset type from search.", igcAssetType);
                 } else {
 
                     IGCSearch igcSearch = new IGCSearch();
                     igcSearch.addType(igcAssetType);
-
-                    /* We need to first retrieve the mapping so we know how to translate
-                     * the provided OMRS property names to IGC property names */
-                    PropertyMappingSet propertyMappingSet = getEntityPropertiesFromMapping(mapping, userId);
 
                     /* Provided there is a mapping, build up a list of IGC-specific properties
                      * and search criteria, based on the values of the InstanceProperties provided */
@@ -1432,14 +1425,15 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
                     Iterator iPropertyNames = matchProperties.getPropertyNames();
-                    while (propertyMappingSet != null && iPropertyNames.hasNext()) {
+                    Set<String> mappedProperties = mapping.getAllMappedIgcProperties();
+                    while (mappedProperties != null && !mappedProperties.isEmpty() && iPropertyNames.hasNext()) {
                         String omrsPropertyName = (String) iPropertyNames.next();
                         InstancePropertyValue value = matchProperties.getPropertyValue(omrsPropertyName);
                         addSearchConditionFromValue(
                                 igcSearchConditionSet,
                                 omrsPropertyName,
                                 properties,
-                                propertyMappingSet,
+                                mapping,
                                 value
                         );
                     }
@@ -3439,21 +3433,6 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     }
 
     /**
-     * Retrieve the property mappings from the mapping.
-     *
-     * @param mapping the mapping from which to retrieve property mappings
-     * @param userId the userId making the request
-     * @return PropertyMappingSet
-     */
-    private PropertyMappingSet getEntityPropertiesFromMapping(EntityMapping mapping, String userId) {
-        PropertyMappingSet propertyMappingSet = null;
-        if (mapping != null) {
-            propertyMappingSet = mapping.getPropertyMappings();
-        }
-        return propertyMappingSet;
-    }
-
-    /**
      * Setup paging properties of the IGC search.
      *
      * @param igcSearch the IGC search object to which to add the criteria
@@ -3687,11 +3666,11 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         } else {
 
             // Otherwise, retrieve the mapping dynamically based on the type of asset
-            ReferenceableMapper referenceMapper = getMapperForParameters(asset, prefix, userId);
+            EntityMappingInstance entityMap = getMappingInstanceForParameters(asset, prefix, userId);
 
-            if (referenceMapper != null) {
+            if (entityMap != null) {
                 // 2. Apply the mapping to the object, and retrieve the resulting EntityDetail
-                detail = referenceMapper.getOMRSEntityDetail();
+                detail = EntityMapping.getEntityDetail(entityMap);
             } else {
                 OMRSErrorCode errorCode = OMRSErrorCode.TYPEDEF_NOT_KNOWN_FOR_INSTANCE;
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
@@ -3714,32 +3693,36 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     }
 
     /**
-     * Retrieves the Mapper that can be used for the provided parameters (or null if none exists).
+     * Retrieves an instance of a mapping that can be used for the provided parameters (or null if none exists).
      *
-     * @param igcObject the IGC asset
+     * @param igcObject the IGC asset to be mapped
      * @param prefix the prefix used for the asset (if any; null otherwise)
      * @param userId the user making the request
-     * @return
+     * @return EntityMappingInstance
      */
-    public ReferenceableMapper getMapperForParameters(Reference igcObject, String prefix, String userId) {
+    public EntityMappingInstance getMappingInstanceForParameters(Reference igcObject, String prefix, String userId) {
 
         String igcAssetType = igcObject.getType();
 
         log.debug("Looking for mapper for type {} with prefix {}", igcAssetType, prefix);
 
+        EntityMappingInstance entityMap = null;
         EntityMapping found = entityMappingStore.getMappingByIgcAssetTypeAndPrefix(igcAssetType, prefix);
-        ReferenceableMapper referenceMapper = null;
         if (found != null) {
             log.debug("Found mapper class: {} ({})", found.getClass().getCanonicalName(), found);
             // Translate the provided asset to a base asset type for the mapper, if needed
-            // (if not needed the 'getBaseIgcAssetFromAlternative' is effecitively a NOOP and gives back same object)
-            referenceMapper = ((ReferenceableMapper) found).initialize(
-                    found.getBaseIgcAssetFromAlternative(igcObject),
-                    igcObject);
+            // (if not needed the 'getBaseIgcAssetFromAlternative' is effectively a NOOP and gives back same object)
+            entityMap = new EntityMappingInstance(
+                    found,
+                    igcomrsRepositoryConnector,
+                    found.getBaseIgcAssetFromAlternative(igcObject, igcomrsRepositoryConnector),
+                    userId
+            );
         } else {
             log.debug("No mapper class found!");
         }
-        return referenceMapper;
+
+        return entityMap;
 
     }
 
@@ -3754,7 +3737,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         List<EntityMapping> mappers = entityMappingStore.getMappingsByIgcAssetType(igcAssetType);
 
         if (mappers.isEmpty()) {
-            EntityMapping defaultMapper = entityMappingStore.getDefaultEntityMapper(igcomrsRepositoryConnector, userId);
+            EntityMapping defaultMapper = entityMappingStore.getDefaultEntityMapper();
             if (defaultMapper != null) {
                 mappers.add(defaultMapper);
             }
@@ -3797,16 +3780,16 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
      * @param igcSearchConditionSet the search conditions to which to add the criteria
      * @param omrsPropertyName the OMRS property name to search
      * @param igcProperties the list of IGC properties to which to add for inclusion in the IGC search
-     * @param propertyMappingSet the property mappings
+     * @param mapping the mapping definition for the entity for which we're searching
      * @param value the value for which to search
      */
     public void addSearchConditionFromValue(IGCSearchConditionSet igcSearchConditionSet,
                                             String omrsPropertyName,
                                             List<String> igcProperties,
-                                            PropertyMappingSet propertyMappingSet,
+                                            EntityMapping mapping,
                                             InstancePropertyValue value) {
 
-        String igcPropertyName = propertyMappingSet.getIgcPropertyName(omrsPropertyName);
+        String igcPropertyName = mapping.getIgcPropertyName(omrsPropertyName);
         if (igcPropertyName != null) {
             igcProperties.add(igcPropertyName);
             InstancePropertyCategory category = value.getInstancePropertyCategory();
@@ -3869,7 +3852,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                 igcSearchConditionSet,
                                 nextEntry.getKey(),
                                 igcProperties,
-                                propertyMappingSet,
+                                mapping,
                                 nextEntry.getValue()
                         );
                     }
@@ -3881,7 +3864,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                 igcSearchConditionSet,
                                 nextEntry.getKey(),
                                 igcProperties,
-                                propertyMappingSet,
+                                mapping,
                                 nextEntry.getValue()
                         );
                     }
@@ -3893,7 +3876,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                 igcSearchConditionSet,
                                 igcPropertyName,
                                 igcProperties,
-                                propertyMappingSet,
+                                mapping,
                                 nextEntry.getValue()
                         );
                     }

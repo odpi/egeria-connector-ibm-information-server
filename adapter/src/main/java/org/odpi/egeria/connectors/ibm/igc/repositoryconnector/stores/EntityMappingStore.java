@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.stores;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
@@ -11,7 +12,6 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +25,8 @@ public class EntityMappingStore {
 
     private static final Logger log = LoggerFactory.getLogger(EntityMappingStore.class);
 
+    private IGCOMRSRepositoryConnector igcomrsRepositoryConnector;
+
     private List<TypeDef> typeDefs;
 
     private Map<String, EntityMapping> omrsGuidToMapping;
@@ -33,7 +35,8 @@ public class EntityMappingStore {
     private Map<String, String> igcAssetTypeAndPrefixToOmrsGuid;
     private Map<String, String> omrsNameToGuid;
 
-    public EntityMappingStore() {
+    public EntityMappingStore(IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
+        this.igcomrsRepositoryConnector = igcomrsRepositoryConnector;
         typeDefs = new ArrayList<>();
         omrsGuidToMapping = new HashMap<>();
         igcAssetTypeToOmrsGuids = new HashMap<>();
@@ -55,12 +58,11 @@ public class EntityMappingStore {
      * @param omrsTypeDef the OMRS TypeDef for which the entity mapping is implemented
      * @param mappingClass the Java class providing the EntityMapping
      * @param igcomrsRepositoryConnector connectivity via an IGC OMRS Repository Connector
-     * @param userId the userId through which to apply the mapping
      * @return boolean false if unable to configure an EntityMapping from the provided class
      */
-    public boolean addMapping(TypeDef omrsTypeDef, Class mappingClass, IGCOMRSRepositoryConnector igcomrsRepositoryConnector, String userId) {
+    public boolean addMapping(TypeDef omrsTypeDef, Class mappingClass, IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
 
-        EntityMapping mapping = getEntityMapper(mappingClass, igcomrsRepositoryConnector, userId);
+        EntityMapping mapping = getEntityMapper(mappingClass);
 
         if (mapping != null) {
             typeDefs.add(omrsTypeDef);
@@ -79,10 +81,10 @@ public class EntityMappingStore {
                 addIgcAssetTypeToGuid(otherType, guid);
             }
             IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
-            igcRestClient.registerPOJO(mapping.getIgcPOJO());
-            List<Class> otherPOJOs = mapping.getOtherIGCPOJOs();
+            igcRestClient.registerPOJO(mapping.getIgcPOJO(igcomrsRepositoryConnector));
+            List<Class> otherPOJOs = mapping.getOtherIGCPOJOs(igcomrsRepositoryConnector);
             if (otherPOJOs != null && !otherPOJOs.isEmpty()) {
-                for (Class pojo : mapping.getOtherIGCPOJOs()) {
+                for (Class pojo : otherPOJOs) {
                     igcRestClient.registerPOJO(pojo);
                 }
             }
@@ -206,16 +208,13 @@ public class EntityMappingStore {
     /**
      * Retrieves the entity mapping that can be applied by default to any entity.
      *
-     * @param igcomrsRepositoryConnector connectivity through an IGC OMRS Repository Connector
-     * @param userId userId through which to retrieve the mapping
      * @return EntityMapping
      */
-    public EntityMapping getDefaultEntityMapper(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                String userId) {
+    public EntityMapping getDefaultEntityMapper() {
         EntityMapping referenceable = null;
         try {
             Class mappingClass = Class.forName(IGCOMRSMetadataCollection.MAPPING_PKG + "entities.ReferenceableMapper");
-            referenceable = getEntityMapper(mappingClass, igcomrsRepositoryConnector, userId);
+            referenceable = getEntityMapper(mappingClass);
         } catch (ClassNotFoundException e) {
             log.error("Unable to find default ReferenceableMapper class: " + IGCOMRSMetadataCollection.MAPPING_PKG + "entities.ReferenceableMapper", e);
         }
@@ -226,21 +225,13 @@ public class EntityMappingStore {
      * Retrieves the entity mapping for the provided Java class and repository connectivity.
      *
      * @param mappingClass the Java class implementing the EntityMapping
-     * @param igcomrsRepositoryConnector connectivity through an IGC OMRS Repository Connector
-     * @param userId userId through which to retrieve the mapping
      * @return EntityMapping
      */
-    private EntityMapping getEntityMapper(Class mappingClass,
-                                          IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                          String userId) {
+    private EntityMapping getEntityMapper(Class mappingClass) {
         EntityMapping entityMapper = null;
         try {
-            Constructor constructor = mappingClass.getConstructor(IGCOMRSRepositoryConnector.class, String.class);
-            entityMapper = (EntityMapping) constructor.newInstance(
-                    igcomrsRepositoryConnector,
-                    userId
-            );
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            entityMapper = (EntityMapping) mappingClass.getMethod("getInstance", IGCVersionEnum.class).invoke(null, igcomrsRepositoryConnector.getIGCVersion());
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             log.error("Unable to find or instantiate EntityMapping class: {}", mappingClass, e);
         }
         return entityMapper;
