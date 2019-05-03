@@ -26,6 +26,7 @@ public class AttachedTagMapper extends RelationshipMapping {
                 "taggedElement",
                 "tags"
         );
+        addLiteralPropertyMapping("isPublic", true);
     }
 
 }

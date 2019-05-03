@@ -2,6 +2,8 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships;
 
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.TermRelationshipStatusMapper;
+
 /**
  * Singleton to map the OMRS "RelatedTerm" relationship for IGC "term" assets.
  */
@@ -24,6 +26,11 @@ public class RelatedTermMapper extends RelationshipMapping {
                 "seeAlso",
                 "seeAlso"
         );
+        addLiteralPropertyMapping("description", null);
+        addLiteralPropertyMapping("expression", null);
+        addLiteralPropertyMapping("status", TermRelationshipStatusMapper.getInstance().getEnumMappingByIgcValue("Active"));
+        addLiteralPropertyMapping("steward", null);
+        addLiteralPropertyMapping("source", null);
     }
 
 }

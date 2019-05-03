@@ -26,6 +26,11 @@ public class ForeignKeyMapper extends RelationshipMapping {
         );
         addAlternativePropertyFromOne("selected_foreign_key_referenced");
         addAlternativePropertyFromTwo("selected_foreign_key_references");
+        addLiteralPropertyMapping("description", null);
+        addLiteralPropertyMapping("confidence", 100);
+        addLiteralPropertyMapping("steward", null);
+        addLiteralPropertyMapping("source", null);
+        addLiteralPropertyMapping("name", null);
     }
 
 }

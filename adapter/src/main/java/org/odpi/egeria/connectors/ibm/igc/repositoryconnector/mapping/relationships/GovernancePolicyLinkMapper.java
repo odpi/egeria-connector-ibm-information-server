@@ -24,6 +24,7 @@ public class GovernancePolicyLinkMapper extends RelationshipMapping {
                 "linkingPolicies",
                 "linkedPolicies"
         );
+        addLiteralPropertyMapping("description", null);
     }
 
 }

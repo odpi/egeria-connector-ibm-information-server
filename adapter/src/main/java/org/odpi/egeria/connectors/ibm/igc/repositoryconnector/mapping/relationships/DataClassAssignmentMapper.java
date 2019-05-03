@@ -63,6 +63,9 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         addMappedOmrsProperty("partialMatch");
         addMappedOmrsProperty("valueFrequency");
         addMappedOmrsProperty("status");
+        addLiteralPropertyMapping("method", null);
+        addLiteralPropertyMapping("steward", null);
+        addLiteralPropertyMapping("source", null);
     }
 
     /**
@@ -220,7 +223,10 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                     );
 
                     Object confidence = detectedClassification.getPropertyByName("confidencePercent");
-                    InstanceProperties relationshipProperties = new InstanceProperties();
+                    InstanceProperties relationshipProperties = relationship.getProperties();
+                    if (relationshipProperties == null) {
+                        relationshipProperties = new InstanceProperties();
+                    }
 
                     /* Before adding to the overall set of relationships, setup the relationship properties
                      * we have in IGC from the 'classification' object. */
@@ -312,8 +318,6 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
 
             try {
 
-                InstanceProperties relationshipProperties = new InstanceProperties();
-
                 // Use 'data_class' object to put RID of data_class itself on the 'selected classification' relationships
                 Relationship relationship = getMappedRelationship(
                         igcomrsRepositoryConnector,
@@ -326,6 +330,11 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                         "selected_classification",
                         userId
                 );
+
+                InstanceProperties relationshipProperties = relationship.getProperties();
+                if (relationshipProperties == null) {
+                    relationshipProperties = new InstanceProperties();
+                }
 
                 EnumPropertyValue status = DataClassAssignmentStatusMapper.getInstance().getEnumMappingByIgcValue("selected");
                 relationshipProperties.setProperty(
@@ -406,7 +415,10 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                     );
 
                     Object confidence = detectedClassification.getPropertyByName("confidencePercent");
-                    InstanceProperties relationshipProperties = new InstanceProperties();
+                    InstanceProperties relationshipProperties = relationship.getProperties();
+                    if (relationshipProperties == null) {
+                        relationshipProperties = new InstanceProperties();
+                    }
 
                     /* Before adding to the overall set of relationships, setup the relationship properties
                      * we have in IGC from the 'classification' object. */
@@ -492,8 +504,6 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             if (selectedClassification != null && selectedClassification.getType() != null) {
                 try {
 
-                    InstanceProperties relationshipProperties = new InstanceProperties();
-
                     Relationship relationship = getMappedRelationship(
                             igcomrsRepositoryConnector,
                             DataClassAssignmentMapper.getInstance(),
@@ -505,6 +515,11 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                             "selected_classification",
                             userId
                     );
+
+                    InstanceProperties relationshipProperties = relationship.getProperties();
+                    if (relationshipProperties == null) {
+                        relationshipProperties = new InstanceProperties();
+                    }
 
                     EnumPropertyValue status = DataClassAssignmentStatusMapper.getInstance().getEnumMappingByIgcValue("selected");
                     relationshipProperties.setProperty(
