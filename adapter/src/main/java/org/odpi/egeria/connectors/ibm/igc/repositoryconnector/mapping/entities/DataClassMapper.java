@@ -75,7 +75,11 @@ public class DataClassMapper extends ReferenceableMapper {
             addComplexIgcProperty("provider");
             addComplexIgcProperty("filters");
             addComplexOmrsProperty("userDefined");
+        } else {
+            addLiteralPropertyMapping("userDefined", null);
         }
+
+        addLiteralPropertyMapping("namespace", null);
 
         // The list of relationships that should be mapped
         addRelationshipMapper(DataClassHierarchyMapper.getInstance());
