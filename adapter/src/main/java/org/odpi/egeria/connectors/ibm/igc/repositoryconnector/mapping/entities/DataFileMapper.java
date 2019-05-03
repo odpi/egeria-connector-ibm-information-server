@@ -2,7 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AssetSchemaTypeMapper_FileRecord;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.NestedFileMapper;
 
@@ -11,15 +11,20 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
  */
 public class DataFileMapper extends ReferenceableMapper {
 
-    public DataFileMapper(IGCOMRSRepositoryConnector igcomrsRepositoryConnector, String userId) {
+    private static class Singleton {
+        private static final DataFileMapper INSTANCE = new DataFileMapper();
+    }
+    public static DataFileMapper getInstance(IGCVersionEnum version) {
+        return Singleton.INSTANCE;
+    }
+
+    private DataFileMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(
-                igcomrsRepositoryConnector,
                 "data_file",
                 "Data File",
-                "DataFile",
-                userId
+                "DataFile"
         );
 
         // The list of properties that should be mapped, none other than qualifiedName

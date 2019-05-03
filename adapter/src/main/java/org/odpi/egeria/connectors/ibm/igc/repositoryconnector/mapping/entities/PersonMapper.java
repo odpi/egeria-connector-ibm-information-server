@@ -2,7 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.ContactThroughMapper_Person;
 
 /**
@@ -10,15 +10,20 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
  */
 public class PersonMapper extends ReferenceableMapper {
 
-    public PersonMapper(IGCOMRSRepositoryConnector igcomrsRepositoryConnector, String userId) {
+    private static class Singleton {
+        private static final PersonMapper INSTANCE = new PersonMapper();
+    }
+    public static PersonMapper getInstance(IGCVersionEnum version) {
+        return Singleton.INSTANCE;
+    }
+
+    private PersonMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(
-                igcomrsRepositoryConnector,
                 "user",
                 "User",
                 "Person",
-                userId,
                 null,
                 false
         );
@@ -29,6 +34,8 @@ public class PersonMapper extends ReferenceableMapper {
         addSimplePropertyMapping("principal_id", "name");
         addSimplePropertyMapping("full_name", "fullName");
         addSimplePropertyMapping("job_title", "jobTitle");
+
+        addLiteralPropertyMapping("isPublic", true);
 
         // The classes to use for mapping any relationships
         addRelationshipMapper(ContactThroughMapper_Person.getInstance());

@@ -2,6 +2,9 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.ContactMethodTypeMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.ContactThroughMapper_Team;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
@@ -17,15 +20,20 @@ public class ContactDetailsMapper extends ReferenceableMapper {
 
     public static final String IGC_RID_PREFIX = IGCOMRSMetadataCollection.generateTypePrefix("CD");
 
-    public ContactDetailsMapper(IGCOMRSRepositoryConnector igcomrsRepositoryConnector, String userId) {
+    private static class Singleton {
+        private static final ContactDetailsMapper INSTANCE = new ContactDetailsMapper();
+    }
+    public static ContactDetailsMapper getInstance(IGCVersionEnum version) {
+        return Singleton.INSTANCE;
+    }
+
+    private ContactDetailsMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(
-                igcomrsRepositoryConnector,
                 "user",
                 "User",
                 "ContactDetails",
-                userId,
                 IGC_RID_PREFIX
         );
         addOtherIGCAssetType("group");
@@ -43,11 +51,21 @@ public class ContactDetailsMapper extends ReferenceableMapper {
 
     /**
      * Implement any complex property mappings that cannot be simply mapped one-to-one.
+     *
+     * @param entityMap the instantiation of a mapping to carry out
+     * @param instanceProperties the instance properties to which to add the complex-mapped properties
+     * @return InstanceProperties
      */
     @Override
-    protected void complexPropertyMappings(InstanceProperties instanceProperties) {
+    protected InstanceProperties complexPropertyMappings(EntityMappingInstance entityMap,
+                                                         InstanceProperties instanceProperties) {
+
+        instanceProperties = super.complexPropertyMappings(entityMap, instanceProperties);
 
         final String methodName = "complexPropertyMappings";
+
+        Reference igcEntity = entityMap.getIgcEntity();
+        IGCOMRSRepositoryConnector igcomrsRepositoryConnector = entityMap.getRepositoryConnector();
 
         // Set the email address as a contact method (only if there is one present)
         String emailAddress = (String) igcEntity.getPropertyByName("email_address");
@@ -62,6 +80,8 @@ public class ContactDetailsMapper extends ReferenceableMapper {
                     methodName
             );
         }
+
+        return instanceProperties;
 
     }
 

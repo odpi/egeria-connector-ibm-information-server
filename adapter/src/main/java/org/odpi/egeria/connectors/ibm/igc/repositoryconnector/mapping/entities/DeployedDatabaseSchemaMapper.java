@@ -2,8 +2,8 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AssetSchemaTypeMapper_DatabaseSchema;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataContentForDataSetMapper;
 
 /**
@@ -11,15 +11,20 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
  */
 public class DeployedDatabaseSchemaMapper extends ReferenceableMapper {
 
-    public DeployedDatabaseSchemaMapper(IGCOMRSRepositoryConnector igcomrsRepositoryConnector, String userId) {
+    private static class Singleton {
+        private static final DeployedDatabaseSchemaMapper INSTANCE = new DeployedDatabaseSchemaMapper();
+    }
+    public static DeployedDatabaseSchemaMapper getInstance(IGCVersionEnum version) {
+        return Singleton.INSTANCE;
+    }
+
+    private DeployedDatabaseSchemaMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(
-                igcomrsRepositoryConnector,
                 "database_schema",
                 "Database Schema",
-                "DeployedDatabaseSchema",
-                userId
+                "DeployedDatabaseSchema"
         );
 
         // The list of properties that should be mapped

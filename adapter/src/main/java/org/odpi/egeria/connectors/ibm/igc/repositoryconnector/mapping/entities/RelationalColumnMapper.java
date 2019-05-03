@@ -2,7 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.PrimaryKeyMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttributeForSchemaMapper_TableColumn;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataClassAssignmentMapper;
@@ -14,15 +14,20 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
  */
 public class RelationalColumnMapper extends ReferenceableMapper {
 
-    public RelationalColumnMapper(IGCOMRSRepositoryConnector igcomrsRepositoryConnector, String userId) {
+    private static class Singleton {
+        private static final RelationalColumnMapper INSTANCE = new RelationalColumnMapper();
+    }
+    public static RelationalColumnMapper getInstance(IGCVersionEnum version) {
+        return Singleton.INSTANCE;
+    }
+
+    private RelationalColumnMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(
-                igcomrsRepositoryConnector,
                 "database_column",
                 "Database Column",
-                "RelationalColumn",
-                userId
+                "RelationalColumn"
         );
 
         // The list of properties that should be mapped

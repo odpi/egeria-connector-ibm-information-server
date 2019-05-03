@@ -2,11 +2,13 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.ConnectionEndpointMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
@@ -20,15 +22,20 @@ public class EndpointMapper extends ReferenceableMapper {
 
     private static final Logger log = LoggerFactory.getLogger(EndpointMapper.class);
 
-    public EndpointMapper(IGCOMRSRepositoryConnector igcomrsRepositoryConnector, String userId) {
+    private static class Singleton {
+        private static final EndpointMapper INSTANCE = new EndpointMapper();
+    }
+    public static EndpointMapper getInstance(IGCVersionEnum version) {
+        return Singleton.INSTANCE;
+    }
+
+    private EndpointMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(
-                igcomrsRepositoryConnector,
                 "host",
                 "Host",
-                "Endpoint",
-                userId
+                "Endpoint"
         );
 
         // IGC 'host_(engine)' is equivalent, so we need to ensure that it is also added to the assets to be
@@ -38,6 +45,9 @@ public class EndpointMapper extends ReferenceableMapper {
         // The list of properties that should be mapped
         addSimplePropertyMapping("name", "name");
         addSimplePropertyMapping("short_description", "description");
+
+        addLiteralPropertyMapping("protocol", null);
+        addLiteralPropertyMapping("encryptionMethod", null);
 
         // This relationship can only be retrieved inverted
         // (relationship in IGC is cannot be traversed in other direction)
@@ -52,10 +62,12 @@ public class EndpointMapper extends ReferenceableMapper {
      * Retrieve the base host asset expected for the mapper from a host_(engine) asset.
      *
      * @param otherAsset the host_(engine) asset to translate into a host asset
+     * @param igcomrsRepositoryConnector connectivity to IGC repository
      * @return Reference - the host asset
      */
     @Override
-    public Reference getBaseIgcAssetFromAlternative(Reference otherAsset) {
+    public Reference getBaseIgcAssetFromAlternative(Reference otherAsset,
+                                                    IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
         String otherAssetType = otherAsset.getType();
         if (otherAssetType.equals("host_(engine)")) {
             IGCSearchCondition igcSearchCondition = new IGCSearchCondition("_id", "=", otherAsset.getId());
@@ -78,11 +90,21 @@ public class EndpointMapper extends ReferenceableMapper {
 
     /**
      * Implement any complex property mappings that cannot be simply mapped one-to-one.
+     *
+     * @param entityMap the instantiation of a mapping to carry out
+     * @param instanceProperties the instance properties to which to add the complex-mapped properties
+     * @return InstanceProperties
      */
     @Override
-    protected void complexPropertyMappings(InstanceProperties instanceProperties) {
+    protected InstanceProperties complexPropertyMappings(EntityMappingInstance entityMap,
+                                                         InstanceProperties instanceProperties) {
+
+        instanceProperties = super.complexPropertyMappings(entityMap, instanceProperties);
 
         final String methodName = "complexPropertyMappings";
+
+        Reference igcEntity = entityMap.getIgcEntity();
+        IGCOMRSRepositoryConnector igcomrsRepositoryConnector = entityMap.getRepositoryConnector();
 
         // Map from name to networkAddress, without clobbering the simple name mapping
         String networkAddress = (String) igcEntity.getPropertyByName("name");
@@ -93,6 +115,8 @@ public class EndpointMapper extends ReferenceableMapper {
                 networkAddress,
                 methodName
         );
+
+        return instanceProperties;
 
     }
 

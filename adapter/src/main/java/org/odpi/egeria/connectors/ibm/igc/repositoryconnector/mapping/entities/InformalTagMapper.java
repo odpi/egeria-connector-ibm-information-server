@@ -2,7 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedTagMapper;
 
 /**
@@ -10,15 +10,20 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
  */
 public class InformalTagMapper extends ReferenceableMapper {
 
-    public InformalTagMapper(IGCOMRSRepositoryConnector igcomrsRepositoryConnector, String userId) {
+    private static class Singleton {
+        private static final InformalTagMapper INSTANCE = new InformalTagMapper();
+    }
+    public static InformalTagMapper getInstance(IGCVersionEnum version) {
+        return Singleton.INSTANCE;
+    }
+
+    private InformalTagMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(
-                igcomrsRepositoryConnector,
                 "label",
                 "Label",
                 "InformalTag",
-                userId,
                 null,
                 false
         );
@@ -26,6 +31,8 @@ public class InformalTagMapper extends ReferenceableMapper {
         // The list of properties that should be mapped
         addSimplePropertyMapping("name", "tagName");
         addSimplePropertyMapping("description", "tagDescription");
+
+        addLiteralPropertyMapping("isPublic", true);
 
         // The list of relationships that should be mapped
         addRelationshipMapper(AttachedTagMapper.getInstance());
