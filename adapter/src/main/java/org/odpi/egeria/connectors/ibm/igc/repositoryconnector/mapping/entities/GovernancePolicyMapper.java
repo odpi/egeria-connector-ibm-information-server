@@ -2,23 +2,28 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.GovernancePolicyLinkMapper;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 
 /**
  * Defines the mapping to the OMRS "GlossaryPolicy" entity.
  */
 public class GovernancePolicyMapper extends ReferenceableMapper {
 
-    public GovernancePolicyMapper(IGCOMRSRepositoryConnector igcomrsRepositoryConnector, String userId) {
+    private static class Singleton {
+        private static final GovernancePolicyMapper INSTANCE = new GovernancePolicyMapper();
+    }
+    public static GovernancePolicyMapper getInstance(IGCVersionEnum version) {
+        return Singleton.INSTANCE;
+    }
+
+    private GovernancePolicyMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(
-                igcomrsRepositoryConnector,
                 "information_governance_policy",
                 "Information Governance Policy",
-                "GovernancePolicy",
-                userId
+                "GovernancePolicy"
         );
 
         // The list of properties that should be mapped

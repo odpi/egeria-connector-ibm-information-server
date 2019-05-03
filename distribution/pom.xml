@@ -32,20 +32,25 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <descriptors>
-                        <descriptor>assembly.xml</descriptor>
-                    </descriptors>
-                </configuration>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven-shade.version}</version>
                 <executions>
                     <execution>
-                        <id>assemble-all</id>
+                        <id>assemble</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.odpi.egeria:egeria-connector-ibm-igc-adapter</include>
+                                    <include>org.odpi.egeria:ibm-igc-rest-client-library</include>
+                                    <include>com.flipkart.zjsonpatch:zjsonpatch</include>
+                                    <include>org.apache.commons:commons-collections4</include>
+                                </includes>
+                            </artifactSet>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

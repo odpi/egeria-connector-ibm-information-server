@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships;
 
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.TermRelationshipStatusMapper;
 
 /**
  * Singleton to map the OMRS "SemanticAssignment" relationship for IGC "term" assets.
@@ -26,6 +27,7 @@ public class SemanticAssignmentMapper extends RelationshipMapping {
                 "assignedElements",
                 "meaning"
         );
+
         // We will explicitly exclude terms from being applied a SemanticAssignment, as it would overlap with
         // classifications like Confidentiality (and is probably better done via other more meaningful
         // term-to-term relationships) - we also need to exclude other assets which have no 'assigned_to_terms'
@@ -38,6 +40,14 @@ public class SemanticAssignmentMapper extends RelationshipMapping {
         pmOne.addExcludedIgcAssetType("information_governance_policy");
         pmOne.addExcludedIgcAssetType("label");
         pmOne.addExcludedIgcAssetType("user");
+
+        addLiteralPropertyMapping("description", null);
+        addLiteralPropertyMapping("expression", null);
+        addLiteralPropertyMapping("status", TermRelationshipStatusMapper.getInstance().getEnumMappingByIgcValue("Active"));
+        addLiteralPropertyMapping("confidence", 100);
+        addLiteralPropertyMapping("steward", null);
+        addLiteralPropertyMapping("source", null);
+
     }
 
 }

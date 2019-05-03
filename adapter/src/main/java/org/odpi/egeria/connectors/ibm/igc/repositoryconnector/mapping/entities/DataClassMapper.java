@@ -6,6 +6,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataClassAssignmentMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataClassHierarchyMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
@@ -22,15 +23,27 @@ public class DataClassMapper extends ReferenceableMapper {
 
     private static final Logger log = LoggerFactory.getLogger(DataClassMapper.class);
 
-    public DataClassMapper(IGCOMRSRepositoryConnector igcomrsRepositoryConnector, String userId) {
+    private static class SingletonOld {
+        private static final DataClassMapper INSTANCE = new DataClassMapper(IGCVersionEnum.V11501);
+    }
+    private static class SingletonNew {
+        private static final DataClassMapper INSTANCE = new DataClassMapper(IGCVersionEnum.V11702);
+    }
+    public static DataClassMapper getInstance(IGCVersionEnum version) {
+        if (version.isEqualTo(IGCVersionEnum.V11702) || version.isHigherThan(IGCVersionEnum.V11702)) {
+            return SingletonNew.INSTANCE;
+        } else {
+            return SingletonOld.INSTANCE;
+        }
+    }
+
+    private DataClassMapper(IGCVersionEnum version) {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(
-                igcomrsRepositoryConnector,
                 "data_class",
                 "Data Class",
-                "DataClass",
-                userId
+                "DataClass"
         );
 
         // IGC 'data_class' is one of the few objects with a relationship-specific asset type associated,
@@ -55,9 +68,8 @@ public class DataClassMapper extends ReferenceableMapper {
         addComplexOmrsProperty("specificationDetails");
         addComplexOmrsProperty("specification");
 
-        // Further expand the complex properties if we're on v11.7 (and these are then available)
-        IGCVersionEnum igcVersion = igcomrsRepositoryConnector.getIGCVersion();
-        if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
+        // Further expand the complex properties if we're on v11.7.0.2+ (and these are then available)
+        if (version.isEqualTo(IGCVersionEnum.V11702) || version.isHigherThan(IGCVersionEnum.V11702)) {
             addComplexIgcProperty("expression");
             addComplexIgcProperty("script");
             addComplexIgcProperty("provider");
@@ -75,21 +87,34 @@ public class DataClassMapper extends ReferenceableMapper {
      * Retrieve the base data_class asset expected for the mapper from a classification asset.
      *
      * @param otherAsset the classification asset to translate into a data_class asset
+     * @param igcomrsRepositoryConnector connectivity to IGC repository
      * @return Reference - the data_class asset
      */
     @Override
-    public Reference getBaseIgcAssetFromAlternative(Reference otherAsset) {
+    public Reference getBaseIgcAssetFromAlternative(Reference otherAsset,
+                                                    IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
         return DataClassAssignmentMapper.getInstance().getProxyTwoAssetFromAsset(
                 otherAsset, igcomrsRepositoryConnector.getIGCRestClient()).get(0);
     }
 
     /**
      * Implement any complex property mappings that cannot be simply mapped one-to-one.
+     *
+     * @param entityMap the instantiation of a mapping to carry out
+     * @param instanceProperties the instance properties to which to add the complex-mapped properties
+     * @return InstanceProperties
      */
     @Override
-    protected void complexPropertyMappings(InstanceProperties instanceProperties) {
+    protected InstanceProperties complexPropertyMappings(EntityMappingInstance entityMap,
+                                                         InstanceProperties instanceProperties) {
+
+        instanceProperties = super.complexPropertyMappings(entityMap, instanceProperties);
 
         final String methodName = "complexPropertyMappings";
+
+        IGCOMRSRepositoryConnector igcomrsRepositoryConnector = entityMap.getRepositoryConnector();
+        Reference igcEntity = entityMap.getIgcEntity();
+
         OMRSRepositoryHelper repositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
         String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
 
@@ -192,6 +217,8 @@ public class DataClassMapper extends ReferenceableMapper {
                     methodName
             );
         }
+
+        return instanceProperties;
 
     }
 

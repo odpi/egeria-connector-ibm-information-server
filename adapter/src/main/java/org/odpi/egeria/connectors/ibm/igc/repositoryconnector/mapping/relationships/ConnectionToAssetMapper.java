@@ -28,6 +28,7 @@ public class ConnectionToAssetMapper extends RelationshipMapping {
         );
         addSubType(ConnectionToAssetMapper_Database.getInstance());
         addSubType(ConnectionToAssetMapper_FileFolder.getInstance());
+        addLiteralPropertyMapping("assetSummary", null);
     }
 
 }

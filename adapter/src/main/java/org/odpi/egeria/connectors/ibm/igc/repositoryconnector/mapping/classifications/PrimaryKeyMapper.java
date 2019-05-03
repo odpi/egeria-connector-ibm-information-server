@@ -9,6 +9,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.KeyPatternMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
@@ -25,9 +26,6 @@ public class PrimaryKeyMapper extends ClassificationMapping {
 
     private static final Logger log = LoggerFactory.getLogger(ConfidentialityMapper.class);
 
-    private static final String C_PRIMARY_KEY = "PrimaryKey";
-    private static final String T_RELATIONAL_COLUMN = "RelationalColumn";
-
     private static class Singleton {
         private static final PrimaryKeyMapper INSTANCE = new PrimaryKeyMapper();
     }
@@ -39,10 +37,12 @@ public class PrimaryKeyMapper extends ClassificationMapping {
         super(
                 "database_column",
                 "defined_primary_key",
-                C_PRIMARY_KEY
+                "RelationalColumn",
+                "PrimaryKey"
         );
         addIgcRelationshipProperty("selected_primary_key");
         addMappedOmrsProperty("name");
+        addLiteralPropertyMapping("keyPattern", KeyPatternMapper.getInstance().getEnumMappingByIgcValue(""));
     }
 
     /**
@@ -83,8 +83,6 @@ public class PrimaryKeyMapper extends ClassificationMapping {
                     );
                     Classification classification = getMappedClassification(
                             igcomrsRepositoryConnector,
-                            C_PRIMARY_KEY,
-                            T_RELATIONAL_COLUMN,
                             classificationProperties,
                             fromIgcObject,
                             userId
@@ -110,8 +108,6 @@ public class PrimaryKeyMapper extends ClassificationMapping {
                     );
                     Classification classification = getMappedClassification(
                             igcomrsRepositoryConnector,
-                            C_PRIMARY_KEY,
-                            T_RELATIONAL_COLUMN,
                             classificationProperties,
                             fromIgcObject,
                             userId

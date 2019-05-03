@@ -222,7 +222,7 @@ public abstract class AttributeMapping {
                 } catch (ClassCastException e) {
                     log.error("Unable to cast {} to {} for {}", propertyValue, property.getAttributeType(), propertyName);
                 } catch (NumberFormatException e) {
-                    log.error("Unable to convert {} to {} for {}", propertyValue, property.getAttributeType(), propertyName);
+                    log.warn("Unable to convert {} to {} for {}", propertyValue, property.getAttributeType(), propertyName);
                 }
             } else {
                 log.error("Cannot translate non-primitive property {} this way.", propertyName);

@@ -43,6 +43,7 @@ public class SpineObjectMapper extends ClassificationMapping {
         super(
                 "term",
                 "category_path",
+                "GlossaryTerm",
                 "SpineObject"
         );
     }
@@ -70,8 +71,6 @@ public class SpineObjectMapper extends ClassificationMapping {
             try {
                 Classification classification = getMappedClassification(
                         igcomrsRepositoryConnector,
-                        "SpineObject",
-                        "GlossaryTerm",
                         null,
                         fromIgcObject,
                         userId

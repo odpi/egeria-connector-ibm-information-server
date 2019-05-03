@@ -14,6 +14,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.ConfidentialityLevelMapper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.GovernanceClassificationStatusMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.EntityNotKnownException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
@@ -41,8 +42,14 @@ public class ConfidentialityMapper extends ClassificationMapping {
         super(
                 IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE,
                 "assigned_to_terms",
+                "Referenceable",
                 "Confidentiality"
         );
+        addLiteralPropertyMapping("status", GovernanceClassificationStatusMapper.getInstance().getEnumMappingByIgcValue(""));
+        addLiteralPropertyMapping("confidence", 100);
+        addLiteralPropertyMapping("steward", null);
+        addLiteralPropertyMapping("source", null);
+        addLiteralPropertyMapping("notes", null);
         addMappedOmrsProperty("level");
         // Exclude IGC types that do not have 'assigned_to_terms'
         addExcludedIgcAssetType("connector");
@@ -89,6 +96,7 @@ public class ConfidentialityMapper extends ClassificationMapping {
             if (catIdentity.toString().endsWith("Confidentiality")) {
 
                 InstanceProperties classificationProperties = new InstanceProperties();
+
                 ConfidentialityLevelMapper confidentialityLevelMapper = ConfidentialityLevelMapper.getInstance();
                 EnumPropertyValue level = confidentialityLevelMapper.getEnumMappingByIgcValue(assignedTerm.getName());
                 classificationProperties.setProperty("level", level);
@@ -96,8 +104,6 @@ public class ConfidentialityMapper extends ClassificationMapping {
                 try {
                     Classification classification = getMappedClassification(
                             igcomrsRepositoryConnector,
-                            "Confidentiality",
-                            "Referenceable",
                             classificationProperties,
                             fromIgcObject,
                             userId

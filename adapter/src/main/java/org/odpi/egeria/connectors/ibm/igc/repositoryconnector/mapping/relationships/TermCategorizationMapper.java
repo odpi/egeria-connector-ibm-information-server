@@ -2,6 +2,8 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships;
 
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.TermRelationshipStatusMapper;
+
 /**
  * Singleton to map the OMRS "TermCategorization" relationship between IGC "category" and "term" assets.
  */
@@ -25,6 +27,8 @@ public class TermCategorizationMapper extends RelationshipMapping {
                 "terms"
         );
         addAlternativePropertyFromTwo("referencing_categories");
+        addLiteralPropertyMapping("description", null);
+        addLiteralPropertyMapping("status", TermRelationshipStatusMapper.getInstance().getEnumMappingByIgcValue("Active"));
     }
 
 }

@@ -12,9 +12,15 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.InstanceMapping;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.ReferenceableMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefAttribute;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.OMRSErrorCode;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.TypeErrorException;
@@ -27,7 +33,7 @@ import java.util.*;
  * Provides the base class for all relationship mappings, as well as base methods for calculating the transformed
  * relationships.
  */
-public abstract class RelationshipMapping {
+public abstract class RelationshipMapping extends InstanceMapping {
 
     private static final Logger log = LoggerFactory.getLogger(RelationshipMapping.class);
     public static final String SELF_REFERENCE_SENTINEL = "__SELF__";
@@ -134,18 +140,22 @@ public abstract class RelationshipMapping {
     public List<InstanceStatus> getSupportedStatuses() { return this.omrsSupportedStatuses; }
 
     /**
-     * Add the provided property name as one supported by this classification mapping.
+     * Add the provided property name as one supported by this relationship mapping.
      *
      * @param name the name of the OMRS property supported by the mapping
      */
     public void addMappedOmrsProperty(String name) { this.mappedOmrsPropertyNames.add(name); }
 
     /**
-     * Retrieve the set of OMRS properties that are supported by the classification mapping.
+     * Retrieve the set of OMRS properties that are supported by the relationship mapping.
      *
      * @return {@code Set<String>}
      */
-    public Set<String> getMappedOmrsPropertyNames() { return this.mappedOmrsPropertyNames; }
+    public Set<String> getMappedOmrsPropertyNames() {
+        HashSet<String> omrsProperties = new HashSet<>(mappedOmrsPropertyNames);
+        omrsProperties.addAll(getLiteralPropertyMappings());
+        return omrsProperties;
+    }
 
     /**
      * Sets a relationship-level IGC asset type (these very rarely exist, only known example is 'classification').
@@ -502,13 +512,6 @@ public abstract class RelationshipMapping {
         public void addAlternativeIgcRelationshipProperty(String igcRelationshipProperty) { this.igcRelationshipProperties.add(igcRelationshipProperty); }
 
         /**
-         * Retrieve the name of the OMRS relationship property that represents this side of the relationship.
-         *
-         * @return String
-         */
-        public String getOmrsRelationshipProperty() { return this.omrsRelationshipProperty; }
-
-        /**
          * Retrieve the prefix that should be added to the IGC Repository ID (RID) in order to make this side of the
          * relationship point to a generated IGC entity instance (ie. one that does not exist distinctly within IGC).
          * If no such entity is required, this will be null.
@@ -830,9 +833,9 @@ public abstract class RelationshipMapping {
         if (igcType != null) {
 
             IGCOMRSMetadataCollection igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
-            ReferenceableMapper referenceableMapper = igcomrsMetadataCollection.getMapperForParameters(igcObj, ridPrefix, userId);
+            EntityMappingInstance entityMap = igcomrsMetadataCollection.getMappingInstanceForParameters(igcObj, ridPrefix, userId);
 
-            if (referenceableMapper != null) {
+            if (entityMap != null) {
 
                 // Construct 'qualifiedName' from the Identity of the object
                 String identity = igcObj.getIdentity(igcRestClient).toString();
@@ -854,7 +857,7 @@ public abstract class RelationshipMapping {
                             igcomrsRepositoryConnector.getMetadataCollectionId(),
                             InstanceProvenanceType.LOCAL_COHORT,
                             userId,
-                            referenceableMapper.getOmrsTypeDefName(),
+                            entityMap.getMapping().getOmrsTypeDefName(),
                             uniqueProperties,
                             null
                     );
@@ -1369,6 +1372,8 @@ public abstract class RelationshipMapping {
         final String methodName = "getMappedRelationship";
         final String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
 
+        IGCOMRSMetadataCollection igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
+        OMRSRepositoryHelper omrsRepositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
         String omrsRelationshipName = omrsRelationshipDef.getName();
 
         Relationship relationship = new Relationship();
@@ -1499,6 +1504,32 @@ public abstract class RelationshipMapping {
                  relationship.setEntityOneProxy(ep1);
                  relationship.setEntityTwoProxy(ep2);
             }
+
+            // Set any fixed (literal) relationship property values
+            Map<String, TypeDefAttribute> omrsAttributeMap = igcomrsMetadataCollection.getTypeDefAttributesForType(omrsRelationshipName);
+            InstanceProperties relationshipProperties = new InstanceProperties();
+            for (String omrsPropertyName : relationshipMapping.getLiteralPropertyMappings()) {
+                if (omrsAttributeMap.containsKey(omrsPropertyName)) {
+                    Object value = relationshipMapping.getOmrsPropertyLiteralValue(omrsPropertyName);
+                    if (value != null) {
+                        TypeDefAttribute typeDefAttribute = omrsAttributeMap.get(omrsPropertyName);
+                        AttributeTypeDefCategory attributeTypeDefCategory = typeDefAttribute.getAttributeType().getCategory();
+                        if (attributeTypeDefCategory == AttributeTypeDefCategory.PRIMITIVE) {
+                            relationshipProperties = AttributeMapping.addPrimitivePropertyToInstance(
+                                    omrsRepositoryHelper,
+                                    repositoryName,
+                                    relationshipProperties,
+                                    typeDefAttribute,
+                                    value,
+                                    methodName
+                            );
+                        } else {
+                            relationshipProperties.setProperty(omrsPropertyName, (InstancePropertyValue)value);
+                        }
+                    }
+                }
+            }
+            relationship.setProperties(relationshipProperties);
 
         } else {
             String omrsEndOneProperty = omrsRelationshipDef.getEndDef1().getAttributeName();

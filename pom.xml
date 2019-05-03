@@ -242,6 +242,7 @@
                     <excludeSubProjects>true</excludeSubProjects>
                     <excludes>
                         <exclude>/CNAME</exclude>
+                        <exclude>/dco_signoffs/*.txt</exclude>
                         <exclude>**/banner.txt</exclude>
                         <exclude>**/*.json</exclude>
                         <exclude>**/*.patch</exclude>

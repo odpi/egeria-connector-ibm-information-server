@@ -827,7 +827,7 @@ public class IGCRestClient {
             String typeId = typeName.value();
             this.mapper.registerSubtypes(clazz);
             this.registeredPojosByType.put(typeId, clazz);
-            log.debug("Registered IGC type {} to be handled by POJO: {}", typeId, clazz.getCanonicalName());
+            log.info("Registered IGC type {} to be handled by POJO: {}", typeId, clazz.getCanonicalName());
         } else {
             log.error("Unable to find JsonTypeName annotation to identify type in POJO: {}", clazz.getCanonicalName());
         }
