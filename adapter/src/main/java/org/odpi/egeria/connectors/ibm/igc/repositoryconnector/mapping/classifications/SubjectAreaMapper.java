@@ -39,6 +39,7 @@ public class SubjectAreaMapper extends ClassificationMapping {
         super(
                 "category",
                 "category_path",
+                "GlossaryCategory",
                 "SubjectArea"
         );
         addMappedOmrsProperty("name");
@@ -95,8 +96,6 @@ public class SubjectAreaMapper extends ClassificationMapping {
                 try {
                     Classification classification = getMappedClassification(
                             igcomrsRepositoryConnector,
-                            "SubjectArea",
-                            "GlossaryCategory",
                             classificationProperties,
                             fromIgcObject,
                             userId
