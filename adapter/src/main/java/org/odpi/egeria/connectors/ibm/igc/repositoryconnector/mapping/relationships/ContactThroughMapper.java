@@ -28,6 +28,9 @@ public class ContactThroughMapper extends RelationshipMapping {
         );
         addSubType(ContactThroughMapper_Person.getInstance());
         addSubType(ContactThroughMapper_Team.getInstance());
+        // TODO: temporary only -- remove below lines once open type definition is fixed
+        addLiteralPropertyMapping("contactMethodType", null);
+        addLiteralPropertyMapping("contactMethodValue", null);
     }
 
 }

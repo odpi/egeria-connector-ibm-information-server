@@ -318,7 +318,7 @@ public abstract class EntityMapping extends InstanceMapping {
      * @return {@code Set<String>}
      */
     public final Set<String> getAllMappedOmrsProperties() {
-        Set<String> omrsProperties = getSimpleMappedOmrsProperties();
+        HashSet<String> omrsProperties = new HashSet<>(getSimpleMappedOmrsProperties());
         omrsProperties.addAll(getComplexMappedOmrsProperties());
         omrsProperties.addAll(getLiteralPropertyMappings());
         return omrsProperties;
