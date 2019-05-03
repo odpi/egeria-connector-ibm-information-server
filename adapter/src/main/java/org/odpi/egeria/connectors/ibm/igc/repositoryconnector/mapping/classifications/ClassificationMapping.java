@@ -79,7 +79,11 @@ public abstract class ClassificationMapping extends InstanceMapping {
      *
      * @return {@code Set<String>}
      */
-    public Set<String> getMappedOmrsPropertyNames() { return this.mappedOmrsPropertyNames; }
+    public Set<String> getMappedOmrsPropertyNames() {
+        HashSet<String> omrsProperties = new HashSet<>(mappedOmrsPropertyNames);
+        omrsProperties.addAll(getLiteralPropertyMappings());
+        return omrsProperties;
+    }
 
     /**
      * Retrieve the IGC asset type to which this classification mapping applies.
