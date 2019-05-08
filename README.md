@@ -13,6 +13,8 @@ Note that currently the implemented connector is read-only: it only implements t
 and communicate metadata from IGC out into the cohort -- it does *not* currently implement the ability to update IGC based
 on events received from other members of the cohort.
 
+Furthermore, [only a subset of the overall Open Metadata Types are currently implemented](docs/mappings/README.md).
+
 ## How it works
 
 The IBM IGC Repository Connector works through a combination of the following:
