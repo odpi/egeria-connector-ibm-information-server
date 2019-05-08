@@ -65,6 +65,7 @@ public class IGCRestClient {
     private Boolean workflowEnabled = false;
     private List<String> cookies = null;
     private boolean successfullyInitialised = false;
+    private RestTemplate restTemplate;
 
     private IGCVersionEnum igcVersion;
     private HashMap<String, Class> registeredPojosByType;
@@ -113,6 +114,7 @@ public class IGCRestClient {
         this.authorization = authorization;
         this.mapper = new ObjectMapper();
         this.registeredPojosByType = new HashMap<>();
+        this.restTemplate = new RestTemplate();
 
         log.debug("Constructing IGCRestClient...");
 
@@ -379,7 +381,7 @@ public class IGCRestClient {
         HttpEntity<MultiValueMap<String, Object>> toSend = new HttpEntity<>(body, headers);
 
         try {
-            response = new RestTemplate().exchange(
+            response = restTemplate.exchange(
                     baseURL + endpoint,
                     method,
                     toSend,
@@ -441,7 +443,7 @@ public class IGCRestClient {
         ResponseEntity<String> response = null;
         try {
             log.debug("{}ing to {} with: {}", method, url, payload);
-            response = new RestTemplate().exchange(
+            response = restTemplate.exchange(
                     url,
                     method,
                     toSend,
