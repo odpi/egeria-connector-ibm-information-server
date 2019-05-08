@@ -13,6 +13,8 @@ Note that currently the implemented connector is read-only: it only implements t
 and communicate metadata from IGC out into the cohort -- it does *not* currently implement the ability to update IGC based
 on events received from other members of the cohort.
 
+Furthermore, [only a subset of the overall Open Metadata Types are currently implemented](docs/mappings/README.md).
+
 ## How it works
 
 The IBM IGC Repository Connector works through a combination of the following:
@@ -41,13 +43,32 @@ There should not be any need to restart the environment after enabling the event
 After building the connector project (`mvn clean install`) the connector is available as:
 
 ```text
-distribution/target/egeria-connector-ibm-igc-package-VERSION-dist.jar
+distribution/target/egeria-connector-ibm-igc-package-VERSION.jar
 ```
 
 Simply copy this file to a location where it can be run alongside the OMAG Server
 Platform from the Egeria core (in the example below, the file would be copied to
-`/lib/egeria-connector-ibm-igc-package-VERSION-dist.jar`), and you can startup
-the OMAG Server Platform with this connector ready-to-be-configured by running:
+`/lib/egeria-connector-ibm-igc-package-VERSION.jar`).
+
+### Configure security
+
+There are [multiple options to configure the security of your environment](docs/security/README.md) for this connector,
+but this must be done prior to starting up the connector itself (step below).
+
+If you simply want to test things out, and are not concerned about security, the simplest (but most insecure) option
+is to set the environment variable `STRICT_SSL` to `false` using something like the following prior to starting
+up the OMAG Server Platform:
+
+```bash
+export STRICT_SSL=false
+```
+
+Note that this will disable all certificate validation for SSL connections made between Egeria and your IGC
+environment, so is inherently insecure.
+
+### Startup the OMAG Server Platform
+
+You can startup the OMAG Server Platform with this connector ready-to-be-configured by running:
 
 ```bash
 $ java -Dloader.path=/lib -jar server-chassis-spring-VERSION.jar
@@ -55,7 +76,6 @@ $ java -Dloader.path=/lib -jar server-chassis-spring-VERSION.jar
 
 (This command will startup the OMAG Server Platform, including all libraries
 in the `/lib` directory as part of the classpath of the OMAG Server Platform.)
-
 
 ### Configure this Egeria connector
 
