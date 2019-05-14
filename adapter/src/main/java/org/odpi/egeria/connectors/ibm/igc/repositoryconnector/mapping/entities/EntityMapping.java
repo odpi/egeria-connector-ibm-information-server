@@ -2,8 +2,10 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
@@ -155,7 +157,7 @@ public abstract class EntityMapping extends InstanceMapping {
         try {
             igcPOJO = Class.forName(sbPojoName.toString());
         } catch (ClassNotFoundException e) {
-            log.error("Unable to find POJO class: {}", sbPojoName.toString(), e);
+            if (log.isErrorEnabled()) { log.error("Unable to find POJO class: {}", sbPojoName.toString(), e); }
         }
         return igcPOJO;
     }
@@ -195,7 +197,7 @@ public abstract class EntityMapping extends InstanceMapping {
      */
     public final boolean matchesAssetType(String igcAssetType) {
         String matchType = Reference.getAssetTypeForSearch(igcAssetType);
-        log.debug("checking for matching asset between {} and {}", this.igcAssetType, matchType);
+        if (log.isDebugEnabled()) { log.debug("checking for matching asset between {} and {}", this.igcAssetType, matchType); }
         return (
                 this.igcAssetType.equals(matchType)
                         || this.igcAssetType.equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE)
@@ -457,6 +459,27 @@ public abstract class EntityMapping extends InstanceMapping {
     }
 
     /**
+     * This method needs to be overridden to define how to search for an entity using a property value that has been
+     * mapped in a complex way.
+     *
+     * @param igcRestClient connectivity to an IGC environment
+     * @param igcSearchConditionSet the set of search criteria to which to add
+     * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
+     * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
+     * @param igcProperties the list of IGC properties to which to add for inclusion in the IGC search
+     * @param value the value for which to search
+     * @return IGCSearchConditionSet - the IGC search criteria to find entities based on the complex property(ies)
+     */
+    public void addComplexPropertySearchCriteria(IGCRestClient igcRestClient,
+                                                 IGCSearchConditionSet igcSearchConditionSet,
+                                                 String igcPropertyName,
+                                                 String omrsPropertyName,
+                                                 List<String> igcProperties,
+                                                 InstancePropertyValue value) {
+        // Nothing to do -- no complex properties by default
+    }
+
+    /**
      * Simple utility function to avoid implementing shared EntitySummary and EntityDetail setup twice.
      *
      * @param entityMap the instantiation of a mapping to carry out
@@ -606,7 +629,7 @@ public abstract class EntityMapping extends InstanceMapping {
                         methodName
                 );
             } else {
-                log.warn("No OMRS attribute {} defined for asset type {} -- skipping mapping.", omrsAttribute, omrsTypeDefName);
+                if (log.isWarnEnabled()) { log.warn("No OMRS attribute {} defined for asset type {} -- skipping mapping.", omrsAttribute, omrsTypeDefName); }
             }
         }
 
@@ -675,7 +698,7 @@ public abstract class EntityMapping extends InstanceMapping {
             // Merge together all the properties we want to map
             ArrayList<String> allProperties = new ArrayList<>();
             for (RelationshipMapping mapping : relationshipMappers) {
-                log.debug("Adding properties from mapping: {}", mapping);
+                if (log.isDebugEnabled()) { log.debug("Adding properties from mapping: {}", mapping); }
                 allProperties.addAll(mapping.getIgcRelationshipPropertiesForType(igcEntity.getType()));
             }
             allProperties.addAll(IGCRestConstants.getModificationProperties());

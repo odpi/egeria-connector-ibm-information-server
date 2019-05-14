@@ -2,6 +2,12 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +17,8 @@ import java.util.List;
  * still be equal.
  */
 public class Identity {
+
+    private static final Logger log = LoggerFactory.getLogger(Identity.class);
 
     private List<Reference> context;
 
@@ -93,6 +101,13 @@ public class Identity {
     public String getRid() { return this.rid; }
 
     /**
+     * Returns the type of the asset represented by this identity.
+     *
+     * @return String
+     */
+    public String getAssetType() { return this.assetType; }
+
+    /**
      * Indicates whether the asset type requires its Repository ID (RID) in order to be unique. In other words, the name
      * and context of the asset type are insufficient to make the identity unique.
      *
@@ -120,6 +135,140 @@ public class Identity {
             sb.append("_");
             sb.append(id);
         }
+    }
+
+    /**
+     * Determine the property path to use (in a search) based on the provided information.
+     *
+     * @param assetType the asset type being searched
+     * @param ctxAssetType the type of asset within the context of the asset being searched
+     * @param pathSoFar the path that has been built-up so far
+     * @return String
+     */
+    private static final String getPropertyPath(String assetType, String ctxAssetType, String pathSoFar) {
+        if (pathSoFar.length() > 0) {
+            pathSoFar = pathSoFar + ".";
+        }
+        if (assetType.equals("database_column") && (ctxAssetType.equals("database_table") || ctxAssetType.equals("view"))) {
+            pathSoFar = pathSoFar + "database_table_or_view";
+        } else if (ctxAssetType.equals("category")) {
+            pathSoFar = pathSoFar + "parent_category";
+        } else {
+            pathSoFar = pathSoFar + ctxAssetType;
+        }
+        return pathSoFar;
+    }
+
+    /**
+     * Add a specific search condition.
+     *
+     * @param igcSearchConditionSet the condition set to which to append
+     * @param propertyPath the property path for the search condition
+     * @param ctxType the type of the context asset for which to add the search condition
+     * @param ctxName the name of the context asset for which to add the search condition
+     * @param ctxId the RID of the context asset for which to add the search condition (only needed if required to
+     *              uniquely identify that type of asset)
+     */
+    private final void addSearchCondition(IGCSearchConditionSet igcSearchConditionSet,
+                                          String propertyPath,
+                                          String ctxType,
+                                          String ctxName,
+                                          String ctxId) {
+        if (requiresRidToBeUnique(ctxType)) {
+            if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", (propertyPath == null ? "_id" : propertyPath), "=", ctxId); }
+            IGCSearchCondition condition = new IGCSearchCondition(
+                    (propertyPath == null ? "_id" : propertyPath),
+                    "=",
+                    ctxId
+            );
+            igcSearchConditionSet.addCondition(condition);
+        } else {
+            if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", (propertyPath == null ? "name" : propertyPath + ".name"), "=", ctxName); }
+            IGCSearchCondition condition = new IGCSearchCondition(
+                    (propertyPath == null ? "name" : propertyPath + ".name"),
+                    "=",
+                    ctxName
+            );
+            igcSearchConditionSet.addCondition(condition);
+        }
+    }
+
+    /**
+     * Composes the search criteria necessary to retrieve an IGC object with this identity, without relying
+     * on its RID.
+     *
+     * @return IGCSearchConditionSet
+     */
+    public final IGCSearchConditionSet getSearchCriteria() {
+
+        // We need to break the qualified name down into its constituent parts and add each as a search condition
+        // (setting the entire set as its own nested condition set)
+        IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
+        igcSearchConditionSet.setMatchAnyCondition(false);
+
+        // Build up the search criteria for all of the context first
+        String propertyPath = "";
+        for (int i = context.size() - 1; i >= 0; i--) {
+            Reference item = context.get(i);
+            String type = item.getType();
+            propertyPath = getPropertyPath(assetType, type, propertyPath);
+            addSearchCondition(igcSearchConditionSet, propertyPath, type, item.getName(), item.getId());
+        }
+
+        // Then add the final condition for this asset itself
+        addSearchCondition(igcSearchConditionSet, null, assetType, assetName, rid);
+
+        return igcSearchConditionSet;
+
+    }
+
+    /**
+     * Builds an Identity based on an identity string (or null if unable to construct an Identity from the
+     * string).
+     *
+     * @param identity the string representing a qualified identity
+     * @param igcRestClient connectivity to an IGC environment
+     * @return Identity
+     * @see #toString()
+     */
+    public static final Identity getFromString(String identity, IGCRestClient igcRestClient) {
+
+        List<Reference> context = new ArrayList<>();
+
+        String assetType = null;
+        String assetName = null;
+        String assetId = null;
+        String[] components = identity.split("::");
+        for (int i = 0; i < components.length; i++) {
+            String component = components[i];
+            String[] tokens = component.split("=");
+            String type = tokens[0].substring(1, tokens[0].length() - 1);
+            String name = tokens[1];
+            String id = null;
+            if (requiresRidToBeUnique(type)) {
+                id = name.split("_")[1];
+            }
+            if (i == components.length - 1) {
+                assetType = type;
+                assetName = name;
+                assetId = id;
+            } else {
+                Reference item = new Reference(name, type, id);
+                context.add(item);
+            }
+        }
+
+        Identity ident = null;
+        try {
+            Class pojo = igcRestClient.getPOJOForType(assetType);
+            if (pojo != null) {
+                ident = new Identity(context, assetType, assetName, assetId);
+            }
+        } catch (Exception e) {
+            if (log.isErrorEnabled()) { log.error("Unable to find registered IGC type '{}' -- cannot construct an IGC identity.", assetType); }
+        }
+        return ident;
+
     }
 
     @Override
