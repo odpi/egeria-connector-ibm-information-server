@@ -2,9 +2,13 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SemanticAssignmentMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
@@ -170,6 +174,76 @@ public class ReferenceableMapper extends EntityMapping {
         }
 
         return instanceProperties;
+
+    }
+
+    /**
+     * Handle the search for 'qualifiedName' and 'additionalProperties' by reverse-engineering them to IGC-specific
+     * properties and values.
+     *
+     * @param igcRestClient connectivity to an IGC environment
+     * @param igcSearchConditionSet the set of search criteria to which to add
+     * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
+     * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
+     * @param igcProperties the list of IGC properties to which to add for inclusion in the IGC search
+     * @param value the value for which to search
+     */
+    @Override
+    public void addComplexPropertySearchCriteria(IGCRestClient igcRestClient,
+                                                 IGCSearchConditionSet igcSearchConditionSet,
+                                                 String igcPropertyName,
+                                                 String omrsPropertyName,
+                                                 List<String> igcProperties,
+                                                 InstancePropertyValue value) {
+
+        if (log.isDebugEnabled()) { log.debug("Adding complex search criteria for: {}", omrsPropertyName); }
+
+        if (omrsPropertyName.equals("qualifiedName")) {
+
+            String qualifiedName = ((PrimitivePropertyValue) value).getPrimitiveValue().toString();
+            if (log.isDebugEnabled()) { log.debug("Looking up identity: {}", qualifiedName); }
+            Identity identity = Identity.getFromString(qualifiedName, igcRestClient);
+
+            boolean skip = false;
+            if (identity != null) {
+                if (log.isDebugEnabled()) { log.debug(". . .found identity: {}", identity.toString()); }
+                String igcType = identity.getAssetType();
+                if (igcType.equals(getIgcAssetType()) || getOtherIGCAssetTypes().contains(igcType)) {
+                    IGCSearchConditionSet nested = identity.getSearchCriteria();
+                    igcSearchConditionSet.addNestedConditionSet(nested);
+                } else {
+                    if (log.isInfoEnabled()) { log.info("Search type did not match identity type -- skipping."); }
+                    skip = true;
+                }
+            } else {
+                if (log.isInfoEnabled()) { log.info("Unable to find identity '{}' -- skipping.", qualifiedName); }
+                skip = true;
+            }
+            if (skip) {
+                if (log.isDebugEnabled()) { log.debug("Adding search condition to ensure no results."); }
+                IGCSearchCondition name = new IGCSearchCondition(
+                        "_id",
+                        "=",
+                        "NONEXISTENT"
+                );
+                IGCSearchConditionSet byName = new IGCSearchConditionSet(name);
+                igcSearchConditionSet.addNestedConditionSet(byName);
+            }
+
+        } else if (omrsPropertyName.equals("additionalProperties")) {
+
+            Map<String, InstancePropertyValue> mapValues = ((MapPropertyValue) value).getMapValues().getInstanceProperties();
+            for (Map.Entry<String, InstancePropertyValue> nextEntry : mapValues.entrySet()) {
+                IGCOMRSMetadataCollection.addIGCSearchConditionFromValue(
+                        igcSearchConditionSet,
+                        nextEntry.getKey(),
+                        igcProperties,
+                        this,
+                        nextEntry.getValue()
+                );
+            }
+
+        }
 
     }
 

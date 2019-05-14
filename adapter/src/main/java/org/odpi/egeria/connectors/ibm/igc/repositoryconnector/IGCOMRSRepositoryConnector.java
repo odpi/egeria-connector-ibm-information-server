@@ -45,7 +45,7 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
         super.initialize(connectorInstanceId, connectionProperties);
 
         final String methodName = "initialize";
-        log.debug("Initializing IGCOMRSRepositoryConnector...");
+        if (log.isDebugEnabled()) { log.debug("Initializing IGCOMRSRepositoryConnector..."); }
 
         // Retrieve connection details
         Map<String, Object> proxyProperties = this.connectionBean.getConfigurationProperties();

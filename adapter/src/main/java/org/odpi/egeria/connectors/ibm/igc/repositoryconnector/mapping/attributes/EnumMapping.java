@@ -53,7 +53,7 @@ public class EnumMapping extends AttributeMapping {
             if (defaultEnum != null) {
                 element = defaultEnum;
             } else {
-                log.error("Could not find corresponding enum value for {}, and no default enum defined for {}.", igcValue, getOmrsAttributeTypeDefName());
+                if (log.isErrorEnabled()) { log.error("Could not find corresponding enum value for {}, and no default enum defined for {}.", igcValue, getOmrsAttributeTypeDefName()); }
             }
         }
         if (element != null) {

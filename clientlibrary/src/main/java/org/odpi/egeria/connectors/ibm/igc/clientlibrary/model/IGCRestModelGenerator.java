@@ -460,7 +460,7 @@ public class IGCRestModelGenerator {
                 fs.append(System.lineSeparator());
 
             } catch (IOException e) {
-                log.error("Unable to open file output: {}" + filename, e);
+                if (log.isErrorEnabled()) { log.error("Unable to open file output: {}" + filename, e); }
             }
 
         }

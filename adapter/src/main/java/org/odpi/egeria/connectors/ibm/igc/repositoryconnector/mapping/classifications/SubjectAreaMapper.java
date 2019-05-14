@@ -249,7 +249,7 @@ public class SubjectAreaMapper extends ClassificationMapping {
             IGCSearch igcSearch = new IGCSearch("category", igcSearchConditionSet);
             ReferenceList results = igcRestClient.search(igcSearch);
             if (results == null || results.getPaging().getNumTotal() < 1) {
-                log.error("No SubjectArea found with name: {}", subjectAreaName);
+                if (log.isErrorEnabled()) { log.error("No SubjectArea found with name: {}", subjectAreaName); }
                 IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_NOT_FOUND;
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                         getOmrsClassificationType(),
@@ -264,14 +264,14 @@ public class SubjectAreaMapper extends ClassificationMapping {
                         errorCode.getUserAction()
                 );
             } else if (results.getPaging().getNumTotal() > 1) {
-                log.warn("Found multiple SubjectArea categories matching {}, taking the first.", subjectAreaName);
+                if (log.isWarnEnabled()) { log.warn("Found multiple SubjectArea categories matching {}, taking the first.", subjectAreaName); }
             }
             String subjectAreaCatRid = results.getItems().get(0).getId();
             IGCUpdate igcUpdate = new IGCUpdate(igcEntity.getId());
             igcUpdate.addRelationship("referencing_categories", subjectAreaCatRid);
             igcUpdate.setRelationshipUpdateMode(IGCUpdate.UpdateMode.APPEND);
             if (!igcRestClient.update(igcUpdate)) {
-                log.error("Unable to update entity {} to add classification {}.", entityGUID, getOmrsClassificationType());
+                if (log.isErrorEnabled()) { log.error("Unable to update entity {} to add classification {}.", entityGUID, getOmrsClassificationType()); }
             }
 
         } else {

@@ -74,7 +74,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                      OMRSRepositoryValidator repositoryValidator,
                                      String metadataCollectionId) {
         super(parentConnector, repositoryName, repositoryHelper, repositoryValidator, metadataCollectionId);
-        log.debug("Constructing IGCOMRSMetadataCollection with name: {}", repositoryName);
+        if (log.isDebugEnabled()) { log.debug("Constructing IGCOMRSMetadataCollection with name: {}", repositoryName); }
         parentConnector.setRepositoryName(repositoryName);
         this.igcRestClient = parentConnector.getIGCRestClient();
         this.igcomrsRepositoryConnector = parentConnector;
@@ -118,11 +118,11 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
          */
         TypeDefGallery typeDefGallery = new TypeDefGallery();
         List<TypeDef> typeDefs = typeDefStore.getAllTypeDefs();
-        log.debug("Retrieved {} implemented TypeDefs for this repository.", typeDefs.size());
+        if (log.isDebugEnabled()) { log.debug("Retrieved {} implemented TypeDefs for this repository.", typeDefs.size()); }
         typeDefGallery.setTypeDefs(typeDefs);
 
         List<AttributeTypeDef> attributeTypeDefs = attributeMappingStore.getAllAttributeTypeDefs();
-        log.debug("Retrieved {} implemented AttributeTypeDefs for this repository.", attributeTypeDefs.size());
+        if (log.isDebugEnabled()) { log.debug("Retrieved {} implemented AttributeTypeDefs for this repository.", attributeTypeDefs.size()); }
         typeDefGallery.setAttributeTypeDefs(attributeTypeDefs);
 
         return typeDefGallery;
@@ -666,7 +666,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         TypeDefCategory typeDefCategory = newTypeDef.getCategory();
         String omrsTypeDefName = newTypeDef.getName();
-        log.debug("Looking for mapping for {} of type {}", omrsTypeDefName, typeDefCategory.getName());
+        if (log.isDebugEnabled()) { log.debug("Looking for mapping for {} of type {}", omrsTypeDefName, typeDefCategory.getName()); }
 
         // See if we have a Mapper defined for the class -- if so, it's implemented
         StringBuilder sbMapperClassname = new StringBuilder();
@@ -688,7 +688,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         try {
 
             Class mappingClass = Class.forName(sbMapperClassname.toString());
-            log.debug(" ... found mapping class: {}", mappingClass);
+            if (log.isDebugEnabled()) { log.debug(" ... found mapping class: {}", mappingClass); }
 
             boolean success = false;
 
@@ -760,7 +760,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         // in the verifyAttributeTypeDef method
         AttributeTypeDefCategory attributeTypeDefCategory = newAttributeTypeDef.getCategory();
         String omrsTypeDefName = newAttributeTypeDef.getName();
-        log.debug("Looking for mapping for {} of type {}", omrsTypeDefName, attributeTypeDefCategory.getName());
+        if (log.isDebugEnabled()) { log.debug("Looking for mapping for {} of type {}", omrsTypeDefName, attributeTypeDefCategory.getName()); }
 
         // See if we have a Mapper defined for the class -- if so, it's implemented
         StringBuilder sbMapperClassname = new StringBuilder();
@@ -771,7 +771,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         try {
             Class mappingClass = Class.forName(sbMapperClassname.toString());
-            log.debug(" ... found mapping class: {}", mappingClass);
+            if (log.isDebugEnabled()) { log.debug(" ... found mapping class: {}", mappingClass); }
             attributeMappingStore.addMapping(newAttributeTypeDef, mappingClass);
         } catch (ClassNotFoundException e) {
             throw new TypeDefNotSupportedException(404, IGCOMRSMetadataCollection.class.getName(), methodName, omrsTypeDefName + " is not supported.", "", "Request support through Egeria GitHub issue.");
@@ -992,7 +992,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         try {
             detail = getEntityDetail(userId, guid);
         } catch (EntityNotKnownException | EntityProxyOnlyException e) {
-            log.info("Entity {} not known to the repository, or only a proxy.", guid, e);
+            if (log.isInfoEnabled()) { log.info("Entity {} not known to the repository, or only a proxy.", guid, e); }
         }
         return detail;
     }
@@ -1032,7 +1032,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         /*
          * Perform operation
          */
-        log.debug("getEntitySummary with guid = {}", guid);
+        if (log.isDebugEnabled()) { log.debug("getEntitySummary with guid = {}", guid); }
 
         // Lookup the basic asset based on the RID (strip off prefix (indicating a generated type), if there)
         String rid = getRidFromGeneratedId(guid);
@@ -1413,7 +1413,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 );
 
                 if (limitResultsByClassification != null && !limitResultsByClassification.isEmpty() && classificationLimiters == null) {
-                    log.info("Classification limiters were specified, but none apply to the asset type {}, so excluding this asset type from search.", igcAssetType);
+                    if (log.isInfoEnabled()) { log.info("Classification limiters were specified, but none apply to the asset type {}, so excluding this asset type from search.", igcAssetType); }
                 } else {
 
                     IGCSearch igcSearch = new IGCSearch();
@@ -1688,7 +1688,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     );
 
                 } else {
-                    log.info("No classification mapping has been implemented for {} on entity {} -- skipping from search.", classificationName, mapping.getOmrsTypeDefName());
+                    if (log.isInfoEnabled()) { log.info("No classification mapping has been implemented for {} on entity {} -- skipping from search.", classificationName, mapping.getOmrsTypeDefName()); }
                 }
 
             }
@@ -1812,7 +1812,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     );
 
                     if (limitResultsByClassification != null && !limitResultsByClassification.isEmpty() && classificationLimiters == null) {
-                        log.info("Classification limiters were specified, but none apply to the asset type {}, so excluding this asset type from search.", igcAssetType);
+                        if (log.isInfoEnabled()) { log.info("Classification limiters were specified, but none apply to the asset type {}, so excluding this asset type from search.", igcAssetType); }
                     } else {
 
                         IGCSearchConditionSet outerConditions = new IGCSearchConditionSet();
@@ -1877,7 +1877,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     }
 
                 } else {
-                    log.warn("Unable to find POJO to handle IGC asset type '{}' -- skipping search against this asset type.", igcAssetType);
+                    if (log.isWarnEnabled()) { log.warn("Unable to find POJO to handle IGC asset type '{}' -- skipping search against this asset type.", igcAssetType); }
                 }
 
             }
@@ -1924,7 +1924,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         try {
             relationship = getRelationship(userId, guid);
         } catch (RelationshipNotKnownException e) {
-            log.info("Could not find relationship {} in repository.", guid, e);
+            if (log.isInfoEnabled()) { log.info("Could not find relationship {} in repository.", guid, e); }
         }
         return relationship;
     }
@@ -1981,7 +1981,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             proxyTwoIgcRid = getRidFromGeneratedId(proxyTwoRid);
         }
 
-        log.debug("Looking up relationship: {}", guid);
+        if (log.isDebugEnabled()) { log.debug("Looking up relationship: {}", guid); }
 
         // Should not need to translate from proxyone / proxytwo to alternative assets, as the RIDs provided
         // in the relationship GUID should already be pointing to the correct assets
@@ -2019,7 +2019,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 // Since the ordering should be set by the GUID we're lookup up anyway, we'll simply set the property
                 // to one of the proxyOne properties
                 String igcPropertyName = relationshipMapping.getProxyOneMapping().getIgcRelationshipProperties().get(0);
-                log.debug(" ... using property: {}", igcPropertyName);
+                if (log.isDebugEnabled()) { log.debug(" ... using property: {}", igcPropertyName); }
                 found = RelationshipMapping.getMappedRelationship(
                         igcomrsRepositoryConnector,
                         relationshipMapping,
@@ -3481,19 +3481,19 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             if (!reference.getType().equals(DEFAULT_IGC_TYPE)) {
                 EntityDetail ed = null;
 
-                log.debug("processResults with mapper: {}", mapper.getClass().getCanonicalName());
+                if (log.isDebugEnabled()) { log.debug("processResults with mapper: {}", mapper.getClass().getCanonicalName()); }
                 String idToLookup;
                 if (mapper.igcRidNeedsPrefix()) {
-                    log.debug(" ... prefix required, getEntityDetail with: {}", mapper.getIgcRidPrefix() + reference.getId());
+                    if (log.isDebugEnabled()) { log.debug(" ... prefix required, getEntityDetail with: {}", mapper.getIgcRidPrefix() + reference.getId()); }
                     idToLookup = mapper.getIgcRidPrefix() + reference.getId();
                 } else {
-                    log.debug(" ... no prefix required, getEntityDetail with: {}", reference.getId());
+                    if (log.isDebugEnabled()) { log.debug(" ... no prefix required, getEntityDetail with: {}", reference.getId()); }
                     idToLookup = reference.getId();
                 }
                 try {
                     ed = getEntityDetail(userId, idToLookup, reference);
                 } catch (EntityNotKnownException e) {
-                    log.error("Unable to find entity: {}", idToLookup);
+                    if (log.isErrorEnabled()) { log.error("Unable to find entity: {}", idToLookup); }
                 }
                 if (ed != null) {
                     entityDetails.add(ed);
@@ -3526,7 +3526,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         if (classificationMapping.matchesAssetType(igcAssetType)) {
             igcSearchConditionSet = classificationMapping.getIGCSearchCriteria(null);
         } else {
-            log.warn("Classification {} cannot be applied to IGC asset type {} - excluding from search limitations.", classificationName, igcAssetType);
+            if (log.isWarnEnabled()) { log.warn("Classification {} cannot be applied to IGC asset type {} - excluding from search limitations.", classificationName, igcAssetType); }
         }
 
         return (igcSearchConditionSet.size() > 0 ? igcSearchConditionSet : null);
@@ -3633,7 +3633,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         final String  methodName        = "getEntityDetail";
 
-        log.debug("getEntityDetail with guid = {}", guid);
+        if (log.isDebugEnabled()) { log.debug("getEntityDetail with guid = {}", guid); }
 
         EntityDetail detail = null;
         String prefix = getPrefixFromGeneratedId(guid);
@@ -3676,7 +3676,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             } else {
                 OMRSErrorCode errorCode = OMRSErrorCode.TYPEDEF_NOT_KNOWN_FOR_INSTANCE;
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        prefix + asset.getType(),
+                        (prefix == null ? "" : prefix) + asset.getType(),
                         "IGC asset",
                         methodName,
                         repositoryName);
@@ -3706,12 +3706,12 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         String igcAssetType = igcObject.getType();
 
-        log.debug("Looking for mapper for type {} with prefix {}", igcAssetType, prefix);
+        if (log.isDebugEnabled()) { log.debug("Looking for mapper for type {} with prefix {}", igcAssetType, prefix); }
 
         EntityMappingInstance entityMap = null;
         EntityMapping found = entityMappingStore.getMappingByIgcAssetTypeAndPrefix(igcAssetType, prefix);
         if (found != null) {
-            log.debug("Found mapper class: {} ({})", found.getClass().getCanonicalName(), found);
+            if (log.isDebugEnabled()) { log.debug("Found mapper class: {} ({})", found.getClass().getCanonicalName(), found); }
             // Translate the provided asset to a base asset type for the mapper, if needed
             // (if not needed the 'getBaseIgcAssetFromAlternative' is effectively a NOOP and gives back same object)
             entityMap = new EntityMappingInstance(
@@ -3721,7 +3721,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     userId
             );
         } else {
-            log.debug("No mapper class found!");
+            if (log.isDebugEnabled()) { log.debug("No mapper class found!"); }
         }
 
         return entityMap;
@@ -3777,7 +3777,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     }
 
     /**
-     * Adds the provided value to the search criteria for IGC.
+     * Adds the provided value to the search criteria for IGC (when we only know the OMRS property).
      *
      * @param igcSearchConditionSet the search conditions to which to add the criteria
      * @param omrsPropertyName the OMRS property name to search
@@ -3791,102 +3791,150 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                             EntityMapping mapping,
                                             InstancePropertyValue value) {
 
-        String igcPropertyName = mapping.getIgcPropertyName(omrsPropertyName);
-        if (igcPropertyName != null) {
-            igcProperties.add(igcPropertyName);
-            InstancePropertyCategory category = value.getInstancePropertyCategory();
-            switch (category) {
-                case PRIMITIVE:
-                    PrimitivePropertyValue actualValue = (PrimitivePropertyValue) value;
-                    PrimitiveDefCategory primitiveType = actualValue.getPrimitiveDefCategory();
-                    switch (primitiveType) {
-                        case OM_PRIMITIVE_TYPE_BOOLEAN:
-                        case OM_PRIMITIVE_TYPE_BYTE:
-                        case OM_PRIMITIVE_TYPE_CHAR:
-                            igcSearchConditionSet.addCondition(new IGCSearchCondition(
-                                    igcPropertyName,
-                                    "=",
-                                    actualValue.getPrimitiveValue().toString()
-                            ));
-                            break;
-                        case OM_PRIMITIVE_TYPE_SHORT:
-                        case OM_PRIMITIVE_TYPE_INT:
-                        case OM_PRIMITIVE_TYPE_LONG:
-                        case OM_PRIMITIVE_TYPE_FLOAT:
-                        case OM_PRIMITIVE_TYPE_DOUBLE:
-                        case OM_PRIMITIVE_TYPE_BIGINTEGER:
-                        case OM_PRIMITIVE_TYPE_BIGDECIMAL:
-                            igcSearchConditionSet.addCondition(new IGCSearchCondition(
-                                    igcPropertyName,
-                                    "=",
-                                    actualValue.getPrimitiveValue().toString()
-                            ));
-                            break;
-                        case OM_PRIMITIVE_TYPE_DATE:
-                            Date date = (Date) actualValue.getPrimitiveValue();
-                            igcSearchConditionSet.addCondition(new IGCSearchCondition(
-                                    igcPropertyName,
-                                    "=",
-                                    "" + date.getTime()
-                            ));
-                            break;
-                        case OM_PRIMITIVE_TYPE_STRING:
-                        default:
-                            igcSearchConditionSet.addCondition(new IGCSearchCondition(
-                                    igcPropertyName,
-                                    "like %{0}%",
-                                    actualValue.getPrimitiveValue().toString()
-                            ));
-                            break;
-                    }
-                    break;
-                case ENUM:
-                    igcSearchConditionSet.addCondition(new IGCSearchCondition(
+        if (omrsPropertyName != null) {
+            if (omrsPropertyName.equals(EntityMapping.COMPLEX_MAPPING_SENTINEL)) {
+
+                log.warn("Unhandled search condition: complex OMRS mapping, unknown IGC property.");
+
+            } else {
+
+                String igcPropertyName = mapping.getIgcPropertyName(omrsPropertyName);
+
+                if (igcPropertyName.equals(EntityMapping.COMPLEX_MAPPING_SENTINEL)) {
+
+                    mapping.addComplexPropertySearchCriteria(
+                            igcRestClient,
+                            igcSearchConditionSet,
                             igcPropertyName,
-                            "=",
-                            ((EnumPropertyValue) value).getSymbolicName()
-                    ));
-                    break;
-                case STRUCT:
-                    Map<String, InstancePropertyValue> structValues = ((StructPropertyValue) value).getAttributes().getInstanceProperties();
-                    for (Map.Entry<String, InstancePropertyValue> nextEntry : structValues.entrySet()) {
-                        addSearchConditionFromValue(
-                                igcSearchConditionSet,
-                                nextEntry.getKey(),
-                                igcProperties,
-                                mapping,
-                                nextEntry.getValue()
-                        );
-                    }
-                    break;
-                case MAP:
-                    Map<String, InstancePropertyValue> mapValues = ((MapPropertyValue) value).getMapValues().getInstanceProperties();
-                    for (Map.Entry<String, InstancePropertyValue> nextEntry : mapValues.entrySet()) {
-                        addSearchConditionFromValue(
-                                igcSearchConditionSet,
-                                nextEntry.getKey(),
-                                igcProperties,
-                                mapping,
-                                nextEntry.getValue()
-                        );
-                    }
-                    break;
-                case ARRAY:
-                    Map<String, InstancePropertyValue> arrayValues = ((ArrayPropertyValue) value).getArrayValues().getInstanceProperties();
-                    for (Map.Entry<String, InstancePropertyValue> nextEntry : arrayValues.entrySet()) {
-                        addSearchConditionFromValue(
-                                igcSearchConditionSet,
-                                igcPropertyName,
-                                igcProperties,
-                                mapping,
-                                nextEntry.getValue()
-                        );
-                    }
-                    break;
-                default:
-                    // Do nothing
-                    break;
+                            omrsPropertyName,
+                            igcProperties,
+                            value);
+
+                } else {
+
+                    igcProperties.add(igcPropertyName);
+                    addIGCSearchConditionFromValue(
+                            igcSearchConditionSet,
+                            igcPropertyName,
+                            igcProperties,
+                            mapping,
+                            value);
+
+                }
+
             }
+        }
+
+    }
+
+    /**
+     * Adds the provided value to search criteria for IGC (once we know the IGC property).
+     *
+     * @param igcSearchConditionSet the search conditions to which to add the criteria
+     * @param igcPropertyName the IGC property name to search
+     * @param igcProperties the list of IGC properties to which to add for inclusion in the IGC search
+     * @param mapping the mapping definition for the entity for which we're searching
+     * @param value the value for which to search
+     */
+    public static void addIGCSearchConditionFromValue(IGCSearchConditionSet igcSearchConditionSet,
+                                                      String igcPropertyName,
+                                                      List<String> igcProperties,
+                                                      EntityMapping mapping,
+                                                      InstancePropertyValue value) {
+
+        InstancePropertyCategory category = value.getInstancePropertyCategory();
+        switch (category) {
+            case PRIMITIVE:
+                PrimitivePropertyValue actualValue = (PrimitivePropertyValue) value;
+                PrimitiveDefCategory primitiveType = actualValue.getPrimitiveDefCategory();
+                switch (primitiveType) {
+                    case OM_PRIMITIVE_TYPE_BOOLEAN:
+                    case OM_PRIMITIVE_TYPE_BYTE:
+                    case OM_PRIMITIVE_TYPE_CHAR:
+                        igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                                igcPropertyName,
+                                "=",
+                                actualValue.getPrimitiveValue().toString()
+                        ));
+                        break;
+                    case OM_PRIMITIVE_TYPE_SHORT:
+                    case OM_PRIMITIVE_TYPE_INT:
+                    case OM_PRIMITIVE_TYPE_LONG:
+                    case OM_PRIMITIVE_TYPE_FLOAT:
+                    case OM_PRIMITIVE_TYPE_DOUBLE:
+                    case OM_PRIMITIVE_TYPE_BIGINTEGER:
+                    case OM_PRIMITIVE_TYPE_BIGDECIMAL:
+                        igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                                igcPropertyName,
+                                "=",
+                                actualValue.getPrimitiveValue().toString()
+                        ));
+                        break;
+                    case OM_PRIMITIVE_TYPE_DATE:
+                        Date date = (Date) actualValue.getPrimitiveValue();
+                        igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                                igcPropertyName,
+                                "=",
+                                "" + date.getTime()
+                        ));
+                        break;
+                    case OM_PRIMITIVE_TYPE_STRING:
+                    default:
+                        igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                                igcPropertyName,
+                                "like %{0}%",
+                                actualValue.getPrimitiveValue().toString()
+                        ));
+                        break;
+                }
+                break;
+            case ENUM:
+                igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                        igcPropertyName,
+                        "=",
+                        ((EnumPropertyValue) value).getSymbolicName()
+                ));
+                break;
+            /*case STRUCT:
+                Map<String, InstancePropertyValue> structValues = ((StructPropertyValue) value).getAttributes().getInstanceProperties();
+                for (Map.Entry<String, InstancePropertyValue> nextEntry : structValues.entrySet()) {
+                    addSearchConditionFromValue(
+                            igcSearchConditionSet,
+                            nextEntry.getKey(),
+                            igcProperties,
+                            mapping,
+                            nextEntry.getValue()
+                    );
+                }
+                break;*/
+            case MAP:
+                Map<String, InstancePropertyValue> mapValues = ((MapPropertyValue) value).getMapValues().getInstanceProperties();
+                for (Map.Entry<String, InstancePropertyValue> nextEntry : mapValues.entrySet()) {
+                    addIGCSearchConditionFromValue(
+                            igcSearchConditionSet,
+                            nextEntry.getKey(),
+                            igcProperties,
+                            mapping,
+                            nextEntry.getValue()
+                    );
+                }
+                break;
+            case ARRAY:
+                Map<String, InstancePropertyValue> arrayValues = ((ArrayPropertyValue) value).getArrayValues().getInstanceProperties();
+                for (Map.Entry<String, InstancePropertyValue> nextEntry : arrayValues.entrySet()) {
+                    addIGCSearchConditionFromValue(
+                            igcSearchConditionSet,
+                            igcPropertyName,
+                            igcProperties,
+                            mapping,
+                            nextEntry.getValue()
+                    );
+                }
+                break;
+            default:
+                // Do nothing
+                if (log.isWarnEnabled()) { log.warn("Unable to handle search criteria for value type: {}", category); }
+                break;
         }
 
     }
@@ -3965,11 +4013,11 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         OMRSStub stub = null;
         if (results.getPaging().getNumTotal() > 0) {
             if (results.getPaging().getNumTotal() > 1) {
-                log.warn("Found multiple stubs for asset, taking only the first: {}", stubName);
+                if (log.isWarnEnabled()) { log.warn("Found multiple stubs for asset, taking only the first: {}", stubName); }
             }
             stub = (OMRSStub) results.getItems().get(0);
         } else {
-            log.info("No stub found for asset: {}", stubName);
+            if (log.isInfoEnabled()) { log.info("No stub found for asset: {}", stubName); }
         }
         return stub;
 
@@ -4037,11 +4085,11 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             xmlStreamWriter.close();
 
         } catch (XMLStreamException e) {
-            log.error("Unable to write XML stream: {}", asset, e);
+            if (log.isErrorEnabled()) { log.error("Unable to write XML stream: {}", asset, e); }
         }
 
         String stubXML = stringWriter.getBuffer().toString();
-        log.debug("Constructed XML for stub: {}", stubXML);
+        if (log.isDebugEnabled()) { log.debug("Constructed XML for stub: {}", stubXML); }
 
         // Upsert using the constructed asset XML
         String results = igcRestClient.upsertOpenIgcAsset(stubXML);
@@ -4114,7 +4162,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         }
 
         String stubXML = stringWriter.getBuffer().toString();
-        log.debug("Constructed XML for stub deletion: {}", stubXML);
+        if (log.isDebugEnabled()) { log.debug("Constructed XML for stub deletion: {}", stubXML); }
 
         // Delete using the constructed asset XML
         return igcRestClient.deleteOpenIgcAsset(stubXML);
@@ -4188,12 +4236,12 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
                 }
             } else {
-                log.debug("No registered POJO for asset type {} -- returning basic reference.", assetRef.getType());
+                if (log.isDebugEnabled()) { log.debug("No registered POJO for asset type {} -- returning basic reference.", assetRef.getType()); }
                 fullAsset = assetRef;
             }
 
         } else {
-            log.info("Unable to retrieve any asset with RID {} -- assume it was deleted.", rid);
+            if (log.isInfoEnabled()) { log.info("Unable to retrieve any asset with RID {} -- assume it was deleted.", rid); }
         }
 
         return fullAsset;
