@@ -468,7 +468,6 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param igcProperties the list of IGC properties to which to add for inclusion in the IGC search
      * @param value the value for which to search
-     * @return IGCSearchConditionSet - the IGC search criteria to find entities based on the complex property(ies)
      */
     public void addComplexPropertySearchCriteria(IGCRestClient igcRestClient,
                                                  IGCSearchConditionSet igcSearchConditionSet,
