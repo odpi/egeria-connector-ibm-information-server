@@ -118,6 +118,10 @@ public class ReferenceableMapper extends EntityMapping {
         // Map IGC's identity characteristics to create a unique 'qualifiedName'
         String qualifiedName = igcEntity.getIdentity(igcomrsRepositoryConnector.getIGCRestClient()).toString();
 
+        if (mapping.igcRidNeedsPrefix()) {
+            qualifiedName = mapping.getIgcRidPrefix() + qualifiedName;
+        }
+
         instanceProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(
                 igcomrsRepositoryConnector.getRepositoryName(),
                 instanceProperties,
@@ -201,6 +205,11 @@ public class ReferenceableMapper extends EntityMapping {
         if (omrsPropertyName.equals("qualifiedName")) {
 
             String qualifiedName = ((PrimitivePropertyValue) value).getPrimitiveValue().toString();
+
+            // Check if the qualifiedName has a generated prefix -- need to remove prior to next steps, if so...
+            if (IGCOMRSMetadataCollection.isGeneratedGUID(qualifiedName)) {
+                qualifiedName = IGCOMRSMetadataCollection.getRidFromGeneratedId(qualifiedName);
+            }
             if (log.isDebugEnabled()) { log.debug("Looking up identity: {}", qualifiedName); }
             Identity identity = Identity.getFromString(qualifiedName, igcRestClient);
 
