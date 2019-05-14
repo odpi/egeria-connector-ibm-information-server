@@ -232,7 +232,7 @@ public class ConfidentialityMapper extends ClassificationMapping {
             IGCSearch igcSearch = new IGCSearch("term", igcSearchConditionSet);
             ReferenceList results = igcRestClient.search(igcSearch);
             if (results == null || results.getPaging().getNumTotal() < 1) {
-                log.error("No Confidentiality found with level: {}", igcTermName);
+                if (log.isErrorEnabled()) { log.error("No Confidentiality found with level: {}", igcTermName); }
                 IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_NOT_FOUND;
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                         getOmrsClassificationType(),
@@ -247,14 +247,14 @@ public class ConfidentialityMapper extends ClassificationMapping {
                         errorCode.getUserAction()
                 );
             } else if (results.getPaging().getNumTotal() > 1) {
-                log.warn("Found multiple Confidentiality terms matching {}, taking the first.", igcTermName);
+                if (log.isWarnEnabled()) { log.warn("Found multiple Confidentiality terms matching {}, taking the first.", igcTermName); }
             }
             String confidentialityTermRid = results.getItems().get(0).getId();
             IGCUpdate igcUpdate = new IGCUpdate(igcEntity.getId());
             igcUpdate.addRelationship("assigned_to_terms", confidentialityTermRid);
             igcUpdate.setRelationshipUpdateMode(IGCUpdate.UpdateMode.APPEND);
             if (!igcRestClient.update(igcUpdate)) {
-                log.error("Unable to update entity {} to add classification {}.", entityGUID, getOmrsClassificationType());
+                if (log.isErrorEnabled()) { log.error("Unable to update entity {} to add classification {}.", entityGUID, getOmrsClassificationType()); }
             }
 
         } else {

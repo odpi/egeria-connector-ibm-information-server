@@ -85,7 +85,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             Reference classifiedObj = (Reference) withDataClass.getPropertyByName("classifies_asset");
             asList.add(classifiedObj);
         } else {
-            log.debug("Not a classification asset, just returning as-is: {}", relationshipAsset);
+            if (log.isDebugEnabled()) { log.debug("Not a classification asset, just returning as-is: {}", relationshipAsset); }
             asList.add(relationshipAsset);
         }
         return asList;
@@ -108,7 +108,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             Reference dataClass = (Reference) withAsset.getPropertyByName("data_class");
             asList.add(dataClass);
         } else {
-            log.debug("Not a classification asset, just returning as-is: {}", relationshipAsset);
+            if (log.isDebugEnabled()) { log.debug("Not a classification asset, just returning as-is: {}", relationshipAsset); }
             asList.add(relationshipAsset);
         }
         return asList;
@@ -276,7 +276,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                     );
 
                     relationship.setProperties(relationshipProperties);
-                    log.debug("mapDetectedClassifications_fromDataClass - adding relationship: {}", relationship);
+                    if (log.isDebugEnabled()) { log.debug("mapDetectedClassifications_fromDataClass - adding relationship: {}", relationship); }
                     relationships.add(relationship);
 
                 } catch (RepositoryErrorException e) {
@@ -343,7 +343,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                 );
 
                 relationship.setProperties(relationshipProperties);
-                log.debug("mapSelectedClassifications_fromDataClass - adding relationship: {}", relationship);
+                if (log.isDebugEnabled()) { log.debug("mapSelectedClassifications_fromDataClass - adding relationship: {}", relationship); }
                 relationships.add(relationship);
 
             } catch (RepositoryErrorException e) {
@@ -468,7 +468,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                     );
 
                     relationship.setProperties(relationshipProperties);
-                    log.debug("mapDetectedClassifications_toDataClass - adding relationship: {}", relationship);
+                    if (log.isDebugEnabled()) { log.debug("mapDetectedClassifications_toDataClass - adding relationship: {}", relationship); }
                     relationships.add(relationship);
 
                 } catch (RepositoryErrorException e) {
@@ -528,18 +528,18 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                     );
 
                     relationship.setProperties(relationshipProperties);
-                    log.debug("mapSelectedClassifications_toDataClass - adding relationship: {}", relationship);
+                    if (log.isDebugEnabled()) { log.debug("mapSelectedClassifications_toDataClass - adding relationship: {}", relationship); }
                     relationships.add(relationship);
 
                 } catch (RepositoryErrorException e) {
                     log.error("Unable to map relationship.", e);
                 }
             } else {
-                log.debug("No selected_classification set for asset -- skipping.");
+                if (log.isDebugEnabled()) { log.debug("No selected_classification set for asset -- skipping."); }
             }
 
         } else {
-            log.info("Provided asset has no selected_classification property: {}", fromIgcObject.getId());
+            if (log.isInfoEnabled()) { log.info("Provided asset has no selected_classification property: {}", fromIgcObject.getId()); }
         }
 
     }

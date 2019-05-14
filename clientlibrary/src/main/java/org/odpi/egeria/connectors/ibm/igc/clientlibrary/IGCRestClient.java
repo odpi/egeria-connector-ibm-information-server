@@ -106,7 +106,7 @@ public class IGCRestClient {
     protected IGCRestClient(String baseURL, String authorization) {
 
         if (baseURL == null || !baseURL.startsWith("https://")) {
-            log.error("Cannot instantiate IGCRestClient -- baseURL must be https: {}", baseURL);
+            if (log.isErrorEnabled()) { log.error("Cannot instantiate IGCRestClient -- baseURL must be https: {}", baseURL); }
             throw new NullPointerException();
         }
 
@@ -116,7 +116,7 @@ public class IGCRestClient {
         this.registeredPojosByType = new HashMap<>();
         this.restTemplate = new RestTemplate();
 
-        log.debug("Constructing IGCRestClient...");
+        if (log.isDebugEnabled()) { log.debug("Constructing IGCRestClient..."); }
 
         // Run a simple initial query to obtain a session and setup the cookies
         if (this.authorization != null) {
@@ -131,12 +131,12 @@ public class IGCRestClient {
 
             if (response != null) {
 
-                log.debug("Checking for workflow and registering version...");
+                if (log.isDebugEnabled()) { log.debug("Checking for workflow and registering version..."); }
                 ObjectMapper tmpMapper = new ObjectMapper();
                 try {
                     this.workflowEnabled = tmpMapper.readValue(response, ReferenceList.class).getPaging().getNumTotal() > 0;
                 } catch (IOException e) {
-                    log.error("Unable to determine if workflow is enabled: {}", e);
+                    if (log.isErrorEnabled()) { log.error("Unable to determine if workflow is enabled: {}", e); }
                 }
                 // Register the non-generated types
                 this.registerPOJO(Paging.class);
@@ -155,7 +155,7 @@ public class IGCRestClient {
                         }
                     }
                 }
-                log.info("Detected IGC version: {}", this.igcVersion.getVersionString());
+                if (log.isInfoEnabled()) { log.info("Detected IGC version: {}", this.igcVersion.getVersionString()); }
                 successfullyInitialised = true;
 
             } else {
@@ -218,7 +218,7 @@ public class IGCRestClient {
                                                              String payload,
                                                              boolean alreadyTriedNewSession) {
         if (alreadyTriedNewSession) {
-            log.error("Opening a new session already attempted without success -- giving up on {} to {} with {}", method, url, payload);
+            if (log.isErrorEnabled()) { log.error("Opening a new session already attempted without success -- giving up on {} to {} with {}", method, url, payload); }
             return null;
         } else {
             // By removing cookies, we'll force a login
@@ -243,7 +243,7 @@ public class IGCRestClient {
                                                             AbstractResource file,
                                                             boolean alreadyTriedNewSession) {
         if (alreadyTriedNewSession) {
-            log.error("Opening a new session already attempted without success -- giving up on {} to {} with {}", method, endpoint, file);
+            if (log.isErrorEnabled()) { log.error("Opening a new session already attempted without success -- giving up on {} to {} with {}", method, endpoint, file); }
             return null;
         } else {
             log.info("Session appears to have timed out -- starting a new session and re-trying the upload.");
@@ -268,7 +268,7 @@ public class IGCRestClient {
                 this.cookies = headers.get(HttpHeaders.SET_COOKIE);
             }
         } else {
-            log.error("Unable to make request or unexpected status: {}", response.getStatusCode());
+            if (log.isErrorEnabled()) { log.error("Unable to make request or unexpected status: {}", response.getStatusCode()); }
         }
 
     }
@@ -284,7 +284,7 @@ public class IGCRestClient {
         try {
             reference = this.mapper.readValue(json, Reference.class);
         } catch (IOException e) {
-            log.error("Unable to translate JSON into POJO: {}", json, e);
+            if (log.isErrorEnabled()) { log.error("Unable to translate JSON into POJO: {}", json, e); }
         }
         return reference;
     }
@@ -300,7 +300,7 @@ public class IGCRestClient {
         try {
             referenceList = this.mapper.readValue(json, ReferenceList.class);
         } catch (IOException e) {
-            log.error("Unable to translate JSON into ReferenceList: {}", json, e);
+            if (log.isErrorEnabled()) { log.error("Unable to translate JSON into ReferenceList: {}", json, e); }
         }
         return referenceList;
     }
@@ -316,7 +316,7 @@ public class IGCRestClient {
         try {
             payload = this.mapper.writeValueAsString(asset);
         } catch (JsonProcessingException e) {
-            log.error("Unable to translate asset into JSON: {}", asset, e);
+            if (log.isErrorEnabled()) { log.error("Unable to translate asset into JSON: {}", asset, e); }
         }
         return payload;
     }
@@ -442,7 +442,7 @@ public class IGCRestClient {
         }
         ResponseEntity<String> response = null;
         try {
-            log.debug("{}ing to {} with: {}", method, url, payload);
+            if (log.isDebugEnabled()) { log.debug("{}ing to {} with: {}", method, url, payload); }
             response = restTemplate.exchange(
                     url,
                     method,
@@ -505,7 +505,7 @@ public class IGCRestClient {
         try {
             alTypes = objectMapper.readValue(response, new TypeReference<List<Type>>(){});
         } catch (IOException e) {
-            log.error("Unable to parse types response: {}", response, e);
+            if (log.isErrorEnabled()) { log.error("Unable to parse types response: {}", response, e); }
         }
         return alTypes;
     }
@@ -550,7 +550,7 @@ public class IGCRestClient {
         Reference reference = null;
         if (results.getPaging().getNumTotal() > 0) {
             if (results.getPaging().getNumTotal() > 1) {
-                log.warn("Found multiple assets for RID {}, taking only the first.", rid);
+                if (log.isWarnEnabled()) { log.warn("Found multiple assets for RID {}, taking only the first.", rid); }
             }
             reference = results.getItems().get(0);
         }
@@ -581,7 +581,7 @@ public class IGCRestClient {
         try {
             referenceList = this.mapper.readValue(results, ReferenceList.class);
         } catch (IOException e) {
-            log.error("Unable to translate JSON results: {}", results, e);
+            if (log.isErrorEnabled()) { log.error("Unable to translate JSON results: {}", results, e); }
         }
         return referenceList;
     }
@@ -638,7 +638,7 @@ public class IGCRestClient {
         try {
             bundle = File.createTempFile("openigc", "zip");
         } catch (IOException e) {
-            log.error("Unable to create temporary file needed for OpenIGC bundle from directory: {}", directory, e);
+            if (log.isErrorEnabled()) { log.error("Unable to create temporary file needed for OpenIGC bundle from directory: {}", directory, e); }
         }
         if (bundle != null) {
             try (
@@ -646,13 +646,13 @@ public class IGCRestClient {
                     ZipOutputStream zipOutput = new ZipOutputStream(bundleOut)
             ) {
                 if (!directory.isDirectory()) {
-                    log.error("Provided bundle location is not a directory: {}", directory);
+                    if (log.isErrorEnabled()) { log.error("Provided bundle location is not a directory: {}", directory); }
                 } else {
                     recursivelyZipFiles(directory, "", zipOutput);
                 }
 
             } catch (IOException e) {
-                log.error("Unable to create temporary file needed for OpenIGC bundle from directory: {}", directory, e);
+                if (log.isErrorEnabled()) { log.error("Unable to create temporary file needed for OpenIGC bundle from directory: {}", directory, e); }
             }
         }
         return bundle;
@@ -686,7 +686,7 @@ public class IGCRestClient {
                     recursivelyZipFiles(subFile, directoryName + subFile.getName(), zipOutput);
                 }
             } catch (IOException e) {
-                log.error("Unable to create directory entry in zip file for {}.", directoryName, e);
+                if (log.isErrorEnabled()) { log.error("Unable to create directory entry in zip file for {}.", directoryName, e); }
             }
 
         } else {
@@ -700,9 +700,9 @@ public class IGCRestClient {
                     zipOutput.write(buffer, 0, length);
                 }
             } catch (FileNotFoundException e) {
-                log.error("Unable to find file: {}", file, e);
+                if (log.isErrorEnabled()) { log.error("Unable to find file: {}", file, e); }
             } catch (IOException e) {
-                log.error("Unable to read/write file: {}", file, e);
+                if (log.isErrorEnabled()) { log.error("Unable to read/write file: {}", file, e); }
             }
 
         }
@@ -723,7 +723,7 @@ public class IGCRestClient {
                 alBundles.add(anBundles.get(i).asText());
             }
         } catch (IOException e) {
-            log.error("Unable to parse bundle response: {}", bundles, e);
+            if (log.isErrorEnabled()) { log.error("Unable to parse bundle response: {}", bundles, e); }
         }
         return alBundles;
     }
@@ -775,7 +775,7 @@ public class IGCRestClient {
                 nextPage = mapper.readValue(nextPageBody, ReferenceList.class);
             }
         } catch (IOException e) {
-            log.error("Unable to parse next page from JSON: {}", paging, e);
+            if (log.isErrorEnabled()) { log.error("Unable to parse next page from JSON: {}", paging, e); }
         }
         return nextPage;
     }
@@ -829,9 +829,9 @@ public class IGCRestClient {
             String typeId = typeName.value();
             this.mapper.registerSubtypes(clazz);
             this.registeredPojosByType.put(typeId, clazz);
-            log.info("Registered IGC type {} to be handled by POJO: {}", typeId, clazz.getCanonicalName());
+            if (log.isInfoEnabled()) { log.info("Registered IGC type {} to be handled by POJO: {}", typeId, clazz.getCanonicalName()); }
         } else {
-            log.error("Unable to find JsonTypeName annotation to identify type in POJO: {}", clazz.getCanonicalName());
+            if (log.isErrorEnabled()) { log.error("Unable to find JsonTypeName annotation to identify type in POJO: {}", clazz.getCanonicalName()); }
         }
     }
 

@@ -63,7 +63,7 @@ public class ChangeSet {
                     currentAsset,
                     flags
             );
-            log.debug("Found the following changes: {}", this.patch.toString());
+            if (log.isDebugEnabled()) { log.debug("Found the following changes: {}", this.patch.toString()); }
             ArrayNode changes = (ArrayNode) this.patch;
             for (int i = 0; i < changes.size(); i++) {
                 JsonNode change = changes.get(i);
@@ -102,7 +102,7 @@ public class ChangeSet {
             }
 
         } catch (IOException e) {
-            log.error("Unable to parse JSON for diff operation: {}, {}", asset, stub, e);
+            if (log.isErrorEnabled()) { log.error("Unable to parse JSON for diff operation: {}, {}", asset, stub, e); }
         }
 
     }
@@ -179,7 +179,7 @@ public class ChangeSet {
             if (aTokens.length > 1) {
                 return aTokens[1];
             } else {
-                log.error("Unable to find any property in path: {}", this.path);
+                if (log.isErrorEnabled()) { log.error("Unable to find any property in path: {}", this.path); }
                 return null;
             }
         }
@@ -272,7 +272,7 @@ public class ChangeSet {
                     value = node.asText();
                     break;
                 default:
-                    log.warn("Unhandled value type '{}': {}", jsonType, node);
+                    if (log.isWarnEnabled()) { log.warn("Unhandled value type '{}': {}", jsonType, node); }
                     break;
             }
 
