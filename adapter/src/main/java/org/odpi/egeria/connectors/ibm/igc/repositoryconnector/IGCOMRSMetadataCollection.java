@@ -1424,18 +1424,20 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     ArrayList<String> properties = new ArrayList<>();
                     IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
-                    Iterator iPropertyNames = matchProperties.getPropertyNames();
-                    Set<String> mappedProperties = mapping.getAllMappedIgcProperties();
-                    while (mappedProperties != null && !mappedProperties.isEmpty() && iPropertyNames.hasNext()) {
-                        String omrsPropertyName = (String) iPropertyNames.next();
-                        InstancePropertyValue value = matchProperties.getPropertyValue(omrsPropertyName);
-                        addSearchConditionFromValue(
-                                igcSearchConditionSet,
-                                omrsPropertyName,
-                                properties,
-                                mapping,
-                                value
-                        );
+                    if (matchProperties != null) {
+                        Iterator iPropertyNames = matchProperties.getPropertyNames();
+                        Set<String> mappedProperties = mapping.getAllMappedIgcProperties();
+                        while (mappedProperties != null && !mappedProperties.isEmpty() && iPropertyNames.hasNext()) {
+                            String omrsPropertyName = (String) iPropertyNames.next();
+                            InstancePropertyValue value = matchProperties.getPropertyValue(omrsPropertyName);
+                            addSearchConditionFromValue(
+                                    igcSearchConditionSet,
+                                    omrsPropertyName,
+                                    properties,
+                                    mapping,
+                                    value
+                            );
+                        }
                     }
 
                     if (classificationLimiters != null) {
