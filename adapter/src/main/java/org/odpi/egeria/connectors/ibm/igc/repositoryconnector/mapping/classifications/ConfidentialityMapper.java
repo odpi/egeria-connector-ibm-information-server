@@ -13,7 +13,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.ConfidentialityLevelMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.GovernanceClassificationStatusMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.EntityNotKnownException;
@@ -78,6 +77,8 @@ public class ConfidentialityMapper extends ClassificationMapping {
                                              Reference fromIgcObject,
                                              String userId) {
 
+        final String methodName = "addMappedOMRSClassification";
+
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
         // Retrieve all assigned_to_terms relationships from this IGC object
@@ -97,10 +98,23 @@ public class ConfidentialityMapper extends ClassificationMapping {
 
                 InstanceProperties classificationProperties = new InstanceProperties();
 
-                ConfidentialityLevelMapper confidentialityLevelMapper = ConfidentialityLevelMapper.getInstance();
-                EnumPropertyValue level = confidentialityLevelMapper.getEnumMappingByIgcValue(assignedTerm.getName());
-                classificationProperties.setProperty("level", level);
+                String confidentialityName = assignedTerm.getName();
+                String level = confidentialityName.substring(0, confidentialityName.indexOf(" "));
 
+                if (level != null) {
+                    try {
+                        int parsedLevel = Integer.parseInt(level);
+                        classificationProperties = igcomrsRepositoryConnector.getRepositoryHelper().addIntPropertyToInstance(
+                                igcomrsRepositoryConnector.getRepositoryName(),
+                                classificationProperties,
+                                "level",
+                                parsedLevel,
+                                methodName
+                        );
+                    } catch (NumberFormatException e) {
+                        log.error("Unable to detect a level in the Confidentiality classification: {}", confidentialityName, e);
+                    }
+                }
                 try {
                     Classification classification = getMappedClassification(
                             igcomrsRepositoryConnector,
@@ -142,13 +156,13 @@ public class ConfidentialityMapper extends ClassificationMapping {
         if (matchClassificationProperties != null) {
             Map<String, InstancePropertyValue> properties = matchClassificationProperties.getInstanceProperties();
             if (properties.containsKey("level")) {
-                EnumPropertyValue level = (EnumPropertyValue) properties.get("level");
-                ConfidentialityLevelMapper confidentialityLevelMapper = ConfidentialityLevelMapper.getInstance();
-                String igcTermName = confidentialityLevelMapper.getIgcValueForOrdinal(level.getOrdinal());
+                PrimitivePropertyValue levelValue = (PrimitivePropertyValue) properties.get("level");
+                Integer level = (Integer) levelValue.getPrimitiveValue();
+                String levelAsString = level.toString() + " ";
                 IGCSearchCondition propertyCondition = new IGCSearchCondition(
                         "assigned_to_terms.name",
-                        "=",
-                        igcTermName
+                        "like {0}%",
+                        levelAsString
                 );
                 igcSearchConditionSet.addCondition(propertyCondition);
                 igcSearchConditionSet.setMatchAnyCondition(false);
@@ -206,9 +220,9 @@ public class ConfidentialityMapper extends ClassificationMapping {
         } else if (classificationProperties.size() == 1 && classificationProperties.containsKey("level")) {
 
             // Goldilocks scenario - we have a 'level' and only a 'level'
-            EnumPropertyValue level = (EnumPropertyValue) classificationProperties.get("level");
-            ConfidentialityLevelMapper confidentialityLevelMapper = ConfidentialityLevelMapper.getInstance();
-            String igcTermName = confidentialityLevelMapper.getIgcValueForOrdinal(level.getOrdinal());
+            PrimitivePropertyValue levelValue = (PrimitivePropertyValue) classificationProperties.get("level");
+            Integer level = (Integer) levelValue.getPrimitiveValue();
+            String levelAsString = level.toString() + " ";
 
             IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
@@ -217,8 +231,8 @@ public class ConfidentialityMapper extends ClassificationMapping {
 
             IGCSearchCondition findTerm = new IGCSearchCondition(
                     "name",
-                    "=",
-                    igcTermName
+                    "like {0}%",
+                    levelAsString
             );
             IGCSearchCondition inConfidentiality = new IGCSearchCondition(
                     "parent_category.name",
@@ -232,7 +246,7 @@ public class ConfidentialityMapper extends ClassificationMapping {
             IGCSearch igcSearch = new IGCSearch("term", igcSearchConditionSet);
             ReferenceList results = igcRestClient.search(igcSearch);
             if (results == null || results.getPaging().getNumTotal() < 1) {
-                if (log.isErrorEnabled()) { log.error("No Confidentiality found with level: {}", igcTermName); }
+                if (log.isErrorEnabled()) { log.error("No Confidentiality found with level: {}", levelAsString); }
                 IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_NOT_FOUND;
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                         getOmrsClassificationType(),
@@ -247,7 +261,7 @@ public class ConfidentialityMapper extends ClassificationMapping {
                         errorCode.getUserAction()
                 );
             } else if (results.getPaging().getNumTotal() > 1) {
-                if (log.isWarnEnabled()) { log.warn("Found multiple Confidentiality terms matching {}, taking the first.", igcTermName); }
+                if (log.isWarnEnabled()) { log.warn("Found multiple Confidentiality terms matching {}, taking the first.", levelAsString); }
             }
             String confidentialityTermRid = results.getItems().get(0).getId();
             IGCUpdate igcUpdate = new IGCUpdate(igcEntity.getId());
