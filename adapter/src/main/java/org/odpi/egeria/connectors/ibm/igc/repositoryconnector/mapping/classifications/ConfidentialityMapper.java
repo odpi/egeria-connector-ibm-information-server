@@ -99,32 +99,39 @@ public class ConfidentialityMapper extends ClassificationMapping {
                 InstanceProperties classificationProperties = new InstanceProperties();
 
                 String confidentialityName = assignedTerm.getName();
-                String level = confidentialityName.substring(0, confidentialityName.indexOf(" "));
+                int spaceIndex = confidentialityName.indexOf(" ");
+                if (spaceIndex > 0) {
 
-                if (level != null) {
-                    try {
-                        int parsedLevel = Integer.parseInt(level);
-                        classificationProperties = igcomrsRepositoryConnector.getRepositoryHelper().addIntPropertyToInstance(
-                                igcomrsRepositoryConnector.getRepositoryName(),
-                                classificationProperties,
-                                "level",
-                                parsedLevel,
-                                methodName
-                        );
-                    } catch (NumberFormatException e) {
-                        log.error("Unable to detect a level in the Confidentiality classification: {}", confidentialityName, e);
+                    String level = confidentialityName.substring(0, spaceIndex);
+
+                    if (level != null) {
+                        try {
+                            int parsedLevel = Integer.parseInt(level);
+                            classificationProperties = igcomrsRepositoryConnector.getRepositoryHelper().addIntPropertyToInstance(
+                                    igcomrsRepositoryConnector.getRepositoryName(),
+                                    classificationProperties,
+                                    "level",
+                                    parsedLevel,
+                                    methodName
+                            );
+                        } catch (NumberFormatException e) {
+                            log.error("Unable to detect a level in the Confidentiality classification: {}", confidentialityName, e);
+                        }
                     }
-                }
-                try {
-                    Classification classification = getMappedClassification(
-                            igcomrsRepositoryConnector,
-                            classificationProperties,
-                            fromIgcObject,
-                            userId
-                    );
-                    classifications.add(classification);
-                } catch (RepositoryErrorException e) {
-                    log.error("Unable to map Confidentiality classification.", e);
+                    try {
+                        Classification classification = getMappedClassification(
+                                igcomrsRepositoryConnector,
+                                classificationProperties,
+                                fromIgcObject,
+                                userId
+                        );
+                        classifications.add(classification);
+                    } catch (RepositoryErrorException e) {
+                        log.error("Unable to map Confidentiality classification.", e);
+                    }
+
+                } else {
+                    log.error("Unable to detect a level in the Confidentiality classification: {}", confidentialityName);
                 }
 
             }
