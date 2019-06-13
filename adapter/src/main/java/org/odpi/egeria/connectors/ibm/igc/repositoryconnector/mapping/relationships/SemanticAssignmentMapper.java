@@ -3,7 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships;
 
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.TermRelationshipStatusMapper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.TermAssignmentStatusMapper;
 
 /**
  * Singleton to map the OMRS "SemanticAssignment" relationship for IGC "term" assets.
@@ -43,7 +43,7 @@ public class SemanticAssignmentMapper extends RelationshipMapping {
 
         addLiteralPropertyMapping("description", null);
         addLiteralPropertyMapping("expression", null);
-        addLiteralPropertyMapping("status", TermRelationshipStatusMapper.getInstance().getEnumMappingByIgcValue("Active"));
+        addLiteralPropertyMapping("status", TermAssignmentStatusMapper.getInstance().getDefaultEnumValue());
         addLiteralPropertyMapping("confidence", 100);
         addLiteralPropertyMapping("steward", null);
         addLiteralPropertyMapping("source", null);
