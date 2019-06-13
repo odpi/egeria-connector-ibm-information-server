@@ -46,19 +46,23 @@ public class EnumMapping extends AttributeMapping {
 
     public EnumPropertyValue getEnumMappingByIgcValue(String igcValue) {
         EnumPropertyValue value = new EnumPropertyValue();
-        EnumElementDef element = null;
         if (enumDefByIgcValue.containsKey(igcValue)) {
-            element = enumDefByIgcValue.get(igcValue);
-        } else {
-            if (defaultEnum != null) {
-                element = defaultEnum;
-            } else {
-                if (log.isErrorEnabled()) { log.error("Could not find corresponding enum value for {}, and no default enum defined for {}.", igcValue, getOmrsAttributeTypeDefName()); }
-            }
-        }
-        if (element != null) {
+            EnumElementDef element = enumDefByIgcValue.get(igcValue);
             value.setOrdinal(element.getOrdinal());
             value.setSymbolicName(element.getValue());
+        } else {
+            value = getDefaultEnumValue();
+        }
+        return value;
+    }
+
+    public EnumPropertyValue getDefaultEnumValue() {
+        EnumPropertyValue value = new EnumPropertyValue();
+        if (defaultEnum != null) {
+            value.setOrdinal(defaultEnum.getOrdinal());
+            value.setSymbolicName(defaultEnum.getValue());
+        } else {
+            if (log.isErrorEnabled()) { log.error("Could not find default enum value for {}.", getOmrsAttributeTypeDefName()); }
         }
         return value;
     }
