@@ -3738,6 +3738,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         List<EntityMapping> mappers = entityMappingStore.getMappingsByIgcAssetType(igcAssetType);
 
+        if (mappers == null) {
+            mappers = new ArrayList<>();
+        }
         if (mappers.isEmpty()) {
             EntityMapping defaultMapper = entityMappingStore.getDefaultEntityMapper();
             if (defaultMapper != null) {
