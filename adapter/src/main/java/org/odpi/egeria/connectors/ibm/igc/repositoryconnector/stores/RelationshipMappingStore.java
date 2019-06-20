@@ -71,7 +71,7 @@ public class RelationshipMappingStore {
         if (omrsGuidToMapping.containsKey(guid)) {
             return omrsGuidToMapping.get(guid);
         } else {
-            log.warn("Unable to find mapping for OMRS type: {}", guid);
+            if (log.isWarnEnabled()) { log.warn("Unable to find mapping for OMRS type: {}", guid); }
             return null;
         }
     }
@@ -87,7 +87,7 @@ public class RelationshipMappingStore {
             String guid = omrsNameToGuid.get(name);
             return getMappingByOmrsTypeGUID(guid);
         } else {
-            log.warn("Unable to find mapping for OMRS type: {}", name);
+            if (log.isWarnEnabled()) { log.warn("Unable to find mapping for OMRS type: {}", name); }
             return null;
         }
     }
@@ -162,7 +162,7 @@ public class RelationshipMappingStore {
             Method getInstance = mappingClass.getMethod("getInstance");
             relationshipMapper = (RelationshipMapping) getInstance.invoke(null);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            log.error("Unable to find or instantiate RelationshipMapping class: {}", mappingClass, e);
+            if (log.isErrorEnabled()) { log.error("Unable to find or instantiate RelationshipMapping class: {}", mappingClass, e); }
         }
         return relationshipMapper;
     }

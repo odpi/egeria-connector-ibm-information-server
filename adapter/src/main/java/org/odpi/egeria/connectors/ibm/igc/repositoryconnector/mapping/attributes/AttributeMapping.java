@@ -116,7 +116,7 @@ public abstract class AttributeMapping {
 
         if (propertyValue != null) {
             String propertyName = property.getAttributeName();
-            log.debug("Adding property " + propertyName + " for " + methodName);
+            if (log.isDebugEnabled()) { log.debug("Adding property " + propertyName + " for " + methodName); }
 
             if (property.getAttributeType().getCategory() == AttributeTypeDefCategory.PRIMITIVE) {
                 try {
@@ -213,22 +213,22 @@ public abstract class AttributeMapping {
                                         methodName
                                 );
                             } else {
-                                log.warn("Unable to parse date automatically -- must be first converted before passing in: {}", propertyValue);
+                                if (log.isWarnEnabled()) { log.warn("Unable to parse date automatically -- must be first converted before passing in: {}", propertyValue); }
                             }
                             break;
                         default:
-                            log.error("Unhandled primitive type {} for {}", primitiveDef.getPrimitiveDefCategory(), propertyName);
+                            if (log.isErrorEnabled()) { log.error("Unhandled primitive type {} for {}", primitiveDef.getPrimitiveDefCategory(), propertyName); }
                     }
                 } catch (ClassCastException e) {
-                    log.error("Unable to cast {} to {} for {}", propertyValue, property.getAttributeType(), propertyName);
+                    if (log.isErrorEnabled()) { log.error("Unable to cast {} to {} for {}", propertyValue, property.getAttributeType(), propertyName); }
                 } catch (NumberFormatException e) {
-                    log.warn("Unable to convert {} to {} for {}", propertyValue, property.getAttributeType(), propertyName);
+                    if (log.isWarnEnabled()) { log.warn("Unable to convert {} to {} for {}", propertyValue, property.getAttributeType(), propertyName); }
                 }
             } else {
-                log.error("Cannot translate non-primitive property {} this way.", propertyName);
+                if (log.isErrorEnabled()) { log.error("Cannot translate non-primitive property {} this way.", propertyName); }
             }
         } else {
-            log.debug("Null property");
+            if (log.isDebugEnabled()) { log.debug("Null property"); }
         }
 
         return resultingProperties;

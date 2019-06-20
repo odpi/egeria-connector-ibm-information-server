@@ -88,7 +88,7 @@ public class AttributeMappingStore {
         if (omrsGuidToAttributeTypeDef.containsKey(guid)) {
             return omrsGuidToAttributeTypeDef.get(guid);
         } else {
-            log.warn("Unable to find OMRS AttributeTypeDef: {}", guid);
+            if (log.isWarnEnabled()) { log.warn("Unable to find OMRS AttributeTypeDef: {}", guid); }
             return null;
         }
     }
@@ -104,7 +104,7 @@ public class AttributeMappingStore {
             String guid = omrsNameToGuid.get(name);
             return getAttributeTypeDefByGUID(guid);
         } else {
-            log.warn("Unable to find OMRS AttributeTypeDef: {}", name);
+            if (log.isWarnEnabled()) { log.warn("Unable to find OMRS AttributeTypeDef: {}", name); }
             return null;
         }
     }
@@ -123,7 +123,7 @@ public class AttributeMappingStore {
                 results.add(getAttributeTypeDefByGUID(guid));
             }
         } else {
-            log.warn("Unable to find OMRS AttributeTypeDefCategory: {}", categoryName);
+            if (log.isWarnEnabled()) { log.warn("Unable to find OMRS AttributeTypeDefCategory: {}", categoryName); }
         }
         return results;
     }
@@ -149,7 +149,7 @@ public class AttributeMappingStore {
             Method getInstance = mappingClass.getMethod("getInstance");
             attributeMapper = (AttributeMapping) getInstance.invoke(null);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            log.error("Unable to find or instantiate AttributeMapping class: {}", mappingClass, e);
+            if (log.isErrorEnabled()) { log.error("Unable to find or instantiate AttributeMapping class: {}", mappingClass, e); }
         }
         return attributeMapper;
     }

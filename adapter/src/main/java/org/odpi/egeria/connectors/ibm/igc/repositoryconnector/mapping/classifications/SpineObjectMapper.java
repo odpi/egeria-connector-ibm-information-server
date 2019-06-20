@@ -135,7 +135,7 @@ public class SpineObjectMapper extends ClassificationMapping {
 
         if (classificationProperties != null && !classificationProperties.isEmpty()) {
 
-            log.error("SpineObject classification has no properties, yet properties were included: {}", initialProperties);
+            if (log.isErrorEnabled()) { log.error("SpineObject classification has no properties, yet properties were included: {}", initialProperties); }
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_EXCEEDS_REPOSITORY;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     getOmrsClassificationType(),
@@ -185,7 +185,7 @@ public class SpineObjectMapper extends ClassificationMapping {
             IGCUpdate igcUpdate = new IGCUpdate(igcEntity.getId());
             igcUpdate.addExclusiveRelationship("parent_category", spineObjectCatRid);
             if (!igcRestClient.update(igcUpdate)) {
-                log.error("Unable to update entity {} to add classification {}.", entityGUID, getOmrsClassificationType());
+                if (log.isErrorEnabled()) { log.error("Unable to update entity {} to add classification {}.", entityGUID, getOmrsClassificationType()); }
             }
 
         }

@@ -5,7 +5,7 @@
 
 More detailed documentation related to the connector is contained in this directory.
 
-- [Design documentation for the IGC <-> OMRS type mappings](mappings)
+- [Implemented IGC -> OMRS type mappings](mappings)
 - [Extensions made to IGC to implement certain OMRS details](ibm-igc-extensions.md)
 - [Notes for developers](developers)
 

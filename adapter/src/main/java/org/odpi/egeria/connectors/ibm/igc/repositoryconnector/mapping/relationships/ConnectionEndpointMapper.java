@@ -66,7 +66,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                     new String[]{ "host", "data_connections" });
             asList.add((Reference) withHost.getPropertyByName("host"));
         } else {
-            log.debug("Not a connector asset, just returning as-is: {}", connectorAsset);
+            if (log.isDebugEnabled()) { log.debug("Not a connector asset, just returning as-is: {}", connectorAsset); }
             asList.add(connectorAsset);
         }
         return asList;
@@ -89,7 +89,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
             dataConnections.getAllPages(igcRestClient);
             return dataConnections.getItems();
         } else {
-            log.debug("Not a connector asset, just returning as-is: {}", connectorAsset);
+            if (log.isDebugEnabled()) { log.debug("Not a connector asset, just returning as-is: {}", connectorAsset); }
             ArrayList<Reference> referenceAsList = new ArrayList<>();
             referenceAsList.add(connectorAsset);
             return referenceAsList;
@@ -139,7 +139,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                 );
             }
         } else {
-            log.warn("Found unexpected asset type during relationship mapping: {}", fromIgcObject);
+            if (log.isWarnEnabled()) { log.warn("Found unexpected asset type during relationship mapping: {}", fromIgcObject); }
         }
 
     }
@@ -175,7 +175,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
             if (dataConnection != null && !dataConnection.getType().equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE)) {
                 try {
 
-                    log.debug("Retrieved connection: {}", dataConnection);
+                    if (log.isDebugEnabled()) { log.debug("Retrieved connection: {}", dataConnection); }
 
                     Relationship relationship = getMappedRelationship(
                             igcomrsRepositoryConnector,
@@ -232,11 +232,11 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
             if (dataConnector != null && !dataConnector.getType().equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE)) {
                 try {
 
-                    log.debug("Retrieved connector: {}", dataConnector);
+                    if (log.isDebugEnabled()) { log.debug("Retrieved connector: {}", dataConnector); }
 
                     //Reference host = (Reference) connectorGetPropertyByName.invoke(dataConnector, "host");
                     Reference host = (Reference) dataConnector.getPropertyByName("host");
-                    log.debug("Retrieved host: {}", host);
+                    if (log.isDebugEnabled()) { log.debug("Retrieved host: {}", host); }
 
                     Relationship relationship = getMappedRelationship(
                             igcomrsRepositoryConnector,

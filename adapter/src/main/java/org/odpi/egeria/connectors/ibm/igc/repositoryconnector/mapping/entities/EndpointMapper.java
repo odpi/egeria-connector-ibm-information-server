@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
@@ -12,8 +13,12 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMapp
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.ConnectionEndpointMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.PrimitivePropertyValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * Defines the mapping to the OMRS "Endpoint" entity.
@@ -79,11 +84,11 @@ public class EndpointMapper extends ReferenceableMapper {
                 // As long as there is at least one result, return the first
                 return hosts.getItems().get(0);
             } else {
-                log.warn("Unable to translate host_(engine) to host, returning host_(engine): {}", otherAsset);
+                if (log.isWarnEnabled()) { log.warn("Unable to translate host_(engine) to host, returning host_(engine): {}", otherAsset); }
                 return otherAsset;
             }
         } else {
-            log.debug("Not a host_(engine) asset, just returning as-is: {}", otherAsset);
+            if (log.isDebugEnabled()) { log.debug("Not a host_(engine) asset, just returning as-is: {}", otherAsset); }
             return otherAsset;
         }
     }
@@ -117,6 +122,40 @@ public class EndpointMapper extends ReferenceableMapper {
         );
 
         return instanceProperties;
+
+    }
+
+    /**
+     * Handle the search for 'networkAddress' by searching against 'name' of the endpoint in IGC.
+     *
+     * @param igcRestClient connectivity to an IGC environment
+     * @param igcSearchConditionSet the set of search criteria to which to add
+     * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
+     * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
+     * @param igcProperties the list of IGC properties to which to add for inclusion in the IGC search
+     * @param value the value for which to search
+     */
+    @Override
+    public void addComplexPropertySearchCriteria(IGCRestClient igcRestClient,
+                                                 IGCSearchConditionSet igcSearchConditionSet,
+                                                 String igcPropertyName,
+                                                 String omrsPropertyName,
+                                                 List<String> igcProperties,
+                                                 InstancePropertyValue value) {
+
+        super.addComplexPropertySearchCriteria(igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, igcProperties, value);
+
+        if (omrsPropertyName.equals("networkAddress")) {
+
+            String networkAddress = ((PrimitivePropertyValue) value).getPrimitiveValue().toString();
+            IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
+                    "name",
+                    "=",
+                    networkAddress
+            );
+            igcSearchConditionSet.addCondition(igcSearchCondition);
+
+        }
 
     }
 

@@ -175,7 +175,7 @@ public abstract class ClassificationMapping extends InstanceMapping {
      */
     public boolean matchesAssetType(String igcAssetType) {
         String simplifiedType = Reference.getAssetTypeForSearch(igcAssetType);
-        log.debug("checking for matching asset between {} and {}", this.igcAssetType, simplifiedType);
+        if (log.isDebugEnabled()) { log.debug("checking for matching asset between {} and {}", this.igcAssetType, simplifiedType); }
         return (
                 this.igcAssetType.equals(simplifiedType)
                         || (this.igcAssetType.equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE) && !this.excludeIgcAssetType.contains(simplifiedType))

@@ -39,6 +39,18 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class Reference extends ObjectPrinter {
 
+    public Reference() {}
+
+    public Reference(String name, String type) {
+        this(name, type, null);
+    }
+
+    public Reference(String name, String type, String id) {
+        this._name = name;
+        this._type = type;
+        this._id = id;
+    }
+
     @JsonIgnore private static final Logger log = LoggerFactory.getLogger(Reference.class);
 
     /**
@@ -482,7 +494,7 @@ public class Reference extends ObjectPrinter {
             Method canBeCreated = pojoClass.getMethod("canBeCreated");
             creatable = (Boolean) canBeCreated.invoke(null);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            log.error("Unable to retrieve creatable status from IGC POJO: {}", pojoClass, e);
+            if (log.isErrorEnabled()) { log.error("Unable to retrieve creatable status from IGC POJO: {}", pojoClass, e); }
         }
         return creatable;
     }
@@ -499,7 +511,7 @@ public class Reference extends ObjectPrinter {
             Method getIgcTypeDisplayName = pojoClass.getMethod("getIgcTypeDisplayName");
             igcAssetDisplayName = (String) getIgcTypeDisplayName.invoke(null);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            log.error("Unable to retrieve display name from IGC POJO: {}", pojoClass, e);
+            if (log.isErrorEnabled()) { log.error("Unable to retrieve display name from IGC POJO: {}", pojoClass, e); }
         }
         return igcAssetDisplayName;
     }
@@ -516,7 +528,7 @@ public class Reference extends ObjectPrinter {
             Method getIgcType = pojoClass.getMethod("getIgcTypeId");
             igcAssetType = (String) getIgcType.invoke(null);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            log.error("Unable to retrieve asset type from IGC POJO: {}", pojoClass, e);
+            if (log.isErrorEnabled()) { log.error("Unable to retrieve asset type from IGC POJO: {}", pojoClass, e); }
         }
         return igcAssetType;
     }
@@ -533,7 +545,7 @@ public class Reference extends ObjectPrinter {
             Method canBeCreated = pojoClass.getMethod("canBeCreated");
             canBe = (Boolean) canBeCreated.invoke(null);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            log.error("Unable to retrieve creation capability from IGC POJO: {}", pojoClass, e);
+            if (log.isErrorEnabled()) { log.error("Unable to retrieve creation capability from IGC POJO: {}", pojoClass, e); }
         }
         return canBe;
     }
@@ -550,7 +562,7 @@ public class Reference extends ObjectPrinter {
             Method getNonRelationshipProperties = pojoClass.getMethod("getNonRelationshipProperties");
             list = (List<String>) getNonRelationshipProperties.invoke(null);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            log.error("Unable to retrieve non-relationship properties from IGC POJO: {}", pojoClass, e);
+            if (log.isErrorEnabled()) { log.error("Unable to retrieve non-relationship properties from IGC POJO: {}", pojoClass, e); }
         }
         return list;
     }
@@ -567,7 +579,7 @@ public class Reference extends ObjectPrinter {
             Method getStringProperties = pojoClass.getMethod("getStringProperties");
             list = (List<String>) getStringProperties.invoke(null);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            log.error("Unable to retrieve string properties from IGC POJO: {}", pojoClass, e);
+            if (log.isErrorEnabled()) { log.error("Unable to retrieve string properties from IGC POJO: {}", pojoClass, e); }
         }
         return list;
     }
@@ -584,7 +596,7 @@ public class Reference extends ObjectPrinter {
             Method getAllProperties = pojoClass.getMethod("getAllProperties");
             list = (List<String>) getAllProperties.invoke(null);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            log.error("Unable to retrieve all properties from IGC POJO: {}", pojoClass, e);
+            if (log.isErrorEnabled()) { log.error("Unable to retrieve all properties from IGC POJO: {}", pojoClass, e); }
         }
         return list;
     }
@@ -601,7 +613,7 @@ public class Reference extends ObjectPrinter {
             Method getPagedProperties = pojoClass.getMethod("getPagedRelationshipProperties");
             list = (List<String>) getPagedProperties.invoke(null);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            log.error("Unable to retrieve paged relationship properties from IGC POJO: {}", pojoClass, e);
+            if (log.isErrorEnabled()) { log.error("Unable to retrieve paged relationship properties from IGC POJO: {}", pojoClass, e); }
         }
         return list;
     }
@@ -620,7 +632,7 @@ public class Reference extends ObjectPrinter {
                 Boolean bHasModificationDetails = (Boolean) hasModificationDetails.invoke(null);
                 hasModDetails = (bHasModificationDetails != null && bHasModificationDetails);
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                log.info("Unable to find modification details for class {}", pojoClass);
+                if (log.isInfoEnabled()) { log.info("Unable to find modification details for class {}", pojoClass); }
             }
         }
         return hasModDetails;
