@@ -7,7 +7,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>egeria-connector-ibm-igc</artifactId>
+        <artifactId>egeria-connector-ibm-information-server</artifactId>
         <groupId>org.odpi.egeria</groupId>
         <version>1.1-SNAPSHOT</version>
     </parent>
@@ -24,6 +24,11 @@
         <dependency>
             <groupId>org.odpi.egeria</groupId>
             <artifactId>egeria-connector-ibm-igc-adapter</artifactId>
+            <version>${open-metadata.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.odpi.egeria</groupId>
+            <artifactId>egeria-connector-ibm-datastage-adapter</artifactId>
             <version>${open-metadata.version}</version>
         </dependency>
     </dependencies>
@@ -46,6 +51,7 @@
                                 <includes>
                                     <include>org.odpi.egeria:egeria-connector-ibm-igc-adapter</include>
                                     <include>org.odpi.egeria:ibm-igc-rest-client-library</include>
+                                    <include>org.odpi.egeria:egeria-connector-ibm-datastage-adapter</include>
                                     <include>com.flipkart.zjsonpatch:zjsonpatch</include>
                                     <include>org.apache.commons:commons-collections4</include>
                                 </includes>
