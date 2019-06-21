@@ -1,0 +1,36 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Copyright Contributors to the ODPi Egeria project. -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>egeria-connector-ibm-information-server</artifactId>
+        <groupId>org.odpi.egeria</groupId>
+        <version>1.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>IBM DataStage Connector</name>
+    <description>
+        An OCF Connector for IBM DataStage (using the REST API of IBM Information Governance Catalog).
+    </description>
+
+    <artifactId>egeria-connector-ibm-datastage-adapter</artifactId>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.odpi.egeria</groupId>
+            <artifactId>ibm-igc-rest-client-library</artifactId>
+            <version>${open-metadata.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.odpi.egeria</groupId>
+            <artifactId>data-engine-client</artifactId>
+            <version>${open-metadata.version}</version>
+        </dependency>
+
+    </dependencies>
+
+</project>
