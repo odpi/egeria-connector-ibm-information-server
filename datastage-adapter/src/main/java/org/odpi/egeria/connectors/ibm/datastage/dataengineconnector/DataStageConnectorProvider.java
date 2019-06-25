@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector;
 import org.odpi.openmetadata.frameworks.connectors.ConnectorProviderBase;
 import org.odpi.openmetadata.frameworks.connectors.properties.beans.ConnectorType;
 
+// TODO: swap to extending DataEngineConnectorProvider (once in Maven)
 public class DataStageConnectorProvider extends ConnectorProviderBase {
 
     static final String  connectorTypeGUID = "f71e6c48-fa06-4016-8437-7f0e8efcfb39";

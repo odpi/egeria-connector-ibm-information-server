@@ -21,6 +21,7 @@ public class IGCUpdate {
     private JsonNodeFactory nf = JsonNodeFactory.instance;
 
     private String ridToUpdate;
+    private Map<String, String> properties;
     private Map<String, List<String>> relationships;
     private Map<String, String> exclusiveRelationships;
     private UpdateMode relationshipUpdateMode;
@@ -29,8 +30,19 @@ public class IGCUpdate {
 
     public IGCUpdate(String ridToUpdate) {
         this.ridToUpdate = ridToUpdate;
+        this.properties = new HashMap<>();
         this.relationships = new HashMap<>();
         this.exclusiveRelationships = new HashMap<>();
+    }
+
+    /**
+     * Adds a new value for the provided property to be set on the update.
+     *
+     * @param propertyName the name of the property to be updated
+     * @param value the new value for the property
+     */
+    public void addProperty(String propertyName, String value) {
+        properties.put(propertyName, value);
     }
 
     /**
@@ -84,24 +96,31 @@ public class IGCUpdate {
      */
     public JsonNode getUpdate() {
         ObjectNode update = nf.objectNode();
-        for (String propertyName : relationships.keySet()) {
-            List<String> rids = relationships.get(propertyName);
-            ArrayNode ridArray = nf.arrayNode(rids.size());
-            for (String rid : rids) {
-                ridArray.add(rid);
+        if (!properties.isEmpty()) {
+            for (String propertyName : properties.keySet()) {
+                update.set(propertyName, nf.textNode(properties.get(propertyName)));
             }
-            ObjectNode items = nf.objectNode();
-            items.set("items", ridArray);
-            if (relationshipUpdateMode != null) {
-                TextNode mode = null;
-                if (relationshipUpdateMode == UpdateMode.REPLACE) {
-                    mode = nf.textNode("replace");
-                } else {
-                    mode = nf.textNode("add");
+        }
+        if (!relationships.isEmpty()) {
+            for (String propertyName : relationships.keySet()) {
+                List<String> rids = relationships.get(propertyName);
+                ArrayNode ridArray = nf.arrayNode(rids.size());
+                for (String rid : rids) {
+                    ridArray.add(rid);
                 }
-                items.set("mode", mode);
+                ObjectNode items = nf.objectNode();
+                items.set("items", ridArray);
+                if (relationshipUpdateMode != null) {
+                    TextNode mode = null;
+                    if (relationshipUpdateMode == UpdateMode.REPLACE) {
+                        mode = nf.textNode("replace");
+                    } else {
+                        mode = nf.textNode("add");
+                    }
+                    items.set("mode", mode);
+                }
+                update.set(propertyName, items);
             }
-            update.set(propertyName, items);
         }
         if (!exclusiveRelationships.isEmpty()) {
             for (String propertyName : exclusiveRelationships.keySet()) {
