@@ -21,6 +21,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -604,9 +605,31 @@ public class IGCRestClient {
      * Apply the update described by the provided update object.
      *
      * @param igcUpdate update criteria to use
+     * @return boolean - indicating success (true) or not (false) of the operation
      */
     public boolean update(IGCUpdate igcUpdate) {
         String result = updateJson(igcUpdate.getRidToUpdate(), igcUpdate.getUpdate());
+        return (result != null);
+    }
+
+    /**
+     * Create the asset specified by the provided value(s).
+     *
+     * @param value the JSON structure defining what should be created
+     * @return String - the JSON indicating the created asset's RID
+     */
+    public String createJson(JsonNode value) {
+        return makeRequest(EP_ASSET, HttpMethod.POST, MediaType.APPLICATION_JSON, value.toString());
+    }
+
+    /**
+     * Create the object described by the provided create object.
+     *
+     * @param igcCreate creation criteria to use
+     * @return boolean - indicating success (true) or not (false) of the operation
+     */
+    public boolean create(IGCCreate igcCreate) {
+        String result = createJson(igcCreate.getCreate());
         return (result != null);
     }
 
