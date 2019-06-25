@@ -20,36 +20,53 @@
 
     <artifactId>egeria-connector-ibm-igc-adapter</artifactId>
 
-    <properties>
-        <zjsonpatch.version>0.4.6</zjsonpatch.version>
-    </properties>
-
     <dependencies>
 
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.odpi.egeria</groupId>
+            <artifactId>open-connector-framework</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.odpi.egeria</groupId>
+            <artifactId>repository-services-apis</artifactId>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>org.odpi.egeria</groupId>
             <artifactId>ibm-igc-rest-client-library</artifactId>
             <version>${open-metadata.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.flipkart.zjsonpatch</groupId>
             <artifactId>zjsonpatch</artifactId>
-            <version>${zjsonpatch.version}</version>
-            <exclusions>
-                <!-- Ensure Jackson remains in line with rest of Egeria (not overridden by zjsonpatch embedded version) -->
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-annotations</artifactId>
-                </exclusion>
-            </exclusions>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>
