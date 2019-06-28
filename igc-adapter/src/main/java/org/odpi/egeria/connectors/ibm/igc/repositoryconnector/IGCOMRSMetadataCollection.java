@@ -826,55 +826,48 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     "Request support through Egeria GitHub issue.");
         } else if (typeDefStore.getTypeDefByGUID(guid) != null) {
 
+            /* For a read-only connector, we do not need to support all of the instance statuses -- this validation is needed on write operations
             // Otherwise, validate that we support all of the valid InstanceStatus settings before deciding whether we
             // fully-support the TypeDef or not
             HashSet<InstanceStatus> validStatuses = new HashSet<>(typeDef.getValidInstanceStatusList());
-            boolean bVerified = false;
+             */
 
+            boolean bVerified = true;
             List<String> issues = new ArrayList<>();
 
             Set<String> mappedProperties = new HashSet<>();
-            HashSet<InstanceStatus> implementedStatuses = new HashSet<>();
             switch (typeDef.getCategory()) {
                 case ENTITY_DEF:
                     EntityMapping entityMapping = entityMappingStore.getMappingByOmrsTypeGUID(guid);
                     if (entityMapping != null) {
                         mappedProperties = entityMapping.getAllMappedOmrsProperties();
-                        implementedStatuses = new HashSet<>(entityMapping.getSupportedStatuses());
                     }
                     break;
                 case RELATIONSHIP_DEF:
                     RelationshipMapping relationshipMapping = relationshipMappingStore.getMappingByOmrsTypeGUID(guid);
                     if (relationshipMapping != null) {
                         mappedProperties = relationshipMapping.getMappedOmrsPropertyNames();
-                        implementedStatuses = new HashSet<>(relationshipMapping.getSupportedStatuses());
                     }
                     break;
                 case CLASSIFICATION_DEF:
                     ClassificationMapping classificationMapping = classificationMappingStore.getMappingByOmrsTypeGUID(guid);
                     if (classificationMapping != null) {
                         mappedProperties = classificationMapping.getMappedOmrsPropertyNames();
-                        implementedStatuses = new HashSet<>(classificationMapping.getSupportedStatuses());
                     }
                     break;
             }
-            bVerified = validStatuses.equals(implementedStatuses);
 
             // Validate that we support all of the possible properties before deciding whether we
             // fully-support the TypeDef or not
-            if (bVerified) {
-                List<TypeDefAttribute> properties = typeDef.getPropertiesDefinition();
-                if (properties != null) {
-                    for (TypeDefAttribute typeDefAttribute : properties) {
-                        String omrsPropertyName = typeDefAttribute.getAttributeName();
-                        if (!mappedProperties.contains(omrsPropertyName)) {
-                            bVerified = false;
-                            issues.add("property '" + omrsPropertyName + "' is not mapped");
-                        }
+            List<TypeDefAttribute> properties = typeDef.getPropertiesDefinition();
+            if (properties != null) {
+                for (TypeDefAttribute typeDefAttribute : properties) {
+                    String omrsPropertyName = typeDefAttribute.getAttributeName();
+                    if (!mappedProperties.contains(omrsPropertyName)) {
+                        bVerified = false;
+                        issues.add("property '" + omrsPropertyName + "' is not mapped");
                     }
                 }
-            } else {
-                issues.add("list of valid statuses does not match");
             }
 
             // If we were unable to verify everything, throw exception indicating it is not a supported TypeDef
