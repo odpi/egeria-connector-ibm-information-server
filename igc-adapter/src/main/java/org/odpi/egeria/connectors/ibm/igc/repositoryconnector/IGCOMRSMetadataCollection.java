@@ -101,7 +101,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
      */
     @Override
     public TypeDefGallery getAllTypes(String   userId) throws RepositoryErrorException,
-            UserNotAuthorizedException
+            UserNotAuthorizedException,
+            InvalidParameterException
     {
         final String                       methodName = "getAllTypes";
 
