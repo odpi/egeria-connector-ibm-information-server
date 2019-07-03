@@ -172,6 +172,11 @@
                 <version>${open-metadata.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.odpi.egeria</groupId>
+                <artifactId>data-engine-proxy-connector</artifactId>
+                <version>${open-metadata.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.flipkart.zjsonpatch</groupId>
                 <artifactId>zjsonpatch</artifactId>
                 <version>0.4.8</version>

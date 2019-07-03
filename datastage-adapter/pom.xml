@@ -32,6 +32,11 @@
         </dependency>
         <dependency>
             <groupId>org.odpi.egeria</groupId>
+            <artifactId>data-engine-proxy-connector</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.odpi.egeria</groupId>
             <artifactId>ibm-igc-rest-client-library</artifactId>
             <version>${open-metadata.version}</version>
             <scope>compile</scope>

@@ -12,9 +12,9 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
-import org.odpi.openmetadata.frameworks.connectors.ConnectorBase;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
+import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.DataEngineConnectorBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +22,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-// TODO: swap to extending DataEngineConnectorBase (once in Maven)
-public class DataStageConnector extends ConnectorBase {
+public class DataStageConnector extends DataEngineConnectorBase {
 
     private static final Logger log = LoggerFactory.getLogger(DataStageConnector.class);
 
@@ -190,7 +189,7 @@ public class DataStageConnector extends ConnectorBase {
      */
     public IGCRestClient getIGCRestClient() { return this.igcRestClient; }
 
-    // TODO: Mark as an Override and provide additional arguments once available
+    @Override
     public void sendProcess() {
 
     }
@@ -381,7 +380,7 @@ public class DataStageConnector extends ConnectorBase {
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
         ReferenceList results = igcRestClient.search(igcSearch);
-        return results == null ? null : results.getItems().get(0);
+        return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
     }
 
     /**
