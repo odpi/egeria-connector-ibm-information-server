@@ -41,12 +41,11 @@
             <version>${open-metadata.version}</version>
             <scope>compile</scope>
         </dependency>
-        <!-- TODO: add back once we actually have some code there to build against
         <dependency>
             <groupId>org.odpi.egeria</groupId>
-            <artifactId>data-engine-client</artifactId>
+            <artifactId>data-engine-api</artifactId>
             <scope>compile</scope>
-        </dependency> -->
+        </dependency>
 
     </dependencies>
 
