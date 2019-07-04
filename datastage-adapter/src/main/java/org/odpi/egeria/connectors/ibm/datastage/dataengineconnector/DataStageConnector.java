@@ -2,6 +2,8 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.LineageMappingMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.ProcessMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.*;
@@ -63,6 +65,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
     private IGCRestClient igcRestClient;
     private IGCVersionEnum igcVersion;
+    private ObjectMapper objectMapper;
 
     /**
      * Default constructor used by the OCF Connector Provider.
@@ -110,6 +113,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 igcRestClient.registerPOJO(pojo);
             }
         }
+        this.objectMapper = new ObjectMapper();
 
     }
 
@@ -196,17 +200,25 @@ public class DataStageConnector extends DataEngineConnectorBase {
             ProcessMapping processMapping = new ProcessMapping(job, stage);
             Process process = processMapping.getProcess();
             if (process != null) {
-                log.info(" ... process: {}", process);
-                // TODO: sendProcess(process);
+                try {
+                    log.info(" ... process: {}", objectMapper.writeValueAsString(process));
+                } catch (JsonProcessingException e) {
+                    log.error("Unable to serialise to JSON: {}", process, e);
+                }
+                sendProcess(process);
             }
         }
         log.info("Load cross-stage lineage mappings...");
         for (Reference link : job.getAllLinks()) {
             LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, link);
-            List<LineageMapping> crossStagelineageMappings = lineageMappingMapping.getLineageMappings();
-            if (crossStagelineageMappings != null && !crossStagelineageMappings.isEmpty()) {
-                log.info(" ... mappings: {}", crossStagelineageMappings);
-                // TODO: sendLineageMappings(crossStagelineageMappings);
+            Set<LineageMapping> crossStageLineageMappings = lineageMappingMapping.getLineageMappings();
+            if (crossStageLineageMappings != null && !crossStageLineageMappings.isEmpty()) {
+                try {
+                    log.info(" ... mappings: {}", objectMapper.writeValueAsString(crossStageLineageMappings));
+                } catch (JsonProcessingException e) {
+                    log.error("Unable to serialise to JSON: {}", crossStageLineageMappings, e);
+                }
+                sendLineageMappings(new ArrayList<>(crossStageLineageMappings));
             }
         }
 
@@ -225,8 +237,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
             ProcessMapping processMapping = new ProcessMapping(job);
             process = processMapping.getProcess();
             if (process != null) {
-                log.info(" ... process: {}", process);
-                // TODO: sendProcess(process);
+                try {
+                    log.info(" ... process: {}", objectMapper.writeValueAsString(process));
+                } catch (JsonProcessingException e) {
+                    log.error("Unable to serialise to JSON: {}", process, e);
+                }
+                sendProcess(process);
             }
         }
         return process;
@@ -245,20 +261,15 @@ public class DataStageConnector extends DataEngineConnectorBase {
             ProcessMapping processMapping = new ProcessMapping(job, jobProcessByRid);
             process = processMapping.getProcess();
             if (process != null) {
-                log.info(" ... process: {}", process);
-                // TODO: sendProcess(process);
+                try {
+                    log.info(" ... process: {}", objectMapper.writeValueAsString(process));
+                } catch (JsonProcessingException e) {
+                    log.error("Unable to serialise to JSON: {}", process, e);
+                }
+                sendProcess(process);
             }
         }
         return process;
-    }
-
-    /**
-     * Retrieve the version identifier of the IGC environment.
-     *
-     * @return IGCVersionEnum
-     */
-    public IGCVersionEnum getIGCVersion() {
-        return this.igcVersion;
     }
 
     /**
@@ -269,14 +280,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
         // Close the session on the IGC REST client
         this.igcRestClient.disconnect();
     }
-
-
-    /**
-     * Access the IGC REST API client directly.
-     *
-     * @return IGCRestClient
-     */
-    public IGCRestClient getIGCRestClient() { return this.igcRestClient; }
 
     /**
      * Retrieve a listing of jobs that have been modified since the provided date and time.
@@ -449,7 +452,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private ReferenceList getDataFieldDetails(Reference datastore) {
 
         ReferenceList results = null;
-        String type = datastore.getType();
         switch(datastore.getType()) {
             case "database_table":
             case "view":

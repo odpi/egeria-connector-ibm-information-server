@@ -9,8 +9,9 @@ import org.odpi.openmetadata.accessservices.dataengine.model.LineageMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Mappings for creating a set of LineageMappings.
@@ -19,7 +20,7 @@ public class LineageMappingMapping extends BaseMapping {
 
     private static final Logger log = LoggerFactory.getLogger(LineageMappingMapping.class);
 
-    private List<LineageMapping> lineageMappings;
+    private Set<LineageMapping> lineageMappings;
 
     /**
      * Creates LineageMappings for stages that have links as input and output.
@@ -33,14 +34,14 @@ public class LineageMappingMapping extends BaseMapping {
      */
     public LineageMappingMapping(DSJob job, Reference link, String stageNameSuffix, boolean bSource) {
         super(job.getIgcRestClient());
-        lineageMappings = new ArrayList<>();
+        lineageMappings = new HashSet<>();
         ReferenceList stageColumns = (ReferenceList) igcRestClient.getPropertyByName(link, "stage_columns");
         // For each stage column defined on the link...
         for (Reference stageColumnRef : stageColumns.getItems()) {
             String colId = stageColumnRef.getId();
             Reference stageColumnFull = job.getStageColumnByRid(colId);
             String thisColumnName = getFullyQualifiedName(stageColumnFull) + stageNameSuffix;
-            if (bSource) {
+            if (!bSource) {
                 // Create a LineageMapping from each previous stage column to this stage column
                 ReferenceList previousColumns = (ReferenceList) igcRestClient.getPropertyByName(stageColumnFull, "previous_stage_columns");
                 for (Reference previousColumnRef : previousColumns.getItems()) {
@@ -72,7 +73,7 @@ public class LineageMappingMapping extends BaseMapping {
      */
     public LineageMappingMapping(DSJob job, Reference link) {
         super(job.getIgcRestClient());
-        lineageMappings = new ArrayList<>();
+        lineageMappings = new HashSet<>();
         // Despite the plural name, a link can only have one input and one output stage so these are singular
         Reference inputStage = (Reference) igcRestClient.getPropertyByName(link, "input_stages");
         Reference outputStage = (Reference) igcRestClient.getPropertyByName(link, "output_stages");
@@ -105,7 +106,7 @@ public class LineageMappingMapping extends BaseMapping {
      */
     public LineageMappingMapping(DSJob job, List<Reference> fields, String relationshipProperty, boolean bSource, String fullyQualifiedStageName, String stageNameSuffix) {
         super(job.getIgcRestClient());
-        lineageMappings = new ArrayList<>();
+        lineageMappings = new HashSet<>();
         // For each field in the data store...
         for (Reference fieldObj : fields) {
             String field1QN = getFullyQualifiedName(fieldObj);
@@ -140,9 +141,9 @@ public class LineageMappingMapping extends BaseMapping {
     /**
      * Retrieve the LineageMappings that were setup.
      *
-     * @return {@List<LineageMapping>}
+     * @return {@Set<LineageMapping>}
      */
-    public List<LineageMapping> getLineageMappings() { return lineageMappings; }
+    public Set<LineageMapping> getLineageMappings() { return lineageMappings; }
 
     /**
      * Create a simple LineageMapping from source to target.

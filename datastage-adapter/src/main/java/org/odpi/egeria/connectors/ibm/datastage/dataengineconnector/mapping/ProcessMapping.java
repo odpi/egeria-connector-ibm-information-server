@@ -85,14 +85,14 @@ public class ProcessMapping extends BaseMapping {
         super(job.getIgcRestClient());
         process = getSkeletonProcess(stage);
         if (process != null) {
-            List<PortImplementation> portImplementations = new ArrayList<>();
-            List<LineageMapping> lineageMappings = new ArrayList<>();
+            Set<PortImplementation> portImplementations = new HashSet<>();
+            Set<LineageMapping> lineageMappings = new HashSet<>();
             addImplementationDetails(job, stage, "input_links", PortType.INPUT_PORT, portImplementations, lineageMappings);
             addDataStoreDetails(job, stage, "reads_from_(design)", "read_by_(design)", PortType.INPUT_PORT, portImplementations, lineageMappings);
             addImplementationDetails(job, stage, "output_links", PortType.OUTPUT_PORT, portImplementations, lineageMappings);
             addDataStoreDetails(job, stage, "writes_to_(design)", "written_by_(design)", PortType.OUTPUT_PORT, portImplementations, lineageMappings);
-            process.setPortImplementations(portImplementations);
-            process.setLineageMappings(lineageMappings);
+            process.setPortImplementations(new ArrayList<>(portImplementations));
+            process.setLineageMappings(new ArrayList<>(lineageMappings));
         }
     }
 
@@ -123,6 +123,11 @@ public class ProcessMapping extends BaseMapping {
         return process;
     }
 
+    private PortImplementation getInputPortImplementation(DSJob job, Reference link, String stageNameSuffix) {
+        PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, link, PortType.INPUT_PORT, stageNameSuffix);
+        return portImplementationMapping.getPortImplementation();
+    }
+
     /**
      * Add implementation details of the job (ports and lineage mappings) to the provided lists, for the provided stage.
      *
@@ -137,13 +142,13 @@ public class ProcessMapping extends BaseMapping {
                                           Reference stage,
                                           String linkProperty,
                                           PortType portType,
-                                          List<PortImplementation> portImplementations,
-                                          List<LineageMapping> lineageMappings) {
+                                          Set<PortImplementation> portImplementations,
+                                          Set<LineageMapping> lineageMappings) {
         String stageNameSuffix = "_" + stage.getName();
         // Setup an x_PORT for each x_link into / out of the stage
-        ReferenceList inputLinks = (ReferenceList) igcRestClient.getPropertyByName(stage, linkProperty);
-        for (Reference inputLinkRef : inputLinks.getItems()) {
-            Reference linkObjFull = job.getLinkByRid(inputLinkRef.getId());
+        ReferenceList links = (ReferenceList) igcRestClient.getPropertyByName(stage, linkProperty);
+        for (Reference linkRef : links.getItems()) {
+            Reference linkObjFull = job.getLinkByRid(linkRef.getId());
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, linkObjFull, portType, stageNameSuffix);
             portImplementations.add(portImplementationMapping.getPortImplementation());
             LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, linkObjFull, stageNameSuffix, portType == PortType.INPUT_PORT);
@@ -168,17 +173,17 @@ public class ProcessMapping extends BaseMapping {
                                      String stageProperty,
                                      String dataStoreProperty,
                                      PortType portType,
-                                     List<PortImplementation> portImplementations,
-                                     List<LineageMapping> lineageMappings) {
+                                     Set<PortImplementation> portImplementations,
+                                     Set<LineageMapping> lineageMappings) {
         String stageNameSuffix = "_" + stage.getName();
         // Setup an x_PORT for any data stores that are used by design as sources / targets
         String fullyQualifiedStageName = getFullyQualifiedName(stage);
-        ReferenceList sources = (ReferenceList) igcRestClient.getPropertyByName(stage, stageProperty);
-        for (Reference sourceRef : sources.getItems()) {
-            List<Reference> fieldsForSource = job.getFieldsForStore(sourceRef.getId());
-            PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, stage, portType, fieldsForSource, fullyQualifiedStageName);
+        ReferenceList stores = (ReferenceList) igcRestClient.getPropertyByName(stage, stageProperty);
+        for (Reference storeRef : stores.getItems()) {
+            List<Reference> fieldsForStore = job.getFieldsForStore(storeRef.getId());
+            PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, stage, portType, fieldsForStore, fullyQualifiedStageName);
             portImplementations.add(portImplementationMapping.getPortImplementation());
-            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, fieldsForSource, dataStoreProperty, portType == PortType.INPUT_PORT, fullyQualifiedStageName, stageNameSuffix);
+            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, fieldsForStore, dataStoreProperty, portType == PortType.INPUT_PORT, fullyQualifiedStageName, stageNameSuffix);
             lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
         }
     }
