@@ -64,9 +64,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private IGCRestClient igcRestClient;
     private IGCVersionEnum igcVersion;
 
-    private Date jobChangesLastSynced;
-    private Date jobChangesCutoff;
-
     /**
      * Default constructor used by the OCF Connector Provider.
      */
@@ -85,9 +82,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                            ConnectionProperties connectionProperties) {
         super.initialize(connectorInstanceId, connectionProperties);
 
-        final String methodName = "initialize";
-        log.info("Initializing DataStageDataEngineConnector...");
-        if (log.isDebugEnabled()) { log.debug("Initializing DataStageDataEngineConnector..."); }
+        if (log.isInfoEnabled()) { log.info("Initializing DataStageDataEngineConnector..."); }
 
         // Note: it is not currently possible to try to pull these from a separate IGC proxy instance, so we need to
         // ask for these same details on this connector as well
@@ -114,9 +109,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 Class pojo = igcRestClient.findPOJOForType(lineageAssetType);
                 igcRestClient.registerPOJO(pojo);
             }
-            // Try to read the date of the last job sync
-            jobChangesLastSynced = getJobChangesLastSynced();
-            jobChangesCutoff = new Date();
         }
 
     }
@@ -148,7 +140,9 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
             while (true) {
                 try {
-                    log.info("Polling for changed DataStage jobs...");
+                    Date jobChangesLastSynced = getJobChangesLastSynced();
+                    Date jobChangesCutoff = new Date();
+                    if (log.isInfoEnabled()) { log.info("Polling for changed DataStage jobs since: {}", jobChangesLastSynced); }
                     ReferenceList changedJobs = getChangedJobs(jobChangesLastSynced, jobChangesCutoff);
                     processChangedJobs(changedJobs);
                     while (changedJobs.hasMorePages()) {
@@ -292,16 +286,20 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @return ReferenceList
      */
     public ReferenceList getChangedJobs(Date from, Date to) {
+        long fromTime = 0;
+        long toTime = to.getTime();
         // TODO: may need to modify search criteria for job retrieval to pick up jobs used in changed sequences
         IGCSearch igcSearch = new IGCSearch("dsjob");
         igcSearch.addProperties(DSJob.getSearchProperties());
-        IGCSearchCondition cTo   = new IGCSearchCondition("modified_on", "<=", "" + (to.getTime() * 1000));
+        IGCSearchCondition cTo   = new IGCSearchCondition("modified_on", "<=", "" + toTime);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(cTo);
         if (from != null) {
-            IGCSearchCondition cFrom = new IGCSearchCondition("modified_on", ">", "" + (from.getTime() * 1000));
+            fromTime = from.getTime();
+            IGCSearchCondition cFrom = new IGCSearchCondition("modified_on", ">", "" + fromTime);
             conditionSet.addCondition(cFrom);
             conditionSet.setMatchAnyCondition(false);
         }
+        if (log.isInfoEnabled()) { log.info(" ... searching for changed jobs > {} and <= {}", fromTime, toTime); }
         igcSearch.addConditions(conditionSet);
         ReferenceList changedJobs = igcRestClient.search(igcSearch);
         return changedJobs;
