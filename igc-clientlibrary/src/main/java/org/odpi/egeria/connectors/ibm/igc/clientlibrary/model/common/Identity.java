@@ -108,6 +108,13 @@ public class Identity {
     public String getAssetType() { return this.assetType; }
 
     /**
+     * Returns the (display) name of the asset represented by this identity.
+     *
+     * @return String
+     */
+    public String getName() { return this.assetName; }
+
+    /**
      * Indicates whether the asset type requires its Repository ID (RID) in order to be unique. In other words, the name
      * and context of the asset type are insufficient to make the identity unique.
      *
