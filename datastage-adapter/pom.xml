@@ -32,16 +32,31 @@
         </dependency>
         <dependency>
             <groupId>org.odpi.egeria</groupId>
+            <artifactId>data-engine-proxy-connector</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.odpi.egeria</groupId>
             <artifactId>ibm-igc-rest-client-library</artifactId>
             <version>${open-metadata.version}</version>
             <scope>compile</scope>
         </dependency>
-        <!-- TODO: add back once we actually have some code there to build against
         <dependency>
             <groupId>org.odpi.egeria</groupId>
-            <artifactId>data-engine-client</artifactId>
+            <artifactId>data-engine-api</artifactId>
             <scope>compile</scope>
-        </dependency> -->
+        </dependency>
+        <!-- TODO: temporary only... -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 

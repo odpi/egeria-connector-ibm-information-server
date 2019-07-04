@@ -266,7 +266,7 @@ public class IGCRestClient {
     private void setCookiesFromResponse(ResponseEntity<String> response) {
 
         // If we had a successful response, setup the cookies
-        if (response.getStatusCode() == HttpStatus.OK) {
+        if (response.getStatusCode() == HttpStatus.OK || response.getStatusCode() == HttpStatus.CREATED) {
             HttpHeaders headers = response.getHeaders();
             if (headers.get(HttpHeaders.SET_COOKIE) != null) {
                 this.cookies = headers.get(HttpHeaders.SET_COOKIE);
@@ -630,7 +630,7 @@ public class IGCRestClient {
      */
     public boolean create(IGCCreate igcCreate) {
         String result = createJson(igcCreate.getCreate());
-        return (result != null);
+        return (result == null);
     }
 
     /**
@@ -872,6 +872,28 @@ public class IGCRestClient {
      */
     public Class getPOJOForType(String typeName) {
         return this.registeredPojosByType.get(typeName);
+    }
+
+    /**
+     * Retrieve the POJO for the provided IGC REST API's JSON representation into a Java object.
+     *
+     * @param assetType the IGC REST API's JSON representation
+     * @return Class
+     */
+    public final Class findPOJOForType(String assetType) {
+        Class igcPOJO = null;
+        StringBuilder sbPojoName = new StringBuilder();
+        sbPojoName.append(IGCRestConstants.IGC_REST_GENERATED_MODEL_PKG);
+        sbPojoName.append(".");
+        sbPojoName.append(getIgcVersion().getVersionString());
+        sbPojoName.append(".");
+        sbPojoName.append(IGCRestConstants.getClassNameForAssetType(assetType));
+        try {
+            igcPOJO = Class.forName(sbPojoName.toString());
+        } catch (ClassNotFoundException e) {
+            if (log.isErrorEnabled()) { log.error("Unable to find POJO class: {}", sbPojoName.toString(), e); }
+        }
+        return igcPOJO;
     }
 
     /**

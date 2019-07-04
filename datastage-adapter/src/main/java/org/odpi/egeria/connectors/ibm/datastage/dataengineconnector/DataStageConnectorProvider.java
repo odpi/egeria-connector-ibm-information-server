@@ -2,11 +2,20 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector;
 
-import org.odpi.openmetadata.frameworks.connectors.ConnectorProviderBase;
 import org.odpi.openmetadata.frameworks.connectors.properties.beans.ConnectorType;
+import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.DataEngineConnectorProvider;
 
-// TODO: swap to extending DataEngineConnectorProvider (once in Maven)
-public class DataStageConnectorProvider extends ConnectorProviderBase {
+/**
+ * In the Open Connector Framework (OCF), a ConnectorProvider is a factory for a specific type of connector.
+ * The DataStageConnectorProvider is the connector provider for the DataStageConnector.
+ * It extends DataEngineConnectorProvider which in turn extends the OCF ConnectorProviderBase.
+ * ConnectorProviderBase supports the creation of connector instances.
+ * <p>
+ * The DataStageConnectorProvider must initialize ConnectorProviderBase with the Java class
+ * name of the OMRS Connector implementation (by calling super.setConnectorClassName(className)).
+ * Then the connector provider will work.
+ */
+public class DataStageConnectorProvider extends DataEngineConnectorProvider {
 
     static final String  connectorTypeGUID = "f71e6c48-fa06-4016-8437-7f0e8efcfb39";
     static final String  connectorTypeName = "DataStage Data Engine Connector";

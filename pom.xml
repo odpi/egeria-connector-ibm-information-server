@@ -168,7 +168,12 @@
             </dependency>
             <dependency>
                 <groupId>org.odpi.egeria</groupId>
-                <artifactId>data-engine-client</artifactId>
+                <artifactId>data-engine-api</artifactId>
+                <version>${open-metadata.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.odpi.egeria</groupId>
+                <artifactId>data-engine-proxy-connector</artifactId>
                 <version>${open-metadata.version}</version>
             </dependency>
             <dependency>

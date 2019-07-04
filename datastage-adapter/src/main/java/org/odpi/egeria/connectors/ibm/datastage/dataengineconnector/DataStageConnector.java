@@ -2,6 +2,10 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.LineageMappingMapping;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.ProcessMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
@@ -12,9 +16,11 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
-import org.odpi.openmetadata.frameworks.connectors.ConnectorBase;
+import org.odpi.openmetadata.accessservices.dataengine.model.LineageMapping;
+import org.odpi.openmetadata.accessservices.dataengine.model.Process;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
+import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.DataEngineConnectorBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,20 +28,44 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-// TODO: swap to extending DataEngineConnectorBase (once in Maven)
-public class DataStageConnector extends ConnectorBase {
+public class DataStageConnector extends DataEngineConnectorBase {
 
     private static final Logger log = LoggerFactory.getLogger(DataStageConnector.class);
 
     public static final String SYNC_RULE_NAME = "Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS";
     public static final String SYNC_RULE_DESC = "GENERATED -- DO NOT UPDATE: last synced at ";
+
     private static final SimpleDateFormat SYNC_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-    private static final int POLL_INTERVAL_IN_SECONDS = 15;
+    private static final int POLL_INTERVAL_IN_SECONDS = 60;
+    private static final List<String> LINEAGE_ASSET_TYPES = createLineageAssetTypes();
+
+    private static List<String> createLineageAssetTypes() {
+        ArrayList<String> lineageTypes = new ArrayList<>();
+        lineageTypes.add("information_governance_rule");
+        lineageTypes.add("data_file_field");
+        lineageTypes.add("data_file_record");
+        lineageTypes.add("data_file");
+        lineageTypes.add("database_column");
+        lineageTypes.add("database_table");
+        lineageTypes.add("view");
+        lineageTypes.add("ds_stage_column");
+        lineageTypes.add("link");
+        lineageTypes.add("stage");
+        lineageTypes.add("dsjob");
+        lineageTypes.add("sequence_job");
+        return Collections.unmodifiableList(lineageTypes);
+    }
+
+    /**
+     * Retrieve a list of the asset types we need to process for lineage.
+     *
+     * @return {@code List<String>}
+     */
+    public static final List<String> getLineageAssetTypes() { return LINEAGE_ASSET_TYPES; }
 
     private IGCRestClient igcRestClient;
     private IGCVersionEnum igcVersion;
-
-    private Date jobChangesLastSynced;
+    private ObjectMapper objectMapper;
 
     /**
      * Default constructor used by the OCF Connector Provider.
@@ -55,9 +85,7 @@ public class DataStageConnector extends ConnectorBase {
                            ConnectionProperties connectionProperties) {
         super.initialize(connectorInstanceId, connectionProperties);
 
-        final String methodName = "initialize";
-        log.info("Initializing DataStageDataEngineConnector...");
-        if (log.isDebugEnabled()) { log.debug("Initializing DataStageDataEngineConnector..."); }
+        if (log.isInfoEnabled()) { log.info("Initializing DataStageDataEngineConnector..."); }
 
         // Note: it is not currently possible to try to pull these from a separate IGC proxy instance, so we need to
         // ask for these same details on this connector as well
@@ -79,13 +107,13 @@ public class DataStageConnector extends ConnectorBase {
             } else {
                 this.igcRestClient.setDefaultPageSize(100);
             }
-            // Try to read the date of the last job sync
-            jobChangesLastSynced = getJobChangesLastSynced();
-            if (jobChangesLastSynced == null) {
-                // If non-existent, try to sync everything since now...
-                jobChangesLastSynced = new Date();
+            // Register the types we'll use as part of job processing
+            for (String lineageAssetType : getLineageAssetTypes()) {
+                Class pojo = igcRestClient.findPOJOForType(lineageAssetType);
+                igcRestClient.registerPOJO(pojo);
             }
         }
+        this.objectMapper = new ObjectMapper();
 
     }
 
@@ -97,6 +125,7 @@ public class DataStageConnector extends ConnectorBase {
     @Override
     public void start() throws ConnectorCheckedException {
         super.start();
+        log.info("Starting DataStagePollThread...");
         new Thread(new DataStagePollThread()).start();
     }
 
@@ -115,20 +144,24 @@ public class DataStageConnector extends ConnectorBase {
 
             while (true) {
                 try {
-                    log.debug("Polling for changed DataStage jobs...");
-                    ReferenceList changedJobs = getChangedJobs(jobChangesLastSynced);
+                    Date jobChangesLastSynced = getJobChangesLastSynced();
+                    Date jobChangesCutoff = new Date();
+                    if (log.isInfoEnabled()) { log.info("Polling for changed DataStage jobs since: {}", jobChangesLastSynced); }
+                    ReferenceList changedJobs = getChangedJobs(jobChangesLastSynced, jobChangesCutoff);
                     processChangedJobs(changedJobs);
                     while (changedJobs.hasMorePages()) {
                         changedJobs.getNextPage(igcRestClient);
                         processChangedJobs(changedJobs);
                     }
-                    if (!saveJobChangesSyncTime(jobChangesLastSynced)) {
+                    if (!saveJobChangesSyncTime(jobChangesCutoff)) {
                         log.error("There was a problem updating the last sync time -- will revert to previous sync time at next synchronization.");
                     }
                     Thread.sleep(POLL_INTERVAL_IN_SECONDS * 1000);
                 } catch (InterruptedException e) {
                     log.error("Thread was interrupted.", e);
                     break;
+                } catch (Exception e) {
+                    log.error("Fatal error occurred during processing.", e);
                 }
             }
         }
@@ -137,40 +170,106 @@ public class DataStageConnector extends ConnectorBase {
 
     private void processChangedJobs(ReferenceList changedJobs) {
         List<Reference> jobList = changedJobs.getItems();
+        List<Reference> seqList = new ArrayList<>();
+        Map<String, Process> jobProcessByRid = new HashMap<>();
+        // Load changed jobs first, to build up appropriate PortAliases list
         for (Reference job : jobList) {
-            DSJob detailedJob = getJobDetails(job);
-            loadProcessesForEachStage(detailedJob);
-            loadProcessForJob(detailedJob);
-            loadProcessForSequence(detailedJob);
+            if (job.getType().equals("sequence_job")) {
+                seqList.add(job);
+            } else {
+                DSJob detailedJob = getJobDetails(job);
+                loadProcessesForEachStage(detailedJob);
+                Process jobProcess = loadProcessForJob(detailedJob);
+                if (jobProcess != null) {
+                    jobProcessByRid.put(job.getId(), jobProcess);
+                }
+            }
+        }
+        // Then load sequences, re-using the PortAliases constructed for the jobs
+        // TODO: this probably will NOT work for nested sequences?
+        for (Reference sequence : seqList) {
+            DSJob detailedSeq = getJobDetails(sequence);
+            loadProcessForSequence(detailedSeq, jobProcessByRid);
         }
     }
 
     private void loadProcessesForEachStage(DSJob job) {
+
         log.info("Load processes for each stage...");
-        // TODO: implement once we have a DE OMAS bean for processes to code against
-    }
-
-    private void loadProcessForJob(DSJob job) {
-        if (job.getType() == DSJob.JobType.JOB) {
-            log.info("Load process for job...");
-            // TODO: implement once we have a DE OMAS bean for processes to code against
+        for (Reference stage : job.getAllStages()) {
+            ProcessMapping processMapping = new ProcessMapping(job, stage);
+            Process process = processMapping.getProcess();
+            if (process != null) {
+                try {
+                    log.info(" ... process: {}", objectMapper.writeValueAsString(process));
+                } catch (JsonProcessingException e) {
+                    log.error("Unable to serialise to JSON: {}", process, e);
+                }
+                sendProcess(process);
+            }
         }
-    }
-
-    private void loadProcessForSequence(DSJob job) {
-        if (job.getType() == DSJob.JobType.SEQUENCE) {
-            log.info("Load process for sequence...");
-            // TODO: implement once we have a DE OMAS bean for processes to code against
+        log.info("Load cross-stage lineage mappings...");
+        for (Reference link : job.getAllLinks()) {
+            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, link);
+            Set<LineageMapping> crossStageLineageMappings = lineageMappingMapping.getLineageMappings();
+            if (crossStageLineageMappings != null && !crossStageLineageMappings.isEmpty()) {
+                try {
+                    log.info(" ... mappings: {}", objectMapper.writeValueAsString(crossStageLineageMappings));
+                } catch (JsonProcessingException e) {
+                    log.error("Unable to serialise to JSON: {}", crossStageLineageMappings, e);
+                }
+                sendLineageMappings(new ArrayList<>(crossStageLineageMappings));
+            }
         }
+
     }
 
     /**
-     * Retrieve the version identifier of the IGC environment.
+     * Load a single Process to represent the DataStage job itself.
      *
-     * @return IGCVersionEnum
+     * @param job the job object for which to load a process
+     * @return Process
      */
-    public IGCVersionEnum getIGCVersion() {
-        return this.igcVersion;
+    private Process loadProcessForJob(DSJob job) {
+        Process process = null;
+        if (job.getType() == DSJob.JobType.JOB) {
+            log.info("Load process for job...");
+            ProcessMapping processMapping = new ProcessMapping(job);
+            process = processMapping.getProcess();
+            if (process != null) {
+                try {
+                    log.info(" ... process: {}", objectMapper.writeValueAsString(process));
+                } catch (JsonProcessingException e) {
+                    log.error("Unable to serialise to JSON: {}", process, e);
+                }
+                sendProcess(process);
+            }
+        }
+        return process;
+    }
+
+    /**
+     * Load a single Process to represent the DataStage sequence itself.
+     *
+     * @param job the job object for which to load a process
+     * @return Process
+     */
+    private Process loadProcessForSequence(DSJob job, Map<String, Process> jobProcessByRid) {
+        Process process = null;
+        if (job.getType() == DSJob.JobType.SEQUENCE) {
+            log.info("Load process for sequence...");
+            ProcessMapping processMapping = new ProcessMapping(job, jobProcessByRid);
+            process = processMapping.getProcess();
+            if (process != null) {
+                try {
+                    log.info(" ... process: {}", objectMapper.writeValueAsString(process));
+                } catch (JsonProcessingException e) {
+                    log.error("Unable to serialise to JSON: {}", process, e);
+                }
+                sendProcess(process);
+            }
+        }
+        return process;
     }
 
     /**
@@ -182,30 +281,28 @@ public class DataStageConnector extends ConnectorBase {
         this.igcRestClient.disconnect();
     }
 
-
-    /**
-     * Access the IGC REST API client directly.
-     *
-     * @return IGCRestClient
-     */
-    public IGCRestClient getIGCRestClient() { return this.igcRestClient; }
-
-    // TODO: Mark as an Override and provide additional arguments once available
-    public void sendProcess() {
-
-    }
-
     /**
      * Retrieve a listing of jobs that have been modified since the provided date and time.
      *
-     * @param since the date and time from which to look for changed jobs
+     * @param from the date and time from which to look for changed jobs
+     * @param to the date and time up to which to look for changed jobs
      * @return ReferenceList
      */
-    public ReferenceList getChangedJobs(Date since) {
+    public ReferenceList getChangedJobs(Date from, Date to) {
+        long fromTime = 0;
+        long toTime = to.getTime();
+        // TODO: may need to modify search criteria for job retrieval to pick up jobs used in changed sequences
         IGCSearch igcSearch = new IGCSearch("dsjob");
         igcSearch.addProperties(DSJob.getSearchProperties());
-        IGCSearchCondition condition = new IGCSearchCondition("modified_on", ">=", "" + since.getTime());
-        IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
+        IGCSearchCondition cTo   = new IGCSearchCondition("modified_on", "<=", "" + toTime);
+        IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(cTo);
+        if (from != null) {
+            fromTime = from.getTime();
+            IGCSearchCondition cFrom = new IGCSearchCondition("modified_on", ">", "" + fromTime);
+            conditionSet.addCondition(cFrom);
+            conditionSet.setMatchAnyCondition(false);
+        }
+        if (log.isInfoEnabled()) { log.info(" ... searching for changed jobs > {} and <= {}", fromTime, toTime); }
         igcSearch.addConditions(conditionSet);
         ReferenceList changedJobs = igcRestClient.search(igcSearch);
         return changedJobs;
@@ -225,8 +322,10 @@ public class DataStageConnector extends ConnectorBase {
         ReferenceList stageCols = getStageColumnDetailsForLinks(jobRid);
 
         Map<String, ReferenceList> dataStoreDetailsMap = new HashMap<>();
-        mapDataStoreDetailsForJob(job, "reads_from_(design)", dataStoreDetailsMap);
-        mapDataStoreDetailsForJob(job, "writes_to_(design)", dataStoreDetailsMap);
+        if (!job.getType().equals("sequence_job")) {
+            mapDataStoreDetailsForJob(job, "reads_from_(design)", dataStoreDetailsMap);
+            mapDataStoreDetailsForJob(job, "writes_to_(design)", dataStoreDetailsMap);
+        }
 
         // Flatten the list of data store details
         List<Reference> dataStoreDetails = new ArrayList<>();
@@ -334,11 +433,12 @@ public class DataStageConnector extends ConnectorBase {
      */
     private void mapDataStoreDetailsForJob(Reference job, String relationshipProperty, Map<String, ReferenceList> dataStoreDetailsMap) {
         ReferenceList candidates = (ReferenceList) igcRestClient.getPropertyByName(job, relationshipProperty);
-        List<Reference> candidateList = candidates.getItems();
-        for (Reference candidate : candidateList) {
-            String candidateId = candidate.getId();
-            if (!dataStoreDetailsMap.containsKey(candidateId)) {
-                dataStoreDetailsMap.put(candidateId, getDataFieldDetails(candidate));
+        if (candidates != null) {
+            for (Reference candidate : candidates.getItems()) {
+                String candidateId = candidate.getId();
+                if (!dataStoreDetailsMap.containsKey(candidateId)) {
+                    dataStoreDetailsMap.put(candidateId, getDataFieldDetails(candidate));
+                }
             }
         }
     }
@@ -352,7 +452,6 @@ public class DataStageConnector extends ConnectorBase {
     private ReferenceList getDataFieldDetails(Reference datastore) {
 
         ReferenceList results = null;
-        String type = datastore.getType();
         switch(datastore.getType()) {
             case "database_table":
             case "view":
@@ -381,7 +480,7 @@ public class DataStageConnector extends ConnectorBase {
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
         ReferenceList results = igcRestClient.search(igcSearch);
-        return results == null ? null : results.getItems().get(0);
+        return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
     }
 
     /**
@@ -412,7 +511,7 @@ public class DataStageConnector extends ConnectorBase {
      */
     private boolean saveJobChangesSyncTime(Date syncTime) {
         Reference exists = getJobSyncRule();
-        String newDescription = SYNC_RULE_DESC + SYNC_DATE_FORMAT.format(jobChangesLastSynced);
+        String newDescription = SYNC_RULE_DESC + SYNC_DATE_FORMAT.format(syncTime);
         if (exists == null) {
             // Create the entry
             IGCCreate igcCreate = new IGCCreate("information_governance_rule");

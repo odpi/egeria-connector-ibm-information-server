@@ -13,12 +13,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Egeria Connector for IBM IGC - packaging</name>
+    <name>Egeria Connector for IBM Information Server - packaging</name>
     <description>
-        Bundling of the connector for distribution and use within an OMAG Server Platform
+        Bundling of the connectors for distribution and use within an OMAG Server Platform
     </description>
 
-    <artifactId>egeria-connector-ibm-igc-package</artifactId>
+    <artifactId>egeria-connector-ibm-information-server-package</artifactId>
 
     <dependencies>
         <dependency>

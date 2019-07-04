@@ -143,21 +143,17 @@ public abstract class EntityMapping extends InstanceMapping {
      */
     private final Class getIgcPOJO(IGCOMRSRepositoryConnector igcomrsRepositoryConnector, String assetType) {
         Class igcPOJO = null;
-        StringBuilder sbPojoName = new StringBuilder();
         if (assetType.equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE)) {
+            StringBuilder sbPojoName = new StringBuilder();
             sbPojoName.append(IGCRestConstants.IGC_REST_COMMON_MODEL_PKG);
             sbPojoName.append(".MainObject");
+            try {
+                igcPOJO = Class.forName(sbPojoName.toString());
+            } catch (ClassNotFoundException e) {
+                if (log.isErrorEnabled()) { log.error("Unable to find POJO class: {}", sbPojoName.toString(), e); }
+            }
         } else {
-            sbPojoName.append(IGCRestConstants.IGC_REST_GENERATED_MODEL_PKG);
-            sbPojoName.append(".");
-            sbPojoName.append(igcomrsRepositoryConnector.getIGCVersion().getVersionString());
-            sbPojoName.append(".");
-            sbPojoName.append(IGCRestConstants.getClassNameForAssetType(assetType));
-        }
-        try {
-            igcPOJO = Class.forName(sbPojoName.toString());
-        } catch (ClassNotFoundException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to find POJO class: {}", sbPojoName.toString(), e); }
+            igcPOJO = igcomrsRepositoryConnector.getIGCRestClient().findPOJOForType(assetType);
         }
         return igcPOJO;
     }

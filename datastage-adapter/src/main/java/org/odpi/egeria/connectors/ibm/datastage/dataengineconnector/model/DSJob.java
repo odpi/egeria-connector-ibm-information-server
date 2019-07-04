@@ -7,10 +7,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DSJob {
 
@@ -68,6 +65,12 @@ public class DSJob {
         this.igcRestClient = igcRestClient;
         this.job = job;
         this.type = job.getType().equals("sequence_job") ? JobType.SEQUENCE : JobType.JOB;
+        this.stageMap = new HashMap<>();
+        this.linkMap = new HashMap<>();
+        this.columnMap = new HashMap<>();
+        this.fieldMap = new HashMap<>();
+        this.storeToFieldsMap = new HashMap<>();
+        this.storeToQualifiedNameMap = new HashMap<>();
         this.inputStageRIDs = new ArrayList<>();
         this.outputStageRIDs = new ArrayList<>();
         classifyStages(stages);
@@ -75,6 +78,13 @@ public class DSJob {
         buildMap(columnMap, columns);
         classifyFields(fields);
     }
+
+    /**
+     * Retrieve the IGC environment connectivity used to collect details for this job.
+     *
+     * @return IGCRestClient
+     */
+    public IGCRestClient getIgcRestClient() { return igcRestClient; }
 
     /**
      * Retrieve the type of job represented by this instance.
@@ -107,6 +117,81 @@ public class DSJob {
             list.add(stageMap.get(outputRid));
         }
         return list;
+    }
+
+    /**
+     * Retrieve all of the stages used within the job.
+     *
+     * @return {@code Collection<Reference>}
+     */
+    public Collection<Reference> getAllStages() {
+        return stageMap.values();
+    }
+
+    /**
+     * Retrieve all of the links used within the job.
+     *
+     * @return {@code Collection<Reference>}
+     */
+    public Collection<Reference> getAllLinks() {
+        return linkMap.values();
+    }
+
+    /**
+     * Retrieve the job object itself.
+     *
+     * @return Reference
+     */
+    public Reference getJobObject() { return job; }
+
+    /**
+     * Retrieve the qualifiedName for the provided data store RID, or null if it cannot be found.
+     *
+     * @param rid the data store RID for which to retrieve a qualifiedName
+     * @return String
+     */
+    public String getQualifiedNameFromStoreRid(String rid) {
+        return storeToQualifiedNameMap.getOrDefault(rid, null);
+    }
+
+    /**
+     * Retrieve the complete 'link' object based on its RID.
+     *
+     * @param rid the RID of the link object
+     * @return Reference
+     */
+    public Reference getLinkByRid(String rid) {
+        return linkMap.getOrDefault(rid, null);
+    }
+
+    /**
+     * Retrieve the complete 'ds_stage_column' object based on its RID.
+     *
+     * @param rid the RID of the ds_stage_column object
+     * @return Reference
+     */
+    public Reference getStageColumnByRid(String rid) {
+        return columnMap.getOrDefault(rid, null);
+    }
+
+    /**
+     * Retrieve the complete data store field ('data_file_field' or 'database_column') based on its RID.
+     *
+     * @param rid the RID of the data store field object
+     * @return Reference
+     */
+    public Reference getDataStoreFieldByRid(String rid) {
+        return fieldMap.getOrDefault(rid, null);
+    }
+
+    /**
+     * Retrieve the list of data store fields for the provided data store ('database_table', 'view', or 'data_file_record') RID.
+     *
+     * @param rid the RID of the data store
+     * @return {@List<Reference>}
+     */
+    public List<Reference> getFieldsForStore(String rid) {
+        return storeToFieldsMap.getOrDefault(rid, null);
     }
 
     private void buildMap(Map<String, Reference> map, ReferenceList objects) {
