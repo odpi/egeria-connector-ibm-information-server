@@ -6,8 +6,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 
-import java.util.List;
-
 public class BaseMapping {
 
     protected IGCRestClient igcRestClient;
