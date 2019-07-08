@@ -69,6 +69,8 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private ObjectMapper objectMapper;
     private String dataEngineGUID;
 
+    private String defaultUserId;
+
     /**
      * Default constructor used by the OCF Connector Provider.
      */
@@ -100,6 +102,8 @@ public class DataStageConnector extends DataEngineConnectorBase {
         String igcPass = (String) proxyProperties.get("ibm.igc.password");
         Integer igcPage = (Integer) proxyProperties.get("ibm.igc.pagesize");
 
+        this.defaultUserId = igcUser;
+
         // Create new REST API client (opens a new session)
         this.igcRestClient = new IGCRestClient(igcHost, igcPort, igcUser, igcPass);
         if (this.igcRestClient.isSuccessfullyInitialised()) {
@@ -124,7 +128,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
         dataEngine.setEngineVersion(igcRestClient.getIgcVersion().getVersionString());
         dataEngine.setQualifiedName("ibm-datastage@" + igcHost + ":" + igcPort);
         dataEngine.setDisplayName(igcHost + ":" + igcPort);
-        dataEngineGUID = registerDataEngine(dataEngine);
+        dataEngineGUID = registerDataEngine(dataEngine, defaultUserId);
         this.objectMapper = new ObjectMapper();
 
     }
@@ -294,7 +298,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 } catch (JsonProcessingException e) {
                     log.error("Unable to serialise to JSON: {}", process, e);
                 }
-                sendProcess(process);
+                sendProcess(process, getUserId(process));
             }
         }
         log.info("Load cross-stage lineage mappings...");
@@ -307,7 +311,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 } catch (JsonProcessingException e) {
                     log.error("Unable to serialise to JSON: {}", crossStageLineageMappings, e);
                 }
-                sendLineageMappings(new ArrayList<>(crossStageLineageMappings));
+                sendLineageMappings(new ArrayList<>(crossStageLineageMappings), defaultUserId);
             }
         }
 
@@ -331,7 +335,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 } catch (JsonProcessingException e) {
                     log.error("Unable to serialise to JSON: {}", process, e);
                 }
-                sendProcess(process);
+                sendProcess(process, getUserId(process));
             }
         }
         return process;
@@ -355,7 +359,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 } catch (JsonProcessingException e) {
                     log.error("Unable to serialise to JSON: {}", process, e);
                 }
-                sendProcess(process);
+                sendProcess(process, getUserId(process));
             }
         }
         return process;
@@ -546,6 +550,20 @@ public class DataStageConnector extends DataEngineConnectorBase {
             igcUpdate.addProperty("short_description", newDescription);
             return igcRestClient.update(igcUpdate);
         }
+    }
+
+    /**
+     * Retrieve the userId of the user against which the process should be recorded.
+     *
+     * @param process
+     * @return String
+     */
+    private String getUserId(Process process) {
+        String userId = process.getOwner();
+        if (userId == null) {
+            userId = defaultUserId;
+        }
+        return userId;
     }
 
 }
