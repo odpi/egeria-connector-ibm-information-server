@@ -29,6 +29,7 @@ public class SchemaTypeMapping extends BaseMapping {
             schemaType = new SchemaType();
             schemaType.setQualifiedName(link.getIdentity(igcRestClient).toString() + stageNameSuffix);
             schemaType.setDisplayName(link.getId());
+            schemaType.setAuthor((String)igcRestClient.getPropertyByName(link, "modified_by"));
             AttributeMapping attributeMapping = new AttributeMapping(job, link, stageNameSuffix);
             schemaType.setAttributeList(attributeMapping.getAttributes());
         }
@@ -51,6 +52,7 @@ public class SchemaTypeMapping extends BaseMapping {
             schemaType = new SchemaType();
             schemaType.setQualifiedName(storeQualifiedName + fullyQualifiedStageName);
             schemaType.setDisplayName(storeName);
+            schemaType.setAuthor((String)igcRestClient.getPropertyByName(stage, "modified_by"));
             AttributeMapping attributeMapping = new AttributeMapping(job, fields, fullyQualifiedStageName);
             schemaType.setAttributeList(attributeMapping.getAttributes());
         }
