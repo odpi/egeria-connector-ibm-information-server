@@ -6,6 +6,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -148,15 +150,12 @@ public class IGCRestClient {
                 // Start with lowest version supported
                 this.igcVersion = IGCVersionEnum.values()[0];
                 List<Type> igcTypes = getTypes(tmpMapper);
-                for (Type type : igcTypes) {
-                    // Check for a type that does not exist in the lowest version supported against higher versions, and if found
-                    // set our version to that higher version
-                    String assetType = type.getId();
-                    for (IGCVersionEnum aVersion : IGCVersionEnum.values()) {
-                        if (aVersion.isHigherThan(this.igcVersion)
-                                && assetType.equals(aVersion.getTypeNameFirstAvailableInThisVersion())) {
-                            this.igcVersion = aVersion;
-                        }
+                Set<String> typeNames = igcTypes.stream().map(Type::getId).collect(Collectors.toSet());
+                for (IGCVersionEnum aVersion : IGCVersionEnum.values()) {
+                    if (aVersion.isHigherThan(this.igcVersion)
+                            && typeNames.contains(aVersion.getTypeNameFirstAvailableInThisVersion())
+                            && !typeNames.contains(aVersion.getTypeNameNotAvailableInThisVersion())) {
+                        this.igcVersion = aVersion;
                     }
                 }
                 if (log.isInfoEnabled()) { log.info("Detected IGC version: {}", this.igcVersion.getVersionString()); }
