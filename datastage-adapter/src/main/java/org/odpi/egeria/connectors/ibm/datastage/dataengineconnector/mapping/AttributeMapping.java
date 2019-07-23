@@ -76,6 +76,16 @@ public class AttributeMapping extends BaseMapping {
     }
 
     /**
+     * Creates a set of Attributes for the provided job and data store field information (for virtual assets).
+     *
+     * @param job the job for which to create the Attributes
+     * @param fields the data store fields containing detail for the Attributes
+     */
+    public AttributeMapping(DSJob job, List<Reference> fields) {
+        this(job, fields, "");
+    }
+
+    /**
      * Retrieve the Attributes that were setup.
      *
      * @return {@code List<Attribute>}

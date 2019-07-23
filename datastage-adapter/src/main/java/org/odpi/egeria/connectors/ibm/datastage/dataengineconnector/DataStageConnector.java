@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.LineageMappingMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.ProcessMapping;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.SchemaTypeMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
@@ -218,8 +219,34 @@ public class DataStageConnector extends DataEngineConnectorBase {
      */
     @Override
     public List<DataEngineSchemaType> getChangedSchemaTypes(Date from, Date to) {
-        // do nothing -- schemas will always be handled by other methods
-        return null;
+
+        log.info("Looking for changed SchemaTypes...");
+        Map<String, DataEngineSchemaType> schemaTypeMap = new HashMap<>();
+
+        // Reset the cache
+        changedJobsCache = new HashSet<>();
+        cacheChangedJobs(getChangedJobs(from, to));
+
+        // Iterate through each job looking for any virtual assets -- these must be created first
+        for (DSJob job : changedJobsCache) {
+            for (String storeRid : job.getStoreRids()) {
+                log.info(" ... considering store: {}", storeRid);
+                if (storeRid.startsWith("extern:") && !schemaTypeMap.containsKey(storeRid)) {
+                    log.info(" ... VIRTUAL! Creating a SchemaType ...");
+                    SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(job, job.getStoreIdentityFromRid(storeRid), job.getFieldsForStore(storeRid));
+                    DataEngineSchemaType deSchemaType = new DataEngineSchemaType(schemaTypeMapping.getSchemaType(), defaultUserId);
+                    try {
+                        log.info(" ... created: {}", objectMapper.writeValueAsString(deSchemaType.getSchemaType()));
+                    } catch (JsonProcessingException e) {
+                        log.error("Unable to serialise to JSON: {}", deSchemaType.getSchemaType(), e);
+                    }
+                    schemaTypeMap.put(storeRid, deSchemaType);
+                }
+            }
+        }
+
+        return new ArrayList<>(schemaTypeMap.values());
+
     }
 
     /**
@@ -259,18 +286,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     public List<DataEngineProcess> getChangedProcesses(Date from, Date to) {
 
         List<DataEngineProcess> changedProcesses = new ArrayList<>();
-
-        // Reset the cache
-        changedJobsCache = new HashSet<>();
-
-        // Start by getting a list of the changed jobs
-        ReferenceList changedJobs = getChangedJobs(from, to);
-        changedProcesses.addAll(getProcessesForJobs(changedJobs));
-        while (changedJobs.hasMorePages()) {
-            changedJobs.getNextPage(igcRestClient);
-            changedProcesses.addAll(getProcessesForJobs(changedJobs));
-        }
-
+        changedProcesses.addAll(getProcessesForJobs());
         return changedProcesses;
 
     }
@@ -322,6 +338,26 @@ public class DataStageConnector extends DataEngineConnectorBase {
     }
 
     /**
+     * Build up the cache of changed job details for use by the other methods (minimizing re-retrieval of details)
+     *
+     * @param jobs
+     */
+    private void cacheChangedJobs(ReferenceList jobs) {
+
+        // TODO: need to keep an eye on how fast this may consume memory, and may need to determine some other way
+        //  to batch up
+        for (Reference job : jobs.getItems()) {
+            DSJob detailedJob = getJobDetails(job);
+            changedJobsCache.add(detailedJob);
+        }
+        if (jobs.hasMorePages()) {
+            jobs.getNextPage(igcRestClient);
+            cacheChangedJobs(jobs);
+        }
+
+    }
+
+    /**
      * Retrieve all of the details about the provided DataStage job.
      *
      * @param job the DataStage job for which to retrieve details
@@ -355,35 +391,30 @@ public class DataStageConnector extends DataEngineConnectorBase {
     /**
      * Translate the list of DataStage jobs into a list of Processes.
      *
-     * @param jobs
      * @return {@code List<DataEngineProcess>}
      */
-    private List<DataEngineProcess> getProcessesForJobs(ReferenceList jobs) {
+    private List<DataEngineProcess> getProcessesForJobs() {
 
         List<DataEngineProcess> processes = new ArrayList<>();
 
-        List<Reference> jobList = jobs.getItems();
-        List<Reference> seqList = new ArrayList<>();
+        List<DSJob> seqList = new ArrayList<>();
         Map<String, DataEngineProcess> jobProcessByRid = new HashMap<>();
         // Translate changed jobs first, to build up appropriate PortAliases list
-        for (Reference job : jobList) {
-            if (job.getType().equals("sequence_job")) {
-                seqList.add(job);
+        for (DSJob detailedJob : changedJobsCache) {
+            if (detailedJob.getType() == DSJob.JobType.SEQUENCE) {
+                seqList.add(detailedJob);
             } else {
-                DSJob detailedJob = getJobDetails(job);
-                changedJobsCache.add(detailedJob); // no need to cache sequences, only normal jobs
                 processes.addAll(getProcessesForEachStage(detailedJob));
                 DataEngineProcess jobProcess = getProcessForJob(detailedJob);
                 if (jobProcess != null) {
-                    jobProcessByRid.put(job.getId(), jobProcess);
+                    jobProcessByRid.put(detailedJob.getJobObject().getId(), jobProcess);
                     processes.add(jobProcess);
                 }
             }
         }
         // Then load sequences, re-using the PortAliases constructed for the jobs
         // TODO: this probably will NOT work for nested sequences?
-        for (Reference sequence : seqList) {
-            DSJob detailedSeq = getJobDetails(sequence);
+        for (DSJob detailedSeq: seqList) {
             processes.add(getProcessForSequence(detailedSeq, jobProcessByRid));
         }
 
