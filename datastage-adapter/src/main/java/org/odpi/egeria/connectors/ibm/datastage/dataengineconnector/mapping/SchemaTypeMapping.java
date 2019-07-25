@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DSJob;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.openmetadata.accessservices.dataengine.model.SchemaType;
 
@@ -14,6 +15,25 @@ import java.util.List;
 public class SchemaTypeMapping extends BaseMapping {
 
     private SchemaType schemaType;
+
+    /**
+     * Creates a SchemaType for the provided data store and field information.
+     *
+     * @param job the job for which to create the SchemaType
+     * @param storeIdentity the store identity for which to create the schema type
+     * @param fields the fields that should be created for the store
+     */
+    public SchemaTypeMapping(DSJob job, Identity storeIdentity, List<Reference> fields) {
+        super(job.getIgcRestClient());
+        schemaType = null;
+        if (storeIdentity != null) {
+            schemaType = new SchemaType();
+            schemaType.setQualifiedName(storeIdentity.getRid());
+            schemaType.setDisplayName(storeIdentity.getName());
+            AttributeMapping attributeMapping = new AttributeMapping(job, fields);
+            schemaType.setAttributeList(attributeMapping.getAttributes());
+        }
+    }
 
     /**
      * Creates a SchemaType for the provided job and link information.
@@ -29,6 +49,7 @@ public class SchemaTypeMapping extends BaseMapping {
             schemaType = new SchemaType();
             schemaType.setQualifiedName(link.getIdentity(igcRestClient).toString() + stageNameSuffix);
             schemaType.setDisplayName(link.getId());
+            schemaType.setAuthor((String)igcRestClient.getPropertyByName(link, "modified_by"));
             AttributeMapping attributeMapping = new AttributeMapping(job, link, stageNameSuffix);
             schemaType.setAttributeList(attributeMapping.getAttributes());
         }
@@ -51,6 +72,7 @@ public class SchemaTypeMapping extends BaseMapping {
             schemaType = new SchemaType();
             schemaType.setQualifiedName(storeQualifiedName + fullyQualifiedStageName);
             schemaType.setDisplayName(storeName);
+            schemaType.setAuthor((String)igcRestClient.getPropertyByName(stage, "modified_by"));
             AttributeMapping attributeMapping = new AttributeMapping(job, fields, fullyQualifiedStageName);
             schemaType.setAttributeList(attributeMapping.getAttributes());
         }

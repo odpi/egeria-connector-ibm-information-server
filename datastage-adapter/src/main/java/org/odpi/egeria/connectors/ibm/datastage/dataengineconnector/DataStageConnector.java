@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.LineageMappingMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.ProcessMapping;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.SchemaTypeMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
@@ -16,11 +17,11 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
-import org.odpi.openmetadata.accessservices.dataengine.model.LineageMapping;
-import org.odpi.openmetadata.accessservices.dataengine.model.Process;
-import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
+import org.odpi.openmetadata.accessservices.dataengine.model.SoftwareServerCapability;
+import org.odpi.openmetadata.frameworks.connectors.ffdc.*;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
 import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.DataEngineConnectorBase;
+import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
     public static final String SYNC_RULE_DESC = "GENERATED -- DO NOT UPDATE: last synced at ";
 
     private static final SimpleDateFormat SYNC_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-    private static final int POLL_INTERVAL_IN_SECONDS = 60;
     private static final List<String> LINEAGE_ASSET_TYPES = createLineageAssetTypes();
 
     private static List<String> createLineageAssetTypes() {
@@ -66,6 +66,11 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private IGCRestClient igcRestClient;
     private IGCVersionEnum igcVersion;
     private ObjectMapper objectMapper;
+    private DataEngineSoftwareServerCapability dataEngine;
+
+    private String defaultUserId;
+
+    private Set<DSJob> changedJobsCache;
 
     /**
      * Default constructor used by the OCF Connector Provider.
@@ -85,6 +90,8 @@ public class DataStageConnector extends DataEngineConnectorBase {
                            ConnectionProperties connectionProperties) {
         super.initialize(connectorInstanceId, connectionProperties);
 
+        final String methodName = "initialize";
+
         if (log.isInfoEnabled()) { log.info("Initializing DataStageDataEngineConnector..."); }
 
         // Note: it is not currently possible to try to pull these from a separate IGC proxy instance, so we need to
@@ -95,6 +102,8 @@ public class DataStageConnector extends DataEngineConnectorBase {
         String igcUser = (String) proxyProperties.get("ibm.igc.username");
         String igcPass = (String) proxyProperties.get("ibm.igc.password");
         Integer igcPage = (Integer) proxyProperties.get("ibm.igc.pagesize");
+
+        this.defaultUserId = igcUser;
 
         // Create new REST API client (opens a new session)
         this.igcRestClient = new IGCRestClient(igcHost, igcPort, igcUser, igcPass);
@@ -113,163 +122,16 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 igcRestClient.registerPOJO(pojo);
             }
         }
+
+        // Create a new SoftwareServerCapability representing this Data Engine
+        SoftwareServerCapability sscDataEngine = new SoftwareServerCapability();
+        sscDataEngine.setEngineType("IBM InfoSphere DataStage");
+        sscDataEngine.setEngineVersion(igcRestClient.getIgcVersion().getVersionString());
+        sscDataEngine.setQualifiedName("ibm-datastage@" + igcHost + ":" + igcPort);
+        sscDataEngine.setDisplayName(igcHost + ":" + igcPort);
+        dataEngine = new DataEngineSoftwareServerCapability(sscDataEngine, defaultUserId);
         this.objectMapper = new ObjectMapper();
 
-    }
-
-    /**
-     * Indicates that the connector is completely configured and can begin processing.
-     *
-     * @throws ConnectorCheckedException there is a problem within the connector.
-     */
-    @Override
-    public void start() throws ConnectorCheckedException {
-        super.start();
-        log.info("Starting DataStagePollThread...");
-        new Thread(new DataStagePollThread()).start();
-    }
-
-    /**
-     * Class to support separate-threaded processing of DataStage jobs.
-     */
-    private class DataStagePollThread implements Runnable {
-
-        /**
-         * Poll for DataStage job changes.
-         */
-        @Override
-        public void run() {
-
-            log.info("Starting DataStage polling thread.");
-
-            while (true) {
-                try {
-                    Date jobChangesLastSynced = getJobChangesLastSynced();
-                    Date jobChangesCutoff = new Date();
-                    if (log.isInfoEnabled()) { log.info("Polling for changed DataStage jobs since: {}", jobChangesLastSynced); }
-                    ReferenceList changedJobs = getChangedJobs(jobChangesLastSynced, jobChangesCutoff);
-                    processChangedJobs(changedJobs);
-                    while (changedJobs.hasMorePages()) {
-                        changedJobs.getNextPage(igcRestClient);
-                        processChangedJobs(changedJobs);
-                    }
-                    if (!saveJobChangesSyncTime(jobChangesCutoff)) {
-                        log.error("There was a problem updating the last sync time -- will revert to previous sync time at next synchronization.");
-                    }
-                    Thread.sleep(POLL_INTERVAL_IN_SECONDS * 1000);
-                } catch (InterruptedException e) {
-                    log.error("Thread was interrupted.", e);
-                    break;
-                } catch (Exception e) {
-                    log.error("Fatal error occurred during processing.", e);
-                }
-            }
-        }
-
-    }
-
-    private void processChangedJobs(ReferenceList changedJobs) {
-        List<Reference> jobList = changedJobs.getItems();
-        List<Reference> seqList = new ArrayList<>();
-        Map<String, Process> jobProcessByRid = new HashMap<>();
-        // Load changed jobs first, to build up appropriate PortAliases list
-        for (Reference job : jobList) {
-            if (job.getType().equals("sequence_job")) {
-                seqList.add(job);
-            } else {
-                DSJob detailedJob = getJobDetails(job);
-                loadProcessesForEachStage(detailedJob);
-                Process jobProcess = loadProcessForJob(detailedJob);
-                if (jobProcess != null) {
-                    jobProcessByRid.put(job.getId(), jobProcess);
-                }
-            }
-        }
-        // Then load sequences, re-using the PortAliases constructed for the jobs
-        // TODO: this probably will NOT work for nested sequences?
-        for (Reference sequence : seqList) {
-            DSJob detailedSeq = getJobDetails(sequence);
-            loadProcessForSequence(detailedSeq, jobProcessByRid);
-        }
-    }
-
-    private void loadProcessesForEachStage(DSJob job) {
-
-        log.info("Load processes for each stage...");
-        for (Reference stage : job.getAllStages()) {
-            ProcessMapping processMapping = new ProcessMapping(job, stage);
-            Process process = processMapping.getProcess();
-            if (process != null) {
-                try {
-                    log.info(" ... process: {}", objectMapper.writeValueAsString(process));
-                } catch (JsonProcessingException e) {
-                    log.error("Unable to serialise to JSON: {}", process, e);
-                }
-                sendProcess(process);
-            }
-        }
-        log.info("Load cross-stage lineage mappings...");
-        for (Reference link : job.getAllLinks()) {
-            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, link);
-            Set<LineageMapping> crossStageLineageMappings = lineageMappingMapping.getLineageMappings();
-            if (crossStageLineageMappings != null && !crossStageLineageMappings.isEmpty()) {
-                try {
-                    log.info(" ... mappings: {}", objectMapper.writeValueAsString(crossStageLineageMappings));
-                } catch (JsonProcessingException e) {
-                    log.error("Unable to serialise to JSON: {}", crossStageLineageMappings, e);
-                }
-                sendLineageMappings(new ArrayList<>(crossStageLineageMappings));
-            }
-        }
-
-    }
-
-    /**
-     * Load a single Process to represent the DataStage job itself.
-     *
-     * @param job the job object for which to load a process
-     * @return Process
-     */
-    private Process loadProcessForJob(DSJob job) {
-        Process process = null;
-        if (job.getType() == DSJob.JobType.JOB) {
-            log.info("Load process for job...");
-            ProcessMapping processMapping = new ProcessMapping(job);
-            process = processMapping.getProcess();
-            if (process != null) {
-                try {
-                    log.info(" ... process: {}", objectMapper.writeValueAsString(process));
-                } catch (JsonProcessingException e) {
-                    log.error("Unable to serialise to JSON: {}", process, e);
-                }
-                sendProcess(process);
-            }
-        }
-        return process;
-    }
-
-    /**
-     * Load a single Process to represent the DataStage sequence itself.
-     *
-     * @param job the job object for which to load a process
-     * @return Process
-     */
-    private Process loadProcessForSequence(DSJob job, Map<String, Process> jobProcessByRid) {
-        Process process = null;
-        if (job.getType() == DSJob.JobType.SEQUENCE) {
-            log.info("Load process for sequence...");
-            ProcessMapping processMapping = new ProcessMapping(job, jobProcessByRid);
-            process = processMapping.getProcess();
-            if (process != null) {
-                try {
-                    log.info(" ... process: {}", objectMapper.writeValueAsString(process));
-                } catch (JsonProcessingException e) {
-                    log.error("Unable to serialise to JSON: {}", process, e);
-                }
-                sendProcess(process);
-            }
-        }
-        return process;
     }
 
     /**
@@ -282,13 +144,180 @@ public class DataStageConnector extends DataEngineConnectorBase {
     }
 
     /**
+     * Retrieve the details about the data engine to which we are connected.
+     *
+     * @return DataEngineSoftwareServerCapability
+     */
+    @Override
+    public DataEngineSoftwareServerCapability getDataEngineDetails() { return dataEngine; }
+
+    /**
+     * Retrieve the date and time at which changes were last synchronized.
+     *
+     * @return Date
+     */
+    @Override
+    public Date getChangesLastSynced() {
+        Reference jobSyncRule = getJobSyncRule();
+        Date lastSync = null;
+        if (jobSyncRule != null) {
+            String description = (String) igcRestClient.getPropertyByName(jobSyncRule, "short_description");
+            String dateString = description.substring(SYNC_RULE_DESC.length());
+            try {
+                lastSync = SYNC_DATE_FORMAT.parse(dateString);
+            } catch (ParseException e) {
+                log.error("Unable to parse date and time of last sync from rule: {} ({})", description, dateString);
+            }
+        }
+        return lastSync;
+    }
+
+    /**
+     * Persist the date and time at which changes were last successfully synchronized.
+     *
+     * @param time
+     * @throws OCFRuntimeException if there is any problem persisting the date and time
+     */
+    @Override
+    public void setChangesLastSynced(Date time) throws OCFRuntimeException {
+        final String methodName = "setChangesLastSynced";
+        Reference exists = getJobSyncRule();
+        String newDescription = SYNC_RULE_DESC + SYNC_DATE_FORMAT.format(time);
+        boolean success;
+        if (exists == null) {
+            // Create the entry
+            IGCCreate igcCreate = new IGCCreate("information_governance_rule");
+            igcCreate.addProperty("name", SYNC_RULE_NAME);
+            igcCreate.addProperty("short_description", newDescription);
+            success = igcRestClient.create(igcCreate);
+        } else {
+            // Update the entry
+            IGCUpdate igcUpdate = new IGCUpdate(exists.getId());
+            igcUpdate.addProperty("short_description", newDescription);
+            success = igcRestClient.update(igcUpdate);
+        }
+        if (!success) {
+            DataStageErrorCode errorCode = DataStageErrorCode.SYNC_TIME_UPDATE_FAILURE;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage();
+            throw new OCFRuntimeException(
+                    errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction()
+            );
+        }
+    }
+
+    /**
+     * Retrieve a list of the changed schema types between the dates and times provided.
+     *
+     * @param from the date and time from which to look for changes (exclusive)
+     * @param to the date and time up to which to look for changes (inclusive)
+     * @return {@code List<DataEngineSchemaType>}
+     */
+    @Override
+    public List<DataEngineSchemaType> getChangedSchemaTypes(Date from, Date to) {
+
+        log.info("Looking for changed SchemaTypes...");
+        Map<String, DataEngineSchemaType> schemaTypeMap = new HashMap<>();
+
+        // Reset the cache
+        changedJobsCache = new HashSet<>();
+        cacheChangedJobs(getChangedJobs(from, to));
+
+        // Iterate through each job looking for any virtual assets -- these must be created first
+        for (DSJob job : changedJobsCache) {
+            for (String storeRid : job.getStoreRids()) {
+                log.info(" ... considering store: {}", storeRid);
+                if (storeRid.startsWith("extern:") && !schemaTypeMap.containsKey(storeRid)) {
+                    log.info(" ... VIRTUAL! Creating a SchemaType ...");
+                    SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(job, job.getStoreIdentityFromRid(storeRid), job.getFieldsForStore(storeRid));
+                    DataEngineSchemaType deSchemaType = new DataEngineSchemaType(schemaTypeMapping.getSchemaType(), defaultUserId);
+                    try {
+                        log.info(" ... created: {}", objectMapper.writeValueAsString(deSchemaType.getSchemaType()));
+                    } catch (JsonProcessingException e) {
+                        log.error("Unable to serialise to JSON: {}", deSchemaType.getSchemaType(), e);
+                    }
+                    schemaTypeMap.put(storeRid, deSchemaType);
+                }
+            }
+        }
+
+        return new ArrayList<>(schemaTypeMap.values());
+
+    }
+
+    /**
+     * Retrieve a list of the changed port implementations between the dates and times provided.
+     *
+     * @param from the date and time from which to look for changes (exclusive)
+     * @param to the date and time up to which to look for changes (inclusive)
+     * @return {@code List<DataEnginePortImplementation>}
+     */
+    @Override
+    public List<DataEnginePortImplementation> getChangedPortImplementations(Date from, Date to) {
+        // do nothing -- port implementations will always be handled by other methods
+        return null;
+    }
+
+    /**
+     * Retrieve a list of the changed port aliases between the dates and times provided.
+     *
+     * @param from the date and time from which to look for changes (exclusive)
+     * @param to the date and time up to which to look for changes (inclusive)
+     * @return {@code List<DataEnginePortAlias>}
+     */
+    @Override
+    public List<DataEnginePortAlias> getChangedPortAliases(Date from, Date to) {
+        // do nothing -- port aliases will always be handled by other methods
+        return null;
+    }
+
+    /**
+     * Retrieve a list of the changed processes between the dates and times provided.
+     *
+     * @param from the date and time from which to look for changes (exclusive)
+     * @param to the date and time up to which to look for changes (inclusive)
+     * @return {@code List<DataEngineProcess>}
+     */
+    @Override
+    public List<DataEngineProcess> getChangedProcesses(Date from, Date to) {
+
+        List<DataEngineProcess> changedProcesses = new ArrayList<>();
+        changedProcesses.addAll(getProcessesForJobs());
+        return changedProcesses;
+
+    }
+
+    /**
+     * Retrieve a list of the changed lineage mappings between the dates and times provided.
+     *
+     * @param from the date and time from which to look for changes (exclusive)
+     * @param to the date and time up to which to look for changes (inclusive)
+     * @return {@code List<DataEngineLineageMappings>}
+     */
+    @Override
+    public List<DataEngineLineageMappings> getChangedLineageMappings(Date from, Date to) {
+        log.info("Retrieving all changed lineage mappings (from cache)...");
+        Set<DataEngineLineageMappings> lineageMappings = new HashSet<>();
+        // Re-use the jobs we've already retrieved and cached to avoid needing to re-query all of their details again
+        log.info(" ... cache size = {}", changedJobsCache.size());
+        for (DSJob job : changedJobsCache) {
+            lineageMappings.addAll(getCrossStageLineageMappings(job));
+        }
+        return new ArrayList<>(lineageMappings);
+    }
+
+    /**
      * Retrieve a listing of jobs that have been modified since the provided date and time.
      *
      * @param from the date and time from which to look for changed jobs
      * @param to the date and time up to which to look for changed jobs
      * @return ReferenceList
      */
-    public ReferenceList getChangedJobs(Date from, Date to) {
+    private ReferenceList getChangedJobs(Date from, Date to) {
         long fromTime = 0;
         long toTime = to.getTime();
         // TODO: may need to modify search criteria for job retrieval to pick up jobs used in changed sequences
@@ -306,6 +335,26 @@ public class DataStageConnector extends DataEngineConnectorBase {
         igcSearch.addConditions(conditionSet);
         ReferenceList changedJobs = igcRestClient.search(igcSearch);
         return changedJobs;
+    }
+
+    /**
+     * Build up the cache of changed job details for use by the other methods (minimizing re-retrieval of details)
+     *
+     * @param jobs
+     */
+    private void cacheChangedJobs(ReferenceList jobs) {
+
+        // TODO: need to keep an eye on how fast this may consume memory, and may need to determine some other way
+        //  to batch up
+        for (Reference job : jobs.getItems()) {
+            DSJob detailedJob = getJobDetails(job);
+            changedJobsCache.add(detailedJob);
+        }
+        if (jobs.hasMorePages()) {
+            jobs.getNextPage(igcRestClient);
+            cacheChangedJobs(jobs);
+        }
+
     }
 
     /**
@@ -340,12 +389,151 @@ public class DataStageConnector extends DataEngineConnectorBase {
     }
 
     /**
+     * Translate the list of DataStage jobs into a list of Processes.
+     *
+     * @return {@code List<DataEngineProcess>}
+     */
+    private List<DataEngineProcess> getProcessesForJobs() {
+
+        List<DataEngineProcess> processes = new ArrayList<>();
+
+        List<DSJob> seqList = new ArrayList<>();
+        Map<String, DataEngineProcess> jobProcessByRid = new HashMap<>();
+        // Translate changed jobs first, to build up appropriate PortAliases list
+        for (DSJob detailedJob : changedJobsCache) {
+            if (detailedJob.getType() == DSJob.JobType.SEQUENCE) {
+                seqList.add(detailedJob);
+            } else {
+                processes.addAll(getProcessesForEachStage(detailedJob));
+                DataEngineProcess jobProcess = getProcessForJob(detailedJob);
+                if (jobProcess != null) {
+                    jobProcessByRid.put(detailedJob.getJobObject().getId(), jobProcess);
+                    processes.add(jobProcess);
+                }
+            }
+        }
+        // Then load sequences, re-using the PortAliases constructed for the jobs
+        // TODO: this probably will NOT work for nested sequences?
+        for (DSJob detailedSeq: seqList) {
+            processes.add(getProcessForSequence(detailedSeq, jobProcessByRid));
+        }
+
+        return processes;
+
+    }
+
+    /**
+     * Translate the detailed stages of the provided DataStage job into Processes.
+     *
+     * @param job
+     * @return {@code List<DataEngineProcess>}
+     */
+    private List<DataEngineProcess> getProcessesForEachStage(DSJob job) {
+
+        List<DataEngineProcess> processes = new ArrayList<>();
+
+        log.info("Translating processes for each stage...");
+        for (Reference stage : job.getAllStages()) {
+            ProcessMapping processMapping = new ProcessMapping(job, stage);
+            DataEngineProcess process = processMapping.getProcess();
+            if (process != null) {
+                try {
+                    log.info(" ... process: {}", objectMapper.writeValueAsString(process));
+                } catch (JsonProcessingException e) {
+                    log.error("Unable to serialise to JSON: {}", process, e);
+                }
+                processes.add(process);
+            }
+        }
+
+        return processes;
+
+    }
+
+    /**
+     * Translate the detailed stages of the provided DataStage job into LineageMappings.
+     *
+     * @param job
+     * @return {@code Set<DataEngineLineageMappings>}
+     */
+    private Set<DataEngineLineageMappings> getCrossStageLineageMappings(DSJob job) {
+
+        Set<DataEngineLineageMappings> lineageMappings = new HashSet<>();
+
+        log.info("Load cross-stage lineage mappings...");
+        for (Reference link : job.getAllLinks()) {
+            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, link);
+            DataEngineLineageMappings crossStageLineageMappings = lineageMappingMapping.getLineageMappings();
+            if (crossStageLineageMappings != null
+                    && crossStageLineageMappings.getLineageMappings() != null
+                    && !crossStageLineageMappings.getLineageMappings().isEmpty()) {
+                try {
+                    log.info(" ... mappings: {}", objectMapper.writeValueAsString(crossStageLineageMappings));
+                } catch (JsonProcessingException e) {
+                    log.error("Unable to serialise to JSON: {}", crossStageLineageMappings, e);
+                }
+                lineageMappings.add(crossStageLineageMappings);
+            }
+        }
+
+        return lineageMappings;
+
+    }
+
+    /**
+     * Translate a single Process to represent the DataStage job itself.
+     *
+     * @param job the job object for which to load a process
+     * @return DataEngineProcess
+     */
+    private DataEngineProcess getProcessForJob(DSJob job) {
+        DataEngineProcess process = null;
+        if (job.getType() == DSJob.JobType.JOB) {
+            log.info("Load process for job...");
+            ProcessMapping processMapping = new ProcessMapping(job);
+            process = processMapping.getProcess();
+            if (process != null) {
+                try {
+                    log.info(" ... process: {}", objectMapper.writeValueAsString(process));
+                } catch (JsonProcessingException e) {
+                    log.error("Unable to serialise to JSON: {}", process, e);
+                }
+            }
+        }
+        return process;
+    }
+
+    /**
+     * Translate a single Process to represent the DataStage sequence itself.
+     *
+     * @param job the job object for which to load a process
+     * @param jobProcessByRid a map from job RID to its detailed process definition
+     * @return DataEngineProcess
+     */
+    private DataEngineProcess getProcessForSequence(DSJob job, Map<String, DataEngineProcess> jobProcessByRid) {
+        DataEngineProcess process = null;
+        if (job.getType() == DSJob.JobType.SEQUENCE) {
+            log.info("Load process for sequence...");
+            ProcessMapping processMapping = new ProcessMapping(job, jobProcessByRid);
+            process = processMapping.getProcess();
+            if (process != null) {
+                try {
+                    log.info(" ... process: {}", objectMapper.writeValueAsString(process));
+                } catch (JsonProcessingException e) {
+                    log.error("Unable to serialise to JSON: {}", process, e);
+                }
+            }
+        }
+        return process;
+    }
+
+    /**
      * Retrieve a listing of the stages within a particular DataStage job.
      *
      * @param jobRid the RID of the job for which to retrieve stage details
      * @return ReferenceList
      */
-    public ReferenceList getStageDetailsForJob(String jobRid) {
+    private ReferenceList getStageDetailsForJob(String jobRid) {
         IGCSearch igcSearch = new IGCSearch("stage");
         igcSearch.addProperties(DSStage.getSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("job_or_container", "=", jobRid);
@@ -362,7 +550,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param jobRid the RID of the job for which to retrieve link details
      * @return ReferenceList
      */
-    public ReferenceList getLinkDetailsForJob(String jobRid) {
+    private ReferenceList getLinkDetailsForJob(String jobRid) {
         IGCSearch igcSearch = new IGCSearch("link");
         igcSearch.addProperties(DSLink.getSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("job_or_container", "=", jobRid);
@@ -379,7 +567,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param jobRid the RID of the job for which to retrieve stage column details
      * @return ReferenceList
      */
-    public ReferenceList getStageColumnDetailsForLinks(String jobRid) {
+    private ReferenceList getStageColumnDetailsForLinks(String jobRid) {
         IGCSearch igcSearch = new IGCSearch("ds_stage_column");
         igcSearch.addProperties(DSStageColumn.getSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("link.job_or_container", "=", jobRid);
@@ -396,7 +584,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param tableRid the RID of the database table for which to retrieve column details
      * @return ReferenceList
      */
-    public ReferenceList getColumnsForTable(String tableRid) {
+    private ReferenceList getColumnsForTable(String tableRid) {
         IGCSearch igcSearch = new IGCSearch("database_column");
         igcSearch.addProperties(DatabaseColumn.getSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("database_table_or_view", "=", tableRid);
@@ -413,7 +601,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param recordRid the RID of the data file record for which to retrieve field details
      * @return ReferenceList
      */
-    public ReferenceList getFieldsForRecord(String recordRid) {
+    private ReferenceList getFieldsForRecord(String recordRid) {
         IGCSearch igcSearch = new IGCSearch("data_file_field");
         igcSearch.addProperties(DataFileField.getSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("data_file_record", "=", recordRid);
@@ -481,49 +669,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
         igcSearch.addConditions(conditionSet);
         ReferenceList results = igcRestClient.search(igcSearch);
         return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
-    }
-
-    /**
-     * Retrieve the date and time that job information was last synchronized.
-     *
-     * @return Date
-     */
-    private Date getJobChangesLastSynced() {
-        Reference jobSyncRule = getJobSyncRule();
-        Date lastSync = null;
-        if (jobSyncRule != null) {
-            String description = (String) igcRestClient.getPropertyByName(jobSyncRule, "short_description");
-            String dateString = description.substring(SYNC_RULE_DESC.length());
-            try {
-                lastSync = SYNC_DATE_FORMAT.parse(dateString);
-            } catch (ParseException e) {
-                log.error("Unable to parse date and time of last sync from rule: {} ({})", description, dateString);
-            }
-        }
-        return lastSync;
-    }
-
-    /**
-     * Save the time the jobs were last synced.
-     *
-     * @param syncTime the date and time of the last synchronization
-     * @return boolean - indicating success (true) or failure (false) of persisting the time
-     */
-    private boolean saveJobChangesSyncTime(Date syncTime) {
-        Reference exists = getJobSyncRule();
-        String newDescription = SYNC_RULE_DESC + SYNC_DATE_FORMAT.format(syncTime);
-        if (exists == null) {
-            // Create the entry
-            IGCCreate igcCreate = new IGCCreate("information_governance_rule");
-            igcCreate.addProperty("name", SYNC_RULE_NAME);
-            igcCreate.addProperty("short_description", newDescription);
-            return igcRestClient.create(igcCreate);
-        } else {
-            // Update the entry
-            IGCUpdate igcUpdate = new IGCUpdate(exists.getId());
-            igcUpdate.addProperty("short_description", newDescription);
-            return igcRestClient.update(igcUpdate);
-        }
     }
 
 }

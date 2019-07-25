@@ -43,7 +43,7 @@ public class DSJob {
     private Map<String, Reference> columnMap;
     private Map<String, Reference> fieldMap;
     private Map<String, List<Reference>> storeToFieldsMap;
-    private Map<String, String> storeToQualifiedNameMap;
+    private Map<String, Identity> storeToIdentityMap;
     private List<String> inputStageRIDs;
     private List<String> outputStageRIDs;
 
@@ -70,7 +70,7 @@ public class DSJob {
         this.columnMap = new HashMap<>();
         this.fieldMap = new HashMap<>();
         this.storeToFieldsMap = new HashMap<>();
-        this.storeToQualifiedNameMap = new HashMap<>();
+        this.storeToIdentityMap = new HashMap<>();
         this.inputStageRIDs = new ArrayList<>();
         this.outputStageRIDs = new ArrayList<>();
         classifyStages(stages);
@@ -151,7 +151,31 @@ public class DSJob {
      * @return String
      */
     public String getQualifiedNameFromStoreRid(String rid) {
-        return storeToQualifiedNameMap.getOrDefault(rid, null);
+        Identity storeIdentity = getStoreIdentityFromRid(rid);
+        String qualifiedName = null;
+        if (storeIdentity != null) {
+            qualifiedName = storeIdentity.toString();
+        }
+        return qualifiedName;
+    }
+
+    /**
+     * Retrieve the store identity for the provided data store RID, or null if it cannot be found.
+     *
+     * @param rid the data store RID for which to retrieve an identity
+     * @return Identity
+     */
+    public Identity getStoreIdentityFromRid(String rid) {
+        return storeToIdentityMap.getOrDefault(rid, null);
+    }
+
+    /**
+     * Retrieve the set of data store RIDs that are used by this job.
+     *
+     * @return {@code Set<String>}
+     */
+    public Set<String> getStoreRids() {
+        return storeToIdentityMap.keySet();
     }
 
     /**
@@ -222,7 +246,7 @@ public class DSJob {
             fieldMap.put(rid, candidateField);
             Identity storeIdentity = candidateField.getIdentity(igcRestClient).getParentIdentity();
             String storeId = storeIdentity.getRid();
-            storeToQualifiedNameMap.put(storeId, storeIdentity.toString());
+            storeToIdentityMap.put(storeId, storeIdentity);
             if (!storeToFieldsMap.containsKey(storeId)) {
                 storeToFieldsMap.put(storeId, new ArrayList<>());
             }

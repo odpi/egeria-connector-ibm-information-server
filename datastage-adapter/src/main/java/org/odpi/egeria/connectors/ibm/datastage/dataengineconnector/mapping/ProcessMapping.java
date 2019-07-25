@@ -7,6 +7,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.openmetadata.accessservices.dataengine.model.*;
 import org.odpi.openmetadata.accessservices.dataengine.model.Process;
+import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.model.DataEngineProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ public class ProcessMapping extends BaseMapping {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessMapping.class);
 
-    private Process process;
+    private DataEngineProcess process;
 
     /**
      * Create a new process from a DSJob.
@@ -37,7 +38,7 @@ public class ProcessMapping extends BaseMapping {
             if (process != null) {
                 PortAliasMapping inputAliasMapping = new PortAliasMapping(job, job.getInputStages(), "reads_from_(design)");
                 PortAliasMapping outputAliasMapping = new PortAliasMapping(job, job.getOutputStages(), "writes_to_(design)");
-                process.setPortAliases(Stream.concat(inputAliasMapping.getPortAliases().stream(), outputAliasMapping.getPortAliases().stream()).collect(Collectors.toList()));
+                process.getProcess().setPortAliases(Stream.concat(inputAliasMapping.getPortAliases().stream(), outputAliasMapping.getPortAliases().stream()).collect(Collectors.toList()));
             }
         } else {
             log.error("Unable to create a job mapping for a sequence: {}", job);
@@ -50,7 +51,7 @@ public class ProcessMapping extends BaseMapping {
      * @param sequence the sequence from which to create a process
      * @param jobProcessByRid a map from job RID to the full Process for that job
      */
-    public ProcessMapping(DSJob sequence, Map<String, Process> jobProcessByRid) {
+    public ProcessMapping(DSJob sequence, Map<String, DataEngineProcess> jobProcessByRid) {
         super(sequence.getIgcRestClient());
         process = null;
         if (sequence.getType() == DSJob.JobType.SEQUENCE) {
@@ -62,13 +63,13 @@ public class ProcessMapping extends BaseMapping {
                     Reference runsJob = (Reference) igcRestClient.getPropertyByName(stage, "runs_sequences_jobs");
                     if (runsJob != null) {
                         String jobId = runsJob.getId();
-                        Process jobProcess = jobProcessByRid.getOrDefault(jobId, null);
+                        DataEngineProcess jobProcess = jobProcessByRid.getOrDefault(jobId, null);
                         if (jobProcess != null) {
-                            portAliases.addAll(jobProcess.getPortAliases());
+                            portAliases.addAll(jobProcess.getProcess().getPortAliases());
                         }
                     }
                 }
-                process.setPortAliases(portAliases.stream().collect(Collectors.toList()));
+                process.getProcess().setPortAliases(portAliases.stream().collect(Collectors.toList()));
             }
         } else {
             log.error("Unable to create a sequence mapping for a job: {}", sequence);
@@ -91,8 +92,8 @@ public class ProcessMapping extends BaseMapping {
             addDataStoreDetails(job, stage, "reads_from_(design)", "read_by_(design)", PortType.INPUT_PORT, portImplementations, lineageMappings);
             addImplementationDetails(job, stage, "output_links", PortType.OUTPUT_PORT, portImplementations, lineageMappings);
             addDataStoreDetails(job, stage, "writes_to_(design)", "written_by_(design)", PortType.OUTPUT_PORT, portImplementations, lineageMappings);
-            process.setPortImplementations(new ArrayList<>(portImplementations));
-            process.setLineageMappings(new ArrayList<>(lineageMappings));
+            process.getProcess().setPortImplementations(new ArrayList<>(portImplementations));
+            process.getProcess().setLineageMappings(new ArrayList<>(lineageMappings));
         }
     }
 
@@ -101,31 +102,27 @@ public class ProcessMapping extends BaseMapping {
      *
      * @return Process
      */
-    public Process getProcess() { return this.process; }
+    public DataEngineProcess getProcess() { return this.process; }
 
     /**
      * Construct a minimal Process object from the provided IGC object (stage, job, sequence, etc).
      *
      * @param igcObj the IGC object from which to construct the skeletal Process
-     * @return Process
+     * @return DataEngineProcess
      */
-    private Process getSkeletonProcess(Reference igcObj) {
-        Process process = null;
+    private DataEngineProcess getSkeletonProcess(Reference igcObj) {
+        DataEngineProcess deProcess = null;
         if (igcObj != null) {
-            process = new Process();
-            // TODO: process.setGuid(jobObj.getId());
+            Process process = new Process();
             process.setName(igcObj.getName());
             process.setDisplayName(igcObj.getName());
-            process.setQualifiedName(getFullyQualifiedName(igcObj));
+            process.setQualifiedName(igcObj.getId());
             process.setDescription(getDescription(igcObj));
             process.setOwner((String)igcRestClient.getPropertyByName(igcObj, "created_by"));
+            String modifiedBy = (String)igcRestClient.getPropertyByName(igcObj, "modified_by");
+            deProcess = new DataEngineProcess(process, modifiedBy);
         }
-        return process;
-    }
-
-    private PortImplementation getInputPortImplementation(DSJob job, Reference link, String stageNameSuffix) {
-        PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, link, PortType.INPUT_PORT, stageNameSuffix);
-        return portImplementationMapping.getPortImplementation();
+        return deProcess;
     }
 
     /**
@@ -152,7 +149,7 @@ public class ProcessMapping extends BaseMapping {
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, linkObjFull, portType, stageNameSuffix);
             portImplementations.add(portImplementationMapping.getPortImplementation());
             LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, linkObjFull, stageNameSuffix, portType == PortType.INPUT_PORT);
-            lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
+            lineageMappings.addAll(lineageMappingMapping.getLineageMappings().getLineageMappings());
         }
     }
 
@@ -184,7 +181,7 @@ public class ProcessMapping extends BaseMapping {
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, stage, portType, fieldsForStore, fullyQualifiedStageName);
             portImplementations.add(portImplementationMapping.getPortImplementation());
             LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, fieldsForStore, dataStoreProperty, portType == PortType.INPUT_PORT, fullyQualifiedStageName, stageNameSuffix);
-            lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
+            lineageMappings.addAll(lineageMappingMapping.getLineageMappings().getLineageMappings());
         }
     }
 
