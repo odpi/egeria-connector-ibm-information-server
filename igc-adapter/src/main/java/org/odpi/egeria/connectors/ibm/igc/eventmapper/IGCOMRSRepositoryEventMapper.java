@@ -526,13 +526,17 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         ArrayList<String> rids = new ArrayList<>();
 
-        for (String token : payload.split(",")) {
-            token = token.trim();
-            String[] subTokens = token.split(":");
-            if (subTokens.length == 2) {
-                rids.add(subTokens[1]);
-            } else {
-                if (log.isWarnEnabled()) { log.warn("Unexpected number of tokens ({}) from event payload: {}", subTokens.length, payload); }
+        if (payload != null && !payload.equals("")) {
+            for (String token : payload.split(",")) {
+                token = token.trim();
+                String[] subTokens = token.split(":");
+                if (subTokens.length == 2) {
+                    rids.add(subTokens[1]);
+                } else {
+                    if (log.isWarnEnabled()) {
+                        log.warn("Unexpected number of tokens ({}) from event payload: {}", subTokens.length, payload);
+                    }
+                }
             }
         }
 
@@ -557,21 +561,26 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         if (latestVersion == null) {
             // If we can't retrieve the asset by RID, it no longer exists -- so send a delete event
-            sendPurgedEntity(assetType, rid);
-            // Find any mapper(s) for this type that use a prefix and send a purge for the prefixed entity as well
-            List<EntityMapping> referenceableMappers = igcomrsMetadataCollection.getMappers(assetType, localServerUserId);
-            for (EntityMapping referenceableMapper : referenceableMappers) {
-                List<RelationshipMapping> relationshipMappings = referenceableMapper.getRelationshipMappers();
-                for (RelationshipMapping relationshipMapping : relationshipMappings) {
-                    String prefixOne = relationshipMapping.getProxyOneMapping().getIgcRidPrefix();
-                    String prefixTwo = relationshipMapping.getProxyTwoMapping().getIgcRidPrefix();
-                    if (prefixTwo != null) {
-                        sendPurgedEntity(assetType, prefixTwo + rid);
-                    }
-                    if (prefixOne != null) {
-                        sendPurgedEntity(assetType, prefixOne + rid);
+            // TODO: currently only possible if we also know the assetType
+            if (assetType != null) {
+                sendPurgedEntity(assetType, rid);
+                // Find any mapper(s) for this type that use a prefix and send a purge for the prefixed entity as well
+                List<EntityMapping> referenceableMappers = igcomrsMetadataCollection.getMappers(assetType, localServerUserId);
+                for (EntityMapping referenceableMapper : referenceableMappers) {
+                    List<RelationshipMapping> relationshipMappings = referenceableMapper.getRelationshipMappers();
+                    for (RelationshipMapping relationshipMapping : relationshipMappings) {
+                        String prefixOne = relationshipMapping.getProxyOneMapping().getIgcRidPrefix();
+                        String prefixTwo = relationshipMapping.getProxyTwoMapping().getIgcRidPrefix();
+                        if (prefixTwo != null) {
+                            sendPurgedEntity(assetType, prefixTwo + rid);
+                        }
+                        if (prefixOne != null) {
+                            sendPurgedEntity(assetType, prefixOne + rid);
+                        }
                     }
                 }
+            } else {
+                if (log.isWarnEnabled()) { log.warn("No asset type was provided for purged RID {} -- cannot generate purgeEntity event.", rid); }
             }
         } else {
 
@@ -1389,41 +1398,35 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      */
     private void sendPurgedEntity(String igcAssetType, String rid) {
 
-        if (igcAssetType != null) {
+        OMRSStub stub = igcomrsMetadataCollection.getOMRSStubForAsset(rid, igcAssetType);
 
-            OMRSStub stub = igcomrsMetadataCollection.getOMRSStubForAsset(rid, igcAssetType);
-
-            // Purge entities by getting all mappers used for that entity (ie. *Type generated entities
-            // as well as non-generated entities)
-            List<EntityMapping> referenceableMappers = igcomrsMetadataCollection.getMappers(igcAssetType, localServerUserId);
-            for (EntityMapping referenceableMapper : referenceableMappers) {
-                String ridToPurge = rid;
-                String ridPrefix = referenceableMapper.getIgcRidPrefix();
-                if (ridPrefix != null) {
-                    ridToPurge = ridPrefix + ridToPurge;
-                }
-                EntityDetail detail = getEntityDetailForStubWithRID(stub, ridToPurge);
-                if (detail != null) {
-                    repositoryEventProcessor.processDeletePurgedEntityEvent(
-                            sourceName,
-                            metadataCollectionId,
-                            originatorServerName,
-                            originatorServerType,
-                            null,
-                            detail
-                    );
-                } else {
-                    if (log.isWarnEnabled()) { log.warn("No stub information exists for purged RID {} -- cannot generated purgeEntity event.", rid); }
-                }
+        // Purge entities by getting all mappers used for that entity (ie. *Type generated entities
+        // as well as non-generated entities)
+        List<EntityMapping> referenceableMappers = igcomrsMetadataCollection.getMappers(igcAssetType, localServerUserId);
+        for (EntityMapping referenceableMapper : referenceableMappers) {
+            String ridToPurge = rid;
+            String ridPrefix = referenceableMapper.getIgcRidPrefix();
+            if (ridPrefix != null) {
+                ridToPurge = ridPrefix + ridToPurge;
             }
-
-            // Finally, remove the stub (so that if such an asset is created in the future it is recognised as new
-            // rather than an update)
-            igcomrsMetadataCollection.deleteOMRSStubForAsset(rid, igcAssetType);
-
-        } else {
-            if (log.isWarnEnabled()) { log.warn("No asset type was provided for purged RID {} -- cannot generate purgeEntity event.", rid); }
+            EntityDetail detail = getEntityDetailForStubWithRID(stub, ridToPurge);
+            if (detail != null) {
+                repositoryEventProcessor.processDeletePurgedEntityEvent(
+                        sourceName,
+                        metadataCollectionId,
+                        originatorServerName,
+                        originatorServerType,
+                        null,
+                        detail
+                );
+            } else {
+                if (log.isWarnEnabled()) { log.warn("No stub information exists for purged RID {} -- cannot generated purgeEntity event.", rid); }
+            }
         }
+
+        // Finally, remove the stub (so that if such an asset is created in the future it is recognised as new
+        // rather than an update)
+        igcomrsMetadataCollection.deleteOMRSStubForAsset(rid, igcAssetType);
 
     }
 
