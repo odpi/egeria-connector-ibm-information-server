@@ -93,6 +93,7 @@
         <!-- Versions of dependent libraries -->
         <slf4j.version>1.7.25</slf4j.version>
         <jackson.version>2.9.9</jackson.version>
+        <jackson.databind.version>2.9.9.3</jackson.databind.version>
         <spring.version>5.1.5.RELEASE</spring.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
@@ -133,7 +134,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
+                <version>${jackson.databind.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
