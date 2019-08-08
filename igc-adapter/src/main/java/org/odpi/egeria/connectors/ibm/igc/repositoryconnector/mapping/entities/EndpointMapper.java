@@ -9,12 +9,18 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceLi
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.ConnectionEndpointMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.PrimitivePropertyValue;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.ffdc.OMRSErrorCode;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,32 +135,75 @@ public class EndpointMapper extends ReferenceableMapper {
     /**
      * Handle the search for 'networkAddress' by searching against 'name' of the endpoint in IGC.
      *
+     * @param repositoryHelper
+     * @param repositoryName name of the repository
      * @param igcRestClient connectivity to an IGC environment
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param igcProperties the list of IGC properties to which to add for inclusion in the IGC search
      * @param value the value for which to search
+     * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
      */
     @Override
-    public void addComplexPropertySearchCriteria(IGCRestClient igcRestClient,
+    public void addComplexPropertySearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                                 String repositoryName,
+                                                 IGCRestClient igcRestClient,
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
                                                  List<String> igcProperties,
-                                                 InstancePropertyValue value) {
+                                                 InstancePropertyValue value) throws FunctionNotSupportedException {
 
-        super.addComplexPropertySearchCriteria(igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, igcProperties, value);
+        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, igcProperties, value);
+
+        final String methodName = "addComplexPropertySearchCriteria";
 
         if (omrsPropertyName.equals("networkAddress")) {
 
+            IGCSearchCondition igcSearchCondition;
             String networkAddress = ((PrimitivePropertyValue) value).getPrimitiveValue().toString();
-            IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
-                    "name",
-                    "=",
-                    networkAddress
-            );
-            igcSearchConditionSet.addCondition(igcSearchCondition);
+            String unqualifiedValue = repositoryHelper.getUnqualifiedLiteralString(networkAddress);
+            if (repositoryHelper.isContainsRegex(networkAddress)) {
+                igcSearchCondition = new IGCSearchCondition(
+                        "name",
+                        "like %{0}%",
+                        unqualifiedValue
+                );
+                igcSearchConditionSet.addCondition(igcSearchCondition);
+            } else if (repositoryHelper.isStartsWithRegex(networkAddress)) {
+                igcSearchCondition = new IGCSearchCondition(
+                        "name",
+                        "like {0}%",
+                        unqualifiedValue
+                );
+                igcSearchConditionSet.addCondition(igcSearchCondition);
+            } else if (repositoryHelper.isEndsWithRegex(networkAddress)) {
+                igcSearchCondition = new IGCSearchCondition(
+                        "name",
+                        "like %{0}",
+                        unqualifiedValue
+                );
+                igcSearchConditionSet.addCondition(igcSearchCondition);
+            } else if (repositoryHelper.isExactMatchRegex(networkAddress)) {
+                igcSearchCondition = new IGCSearchCondition(
+                        "name",
+                        "=",
+                        unqualifiedValue
+                );
+                igcSearchConditionSet.addCondition(igcSearchCondition);
+            } else {
+                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
+                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                        repositoryName,
+                        networkAddress);
+                throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
+                        EndpointMapper.class.getName(),
+                        methodName,
+                        errorMessage,
+                        errorCode.getSystemAction(),
+                        errorCode.getUserAction());
+            }
 
         }
 
