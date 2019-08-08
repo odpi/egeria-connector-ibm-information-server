@@ -1,7 +1,11 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <!-- Copyright Contributors to the ODPi Egeria project. -->
 
-# Egeria IGC repo connector.postman_collection.json
+# Egeria IGC Connector.postman_environment.json
+
+Provides an example environment definition, with all the variables needed pre-defined (you simply need to provide values specific to your own environment).
+
+# Egeria READ repo connector.postman_collection.json
 
 This script can be used to configure Egeria for use with an existing IBM Information Governance Catalog ("IGC") environment.
 
@@ -25,10 +29,19 @@ Variables:
 
 Each step is sequentially numbered so that they can be executed in-order as part of a Postman "Runner", if desired.
 
-# Egeria IGC Connector.postman_environment.json
+# Egeria READ tests.postman_collection.json
 
-Provides an example environment definition, with all the variables needed pre-defined (you simply need to provide values specific to your own environment).
+This script can be used to run through a number of different tests of the connector, assuming the IGC environment
+has first been populated with the Coco Pharmaceutical samples and column analysis has been run (either automatically
+in v11.7.x or manually in v11.5.x).
 
+Prerequisites:
+
+- an existing IBM IGC environment, running v11.5.0.1 or later
+- kafka running with the queue specified below created.
+- samples loaded for Coco Pharmaceuticals
+- column analysis run against the tables in the Coco Pharmaceuticals sample databases
+- connector configured (eg. using `Egeria READ repo connector.postman_collection.json` above)
 
 ----
 License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/),

@@ -1,0 +1,4081 @@
+{
+	"info": {
+		"_postman_id": "52c0e33c-078b-46b6-9c7c-6b8a44e01417",
+		"name": "Egeria READ tests",
+		"description": "Collection to run tests against Egeria's Information Server (IGC) integration for v11.5",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "01.1 - Search (byPropertyValue)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f343804f-3cf9-46bd-bb20-6f189cf0b856",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"6 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(6);",
+							"});",
+							"pm.test(\"Proper GlossaryTerm entities\", function() {",
+							"    for (let i = 0; i < 6; i++) {",
+							"        pm.expect(jsonData.entities[i].type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"        pm.expect(jsonData.entities[i].version).to.be.above(1);",
+							"    }",
+							"});",
+							"",
+							"const termGuid = jsonData.entities[0].guid;",
+							"pm.environment.set('rid_term_al1', termGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"0db3e6ec-f5ef-4d75-ae38-b7ee6fd6ec0a\",\n\t\"pageSize\": 10\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property-value?searchCriteria=.%2A%5CQaddress%5CE.%2A",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entities",
+						"by-property-value"
+					],
+					"query": [
+						{
+							"key": "searchCriteria",
+							"value": ".%2A%5CQaddress%5CE.%2A"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "01.2 - Search (byProperty)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f343804f-3cf9-46bd-bb20-6f189cf0b856",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"6 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(6);",
+							"});",
+							"pm.test(\"Proper GlossaryTerm entities\", function() {",
+							"    for (let i = 0; i < 6; i++) {",
+							"        pm.expect(jsonData.entities[i].type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"        pm.expect(jsonData.entities[i].version).to.be.above(1);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"0db3e6ec-f5ef-4d75-ae38-b7ee6fd6ec0a\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ALL\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"displayName\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\QAddress\\\\E.*\"\n\t\t\t}\n\t\t}\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entities",
+						"by-property"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "01.3 - Search (byProperty) ANY",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f343804f-3cf9-46bd-bb20-6f189cf0b856",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"8 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(8);",
+							"});",
+							"pm.test(\"Proper GlossaryTerm entities\", function() {",
+							"    for (let i = 0; i < 8; i++) {",
+							"        pm.expect(jsonData.entities[i].type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"        pm.expect(jsonData.entities[i].version).to.be.above(1);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"0db3e6ec-f5ef-4d75-ae38-b7ee6fd6ec0a\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ANY\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"displayName\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\Qaddress\\\\E.*\"\n\t\t\t},\n\t\t\t\"summary\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\Qnumber\\\\E.*\"\n\t\t\t}\n\t\t}\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entities",
+						"by-property"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "01.4 - Search (byProperty) ALL",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f343804f-3cf9-46bd-bb20-6f189cf0b856",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"1 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(1);",
+							"});",
+							"pm.test(\"Proper GlossaryTerm entity\", function() {",
+							"    pm.expect(jsonData.entities[0].type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"    pm.expect(jsonData.entities[0].version).to.be.above(1);",
+							"    pm.expect(jsonData.entities[0].properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Address Line 1\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"0db3e6ec-f5ef-4d75-ae38-b7ee6fd6ec0a\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ALL\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"displayName\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\Qaddress\\\\E.*\"\n\t\t\t},\n\t\t\t\"summary\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\Qnumber\\\\E.*\"\n\t\t\t}\n\t\t}\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entities",
+						"by-property"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "01.5 - Search supertype (byPropertyValue)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f343804f-3cf9-46bd-bb20-6f189cf0b856",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"4 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(4);",
+							"});",
+							"pm.test(\"Proper Database or DataFile entities\", function() {",
+							"    for (let i = 0; i < 4; i++) {",
+							"        pm.expect(jsonData.entities[i].type.typeDefName).to.be.oneOf([\"Database\",\"DataFile\"]);",
+							"        pm.expect(jsonData.entities[i].version).to.be.above(1);",
+							"    }",
+							"});",
+							"",
+							"const dbGuid = jsonData.entities[3].guid;",
+							"pm.environment.set('rid_database', dbGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"896d14c2-7522-4f6c-8519-757711943fe6\",\n\t\"pageSize\": 10\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property-value?searchCriteria=.%2A%5CQCOMPDIR%5CE.%2A",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entities",
+						"by-property-value"
+					],
+					"query": [
+						{
+							"key": "searchCriteria",
+							"value": ".%2A%5CQCOMPDIR%5CE.%2A"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "01.6 - Search everything (byPropertyValue)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f343804f-3cf9-46bd-bb20-6f189cf0b856",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"14 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(14);",
+							"});",
+							"pm.test(\"Proper GlossaryTerm or DataClass entity\", function() {",
+							"    for (let i = 0; i < 14; i++) {",
+							"        pm.expect(jsonData.entities[i].type.typeDefName).to.be.oneOf([\"GlossaryTerm\",\"DataClass\"]);",
+							"        pm.expect(jsonData.entities[i].version).to.be.above(1);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"pageSize\": 500\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property-value?searchCriteria=.%2A%5CQaddress%5CE.%2A",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entities",
+						"by-property-value"
+					],
+					"query": [
+						{
+							"key": "searchCriteria",
+							"value": ".%2A%5CQaddress%5CE.%2A"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "01.7 - Search everything (limitByClassification)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f343804f-3cf9-46bd-bb20-6f189cf0b856",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"6 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(6);",
+							"});",
+							"pm.test(\"Proper GlossaryTerm or DataClass entity\", function() {",
+							"    for (let i = 0; i < 6; i++) {",
+							"        pm.expect(jsonData.entities[i].type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"        pm.expect(jsonData.entities[i].version).to.be.above(1);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"pageSize\": 500,\n\t\"limitResultsByClassification\": [\"Confidentiality\"]\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property-value?searchCriteria=.%2A%5CQaddress%5CE.%2A",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entities",
+						"by-property-value"
+					],
+					"query": [
+						{
+							"key": "searchCriteria",
+							"value": ".%2A%5CQaddress%5CE.%2A"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "01.8 - Search (byClassification)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f343804f-3cf9-46bd-bb20-6f189cf0b856",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"12 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(12);",
+							"});",
+							"pm.test(\"Proper GlossaryTerm entities\", function() {",
+							"    for (let i = 0; i < 12; i++) {",
+							"        pm.expect(jsonData.entities[i].type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"        pm.expect(jsonData.entities[i].version).to.be.above(1);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"0db3e6ec-f5ef-4d75-ae38-b7ee6fd6ec0a\",\n\t\"pageSize\": 100,\n\t\"matchCriteria\": \"ALL\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"level\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n                \"typeGUID\": \"7fc49104-fd3a-46c8-b6bf-f16b6074cd35\",\n\t\t\t\t\"typeName\": \"int\",\n                \"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_INT\",\n                \"primitiveValue\": 3\n\t\t\t}\n\t\t}\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-classification/Confidentiality",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entities",
+						"by-classification",
+						"Confidentiality"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "02.1 - Get Term: AL1 (Detail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is GlossaryTerm\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper GlossaryTerm entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.summary.primitiveValue).to.equal(\"Street and street number\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"Address Line 1\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Address Line 1\");",
+							"});",
+							"pm.test(\"Classified as Sensitive\", function() {",
+							"    pm.expect(jsonData.entity.classifications[0].type.typeDefName).to.equal(\"Confidentiality\");",
+							"    pm.expect(jsonData.entity.classifications[0].version).to.be.above(1);",
+							"    pm.expect(jsonData.entity.classifications[0].properties.instanceProperties.level.primitiveValue).to.equal(3);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_term_al1}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "02.2 - Get Term: AL1 (Summary)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Classified as Sensitive\", function() {",
+							"    pm.expect(jsonData.entity.classifications[0].type.typeDefName).to.equal(\"Confidentiality\");",
+							"    pm.expect(jsonData.entity.classifications[0].version).to.be.above(1);",
+							"    pm.expect(jsonData.entity.classifications[0].properties.instanceProperties.level.primitiveValue).to.equal(3);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/summary",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"summary"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_term_al1}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "03.0 - Get Relationships: AL1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"3 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(3);",
+							"});",
+							"pm.test(\"Proper SemanticAssignment relationship\", function() {",
+							"    for (let i = 0; i < 2; i++) {",
+							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"SemanticAssignment\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.be.oneOf([\"RelationalColumn\",\"TabularColumn\"]);",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Address Line 1\");",
+							"    }",
+							"});",
+							"pm.test(\"Proper TermCategorization relationship\", function() {",
+							"    pm.expect(jsonData.relationships[2].type.typeDefName).to.equal(\"TermCategorization\");",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.type.typeDefName).to.equal(\"GlossaryCategory\");",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms\");",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Address Line 1\");",
+							"});",
+							"",
+							"const categoryGuid = jsonData.relationships[2].entityOneProxy.guid;",
+							"pm.environment.set('rid_category', categoryGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_term_al1}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "04.0 - Get Relationships for Category",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7b6531c8-2204-4021-ad93-2eb59e7a4a43",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"43 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(43);",
+							"});",
+							"pm.test(\"Proper CategoryHierarchyLink relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"CategoryHierarchyLink\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"GlossaryCategory\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryCategory\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms\");",
+							"});",
+							"pm.test(\"Proper TermCategorization relationships\", function() {",
+							"    var jsonData = pm.response.json();",
+							"    for (let i = 1; i < 43; i++) {",
+							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"TermCategorization\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.equal(\"GlossaryCategory\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=\");",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_category}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "05.1 - Get DB: COMPDIR",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is Database\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"Database\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper Database entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.name.primitiveValue).to.equal(\"COMPDIR\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.type.primitiveValue).to.be.oneOf([\"DB2\",\"Odbc\"]);",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.instance.primitiveValue).to.be.oneOf([\"db2inst1\",\"LOCAL-VDC-POSTGRESQL-SERVICE\"]);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_database}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "05.2 - Get Relationships: DB",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"2 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(2);",
+							"});",
+							"pm.test(\"Proper DataContentForDataSet relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"DataContentForDataSet\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"Database\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database)\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"DeployedDatabaseSchema\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database_schema)\");",
+							"});",
+							"pm.test(\"Proper ConnectionToAsset relationship\", function() {",
+							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"ConnectionToAsset\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"Connection\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_connection)=CocoPharma_COMPDIR\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"Database\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database)=COMPDIR\");",
+							"});",
+							"",
+							"const schemaGuid = jsonData.relationships[0].entityTwoProxy.guid;",
+							"const connectionGuid = jsonData.relationships[1].entityOneProxy.guid;",
+							"pm.environment.set('rid_database_schema', schemaGuid);",
+							"pm.environment.set('rid_data_connection_db', connectionGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_database}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "06.1 - Get Connection DB",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is Connection\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"Connection\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper Connection entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.contain(\"CocoPharma_COMPDIR\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_connection)=CocoPharma_COMPDIR\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_data_connection_db}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "06.2 - Get Relationships: Connection DB",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"3 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(3);",
+							"});",
+							"pm.test(\"Proper ConnectionToAsset relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"ConnectionToAsset\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"Connection\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_connection)=CocoPharma_COMPDIR\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"Database\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database)=COMPDIR\");",
+							"});",
+							"pm.test(\"Proper ConnectionConnectorType relationship\", function() {",
+							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"ConnectionConnectorType\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"Connection\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_connection)=CocoPharma_COMPDIR\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"ConnectorType\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(connector)=\");",
+							"});",
+							"pm.test(\"Proper ConnectionEndpoint relationship\", function() {",
+							"    pm.expect(jsonData.relationships[2].type.typeDefName).to.equal(\"ConnectionEndpoint\");",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.type.typeDefName).to.equal(\"Endpoint\");",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(host_(engine))\");",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.type.typeDefName).to.equal(\"Connection\");",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_connection)=CocoPharma_COMPDIR\");",
+							"});",
+							"",
+							"const hostGuid = jsonData.relationships[2].entityOneProxy.guid;",
+							"pm.environment.set('rid_host_db', hostGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_data_connection_db}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "07.1 - Get Host",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is Endpoint\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"Endpoint\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper Endpoint entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(host_(engine))=\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_host_db}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "07.2 - Get Relationships: Host",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"7 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(7);",
+							"});",
+							"pm.test(\"Proper ConnectionEndpoint relationships\", function() {",
+							"    for (let i = 0; i < 7; i++) {",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.equal(\"Endpoint\");",
+							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"ConnectionEndpoint\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(host_(engine))=\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"Connection\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_connection)=\");",
+							"        if (jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue.includes(\"LOCALFS\")) {",
+							"            pm.environment.set('rid_data_connection_fs', jsonData.relationships[i].entityTwoProxy.guid);",
+							"        }",
+							"    }",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_host_db}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "08.1 - Get Schema: DB2INST1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is DeployedDatabaseSchema\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"DeployedDatabaseSchema\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper DeployedDatabaseSchema entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.name.primitiveValue).to.be.oneOf([\"DB2INST1\",\"public\"]);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_database_schema}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "08.2 - Get Relationships: Schema",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"2 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(2);",
+							"});",
+							"pm.test(\"Proper AssetSchemaType relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"AssetSchemaType\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"DeployedDatabaseSchema\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database_schema)\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"RelationalDBSchemaType\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.guid).to.contain(\"__|RDBST|__\");",
+							"});",
+							"pm.test(\"Proper DataContentForDataSet relationship\", function() {",
+							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"DataContentForDataSet\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"Database\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database)\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"DeployedDatabaseSchema\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database_schema)\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_database_schema}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "08.3 - Get SchemaType: DB2INST1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is RelationalDBSchemaType\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"RelationalDBSchemaType\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper RelationalDBSchemaType entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.be.oneOf([\"DB2INST1\",\"public\"]);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "__|RDBST|__{{rid_database_schema}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "08.4 - Get Relationships: SchemaType",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"4 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(4);",
+							"});",
+							"pm.test(\"Proper AssetSchemaType relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"AssetSchemaType\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"DeployedDatabaseSchema\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database)=COMPDIR::(database_schema)=\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"RelationalDBSchemaType\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.guid).to.contain(\"__|RDBST|__\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database)=COMPDIR::(database_schema)=\");",
+							"});",
+							"pm.test(\"Proper AttributeForSchema relationship\", function() {",
+							"    for (let i = 1; i < 4; i++) {",
+							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"AttributeForSchema\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.equal(\"RelationalDBSchemaType\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.guid).to.contain(\"__|RDBST|__\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database)=COMPDIR::(database_schema)=\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"RelationalTable\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(database_table)\");",
+							"    }",
+							"});",
+							"",
+							"const tableGuid = jsonData.relationships[1].entityTwoProxy.guid;",
+							"pm.environment.set('rid_database_table', tableGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "__|RDBST|__{{rid_database_schema}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "09.1 - Get Table: CONTACTEMAIL",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is RelationalTable\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"RelationalTable\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper RelationalTable entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.name.primitiveValue).to.equal(\"CONTACTEMAIL\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_database_table}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "09.2 - Get Relationships: Table",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"2 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(2);",
+							"});",
+							"pm.test(\"Proper AttributeForSchema relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"AttributeForSchema\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"RelationalDBSchemaType\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"RelationalTable\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper SchemaAttributeType relationship\", function() {",
+							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"SchemaAttributeType\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"RelationalTable\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"RelationalTableType\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_database_table}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "09.3 - Get TableType: CONTACTEMAIL",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is RelationalTableType\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"RelationalTableType\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper RelationalTableType entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"CONTACTEMAIL\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "__|RTT|__{{rid_database_table}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "09.4 - Get Relationships: TableType",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"4 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(4);",
+							"});",
+							"pm.test(\"Proper SchemaAttributeType relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"SchemaAttributeType\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"RelationalTable\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(database_table)=CONTACTEMAIL\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"RelationalTableType\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.guid).to.contain(\"__|RTT|__\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(database_table)=CONTACTEMAIL\");",
+							"});",
+							"pm.test(\"Proper AttributeForSchema relationship\", function() {",
+							"    for (let i = 1; i < 4; i++) {",
+							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"AttributeForSchema\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.equal(\"RelationalTableType\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.guid).to.contain(\"__|RTT|__\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(database_table)=CONTACTEMAIL\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"RelationalColumn\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(database_table)=CONTACTEMAIL::(database_column)\");",
+							"    }",
+							"});",
+							"",
+							"const columnGuid = jsonData.relationships[1].entityTwoProxy.guid;",
+							"pm.environment.set('rid_database_column', columnGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "__|RTT|__{{rid_database_table}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10.1 - Get Column: EMAIL",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is RelationalColumn\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"RelationalColumn\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper RelationalColumn entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.name.primitiveValue).to.equal(\"EMAIL\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_database_column}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10.2 - Get Relationships: Column",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"7 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(7);",
+							"});",
+							"pm.test(\"Proper SemanticAssignment relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"SemanticAssignment\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.be.oneOf([\"RelationalColumn\",\"TabularColumn\"]);",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Email Address\");",
+							"});",
+							"pm.test(\"Proper AttributeForSchema relationship\", function() {",
+							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"AttributeForSchema\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"RelationalTableType\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"RelationalColumn\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper SchemaAttributeType relationship\", function() {",
+							"    pm.expect(jsonData.relationships[2].type.typeDefName).to.equal(\"SchemaAttributeType\");",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.type.typeDefName).to.equal(\"RelationalColumn\");",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.type.typeDefName).to.equal(\"RelationalColumnType\");",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper DataClassAssignment detected relationships\", function() {",
+							"    for (let i = 3; i < 6; i++) {",
+							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"DataClassAssignment\");",
+							"        pm.expect(jsonData.relationships[i].version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.be.oneOf([\"RelationalColumn\",\"TabularColumn\"]);",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"DataClass\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_class)=\");",
+							"        pm.expect(jsonData.relationships[i].properties.instanceProperties.confidence.primitiveValue).to.equal(100);",
+							"        pm.expect(jsonData.relationships[i].properties.instanceProperties.status.ordinal).to.equal(0);",
+							"        pm.expect(jsonData.relationships[i].properties.instanceProperties.status.symbolicName).to.equal(\"Discovered\");",
+							"    }",
+							"});",
+							"pm.test(\"Proper DataClassAssignment proposed relationship\", function() {",
+							"    pm.expect(jsonData.relationships[6].type.typeDefName).to.equal(\"DataClassAssignment\");",
+							"    pm.expect(jsonData.relationships[6].version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[6].entityOneProxy.type.typeDefName).to.be.oneOf([\"RelationalColumn\",\"TabularColumn\"]);",
+							"    pm.expect(jsonData.relationships[6].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[6].entityTwoProxy.type.typeDefName).to.equal(\"DataClass\");",
+							"    pm.expect(jsonData.relationships[6].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[6].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(data_class)=Email Address\");",
+							"    pm.expect(jsonData.relationships[6].properties.instanceProperties.status.ordinal).to.equal(1);",
+							"    pm.expect(jsonData.relationships[6].properties.instanceProperties.status.symbolicName).to.equal(\"Proposed\");",
+							"});",
+							"",
+							"const dataclassGuid = jsonData.relationships[6].entityTwoProxy.guid;",
+							"pm.environment.set('rid_data_class', dataclassGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_database_column}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10.3 - Get ColumnType: EMAIL",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is RelationalColumnType\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"RelationalColumnType\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper RelationalColumnType entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"EMAIL\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.dataType.primitiveValue).to.equals(\"VARCHAR\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "__|RCT|__{{rid_database_column}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10.4 - Get Relationships: ColumnType",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"2 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(2);",
+							"});",
+							"pm.test(\"Proper SemanticAssignment relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"SemanticAssignment\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"RelationalColumn\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Email Address\");",
+							"});",
+							"pm.test(\"Proper SchemaAttributeType relationship\", function() {",
+							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"SchemaAttributeType\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"RelationalColumn\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database)=COMPDIR::(database_schema)=DB2INST1::(database_table)=CONTACTEMAIL::(database_column)=EMAIL\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"RelationalColumnType\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.guid).to.contain(\"__|RCT|__\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database)=COMPDIR::(database_schema)=DB2INST1::(database_table)=CONTACTEMAIL::(database_column)=EMAIL\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "__|RCT|__{{rid_database_column}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10.5 - Get ColumnType: EMAIL (Summary)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/summary",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"summary"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "__|RCT|__{{rid_database_column}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "11.0 - Get DataClass: Email",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7f9fb3c5-0aec-464e-9fbb-da2404c19ec7",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Proper DataClass entity\", function() {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"DataClass\");",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(data_class)=Email Address\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.name.primitiveValue).to.equal(\"Email Address\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.example.primitiveValue).to.equal(\"paul_fowler@aol.com\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_data_class}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "12.0 - Get Relationships for DC",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e033cb4b-9c2e-465a-b52b-81392fbe62e2",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"3 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(3);",
+							"});",
+							"pm.test(\"Proper DataClassAssignment detected relationships\", function() {",
+							"    for (let i = 0; i < 2; i++) {",
+							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"DataClassAssignment\");",
+							"        pm.expect(jsonData.relationships[i].version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.be.oneOf([\"RelationalColumn\",\"TabularColumn\"]);",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"DataClass\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(data_class)=Email Address\");",
+							"        pm.expect(jsonData.relationships[i].properties.instanceProperties.confidence.primitiveValue).to.equal(100);",
+							"        pm.expect(jsonData.relationships[i].properties.instanceProperties.status.ordinal).to.equal(0);",
+							"        pm.expect(jsonData.relationships[i].properties.instanceProperties.status.symbolicName).to.equal(\"Discovered\");",
+							"    }",
+							"});",
+							"pm.test(\"Proper DataClassAssignment proposed relationship\", function() {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.relationships[2].type.typeDefName).to.equal(\"DataClassAssignment\");",
+							"    pm.expect(jsonData.relationships[2].version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.type.typeDefName).to.be.oneOf([\"RelationalColumn\",\"TabularColumn\"]);",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.type.typeDefName).to.equal(\"DataClass\");",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(data_class)=Email Address\");",
+							"    pm.expect(jsonData.relationships[2].properties.instanceProperties.status.ordinal).to.equal(1);",
+							"    pm.expect(jsonData.relationships[2].properties.instanceProperties.status.symbolicName).to.equal(\"Proposed\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_data_class}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "13.1 - Get Connection FS",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is Connection\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"Connection\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper Connection entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"LOCALFS\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_connection)=LOCALFS\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_data_connection_fs}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "13.2 - Get Relationships: Connection FS",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"3 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(3);",
+							"});",
+							"pm.test(\"Proper ConnectionToAsset relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"ConnectionToAsset\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"Connection\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_connection)=LOCALFS\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/\");",
+							"});",
+							"pm.test(\"Proper ConnectionConnectorType relationship\", function() {",
+							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"ConnectionConnectorType\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"Connection\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_connection)=LOCALFS\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"ConnectorType\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(connector)=LocalFileConnector\");",
+							"});",
+							"pm.test(\"Proper ConnectionEndpoint relationship\", function() {",
+							"    pm.expect(jsonData.relationships[2].type.typeDefName).to.equal(\"ConnectionEndpoint\");",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.type.typeDefName).to.equal(\"Endpoint\");",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(host_(engine))\");",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.type.typeDefName).to.equal(\"Connection\");",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_connection)=LOCALFS\");",
+							"});",
+							"",
+							"const folderGuid = jsonData.relationships[0].entityTwoProxy.guid;",
+							"pm.environment.set('rid_folder_root', folderGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_data_connection_fs}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "14.1 - Get Relationships: Root Folder",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"2 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(2);",
+							"});",
+							"pm.test(\"Proper FolderHierarchy relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"FolderHierarchy\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/::(data_file_folder)=data\");",
+							"});",
+							"pm.test(\"Proper ConnectionToAsset relationships\", function() {",
+							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"ConnectionToAsset\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"Connection\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_connection)=LOCALFS\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/\");",
+							"});",
+							"",
+							"const folderGuid = jsonData.relationships[0].entityTwoProxy.guid;",
+							"pm.environment.set('rid_folder_data', folderGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_folder_root}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "14.2 - Get Relationships: Data Folder",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"2 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(2);",
+							"});",
+							"pm.test(\"Proper FolderHierarchy relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"FolderHierarchy\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/::(data_file_folder)=data\");",
+							"});",
+							"pm.test(\"Proper FolderHierarchy relationships\", function() {",
+							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"FolderHierarchy\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/::(data_file_folder)=data\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files\");",
+							"});",
+							"",
+							"const folderGuid = jsonData.relationships[1].entityTwoProxy.guid;",
+							"pm.environment.set('rid_folder_files', folderGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_folder_data}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "14.3 - Get Relationships: Files Folder",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"2 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(2);",
+							"});",
+							"pm.test(\"Proper FolderHierarchy relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"FolderHierarchy\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/::(data_file_folder)=data\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files\");",
+							"});",
+							"pm.test(\"Proper FolderHierarchy relationships\", function() {",
+							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"FolderHierarchy\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma\");",
+							"});",
+							"",
+							"const folderGuid = jsonData.relationships[1].entityTwoProxy.guid;",
+							"pm.environment.set('rid_folder_coco', folderGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_folder_files}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "14.4 - Get Relationships: CocoPharma Folder",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"9 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(9);",
+							"});",
+							"pm.test(\"Proper FolderHierarchy relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"FolderHierarchy\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma\");",
+							"});",
+							"pm.test(\"Proper NestedFile relationships\", function() {",
+							"    for (let i = 1; i < 9; i++) {",
+							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"NestedFile\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"DataFile\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=\");",
+							"    }",
+							"});",
+							"",
+							"const fileGuid = jsonData.relationships[1].entityTwoProxy.guid;",
+							"pm.environment.set('rid_data_file', fileGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_folder_coco}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "15.1 - Get File: ContactEmail.csv",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is DataFile\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"DataFile\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper DataFile entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_data_file}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "15.2 - Get Relationships: File",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"2 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(2);",
+							"});",
+							"pm.test(\"Proper AssetSchemaType relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"AssetSchemaType\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"DataFile\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file)=CompDir-ContactEmail.csv\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"TabularSchemaType\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail\");",
+							"});",
+							"pm.test(\"Proper NestedFile relationship\", function() {",
+							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"NestedFile\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"FileFolder\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"DataFile\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv\");",
+							"});",
+							"",
+							"const recordGuid = jsonData.relationships[0].entityTwoProxy.guid;",
+							"pm.environment.set('rid_data_file_record', recordGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_data_file}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "16.1 - Get Record: CONTACTEMAIL",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is TabularSchemaType\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"TabularSchemaType\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper TabularSchemaType entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"CompDir-ContactEmail\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_data_file_record}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "16.2 - Get Relationships: Record",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"4 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(4);",
+							"});",
+							"pm.test(\"Proper AssetSchemaType relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"AssetSchemaType\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"DataFile\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file)=CompDir-ContactEmail.csv\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"TabularSchemaType\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_record)=CompDir-ContactEmail\");",
+							"});",
+							"pm.test(\"Proper AttributeForSchema relationships\", function() {",
+							"    for (let i = 1; i < 4; i++) {",
+							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"AttributeForSchema\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.equal(\"TabularSchemaType\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_record)=CompDir-ContactEmail\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"TabularColumn\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(data_file_record)=CompDir-ContactEmail::(data_file_field)=\");",
+							"    }",
+							"});",
+							"",
+							"const fieldGuid = jsonData.relationships[1].entityTwoProxy.guid;",
+							"pm.environment.set('rid_data_file_field', fieldGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_data_file_record}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "17.1 - Get Field: EMAIL",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is TabularColumn\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"TabularColumn\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper TabularColumn entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.name.primitiveValue).to.equal(\"Email\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_data_file_field}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "17.2 - Get Relationships: Field",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"3 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(3);",
+							"});",
+							"pm.test(\"Proper SemanticAssignment relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"SemanticAssignment\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"TabularColumn\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Email Address\");",
+							"});",
+							"pm.test(\"Proper AttributeForSchema relationship\", function() {",
+							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"AttributeForSchema\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"TabularSchemaType\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"TabularColumn\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail::(data_file_field)=Email\")",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper SchemaAttributeType relationship\", function() {",
+							"    pm.expect(jsonData.relationships[2].type.typeDefName).to.equal(\"SchemaAttributeType\");",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.type.typeDefName).to.equal(\"TabularColumn\");",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail::(data_file_field)=Email\");",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.type.typeDefName).to.equal(\"TabularColumnType\");",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.guid).to.contain(\"__|TCT|__\");",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail::(data_file_field)=Email\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_data_file_field}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "17.3 - Get ColumnType: Field",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is TabularColumnType\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"TabularColumnType\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper TabularColumnType entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"Email\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.dataType.primitiveValue).to.equals(\"STRING\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "__|TCT|__{{rid_data_file_field}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "17.4 - Get Relationships: ColumnType",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"2 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(2);",
+							"});",
+							"pm.test(\"Proper SemanticAssignment relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"SemanticAssignment\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"TabularColumn\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Email Address\");",
+							"});",
+							"pm.test(\"Proper SchemaAttributeType relationship\", function() {",
+							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"SchemaAttributeType\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"TabularColumn\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail::(data_file_field)=Email\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"TabularColumnType\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.guid).to.contain(\"__|TCT|__\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail::(data_file_field)=Email\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "__|TCT|__{{rid_data_file_field}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "18.1 - Search (byProperty) Spine Object",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f343804f-3cf9-46bd-bb20-6f189cf0b856",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"5 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(5);",
+							"});",
+							"pm.test(\"Proper GlossaryTerm entities\", function() {",
+							"    for (let i = 0; i < 5; i++) {",
+							"        pm.expect(jsonData.entities[i].type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"        pm.expect(jsonData.entities[i].version).to.be.above(1);",
+							"    }",
+							"});",
+							"",
+							"const spineGuid = jsonData.entities[0].guid;",
+							"pm.environment.set('rid_term_spine', spineGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"0db3e6ec-f5ef-4d75-ae38-b7ee6fd6ec0a\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ALL\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"displayName\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\Qemployee\\\\E.*\"\n\t\t\t}\n\t\t}\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entities",
+						"by-property"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "18.2 - Get Spine Object",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is GlossaryTerm\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper GlossaryTerm entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"Employee\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Spine Objects::(term)=Employee\");",
+							"});",
+							"pm.test(\"Classified as SpineObject\", function() {",
+							"    pm.expect(jsonData.entity.classifications[0].type.typeDefName).to.equal(\"SpineObject\");",
+							"    pm.expect(jsonData.entity.classifications[0].version).to.be.above(1);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_term_spine}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "19.1 - Search (byProperty) Subject Area",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f343804f-3cf9-46bd-bb20-6f189cf0b856",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"1 total result\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(1);",
+							"});",
+							"pm.test(\"Proper GlossaryCategory entity\", function() {",
+							"    pm.expect(jsonData.entities[0].type.typeDefName).to.equal(\"GlossaryCategory\");",
+							"    pm.expect(jsonData.entities[0].version).to.be.above(1);",
+							"});",
+							"",
+							"const subjectareaGuid = jsonData.entities[0].guid;",
+							"pm.environment.set('rid_category_subjectarea', subjectareaGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"e507485b-9b5a-44c9-8a28-6967f7ff3672\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ALL\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"displayName\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\QHospital\\\\E.*\"\n\t\t\t}\n\t\t}\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entities",
+						"by-property"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "19.2 - Get Subject Area",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is GlossaryCategory\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"GlossaryCategory\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper GlossaryCategory entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"Hospital\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Subject Areas::(category)=Organization::(category)=Hospital\");",
+							"});",
+							"pm.test(\"Classified as SubjectArea\", function() {",
+							"    pm.expect(jsonData.entity.classifications[0].type.typeDefName).to.equal(\"SubjectArea\");",
+							"    pm.expect(jsonData.entity.classifications[0].version).to.be.above(1);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_category_subjectarea}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "20.1 - Search (byProperty) Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f343804f-3cf9-46bd-bb20-6f189cf0b856",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"1 total result\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(1);",
+							"});",
+							"pm.test(\"Proper GlossaryCategory entity\", function() {",
+							"    pm.expect(jsonData.entities[0].type.typeDefName).to.equal(\"GovernancePolicy\");",
+							"    pm.expect(jsonData.entities[0].version).to.be.above(1);",
+							"});",
+							"",
+							"const policyGuid = jsonData.entities[0].guid;",
+							"pm.environment.set('rid_policy', policyGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"a7defa41-9cfa-4be5-9059-359022bb016d\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ALL\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"title\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \"\\\\QConfidential information should be masked when user does not have specific access to its Subject Area\\\\E\"\n\t\t\t}\n\t\t}\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entities",
+						"by-property"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "20.2 - Get Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is GovernancePolicy\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"GovernancePolicy\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper GovernancePolicy entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.title.primitiveValue).to.equal(\"Confidential information should be masked when user does not have specific access to its Subject Area\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(information_governance_policy)=Data Access Policies::(information_governance_policy)=Confidential information should be masked when user does not have specific access to its Subject Area\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_policy}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "21.1 - Search (byProperty) User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f343804f-3cf9-46bd-bb20-6f189cf0b856",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"1 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(1);",
+							"});",
+							"pm.test(\"Proper Person entity\", function() {",
+							"    pm.expect(jsonData.entities[0].type.typeDefName).to.equal(\"Person\");",
+							"    pm.expect(jsonData.entities[0].version).to.be.above(1);",
+							"});",
+							"",
+							"const userGuid = jsonData.entities[0].guid;",
+							"pm.environment.set('rid_user', userGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"ac406bf8-e53e-49f1-9088-2af28bbbd285\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ALL\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"fullName\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \"\\\\QGary Geeke\\\\E\"\n\t\t\t}\n\t\t}\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entities",
+						"by-property"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "21.2 - Get User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is Person\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"Person\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper Person entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.name.primitiveValue).to.equal(\"ggeeke\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.fullName.primitiveValue).to.equal(\"Gary Geeke\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.jobTitle.primitiveValue).to.equal(\"IT Infrastructure Administrator\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_user}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "21.3 - Get Contact Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is ContactDetails\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"ContactDetails\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper ContactDetails entity\", function() {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.contactMethodType.ordinal).to.equal(0);",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.contactMethodType.symbolicName).to.equal(\"Email\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.contactMethodValue.primitiveValue).to.equal(\"gary.geeke@cocopharmaceutical.com\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "__|CD|__{{rid_user}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "21.4 - Get Relationships: User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"1 total relationship\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(1);",
+							"});",
+							"pm.test(\"Proper ContactThrough relationship\", function() {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"ContactThrough\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"Person\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(steward_user)=Mr. Gary Geeke\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"ContactDetails\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.guid).to.contain(\"__|CD|__\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"__|CD|__(steward_user)=Mr. Gary Geeke\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_user}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "22.1 - Search (byProperty) Team",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f343804f-3cf9-46bd-bb20-6f189cf0b856",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"1 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(1);",
+							"});",
+							"pm.test(\"Proper Team entity\", function() {",
+							"    pm.expect(jsonData.entities[0].type.typeDefName).to.equal(\"Team\");",
+							"    pm.expect(jsonData.entities[0].version).to.be.above(1);",
+							"});",
+							"",
+							"const groupGuid = jsonData.entities[0].guid;",
+							"pm.environment.set('rid_group', groupGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"36db26d5-aba2-439b-bc15-d62d373c5db6\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ALL\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"name\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \"\\\\Qcocopharma_it_ops\\\\E\"\n\t\t\t}\n\t\t}\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entities",
+						"by-property"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "22.2 - Get Team",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is Team\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"Team\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper Team entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.name.primitiveValue).to.equal(\"cocopharma_it_ops\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.description.primitiveValue).to.equal(\"IT Operations\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_group}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"id": "0dc29fd3-38fa-4803-b823-6e4ccdee9a00",
+			"key": "infosvr_host",
+			"value": "egis-v115.fyre.ibm.com",
+			"type": "string"
+		}
+	]
+}

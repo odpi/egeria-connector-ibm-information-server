@@ -16,6 +16,8 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryC
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedTagMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -186,20 +188,25 @@ public class ReferenceableMapper extends EntityMapping {
      * Handle the search for 'qualifiedName' and 'additionalProperties' by reverse-engineering them to IGC-specific
      * properties and values.
      *
+     * @param repositoryHelper helper for the OMRS repository
+     * @param repositoryName name of the repository
      * @param igcRestClient connectivity to an IGC environment
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param igcProperties the list of IGC properties to which to add for inclusion in the IGC search
      * @param value the value for which to search
+     * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
      */
     @Override
-    public void addComplexPropertySearchCriteria(IGCRestClient igcRestClient,
+    public void addComplexPropertySearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                                 String repositoryName,
+                                                 IGCRestClient igcRestClient,
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
                                                  List<String> igcProperties,
-                                                 InstancePropertyValue value) {
+                                                 InstancePropertyValue value) throws FunctionNotSupportedException {
 
         if (log.isDebugEnabled()) { log.debug("Adding complex search criteria for: {}", omrsPropertyName); }
 
@@ -245,6 +252,8 @@ public class ReferenceableMapper extends EntityMapping {
             Map<String, InstancePropertyValue> mapValues = ((MapPropertyValue) value).getMapValues().getInstanceProperties();
             for (Map.Entry<String, InstancePropertyValue> nextEntry : mapValues.entrySet()) {
                 IGCOMRSMetadataCollection.addIGCSearchConditionFromValue(
+                        repositoryHelper,
+                        repositoryName,
                         igcSearchConditionSet,
                         nextEntry.getKey(),
                         igcProperties,
