@@ -43,12 +43,12 @@ There should not be any need to restart the environment after enabling the event
 After building the connector project (`mvn clean install`) the connector is available as:
 
 ```text
-distribution/target/egeria-connector-ibm-igc-package-VERSION.jar
+distribution/target/egeria-connector-ibm-information-server-package-VERSION.jar
 ```
 
 Simply copy this file to a location where it can be run alongside the OMAG Server
 Platform from the Egeria core (in the example below, the file would be copied to
-`/lib/egeria-connector-ibm-igc-package-VERSION.jar`).
+`/lib/egeria-connector-ibm-information-server-package-VERSION.jar`).
 
 ### Configure security
 
