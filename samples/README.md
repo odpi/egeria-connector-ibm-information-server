@@ -5,7 +5,7 @@
 
 Provides an example environment definition, with all the variables needed pre-defined (you simply need to provide values specific to your own environment).
 
-# Egeria READ repo connector.postman_collection.json
+# Egeria IGC repo connector.postman_collection.json
 
 This script can be used to configure Egeria for use with an existing IBM Information Governance Catalog ("IGC") environment.
 
@@ -41,7 +41,7 @@ Prerequisites:
 - kafka running with the queue specified below created.
 - samples loaded for Coco Pharmaceuticals
 - column analysis run against the tables in the Coco Pharmaceuticals sample databases
-- connector configured (eg. using `Egeria READ repo connector.postman_collection.json` above)
+- connector configured (eg. using `Egeria IGC repo connector.postman_collection.json` above)
 
 ----
 License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/),
