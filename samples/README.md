@@ -43,6 +43,30 @@ Prerequisites:
 - column analysis run against the tables in the Coco Pharmaceuticals sample databases
 - connector configured (eg. using `Egeria IGC repo connector.postman_collection.json` above)
 
+# Egeria DataStage proxy.postman_collection.json
+
+This script can be used to configure Egeria for use with an existing IBM InfoSphere DataStage environment.
+
+Prerequisites:
+
+- an existing IBM InfoSphere DataStage environment, running v11.5.0.1 or later
+- IBM Information Governance Catalog also running within that same environment
+
+Variables:
+
+- `baseURL` the egeria URL
+- `user` the userName to pass to Egeria
+- `kafkaep` kafka endpoint for the cohort
+- `igc_host` the hostname (or IP address) of the existing IGC environment (domain / servics tier)
+- `igc_port` the port number of the domain tier console of the existing IGC environment
+- `igc_user` the username of a user to access IGC's REST API
+- `igc_password` the password of the user to access IGC's REST API
+
+Each step is sequentially numbered so that they can be executed in-order as part of a Postman "Runner", if desired.
+
+(Note that in the sample the server name for the access services server is hard-coded to `omas` and the server for the
+DataStage proxy is hard-coded to `datastage`.)
+
 ----
 License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/),
 Copyright Contributors to the ODPi Egeria project.

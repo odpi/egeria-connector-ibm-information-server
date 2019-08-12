@@ -1,0 +1,406 @@
+{
+	"info": {
+		"_postman_id": "ea4e5723-8f2a-45c6-a2a5-8ff645856407",
+		"name": "Egeria DataStage proxy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "01.0 - Set graph repo (OMAS)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/omas/local-repository/mode/local-graph-repository",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"open-metadata",
+						"admin-services",
+						"users",
+						"{{user}}",
+						"servers",
+						"omas",
+						"local-repository",
+						"mode",
+						"local-graph-repository"
+					]
+				},
+				"description": "Query Current Configuration"
+			},
+			"response": []
+		},
+		{
+			"name": "01.1 - Set root URL (OMAS)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7008e39f-c266-454f-8e83-a25a7abb8d8f",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/omas/server-url-root?url={{baseURL}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"open-metadata",
+						"admin-services",
+						"users",
+						"{{user}}",
+						"servers",
+						"omas",
+						"server-url-root"
+					],
+					"query": [
+						{
+							"key": "url",
+							"value": "{{baseURL}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "01.2 - Configure event bus (OMAS)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7008e39f-c266-454f-8e83-a25a7abb8d8f",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"producer\": {\n\t\t\"bootstrap.servers\":\"{{kafkaep}}\"\n\t},\n\t\"consumer\": {\n   \t\t\"bootstrap.servers\":\"{{kafkaep}}\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/omas/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"open-metadata",
+						"admin-services",
+						"users",
+						"{{user}}",
+						"servers",
+						"omas",
+						"event-bus"
+					],
+					"query": [
+						{
+							"key": "connectorProvider",
+							"value": "org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider"
+						},
+						{
+							"key": "topicURLRoot",
+							"value": "OMRSTopic"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "01.3 - Enable access services (OMAS)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/omas/access-services?serviceMode=ENABLED",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"open-metadata",
+						"admin-services",
+						"users",
+						"{{user}}",
+						"servers",
+						"omas",
+						"access-services"
+					],
+					"query": [
+						{
+							"key": "serviceMode",
+							"value": "ENABLED"
+						}
+					]
+				},
+				"description": "Query Current Configuration"
+			},
+			"response": []
+		},
+		{
+			"name": "01.4 - Start Server (OMAS)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bdfce345-26b1-4f34-a5fb-511b245ef3d9",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/omas/instance",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"open-metadata",
+						"admin-services",
+						"users",
+						"{{user}}",
+						"servers",
+						"omas",
+						"instance"
+					]
+				},
+				"description": "Query Current Configuration"
+			},
+			"response": []
+		},
+		{
+			"name": "02.0 - Set inmemory repo (DS)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/datastage/local-repository/mode/in-memory-repository",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"open-metadata",
+						"admin-services",
+						"users",
+						"{{user}}",
+						"servers",
+						"datastage",
+						"local-repository",
+						"mode",
+						"in-memory-repository"
+					]
+				},
+				"description": "Query Current Configuration"
+			},
+			"response": []
+		},
+		{
+			"name": "02.1 - Set DataStage proxy (DS)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7008e39f-c266-454f-8e83-a25a7abb8d8f",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"DataEngineProxyConfig\",\n\t\"accessServiceRootURL\": \"{{baseURL}}\",\n\t\"accessServiceServerName\": \"omas\",\n\t\"dataEngineProxyProvider\": \"org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnectorProvider\",\n\t\"pollForChanges\": true,\n\t\"pollIntervalInSeconds\": 60,\n\t\"dataEngineConfig\": {\n\t\t\"ibm.igc.services.host\": \"{{igc_host}}\",\n\t\t\"ibm.igc.services.port\": \"{{igc_port}}\",\n\t\t\"ibm.igc.username\": \"{{igc_user}}\",\n\t\t\"ibm.igc.password\": \"{{igc_password}}\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/datastage/data-engine-proxy-service/configuration",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"open-metadata",
+						"admin-services",
+						"users",
+						"{{user}}",
+						"servers",
+						"datastage",
+						"data-engine-proxy-service",
+						"configuration"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "02.2 - Query Configuration (DS)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cd4e2e25-7bf9-4cbb-9da5-1955f579d834",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"DataStage endpoint configured\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.omagserverConfig.repositoryServicesConfig.localRepositoryConfig.localRepositoryLocalConnection.qualifiedName).to.equal(\"Local connection to In-memory repository@datastage\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/datastage/configuration/",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"open-metadata",
+						"admin-services",
+						"users",
+						"{{user}}",
+						"servers",
+						"datastage",
+						"configuration",
+						""
+					]
+				},
+				"description": "Query Current Configuration"
+			},
+			"response": []
+		},
+		{
+			"name": "02.3 - Start Server (DS)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bdfce345-26b1-4f34-a5fb-511b245ef3d9",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/datastage/instance",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"open-metadata",
+						"admin-services",
+						"users",
+						"{{user}}",
+						"servers",
+						"datastage",
+						"instance"
+					]
+				},
+				"description": "Query Current Configuration"
+			},
+			"response": []
+		}
+	]
+}
