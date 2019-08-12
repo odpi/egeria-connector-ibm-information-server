@@ -9,7 +9,7 @@ propagating or retrieving information _from_ IGC, and not _to_ IGC).
 
 Hoping for a mapping that isn't there?
 
-- [Submit an issue](https://github.com/odpi/egeria-connector-ibm-igc/issues/new), or
+- [Submit an issue](https://github.com/odpi/egeria-connector-ibm-information-server/issues/new), or
 - Check out any of the linked code below for examples of what's needed to create a mapping,
     and create your own (and feel free to submit a PR with the result!)
 

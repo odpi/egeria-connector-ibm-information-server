@@ -38,14 +38,14 @@
     </organization>
 
     <scm>
-        <connection>scm:git:git://github.com/odpi/egeria-connector-ibm-igc.git</connection>
-        <developerConnection>scm:git:ssh://github.com:odpi/egeria-connector-ibm-igc.git</developerConnection>
-        <url>http://github.com/odpi/egeria-connector-ibm-igc/tree/master</url>
+        <connection>scm:git:git://github.com/odpi/egeria-connector-ibm-information-server.git</connection>
+        <developerConnection>scm:git:ssh://github.com:odpi/egeria-connector-ibm-information-server.git</developerConnection>
+        <url>http://github.com/odpi/egeria-connector-ibm-information-server/tree/master</url>
     </scm>
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/odpi/egeria-connector-ibm-igc/issues</url>
+        <url>https://github.com/odpi/egeria-connector-ibm-information-server/issues</url>
     </issueManagement>
 
     <inceptionYear>2018</inceptionYear>
@@ -78,8 +78,9 @@
     <modules>
         <module>igc-clientlibrary</module>
         <module>igc-adapter</module>
-        <module>distribution</module>
         <module>datastage-adapter</module>
+        <!-- <module>ia-clientlibrary</module> -->
+        <module>distribution</module>
     </modules>
 
     <properties>
@@ -139,6 +140,11 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-xml</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
             <dependency>
