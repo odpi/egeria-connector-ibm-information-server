@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the ODPi Egeria project.
 ---
-project: 'egeria-connector-ibm-igc'
+project: 'egeria-connector-ibm-information-server'
 project_creation_date: '2019-04-16'
 lifecycle_state: 'active'
 project_category: 'metadata'
@@ -14,8 +14,8 @@ project_lead: &odpi_releng_ptl
 primary_contact: *odpi_releng_ptl
 issue_tracking:
     type: 'github'
-    url: 'https://github.com/odpi/egeria-connector-ibm-igc/issues'
-    key: 'egeria-connector-ibm-igc'
+    url: 'https://github.com/odpi/egeria-connector-ibm-information-server/issues'
+    key: 'egeria-connector-ibm-information-server'
 mailing_list:
     type: 'other'
     url: 'https://lists.odpi.org/g/odpi-project-egeria'
@@ -33,7 +33,7 @@ meetings:
       day: 'thu'
       time: '13:00 UTC'
 repositories:
-    - 'egeria-connector-ibm-igc'
+    - 'egeria-connector-ibm-information-server'
 committers:
     - <<: *odpi_releng_ptl
     - name: 'Mandy Chessell'
