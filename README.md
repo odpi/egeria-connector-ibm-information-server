@@ -1,28 +1,46 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 <!-- Copyright Contributors to the ODPi Egeria project. -->
 
-# IBM InfoSphere Information Governance Catalog Repository Connector
+# IBM InfoSphere Information Server Connectors
 
-[IBM InfoSphere Information Governance Catalog](https://www.ibm.com/marketplace/information-governance-catalog) is a
-commercially-available metadata repository from IBM, commonly referred to simply as "IGC". While the most recent versions
-of the software provide their own connectivity to OMRS cohorts, an example implementation of such connectivity is also
-provided here both for reference purposes and also to provide an integration point to older versions of the software
-(from v11.5.0.1 onwards).
+[IBM InfoSphere Information Server](https://www.ibm.com/marketplace/infosphere-information-server) is a
+commercially-available data integration, quality and governance suite from IBM. It is comprised of multiple modules,
+and this repository contains Egeria connectors for some of those modules:
 
-Note that currently the implemented connector is read-only: it only implements those methods necessary to search, retrieve,
-and communicate metadata from IGC out into the cohort -- it does *not* currently implement the ability to update IGC based
-on events received from other members of the cohort.
+- [IBM InfoSphere Information Governance Catalog](https://www.ibm.com/marketplace/information-governance-catalog) is the
+    metadata repository module within the suite, commonly referred to simply as "IGC". While the most recent versions of
+    the software provide their own connectivity to OMRS cohorts, an example implementation of such connectivity is also
+    provided here both for reference purposes and also to provide an integration point to older versions of the software
+    (from v11.5.0.1 onwards).
 
-Furthermore, [only a subset of the overall Open Metadata Types are currently implemented](docs/mappings/README.md).
+    Note that currently the implemented connector is read-only: it only implements those methods necessary to search,
+    retrieve, and communicate metadata from IGC out into the cohort -- it does *not* currently implement the ability to
+    update IGC based on events received from other members of the cohort.
+
+    Furthermore, [only a subset of the overall Open Metadata Types are currently implemented](docs/mappings/README.md).
+
+- [IBM InfoSphere DataStage](https://www.ibm.com/marketplace/datastage) is a high-performance ETL module within the
+    suite, and is pre-integrated to IGC. The connector implemented for this module is a Data Engine Proxy, translating
+    the creation and update of DataStage ETL routines (jobs and sequences) into the appropriate Egeria components to
+    represent and participate in end-to-end data lineage.
 
 ## How it works
 
 The IBM IGC Repository Connector works through a combination of the following:
 
-- IBM IGC's REST API, itself abstracted through the [IGC REST Client Library](ibm-igc-rest-client-library)
+- IBM IGC's REST API, itself abstracted through the [IGC REST Client Library](igc-clientlibrary)
 - IBM InfoSphere Information Server's embedded Apache Kafka event bus
     - specifically the `InfosphereEvents` topic (hence the need to enable events in the setup)
 - Some [IGC extensions](docs/ibm-igc-extensions.md) that implement specific additional functionality
+- Egeria's Metadata Repository Proxy Services
+
+The IBM DataStage Data Engine Proxy Connector works through a combination of the following:
+
+- IBM IGC's REST API, itself abstracted through the [IGC REST Client Library](igc-clientlibrary)
+- An Information Governance Rule in IGC named `Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS`
+    and whose description provides the precise date and time at which synchronization last occurred
+- Egeria's [Data Engine Proxy Services Governance Server](https://github.com/odpi/egeria/tree/master/open-metadata-implementation/governance-servers/data-engine-proxy-services)
+    - which in turn makes use of an Egeria [Data Engine OMAS](https://github.com/odpi/egeria/tree/master/open-metadata-implementation/access-services/data-engine)
 
 ## Getting started
 
@@ -77,9 +95,9 @@ $ java -Dloader.path=/lib -jar server-chassis-spring-VERSION.jar
 (This command will startup the OMAG Server Platform, including all libraries
 in the `/lib` directory as part of the classpath of the OMAG Server Platform.)
 
-### Configure this Egeria connector
+### Configure the IGC connector
 
-You will need to configure the OMAG Server Platform as follows (order is important) to make use of this Egeria connector.
+You will need to configure the OMAG Server Platform as follows (order is important) to make use of the IGC connector.
 For example payloads and endpoints, see the [Postman samples](samples).
 
 1. Configure your event bus for Egeria, by POSTing a payload like the following:
@@ -151,6 +169,106 @@ For example payloads and endpoints, see the [Postman samples](samples).
 After following these instructions, your IGC instance will be participating in the Egeria cohort. For those objects
 supported by the connector, any new instances or updates to existing instances should result in that metadata
 automatically being communicated out to the rest of the cohort.
+
+### Configure the DataStage connector
+
+You will need to configure the OMAG Server Platform as follows (order is important) to make use of the DataStage connector.
+For example payloads and endpoints, see the [Postman samples](samples).
+
+1. Configure a local Egeria metadata repository for the access services, by POSTing something like the following
+    (to use the graph repository):
+
+    ```
+    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{omas_server}}/local-repository/mode/local-graph-repository
+    ```
+
+1. Configure your event bus for the access services, by POSTing a payload like the following:
+
+    ```json
+    {
+        "producer": {
+            "bootstrap.servers":"localhost:9092"
+        },
+        "consumer": {
+            "bootstrap.servers":"localhost:9092"
+        }
+    }
+    ```
+
+    to:
+
+    ```
+    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{omas_server}}/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic
+    ```
+
+1. Enable the access services by POSTing something like the following:
+
+    ```
+    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{omas_server}}/access-services?serviceMode=ENABLED
+    ```
+
+1. The access services should now be configured, and you should now be able to start them by POSTing something like the
+    following:
+
+    ```
+    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{omas_server}}/instance
+    ```
+
+1. Configure a local metadata repository for the DataStage connector, by POSTing something like the following
+    (to use the in-memory repository):
+
+    ```
+    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{ds_server}}/local-repository/mode/in-memory-repository
+    ```
+
+1. Configure the DataStage connector, by POSTing a payload like the following:
+
+    ```json
+    {
+        "class": "DataEngineProxyConfig",
+        "accessServiceRootURL": "http://localhost:8080",
+        "accessServiceServerName": "omas",
+        "dataEngineProxyProvider": "org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnectorProvider",
+        "pollForChanges": true,
+        "pollIntervalInSeconds": 60,
+        "dataEngineConfig": {
+            "ibm.igc.services.host": "{{igc_host}}",
+            "ibm.igc.services.port": "{{igc_port}}",
+            "ibm.igc.username": "{{igc_user}}",
+            "ibm.igc.password": "{{igc_password}}"
+        }
+    }
+    ```
+
+    to:
+
+    ```
+    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{ds_server}}/data-engine-proxy-service/configuration
+    ```
+
+    The payload should include the hostname and port of your IGC environment's domain (services) tier,
+    and a `username` and `password` through which the REST API can be accessed.
+
+    Note that you also need to provide the `connectorProvider` parameter, set to the name of the DataStage
+    connectorProvider class (value as given above).
+
+    Finally, note that we specify the connector should poll for changes at a particular interval. This is because
+    changes to DataStage routines within DataStage do not trigger events into IGC's embedded Kafka topic (at least for
+    older versions of Information Server), so we must busy-poll for changes. You can modify the interval if you want
+    the connector to wait more or less time between each check for changes.
+
+1. The connector should now be configured, and you should now be able to start the instance by POSTing something like
+    the following:
+
+   ```
+   POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{ds_server}}/instance
+   ```
+
+After following these instructions, your DataStage environment will be polled for any changes (including creation of new)
+DataStage jobs (including sequences). For those objects supported by the connector, any new instances or updates to
+existing instances should result in that metadata automatically being communicated to the Data Engine OMAS within the
+number of seconds specified by the `pollIntervalInSeconds` (though be aware that a large number of changes may take some
+time to synchronize).
 
 ## Loading samples
 
