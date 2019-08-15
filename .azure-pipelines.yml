@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the ODPi Egeria project.
+---
+trigger:
+  branches:
+    include:
+      - master
+      - azure-pipelines
+
+stages:
+  - stage: Verify
+    jobs:
+      - job: VerifyBuild
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          matrix:
+            Java8:
+              JAVA_VERSION: '1.8'
+            Java11:
+              JAVA_VERSION: '1.11'
+        steps:
+          - script: mkdir -p ${HOME}/.m2
+          - task: DownloadSecureFile@1
+            name: mavenSettings
+            inputs:
+              secureFile: odpi-settings.xml
+          - script: mv $(mavenSettings.secureFilePath) ${HOME}/.m2/settings.xml
+          - task: Maven@3
+            inputs:
+              mavenPomFile: 'pom.xml'
+              mavenOptions: '-Xmx3072m -DskipFVT'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: $(JAVA_VERSION)
+              jdkArchitectureOption: 'x64'
+              mavenFeedAuthenticate: true
+              goals: 'deploy -P azure-pipelines'
+              # goals: 'clean deploy'
+              # publishJUnitResults: true
+              # testResultsFiles: '**/surefire-reports/TEST-*.xml'
