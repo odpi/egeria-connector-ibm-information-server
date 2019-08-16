@@ -52,6 +52,7 @@
                                     <include>org.odpi.egeria:egeria-connector-ibm-igc-adapter</include>
                                     <include>org.odpi.egeria:ibm-igc-rest-client-library</include>
                                     <include>org.odpi.egeria:egeria-connector-ibm-datastage-adapter</include>
+                                    <include>org.odpi.egeria:ibm-ia-rest-client-library</include>
                                     <include>com.flipkart.zjsonpatch:zjsonpatch</include>
                                     <include>org.apache.commons:commons-collections4</include>
                                 </includes>

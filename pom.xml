@@ -79,7 +79,7 @@
         <module>igc-clientlibrary</module>
         <module>igc-adapter</module>
         <module>datastage-adapter</module>
-        <!-- <module>ia-clientlibrary</module> -->
+        <module>ia-clientlibrary</module>
         <module>distribution</module>
     </modules>
 
@@ -95,6 +95,7 @@
         <slf4j.version>1.7.25</slf4j.version>
         <jackson.version>2.9.9</jackson.version>
         <jackson.databind.version>2.9.9.3</jackson.databind.version>
+        <woodstox.version>5.3.0</woodstox.version>
         <spring.version>5.1.5.RELEASE</spring.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
@@ -146,6 +147,11 @@
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-xml</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.woodstox</groupId>
+                <artifactId>woodstox-core</artifactId>
+                <version>${woodstox.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.kafka</groupId>
