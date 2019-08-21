@@ -25,8 +25,8 @@ public class LineageMappingMapping extends BaseMapping {
 
     /**
      * Creates LineageMappings for stages that have links as input and output.
-     * - STAGEB ( -> processing -> )
-     *   - DSLink1_STAGEB to DSLink2_STAGEB (INPUT_PORT to OUTPUT_PORT)
+     * - {@code STAGEB ( -> processing -> )}
+     *   - {@code DSLink1_STAGEB to DSLink2_STAGEB (INPUT_PORT to OUTPUT_PORT)}
      *
      * @param job the job for which to create the LineageMappings
      * @param link the link for which to create the LineageMappings
@@ -66,10 +66,10 @@ public class LineageMappingMapping extends BaseMapping {
 
     /**
      * Creates LineageMappings between stages.
-     * - STAGEA (data source -> )
-     *   - DSLink1_STAGEA to DSLink1_STAGEB (cross-process mapping)
-     * - STAGEB ( -> processing -> )
-     *   - DSLink2_STAGEB to DSLink2_STAGEC (cross-process mapping)
+     * - {@code STAGEA (data source -> )}
+     *   - {@code DSLink1_STAGEA to DSLink1_STAGEB (cross-process mapping)}
+     * - {@code STAGEB ( -> processing -> )}
+     *   - {@code DSLink2_STAGEB to DSLink2_STAGEC (cross-process mapping)}
      *
      * @param job the job for which to create the LineageMappings
      * @param link the link for which to create the LineageMappings
@@ -95,12 +95,12 @@ public class LineageMappingMapping extends BaseMapping {
 
     /**
      * Creates LineageMappings between data stores and stages.
-     * - STAGEA (data source -> )
-     *   - StoreX to StoreX_STAGEA (reads_from_(design) to INPUT_PORT)
-     *   - StoreX_STAGEA to DSLink1_STAGEA (INPUT_PORT to OUTPUT_PORT)
-     * - STAGEC ( -> data store)
-     *   - DSLink2_STAGEC to StoreY_STAGEC (INPUT_PORT to OUTPUT_PORT)
-     *   - StoreY_STAGEC to StoreY (OUTPUT_PORT to written_by_(design))
+     * - {@code STAGEA (data source -> )}
+     *   - {@code StoreX to StoreX_STAGEA (reads_from_(design) to INPUT_PORT)}
+     *   - {@code StoreX_STAGEA to DSLink1_STAGEA (INPUT_PORT to OUTPUT_PORT)}
+     * - {@code STAGEC ( -> data store)}
+     *   - {@code DSLink2_STAGEC to StoreY_STAGEC (INPUT_PORT to OUTPUT_PORT)}
+     *   - {@code StoreY_STAGEC to StoreY (OUTPUT_PORT to written_by_(design))}
      *
      * @param job the job for which to create the LineageMappings
      * @param fields list of IGC field objects (data_file_field or database_column)
