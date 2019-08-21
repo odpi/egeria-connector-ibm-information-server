@@ -212,7 +212,7 @@ public class DSJob {
      * Retrieve the list of data store fields for the provided data store ('database_table', 'view', or 'data_file_record') RID.
      *
      * @param rid the RID of the data store
-     * @return {@List<Reference>}
+     * @return {@code List<Reference>}
      */
     public List<Reference> getFieldsForStore(String rid) {
         return storeToFieldsMap.getOrDefault(rid, null);
