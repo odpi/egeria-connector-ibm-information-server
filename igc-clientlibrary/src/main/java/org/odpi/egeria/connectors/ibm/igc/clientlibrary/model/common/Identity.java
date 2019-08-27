@@ -161,7 +161,7 @@ public class Identity {
         } else if (ctxAssetType.equals("category")) {
             pathSoFar = pathSoFar + "parent_category";
         } else {
-            pathSoFar = pathSoFar + ctxAssetType;
+            pathSoFar = pathSoFar + Reference.getAssetTypeForSearch(ctxAssetType);
         }
         return pathSoFar;
     }
