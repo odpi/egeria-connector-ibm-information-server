@@ -1420,12 +1420,16 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     ArrayList<String> properties = new ArrayList<>();
                     IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
+                    String qualifiedNameRegex = null;
                     if (matchProperties != null) {
                         Iterator iPropertyNames = matchProperties.getPropertyNames();
                         Set<String> mappedProperties = mapping.getAllMappedIgcProperties();
                         while (mappedProperties != null && !mappedProperties.isEmpty() && iPropertyNames.hasNext()) {
                             String omrsPropertyName = (String) iPropertyNames.next();
                             InstancePropertyValue value = matchProperties.getPropertyValue(omrsPropertyName);
+                            if (omrsPropertyName.equals("qualifiedName")) {
+                                qualifiedNameRegex = (String) ((PrimitivePropertyValue)value).getPrimitiveValue();
+                            }
                             addSearchConditionFromValue(
                                     igcSearchConditionSet,
                                     omrsPropertyName,
@@ -1469,13 +1473,28 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         igcSearch.addSortingCriteria(igcSearchSorting);
                     }
 
-                    processResults(
-                            mapping,
-                            this.igcRestClient.search(igcSearch),
-                            entityDetails,
-                            pageSize,
-                            userId
-                    );
+                    // If searching by qualifiedName, exact match (or starts with) we need to check results
+                    // to remove any (non-)generated type based on the qualifiedName (because the search results
+                    // will contain both from various iterations of this loop, and only one or the other should be
+                    // returned by the search)
+                    boolean includeResult = true;
+                    if (qualifiedNameRegex != null
+                            && (repositoryHelper.isStartsWithRegex(qualifiedNameRegex) || repositoryHelper.isExactMatchRegex(qualifiedNameRegex))) {
+                        String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedNameRegex);
+                        String prefix = mapping.getIgcRidPrefix();
+                        boolean generatedQN = isGeneratedGUID(unqualifiedName);
+                        includeResult = (generatedQN && prefix != null) || (!generatedQN && prefix == null);
+                    }
+
+                    if (includeResult) {
+                        processResults(
+                                mapping,
+                                this.igcRestClient.search(igcSearch),
+                                entityDetails,
+                                pageSize,
+                                userId
+                        );
+                    }
 
                 }
 
