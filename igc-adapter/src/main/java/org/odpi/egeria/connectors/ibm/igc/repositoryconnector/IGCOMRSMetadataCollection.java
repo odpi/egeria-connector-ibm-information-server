@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -1396,105 +1397,80 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             // Otherwise, only bother searching if we are after ACTIVE (or "all") entities -- non-ACTIVE means we
             // will just return an empty list
 
-            List<EntityMapping> mappingsToSearch = getMappingsToSearch(entityTypeGUID, userId);
+            // Short-circuit iterating through mappings if we are searching for something by qualifiedName,
+            // in which case we should be able to infer the type we need to search based on the Identity implied
+            // by the qualifiedName provided
+            if (matchProperties != null
+                    && matchProperties.getPropertyCount() == 1
+                    && matchProperties.getPropertyNames().next().equals("qualifiedName")) {
+                String qualifiedNameToFind = (String) ((PrimitivePropertyValue)matchProperties.getInstanceProperties().get("qualifiedName")).getPrimitiveValue();
+                if (repositoryHelper.isExactMatchRegex(qualifiedNameToFind)) {
+                    String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedNameToFind);
+                    String qualifiedName = unqualifiedName;
+                    String prefix = null;
+                    if (isGeneratedGUID(unqualifiedName)) {
+                        prefix = getPrefixFromGeneratedId(unqualifiedName);
+                        qualifiedName = getRidFromGeneratedId(unqualifiedName);
+                    }
+                    Identity identity = Identity.getFromString(qualifiedName, igcRestClient);
+                    if (identity != null) {
+                        String igcType = identity.getAssetType();
+                        List<EntityMapping> mappers = getMappers(igcType, userId);
+                        for (EntityMapping mapper : mappers) {
+                            String mapperPrefix = mapper.getIgcRidPrefix();
+                            if ( (mapperPrefix == null && prefix == null)
+                                    || (mapperPrefix != null && mapperPrefix.equals(prefix)) ) {
 
-            // Now iterate through all of the mappings we need to search, construct and run an appropriate search
-            // for each one
-            for (EntityMapping mapping : mappingsToSearch) {
-
-                String igcAssetType = mapping.getIgcAssetType();
-                IGCSearchConditionSet classificationLimiters = getSearchCriteriaForClassifications(
-                        igcAssetType,
-                        limitResultsByClassification
-                );
-
-                if (limitResultsByClassification != null && !limitResultsByClassification.isEmpty() && classificationLimiters == null) {
-                    if (log.isInfoEnabled()) { log.info("Classification limiters were specified, but none apply to the asset type {}, so excluding this asset type from search.", igcAssetType); }
-                } else {
-
-                    IGCSearch igcSearch = new IGCSearch();
-                    igcSearch.addType(igcAssetType);
-
-                    /* Provided there is a mapping, build up a list of IGC-specific properties
-                     * and search criteria, based on the values of the InstanceProperties provided */
-                    ArrayList<String> properties = new ArrayList<>();
-                    IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
-
-                    String qualifiedNameRegex = null;
-                    if (matchProperties != null) {
-                        Iterator iPropertyNames = matchProperties.getPropertyNames();
-                        Set<String> mappedProperties = mapping.getAllMappedIgcProperties();
-                        while (mappedProperties != null && !mappedProperties.isEmpty() && iPropertyNames.hasNext()) {
-                            String omrsPropertyName = (String) iPropertyNames.next();
-                            InstancePropertyValue value = matchProperties.getPropertyValue(omrsPropertyName);
-                            if (omrsPropertyName.equals("qualifiedName")) {
-                                qualifiedNameRegex = (String) ((PrimitivePropertyValue)value).getPrimitiveValue();
+                                // validate mapped OMRS type against the provided entityTypeGUID (if non-null), and
+                                // only proceed with the search if IGC identity is a (sub)type of the one requested
+                                boolean runSearch = true;
+                                if (entityTypeGUID != null) {
+                                    String mappedOmrsTypeName = mapper.getOmrsTypeDefName();
+                                    TypeDef entityTypeDef = repositoryHelper.getTypeDef(repositoryName,
+                                            "entityTypeGUID",
+                                            entityTypeGUID,
+                                            methodName);
+                                    runSearch = repositoryHelper.isTypeOf(metadataCollectionId, mappedOmrsTypeName, entityTypeDef.getName());
+                                }
+                                if (runSearch) {
+                                    processResultsForMapping(
+                                            mapper,
+                                            entityDetails,
+                                            userId,
+                                            matchProperties,
+                                            matchCriteria,
+                                            fromEntityElement,
+                                            limitResultsByClassification,
+                                            sequencingProperty,
+                                            sequencingOrder,
+                                            pageSize
+                                    );
+                                }
                             }
-                            addSearchConditionFromValue(
-                                    igcSearchConditionSet,
-                                    omrsPropertyName,
-                                    properties,
-                                    mapping,
-                                    value
-                            );
                         }
                     }
+                }
 
-                    if (classificationLimiters != null) {
-                        igcSearchConditionSet.addNestedConditionSet(classificationLimiters);
-                    }
+            } else {
 
-                    IGCSearchSorting igcSearchSorting = null;
-                    if (sequencingProperty == null && sequencingOrder != null) {
-                        igcSearchSorting = IGCOMRSMetadataCollection.sortFromNonPropertySequencingOrder(sequencingOrder);
-                    }
+                // If we're searching for anything else, however, we need to iterate through all of the possible mappings
+                // to ensure a full set of search results, so construct and run an appropriate search for each one
+                List<EntityMapping> mappingsToSearch = getMappingsToSearch(entityTypeGUID, userId);
 
-                    if (matchCriteria != null) {
-                        switch (matchCriteria) {
-                            case ALL:
-                                igcSearchConditionSet.setMatchAnyCondition(false);
-                                break;
-                            case ANY:
-                                igcSearchConditionSet.setMatchAnyCondition(true);
-                                break;
-                            case NONE:
-                                igcSearchConditionSet.setMatchAnyCondition(false);
-                                igcSearchConditionSet.setNegateAll(true);
-                                break;
-                        }
-                    }
+                for (EntityMapping mapping : mappingsToSearch) {
 
-                    igcSearch.addProperties(properties);
-                    igcSearch.addConditions(igcSearchConditionSet);
-
-                    setPagingForSearch(igcSearch, fromEntityElement, pageSize);
-
-                    if (igcSearchSorting != null) {
-                        igcSearch.addSortingCriteria(igcSearchSorting);
-                    }
-
-                    // If searching by qualifiedName, exact match (or starts with) we need to check results
-                    // to remove any (non-)generated type based on the qualifiedName (because the search results
-                    // will contain both from various iterations of this loop, and only one or the other should be
-                    // returned by the search)
-                    boolean includeResult = true;
-                    if (qualifiedNameRegex != null
-                            && (repositoryHelper.isStartsWithRegex(qualifiedNameRegex) || repositoryHelper.isExactMatchRegex(qualifiedNameRegex))) {
-                        String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedNameRegex);
-                        String prefix = mapping.getIgcRidPrefix();
-                        boolean generatedQN = isGeneratedGUID(unqualifiedName);
-                        includeResult = (generatedQN && prefix != null) || (!generatedQN && prefix == null);
-                    }
-
-                    if (includeResult) {
-                        processResults(
-                                mapping,
-                                this.igcRestClient.search(igcSearch),
-                                entityDetails,
-                                pageSize,
-                                userId
-                        );
-                    }
+                    processResultsForMapping(
+                            mapping,
+                            entityDetails,
+                            userId,
+                            matchProperties,
+                            matchCriteria,
+                            fromEntityElement,
+                            limitResultsByClassification,
+                            sequencingProperty,
+                            sequencingOrder,
+                            pageSize
+                    );
 
                 }
 
@@ -2499,6 +2475,135 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         return map;
 
+    }
+
+    /**
+     * Run a search against IGC and process the results, based on the provided parameters.
+     *
+     * @param mapping the mapping to use for running the search
+     * @param entityDetails the list of results to append into
+     * @param userId unique identifier for requesting user
+     * @param matchProperties Optional list of entity properties to match (where any String property's value should
+     *                        be defined as a Java regular expression, even if it should be an exact match).
+     * @param matchCriteria Enum defining how the properties should be matched to the entities in the repository.
+     * @param fromEntityElement the starting element number of the entities to return.
+     *                                This is used when retrieving elements
+     *                                beyond the first page of results. Zero means start from the first element.
+     * @param limitResultsByClassification List of classifications that must be present on all returned entities.
+     * @param sequencingProperty String name of the entity property that is to be used to sequence the results.
+     *                           Null means do not sequence on a property name (see SequencingOrder).
+     * @param sequencingOrder Enum defining how the results should be ordered.
+     * @param pageSize the maximum number of result entities that can be returned on this request.  Zero means
+     *                 unrestricted return results size.
+     * @throws FunctionNotSupportedException
+     * @throws RepositoryErrorException
+     */
+    private void processResultsForMapping(EntityMapping mapping,
+                                          List<EntityDetail> entityDetails,
+                                          String userId,
+                                          InstanceProperties matchProperties,
+                                          MatchCriteria matchCriteria,
+                                          int fromEntityElement,
+                                          List<String> limitResultsByClassification,
+                                          String sequencingProperty,
+                                          SequencingOrder sequencingOrder,
+                                          int pageSize)
+            throws FunctionNotSupportedException, RepositoryErrorException {
+
+        String igcAssetType = mapping.getIgcAssetType();
+        IGCSearchConditionSet classificationLimiters = getSearchCriteriaForClassifications(
+                igcAssetType,
+                limitResultsByClassification
+        );
+
+        if (limitResultsByClassification != null && !limitResultsByClassification.isEmpty() && classificationLimiters == null) {
+            if (log.isInfoEnabled()) { log.info("Classification limiters were specified, but none apply to the asset type {}, so excluding this asset type from search.", igcAssetType); }
+        } else {
+
+            IGCSearch igcSearch = new IGCSearch();
+            igcSearch.addType(igcAssetType);
+
+            /* Provided there is a mapping, build up a list of IGC-specific properties
+             * and search criteria, based on the values of the InstanceProperties provided */
+            ArrayList<String> properties = new ArrayList<>();
+            IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
+
+            String qualifiedNameRegex = null;
+            if (matchProperties != null) {
+                Iterator iPropertyNames = matchProperties.getPropertyNames();
+                Set<String> mappedProperties = mapping.getAllMappedIgcProperties();
+                while (mappedProperties != null && !mappedProperties.isEmpty() && iPropertyNames.hasNext()) {
+                    String omrsPropertyName = (String) iPropertyNames.next();
+                    InstancePropertyValue value = matchProperties.getPropertyValue(omrsPropertyName);
+                    if (omrsPropertyName.equals("qualifiedName")) {
+                        qualifiedNameRegex = (String) ((PrimitivePropertyValue) value).getPrimitiveValue();
+                    }
+                    addSearchConditionFromValue(
+                            igcSearchConditionSet,
+                            omrsPropertyName,
+                            properties,
+                            mapping,
+                            value
+                    );
+                }
+            }
+
+            if (classificationLimiters != null) {
+                igcSearchConditionSet.addNestedConditionSet(classificationLimiters);
+            }
+
+            IGCSearchSorting igcSearchSorting = null;
+            if (sequencingProperty == null && sequencingOrder != null) {
+                igcSearchSorting = IGCOMRSMetadataCollection.sortFromNonPropertySequencingOrder(sequencingOrder);
+            }
+
+            if (matchCriteria != null) {
+                switch (matchCriteria) {
+                    case ALL:
+                        igcSearchConditionSet.setMatchAnyCondition(false);
+                        break;
+                    case ANY:
+                        igcSearchConditionSet.setMatchAnyCondition(true);
+                        break;
+                    case NONE:
+                        igcSearchConditionSet.setMatchAnyCondition(false);
+                        igcSearchConditionSet.setNegateAll(true);
+                        break;
+                }
+            }
+
+            igcSearch.addProperties(properties);
+            igcSearch.addConditions(igcSearchConditionSet);
+
+            setPagingForSearch(igcSearch, fromEntityElement, pageSize);
+
+            if (igcSearchSorting != null) {
+                igcSearch.addSortingCriteria(igcSearchSorting);
+            }
+
+            // If searching by qualifiedName, exact match (or starts with) we need to check results
+            // to remove any (non-)generated type based on the qualifiedName (because the search results
+            // will contain both from various iterations of this loop, and only one or the other should be
+            // returned by the search)
+            boolean includeResult = true;
+            if (qualifiedNameRegex != null
+                    && (repositoryHelper.isStartsWithRegex(qualifiedNameRegex) || repositoryHelper.isExactMatchRegex(qualifiedNameRegex))) {
+                String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedNameRegex);
+                String prefix = mapping.getIgcRidPrefix();
+                boolean generatedQN = isGeneratedGUID(unqualifiedName);
+                includeResult = (generatedQN && prefix != null) || (!generatedQN && prefix == null);
+            }
+
+            if (includeResult) {
+                processResults(
+                        mapping,
+                        this.igcRestClient.search(igcSearch),
+                        entityDetails,
+                        pageSize,
+                        userId
+                );
+            }
+        }
     }
 
     /**
