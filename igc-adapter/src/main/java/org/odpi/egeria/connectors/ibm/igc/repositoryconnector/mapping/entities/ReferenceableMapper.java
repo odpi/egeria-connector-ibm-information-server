@@ -9,6 +9,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SemanticAssignmentMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
@@ -208,34 +209,74 @@ public class ReferenceableMapper extends EntityMapping {
                                                  List<String> igcProperties,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
 
+        final String methodName = "addComplexPropertySearchCriteria";
+
         if (log.isDebugEnabled()) { log.debug("Adding complex search criteria for: {}", omrsPropertyName); }
 
         if (omrsPropertyName.equals("qualifiedName")) {
 
             String qualifiedName = ((PrimitivePropertyValue) value).getPrimitiveValue().toString();
+            String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedName);
 
             // Check if the qualifiedName has a generated prefix -- need to remove prior to next steps, if so...
-            if (IGCOMRSMetadataCollection.isGeneratedGUID(qualifiedName)) {
-                qualifiedName = IGCOMRSMetadataCollection.getRidFromGeneratedId(qualifiedName);
+            if (IGCOMRSMetadataCollection.isGeneratedGUID(unqualifiedName)) {
+                unqualifiedName = IGCOMRSMetadataCollection.getRidFromGeneratedId(unqualifiedName);
             }
-            if (log.isDebugEnabled()) { log.debug("Looking up identity: {}", qualifiedName); }
-            Identity identity = Identity.getFromString(qualifiedName, igcRestClient);
-
+            if (log.isDebugEnabled()) { log.debug("Looking up identity: {}", unqualifiedName); }
+            Identity identity = Identity.getFromString(unqualifiedName, igcRestClient);
             boolean skip = false;
-            if (identity != null) {
-                if (log.isDebugEnabled()) { log.debug(". . .found identity: {}", identity.toString()); }
-                String igcType = identity.getAssetType();
-                if (igcType.equals(getIgcAssetType()) || getOtherIGCAssetTypes().contains(igcType)) {
+
+            if (repositoryHelper.isContainsRegex(qualifiedName)
+                    || repositoryHelper.isStartsWithRegex(qualifiedName)
+                    || repositoryHelper.isEndsWithRegex(qualifiedName)) {
+                // TODO: identity must be translate-able (to some degree?) but type being searched does not need to match
+                if (identity != null) {
+                    if (log.isDebugEnabled()) { log.debug(". . .found identity: {}", identity.toString()); }
                     IGCSearchConditionSet nested = identity.getSearchCriteria();
                     igcSearchConditionSet.addNestedConditionSet(nested);
                 } else {
-                    if (log.isInfoEnabled()) { log.info("Search type did not match identity type -- skipping."); }
+                    if (log.isInfoEnabled()) { log.info("Unable to find identity '{}' -- skipping.", qualifiedName); }
+                    skip = true;
+                }
+                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
+                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                        repositoryName,
+                        qualifiedName);
+                throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
+                        IGCOMRSMetadataCollection.class.getName(),
+                        methodName,
+                        errorMessage,
+                        errorCode.getSystemAction(),
+                        errorCode.getUserAction());
+            } else if (repositoryHelper.isExactMatchRegex(qualifiedName)) {
+                // Identity must be translate-able and match the type being searched, if it is to be an exact match
+                if (identity != null) {
+                    if (log.isDebugEnabled()) { log.debug(". . .found identity: {}", identity.toString()); }
+                    String igcType = identity.getAssetType();
+                    if (igcType.equals(getIgcAssetType()) || getOtherIGCAssetTypes().contains(igcType)) {
+                        IGCSearchConditionSet nested = identity.getSearchCriteria();
+                        igcSearchConditionSet.addNestedConditionSet(nested);
+                    } else {
+                        if (log.isInfoEnabled()) { log.info("Search type did not match identity type -- skipping."); }
+                        skip = true;
+                    }
+                } else {
+                    if (log.isInfoEnabled()) { log.info("Unable to find identity '{}' -- skipping.", qualifiedName); }
                     skip = true;
                 }
             } else {
-                if (log.isInfoEnabled()) { log.info("Unable to find identity '{}' -- skipping.", qualifiedName); }
-                skip = true;
+                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
+                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                        repositoryName,
+                        qualifiedName);
+                throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
+                        IGCOMRSMetadataCollection.class.getName(),
+                        methodName,
+                        errorMessage,
+                        errorCode.getSystemAction(),
+                        errorCode.getUserAction());
             }
+
             if (skip) {
                 if (log.isDebugEnabled()) { log.debug("Adding search condition to ensure no results."); }
                 IGCSearchCondition name = new IGCSearchCondition(

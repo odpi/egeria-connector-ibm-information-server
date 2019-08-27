@@ -2932,12 +2932,6 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     case OM_PRIMITIVE_TYPE_BOOLEAN:
                     case OM_PRIMITIVE_TYPE_BYTE:
                     case OM_PRIMITIVE_TYPE_CHAR:
-                        igcSearchConditionSet.addCondition(new IGCSearchCondition(
-                                igcPropertyName,
-                                "=",
-                                actualValue.getPrimitiveValue().toString()
-                        ));
-                        break;
                     case OM_PRIMITIVE_TYPE_SHORT:
                     case OM_PRIMITIVE_TYPE_INT:
                     case OM_PRIMITIVE_TYPE_LONG:
