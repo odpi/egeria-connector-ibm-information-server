@@ -47,12 +47,30 @@ public class IGCRestConstants {
         return Collections.unmodifiableMap(map);
     }
 
+    private static final List<String> FILE_TYPES = createFileTypes();
+
+    private static List<String> createFileTypes() {
+        ArrayList<String> fileTypes = new ArrayList<>();
+        fileTypes.add("data_file_field");
+        fileTypes.add("data_file_record");
+        fileTypes.add("data_file");
+        fileTypes.add("data_file_folder");
+        return Collections.unmodifiableList(fileTypes);
+    }
+
     /**
      * Retrieve a list of the modification detail properties used by the IGC REST API.
      *
      * @return {@code List<String>}
      */
     public static final List<String> getModificationProperties() { return MODIFICATION_DETAILS; }
+
+    /**
+     * Retrieve a list of the asset types that deal with files in some way.
+     *
+     * @return {@code List<String>}
+     */
+    public static final List<String> getFileTypes() { return FILE_TYPES; }
 
     /**
      * Retrieve the name of a POJO class from the IGC asset type name.
