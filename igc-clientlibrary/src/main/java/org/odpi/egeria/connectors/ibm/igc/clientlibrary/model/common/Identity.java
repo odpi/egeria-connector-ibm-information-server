@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.slf4j.Logger;
@@ -213,13 +214,63 @@ public class Identity {
         IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
         igcSearchConditionSet.setMatchAnyCondition(false);
 
-        // Build up the search criteria for all of the context first
-        String propertyPath = "";
-        for (int i = context.size() - 1; i >= 0; i--) {
-            Reference item = context.get(i);
-            String type = item.getType();
-            propertyPath = getPropertyPath(assetType, type, propertyPath);
-            addSearchCondition(igcSearchConditionSet, propertyPath, type, item.getName(), item.getId());
+        // If this is a file-related entity, the search criteria is not as straightforward as otherwise
+        if (IGCRestConstants.getFileTypes().contains(assetType)) {
+            String propertyPath = "";
+            String dataFilePath = "";
+            String dataFileHost = "";
+            for (int i = context.size() - 1; i >= 0; i--) {
+                Reference item = context.get(i);
+                String type = item.getType();
+                if (type.equals("host_(engine)")) {
+                    dataFileHost = item.getName();
+                } else if (type.equals("data_file_folder")) {
+                    String path = item.getName();
+                    if (path.equals("/")) {
+                        dataFilePath = "/" + dataFilePath;
+                    } else {
+                        dataFilePath = path + (dataFilePath.equals("") ? "" : "/" + dataFilePath);
+                    }
+                } else {
+                    // Add context up as conditions until we hit 'data_file_folder' elements
+                    propertyPath = getPropertyPath(assetType, type, propertyPath);
+                    addSearchCondition(igcSearchConditionSet, propertyPath, type, item.getName(), item.getId());
+                }
+            }
+            // If the propertyPath is empty, we must be searching for just a file folder on its own
+            if (propertyPath.equals("")) {
+                // Add the immediate parent folder (cannot do the entire hierarchy in the case of a data file folder
+                int index = dataFilePath.lastIndexOf("/");
+                if (index > 0) {
+                    String parentName = dataFilePath.substring(index + 1);
+                    if (log.isDebugEnabled()) { log.debug("Adding search condition: parent_folder.name {} {}", "=", parentName); }
+                    IGCSearchCondition cPath = new IGCSearchCondition("parent_folder.name", "=", parentName);
+                    igcSearchConditionSet.addCondition(cPath);
+                }
+                // Add the 'host' element as 'host.name'
+                if (log.isDebugEnabled()) { log.debug("Adding search condition: host.name {} {}", "=", dataFileHost); }
+                IGCSearchCondition cHost = new IGCSearchCondition("host.name", "=", dataFileHost);
+                igcSearchConditionSet.addCondition(cHost);
+            } else {
+                // Otherwise, we are looking for some file-related asset within a folder, so add these further conditions
+                // Concatenate the 'data_file_folder' elements into a string with '/' separators, and add as '...data_file.path'
+                if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", propertyPath + ".path", "=", dataFilePath); }
+                IGCSearchCondition cPath = new IGCSearchCondition(propertyPath + ".path", "=", dataFilePath);
+                igcSearchConditionSet.addCondition(cPath);
+                // Add the 'host' element as '...datafile.host.name'
+                if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", propertyPath + ".host.name", "=", dataFileHost); }
+                IGCSearchCondition cHost = new IGCSearchCondition(propertyPath + ".host.name", "=", dataFileHost);
+                igcSearchConditionSet.addCondition(cHost);
+            }
+        } else {
+            // Build up the search criteria for all of the context first
+            String propertyPath = "";
+            for (int i = context.size() - 1; i >= 0; i--) {
+                Reference item = context.get(i);
+                String type = item.getType();
+                propertyPath = getPropertyPath(assetType, type, propertyPath);
+                addSearchCondition(igcSearchConditionSet, propertyPath, type, item.getName(), item.getId());
+            }
         }
 
         // Then add the final condition for this asset itself
