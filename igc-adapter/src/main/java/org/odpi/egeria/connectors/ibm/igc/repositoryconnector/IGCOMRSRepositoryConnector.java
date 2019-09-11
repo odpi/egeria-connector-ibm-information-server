@@ -56,7 +56,10 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
         String igcPort = (String) proxyProperties.get("ibm.igc.services.port");
         String igcUser = (String) proxyProperties.get("ibm.igc.username");
         String igcPass = (String) proxyProperties.get("ibm.igc.password");
-        this.defaultZones = (List<String>) proxyProperties.get("default.zones");
+        Object zones = proxyProperties.get("default.zones");
+        if (zones != null) {
+            this.defaultZones = (List<String>) zones;
+        }
 
         // Create new REST API client (opens a new session)
         this.igcRestClient = new IGCRestClient(igcHost, igcPort, igcUser, igcPass);
