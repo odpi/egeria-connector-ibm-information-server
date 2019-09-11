@@ -10,6 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCol
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.InstanceMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefAttribute;
@@ -38,6 +39,11 @@ public abstract class ClassificationMapping extends InstanceMapping {
     private List<InstanceStatus> omrsSupportedStatuses;
     private Set<String> mappedOmrsPropertyNames;
 
+    private Map<String, EntityMapping.PropertyMapping> mappingByIgcProperty;
+    private Map<String, EntityMapping.PropertyMapping> mappingByOmrsProperty;
+
+    private List<ClassificationMapping> subtypes;
+
     public ClassificationMapping(String igcAssetType,
                                  String igcRelationshipProperty,
                                  String omrsEntityType,
@@ -50,6 +56,9 @@ public abstract class ClassificationMapping extends InstanceMapping {
         this.excludeIgcAssetType = new HashSet<>();
         this.omrsSupportedStatuses = new ArrayList<>();
         this.mappedOmrsPropertyNames = new HashSet<>();
+        this.mappingByIgcProperty = new HashMap<>();
+        this.mappingByOmrsProperty = new HashMap<>();
+        this.subtypes = new ArrayList<>();
         addSupportedStatus(InstanceStatus.ACTIVE);
         addSupportedStatus(InstanceStatus.DELETED);
     }
@@ -83,6 +92,7 @@ public abstract class ClassificationMapping extends InstanceMapping {
     public Set<String> getMappedOmrsPropertyNames() {
         HashSet<String> omrsProperties = new HashSet<>(mappedOmrsPropertyNames);
         omrsProperties.addAll(getLiteralPropertyMappings());
+        omrsProperties.addAll(mappingByOmrsProperty.keySet());
         return omrsProperties;
     }
 
@@ -94,11 +104,24 @@ public abstract class ClassificationMapping extends InstanceMapping {
     public String getIgcAssetType() { return this.igcAssetType; }
 
     /**
-     * Retrieve the list of IGC properties used to apply this classification mapping.
+     * Retrieve the set of IGC properties used to apply this classification mapping.
      *
-     * @return {@code List<String>}
+     * @return {@code Set<String>}
      */
-    public List<String> getIgcRelationshipProperties() { return this.igcRelationshipProperties; }
+    public Set<String> getMappedIgcPropertyNames() {
+        HashSet<String> igcProperties = new HashSet<>(igcRelationshipProperties);
+        igcProperties.addAll(mappingByIgcProperty.keySet());
+        return igcProperties;
+    }
+
+    /**
+     * Returns only the subset of mapped IGC properties that are simple one-to-one mappings to OMRS properties.
+     *
+     * @return {@code Set<String>}
+     */
+    public final Set<String> getSimpleMappedIgcProperties() {
+        return mappingByIgcProperty.keySet();
+    }
 
     /**
      * Retrieve the name of the OMRS ClassificationDef represented by this mapping.
@@ -116,6 +139,14 @@ public abstract class ClassificationMapping extends InstanceMapping {
     public void addExcludedIgcAssetType(String igcAssetType) { this.excludeIgcAssetType.add(igcAssetType); }
 
     /**
+     * When the asset this applies to is a 'main_object', this method details any objects that should NOT be
+     * included under that umbrella.
+     *
+     * @return {@code Set<String>} - names of the IGC asset types that should not be included
+     */
+    public Set<String> getExcludedIgcAssetTypes() { return this.excludeIgcAssetType; }
+
+    /**
      * Add the provided property as one of the IGC properties needed to setup this classification.
      *
      * @param property the IGC asset's property name
@@ -123,29 +154,84 @@ public abstract class ClassificationMapping extends InstanceMapping {
     public void addIgcRelationshipProperty(String property) { this.igcRelationshipProperties.add(property); }
 
     /**
+     * Add a simple one-to-one property mapping between an IGC property and an OMRS property.
+     *
+     * @param igcPropertyName the IGC property name to be mapped
+     * @param omrsPropertyName the OMRS property name to be mapped
+     */
+    public final void addSimplePropertyMapping(String igcPropertyName, String omrsPropertyName) {
+        EntityMapping.PropertyMapping pm = new EntityMapping.PropertyMapping(igcPropertyName, omrsPropertyName);
+        mappingByOmrsProperty.put(omrsPropertyName, pm);
+        mappingByIgcProperty.put(igcPropertyName, pm);
+    }
+
+    /**
+     * Indicates whether this classification mapping has subtypes (true) or not (false).
+     * Subtypes can be used where the same classification may represent classifications between a number of different
+     * IGC objects and each needs to be distinguished to appropriately apply a mapping.
+     *
+     * @return boolean
+     */
+    public boolean hasSubTypes() { return !this.subtypes.isEmpty(); }
+
+    /**
+     * Adds a subtype to this classification mapping.
+     * Subtypes can be used where the same classification may represent classifications between a number of different
+     * IGC objects and each needs to be distinguished to appropriately apply a mapping.
+     *
+     * @param subClassificationMapping the classification mapping that defines a subtype of this mapping
+     */
+    public void addSubType(ClassificationMapping subClassificationMapping) { this.subtypes.add(subClassificationMapping); }
+
+    /**
+     * Retrieve the listing of sub-classification mappings of this mapping.
+     * Subtypes can be used where the same classification may represent classifications between a number of different
+     * IGC objects and each needs to be distinguished to appropriately apply a mapping.
+     *
+     * @return {@code List<ClassificationMapping>}
+     */
+    public List<ClassificationMapping> getSubTypes() { return this.subtypes; }
+
+    /**
      * Implement this method to actually define the logic for the classification. (Since IGC has no actual concept
      * of classification, this is left as a method to-be-implemented depending on how the implementation desires the
-     * classification to be represented within IGC.)
+     * classification to be represented within IGC.) By default, it will only apply simple and literal mappings that
+     * have been defined for the classification.
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC repository via OMRS connector
      * @param classifications the list of classifications to which new classifications should be added
      * @param fromIgcObject the IGC object from which to determine the classifications
      * @param userId the user requesting the classifications (currently unused)
      */
-    public abstract void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                      List<Classification> classifications,
-                                                      Reference fromIgcObject,
-                                                      String userId);
+    public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                             List<Classification> classifications,
+                                             Reference fromIgcObject,
+                                             String userId) {
+        try {
+            Classification classification = getMappedClassification(
+                    igcomrsRepositoryConnector,
+                    new InstanceProperties(),
+                    fromIgcObject,
+                    userId
+            );
+            classifications.add(classification);
+        } catch (RepositoryErrorException e) {
+            log.error("Unable to map classification.", e);
+        }
+    }
 
     /**
      * Implement this method to define how IGC assets can be searched based on this classification. (Since IGC has no
      * actual concept of classification, this is left as a method to-be-implemented depending on how the implementation
-     * desires the classification to be represented within IGC.)
+     * desires the classification to be represented within IGC.) By default, it will return an empty set of conditions
+     * to find the classification.
      *
      * @param matchClassificationProperties the criteria to use when searching for the classification
      * @return IGCSearchConditionSet - the IGC search criteria to find entities based on this classification
      */
-    public abstract IGCSearchConditionSet getIGCSearchCriteria(InstanceProperties matchClassificationProperties);
+    public IGCSearchConditionSet getIGCSearchCriteria(InstanceProperties matchClassificationProperties) {
+        return new IGCSearchConditionSet();
+    }
 
     /**
      * Implement this method to define how to add an OMRS classification to an existing IGC asset. (Since IGC has no
@@ -205,9 +291,27 @@ public abstract class ClassificationMapping extends InstanceMapping {
         IGCOMRSMetadataCollection igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
         OMRSRepositoryHelper omrsRepositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
         String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
+        Map<String, TypeDefAttribute> omrsAttributeMap = igcomrsMetadataCollection.getTypeDefAttributesForType(omrsClassificationType);
+
+        // Then we'll iterate through the provided mappings to set an OMRS instance property for each one
+        for (String igcPropertyName : mappingByIgcProperty.keySet()) {
+            String omrsAttribute = mappingByIgcProperty.get(igcPropertyName).getOmrsPropertyName();
+            if (omrsAttributeMap.containsKey(omrsAttribute)) {
+                TypeDefAttribute typeDefAttribute = omrsAttributeMap.get(omrsAttribute);
+                classificationProperties = AttributeMapping.addPrimitivePropertyToInstance(
+                        omrsRepositoryHelper,
+                        repositoryName,
+                        classificationProperties,
+                        typeDefAttribute,
+                        igcRestClient.getPropertyByName(fromIgcObject, igcPropertyName),
+                        methodName
+                );
+            } else {
+                if (log.isWarnEnabled()) { log.warn("No OMRS attribute {} defined for classification type {} -- skipping mapping.", omrsAttribute, omrsClassificationType); }
+            }
+        }
 
         // Set any fixed (literal) relationship property values
-        Map<String, TypeDefAttribute> omrsAttributeMap = igcomrsMetadataCollection.getTypeDefAttributesForType(omrsClassificationType);
         for (String omrsPropertyName : getLiteralPropertyMappings()) {
             if (omrsAttributeMap.containsKey(omrsPropertyName)) {
                 Object value = getOmrsPropertyLiteralValue(omrsPropertyName);

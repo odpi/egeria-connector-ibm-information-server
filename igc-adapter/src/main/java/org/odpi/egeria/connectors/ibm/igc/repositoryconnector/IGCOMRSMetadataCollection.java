@@ -852,9 +852,11 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     }
                     break;
                 case CLASSIFICATION_DEF:
-                    ClassificationMapping classificationMapping = classificationMappingStore.getMappingByOmrsTypeGUID(guid);
-                    if (classificationMapping != null) {
-                        mappedProperties = classificationMapping.getMappedOmrsPropertyNames();
+                    List<ClassificationMapping> classificationMappings = classificationMappingStore.getMappingsByOmrsTypeGUID(guid);
+                    if (classificationMappings != null && !classificationMappings.isEmpty()) {
+                        for (ClassificationMapping classificationMapping : classificationMappings) {
+                            mappedProperties.addAll(classificationMapping.getMappedOmrsPropertyNames());
+                        }
                     }
                     break;
             }
@@ -1637,7 +1639,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
                     // Retrieve the list of property names we need for the classification
-                    List<String> igcClassificationProperties = foundMapping.getIgcRelationshipProperties();
+                    Set<String> igcClassificationProperties = foundMapping.getMappedIgcPropertyNames();
 
                     // Compose the search criteria for the classification as a set of nested conditions, so that
                     // matchCriteria does not change the meaning of what we're searching
@@ -1664,7 +1666,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         }
                     }
 
-                    igcSearch.addProperties(igcClassificationProperties);
+                    igcSearch.addProperties(new ArrayList(igcClassificationProperties));
                     igcSearch.addConditions(igcSearchConditionSet);
 
                     setPagingForSearch(igcSearch, fromEntityElement, pageSize);
@@ -2165,7 +2167,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                             errorCode.getUserAction());
                 }
 
-                ClassificationMapping classificationMapping = classificationMappingStore.getMappingByOmrsTypeName(classificationName);
+                ClassificationMapping classificationMapping = classificationMappingStore.getMappingByTypes(classificationName, igcEntity.getType());
 
                 if (classificationMapping != null) {
 
@@ -2713,8 +2715,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
-        ClassificationMapping classificationMapping = classificationMappingStore.getMappingByOmrsTypeName(classificationName);
-        if (classificationMapping.matchesAssetType(igcAssetType)) {
+        ClassificationMapping classificationMapping = classificationMappingStore.getMappingByTypes(classificationName, igcAssetType);
+        if (classificationMapping != null) {
             igcSearchConditionSet = classificationMapping.getIGCSearchCriteria(null);
         } else {
             if (log.isWarnEnabled()) { log.warn("Classification {} cannot be applied to IGC asset type {} - excluding from search limitations.", classificationName, igcAssetType); }

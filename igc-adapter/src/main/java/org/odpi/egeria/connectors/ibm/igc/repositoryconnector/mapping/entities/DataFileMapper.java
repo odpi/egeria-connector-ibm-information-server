@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.AssetZoneMembershipMapper_DataFile;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AssetSchemaTypeMapper_FileRecord;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.NestedFileMapper;
 
@@ -34,6 +35,9 @@ public class DataFileMapper extends ReferenceableMapper {
         // The list of relationships that should be mapped
         addRelationshipMapper(AssetSchemaTypeMapper_FileRecord.getInstance(null));
         addRelationshipMapper(NestedFileMapper.getInstance(null));
+
+        // The list of classifications that should be mapped
+        addClassificationMapper(AssetZoneMembershipMapper_DataFile.getInstance(null));
 
     }
 

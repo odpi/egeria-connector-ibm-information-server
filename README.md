@@ -132,7 +132,8 @@ For example payloads and endpoints, see the [Postman samples](samples).
         "ibm.igc.services.host": "{{igc_host}}",
         "ibm.igc.services.port": "{{igc_port}}",
         "ibm.igc.username": "{{igc_user}}",
-        "ibm.igc.password": "{{igc_password}}"
+        "ibm.igc.password": "{{igc_password}}",
+        "default.zones": [ "x", "y", "z" ]
     }
     ```
 
@@ -144,6 +145,9 @@ For example payloads and endpoints, see the [Postman samples](samples).
 
     The payload should include the hostname and port of your IGC environment's domain (services) tier,
     and a `username` and `password` through which the REST API can be accessed.
+    
+    You can optionally also provide a list of zone names that will be used as default zones for all Assets retrieved
+    from IGC through the proxy.
 
     Note that you also need to provide the `connectorProvider` parameter, set to the name of the IGC
     connectorProvider class (value as given above).

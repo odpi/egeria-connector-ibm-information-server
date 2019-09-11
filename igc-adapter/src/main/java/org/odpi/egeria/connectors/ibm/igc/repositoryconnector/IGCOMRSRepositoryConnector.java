@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
+import java.util.List;
 import java.util.Map;
 
 public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
@@ -22,6 +23,8 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
 
     private IGCRestClient igcRestClient;
     private IGCVersionEnum igcVersion;
+
+    private List<String> defaultZones;
 
     private boolean successfulInit;
 
@@ -53,6 +56,7 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
         String igcPort = (String) proxyProperties.get("ibm.igc.services.port");
         String igcUser = (String) proxyProperties.get("ibm.igc.username");
         String igcPass = (String) proxyProperties.get("ibm.igc.password");
+        this.defaultZones = (List<String>) proxyProperties.get("default.zones");
 
         // Create new REST API client (opens a new session)
         this.igcRestClient = new IGCRestClient(igcHost, igcPort, igcUser, igcPass);
@@ -157,6 +161,13 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      * @return IGCRestClient
      */
     public IGCRestClient getIGCRestClient() { return this.igcRestClient; }
+
+    /**
+     * Retrieve the list of default zones to apply to assets.
+     *
+     * @return {@code List<String>}
+     */
+    public List<String> getDefaultZones() { return this.defaultZones; }
 
     /**
      * Generates a zip file for the OMRS OpenIGC bundle, needed to enable change tracking for the event mapper.

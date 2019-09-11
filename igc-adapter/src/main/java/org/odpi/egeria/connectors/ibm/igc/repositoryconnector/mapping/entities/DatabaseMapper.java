@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.AssetZoneMembershipMapper_Database;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.ConnectionToAssetMapper_Database;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataContentForDataSetMapper;
 
@@ -40,6 +41,9 @@ public class DatabaseMapper extends ReferenceableMapper {
         // The list of relationships that should be mapped
         addRelationshipMapper(DataContentForDataSetMapper.getInstance(null));
         addRelationshipMapper(ConnectionToAssetMapper_Database.getInstance(null));
+
+        // The list of classifications that should be mapped
+        addClassificationMapper(AssetZoneMembershipMapper_Database.getInstance(null));
 
     }
 

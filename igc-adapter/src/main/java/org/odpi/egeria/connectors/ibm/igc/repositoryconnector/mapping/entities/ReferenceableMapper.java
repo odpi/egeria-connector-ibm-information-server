@@ -11,6 +11,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SemanticAssignmentMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
@@ -139,6 +140,9 @@ public class ReferenceableMapper extends EntityMapping {
 
         List<String> nonRelationshipProperties = igcRestClient.getNonRelationshipPropertiesFromPOJO(igcEntity.getType());
         Set<String> alreadyMapped = mapping.getAllMappedIgcProperties();
+        for (ClassificationMapping classificationMapping : mapping.getClassificationMappers()) {
+            alreadyMapped.addAll(classificationMapping.getMappedIgcPropertyNames());
+        }
         if (nonRelationshipProperties != null) {
 
             // Remove all of the already-mapped properties from our list of non-relationship properties
