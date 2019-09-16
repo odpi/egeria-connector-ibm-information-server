@@ -792,6 +792,10 @@ public class IGCRestClient {
                 if (this.workflowEnabled && !sNextURL.contains("workflowMode=draft")) {
                     sNextURL += "&workflowMode=draft";
                 }
+                if (!sNextURL.startsWith(baseURL)) {
+                    UriComponents components = UriComponentsBuilder.fromHttpUrl(sNextURL).build(true);
+                    log.warn("Configured base URL of environment ({}) does not match IGC's own configuration (https://{}:{}) -- likely to be odd failures ahead.", baseURL, components.getHost(), components.getPort());
+                }
                 String nextPageBody = makeRequest(sNextURL.substring(baseURL.length()), HttpMethod.GET, null, null);
                 // If the page is part of an ASSET retrieval, we need to strip off the attribute
                 // name of the relationship for proper multi-page composition
