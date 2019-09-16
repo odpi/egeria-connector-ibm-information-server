@@ -53,12 +53,12 @@
             <artifactId>jackson-dataformat-xml</artifactId>
             <scope>compile</scope>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.odpi.egeria</groupId>
             <artifactId>http-helper</artifactId>
             <scope>compile</scope>
         </dependency>
-        <!-- <dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.27</version>
