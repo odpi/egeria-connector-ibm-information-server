@@ -11,10 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Store of implemented classification mappings for the repository.
@@ -51,8 +48,9 @@ public class ClassificationMappingStore {
         if (mapping != null) {
             typeDefs.add(omrsTypeDef);
             String guid = omrsTypeDef.getGUID();
+            String name = omrsTypeDef.getName();
             omrsGuidToMapping.put(guid, mapping);
-            omrsNameToGuid.put(omrsTypeDef.getName(), guid);
+            omrsNameToGuid.put(name, guid);
         }
 
         return (mapping != null);
@@ -82,19 +80,49 @@ public class ClassificationMappingStore {
     }
 
     /**
-     * Retrieves a classification mapping based ont he name of the OMRS classification type.
+     * Retrieves a classification mapping based on the name of the OMRS classification type.
      *
      * @param name of the OMRS classification type
      * @return ClassificationMapping
      */
     public ClassificationMapping getMappingByOmrsTypeName(String name) {
         if (omrsNameToGuid.containsKey(name)) {
-            String guid = omrsNameToGuid.get(name);
-            return getMappingByOmrsTypeGUID(guid);
+            return getMappingByOmrsTypeGUID(omrsNameToGuid.get(name));
         } else {
             if (log.isWarnEnabled()) { log.warn("Unable to find mapping for OMRS type: {}", name); }
             return null;
         }
+    }
+
+    /**
+     * Retrieves a ClassificationMapping by OMRS classification type from those that are listed as implemented.
+     *
+     * @param omrsClassificationType the name of the OMRS classification type for which to retrieve a mapping
+     * @param igcAssetType the IGC asset type
+     * @return ClassificationMapping
+     */
+    public ClassificationMapping getMappingByTypes(String omrsClassificationType,
+                                                   String igcAssetType) {
+        ClassificationMapping found = null;
+        ClassificationMapping candidate = getMappingByOmrsTypeName(omrsClassificationType);
+        String candidateIgcType = candidate.getIgcAssetType();
+        Set<String> excludedIgcTypes = candidate.getExcludedIgcAssetTypes();
+        if (!excludedIgcTypes.contains(igcAssetType)) {
+            // If the IGC types also match, short-circuit out
+            if (candidateIgcType.equals(igcAssetType) || candidateIgcType.equals("main_object")) {
+                found = candidate;
+            } else if (candidate.hasSubTypes()) {
+                // Otherwise, check any sub-types and short-circuit out if we find a match
+                for (ClassificationMapping subMapping : candidate.getSubTypes()) {
+                    candidateIgcType = candidate.getIgcAssetType();
+                    if (candidateIgcType.equals(igcAssetType) || candidateIgcType.equals("main_object")) {
+                        found = subMapping;
+                        break;
+                    }
+                }
+            }
+        }
+        return found;
     }
 
     /**

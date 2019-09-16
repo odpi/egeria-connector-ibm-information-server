@@ -81,10 +81,21 @@ public class TypeDefStore {
      * @return TypeDef
      */
     public TypeDef getUnimplementedTypeDefByGUID(String guid) {
+        return getUnimplementedTypeDefByGUID(guid, true);
+    }
+
+    /**
+     * Retrieves an unimplemented TypeDef by its GUID.
+     *
+     * @param guid of the type definition
+     * @param logOnNotFound whether to log or not if not found
+     * @return TypeDef
+     */
+    public TypeDef getUnimplementedTypeDefByGUID(String guid, boolean logOnNotFound) {
         if (unimplementedTypeDefs.containsKey(guid)) {
             return unimplementedTypeDefs.get(guid);
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unable to find unimplemented OMRS TypeDef: {}", guid); }
+            if (logOnNotFound && log.isWarnEnabled()) { log.warn("Unable to find unimplemented OMRS TypeDef: {}", guid); }
             return null;
         }
     }

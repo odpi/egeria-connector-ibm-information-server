@@ -82,7 +82,7 @@ public abstract class EntityMapping extends InstanceMapping {
     /**
      * Subclass to contain individual mappings.
      */
-    public final class PropertyMapping {
+    public static final class PropertyMapping {
 
         private String igcPropertyName;
         private String omrsPropertyName;
@@ -538,7 +538,7 @@ public abstract class EntityMapping extends InstanceMapping {
         // Merge together all the properties we want to map
         ArrayList<String> allProperties = new ArrayList<>();
         for (ClassificationMapping classificationMapping : mapping.getClassificationMappers()) {
-            allProperties.addAll(classificationMapping.getIgcRelationshipProperties());
+            allProperties.addAll(classificationMapping.getMappedIgcPropertyNames());
         }
 
         allProperties.addAll(mapping.getAllMappedIgcProperties());
@@ -575,7 +575,7 @@ public abstract class EntityMapping extends InstanceMapping {
         ArrayList<String> allProperties = new ArrayList<>();
         allProperties.addAll(mapping.getAllMappedIgcProperties());
         for (ClassificationMapping classificationMapping : mapping.getClassificationMappers()) {
-            allProperties.addAll(classificationMapping.getIgcRelationshipProperties());
+            allProperties.addAll(classificationMapping.getMappedIgcPropertyNames());
         }
         allProperties.addAll(nonRelationshipProperties);
 
