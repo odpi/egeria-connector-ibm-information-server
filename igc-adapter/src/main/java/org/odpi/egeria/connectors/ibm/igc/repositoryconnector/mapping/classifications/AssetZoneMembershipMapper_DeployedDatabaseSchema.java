@@ -18,7 +18,7 @@ public class AssetZoneMembershipMapper_DeployedDatabaseSchema extends AssetZoneM
         super(
                 "database_schema",
                 null,
-                "Asset",
+                "DeployedDatabaseSchema",
                 "AssetZoneMembership"
         );
     }

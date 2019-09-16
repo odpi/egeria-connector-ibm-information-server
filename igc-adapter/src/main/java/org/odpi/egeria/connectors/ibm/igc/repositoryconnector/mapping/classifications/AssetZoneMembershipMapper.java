@@ -23,6 +23,9 @@ import java.util.Map;
 /**
  * Singleton to map the OMRS "AssetZoneMembership" classification.
  * @see AssetZoneMembershipMapper_Database
+ * @see AssetZoneMembershipMapper_DeployedDatabaseSchema
+ * @see AssetZoneMembershipMapper_FileFolder
+ * @see AssetZoneMembershipMapper_DataFile
  */
 public class AssetZoneMembershipMapper extends ClassificationMapping {
 
@@ -42,6 +45,7 @@ public class AssetZoneMembershipMapper extends ClassificationMapping {
                 "Asset",
                 "AssetZoneMembership"
         );
+        addMappedOmrsProperty("zoneMembership");
         addSubType(AssetZoneMembershipMapper_Database.getInstance(null));
         addSubType(AssetZoneMembershipMapper_DeployedDatabaseSchema.getInstance(null));
         addSubType(AssetZoneMembershipMapper_FileFolder.getInstance(null));
@@ -58,7 +62,6 @@ public class AssetZoneMembershipMapper extends ClassificationMapping {
                 omrsEntityType,
                 omrsClassificationType
         );
-        addMappedOmrsProperty("zoneMembership");
     }
 
     /**

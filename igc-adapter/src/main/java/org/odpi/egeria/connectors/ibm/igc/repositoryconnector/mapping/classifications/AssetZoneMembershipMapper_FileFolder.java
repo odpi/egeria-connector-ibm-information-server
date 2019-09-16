@@ -18,7 +18,7 @@ public class AssetZoneMembershipMapper_FileFolder extends AssetZoneMembershipMap
         super(
                 "data_file_folder",
                 null,
-                "Asset",
+                "FileFolder",
                 "AssetZoneMembership"
         );
     }

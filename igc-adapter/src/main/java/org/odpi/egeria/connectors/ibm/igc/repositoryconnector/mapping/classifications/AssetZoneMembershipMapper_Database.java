@@ -20,7 +20,7 @@ public class AssetZoneMembershipMapper_Database extends AssetZoneMembershipMappe
         super(
                 "database",
                 null,
-                "Asset",
+                "Database",
                 "AssetZoneMembership"
         );
     }

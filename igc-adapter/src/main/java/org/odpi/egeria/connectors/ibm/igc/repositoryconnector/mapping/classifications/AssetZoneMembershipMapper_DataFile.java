@@ -18,7 +18,7 @@ public class AssetZoneMembershipMapper_DataFile extends AssetZoneMembershipMappe
         super(
                 "data_file",
                 null,
-                "Asset",
+                "DataFile",
                 "AssetZoneMembership"
         );
     }
