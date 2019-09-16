@@ -24,13 +24,13 @@ public class ClassificationMappingStore {
 
     private List<TypeDef> typeDefs;
 
-    private Map<String, List<ClassificationMapping>> omrsGuidToMappings;
-    private Map<String, List<String>> omrsNameToGuids;
+    private Map<String, ClassificationMapping> omrsGuidToMapping;
+    private Map<String, String> omrsNameToGuid;
 
     public ClassificationMappingStore(IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
         typeDefs = new ArrayList<>();
-        omrsGuidToMappings = new HashMap<>();
-        omrsNameToGuids = new HashMap<>();
+        omrsGuidToMapping = new HashMap<>();
+        omrsNameToGuid = new HashMap<>();
         this.igcomrsRepositoryConnector = igcomrsRepositoryConnector;
     }
 
@@ -49,16 +49,8 @@ public class ClassificationMappingStore {
             typeDefs.add(omrsTypeDef);
             String guid = omrsTypeDef.getGUID();
             String name = omrsTypeDef.getName();
-            if (!omrsGuidToMappings.containsKey(guid)) {
-                List<ClassificationMapping> list = new ArrayList<>();
-                omrsGuidToMappings.put(guid, list);
-            }
-            if (!omrsNameToGuids.containsKey(name)) {
-                List<String> list = new ArrayList<>();
-                omrsNameToGuids.put(name, list);
-            }
-            omrsGuidToMappings.get(guid).add(mapping);
-            omrsNameToGuids.get(name).add(guid);
+            omrsGuidToMapping.put(guid, mapping);
+            omrsNameToGuid.put(name, guid);
         }
 
         return (mapping != null);
@@ -76,11 +68,11 @@ public class ClassificationMappingStore {
      * Retrieves a classification mapping based on the GUID of the OMRS classification type.
      *
      * @param guid of the OMRS classification type
-     * @return {@code List<ClassificationMapping>}
+     * @return ClassificationMapping
      */
-    public List<ClassificationMapping> getMappingsByOmrsTypeGUID(String guid) {
-        if (omrsGuidToMappings.containsKey(guid)) {
-            return omrsGuidToMappings.get(guid);
+    public ClassificationMapping getMappingByOmrsTypeGUID(String guid) {
+        if (omrsGuidToMapping.containsKey(guid)) {
+            return omrsGuidToMapping.get(guid);
         } else {
             if (log.isWarnEnabled()) { log.warn("Unable to find mapping for OMRS type: {}", guid); }
             return null;
@@ -88,19 +80,14 @@ public class ClassificationMappingStore {
     }
 
     /**
-     * Retrieves a classification mapping based ont he name of the OMRS classification type.
+     * Retrieves a classification mapping based on the name of the OMRS classification type.
      *
      * @param name of the OMRS classification type
-     * @return {@code List<ClassificationMapping>}
+     * @return ClassificationMapping
      */
-    public List<ClassificationMapping> getMappingsByOmrsTypeName(String name) {
-        if (omrsNameToGuids.containsKey(name)) {
-            List<String> guids = omrsNameToGuids.get(name);
-            List<ClassificationMapping> classificationMappings = new ArrayList<>();
-            for (String guid : guids) {
-                classificationMappings.addAll(getMappingsByOmrsTypeGUID(guid));
-            }
-            return classificationMappings;
+    public ClassificationMapping getMappingByOmrsTypeName(String name) {
+        if (omrsNameToGuid.containsKey(name)) {
+            return getMappingByOmrsTypeGUID(omrsNameToGuid.get(name));
         } else {
             if (log.isWarnEnabled()) { log.warn("Unable to find mapping for OMRS type: {}", name); }
             return null;
@@ -117,23 +104,20 @@ public class ClassificationMappingStore {
     public ClassificationMapping getMappingByTypes(String omrsClassificationType,
                                                    String igcAssetType) {
         ClassificationMapping found = null;
-        List<ClassificationMapping> candidates = getMappingsByOmrsTypeName(omrsClassificationType);
-        for (ClassificationMapping candidate : candidates) {
-            String candidateIgcType = candidate.getIgcAssetType();
-            Set<String> excludedIgcTypes = candidate.getExcludedIgcAssetTypes();
-            if (!excludedIgcTypes.contains(igcAssetType)) {
-                // If the IGC types also match, short-circuit out
-                if (candidateIgcType.equals(igcAssetType) || candidateIgcType.equals("main_object")) {
-                    found = candidate;
-                    break;
-                } else if (candidate.hasSubTypes()) {
-                    // Otherwise, check any sub-types and short-circuit out if we find a match
-                    for (ClassificationMapping subMapping : candidate.getSubTypes()) {
-                        candidateIgcType = candidate.getIgcAssetType();
-                        if (candidateIgcType.equals(igcAssetType) || candidateIgcType.equals("main_object")) {
-                            found = subMapping;
-                            break;
-                        }
+        ClassificationMapping candidate = getMappingByOmrsTypeName(omrsClassificationType);
+        String candidateIgcType = candidate.getIgcAssetType();
+        Set<String> excludedIgcTypes = candidate.getExcludedIgcAssetTypes();
+        if (!excludedIgcTypes.contains(igcAssetType)) {
+            // If the IGC types also match, short-circuit out
+            if (candidateIgcType.equals(igcAssetType) || candidateIgcType.equals("main_object")) {
+                found = candidate;
+            } else if (candidate.hasSubTypes()) {
+                // Otherwise, check any sub-types and short-circuit out if we find a match
+                for (ClassificationMapping subMapping : candidate.getSubTypes()) {
+                    candidateIgcType = candidate.getIgcAssetType();
+                    if (candidateIgcType.equals(igcAssetType) || candidateIgcType.equals("main_object")) {
+                        found = subMapping;
+                        break;
                     }
                 }
             }

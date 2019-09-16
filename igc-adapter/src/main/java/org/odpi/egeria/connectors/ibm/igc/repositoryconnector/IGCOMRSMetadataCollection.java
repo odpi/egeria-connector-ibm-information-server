@@ -818,7 +818,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         String guid = typeDef.getGUID();
 
         // If we know the TypeDef is unimplemented, immediately throw an exception stating as much
-        if (typeDefStore.getUnimplementedTypeDefByGUID(guid) != null) {
+        if (typeDefStore.getUnimplementedTypeDefByGUID(guid, false) != null) {
             throw new TypeDefNotSupportedException(
                     404,
                     IGCOMRSMetadataCollection.class.getName(),
@@ -852,11 +852,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     }
                     break;
                 case CLASSIFICATION_DEF:
-                    List<ClassificationMapping> classificationMappings = classificationMappingStore.getMappingsByOmrsTypeGUID(guid);
-                    if (classificationMappings != null && !classificationMappings.isEmpty()) {
-                        for (ClassificationMapping classificationMapping : classificationMappings) {
-                            mappedProperties.addAll(classificationMapping.getMappedOmrsPropertyNames());
-                        }
+                    ClassificationMapping classificationMapping = classificationMappingStore.getMappingByOmrsTypeGUID(guid);
+                    if (classificationMapping != null) {
+                        mappedProperties = classificationMapping.getMappedOmrsPropertyNames();
                     }
                     break;
             }
