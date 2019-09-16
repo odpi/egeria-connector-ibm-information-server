@@ -35,6 +35,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Library of methods to connect to and interact with an IBM Information Governance Catalog environment
@@ -446,8 +448,9 @@ public class IGCRestClient {
         ResponseEntity<String> response = null;
         try {
             if (log.isDebugEnabled()) { log.debug("{}ing to {} with: {}", method, url, payload); }
+            UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(url).build(true);
             response = restTemplate.exchange(
-                    url,
+                    uriComponents.toUri(),
                     method,
                     toSend,
                     String.class);

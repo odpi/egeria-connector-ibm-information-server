@@ -41,8 +41,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -346,13 +345,107 @@ public class IARestClient {
     }
 
     /**
+     * Retrieve a list of all the (qualified) names of tables within the specified project.
+     *
+     * @param details the project details as retrieved from getProjectDetails
+     * @return {@List<String>}
+     * @see #getProjectDetails(String)
+     */
+    public List<String> getTablesInProject(Project details) {
+        List<String> tableNames = new ArrayList<>();
+        for (DataSource dataSource : details.getDataSources()) {
+            for (Schema schema : dataSource.getSchemas()) {
+                for (Table table : schema.getTables()) {
+                    String qualifiedName = dataSource.getName() + "." + schema.getName() + "." + table.getName();
+                    tableNames.add(qualifiedName);
+                }
+            }
+        }
+        return tableNames;
+    }
+
+    /**
+     * Retrieve a list of all the (qualified) names of columns within the specified project.
+     *
+     * @param details the project details as retrieved from getProjectDetails
+     * @return {@List<String>}
+     * @see #getProjectDetails(String)
+     */
+    public List<String> getColumnsInProject(Project details) {
+        List<String> columnNames = new ArrayList<>();
+        for (DataSource dataSource : details.getDataSources()) {
+            for (Schema schema : dataSource.getSchemas()) {
+                for (Table table : schema.getTables()) {
+                    for (Column column : table.getColumns()) {
+                        String qualifiedName = dataSource.getName() + "." + schema.getName() + "." + table.getName() + "." + column.getName();
+                        columnNames.add(qualifiedName);
+                    }
+                }
+            }
+        }
+        return columnNames;
+    }
+
+    /**
+     * Retrieve the column analysis results for a table as a Map, keyed by the name of the column.
+     *
+     * @param projectName the name of the project from which to retrieve results
+     * @param tableName the name of the table for which to retrieve results
+     * @return {@code Map<String, ColumnAnalysisResults>} - a map from column name to analysis results
+     */
+    public Map<String, ColumnAnalysisResults> getColumnAnalysisResultsForTable(String projectName,
+                                                                               String tableName) {
+        Project results = getColumnAnalysisResults(projectName, tableName + ".*");
+        Map<String, ColumnAnalysisResults> map = new HashMap<>();
+        for (DataSource dataSource : results.getDataSources()) {
+            for (Schema schema : dataSource.getSchemas()) {
+                for (Table table : schema.getTables()) {
+                    for (Column column : table.getColumns()) {
+                        ColumnAnalysisResults columnAnalysisResults = column.getColumnAnalysisResults();
+                        if (columnAnalysisResults != null) {
+                            map.put(column.getName(), columnAnalysisResults);
+                        }
+                    }
+                }
+            }
+        }
+        return map;
+    }
+
+    /**
+     * Retrieve the data quality analysis results for a table as a Map, keyed by the name of the column.
+     *
+     * @param projectName the name of the project from which to retrieve results
+     * @param tableName the name of the table for which to retrieve results
+     * @return {@code Map<String, List<DataQualityProblem>>} - a map from column name to analysis results
+     */
+    public Map<String, List<DataQualityProblem>> getDataQualityAnalysisResultsForTable(String projectName,
+                                                                                    String tableName) {
+        Project results = getDataQualityAnalysisResults(projectName, tableName);
+        Map<String, List<DataQualityProblem>> map = new HashMap<>();
+        for (DataSource dataSource : results.getDataSources()) {
+            for (Schema schema : dataSource.getSchemas()) {
+                for (Table table : schema.getTables()) {
+                    for (Column column : table.getColumns()) {
+                        List<DataQualityProblem> dataQualityProblems = column.getDataQualityProblems();
+                        if (dataQualityProblems != null) {
+                            map.put(column.getName(), dataQualityProblems);
+                        }
+                    }
+                }
+            }
+        }
+        return map;
+    }
+
+    /**
      * Retrieve the column analysis results for the specified IA project.
      *
      * @param projectName the name of the IA project for which to retrieve column analysis results
      * @param columnName (optional) qualified name of a column for which to retrieve analysis results
      * @return Project - containing only the column analysis results details
      */
-    public Project getColumnAnalysisResults(String projectName,
+    private Project getColumnAnalysisResults(String projectName,
                                             String columnName) {
         return makeColumnBasedRequest(projectName, columnName, EP_COL_ANALYSIS_RESULTS, "getColumnAnalysisResults");
     }
@@ -394,7 +487,7 @@ public class IARestClient {
      * @param tableName (optional) qualified name of a table for which to retrieve analysis results
      * @return Project - containing only the data quality analysis results details
      */
-    public Project getDataQualityAnalysisResults(String projectName,
+    private Project getDataQualityAnalysisResults(String projectName,
                                                  String tableName) {
         return makeTableBasedRequest(projectName, tableName, EP_DQ_ANALYSIS_RESULTS, "getDataQualityAnalysisResults");
     }
@@ -403,34 +496,91 @@ public class IARestClient {
      * Retrieve information on results that have been published for the specified IA project.
      *
      * @param projectName the name of the IA project for which to retrieve the published results
-     * @return Project - containing only the published results information
+     * @return {@code Map<String, Date>} - a map from table name to last publication date, empty if nothing published
      */
-    public Project getPublishedResults(String projectName) {
-        return makeColumnBasedRequest(projectName, null, EP_PUBLISHED_RESULTS, "getPublishedResults");
+    public Map<String, Date> getPublishedResults(String projectName) {
+        Project publishedResults = makeColumnBasedRequest(projectName, null, EP_PUBLISHED_RESULTS, "getPublishedResults");
+        List<Table> results = publishedResults.getPublishedResults();
+        Map<String, Date> map = new HashMap<>();
+        if (results != null) {
+            for (Table table : results) {
+                map.put(table.getName(), table.getPublicationDateOfAnalysisResults());
+            }
+        }
+        return map;
     }
 
     /**
-     * Run a column analysis within the specified project, using the details provided.
+     * Run a column analysis within the specified project, against the specified column(s).
+     * The name of the column should be fully-qualified (database.schema.table.column), and multiple columns can be
+     * specified by using a '*' for example: database.schema.table.* for all columns in a table.
      *
      * @param projectName the name of the project in which to run the column analysis
-     * @param details the details of which column(s) and options to use for the analysis
+     * @param columnName the fully-qualified name of the column(s) to run analysis against
      * @return TaskExecutionReport containing the scheduled task ID or any errors
      */
     public TaskExecutionReport runColumnAnalysis(String projectName,
-                                                 RunColumnAnalysis details) {
-        return makeTaskRequest(projectName, details, "runColumnAnalysis");
+                                                 String columnName) {
+        Column column = new Column();
+        column.setName(columnName);
+        List<Column> columns = new ArrayList<>();
+        columns.add(column);
+        RunColumnAnalysis runColumnAnalysis = new RunColumnAnalysis();
+        runColumnAnalysis.setColumns(columns);
+        return makeTaskRequest(projectName, runColumnAnalysis, "runColumnAnalysis");
     }
 
     /**
-     * Run a data quality analysis within the specified project, using the details provided.
+     * Run a data quality analysis within the specified project, against the specified table.
+     * The name of the table should be fully-qualified (database.schema.table).
      *
      * @param projectName the name of the project in which to run the data quality analysis
-     * @param details the details of which table(s) and options to use for the analysis
+     * @param tableName the fully-qualified name of the table to run analysis against
      * @return TaskExecutionReport containing the scheduled task ID or any errors
      */
     public TaskExecutionReport runDataQualityAnalysis(String projectName,
-                                                      RunDataQualityAnalysis details) {
-        return makeTaskRequest(projectName, details, "runDataQualityAnalysis");
+                                                      String tableName) {
+        Table table = new Table();
+        table.setName(tableName);
+        List<Table> tables = new ArrayList<>();
+        tables.add(table);
+        RunDataQualityAnalysis runDataQualityAnalysis = new RunDataQualityAnalysis();
+        runDataQualityAnalysis.setTables(tables);
+        return makeTaskRequest(projectName, runDataQualityAnalysis, "runDataQualityAnalysis");
+    }
+
+    /**
+     * Publish analysis results from the specified project's specified table.
+     *
+     * @param projectName the name of the project from which to publish analysis results
+     * @param tableName the fully-qualified name of the table for which to publish results
+     */
+    public void publishResults(String projectName,
+                               String tableName) {
+        Table table = new Table();
+        table.setName(tableName);
+        List<Table> tables = new ArrayList<>();
+        tables.add(table);
+        PublishResults toPublish = new PublishResults();
+        toPublish.setTableList(tables);
+        publishResults(projectName, toPublish);
+    }
+
+    /**
+     * Retrieve the status of each task within a running request.
+     *
+     * @param taskExecutionReport the response of a running request containing task information
+     * @return {@code List<TaskExecutionSchedule>}
+     */
+    public List<TaskExecutionSchedule> getTaskStatus(TaskExecutionReport taskExecutionReport) {
+        List<TaskExecutionSchedule> taskExecutionSchedules = new ArrayList<>();
+        for (ScheduledTask scheduledTask : taskExecutionReport.getScheduledTaskList()) {
+            TaskExecutionSchedule taskExecutionSchedule = getTaskStatus(scheduledTask.getScheduleId());
+            if (taskExecutionSchedule != null) {
+                taskExecutionSchedules.add(taskExecutionSchedule);
+            }
+        }
+        return taskExecutionSchedules;
     }
 
     /**
@@ -456,8 +606,8 @@ public class IARestClient {
      * @param projectName the name of the project from which to publish results
      * @param details the details of which column(s) and options to use for publishing
      */
-    public void publishResults(String projectName,
-                               PublishResults details) {
+    private void publishResults(String projectName,
+                                PublishResults details) {
         String xmlPayload = getTaskPayload(projectName, details);
         if (log.isInfoEnabled()) { log.info("Task request payload: " + xmlPayload); }
         String response = makeRequest(EP_PUBLISH, HttpMethod.POST, xmlPayload);
