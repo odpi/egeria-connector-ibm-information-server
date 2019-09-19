@@ -2,11 +2,13 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DSJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.openmetadata.accessservices.dataengine.model.*;
 import org.odpi.openmetadata.accessservices.dataengine.model.Process;
+import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.model.DataEngineLineageMappings;
 import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.model.DataEngineProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +41,20 @@ public class ProcessMapping extends BaseMapping {
                 PortAliasMapping inputAliasMapping = new PortAliasMapping(job, job.getInputStages(), "reads_from_(design)");
                 PortAliasMapping outputAliasMapping = new PortAliasMapping(job, job.getOutputStages(), "writes_to_(design)");
                 process.getProcess().setPortAliases(Stream.concat(inputAliasMapping.getPortAliases().stream(), outputAliasMapping.getPortAliases().stream()).collect(Collectors.toList()));
+                Set<LineageMapping> lineageMappings = new HashSet<>();
+                for (Reference link : job.getAllLinks()) {
+                    LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, link);
+                    DataEngineLineageMappings crossStageLineageMappings = lineageMappingMapping.getLineageMappings();
+                    if (crossStageLineageMappings != null) {
+                        Set<LineageMapping> mappings = crossStageLineageMappings.getLineageMappings();
+                        if (mappings != null && !mappings.isEmpty()) {
+                            lineageMappings.addAll(mappings);
+                        }
+                    }
+                }
+                if (!lineageMappings.isEmpty()) {
+                    process.getProcess().setLineageMappings(lineageMappings.stream().collect(Collectors.toList()));
+                }
             }
         } else {
             log.error("Unable to create a job mapping for a sequence: {}", job);
