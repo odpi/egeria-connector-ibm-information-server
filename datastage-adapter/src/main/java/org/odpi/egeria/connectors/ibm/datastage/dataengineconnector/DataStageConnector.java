@@ -300,14 +300,8 @@ public class DataStageConnector extends DataEngineConnectorBase {
      */
     @Override
     public List<DataEngineLineageMappings> getChangedLineageMappings(Date from, Date to) {
-        log.info("Retrieving all changed lineage mappings (from cache)...");
-        Set<DataEngineLineageMappings> lineageMappings = new HashSet<>();
-        // Re-use the jobs we've already retrieved and cached to avoid needing to re-query all of their details again
-        log.info(" ... cache size = {}", changedJobsCache.size());
-        for (DSJob job : changedJobsCache) {
-            lineageMappings.addAll(getCrossStageLineageMappings(job));
-        }
-        return new ArrayList<>(lineageMappings);
+        // do nothing -- lineage mappings will always be handled by other methods
+        return null;
     }
 
     /**
@@ -447,36 +441,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
         }
 
         return processes;
-
-    }
-
-    /**
-     * Translate the detailed stages of the provided DataStage job into LineageMappings.
-     *
-     * @param job
-     * @return {@code Set<DataEngineLineageMappings>}
-     */
-    private Set<DataEngineLineageMappings> getCrossStageLineageMappings(DSJob job) {
-
-        Set<DataEngineLineageMappings> lineageMappings = new HashSet<>();
-
-        log.info("Load cross-stage lineage mappings...");
-        for (Reference link : job.getAllLinks()) {
-            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, link);
-            DataEngineLineageMappings crossStageLineageMappings = lineageMappingMapping.getLineageMappings();
-            if (crossStageLineageMappings != null
-                    && crossStageLineageMappings.getLineageMappings() != null
-                    && !crossStageLineageMappings.getLineageMappings().isEmpty()) {
-                try {
-                    log.info(" ... mappings: {}", objectMapper.writeValueAsString(crossStageLineageMappings));
-                } catch (JsonProcessingException e) {
-                    log.error("Unable to serialise to JSON: {}", crossStageLineageMappings, e);
-                }
-                lineageMappings.add(crossStageLineageMappings);
-            }
-        }
-
-        return lineageMappings;
 
     }
 
