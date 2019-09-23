@@ -7,7 +7,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 /**
  * Singleton to map the OMRS "AttributeForSchemaMapper" relationship.
  * @see AttributeForSchemaMapper_RecordField
- * @see AttributeForSchemaMapper_TableColumn
  * @see AttributeForSchemaMapper_TableSchema
  */
 public class AttributeForSchemaMapper extends RelationshipMapping {
@@ -30,7 +29,6 @@ public class AttributeForSchemaMapper extends RelationshipMapping {
                 "attributes"
         );
         addSubType(AttributeForSchemaMapper_TableSchema.getInstance(null));
-        addSubType(AttributeForSchemaMapper_TableColumn.getInstance(null));
         addSubType(AttributeForSchemaMapper_RecordField.getInstance(null));
     }
 

@@ -3,8 +3,9 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.TypeEmbeddedAttributeMapper_RelationalTable;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttributeForSchemaMapper_TableSchema;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SchemaAttributeTypeMapper_DatabaseTable;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.NestedSchemaAttributeMapper;
 
 /**
  * Defines the mapping to the OMRS "RelationalTable" entity.
@@ -32,7 +33,10 @@ public class RelationalTableMapper extends ReferenceableMapper {
 
         // The list of relationships that should be mapped
         addRelationshipMapper(AttributeForSchemaMapper_TableSchema.getInstance(null));
-        addRelationshipMapper(SchemaAttributeTypeMapper_DatabaseTable.getInstance(null));
+        addRelationshipMapper(NestedSchemaAttributeMapper.getInstance(null));
+
+        // The list of classifications that should be mapped
+        addClassificationMapper(TypeEmbeddedAttributeMapper_RelationalTable.getInstance(null));
 
     }
 

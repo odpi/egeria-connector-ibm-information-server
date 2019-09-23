@@ -4,15 +4,13 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.PrimaryKeyMapper;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttributeForSchemaMapper_TableColumn;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataClassAssignmentMapper;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.ForeignKeyMapper;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SchemaAttributeTypeMapper_DatabaseColumn;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.TypeEmbeddedAttributeMapper_RelationalColumn;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.*;
 
 /**
  * Defines the mapping to the OMRS "RelationalColumn" entity.
  */
-public class RelationalColumnMapper extends ReferenceableMapper {
+public class RelationalColumnMapper extends SchemaAttribute_Mapper {
 
     private static class Singleton {
         private static final RelationalColumnMapper INSTANCE = new RelationalColumnMapper();
@@ -40,13 +38,12 @@ public class RelationalColumnMapper extends ReferenceableMapper {
         addSimplePropertyMapping("unique", "isUnique");
 
         // The list of relationships that should be mapped
-        addRelationshipMapper(AttributeForSchemaMapper_TableColumn.getInstance(null));
-        addRelationshipMapper(SchemaAttributeTypeMapper_DatabaseColumn.getInstance(null));
+        addRelationshipMapper(NestedSchemaAttributeMapper.getInstance(null));
         addRelationshipMapper(ForeignKeyMapper.getInstance(null));
-        addRelationshipMapper(DataClassAssignmentMapper.getInstance(null));
 
         // The list of classifications that should be mapped
         addClassificationMapper(PrimaryKeyMapper.getInstance(null));
+        addClassificationMapper(TypeEmbeddedAttributeMapper_RelationalColumn.getInstance(null));
 
     }
 
