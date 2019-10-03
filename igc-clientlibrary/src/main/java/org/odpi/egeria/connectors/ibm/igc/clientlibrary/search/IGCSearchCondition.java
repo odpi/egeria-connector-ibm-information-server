@@ -2,8 +2,11 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.search;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.List;
 
 /**
  * Manages a single condition to use as part of an {@link IGCSearch}.
@@ -15,6 +18,7 @@ public class IGCSearchCondition {
     private String property;
     private String operator;
     private String value = null;
+    private List<String> values = null;
 
     private Boolean negated = null;
 
@@ -78,6 +82,44 @@ public class IGCSearchCondition {
         this.negated = negated;
     }
 
+    /**
+     * Creates a new search condition directly. For example, the following would search for any assets
+     * where the "name" is one of the values in the provided list "A", "B", or "C":
+     *
+     * <ul>
+     *     <li>property: "name"</li>
+     *     <li>listOfValues: [ "A", "B", "C" ]</li>
+     * </ul>
+     *
+     * @param property the property of an asset type to search against
+     * @param listOfValues the list of values to compare the property against
+     */
+    public IGCSearchCondition(String property, List<String> listOfValues) {
+        this.property = property;
+        this.operator = "in";
+        this.values = listOfValues;
+    }
+
+    /**
+     * Creates a new search condition directly. For example, the following would search for any assets
+     * where the "name" is NOT one of the values in the provided list "A", "B", or "C":
+     * <ul>
+     *     <li>property: "name"</li>
+     *     <li>listOfValues: [ "A", "B", "C" ]</li>
+     *     <li>negated: true</li>
+     * </ul>
+     *
+     * @param property the property of an asset type to search against
+     * @param listOfValues the list of values to compare the property against
+     * @param negated whether to invert (negate) the comparison operator or not
+     */
+    public IGCSearchCondition(String property, List<String> listOfValues, Boolean negated) {
+        this.property = property;
+        this.operator = "in";
+        this.values = listOfValues;
+        this.negated = negated;
+    }
+
     public String getProperty() { return this.property; }
     public void setProperty(String property) { this.property = property; }
 
@@ -86,6 +128,9 @@ public class IGCSearchCondition {
 
     public String getValue() { return this.value; }
     public void setValue(String value) { this.value = value; }
+
+    public List<String> getValues() { return this.values; }
+    public void setValues(List<String> values) { this.values = values; }
 
     public Boolean getNegated() { return this.negated; }
     public void setNegated(Boolean negated) { this.negated = negated; }
@@ -99,7 +144,13 @@ public class IGCSearchCondition {
         ObjectNode condObj = nf.objectNode();
         condObj.set("property", nf.textNode(getProperty()));
         condObj.set("operator", nf.textNode(getOperator()));
-        if (this.value != null) {
+        if (this.values != null && !this.values.isEmpty()) {
+            ArrayNode arrayNode = nf.arrayNode(getValues().size());
+            for (String oneValue : getValues()) {
+                arrayNode.add(oneValue);
+            }
+            condObj.set("value", arrayNode);
+        } else if (this.value != null) {
             condObj.set("value", nf.textNode(getValue()));
         }
         if (this.negated != null) {
