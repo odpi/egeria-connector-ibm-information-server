@@ -155,12 +155,12 @@ public class EntityMappingInstance {
     public final void initializeEntitySummary() {
         if (omrsSummary == null) {
             omrsSummary = new EntitySummary();
-            String guid = igcEntity.getId();
+            String rid = igcEntity.getId();
             String igcRidPrefix = mapping.getIgcRidPrefix();
             if (igcRidPrefix != null) {
-                guid = igcRidPrefix + guid;
+                rid = igcRidPrefix + rid;
             }
-            omrsSummary.setGUID(guid);
+            omrsSummary.setGUID(igcomrsMetadataCollection.getGuidForRid(rid));
             omrsSummary.setInstanceURL(igcEntity.getUrl());
         }
     }
@@ -179,12 +179,12 @@ public class EntityMappingInstance {
                         mapping.getOmrsTypeDefName()
                 );
                 omrsDetail.setStatus(InstanceStatus.ACTIVE);
-                String guid = igcEntity.getId();
+                String rid = igcEntity.getId();
                 String igcRidPrefix = mapping.getIgcRidPrefix();
                 if (igcRidPrefix != null) {
-                    guid = igcRidPrefix + guid;
+                    rid = igcRidPrefix + rid;
                 }
-                omrsDetail.setGUID(guid);
+                omrsDetail.setGUID(igcomrsMetadataCollection.getGuidForRid(rid));
                 omrsDetail.setInstanceURL(igcEntity.getUrl());
             } catch (TypeErrorException e) {
                 log.error("Unable to get skeleton detail entity, defaulting to basic summary.", e);
