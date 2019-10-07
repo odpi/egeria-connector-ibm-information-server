@@ -29,7 +29,7 @@ public class RelationalTableMapper extends ReferenceableMapper {
         );
 
         // The list of properties that should be mapped
-        addSimplePropertyMapping("name", "name");
+        addSimplePropertyMapping("name", "displayName");
 
         // The list of relationships that should be mapped
         addRelationshipMapper(AttributeForSchemaMapper_TableSchema.getInstance(null));

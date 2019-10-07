@@ -41,12 +41,8 @@ public class TypeEmbeddedAttributeMapper extends ClassificationMapping {
                 "SchemaAttribute",
                 "TypeEmbeddedAttribute"
         );
-        addLiteralPropertyMapping("versionNumber", null);
-        addLiteralPropertyMapping("author", null);
-        addLiteralPropertyMapping("usage", null);
         addLiteralPropertyMapping("encodingStandard", null);
         addMappedOmrsProperty("dataType");
-        addMappedOmrsProperty("defaultValue");
         addSubType(TypeEmbeddedAttributeMapper_RelationalTable.getInstance(null));
         addSubType(TypeEmbeddedAttributeMapper_RelationalColumn.getInstance(null));
     }
