@@ -2050,9 +2050,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     errorCode.getSystemAction(),
                     errorCode.getUserAction());
         }
-        String proxyOneRid = RelationshipMapping.getProxyOneGUIDFromRelationshipGUID(relationshipRid);
-        String proxyTwoRid = RelationshipMapping.getProxyTwoGUIDFromRelationshipGUID(relationshipRid);
-        String omrsRelationshipName = RelationshipMapping.getRelationshipTypeFromRelationshipGUID(relationshipRid);
+        String proxyOneRid = RelationshipMapping.getProxyOneRIDFromRelationshipRID(relationshipRid);
+        String proxyTwoRid = RelationshipMapping.getProxyTwoRIDFromRelationshipRID(relationshipRid);
+        String omrsRelationshipName = RelationshipMapping.getRelationshipTypeFromRelationshipRID(relationshipRid);
 
         String proxyOneIgcRid = proxyOneRid;
         String proxyTwoIgcRid = proxyTwoRid;

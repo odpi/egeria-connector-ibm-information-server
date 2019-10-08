@@ -266,6 +266,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 case "IA_TABLE_ADDED_TO_PROJECT":
                 case "IA_TABLE_REMOVED_FROM_PROJECT":
                 case "IA_DATARULE_CREATED_EVENT":
+                case "IA_DATARULE_DELETED_EVENT":
                 case "IA_COLUMN_ANALYSIS_SUBMITTED_EVENT":
                 case "IA_DATAQUALITY_ANALYSIS_SUBMITTED":
                 case "IA_COLUMN_ANALYSIS_STARTED_EVENT":
@@ -831,13 +832,14 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             RelationshipMapping.ProxyMapping pmOne = relationshipMapping.getProxyOneMapping();
             RelationshipMapping.ProxyMapping pmTwo = relationshipMapping.getProxyTwoMapping();
 
-            String relationshipGUID = RelationshipMapping.getRelationshipGUID(
+            String relationshipRID = RelationshipMapping.getRelationshipRID(
                     relationshipMapping,
                     proxyOne,
                     proxyTwo,
                     change.getIgcPropertyName(),
                     null
             );
+            String relationshipGUID = igcomrsMetadataCollection.getGuidForRid(relationshipRID);
             if (log.isDebugEnabled()) { log.debug(" ... calculated relationship GUID: {}", relationshipGUID); }
 
             // Only continue if this relationship is different from the one that triggered the processing in the first place
@@ -861,10 +863,10 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         );
                         // After purging the relationship, process any other updates
                         // on the assets at each end of the relationship
-                        processAsset(RelationshipMapping.getProxyOneGUIDFromRelationshipGUID(relationshipGUID),
+                        processAsset(RelationshipMapping.getProxyOneRIDFromRelationshipRID(relationshipRID),
                                 pmOne.getIgcAssetType(),
                                 relationshipGUID);
-                        processAsset(RelationshipMapping.getProxyTwoGUIDFromRelationshipGUID(relationshipGUID),
+                        processAsset(RelationshipMapping.getProxyTwoRIDFromRelationshipRID(relationshipRID),
                                 pmTwo.getIgcAssetType(),
                                 relationshipGUID);
                     } catch (InvalidParameterException | RepositoryErrorException | TypeDefNotKnownException e) {
@@ -940,13 +942,14 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         if (log.isDebugEnabled()) { log.debug("processSelfReferencingRelationship processing for {} and type: {}", latestVersionRID, omrsRelationshipType); }
 
-        String relationshipGUID = RelationshipMapping.getRelationshipGUID(
+        String relationshipRID = RelationshipMapping.getRelationshipRID(
                 relationshipMapping,
                 latestVersion,
                 latestVersion,
                 RelationshipMapping.SELF_REFERENCE_SENTINEL,
                 null
         );
+        String relationshipGUID = igcomrsMetadataCollection.getGuidForRid(relationshipRID);
         if (log.isDebugEnabled()) { log.debug(" ... calculated relationship GUID: {}", relationshipGUID); }
 
         // Only continue if this relationship is different from the one that triggered the processing in the first place
@@ -1054,7 +1057,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 }
                 if (oldProxyOne != null && oldProxyTwo != null) {
                     // Re-construct the old relationship GUID from this replaced RID
-                    String oldRelationshipGUID = RelationshipMapping.getRelationshipGUID(
+                    String oldRelationshipRID = RelationshipMapping.getRelationshipRID(
                             relationshipMapping,
                             oldProxyOne,
                             oldProxyTwo,
@@ -1062,6 +1065,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                             null,
                             true
                     );
+                    String oldRelationshipGUID = igcomrsMetadataCollection.getGuidForRid(oldRelationshipRID);
                     if (log.isDebugEnabled()) { log.debug(" ... calculated old relationship GUID: {}", oldRelationshipGUID); }
                     sendPurgedRelationship(
                             relationshipMapping,
@@ -1102,8 +1106,9 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                         Reference proxyTwo) {
 
         // Determine if there is a relationship-level asset (RID)
-        String proxyOneGuid = RelationshipMapping.getProxyOneGUIDFromRelationshipGUID(relationshipGUID);
-        String proxyTwoGuid = RelationshipMapping.getProxyTwoGUIDFromRelationshipGUID(relationshipGUID);
+        String relationshipRID = igcomrsMetadataCollection.getRidFromGuid(relationshipGUID);
+        String proxyOneGuid = RelationshipMapping.getProxyOneRIDFromRelationshipRID(relationshipRID);
+        String proxyTwoGuid = RelationshipMapping.getProxyTwoRIDFromRelationshipRID(relationshipRID);
         String proxyOneRid = IGCOMRSMetadataCollection.getRidFromGeneratedId(proxyOneGuid);
         String relationshipLevelRid = null;
         if (proxyOneGuid.equals(proxyTwoGuid) && proxyOneRid.equals(proxyOne.getId())) {
