@@ -586,12 +586,12 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param relationshipLevelRid the relationship-level RID (if any) within IGC (these are very rare)
      * @return String - the unique GUID for the relationship
      */
-    public static String getRelationshipGUID(RelationshipMapping relationshipMapping,
-                                             Reference endOne,
-                                             Reference endTwo,
-                                             String igcPropertyName,
-                                             String relationshipLevelRid) {
-        return getRelationshipGUID(
+    public static String getRelationshipRID(RelationshipMapping relationshipMapping,
+                                            Reference endOne,
+                                            Reference endTwo,
+                                            String igcPropertyName,
+                                            String relationshipLevelRid) {
+        return getRelationshipRID(
                 relationshipMapping,
                 endOne,
                 endTwo,
@@ -620,12 +620,12 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param proxyOrderKnown should be true iff the provided candidate proxies are known to be in the correct order
      * @return String - the unique GUID for the relationship
      */
-    public static String getRelationshipGUID(RelationshipMapping relationshipMapping,
-                                             Reference endOne,
-                                             Reference endTwo,
-                                             String igcPropertyName,
-                                             String relationshipLevelRid,
-                                             boolean proxyOrderKnown) {
+    public static String getRelationshipRID(RelationshipMapping relationshipMapping,
+                                            Reference endOne,
+                                            Reference endTwo,
+                                            String igcPropertyName,
+                                            String relationshipLevelRid,
+                                            boolean proxyOrderKnown) {
 
         String omrsRelationshipName = relationshipMapping.getOmrsRelationshipType();
         // Lookup types via this helper function, to translate any alias types (eg. host_(engine) and host)
@@ -761,50 +761,50 @@ public abstract class RelationshipMapping extends InstanceMapping {
     }
 
     /**
-     * Retrieve the portion of the provided relationship GUID that represents the GUID for proxy one of the relationship.
+     * Retrieve the portion of the provided relationship RID that represents the RID for proxy one of the relationship.
      *
-     * @param relationshipGUID the relationship GUID
-     * @return String - giving just the GUID for proxy one of the relationship
+     * @param relationshipRID the relationship RID
+     * @return String - giving just the RID for proxy one of the relationship
      */
-    public static String getProxyOneGUIDFromRelationshipGUID(String relationshipGUID) {
-        return getRelationshipGUIDToken(relationshipGUID, 0);
+    public static String getProxyOneRIDFromRelationshipRID(String relationshipRID) {
+        return getRelationshipRIDToken(relationshipRID, 0);
     }
 
     /**
-     * Retrieve the portion of the provided relationship GUID that represents the GUID for proxy two of the relationship.
+     * Retrieve the portion of the provided relationship RID that represents the RID for proxy two of the relationship.
      *
-     * @param relationshipGUID the relationship GUID
-     * @return String - giving just the GUID for proxy two of the relationship
+     * @param relationshipRID the relationship RID
+     * @return String - giving just the RID for proxy two of the relationship
      */
-    public static String getProxyTwoGUIDFromRelationshipGUID(String relationshipGUID) {
-        return getRelationshipGUIDToken(relationshipGUID, 2);
+    public static String getProxyTwoRIDFromRelationshipRID(String relationshipRID) {
+        return getRelationshipRIDToken(relationshipRID, 2);
     }
 
     /**
-     * Retrieve the portion of the provided relationship GUID that represents the OMRS relationship type.
-     * @param relationshipGUID the relationship GUID
+     * Retrieve the portion of the provided relationship RID that represents the OMRS relationship type.
+     * @param relationshipRID the relationship RID
      * @return String - giving just the name of the OMRS relationship type
      */
-    public static String getRelationshipTypeFromRelationshipGUID(String relationshipGUID) {
-        return getRelationshipGUIDToken(relationshipGUID, 1);
+    public static String getRelationshipTypeFromRelationshipRID(String relationshipRID) {
+        return getRelationshipRIDToken(relationshipRID, 1);
     }
 
     /**
-     * Utility method to parse the different portions of a relationship GUID.
+     * Utility method to parse the different portions of a relationship RID.
      *
-     * @param relationshipGUID the relationship GUID
-     * @param index which token to retrieve from the relationship GUID
-     * @return String - the string at the token provided of the provided relationship GUID
+     * @param relationshipRID the relationship RID
+     * @param index which token to retrieve from the relationship RID
+     * @return String - the string at the token provided of the provided relationship RID
      */
-    private static String getRelationshipGUIDToken(String relationshipGUID, int index) {
-        String[] aTokens = relationshipGUID.split("::");
+    private static String getRelationshipRIDToken(String relationshipRID, int index) {
+        String[] aTokens = relationshipRID.split("::");
         if (aTokens.length != 3) {
-            if (log.isWarnEnabled()) { log.warn("Unexpected number of tokens from relationship GUID: {}", relationshipGUID); }
+            if (log.isWarnEnabled()) { log.warn("Unexpected number of tokens from relationship RID: {}", relationshipRID); }
         }
         if (aTokens.length >= index) {
             return aTokens[index];
         } else {
-            if (log.isErrorEnabled()) { log.error("Unable to translate provided relationship GUID: {}", relationshipGUID); }
+            if (log.isErrorEnabled()) { log.error("Unable to translate provided relationship RID: {}", relationshipRID); }
             return null;
         }
     }
@@ -1400,7 +1400,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
         if (proxyOne != null && proxyTwo != null) {
 
-            String relationshipGUID = RelationshipMapping.getRelationshipGUID(
+            String relationshipRID = RelationshipMapping.getRelationshipRID(
                     relationshipMapping,
                     proxyOne,
                     proxyTwo,
@@ -1409,7 +1409,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     proxyOrderKnown
             );
 
-            if (relationshipGUID == null) {
+            if (relationshipRID == null) {
                 if (log.isErrorEnabled()) { log.error("Unable to construct relationship GUID -- skipping relationship: {}", omrsRelationshipName); }
                 String omrsEndOneProperty = omrsRelationshipDef.getEndDef1().getAttributeName();
                 String omrsEndTwoProperty = omrsRelationshipDef.getEndDef2().getAttributeName();
@@ -1427,13 +1427,13 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         errorCode.getUserAction());
             }
 
-            relationship.setGUID(igcomrsMetadataCollection.getGuidForRid(relationshipGUID));
+            relationship.setGUID(igcomrsMetadataCollection.getGuidForRid(relationshipRID));
             relationship.setMetadataCollectionId(igcomrsRepositoryConnector.getMetadataCollectionId());
             relationship.setStatus(InstanceStatus.ACTIVE);
             relationship.setInstanceProvenanceType(InstanceProvenanceType.LOCAL_COHORT);
 
-            String guidForEP1 = RelationshipMapping.getProxyOneGUIDFromRelationshipGUID(relationshipGUID);
-            String guidForEP2 = RelationshipMapping.getProxyTwoGUIDFromRelationshipGUID(relationshipGUID);
+            String guidForEP1 = RelationshipMapping.getProxyOneRIDFromRelationshipRID(relationshipRID);
+            String guidForEP2 = RelationshipMapping.getProxyTwoRIDFromRelationshipRID(relationshipRID);
             String ridForEP1 = IGCOMRSMetadataCollection.getRidFromGeneratedId(guidForEP1);
             String ridForEP2 = IGCOMRSMetadataCollection.getRidFromGeneratedId(guidForEP2);
 
