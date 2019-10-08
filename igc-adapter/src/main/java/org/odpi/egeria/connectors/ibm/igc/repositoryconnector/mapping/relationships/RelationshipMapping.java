@@ -862,9 +862,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                             null
                     );
                     if (ridPrefix != null) {
-                        entityProxy.setGUID(ridPrefix + igcObj.getId());
+                        entityProxy.setGUID(igcomrsMetadataCollection.getGuidForRid(ridPrefix + igcObj.getId()));
                     } else {
-                        entityProxy.setGUID(igcObj.getId());
+                        entityProxy.setGUID(igcomrsMetadataCollection.getGuidForRid(igcObj.getId()));
                     }
 
                     if (igcRestClient.hasModificationDetails(igcObj.getType())) {
@@ -1427,7 +1427,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         errorCode.getUserAction());
             }
 
-            relationship.setGUID(relationshipGUID);
+            relationship.setGUID(igcomrsMetadataCollection.getGuidForRid(relationshipGUID));
             relationship.setMetadataCollectionId(igcomrsRepositoryConnector.getMetadataCollectionId());
             relationship.setStatus(InstanceStatus.ACTIVE);
             relationship.setInstanceProvenanceType(InstanceProvenanceType.LOCAL_COHORT);
