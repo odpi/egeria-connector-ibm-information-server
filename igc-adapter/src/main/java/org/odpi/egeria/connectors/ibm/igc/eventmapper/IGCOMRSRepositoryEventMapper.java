@@ -447,7 +447,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         EntityDetail detail = null;
         try {
-            detail = igcomrsMetadataCollection.getEntityDetail(localServerUserId, rid, asset);
+            detail = igcomrsMetadataCollection.getEntityDetail(localServerUserId, igcomrsMetadataCollection.getGuidForRid(rid), asset);
         } catch (EntityNotKnownException e) {
             if (log.isErrorEnabled()) { log.error("Unable to find EntityDetail for RID: {}", rid, e); }
         } catch (RepositoryErrorException e) {
@@ -489,7 +489,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             }
             if (log.isDebugEnabled()) { log.debug(" ... retrieved asset from stub: {}", asset); }
             try {
-                detail = igcomrsMetadataCollection.getEntityDetail(localServerUserId, rid, asset);
+                detail = igcomrsMetadataCollection.getEntityDetail(localServerUserId, igcomrsMetadataCollection.getGuidForRid(rid), asset);
             } catch (EntityNotKnownException e) {
                 if (log.isErrorEnabled()) { log.error("Unable to find EntityDetail for stub with RID: {}", rid, e); }
             } catch (RepositoryErrorException e) {

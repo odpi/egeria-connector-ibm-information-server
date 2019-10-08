@@ -1318,7 +1318,9 @@
 							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database_schema)\");",
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"RelationalDBSchemaType\");",
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.guid).to.contain(\"__|RDBST|__\");",
+							"    const rdbstGuid = jsonData.relationships[0].entityTwoProxy.guid;",
+							"    pm.expect(rdbstGuid).to.contain(\"__|RDBST|__\");",
+							"    pm.environment.set('rid_rdbst', rdbstGuid);",
 							"});",
 							"pm.test(\"Proper DataContentForDataSet relationship\", function() {",
 							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"DataContentForDataSet\");",
@@ -1423,7 +1425,7 @@
 					"variable": [
 						{
 							"key": "guid",
-							"value": "__|RDBST|__{{rid_database_schema}}"
+							"value": "{{rid_rdbst}}"
 						}
 					]
 				}
@@ -1509,7 +1511,7 @@
 					"variable": [
 						{
 							"key": "guid",
-							"value": "__|RDBST|__{{rid_database_schema}}"
+							"value": "{{rid_rdbst}}"
 						}
 					]
 				}
@@ -1600,6 +1602,9 @@
 							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"RelationalTable\");",
 							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"RelationalTableType\");",
 							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
+							"    const rttGuid = jsonData.relationships[1].entityTwoProxy.guid;",
+							"    pm.expect(rttGuid).to.contain(\"__|RTT|__\");",
+							"    pm.environment.set('rid_rtt', rttGuid);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -1696,7 +1701,7 @@
 					"variable": [
 						{
 							"key": "guid",
-							"value": "__|RTT|__{{rid_database_table}}"
+							"value": "{{rid_rtt}}"
 						}
 					]
 				}
@@ -1782,7 +1787,7 @@
 					"variable": [
 						{
 							"key": "guid",
-							"value": "__|RTT|__{{rid_database_table}}"
+							"value": "{{rid_rtt}}"
 						}
 					]
 				}
@@ -1880,6 +1885,9 @@
 							"    pm.expect(jsonData.relationships[2].entityOneProxy.type.typeDefName).to.equal(\"RelationalColumn\");",
 							"    pm.expect(jsonData.relationships[2].entityTwoProxy.type.typeDefName).to.equal(\"RelationalColumnType\");",
 							"    pm.expect(jsonData.relationships[2].entityTwoProxy.version).to.be.above(1);",
+							"    const rctGuid = jsonData.relationships[2].entityTwoProxy.guid;",
+							"    pm.expect(rctGuid).to.contain(\"__|RCT|__\");",
+							"    pm.environment.set('rid_rct', rctGuid);",
 							"});",
 							"pm.test(\"Proper DataClassAssignment detected relationships\", function() {",
 							"    for (let i = 3; i < 6; i++) {",
@@ -2006,7 +2014,7 @@
 					"variable": [
 						{
 							"key": "guid",
-							"value": "__|RCT|__{{rid_database_column}}"
+							"value": "{{rid_rct}}"
 						}
 					]
 				}
@@ -2085,7 +2093,7 @@
 					"variable": [
 						{
 							"key": "guid",
-							"value": "__|RCT|__{{rid_database_column}}"
+							"value": "{{rid_rct}}"
 						}
 					]
 				}
@@ -2137,7 +2145,7 @@
 					"variable": [
 						{
 							"key": "guid",
-							"value": "__|RCT|__{{rid_database_column}}"
+							"value": "{{rid_rct}}"
 						}
 					]
 				}
@@ -3141,7 +3149,9 @@
 							"    pm.expect(jsonData.relationships[2].entityOneProxy.version).to.be.above(1);",
 							"    pm.expect(jsonData.relationships[2].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail::(data_file_field)=Email\");",
 							"    pm.expect(jsonData.relationships[2].entityTwoProxy.type.typeDefName).to.equal(\"TabularColumnType\");",
-							"    pm.expect(jsonData.relationships[2].entityTwoProxy.guid).to.contain(\"__|TCT|__\");",
+							"    const tctGuid = jsonData.relationships[2].entityTwoProxy.guid;",
+							"    pm.expect(tctGuid).to.contain(\"__|TCT|__\");",
+							"    pm.environment.set('rid_tct', tctGuid);",
 							"    pm.expect(jsonData.relationships[2].entityTwoProxy.version).to.be.above(1);",
 							"    pm.expect(jsonData.relationships[2].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail::(data_file_field)=Email\");",
 							"});"
@@ -3241,7 +3251,7 @@
 					"variable": [
 						{
 							"key": "guid",
-							"value": "__|TCT|__{{rid_data_file_field}}"
+							"value": "{{rid_tct}}"
 						}
 					]
 				}
@@ -3320,7 +3330,7 @@
 					"variable": [
 						{
 							"key": "guid",
-							"value": "__|TCT|__{{rid_data_file_field}}"
+							"value": "{{rid_tct}}"
 						}
 					]
 				}
@@ -3720,6 +3730,10 @@
 							"",
 							"const userGuid = jsonData.entities[0].guid;",
 							"pm.environment.set('rid_user', userGuid);",
+							"const mdColId = userGuid.substring(0, userGuid.indexOf(\"_\"));",
+							"const userRid = userGuid.substring(userGuid.indexOf(\"_\") + 1);",
+							"const cdGuid = mdColId + \"___|CD|__\" + userRid;",
+							"pm.environment.set('rid_cd', cdGuid);",
 							""
 						],
 						"type": "text/javascript"
@@ -3870,7 +3884,7 @@
 					"variable": [
 						{
 							"key": "guid",
-							"value": "__|CD|__{{rid_user}}"
+							"value": "{{rid_cd}}"
 						}
 					]
 				}
@@ -4072,7 +4086,7 @@
 	],
 	"variable": [
 		{
-			"id": "0dc29fd3-38fa-4803-b823-6e4ccdee9a00",
+			"id": "047066d8-32ae-46bc-952e-93f25b7b5ba0",
 			"key": "infosvr_host",
 			"value": "egis-v115.fyre.ibm.com",
 			"type": "string"
