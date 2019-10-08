@@ -24,7 +24,6 @@ public class TypeEmbeddedAttributeMapper_RelationalColumn extends TypeEmbeddedAt
                 "TypeEmbeddedAttribute"
         );
         addSimplePropertyMapping("data_type", "dataType");
-        addSimplePropertyMapping("default_value", "defaultValue");
     }
 
 }

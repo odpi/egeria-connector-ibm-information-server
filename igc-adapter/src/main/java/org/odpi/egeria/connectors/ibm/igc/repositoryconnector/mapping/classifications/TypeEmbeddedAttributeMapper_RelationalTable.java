@@ -24,7 +24,6 @@ public class TypeEmbeddedAttributeMapper_RelationalTable extends TypeEmbeddedAtt
                 "TypeEmbeddedAttribute"
         );
         addLiteralPropertyMapping("dataType", null);
-        addLiteralPropertyMapping("defaultValue", null);
     }
 
 }
