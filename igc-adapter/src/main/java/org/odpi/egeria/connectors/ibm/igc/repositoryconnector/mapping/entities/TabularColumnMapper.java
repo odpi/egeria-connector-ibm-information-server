@@ -3,14 +3,13 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.TypeEmbeddedAttributeMapper_TabularColumn;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttributeForSchemaMapper_RecordField;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataClassAssignmentMapper;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SchemaAttributeTypeMapper_FileField;
 
 /**
  * Defines the mapping to the OMRS "TabularColumn" entity.
  */
-public class TabularColumnMapper extends ReferenceableMapper {
+public class TabularColumnMapper extends SchemaAttribute_Mapper {
 
     private static class Singleton {
         private static final TabularColumnMapper INSTANCE = new TabularColumnMapper();
@@ -34,8 +33,9 @@ public class TabularColumnMapper extends ReferenceableMapper {
 
         // The list of relationships that should be mapped
         addRelationshipMapper(AttributeForSchemaMapper_RecordField.getInstance(null));
-        addRelationshipMapper(SchemaAttributeTypeMapper_FileField.getInstance(null));
-        addRelationshipMapper(DataClassAssignmentMapper.getInstance(null));
+
+        // The list of classifications that should be mapped
+        addClassificationMapper(TypeEmbeddedAttributeMapper_TabularColumn.getInstance(null));
 
     }
 

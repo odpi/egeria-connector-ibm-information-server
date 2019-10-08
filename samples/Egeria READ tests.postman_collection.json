@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "52c0e33c-078b-46b6-9c7c-6b8a44e01417",
-		"name": "Egeria READ tests",
+		"_postman_id": "c68ccdc5-ba56-4a55-90fc-c15ed2eac57c",
+		"name": "Egeria READ tests simplified",
 		"description": "Collection to run tests against Egeria's Information Server (IGC) integration for v11.5",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1587,8 +1587,8 @@
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
-							"pm.test(\"2 total relationships\", function () {",
-							"    pm.expect(jsonData.relationships).to.have.lengthOf(2);",
+							"pm.test(\"4 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(4);",
 							"});",
 							"pm.test(\"Proper AttributeForSchema relationship\", function() {",
 							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"AttributeForSchema\");",
@@ -1597,14 +1597,18 @@
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"RelationalTable\");",
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
 							"});",
-							"pm.test(\"Proper SchemaAttributeType relationship\", function() {",
-							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"SchemaAttributeType\");",
-							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"RelationalTable\");",
-							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"RelationalTableType\");",
-							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
-							"    const rttGuid = jsonData.relationships[1].entityTwoProxy.guid;",
-							"    pm.expect(rttGuid).to.contain(\"__|RTT|__\");",
-							"    pm.environment.set('rid_rtt', rttGuid);",
+							"pm.test(\"Proper NestedSchemaAttribute relationships\", function() {",
+							"    for (let i = 1; i < 4; i++) {",
+							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"NestedSchemaAttribute\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.equal(\"RelationalTable\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"RelationalColumn\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
+							"        const columnName = jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue;",
+							"        if (columnName.endsWith(\"EMAIL\")) {",
+							"            pm.environment.set('rid_database_column', jsonData.relationships[i].entityTwoProxy.guid);",
+							"        }",
+							"    }",
 							"});"
 						],
 						"type": "text/javascript"
@@ -1653,148 +1657,6 @@
 			"response": []
 		},
 		{
-			"name": "09.3 - Get TableType: CONTACTEMAIL",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
-						"exec": [
-							"const jsonData = pm.response.json();",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.test(\"TypeDef is RelationalTableType\", function () {",
-							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"RelationalTableType\");",
-							"});",
-							"pm.test(\"Version is > 1\", function() {",
-							"    pm.expect(jsonData.entity.version).to.be.above(1);",
-							"});",
-							"pm.test(\"Proper RelationalTableType entity\", function() {",
-							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"CONTACTEMAIL\");",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
-					"host": [
-						"{{baseURL}}"
-					],
-					"path": [
-						"servers",
-						"{{server}}",
-						"open-metadata",
-						"repository-services",
-						"users",
-						"{{user}}",
-						"instances",
-						"entity",
-						":guid"
-					],
-					"variable": [
-						{
-							"key": "guid",
-							"value": "{{rid_rtt}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "09.4 - Get Relationships: TableType",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "30418654-3f98-4563-a066-5fbe893737a8",
-						"exec": [
-							"const jsonData = pm.response.json();",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.test(\"4 total relationships\", function () {",
-							"    pm.expect(jsonData.relationships).to.have.lengthOf(4);",
-							"});",
-							"pm.test(\"Proper SchemaAttributeType relationship\", function() {",
-							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"SchemaAttributeType\");",
-							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"RelationalTable\");",
-							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(database_table)=CONTACTEMAIL\");",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"RelationalTableType\");",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.guid).to.contain(\"__|RTT|__\");",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(database_table)=CONTACTEMAIL\");",
-							"});",
-							"pm.test(\"Proper AttributeForSchema relationship\", function() {",
-							"    for (let i = 1; i < 4; i++) {",
-							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"AttributeForSchema\");",
-							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.equal(\"RelationalTableType\");",
-							"        pm.expect(jsonData.relationships[i].entityOneProxy.guid).to.contain(\"__|RTT|__\");",
-							"        pm.expect(jsonData.relationships[i].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(database_table)=CONTACTEMAIL\");",
-							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"RelationalColumn\");",
-							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
-							"        pm.expect(jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"::(database_table)=CONTACTEMAIL::(database_column)\");",
-							"    }",
-							"});",
-							"",
-							"const columnGuid = jsonData.relationships[1].entityTwoProxy.guid;",
-							"pm.environment.set('rid_database_column', columnGuid);",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
-				},
-				"url": {
-					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
-					"host": [
-						"{{baseURL}}"
-					],
-					"path": [
-						"servers",
-						"{{server}}",
-						"open-metadata",
-						"repository-services",
-						"users",
-						"{{user}}",
-						"instances",
-						"entity",
-						":guid",
-						"relationships"
-					],
-					"variable": [
-						{
-							"key": "guid",
-							"value": "{{rid_rtt}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "10.1 - Get Column: EMAIL",
 			"event": [
 				{
@@ -1815,6 +1677,11 @@
 							"});",
 							"pm.test(\"Proper RelationalColumn entity\", function() {",
 							"    pm.expect(jsonData.entity.properties.instanceProperties.name.primitiveValue).to.equal(\"EMAIL\");",
+							"});",
+							"pm.test(\"TypeEmbeddedAttribute classification\", function() {",
+							"    pm.expect(jsonData.entity.classifications).to.have.lengthOf(1);",
+							"    pm.expect(jsonData.entity.classifications[0].type.typeDefName).to.equal(\"TypeEmbeddedAttribute\");",
+							"    pm.expect(jsonData.entity.classifications[0].properties.instanceProperties.dataType.primitiveValue).to.equal(\"STRING\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -1863,8 +1730,8 @@
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
-							"pm.test(\"7 total relationships\", function () {",
-							"    pm.expect(jsonData.relationships).to.have.lengthOf(7);",
+							"pm.test(\"6 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(6);",
 							"});",
 							"pm.test(\"Proper SemanticAssignment relationship\", function() {",
 							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"SemanticAssignment\");",
@@ -1874,23 +1741,8 @@
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Email Address\");",
 							"});",
-							"pm.test(\"Proper AttributeForSchema relationship\", function() {",
-							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"AttributeForSchema\");",
-							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"RelationalTableType\");",
-							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"RelationalColumn\");",
-							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
-							"});",
-							"pm.test(\"Proper SchemaAttributeType relationship\", function() {",
-							"    pm.expect(jsonData.relationships[2].type.typeDefName).to.equal(\"SchemaAttributeType\");",
-							"    pm.expect(jsonData.relationships[2].entityOneProxy.type.typeDefName).to.equal(\"RelationalColumn\");",
-							"    pm.expect(jsonData.relationships[2].entityTwoProxy.type.typeDefName).to.equal(\"RelationalColumnType\");",
-							"    pm.expect(jsonData.relationships[2].entityTwoProxy.version).to.be.above(1);",
-							"    const rctGuid = jsonData.relationships[2].entityTwoProxy.guid;",
-							"    pm.expect(rctGuid).to.contain(\"__|RCT|__\");",
-							"    pm.environment.set('rid_rct', rctGuid);",
-							"});",
 							"pm.test(\"Proper DataClassAssignment detected relationships\", function() {",
-							"    for (let i = 3; i < 6; i++) {",
+							"    for (let i = 1; i < 4; i++) {",
 							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"DataClassAssignment\");",
 							"        pm.expect(jsonData.relationships[i].version).to.be.above(1);",
 							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.be.oneOf([\"RelationalColumn\",\"TabularColumn\"]);",
@@ -1904,18 +1756,24 @@
 							"    }",
 							"});",
 							"pm.test(\"Proper DataClassAssignment proposed relationship\", function() {",
-							"    pm.expect(jsonData.relationships[6].type.typeDefName).to.equal(\"DataClassAssignment\");",
-							"    pm.expect(jsonData.relationships[6].version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[6].entityOneProxy.type.typeDefName).to.be.oneOf([\"RelationalColumn\",\"TabularColumn\"]);",
-							"    pm.expect(jsonData.relationships[6].entityOneProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[6].entityTwoProxy.type.typeDefName).to.equal(\"DataClass\");",
-							"    pm.expect(jsonData.relationships[6].entityTwoProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[6].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(data_class)=Email Address\");",
-							"    pm.expect(jsonData.relationships[6].properties.instanceProperties.status.ordinal).to.equal(1);",
-							"    pm.expect(jsonData.relationships[6].properties.instanceProperties.status.symbolicName).to.equal(\"Proposed\");",
+							"    pm.expect(jsonData.relationships[4].type.typeDefName).to.equal(\"DataClassAssignment\");",
+							"    pm.expect(jsonData.relationships[4].version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[4].entityOneProxy.type.typeDefName).to.be.oneOf([\"RelationalColumn\",\"TabularColumn\"]);",
+							"    pm.expect(jsonData.relationships[4].entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[4].entityTwoProxy.type.typeDefName).to.equal(\"DataClass\");",
+							"    pm.expect(jsonData.relationships[4].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[4].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(data_class)=Email Address\");",
+							"    pm.expect(jsonData.relationships[4].properties.instanceProperties.status.ordinal).to.equal(1);",
+							"    pm.expect(jsonData.relationships[4].properties.instanceProperties.status.symbolicName).to.equal(\"Proposed\");",
+							"});",
+							"pm.test(\"Proper NestedSchemaAttribute relationship\", function() {",
+							"    pm.expect(jsonData.relationships[5].type.typeDefName).to.equal(\"NestedSchemaAttribute\");",
+							"    pm.expect(jsonData.relationships[5].entityOneProxy.type.typeDefName).to.equal(\"RelationalTable\");",
+							"    pm.expect(jsonData.relationships[5].entityTwoProxy.type.typeDefName).to.equal(\"RelationalColumn\");",
+							"    pm.expect(jsonData.relationships[5].entityTwoProxy.version).to.be.above(1);",
 							"});",
 							"",
-							"const dataclassGuid = jsonData.relationships[6].entityTwoProxy.guid;",
+							"const dataclassGuid = jsonData.relationships[4].entityTwoProxy.guid;",
 							"pm.environment.set('rid_data_class', dataclassGuid);",
 							""
 						],
@@ -1965,143 +1823,7 @@
 			"response": []
 		},
 		{
-			"name": "10.3 - Get ColumnType: EMAIL",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
-						"exec": [
-							"const jsonData = pm.response.json();",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.test(\"TypeDef is RelationalColumnType\", function () {",
-							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"RelationalColumnType\");",
-							"});",
-							"pm.test(\"Version is > 1\", function() {",
-							"    pm.expect(jsonData.entity.version).to.be.above(1);",
-							"});",
-							"pm.test(\"Proper RelationalColumnType entity\", function() {",
-							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"EMAIL\");",
-							"    pm.expect(jsonData.entity.properties.instanceProperties.dataType.primitiveValue).to.equals(\"VARCHAR\");",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
-					"host": [
-						"{{baseURL}}"
-					],
-					"path": [
-						"servers",
-						"{{server}}",
-						"open-metadata",
-						"repository-services",
-						"users",
-						"{{user}}",
-						"instances",
-						"entity",
-						":guid"
-					],
-					"variable": [
-						{
-							"key": "guid",
-							"value": "{{rid_rct}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "10.4 - Get Relationships: ColumnType",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "30418654-3f98-4563-a066-5fbe893737a8",
-						"exec": [
-							"const jsonData = pm.response.json();",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.test(\"2 total relationships\", function () {",
-							"    pm.expect(jsonData.relationships).to.have.lengthOf(2);",
-							"});",
-							"pm.test(\"Proper SemanticAssignment relationship\", function() {",
-							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"SemanticAssignment\");",
-							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"RelationalColumn\");",
-							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Email Address\");",
-							"});",
-							"pm.test(\"Proper SchemaAttributeType relationship\", function() {",
-							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"SchemaAttributeType\");",
-							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"RelationalColumn\");",
-							"    pm.expect(jsonData.relationships[1].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database)=COMPDIR::(database_schema)=DB2INST1::(database_table)=CONTACTEMAIL::(database_column)=EMAIL\");",
-							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"RelationalColumnType\");",
-							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[1].entityTwoProxy.guid).to.contain(\"__|RCT|__\");",
-							"    pm.expect(jsonData.relationships[1].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database)=COMPDIR::(database_schema)=DB2INST1::(database_table)=CONTACTEMAIL::(database_column)=EMAIL\");",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
-				},
-				"url": {
-					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
-					"host": [
-						"{{baseURL}}"
-					],
-					"path": [
-						"servers",
-						"{{server}}",
-						"open-metadata",
-						"repository-services",
-						"users",
-						"{{user}}",
-						"instances",
-						"entity",
-						":guid",
-						"relationships"
-					],
-					"variable": [
-						{
-							"key": "guid",
-							"value": "{{rid_rct}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "10.5 - Get ColumnType: EMAIL (Summary)",
+			"name": "10.3 - Get Column: EMAIL (Summary)",
 			"event": [
 				{
 					"listen": "test",
@@ -2145,7 +1867,7 @@
 					"variable": [
 						{
 							"key": "guid",
-							"value": "{{rid_rct}}"
+							"value": "{{rid_database_column}}"
 						}
 					]
 				}
@@ -3076,6 +2798,11 @@
 							"});",
 							"pm.test(\"Proper TabularColumn entity\", function() {",
 							"    pm.expect(jsonData.entity.properties.instanceProperties.name.primitiveValue).to.equal(\"Email\");",
+							"});",
+							"pm.test(\"TypeEmbeddedAttribute classification\", function() {",
+							"    pm.expect(jsonData.entity.classifications).to.have.lengthOf(1);",
+							"    pm.expect(jsonData.entity.classifications[0].type.typeDefName).to.equal(\"TypeEmbeddedAttribute\");",
+							"    pm.expect(jsonData.entity.classifications[0].properties.instanceProperties.dataType.primitiveValue).to.equal(\"STRING\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -3124,8 +2851,8 @@
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
-							"pm.test(\"3 total relationships\", function () {",
-							"    pm.expect(jsonData.relationships).to.have.lengthOf(3);",
+							"pm.test(\"2 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(2);",
 							"});",
 							"pm.test(\"Proper SemanticAssignment relationship\", function() {",
 							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"SemanticAssignment\");",
@@ -3142,18 +2869,6 @@
 							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"TabularColumn\");",
 							"    pm.expect(jsonData.relationships[1].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail::(data_file_field)=Email\")",
 							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
-							"});",
-							"pm.test(\"Proper SchemaAttributeType relationship\", function() {",
-							"    pm.expect(jsonData.relationships[2].type.typeDefName).to.equal(\"SchemaAttributeType\");",
-							"    pm.expect(jsonData.relationships[2].entityOneProxy.type.typeDefName).to.equal(\"TabularColumn\");",
-							"    pm.expect(jsonData.relationships[2].entityOneProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[2].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail::(data_file_field)=Email\");",
-							"    pm.expect(jsonData.relationships[2].entityTwoProxy.type.typeDefName).to.equal(\"TabularColumnType\");",
-							"    const tctGuid = jsonData.relationships[2].entityTwoProxy.guid;",
-							"    pm.expect(tctGuid).to.contain(\"__|TCT|__\");",
-							"    pm.environment.set('rid_tct', tctGuid);",
-							"    pm.expect(jsonData.relationships[2].entityTwoProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[2].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail::(data_file_field)=Email\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -3195,142 +2910,6 @@
 						{
 							"key": "guid",
 							"value": "{{rid_data_file_field}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "17.3 - Get ColumnType: Field",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
-						"exec": [
-							"const jsonData = pm.response.json();",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.test(\"TypeDef is TabularColumnType\", function () {",
-							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"TabularColumnType\");",
-							"});",
-							"pm.test(\"Version is > 1\", function() {",
-							"    pm.expect(jsonData.entity.version).to.be.above(1);",
-							"});",
-							"pm.test(\"Proper TabularColumnType entity\", function() {",
-							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"Email\");",
-							"    pm.expect(jsonData.entity.properties.instanceProperties.dataType.primitiveValue).to.equals(\"STRING\");",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
-					"host": [
-						"{{baseURL}}"
-					],
-					"path": [
-						"servers",
-						"{{server}}",
-						"open-metadata",
-						"repository-services",
-						"users",
-						"{{user}}",
-						"instances",
-						"entity",
-						":guid"
-					],
-					"variable": [
-						{
-							"key": "guid",
-							"value": "{{rid_tct}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "17.4 - Get Relationships: ColumnType",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "30418654-3f98-4563-a066-5fbe893737a8",
-						"exec": [
-							"const jsonData = pm.response.json();",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.test(\"2 total relationships\", function () {",
-							"    pm.expect(jsonData.relationships).to.have.lengthOf(2);",
-							"});",
-							"pm.test(\"Proper SemanticAssignment relationship\", function() {",
-							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"SemanticAssignment\");",
-							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"TabularColumn\");",
-							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Email Address\");",
-							"});",
-							"pm.test(\"Proper SchemaAttributeType relationship\", function() {",
-							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"SchemaAttributeType\");",
-							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"TabularColumn\");",
-							"    pm.expect(jsonData.relationships[1].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail::(data_file_field)=Email\");",
-							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"TabularColumnType\");",
-							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[1].entityTwoProxy.guid).to.contain(\"__|TCT|__\");",
-							"    pm.expect(jsonData.relationships[1].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail::(data_file_field)=Email\");",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
-				},
-				"url": {
-					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
-					"host": [
-						"{{baseURL}}"
-					],
-					"path": [
-						"servers",
-						"{{server}}",
-						"open-metadata",
-						"repository-services",
-						"users",
-						"{{user}}",
-						"instances",
-						"entity",
-						":guid",
-						"relationships"
-					],
-					"variable": [
-						{
-							"key": "guid",
-							"value": "{{rid_tct}}"
 						}
 					]
 				}
@@ -4086,7 +3665,7 @@
 	],
 	"variable": [
 		{
-			"id": "047066d8-32ae-46bc-952e-93f25b7b5ba0",
+			"id": "a1d7b657-92b2-40ab-a31a-1ce69579e8b0",
 			"key": "infosvr_host",
 			"value": "egis-v115.fyre.ibm.com",
 			"type": "string"
