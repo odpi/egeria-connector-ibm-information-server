@@ -9,6 +9,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.InstanceMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
@@ -20,7 +21,6 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefAttribute;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
-import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,7 +145,7 @@ public abstract class EntityMapping extends InstanceMapping {
      */
     private final Class getIgcPOJO(IGCOMRSRepositoryConnector igcomrsRepositoryConnector, String assetType) {
         Class igcPOJO = null;
-        if (assetType.equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE)) {
+        if (assetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
             StringBuilder sbPojoName = new StringBuilder();
             sbPojoName.append(IGCRestConstants.IGC_REST_COMMON_MODEL_PKG);
             sbPojoName.append(".MainObject");
@@ -198,7 +198,7 @@ public abstract class EntityMapping extends InstanceMapping {
         if (log.isDebugEnabled()) { log.debug("checking for matching asset between {} and {}", this.igcAssetType, matchType); }
         return (
                 this.igcAssetType.equals(matchType)
-                        || this.igcAssetType.equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE)
+                        || this.igcAssetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)
         );
     }
 
@@ -707,7 +707,7 @@ public abstract class EntityMapping extends InstanceMapping {
                 allProperties.addAll(mapping.getIgcRelationshipPropertiesForType(igcEntity.getType()));
             }
             allProperties.addAll(IGCRestConstants.getModificationProperties());
-            IGCSearchSorting sort = IGCOMRSMetadataCollection.sortFromNonPropertySequencingOrder(sequencingOrder);
+            IGCSearchSorting sort = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
             igcEntity = igcEntity.getAssetWithSubsetOfProperties(
                     igcomrsRepositoryConnector.getIGCRestClient(),
                     allProperties.toArray(new String[0]),

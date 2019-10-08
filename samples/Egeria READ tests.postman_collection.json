@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c68ccdc5-ba56-4a55-90fc-c15ed2eac57c",
+		"_postman_id": "a1bc6690-f8f4-47ec-b34e-fe11a5a7f850",
 		"name": "Egeria READ tests simplified",
 		"description": "Collection to run tests against Egeria's Information Server (IGC) integration for v11.5",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -1538,7 +1538,7 @@
 							"    pm.expect(jsonData.entity.version).to.be.above(1);",
 							"});",
 							"pm.test(\"Proper RelationalTable entity\", function() {",
-							"    pm.expect(jsonData.entity.properties.instanceProperties.name.primitiveValue).to.equal(\"CONTACTEMAIL\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"CONTACTEMAIL\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -1676,7 +1676,7 @@
 							"    pm.expect(jsonData.entity.version).to.be.above(1);",
 							"});",
 							"pm.test(\"Proper RelationalColumn entity\", function() {",
-							"    pm.expect(jsonData.entity.properties.instanceProperties.name.primitiveValue).to.equal(\"EMAIL\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"EMAIL\");",
 							"});",
 							"pm.test(\"TypeEmbeddedAttribute classification\", function() {",
 							"    pm.expect(jsonData.entity.classifications).to.have.lengthOf(1);",
@@ -2797,7 +2797,7 @@
 							"    pm.expect(jsonData.entity.version).to.be.above(1);",
 							"});",
 							"pm.test(\"Proper TabularColumn entity\", function() {",
-							"    pm.expect(jsonData.entity.properties.instanceProperties.name.primitiveValue).to.equal(\"Email\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"Email\");",
 							"});",
 							"pm.test(\"TypeEmbeddedAttribute classification\", function() {",
 							"    pm.expect(jsonData.entity.classifications).to.have.lengthOf(1);",
@@ -3670,5 +3670,6 @@
 			"value": "egis-v115.fyre.ibm.com",
 			"type": "string"
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }

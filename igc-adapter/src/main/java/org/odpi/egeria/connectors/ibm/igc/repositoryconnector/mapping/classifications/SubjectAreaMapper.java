@@ -295,7 +295,7 @@ public class SubjectAreaMapper extends ClassificationMapping {
         }
 
         IGCOMRSMetadataCollection collection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
-        return collection.getEntityDetail(userId, entityGUID, igcEntity);
+        return collection.getIgcRepositoryHelper().getEntityDetail(userId, entityGUID, igcEntity);
 
     }
 

@@ -15,6 +15,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.eventmapper.model.*;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.OMRSStub;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping;
@@ -53,6 +54,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     private String sourceName;
     private IGCOMRSRepositoryConnector igcomrsRepositoryConnector;
     private IGCOMRSMetadataCollection igcomrsMetadataCollection;
+    private IGCRepositoryHelper igcRepositoryHelper;
     private IGCRestClient igcRestClient;
     private String metadataCollectionId;
     private String originatorServerName;
@@ -123,6 +125,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         super.start();
         log.info("IGC Event Mapper starting...");
         this.igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
+        this.igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
         this.metadataCollectionId = igcomrsRepositoryConnector.getMetadataCollectionId();
         this.originatorServerName = igcomrsRepositoryConnector.getServerName();
         this.originatorServerType = igcomrsRepositoryConnector.getServerType();
@@ -351,7 +354,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             case InfosphereEventsAssetEvent.ACTION_DELETE:
                 String igcAssetDisplayName = event.getAssetType();
                 if (igcAssetDisplayName != null && !igcAssetDisplayName.equals("OMRS Stub")) {
-                    String igcAssetType = igcomrsMetadataCollection.getIgcAssetTypeForAssetName(igcAssetDisplayName);
+                    String igcAssetType = igcRepositoryHelper.getIgcAssetTypeForAssetName(igcAssetDisplayName);
                     processAsset(assetRid, igcAssetType, null);
                 }
                 break;
@@ -448,7 +451,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         EntityDetail detail = null;
         try {
-            detail = igcomrsMetadataCollection.getEntityDetail(localServerUserId, igcomrsMetadataCollection.getGuidForRid(rid), asset);
+            detail = igcRepositoryHelper.getEntityDetail(localServerUserId, igcRepositoryHelper.getGuidForRid(rid), asset);
         } catch (EntityNotKnownException e) {
             if (log.isErrorEnabled()) { log.error("Unable to find EntityDetail for RID: {}", rid, e); }
         } catch (RepositoryErrorException e) {
@@ -490,7 +493,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             }
             if (log.isDebugEnabled()) { log.debug(" ... retrieved asset from stub: {}", asset); }
             try {
-                detail = igcomrsMetadataCollection.getEntityDetail(localServerUserId, igcomrsMetadataCollection.getGuidForRid(rid), asset);
+                detail = igcRepositoryHelper.getEntityDetail(localServerUserId, igcRepositoryHelper.getGuidForRid(rid), asset);
             } catch (EntityNotKnownException e) {
                 if (log.isErrorEnabled()) { log.error("Unable to find EntityDetail for stub with RID: {}", rid, e); }
             } catch (RepositoryErrorException e) {
@@ -558,7 +561,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         if (log.isDebugEnabled()) { log.debug("processAsset called with rid {} and type {}", rid, assetType); }
 
-        Reference latestVersion = igcomrsMetadataCollection.getFullAssetDetails(rid);
+        Reference latestVersion = igcRepositoryHelper.getFullAssetDetails(rid);
 
         if (latestVersion == null) {
             // If we can't retrieve the asset by RID, it no longer exists -- so send a delete event
@@ -566,7 +569,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             if (assetType != null) {
                 sendPurgedEntity(assetType, rid);
                 // Find any mapper(s) for this type that use a prefix and send a purge for the prefixed entity as well
-                List<EntityMapping> referenceableMappers = igcomrsMetadataCollection.getMappers(assetType, localServerUserId);
+                List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(assetType, localServerUserId);
                 for (EntityMapping referenceableMapper : referenceableMappers) {
                     List<RelationshipMapping> relationshipMappings = referenceableMapper.getRelationshipMappers();
                     for (RelationshipMapping relationshipMapping : relationshipMappings) {
@@ -586,7 +589,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         } else {
 
             // Otherwise see if there's a stub...
-            OMRSStub stub = igcomrsMetadataCollection.getOMRSStubForAsset(latestVersion);
+            OMRSStub stub = igcRepositoryHelper.getOMRSStubForAsset(latestVersion);
 
             // Calculate the delta between the latest version and the previous saved stub
             ChangeSet changeSet = new ChangeSet(igcRestClient, latestVersion, stub);
@@ -604,7 +607,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             }
 
             // Retrieve the mapping from IGC property name to OMRS relationship type
-            Map<String, List<RelationshipMapping>> relationshipMap = igcomrsMetadataCollection.getIgcPropertiesToRelationshipMappings(
+            Map<String, List<RelationshipMapping>> relationshipMap = igcRepositoryHelper.getIgcPropertiesToRelationshipMappings(
                     latestVersion.getType(),
                     localServerUserId
             );
@@ -839,7 +842,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     change.getIgcPropertyName(),
                     null
             );
-            String relationshipGUID = igcomrsMetadataCollection.getGuidForRid(relationshipRID);
+            String relationshipGUID = igcRepositoryHelper.getGuidForRid(relationshipRID);
             if (log.isDebugEnabled()) { log.debug(" ... calculated relationship GUID: {}", relationshipGUID); }
 
             // Only continue if this relationship is different from the one that triggered the processing in the first place
@@ -871,8 +874,6 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                 relationshipGUID);
                     } catch (InvalidParameterException | RepositoryErrorException | TypeDefNotKnownException e) {
                         if (log.isErrorEnabled()) { log.error("Unable to retrieve relationship type definition: {}", omrsRelationshipType, e); }
-                    } catch (UserNotAuthorizedException e) {
-                        if (log.isErrorEnabled()) { log.error("User not authorized to retrieve type definition: {}", omrsRelationshipType, e); }
                     }
                 } else {
                     try {
@@ -909,8 +910,6 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         if (log.isErrorEnabled()) { log.error("Unable to find relationship with GUID: {}", relationshipGUID); }
                     } catch (InvalidParameterException | RepositoryErrorException e) {
                         if (log.isErrorEnabled()) { log.error("Unknown error occurred trying to retrieve relationship: {}", relationshipGUID, e); }
-                    } catch (UserNotAuthorizedException e) {
-                        if (log.isErrorEnabled()) { log.error("User not authorized to retrieve relationship: {}", relationshipGUID, e); }
                     }
                 }
             } else {
@@ -949,7 +948,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 RelationshipMapping.SELF_REFERENCE_SENTINEL,
                 null
         );
-        String relationshipGUID = igcomrsMetadataCollection.getGuidForRid(relationshipRID);
+        String relationshipGUID = igcRepositoryHelper.getGuidForRid(relationshipRID);
         if (log.isDebugEnabled()) { log.debug(" ... calculated relationship GUID: {}", relationshipGUID); }
 
         // Only continue if this relationship is different from the one that triggered the processing in the first place
@@ -969,8 +968,6 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 if (log.isErrorEnabled()) { log.error("Unable to find relationship with GUID: {}", relationshipGUID); }
             } catch (InvalidParameterException | RepositoryErrorException e) {
                 if (log.isErrorEnabled()) { log.error("Unknown error occurred trying to retrieve relationship: {}", relationshipGUID, e); }
-            } catch (UserNotAuthorizedException e) {
-                if (log.isErrorEnabled()) { log.error("User not authorized to retrieve relationship: {}", relationshipGUID, e); }
             }
         } else {
             if (log.isInfoEnabled()) { log.info("Relationship was same as the one that triggered this processing -- skipping: {}", relationshipTriggerGUID); }
@@ -1065,7 +1062,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                             null,
                             true
                     );
-                    String oldRelationshipGUID = igcomrsMetadataCollection.getGuidForRid(oldRelationshipRID);
+                    String oldRelationshipGUID = igcRepositoryHelper.getGuidForRid(oldRelationshipRID);
                     if (log.isDebugEnabled()) { log.debug(" ... calculated old relationship GUID: {}", oldRelationshipGUID); }
                     sendPurgedRelationship(
                             relationshipMapping,
@@ -1078,7 +1075,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 } else {
                     if (log.isWarnEnabled()) { log.warn("Unable to find previous version for relationship replacement -- sending only new: {}", newRelationshipGUID); }
                 }
-            } catch (InvalidParameterException | RepositoryErrorException | TypeDefNotKnownException | UserNotAuthorizedException e) {
+            } catch (InvalidParameterException | RepositoryErrorException | TypeDefNotKnownException e) {
                 if (log.isErrorEnabled()) { log.error("Unable to find relationship type definition '{}' / not supported for guid: {}", relationshipMapping.getOmrsRelationshipType(), newRelationshipGUID); }
             }
         } else {
@@ -1106,10 +1103,10 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                         Reference proxyTwo) {
 
         // Determine if there is a relationship-level asset (RID)
-        String relationshipRID = igcomrsMetadataCollection.getRidFromGuid(relationshipGUID);
+        String relationshipRID = igcRepositoryHelper.getRidFromGuid(relationshipGUID);
         String proxyOneGuid = RelationshipMapping.getProxyOneRIDFromRelationshipRID(relationshipRID);
         String proxyTwoGuid = RelationshipMapping.getProxyTwoRIDFromRelationshipRID(relationshipRID);
-        String proxyOneRid = IGCOMRSMetadataCollection.getRidFromGeneratedId(proxyOneGuid);
+        String proxyOneRid = IGCRepositoryHelper.getRidFromGeneratedId(proxyOneGuid);
         String relationshipLevelRid = null;
         if (proxyOneGuid.equals(proxyTwoGuid) && proxyOneRid.equals(proxyOne.getId())) {
             relationshipLevelRid = proxyOneGuid;
@@ -1120,8 +1117,8 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             try {
                 // Retrieve OMRS Stubs for the provided proxies, to ensure we will have sufficient details
                 // to include as actual EntityProxy instances on the relationship
-                OMRSStub stubOne = igcomrsMetadataCollection.getOMRSStubForAsset(proxyOne);
-                OMRSStub stubTwo = igcomrsMetadataCollection.getOMRSStubForAsset(proxyTwo);
+                OMRSStub stubOne = igcRepositoryHelper.getOMRSStubForAsset(proxyOne);
+                OMRSStub stubTwo = igcRepositoryHelper.getOMRSStubForAsset(proxyTwo);
                 Relationship relationship = RelationshipMapping.getMappedRelationship(
                         igcomrsRepositoryConnector,
                         relationshipMapping,
@@ -1181,7 +1178,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             }
 
             // See if there are any generated entities to send an event for (ie. *Type)
-            List<EntityMapping> referenceableMappers = igcomrsMetadataCollection.getMappers(asset.getType(), localServerUserId);
+            List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(asset.getType(), localServerUserId);
             for (EntityMapping referenceableMapper : referenceableMappers) {
                 // Generated entities MUST have a prefix, so if there is no prefix ignore that mapper
                 String ridPrefix = referenceableMapper.getIgcRidPrefix();
@@ -1214,7 +1211,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
             // Finally, update the stub with the latest version of the asset
             // (if any of the above fail, this will also be missed, so we will simply have more updates on the next event)
-            igcomrsMetadataCollection.upsertOMRSStubForAsset(asset);
+            igcRepositoryHelper.upsertOMRSStubForAsset(asset);
 
         } else {
             if (log.isErrorEnabled()) { log.error("EntityDetail could not be retrieved for RID: {}", asset.getId()); }
@@ -1248,7 +1245,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             processClassifications(latest, latest.getClassifications(), last == null ? new ArrayList<>() : last.getClassifications());
 
             // See if there are any generated entities to send an event for (ie. *Type)
-            List<EntityMapping> referenceableMappers = igcomrsMetadataCollection.getMappers(latestVersion.getType(), localServerUserId);
+            List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(latestVersion.getType(), localServerUserId);
             for (EntityMapping referenceableMapper : referenceableMappers) {
                 // Generated entities MUST have a prefix, so if there is no prefix ignore that mapper
                 String ridPrefix = referenceableMapper.getIgcRidPrefix();
@@ -1277,7 +1274,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
             // Finally, update the stub with the latest version of the asset
             // (if any of the above fail, this will also be missed, so we will simply have more updates on the next event)
-            igcomrsMetadataCollection.upsertOMRSStubForAsset(latestVersion);
+            igcRepositoryHelper.upsertOMRSStubForAsset(latestVersion);
 
         } else {
             if (log.isErrorEnabled()) { log.error("Latest EntityDetail could not be retrieved for RID: {}", latestVersion.getId()); }
@@ -1403,11 +1400,11 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      */
     private void sendPurgedEntity(String igcAssetType, String rid) {
 
-        OMRSStub stub = igcomrsMetadataCollection.getOMRSStubForAsset(rid, igcAssetType);
+        OMRSStub stub = igcRepositoryHelper.getOMRSStubForAsset(rid, igcAssetType);
 
         // Purge entities by getting all mappers used for that entity (ie. *Type generated entities
         // as well as non-generated entities)
-        List<EntityMapping> referenceableMappers = igcomrsMetadataCollection.getMappers(igcAssetType, localServerUserId);
+        List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(igcAssetType, localServerUserId);
         for (EntityMapping referenceableMapper : referenceableMappers) {
             String ridToPurge = rid;
             String ridPrefix = referenceableMapper.getIgcRidPrefix();
@@ -1431,7 +1428,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         // Finally, remove the stub (so that if such an asset is created in the future it is recognised as new
         // rather than an update)
-        igcomrsMetadataCollection.deleteOMRSStubForAsset(rid, igcAssetType);
+        igcRepositoryHelper.deleteOMRSStubForAsset(rid, igcAssetType);
 
     }
 

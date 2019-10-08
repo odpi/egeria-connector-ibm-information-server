@@ -14,6 +14,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.GovernanceClassificationStatusMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.EntityNotKnownException;
@@ -40,7 +41,7 @@ public class ConfidentialityMapper extends ClassificationMapping {
 
     private ConfidentialityMapper() {
         super(
-                IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE,
+                IGCRepositoryHelper.DEFAULT_IGC_TYPE,
                 "assigned_to_terms",
                 "Referenceable",
                 "Confidentiality"
@@ -299,7 +300,7 @@ public class ConfidentialityMapper extends ClassificationMapping {
         }
 
         IGCOMRSMetadataCollection collection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
-        return collection.getEntityDetail(userId, entityGUID, igcEntity);
+        return collection.getIgcRepositoryHelper().getEntityDetail(userId, entityGUID, igcEntity);
 
     }
 

@@ -19,6 +19,26 @@ public enum IGCOMRSErrorCode {
             "This repository has a fixed subset of regular expressions it can support.",
             "No action required, this is a limitation of the technology. To search using such regular expressions, the metadata of interest" +
                     " must be synchronized to a cohort repository that can support such regular expressions."),
+    NO_HISTORY(501, "OMRS-IGC-REPOSITORY-501-002 ",
+            "Repository {0} is not able to service historical queries",
+            "This repository does not retain historical metadata, so cannot support historical queries.",
+            "No action required, this is a limitation of the technology. To search such history, the metadata of interest" +
+                    " must be synchronized to a cohort repository that can support history."),
+    NO_RELATIONSHIP_PROPERTIES(501, "OMRS-IGC-REPOSITORY-501-003 ",
+            "Repository {0} does not support properties on relationships",
+            "This repository does not store properties on relationships, so they cannot be updated or searched.",
+            "No action required, this is a limitation of the technology. To store or search properties on relationships, the metadata of" +
+                    " interest must be mastered (homed) in a cohort repository that can support relationship properties."),
+    UNSUPPORTED_OBJECT_TYPE(501, "OMRS-IGC-REPOSITORY-501-004 ",
+            "Requested object \"{0}\" is of type \"{1}\" that is not supported by repository {2}",
+            "This repository cannot support retrieving details for or searching for certain object types.",
+            "No action required, this is a limitation of the technology. To store or search such objects, the metadata of interest" +
+                    " must be mastered (homed) in a cohort repository that can support it."),
+    UNSUPPORTED_STATUS(501, "OMRS-IGC-REPOSITORY-501-005 ",
+            "Requested status \"{0}\" for type \"{1}\" is not supported by repository {2}",
+            "This repository cannot support the requested status on the provided type.",
+            "No action required, this is a limitation of the technology. To store or search based on such a status, the metadata of" +
+                    " interest must be mastered (homed) in a cohort repository that can support it."),
     CLASSIFICATION_INSUFFICIENT_PROPERTIES(400, "OMRS-IGC-REPOSITORY-400-001 ",
             "The properties provided for classification \"{0}\" on entity \"{1}\" are insufficient",
             "The system is unable to proceed classifying an entity because insufficient detail has been provided.",
@@ -39,6 +59,22 @@ public enum IGCOMRSErrorCode {
             "The classification \"{0}\" cannot be applied to IGC entity \"{1}\"",
             "The system does not support the listed classification on the IGC entity type listed.",
             "Raise an enhancement request with IBM support."),
+    TYPEDEF_NOT_MAPPED(404, "OMRS-IGC-REPOSITORY-404-001 ",
+            "The TypeDef \"{0}\" has not been mapped to a pre-existing type in repository {1}",
+            "The system does not support the provided TypeDef, or it has not been mapped to a pre-existing type.",
+            "Raise an issue on the Egeria GitHub repository to see if it is feasible to map this TypeDef."),
+    ATTRIBUTE_TYPEDEF_NOT_MAPPED(404, "OMRS-IGC-REPOSITORY-404-002 ",
+            "The AttributeTypeDef \"{0}\" has not been mapped to a pre-existing type in repository {1}",
+            "The system does not support the provided AttributeTypeDef, or it has not been mapped to a pre-existing type.",
+            "Raise an issue on the Egeria GitHub repository to see if it is feasible to map this AttributeTypeDef."),
+    ENTITY_NOT_KNOWN(404, "OMRS-IGC-REPOSITORY-404-003 ",
+            "The entity instance with GUID \"{0}\" and RID \"{1}\" is not known to repository {2}",
+            "The system was unable to find an object with the provided RID.",
+            "Ensure your IGC repository actually contains such an object, and if so raise an issue on the Egeria GitHub with details."),
+    RELATIONSHIP_NOT_KNOWN(404, "OMRS-IGC-REPOSITORY-404-004 ",
+            "The relationship instance with GUID \"{0}\" is not known to repository {1}",
+            "The system was unable to find a relationship based on the provided GUID.",
+            "Ensure your IGC repository actually contains such a relationship, and if so raise an issue on the Egeria GitHub with details."),
     ;
 
     private int    httpErrorCode;
