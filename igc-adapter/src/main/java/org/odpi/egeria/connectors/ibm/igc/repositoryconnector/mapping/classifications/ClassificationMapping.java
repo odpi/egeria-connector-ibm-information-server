@@ -244,15 +244,31 @@ public abstract class ClassificationMapping extends InstanceMapping {
      * @param entityGUID the GUID of the OMRS entity (ie. including any prefix)
      * @param initialProperties the set of classification-specific properties to add to the classification
      * @param userId the user requesting the classification to be added (currently unused)
-     * @return EntityDetail the updated entity with the OMRS classification added
-     * @throws RepositoryErrorException
+     * @throws RepositoryErrorException on any mismatch between the requested classification and what IGC supports
      */
-    public abstract EntityDetail addClassificationToIGCAsset(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                             Reference igcAsset,
-                                                             String entityGUID,
-                                                             InstanceProperties initialProperties,
-                                                             String userId)
-            throws RepositoryErrorException, EntityNotKnownException;
+    public abstract void addClassificationToIGCAsset(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                     Reference igcAsset,
+                                                     String entityGUID,
+                                                     InstanceProperties initialProperties,
+                                                     String userId)
+            throws RepositoryErrorException;
+
+    /**
+     * Implement this method to define how to remove an OMRS classification from an existing IGC asset. (Since IGC has
+     * no actual concept of classification, this is left as a method to-be-implemented depending on how the
+     * implementation desires the classification to be represented within IGC.)
+     *
+     * @param igcomrsRepositoryConnector connectivity to the IGC repository via OMRS connector
+     * @param igcAsset the IGC object from which to remove the OMRS classification
+     * @param entityGUID the GUID of the OMRS entity (ie. including any prefix)
+     * @param userId the user requesting the classification to be removed (currently unused)
+     * @throws RepositoryErrorException on any mismatch between the requested classification and what IGC supports
+     */
+    public abstract void removeClassificationFromIGCAsset(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                          Reference igcAsset,
+                                                          String entityGUID,
+                                                          String userId)
+            throws RepositoryErrorException;
 
     /**
      * Indicates whether this classification mapping matches the provided IGC asset type: that is, this mapping

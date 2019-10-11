@@ -189,7 +189,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
             IGCCreate igcCreate = new IGCCreate("information_governance_rule");
             igcCreate.addProperty("name", SYNC_RULE_NAME);
             igcCreate.addProperty("short_description", newDescription);
-            success = igcRestClient.create(igcCreate);
+            success = igcRestClient.create(igcCreate) != null;
         } else {
             // Update the entry
             IGCUpdate igcUpdate = new IGCUpdate(exists.getId());

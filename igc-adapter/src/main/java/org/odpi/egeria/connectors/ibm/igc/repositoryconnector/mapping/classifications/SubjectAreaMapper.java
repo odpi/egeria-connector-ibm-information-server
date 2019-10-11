@@ -113,8 +113,6 @@ public class SubjectAreaMapper extends ClassificationMapping {
 
     /**
      * Search for SubjectArea by looking at ancestral categories of the term being under a "Subject Area" category.
-     * (There are no properties on the SpineObject classification, so no need to even check the provided
-     * matchClassificationProperties.)
      *
      * @param matchClassificationProperties the criteria to use when searching for the classification
      * @return IGCSearchConditionSet - the IGC search criteria to find entities based on this classification
@@ -172,24 +170,14 @@ public class SubjectAreaMapper extends ClassificationMapping {
     }
 
     /**
-     * Implement this method to define how to add an OMRS classification to an existing IGC asset. (Since IGC has no
-     * actual concept of classification, this is left as a method to-be-implemented depending on how the implementation
-     * desires the classification to be represented within IGC.)
-     *
-     * @param igcomrsRepositoryConnector connectivity to the IGC repository via OMRS connector
-     * @param igcEntity the IGC object to which to add the OMRS classification
-     * @param entityGUID the GUID of the OMRS entity (ie. including any prefix)
-     * @param initialProperties the set of classification-specific properties to add to the classification
-     * @param userId the user requesting the classification to be added (currently unused)
-     * @return EntityDetail the updated entity with the OMRS classification added
-     * @throws RepositoryErrorException
+     * {@inheritDoc}
      */
     @Override
-    public EntityDetail addClassificationToIGCAsset(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                    Reference igcEntity,
-                                                    String entityGUID,
-                                                    InstanceProperties initialProperties,
-                                                    String userId) throws RepositoryErrorException, EntityNotKnownException {
+    public void addClassificationToIGCAsset(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                            Reference igcEntity,
+                                            String entityGUID,
+                                            InstanceProperties initialProperties,
+                                            String userId) throws RepositoryErrorException {
 
         final String methodName = "addClassificationToIGCAsset";
 
@@ -200,7 +188,7 @@ public class SubjectAreaMapper extends ClassificationMapping {
 
         if (classificationProperties == null || classificationProperties.isEmpty()) {
 
-            log.error("Confidentiality classification requires the 'name' property for IGC.");
+            log.error("SubjectArea classification requires the 'name' property for IGC.");
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_INSUFFICIENT_PROPERTIES;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     getOmrsClassificationType(),
@@ -294,9 +282,31 @@ public class SubjectAreaMapper extends ClassificationMapping {
 
         }
 
-        IGCOMRSMetadataCollection collection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
-        return collection.getIgcRepositoryHelper().getEntityDetail(userId, entityGUID, igcEntity);
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void removeClassificationFromIGCAsset(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                 Reference igcAsset,
+                                                 String entityGUID,
+                                                 String userId)
+            throws RepositoryErrorException {
+        final String methodName = "removeClassificationFromIGCAsset";
+        IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_NOT_EDITABLE;
+        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                getOmrsClassificationType(),
+                entityGUID
+        );
+        throw new RepositoryErrorException(
+                errorCode.getHTTPErrorCode(),
+                this.getClass().getName(),
+                methodName,
+                errorMessage,
+                errorCode.getSystemAction(),
+                errorCode.getUserAction()
+        );
     }
 
 }

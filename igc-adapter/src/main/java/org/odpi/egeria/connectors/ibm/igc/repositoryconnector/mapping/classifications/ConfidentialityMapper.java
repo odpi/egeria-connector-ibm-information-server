@@ -22,8 +22,7 @@ import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorEx
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Singleton defining the mapping to the OMRS "Confidentiality" classification.
@@ -183,24 +182,14 @@ public class ConfidentialityMapper extends ClassificationMapping {
     }
 
     /**
-     * Implement this method to define how to add an OMRS classification to an existing IGC asset. (Since IGC has no
-     * actual concept of classification, this is left as a method to-be-implemented depending on how the implementation
-     * desires the classification to be represented within IGC.)
-     *
-     * @param igcomrsRepositoryConnector connectivity to the IGC repository via OMRS connector
-     * @param igcEntity the IGC object to which to add the OMRS classification
-     * @param entityGUID the GUID of the OMRS entity (ie. including any prefix)
-     * @param initialProperties the set of classification-specific properties to add to the classification
-     * @param userId the user requesting the classification to be added (currently unused)
-     * @return EntityDetail the updated entity with the OMRS classification added
-     * @throws RepositoryErrorException
+     * {@inheritDoc}
      */
     @Override
-    public EntityDetail addClassificationToIGCAsset(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                    Reference igcEntity,
-                                                    String entityGUID,
-                                                    InstanceProperties initialProperties,
-                                                    String userId) throws RepositoryErrorException, EntityNotKnownException {
+    public void addClassificationToIGCAsset(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                            Reference igcEntity,
+                                            String entityGUID,
+                                            InstanceProperties initialProperties,
+                                            String userId) throws RepositoryErrorException {
 
         final String methodName = "addClassificationToIGCAsset";
 
@@ -299,8 +288,105 @@ public class ConfidentialityMapper extends ClassificationMapping {
 
         }
 
-        IGCOMRSMetadataCollection collection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
-        return collection.getIgcRepositoryHelper().getEntityDetail(userId, entityGUID, igcEntity);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void removeClassificationFromIGCAsset(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                 Reference igcAsset,
+                                                 String entityGUID,
+                                                 String userId)
+            throws RepositoryErrorException {
+
+        final String methodName = "removeClassificationFromIGCAsset";
+
+        IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
+
+        // Retrieve all of the 'assigned_to_terms' relationships for this particular term
+        IGCSearchCondition thisTerm = new IGCSearchCondition(
+                "_id",
+                "=",
+                igcAsset.getId()
+        );
+        IGCSearchCondition relatedToConfidentiality = new IGCSearchCondition(
+                "assigned_to_terms.parent_category.name",
+                "=",
+                "Confidentiality"
+        );
+        IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(thisTerm);
+        igcSearchConditionSet.addCondition(relatedToConfidentiality);
+        igcSearchConditionSet.setMatchAnyCondition(false);
+
+        IGCSearch igcSearch = new IGCSearch("term", igcSearchConditionSet);
+        igcSearch.addProperty("assigned_to_terms");
+
+        ReferenceList thisTermResults = igcRestClient.search(igcSearch);
+
+        // Only continue if the term has some Confidentiality assigned
+        if (thisTermResults != null && thisTermResults.getPaging().getNumTotal() > 0) {
+
+            // search for all Confidentiality terms
+            IGCSearchCondition inConfidentiality = new IGCSearchCondition(
+                    "parent_category.name",
+                    "=",
+                    "Confidentiality"
+            );
+            igcSearchConditionSet = new IGCSearchConditionSet(inConfidentiality);
+            igcSearch = new IGCSearch("term", igcSearchConditionSet);
+            ReferenceList confidentialityTerms = igcRestClient.search(igcSearch);
+
+            Set<String> confidentialityRids = new HashSet<>();
+            if (confidentialityTerms != null) {
+                confidentialityTerms.getAllPages(igcRestClient);
+                for (Reference confidentialityTerm : confidentialityTerms.getItems()) {
+                    confidentialityRids.add(confidentialityTerm.getId());
+                }
+            }
+
+            // cull the list of referencing categories to remove any under Confidentiality
+            IGCUpdate igcUpdate = new IGCUpdate(igcAsset.getId());
+            ReferenceList assignedToTerms = (ReferenceList) igcRestClient.getPropertyByName(thisTermResults.getItems().get(0), "assigned_to_terms");
+            assignedToTerms.getAllPages(igcRestClient);
+            boolean bRemovedOne = false;
+            for (Reference assignedToTerm : assignedToTerms.getItems()) {
+                String assignedRid = assignedToTerm.getId();
+                if (confidentialityRids.contains(assignedRid)) {
+                    // Drop any confidentiality relationships
+                    bRemovedOne = true;
+                    if (assignedToTerms.getPaging().getNumTotal() == 1) {
+                        // If there is only this one relationship, we should explicitly null it
+                        igcUpdate.addRelationship("assigned_to_terms", null);
+                    }
+                } else {
+                    // Retain all other relationships
+                    igcUpdate.addRelationship("assigned_to_terms", assignedRid);
+                }
+            }
+
+            // if any change, update the referencing categories with a 'replace' semantic
+            if (bRemovedOne) {
+                igcUpdate.setRelationshipUpdateMode(IGCUpdate.UpdateMode.REPLACE);
+                if (!igcRestClient.update(igcUpdate)) {
+                    if (log.isErrorEnabled()) { log.error("Unable to update entity {} to remove classification {}.", entityGUID, getOmrsClassificationType()); }
+                    IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_ERROR_UNKNOWN;
+                    String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                            getOmrsClassificationType(),
+                            entityGUID
+                    );
+                    throw new RepositoryErrorException(
+                            errorCode.getHTTPErrorCode(),
+                            this.getClass().getName(),
+                            methodName,
+                            errorMessage,
+                            errorCode.getSystemAction(),
+                            errorCode.getUserAction()
+                    );
+                }
+            }
+
+        }
 
     }
 

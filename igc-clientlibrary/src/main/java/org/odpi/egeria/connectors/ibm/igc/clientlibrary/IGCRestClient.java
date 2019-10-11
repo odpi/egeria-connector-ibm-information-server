@@ -499,6 +499,38 @@ public class IGCRestClient {
     }
 
     /**
+     * General utility for making creation requests.
+     *
+     * @param endpoint the REST resource against which to make the request
+     * @param method HttpMethod (POST, PUT, etc)
+     * @param contentType the type of content to expect in the payload
+     * @param payload the data that should be created
+     * @return String - containing the RID of the created object instance
+     */
+    public String makeCreateRequest(String endpoint, HttpMethod method, MediaType contentType, String payload) {
+        ResponseEntity<String> response = makeRequest(
+                baseURL + endpoint,
+                method,
+                contentType,
+                payload,
+                false
+        );
+        String rid = null;
+        if (!response.getStatusCode().equals(HttpStatus.CREATED)) {
+            log.error("Unable to create instance -- check IGC environment connectivity and authentication details.");
+            throw new NullPointerException("Unable to create instance -- check IGC environment connectivity and authentication details.");
+        } else {
+            HttpHeaders headers = response.getHeaders();
+            List<String> instanceURLs = headers.get("Location");
+            if (instanceURLs != null && !instanceURLs.isEmpty() && instanceURLs.size() == 1) {
+                String instanceURL = instanceURLs.get(0);
+                rid = instanceURL.substring(instanceURL.lastIndexOf("/"));
+            }
+        }
+        return rid;
+    }
+
+    /**
      * Retrieves the list of metadata types supported by IGC.
      *
      * @param objectMapper an ObjectMapper to use for translating the types list
@@ -599,7 +631,7 @@ public class IGCRestClient {
      * @param value the JSON structure defining what value(s) of the asset to update (and mode)
      * @return String - the JSON indicating the updated asset's RID and updates made
      */
-    public String updateJson(String rid, JsonNode value) {
+    private String updateJson(String rid, JsonNode value) {
         return makeRequest(EP_ASSET + "/" + rid, HttpMethod.PUT, MediaType.APPLICATION_JSON, value.toString());
     }
 
@@ -618,20 +650,43 @@ public class IGCRestClient {
      * Create the asset specified by the provided value(s).
      *
      * @param value the JSON structure defining what should be created
-     * @return String - the JSON indicating the created asset's RID
+     * @return String - the created asset's RID
      */
-    public String createJson(JsonNode value) {
-        return makeRequest(EP_ASSET, HttpMethod.POST, MediaType.APPLICATION_JSON, value.toString());
+    private String createJson(JsonNode value) {
+        return makeCreateRequest(EP_ASSET, HttpMethod.POST, MediaType.APPLICATION_JSON, value.toString());
     }
 
     /**
      * Create the object described by the provided create object.
      *
      * @param igcCreate creation criteria to use
-     * @return boolean - indicating success (true) or not (false) of the operation
+     * @return String - the created asset's RID (or null if nothing was created)
      */
-    public boolean create(IGCCreate igcCreate) {
-        String result = createJson(igcCreate.getCreate());
+    public String create(IGCCreate igcCreate) {
+        return createJson(igcCreate.getCreate());
+    }
+
+    /**
+     * Delete the asset specified by the provided RID.
+     *
+     * @param rid the RID of the asset to delete
+     * @return String - null upon successful deletion, otherwise containing a message pertaining to the failure
+     */
+    private String deleteJson(String rid) {
+        return makeRequest(EP_ASSET + "/" + rid, HttpMethod.DELETE, MediaType.APPLICATION_JSON, null);
+    }
+
+    /**
+     * Delete the object specified by the provided RID.
+     *
+     * @param rid the RID of the asset to delete
+     * @return boolean
+     */
+    public boolean delete(String rid) {
+        String result = deleteJson(rid);
+        if (result != null) {
+            log.error("Unable to delete asset {}: {}", rid, result);
+        }
         return (result == null);
     }
 

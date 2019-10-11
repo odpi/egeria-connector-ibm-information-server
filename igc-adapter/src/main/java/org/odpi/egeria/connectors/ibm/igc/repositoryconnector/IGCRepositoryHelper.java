@@ -21,9 +21,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.PrimitiveDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
-import org.odpi.openmetadata.repositoryservices.ffdc.exception.EntityNotKnownException;
-import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
-import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,6 +147,15 @@ public class IGCRepositoryHelper {
     EntityMapping getEntityMappingByGUID(String guid) {
         return entityMappingStore.getMappingByOmrsTypeGUID(guid);
     }
+
+    /**
+     * Retrieves the entity mapping by the IGC asset type and prefix (if any).
+     *
+     * @param assetType the IGC asset type
+     * @param prefix the prefix, or null if no prefix
+     * @return EntityMapping
+     */
+    EntityMapping getEntityMappingByIgcType(String assetType, String prefix) { return entityMappingStore.getMappingByIgcAssetTypeAndPrefix(assetType, prefix); }
 
     /**
      * Retrieves the classification mapping by GUID of the OMRS TypeDef.
@@ -606,6 +613,171 @@ public class IGCRepositoryHelper {
         }
 
         return detail;
+
+    }
+
+    /**
+     * Add the specified classification to the provided entity.
+     *
+     * @param userId
+     * @param entityGUID
+     * @param classificationTypeDef
+     * @param classificationProperties
+     * @returns Reference - the IGC asset that was classified
+     * @throws RepositoryErrorException
+     * @throws EntityNotKnownException
+     * @throws ClassificationErrorException
+     */
+    public Reference classifyEntity(String userId,
+                                    String entityGUID,
+                                    TypeDef classificationTypeDef,
+                                    InstanceProperties classificationProperties) throws
+            RepositoryErrorException,
+            EntityNotKnownException,
+            ClassificationErrorException {
+
+        final String methodName = "classifyEntity";
+
+        String classificationName = classificationTypeDef.getName();
+
+        String possiblyPrefixedRid = getRidFromGuid(entityGUID);
+        if (possiblyPrefixedRid == null) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    entityGUID,
+                    "null",
+                    repositoryName);
+            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        }
+        String rid = IGCRepositoryHelper.getRidFromGeneratedId(possiblyPrefixedRid);
+        Reference igcEntity = this.igcRestClient.getAssetRefById(rid);
+
+        if (igcEntity == null) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    entityGUID,
+                    rid,
+                    repositoryName
+            );
+            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        }
+
+        ClassificationMapping classificationMapping = getClassificationMappingByTypes(classificationName, igcEntity.getType());
+        if (classificationMapping != null) {
+            classificationMapping.addClassificationToIGCAsset(
+                    igcomrsRepositoryConnector,
+                    igcEntity,
+                    entityGUID,
+                    classificationProperties,
+                    userId
+            );
+        } else {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    classificationName,
+                    repositoryName);
+            throw new ClassificationErrorException(
+                    errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction()
+            );
+        }
+
+        return igcEntity;
+
+    }
+
+    /**
+     * Remove the specified classification from the provided entity.
+     *
+     * @param userId
+     * @param entityGUID
+     * @param classificationTypeDef
+     * @returns Reference - the IGC asset that was declassified
+     * @throws RepositoryErrorException
+     * @throws EntityNotKnownException
+     * @throws ClassificationErrorException
+     */
+    public Reference declassifyEntity(String userId,
+                                      String entityGUID,
+                                      TypeDef classificationTypeDef) throws
+            RepositoryErrorException,
+            EntityNotKnownException,
+            ClassificationErrorException {
+
+        final String methodName = "declassifyEntity";
+
+        String classificationName = classificationTypeDef.getName();
+
+        String possiblyPrefixedRid = getRidFromGuid(entityGUID);
+        if (possiblyPrefixedRid == null) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    entityGUID,
+                    "null",
+                    repositoryName);
+            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        }
+        String rid = IGCRepositoryHelper.getRidFromGeneratedId(possiblyPrefixedRid);
+        Reference igcEntity = this.igcRestClient.getAssetRefById(rid);
+
+        if (igcEntity == null) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    entityGUID,
+                    rid,
+                    repositoryName
+            );
+            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        }
+
+        ClassificationMapping classificationMapping = getClassificationMappingByTypes(classificationName, igcEntity.getType());
+        if (classificationMapping != null) {
+            classificationMapping.removeClassificationFromIGCAsset(
+                    igcomrsRepositoryConnector,
+                    igcEntity,
+                    entityGUID,
+                    userId
+            );
+        } else {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    classificationName,
+                    repositoryName);
+            throw new ClassificationErrorException(
+                    errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction()
+            );
+        }
+
+        return igcEntity;
 
     }
 

@@ -313,6 +313,17 @@ public abstract class EntityMapping extends InstanceMapping {
     }
 
     /**
+     * Returns only the subset of mapped OMRS properties that can be written (created or updated).
+     *
+     * @return {@code Set<String>}
+     */
+    public final Set<String> getWriteableMappedOmrsProperties() {
+        HashSet<String> omrsProperties = new HashSet<>(getSimpleMappedOmrsProperties());
+        omrsProperties.addAll(getComplexMappedOmrsProperties());
+        return omrsProperties;
+    }
+
+    /**
      * Returns the set of OMRS property names that are mapped: either to IGC properties, or as fixed (literal) values.
      *
      * @return {@code Set<String>}
