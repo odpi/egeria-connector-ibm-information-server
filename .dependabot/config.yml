@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the Egeria project.
+
+version: 1
+
+update_configs:
+
+  # Main java project - will cover the whole tree
+  - package_manager: "java:maven"
+    directory: "/"
+    update_schedule: "daily"
+    default_reviewers:
+      - "cmgrote"
