@@ -20,6 +20,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.odpi.openmetadata.accessservices.dataengine.model.SoftwareServerCapability;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.*;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
+import org.odpi.openmetadata.frameworks.connectors.properties.EndpointProperties;
 import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.DataEngineConnectorBase;
 import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.model.*;
 import org.slf4j.Logger;
@@ -94,19 +95,46 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
         if (log.isInfoEnabled()) { log.info("Initializing DataStageDataEngineConnector..."); }
 
-        // Note: it is not currently possible to try to pull these from a separate IGC proxy instance, so we need to
-        // ask for these same details on this connector as well
+        EndpointProperties endpointProperties = connectionProperties.getEndpoint();
+        if (endpointProperties == null) {
+            DataStageErrorCode errorCode = DataStageErrorCode.CONNECTION_FAILURE;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("null");
+            throw new OCFRuntimeException(
+                    errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction()
+            );
+        }
+        String address = endpointProperties.getAddress();
+        if (address == null || address.equals("")) {
+            DataStageErrorCode errorCode = DataStageErrorCode.CONNECTION_FAILURE;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
+            throw new OCFRuntimeException(
+                    errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction()
+            );
+        }
+
+        String igcUser = connectionProperties.getUserId();
+        String igcPass = connectionProperties.getClearPassword();
+
         Map<String, Object> proxyProperties = this.connectionBean.getConfigurationProperties();
-        String igcHost = (String) proxyProperties.get("ibm.igc.services.host");
-        String igcPort = (String) proxyProperties.get("ibm.igc.services.port");
-        String igcUser = (String) proxyProperties.get("ibm.igc.username");
-        String igcPass = (String) proxyProperties.get("ibm.igc.password");
-        Integer igcPage = (Integer) proxyProperties.get("ibm.igc.pagesize");
+        Integer igcPage = null;
+        if (proxyProperties != null) {
+            igcPage = (Integer) proxyProperties.get("pageSize");
+        }
 
         this.defaultUserId = igcUser;
 
         // Create new REST API client (opens a new session)
-        this.igcRestClient = new IGCRestClient(igcHost, igcPort, igcUser, igcPass);
+        this.igcRestClient = new IGCRestClient("https://" + address, igcUser, igcPass);
         if (this.igcRestClient.isSuccessfullyInitialised()) {
             // Set the version based on the IGC client's auto-determination of the IGC environment's version
             this.igcVersion = this.igcRestClient.getIgcVersion();
@@ -121,14 +149,25 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 Class pojo = igcRestClient.findPOJOForType(lineageAssetType);
                 igcRestClient.registerPOJO(pojo);
             }
+        } else {
+            DataStageErrorCode errorCode = DataStageErrorCode.CONNECTION_FAILURE;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
+            throw new OCFRuntimeException(
+                    errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction()
+            );
         }
 
         // Create a new SoftwareServerCapability representing this Data Engine
         SoftwareServerCapability sscDataEngine = new SoftwareServerCapability();
         sscDataEngine.setEngineType("IBM InfoSphere DataStage");
         sscDataEngine.setEngineVersion(igcRestClient.getIgcVersion().getVersionString());
-        sscDataEngine.setQualifiedName("ibm-datastage@" + igcHost + ":" + igcPort);
-        sscDataEngine.setDisplayName(igcHost + ":" + igcPort);
+        sscDataEngine.setQualifiedName("ibm-datastage@" + address);
+        sscDataEngine.setDisplayName(address);
         dataEngine = new DataEngineSoftwareServerCapability(sscDataEngine, defaultUserId);
         this.objectMapper = new ObjectMapper();
 

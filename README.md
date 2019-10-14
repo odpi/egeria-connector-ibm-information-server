@@ -232,15 +232,21 @@ For example payloads and endpoints, see the [Postman samples](samples).
         "class": "DataEngineProxyConfig",
         "accessServiceRootURL": "http://localhost:8080",
         "accessServiceServerName": "omas",
-        "dataEngineProxyProvider": "org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnectorProvider",
-        "pollForChanges": true,
-        "pollIntervalInSeconds": 60,
-        "dataEngineConfig": {
-            "ibm.igc.services.host": "{{igc_host}}",
-            "ibm.igc.services.port": "{{igc_port}}",
-            "ibm.igc.username": "{{igc_user}}",
-            "ibm.igc.password": "{{igc_password}}"
-        }
+        "dataEngineProxyConnection": {
+            "class": "Connection",
+            "connectorType": {
+                "class": "ConnectorType",
+                "connectorProviderClassName": "org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnectorProvider"
+            },
+            "endpoint": {
+                "class": "Endpoint",
+                "address": "{{igc_host}}:{{igc_port}}",
+                "protocol": "https"
+            },
+            "userId": "{{igc_user}}",
+            "clearPassword": "{{igc_password}}"
+        },
+        "pollIntervalInSeconds": 60
     }
     ```
 

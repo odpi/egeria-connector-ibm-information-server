@@ -6,10 +6,14 @@ import java.text.MessageFormat;
 
 public enum DataStageErrorCode {
 
-    SYNC_TIME_UPDATE_FAILURE(500, "DATA-ENGINE-IBM-DATASTAGE-500-001",
+    SYNC_TIME_UPDATE_FAILURE(500, "DATA-ENGINE-IBM-DATASTAGE-500-001 ",
             "Unable to update sync time for IBM DataStage",
             "The system was unable to update the date and time at which synchronization was last successful.",
             "Check the system logs and diagnose or report the problem."),
+    CONNECTION_FAILURE(500, "DATA-ENGINE-IBM-DATASTAGE-500-002 ",
+            "Unable to initialize DataStage connectivity to: {0}",
+            "The system was unable to initialize connectivity to IBM DataStage on the provided address.",
+            "Check the inter-host network resolution, credentials and system logs to diagnose or report the problem."),
     ;
 
     private int    httpErrorCode;

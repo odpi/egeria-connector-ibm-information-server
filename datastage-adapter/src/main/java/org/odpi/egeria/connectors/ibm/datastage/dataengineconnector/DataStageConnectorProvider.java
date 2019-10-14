@@ -5,6 +5,9 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector;
 import org.odpi.openmetadata.frameworks.connectors.properties.beans.ConnectorType;
 import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.DataEngineConnectorProvider;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * In the Open Connector Framework (OCF), a ConnectorProvider is a factory for a specific type of connector.
  * The DataStageConnectorProvider is the connector provider for the DataStageConnector.
@@ -21,13 +24,17 @@ public class DataStageConnectorProvider extends DataEngineConnectorProvider {
     static final String  connectorTypeName = "DataStage Data Engine Connector";
     static final String  connectorTypeDescription = "DataStage Data Engine Connector that processes job information from the IBM DataStage ETL engine.";
 
+    protected static final String pageSize = "pageSize";
+
     /**
      * Constructor used to initialize the ConnectorProviderBase with the Java class name of the specific
      * OMRS Connector implementation.
      */
     public DataStageConnectorProvider() {
+
         Class connectorClass = DataStageConnector.class;
         super.setConnectorClassName(connectorClass.getName());
+
         ConnectorType connectorType = new ConnectorType();
         connectorType.setType(ConnectorType.getConnectorTypeType());
         connectorType.setGUID(connectorTypeGUID);
@@ -35,7 +42,13 @@ public class DataStageConnectorProvider extends DataEngineConnectorProvider {
         connectorType.setDisplayName(connectorTypeName);
         connectorType.setDescription(connectorTypeDescription);
         connectorType.setConnectorProviderClassName(this.getClass().getName());
+
+        List<String> recognizedConfigurationProperties = new ArrayList<>();
+        recognizedConfigurationProperties.add(pageSize);
+        connectorType.setRecognizedConfigurationProperties(recognizedConfigurationProperties);
+
         super.connectorTypeBean = connectorType;
+
     }
 
 }
