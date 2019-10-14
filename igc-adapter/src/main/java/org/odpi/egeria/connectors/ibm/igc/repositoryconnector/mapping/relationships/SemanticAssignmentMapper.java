@@ -3,7 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.TermAssignmentStatusMapper;
 
 /**
@@ -20,7 +20,7 @@ public class SemanticAssignmentMapper extends RelationshipMapping {
 
     private SemanticAssignmentMapper() {
         super(
-                IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE,
+                IGCRepositoryHelper.DEFAULT_IGC_TYPE,
                 "term",
                 "assigned_to_terms",
                 "assigned_assets",

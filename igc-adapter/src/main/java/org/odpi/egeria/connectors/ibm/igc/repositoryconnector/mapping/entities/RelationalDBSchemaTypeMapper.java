@@ -3,16 +3,16 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AssetSchemaTypeMapper_DatabaseSchema;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttributeForSchemaMapper_TableSchema;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 
 /**
  * Defines the mapping to the OMRS "RelationalDBSchemaType" entity.
  */
 public class RelationalDBSchemaTypeMapper extends ReferenceableMapper {
 
-    public static final String IGC_RID_PREFIX = IGCOMRSMetadataCollection.generateTypePrefix("RDBST");
+    public static final String IGC_RID_PREFIX = IGCRepositoryHelper.generateTypePrefix("RDBST");
 
     private static class Singleton {
         private static final RelationalDBSchemaTypeMapper INSTANCE = new RelationalDBSchemaTypeMapper();

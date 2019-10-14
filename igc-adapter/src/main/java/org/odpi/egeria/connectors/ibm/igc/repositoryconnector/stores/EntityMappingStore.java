@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.stores;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
@@ -214,10 +215,10 @@ public class EntityMappingStore {
     public EntityMapping getDefaultEntityMapper() {
         EntityMapping referenceable = null;
         try {
-            Class mappingClass = Class.forName(IGCOMRSMetadataCollection.MAPPING_PKG + "entities.ReferenceableMapper");
+            Class mappingClass = Class.forName(IGCRepositoryHelper.MAPPING_PKG + "entities.ReferenceableMapper");
             referenceable = getEntityMapper(mappingClass);
         } catch (ClassNotFoundException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to find default ReferenceableMapper class: {}", IGCOMRSMetadataCollection.MAPPING_PKG + "entities.ReferenceableMapper", e); }
+            if (log.isErrorEnabled()) { log.error("Unable to find default ReferenceableMapper class: {}", IGCRepositoryHelper.MAPPING_PKG + "entities.ReferenceableMapper", e); }
         }
         return referenceable;
     }

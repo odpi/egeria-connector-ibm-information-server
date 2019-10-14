@@ -10,8 +10,8 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceLi
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.DataClassAssignmentStatusMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.DataClassMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.EnumPropertyValue;
@@ -46,7 +46,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
 
     private DataClassAssignmentMapper() {
         super(
-                IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE,
+                IGCRepositoryHelper.DEFAULT_IGC_TYPE,
                 "data_class",
                 "detected_classifications",
                 "classified_assets_detected",
@@ -206,7 +206,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             /* Only proceed with the classified object if it is not a 'main_object' asset
              * (in this scenario, 'main_object' represents ColumnAnalysisMaster objects that are not accessible
              *  and will throw bad request (400) REST API errors) */
-            if (classifiedObj != null && !classifiedObj.getType().equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE)) {
+            if (classifiedObj != null && !classifiedObj.getType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
                 try {
 
                     // Use 'classification' object to put RID of classification on the 'detected classification' relationships
@@ -399,7 +399,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             /* Only proceed with the classified object if it is not a 'main_object' asset
              * (in this scenario, 'main_object' represents ColumnAnalysisMaster objects that are not accessible
              *  and will throw bad request (400) REST API errors) */
-            if (dataClassObj != null && !dataClassObj.getType().equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE)) {
+            if (dataClassObj != null && !dataClassObj.getType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
                 try {
 
                     // Use 'classification' object to put RID of classification on the 'detected classification' relationships

@@ -9,8 +9,8 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceLi
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Relationship;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
@@ -173,7 +173,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
             /* Only proceed with the connection object if it is not a 'main_object' asset
              * (in this scenario, 'main_object' represents ColumnAnalysisMaster objects that are not accessible
              *  and will throw bad request (400) REST API errors) */
-            if (dataConnection != null && !dataConnection.getType().equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE)) {
+            if (dataConnection != null && !dataConnection.getType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
                 try {
 
                     if (log.isDebugEnabled()) { log.debug("Retrieved connection: {}", dataConnection); }
@@ -231,7 +231,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
             /* Only proceed with the connector object if it is not a 'main_object' asset
              * (in this scenario, 'main_object' represents ColumnAnalysisMaster objects that are not accessible
              *  and will throw bad request (400) REST API errors) */
-            if (dataConnector != null && !dataConnector.getType().equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE)) {
+            if (dataConnector != null && !dataConnector.getType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
                 try {
 
                     if (log.isDebugEnabled()) { log.debug("Retrieved connector: {}", dataConnector); }

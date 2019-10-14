@@ -3,7 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 
 /**
  * Singleton to map the OMRS "AttachedTag" relationship for IGC "label" assets.
@@ -19,7 +19,7 @@ public class AttachedTagMapper extends RelationshipMapping {
 
     private AttachedTagMapper() {
         super(
-                IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE,
+                IGCRepositoryHelper.DEFAULT_IGC_TYPE,
                 "label",
                 "labels",
                 "labeled_assets",

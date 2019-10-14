@@ -12,10 +12,10 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.InstanceMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.ReferenceableMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
@@ -370,9 +370,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 same = this.one;
             } else if (simpleType.equals(two.getIgcAssetType())) {
                 same = this.two;
-            } else if (one.getIgcAssetType().equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE) && !one.excludeIgcAssetType.contains(simpleType)) {
+            } else if (one.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !one.excludeIgcAssetType.contains(simpleType)) {
                 same = this.one;
-            } else if (two.getIgcAssetType().equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE) && !two.excludeIgcAssetType.contains(simpleType)) {
+            } else if (two.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !two.excludeIgcAssetType.contains(simpleType)) {
                 same = this.two;
             } else {
                 if (log.isErrorEnabled()) { log.error("getProxyFromType - Provided asset type does not match either proxy type (or was explicitly excluded): {}", simpleType); }
@@ -401,9 +401,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 other = this.two;
             } else if (simpleType.equals(two.getIgcAssetType())) {
                 other = this.one;
-            } else if (one.getIgcAssetType().equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE) && !one.excludeIgcAssetType.contains(simpleType)) {
+            } else if (one.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !one.excludeIgcAssetType.contains(simpleType)) {
                 other = this.two;
-            } else if (two.getIgcAssetType().equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE) && !two.excludeIgcAssetType.contains(simpleType)) {
+            } else if (two.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !two.excludeIgcAssetType.contains(simpleType)) {
                 other = this.one;
             } else {
                 if (log.isErrorEnabled()) { log.error("getOtherProxyFromType - Provided asset type does not match either proxy type (or was explicitly excluded): {}", simpleType); }
@@ -435,9 +435,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 addRealPropertiesToList(one.getIgcRelationshipProperties(), properties);
             } else if (simpleType.equals(two.getIgcAssetType())) {
                 addRealPropertiesToList(two.getIgcRelationshipProperties(), properties);
-            } else if (one.getIgcAssetType().equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE) && !one.excludeIgcAssetType.contains(simpleType)) {
+            } else if (one.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !one.excludeIgcAssetType.contains(simpleType)) {
                 addRealPropertiesToList(one.getIgcRelationshipProperties(), properties);
-            } else if (two.getIgcAssetType().equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE) && !two.excludeIgcAssetType.contains(simpleType)) {
+            } else if (two.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !two.excludeIgcAssetType.contains(simpleType)) {
                 addRealPropertiesToList(two.getIgcRelationshipProperties(), properties);
             } else {
                 if (log.isWarnEnabled()) { log.warn("getIgcRelationshipPropertiesForType - Provided asset type does not match either proxy type (or was explicitly excluded): {}", simpleType); }
@@ -548,7 +548,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             if (log.isDebugEnabled()) { log.debug("checking for matching asset between {} and {}", this.igcAssetType, simplifiedType); }
             return (
                     this.igcAssetType.equals(simplifiedType)
-                    || (this.igcAssetType.equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE) && !this.excludeIgcAssetType.contains(simplifiedType))
+                    || (this.igcAssetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !this.excludeIgcAssetType.contains(simplifiedType))
                     || (hasLinkingAsset() && simplifiedType.equals(getLinkingAssetType()))
             );
         }
@@ -833,7 +833,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
         if (igcType != null) {
 
             IGCOMRSMetadataCollection igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
-            EntityMappingInstance entityMap = igcomrsMetadataCollection.getMappingInstanceForParameters(igcObj, ridPrefix, userId);
+            IGCRepositoryHelper igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
+            EntityMappingInstance entityMap = igcRepositoryHelper.getMappingInstanceForParameters(igcObj, ridPrefix, userId);
 
             if (entityMap != null) {
 
@@ -862,9 +863,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                             null
                     );
                     if (ridPrefix != null) {
-                        entityProxy.setGUID(igcomrsMetadataCollection.getGuidForRid(ridPrefix + igcObj.getId()));
+                        entityProxy.setGUID(igcRepositoryHelper.getGuidForRid(ridPrefix + igcObj.getId()));
                     } else {
-                        entityProxy.setGUID(igcomrsMetadataCollection.getGuidForRid(igcObj.getId()));
+                        entityProxy.setGUID(igcRepositoryHelper.getGuidForRid(igcObj.getId()));
                     }
 
                     if (igcRestClient.hasModificationDetails(igcObj.getType())) {
@@ -1140,7 +1141,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                         String userId) {
 
         IGCSearch igcSearch = new IGCSearch(assetType, igcSearchConditionSet);
-        if (!assetType.equals(IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE)) {
+        if (!assetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
             if (igcomrsRepositoryConnector.getIGCRestClient().hasModificationDetails(assetType)) {
                 igcSearch.addProperties(IGCRestConstants.getModificationProperties());
             }
@@ -1374,6 +1375,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
         final String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
 
         IGCOMRSMetadataCollection igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
+        IGCRepositoryHelper igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
         OMRSRepositoryHelper omrsRepositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
         String omrsRelationshipName = omrsRelationshipDef.getName();
 
@@ -1427,15 +1429,15 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         errorCode.getUserAction());
             }
 
-            relationship.setGUID(igcomrsMetadataCollection.getGuidForRid(relationshipRID));
+            relationship.setGUID(igcRepositoryHelper.getGuidForRid(relationshipRID));
             relationship.setMetadataCollectionId(igcomrsRepositoryConnector.getMetadataCollectionId());
             relationship.setStatus(InstanceStatus.ACTIVE);
             relationship.setInstanceProvenanceType(InstanceProvenanceType.LOCAL_COHORT);
 
             String guidForEP1 = RelationshipMapping.getProxyOneRIDFromRelationshipRID(relationshipRID);
             String guidForEP2 = RelationshipMapping.getProxyTwoRIDFromRelationshipRID(relationshipRID);
-            String ridForEP1 = IGCOMRSMetadataCollection.getRidFromGeneratedId(guidForEP1);
-            String ridForEP2 = IGCOMRSMetadataCollection.getRidFromGeneratedId(guidForEP2);
+            String ridForEP1 = IGCRepositoryHelper.getRidFromGeneratedId(guidForEP1);
+            String ridForEP2 = IGCRepositoryHelper.getRidFromGeneratedId(guidForEP2);
 
             EntityProxy ep1 = null;
             EntityProxy ep2 = null;
