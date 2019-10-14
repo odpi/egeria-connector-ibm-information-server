@@ -98,7 +98,7 @@
         <woodstox.version>5.3.0</woodstox.version>
         <spring.version>5.1.5.RELEASE</spring.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
-        <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
+        <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
         <maven-download.version>1.4.1</maven-download.version>
         <maven-antrun.version>1.8</maven-antrun.version>
