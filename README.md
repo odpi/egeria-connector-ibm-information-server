@@ -232,7 +232,7 @@ For example payloads and endpoints, see the [Postman samples](samples).
         "class": "DataEngineProxyConfig",
         "accessServiceRootURL": "http://localhost:8080",
         "accessServiceServerName": "omas",
-        "dataEngineProxyConnection": {
+        "dataEngineConnection": {
             "class": "Connection",
             "connectorType": {
                 "class": "ConnectorType",
@@ -240,11 +240,11 @@ For example payloads and endpoints, see the [Postman samples](samples).
             },
             "endpoint": {
                 "class": "Endpoint",
-                "address": "{{igc_host}}:{{igc_port}}",
+                "address": "{{ds_host}}:{{ds_port}}",
                 "protocol": "https"
             },
-            "userId": "{{igc_user}}",
-            "clearPassword": "{{igc_password}}"
+            "userId": "{{username}}",
+            "clearPassword": "{{password}}"
         },
         "pollIntervalInSeconds": 60
     }
@@ -256,8 +256,8 @@ For example payloads and endpoints, see the [Postman samples](samples).
     POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{ds_server}}/data-engine-proxy-service/configuration
     ```
 
-    The payload should include the hostname and port of your IGC environment's domain (services) tier,
-    and a `username` and `password` through which the REST API can be accessed.
+    The payload should include the hostname and port of your Information Server environment's domain (services) tier,
+    and a `username` and `password` through which the IGC module's REST API can be accessed.
 
     Note that you also need to provide the `connectorProvider` parameter, set to the name of the DataStage
     connectorProvider class (value as given above).
