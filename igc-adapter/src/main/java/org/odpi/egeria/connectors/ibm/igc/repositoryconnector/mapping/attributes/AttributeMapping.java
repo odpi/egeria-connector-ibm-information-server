@@ -242,7 +242,7 @@ public abstract class AttributeMapping {
      * Retrieve the provided OMRS value as a mapped IGC value.
      *
      * @param value the value to translate from an OMRS instance property value to an IGC value
-     * @returns String
+     * @return String
      * @throws PropertyErrorException if the value cannot be translated to an IGC value
      */
     public static String getIgcValueFromPropertyValue(InstancePropertyValue value) throws PropertyErrorException {

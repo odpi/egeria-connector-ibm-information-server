@@ -619,11 +619,11 @@ public class IGCRepositoryHelper {
     /**
      * Add the specified classification to the provided entity.
      *
-     * @param userId
-     * @param entityGUID
-     * @param classificationTypeDef
-     * @param classificationProperties
-     * @returns Reference - the IGC asset that was classified
+     * @param userId the user requesting the addition of the classification
+     * @param entityGUID the GUID of the entity to which to add the classification
+     * @param classificationTypeDef the TypeDef of the classification to add
+     * @param classificationProperties the properties to set on the classification that is to be added
+     * @return Reference - the IGC asset that was classified
      * @throws RepositoryErrorException
      * @throws EntityNotKnownException
      * @throws ClassificationErrorException
@@ -703,10 +703,10 @@ public class IGCRepositoryHelper {
     /**
      * Remove the specified classification from the provided entity.
      *
-     * @param userId
-     * @param entityGUID
-     * @param classificationTypeDef
-     * @returns Reference - the IGC asset that was declassified
+     * @param userId the user requesting the classification removal
+     * @param entityGUID the GUID of the entity from which classification should be removed
+     * @param classificationTypeDef the TypeDef of the classification that should be removed
+     * @return Reference - the IGC asset that was declassified
      * @throws RepositoryErrorException
      * @throws EntityNotKnownException
      * @throws ClassificationErrorException
