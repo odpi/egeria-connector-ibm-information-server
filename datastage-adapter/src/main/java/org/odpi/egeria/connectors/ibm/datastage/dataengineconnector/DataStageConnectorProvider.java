@@ -2,8 +2,8 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector;
 
-import org.odpi.openmetadata.frameworks.connectors.ConnectorProviderBase;
 import org.odpi.openmetadata.frameworks.connectors.properties.beans.ConnectorType;
+import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.DataEngineConnectorProviderBase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.List;
  * name of the OMRS Connector implementation (by calling super.setConnectorClassName(className)).
  * Then the connector provider will work.
  */
-public class DataStageConnectorProvider extends ConnectorProviderBase {
+public class DataStageConnectorProvider extends DataEngineConnectorProviderBase {
 
     static final String  connectorTypeGUID = "f71e6c48-fa06-4016-8437-7f0e8efcfb39";
     static final String  connectorTypeName = "DataStage Data Engine Connector";
