@@ -281,7 +281,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"class\": \"DataEngineProxyConfig\",\n\t\"accessServiceRootURL\": \"{{baseURL}}\",\n\t\"accessServiceServerName\": \"omas\",\n\t\"dataEngineProxyProvider\": \"org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnectorProvider\",\n\t\"pollForChanges\": true,\n\t\"pollIntervalInSeconds\": 60,\n\t\"dataEngineConfig\": {\n\t\t\"ibm.igc.services.host\": \"{{igc_host}}\",\n\t\t\"ibm.igc.services.port\": \"{{igc_port}}\",\n\t\t\"ibm.igc.username\": \"{{igc_user}}\",\n\t\t\"ibm.igc.password\": \"{{igc_password}}\"\n\t}\n}"
+					"raw": "{\n\t\"class\": \"DataEngineProxyConfig\",\n\t\"accessServiceRootURL\": \"{{baseURL}}\",\n\t\"accessServiceServerName\": \"omas\",\n\t\"dataEngineConnection\": {\n        \"class\": \"Connection\",\n        \"connectorType\": {\n            \"class\": \"ConnectorType\",\n            \"connectorProviderClassName\": \"org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnectorProvider\"\n        },\n        \"endpoint\": {\n            \"class\": \"Endpoint\",\n            \"address\": \"{{igc_host}}:{{igc_port}}\",\n            \"protocol\": \"https\"\n        },\n        \"userId\": \"{{igc_user}}\",\n        \"clearPassword\": \"{{igc_password}}\"\n    },\n    \"pollIntervalInSeconds\": 60\n}"
 				},
 				"url": {
 					"raw": "{{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/datastage/data-engine-proxy-service/configuration",

@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Utility class for interacting with 'data_file_field' information via IGC's REST API.
+ */
 public class DataFileField {
 
     private static final List<String> SEARCH_PROPERTIES = createSearchProperties();

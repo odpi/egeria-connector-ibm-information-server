@@ -98,7 +98,19 @@ public class IGCRestClient {
      * @param password the password for the user
      */
     public IGCRestClient(String host, String port, String user, String password) {
-        this("https://" + host + ":" + port, encodeBasicAuth(user, password));
+        this("https://" + host + ":" + port, user, password);
+    }
+
+    /**
+     * Creates a new session on the server and retains the cookies to re-use the same session for the life
+     * of the client (or until the session times out); whichever occurs first.
+     *
+     * @param baseURL the base URL of the domain tier of Information Server
+     * @param user the username with which to open and retain the session
+     * @param password the password of the user
+     */
+    public IGCRestClient(String baseURL, String user, String password) {
+        this(baseURL, encodeBasicAuth(user, password));
     }
 
     /**
