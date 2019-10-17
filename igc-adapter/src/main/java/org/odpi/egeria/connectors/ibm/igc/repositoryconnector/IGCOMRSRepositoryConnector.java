@@ -6,6 +6,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.OMRSStub;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
+import org.odpi.openmetadata.frameworks.connectors.properties.EndpointProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.OMRSMetadataCollection;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryConnector;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.OMRSRuntimeException;
@@ -43,26 +44,42 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      */
     @Override
     public void initialize(String               connectorInstanceId,
-                           ConnectionProperties connectionProperties)
-    {
+                           ConnectionProperties connectionProperties) {
+
         super.initialize(connectorInstanceId, connectionProperties);
 
         final String methodName = "initialize";
         if (log.isDebugEnabled()) { log.debug("Initializing IGCOMRSRepositoryConnector..."); }
 
+        EndpointProperties endpointProperties = connectionProperties.getEndpoint();
+        if (endpointProperties == null) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("null");
+            throw new OMRSRuntimeException(
+                    errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction()
+            );
+        }
+        String address = endpointProperties.getProtocol() + "://" + endpointProperties.getAddress();
+
+        String igcUser = connectionProperties.getUserId();
+        String igcPass = connectionProperties.getClearPassword();
+
         // Retrieve connection details
         Map<String, Object> proxyProperties = this.connectionBean.getConfigurationProperties();
-        String igcHost = (String) proxyProperties.get("ibm.igc.services.host");
-        String igcPort = (String) proxyProperties.get("ibm.igc.services.port");
-        String igcUser = (String) proxyProperties.get("ibm.igc.username");
-        String igcPass = (String) proxyProperties.get("ibm.igc.password");
-        Object zones = proxyProperties.get("default.zones");
-        if (zones != null) {
-            this.defaultZones = (List<String>) zones;
+        if (proxyProperties != null) {
+            Object zones = proxyProperties.get("defaultZones");
+            if (zones != null) {
+                this.defaultZones = (List<String>) zones;
+            }
         }
 
         // Create new REST API client (opens a new session)
-        this.igcRestClient = new IGCRestClient(igcHost, igcPort, igcUser, igcPass);
+        this.igcRestClient = new IGCRestClient(address, igcUser, igcPass);
         if (this.igcRestClient.isSuccessfullyInitialised()) {
             if (getMaxPageSize() > 0) {
                 this.igcRestClient.setDefaultPageSize(getMaxPageSize());
@@ -85,7 +102,7 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
 
         if (!successfulInit) {
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(igcHost + ":" + igcPort);
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
             throw new OMRSRuntimeException(
                     errorCode.getHTTPErrorCode(),
                     this.getClass().getName(),

@@ -1,6 +1,8 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 <!-- Copyright Contributors to the ODPi Egeria project. -->
 
+[![GitHub](https://img.shields.io/github/license/odpi/egeria-connector-ibm-information-server)](LICENSE) [![Azure](https://dev.azure.com/odpi/egeria/_apis/build/status/odpi.egeria-connector-ibm-information-server)](https://dev.azure.com/odpi/Egeria/_build)
+
 # IBM InfoSphere Information Server Connectors
 
 [IBM InfoSphere Information Server](https://www.ibm.com/marketplace/infosphere-information-server) is a
@@ -129,18 +131,28 @@ For example payloads and endpoints, see the [Postman samples](samples).
 
     ```json
     {
-        "ibm.igc.services.host": "{{igc_host}}",
-        "ibm.igc.services.port": "{{igc_port}}",
-        "ibm.igc.username": "{{igc_user}}",
-        "ibm.igc.password": "{{igc_password}}",
-        "default.zones": [ "x", "y", "z" ]
+        "class": "Connection",
+        "connectorType": {
+            "class": "ConnectorType",
+            "connectorProviderClassName": "org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider"
+        },
+        "endpoint": {
+            "class": "Endpoint",
+            "address": "{{igc_host}}:{{igc_port}}",
+            "protocol": "https"
+        },
+        "userId": "{{igc_user}}",
+        "clearPassword": "{{igc_password}}",
+        "configurationProperties": {
+            "defaultZones": [ "x", "y", "z" ]
+        }
     }
     ```
 
     to:
 
     ```
-    {{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/{{server}}/local-repository/mode/repository-proxy/details?connectorProvider=org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider
+    {{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/{{server}}/local-repository/mode/repository-proxy/connection
     ```
 
     The payload should include the hostname and port of your IGC environment's domain (services) tier,
