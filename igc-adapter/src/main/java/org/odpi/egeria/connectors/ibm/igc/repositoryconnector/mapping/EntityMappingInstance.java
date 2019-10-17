@@ -160,7 +160,7 @@ public class EntityMappingInstance {
             if (igcRidPrefix != null) {
                 rid = igcRidPrefix + rid;
             }
-            omrsSummary.setGUID(igcomrsMetadataCollection.getGuidForRid(rid));
+            omrsSummary.setGUID(igcomrsMetadataCollection.getIgcRepositoryHelper().getGuidForRid(rid));
             omrsSummary.setInstanceURL(igcEntity.getUrl());
         }
     }
@@ -184,7 +184,7 @@ public class EntityMappingInstance {
                 if (igcRidPrefix != null) {
                     rid = igcRidPrefix + rid;
                 }
-                omrsDetail.setGUID(igcomrsMetadataCollection.getGuidForRid(rid));
+                omrsDetail.setGUID(igcomrsMetadataCollection.getIgcRepositoryHelper().getGuidForRid(rid));
                 omrsDetail.setInstanceURL(igcEntity.getUrl());
             } catch (TypeErrorException e) {
                 log.error("Unable to get skeleton detail entity, defaulting to basic summary.", e);

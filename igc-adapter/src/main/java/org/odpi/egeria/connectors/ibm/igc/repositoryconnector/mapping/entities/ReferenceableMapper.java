@@ -10,6 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SemanticAssignmentMapper;
@@ -41,8 +42,8 @@ public class ReferenceableMapper extends EntityMapping {
     // By default (if no IGC type or OMRS type defined), map between 'main_object' (IGC) and Referenceable (OMRS)
     private ReferenceableMapper() {
         this(
-                IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE,
-                IGCOMRSMetadataCollection.DEFAULT_IGC_TYPE_DISPLAY_NAME,
+                IGCRepositoryHelper.DEFAULT_IGC_TYPE,
+                IGCRepositoryHelper.DEFAULT_IGC_TYPE_DISPLAY_NAME,
                 "Referenceable"
         );
     }
@@ -223,8 +224,8 @@ public class ReferenceableMapper extends EntityMapping {
             String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedName);
 
             // Check if the qualifiedName has a generated prefix -- need to remove prior to next steps, if so...
-            if (IGCOMRSMetadataCollection.isGeneratedGUID(unqualifiedName)) {
-                unqualifiedName = IGCOMRSMetadataCollection.getRidFromGeneratedId(unqualifiedName);
+            if (IGCRepositoryHelper.isGeneratedRID(unqualifiedName)) {
+                unqualifiedName = IGCRepositoryHelper.getRidFromGeneratedId(unqualifiedName);
             }
             if (log.isDebugEnabled()) { log.debug("Looking up identity: {}", unqualifiedName); }
             Identity identity = Identity.getFromString(unqualifiedName, igcRestClient);
@@ -296,13 +297,11 @@ public class ReferenceableMapper extends EntityMapping {
 
             Map<String, InstancePropertyValue> mapValues = ((MapPropertyValue) value).getMapValues().getInstanceProperties();
             for (Map.Entry<String, InstancePropertyValue> nextEntry : mapValues.entrySet()) {
-                IGCOMRSMetadataCollection.addIGCSearchConditionFromValue(
+                IGCRepositoryHelper.addIGCSearchConditionFromValue(
                         repositoryHelper,
                         repositoryName,
                         igcSearchConditionSet,
                         nextEntry.getKey(),
-                        igcProperties,
-                        this,
                         nextEntry.getValue()
                 );
             }
