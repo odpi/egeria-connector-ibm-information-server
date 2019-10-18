@@ -703,8 +703,9 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         );
                     } else if (change.getIgcPropertyPath().endsWith("_id") && Reference.isSimpleType(relatedValue)) {
                         // In cases where a single object has been replaced, the JSON Patch may only show each property
-                        // as needing replacement rather than the object as a whole -- so just watch for any changes to '_id'
-                        // and if found pull back a new asset reference for the related asset to use
+                        // as needing replacement rather than the object as a whole -- this _should_ already be handled
+                        // automatically by the change processing, so if we arrive here we missed something in the
+                        // ChangeSet class's processing
                         if (log.isErrorEnabled()) { log.error(" ... change consolidation in ChangeSet did not work: {}", change); }
                     } else {
                         if (log.isWarnEnabled()) { log.warn("Expected relationship for path '{}' for guid {} but found neither Reference nor ReferenceList: {}", change.getIgcPropertyPath(), latestVersion.getId(), relatedValue); }
