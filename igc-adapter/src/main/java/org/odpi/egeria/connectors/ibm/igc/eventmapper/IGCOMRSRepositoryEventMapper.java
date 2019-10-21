@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * IGCOMRSRepositoryEventMapper supports the event mapper function for the IBM Information Server suite
@@ -62,9 +63,9 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
     private IGCVersionEnum igcVersion;
     private Properties igcKafkaProperties;
-    private String igcKafkaBootstrap;
     private String igcKafkaTopic;
 
+    private IGCKafkaConsumerThread igcKafkaConsumer;
     private ObjectMapper mapper;
 
     /**
@@ -100,7 +101,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         this.igcKafkaTopic = "InfosphereEvents";
 
         // Retrieve connection details to configure Kafka connectivity
-        this.igcKafkaBootstrap = this.connectionBean.getEndpoint().getAddress();
+        String igcKafkaBootstrap = this.connectionBean.getEndpoint().getAddress();
         igcKafkaProperties = new Properties();
         igcKafkaProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, igcKafkaBootstrap);
         igcKafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "IGCOMRSRepositoryEventMapper_consumer");
@@ -124,6 +125,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         super.start();
         log.info("IGC Event Mapper starting...");
+        this.igcKafkaConsumer = new IGCKafkaConsumerThread();
         this.igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
         this.igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
         this.metadataCollectionId = igcomrsRepositoryConnector.getMetadataCollectionId();
@@ -177,7 +179,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         }
 
         log.info("Starting consumption from IGC Kafka bus.");
-        new Thread(new IGCKafkaConsumerThread()).start();
+        igcKafkaConsumer.start();
 
     }
 
@@ -187,12 +189,25 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      */
     private class IGCKafkaConsumerThread implements Runnable {
 
+        private Thread worker;
+        private final AtomicBoolean running = new AtomicBoolean(false);
+
+        public void start() {
+            worker = new Thread(this);
+            worker.start();
+        }
+
+        public void stop() {
+            running.set(false);
+        }
+
         /**
          * Read IGC Infosphere topic Kafka events.
          */
         @Override
         public void run() {
 
+            running.set(true);
             log.info("Starting IGC Event Mapper consumer thread.");
             final Consumer<Long, String> consumer = new KafkaConsumer<>(igcKafkaProperties);
             consumer.subscribe(Collections.singletonList(igcKafkaTopic));
@@ -200,7 +215,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             // TODO: Likely need to tweak these settings to give further processing time for large events
             //  like IMAM shares -- or even switch to manual offset management rather than auto-commits
             //  (see: https://kafka.apache.org/0110/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html)
-            while (true) {
+            while (running.get()) {
                 try {
                     ConsumerRecords<Long, String> events = consumer.poll(100);
                     for (ConsumerRecord<Long, String> event : events) {
@@ -333,7 +348,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
     /**
      * Processes Data Connection events from v11.5 of Information Server.
-     * @param event
+     * @param event the data connection event to process
      */
     private void processDataConnectionEventV115(InfosphereEventsDCEvent event) {
 
@@ -397,7 +412,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             case InfosphereEventsIAEvent.COL_ANALYZED:
             case InfosphereEventsIAEvent.COL_CLASSIFIED:
                 // TODO: could potentially retrieve more from these via IA REST API...
-                if (log.isWarnEnabled()) { log.warn("Column / field analyzed or classified, but not yet published -- skipping: {}", event); }
+                if (log.isInfoEnabled()) { log.info("Column / field analyzed or classified, but not yet published -- skipping: {}", action); }
                 break;
             case InfosphereEventsIAEvent.TBL_PUBLISHED:
                 // This is the only event we can really do something with, as IGC API can only see
@@ -438,7 +453,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 }
                 break;
             default:
-                if (log.isWarnEnabled()) { log.warn("Action '{}' is not yet implemented for IA: {}", action, event); }
+                if (log.isInfoEnabled()) { log.info("Action '{}' is not yet implemented for IA: {}", action, event); }
                 break;
         }
 
@@ -614,9 +629,20 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             // Output any entities first
             if (stub == null) {
                 // If there is no stub, we need to treat this as a new entity
+                if (log.isDebugEnabled()) { log.debug("Creating a new entity and stub for: {}", latestVersion.getId()); }
                 sendNewEntity(latestVersion);
             } else if (!changedProperties.isEmpty()) {
                 // Otherwise, it should be treated as an updated entity, but only if there was some change
+                if (log.isDebugEnabled()) {
+                    log.debug("Detected changes on entity {}", latestVersion.getId());
+                    log.debug(" ... properties that changed: {}", changedProperties);
+                    for (String propertyName : changedProperties) {
+                        log.debug(" ...... details for property '{}'", propertyName);
+                        log.debug(" .......... {}", changeSet.getChangesForProperty(propertyName).toString());
+                    }
+                    log.debug(" ... before: {}", stub.getPayload());
+                    log.debug(" ... now:    {}", igcRestClient.getValueAsJSON(latestVersion));
+                }
                 sendUpdatedEntity(latestVersion, stub);
             } else {
                 if (log.isInfoEnabled()) { log.info("Skipping asset - no changes detected: {}", latestVersion.getId()); }
@@ -628,6 +654,16 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     localServerUserId
             );
             if (log.isDebugEnabled()) { log.debug(" ... found mappings: {}", relationshipMap); }
+
+            // Regardless of whether changedProperties is empty or not, we need to potentially process the
+            // relationships for generated types (ie. where the igcProperty = self-reference sentinel), and this
+            // self-reference sentinel will never be in the change set since it isn't a real property on the asset!
+            // (We should also do this first, in case the code below attempts to update these self-referencing relationships)
+            if (relationshipMap.containsKey(RelationshipMapping.SELF_REFERENCE_SENTINEL)) {
+                for (RelationshipMapping relationshipMapping : relationshipMap.get(RelationshipMapping.SELF_REFERENCE_SENTINEL)) {
+                    processSelfReferencingRelationship(relationshipMapping, latestVersion, stub, relationshipGUID);
+                }
+            }
 
             // And then recursively process relationships (which will in turn recursively process further
             // assets), to ensure top-level entities are ultimately output before lower-level entities
@@ -647,15 +683,6 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                             );
                         }
                     }
-                }
-            }
-
-            // Regardless of whether changedProperties is empty or not, we need to potentially process the
-            // relationships for generated types (ie. where the igcProperty = self-reference sentinel), and this
-            // self-reference sentinel will never be in the change set since it isn't a real property on the asset!
-            if (relationshipMap.containsKey(RelationshipMapping.SELF_REFERENCE_SENTINEL)) {
-                for (RelationshipMapping relationshipMapping : relationshipMap.get(RelationshipMapping.SELF_REFERENCE_SENTINEL)) {
-                    processSelfReferencingRelationship(relationshipMapping, latestVersion, stub, relationshipGUID);
                 }
             }
 
@@ -723,7 +750,8 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         // automatically by the change processing, so if we arrive here we missed something in the
                         // ChangeSet class's processing
                         if (log.isErrorEnabled()) { log.error(" ... change consolidation in ChangeSet did not work: {}", change); }
-                    } else {
+                    } else if (!change.getIgcPropertyPath().endsWith("_name") && !change.getIgcPropertyPath().endsWith("_url")) {
+                        // if the path ends with '_name' or '_url' then we should already be handling it by the '_id' clause above
                         if (log.isWarnEnabled()) { log.warn("Expected relationship for path '{}' for guid {} but found neither Reference nor ReferenceList: {}", change.getIgcPropertyPath(), latestVersion.getId(), relatedValue); }
                     }
                 } else {
@@ -814,7 +842,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             }
 
         } else {
-            if (log.isWarnEnabled()) { log.warn("Related RID for guid {} and relationship {} was null -- skipped.", latestVersion.getId(), omrsRelationshipType); }
+            if (log.isInfoEnabled()) { log.info("Related RID for guid {} and relationship {} was null -- skipped.", latestVersion.getId(), omrsRelationshipType); }
         }
 
     }
@@ -1344,7 +1372,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      * Translate a list of classifications in to a Map keyed by the classification type's GUID.
      * (Note that this assumes a given classification type will only have one instance in the list!)
      *
-     * @param classifications
+     * @param classifications the list of classifications to trasnform
      * @return {@code Map<String, Classification>}
      */
     private Map<String, Classification> getClassificationMapFromList(List<Classification> classifications) {
@@ -1364,7 +1392,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     /**
      * Send an event for a new classification being added to the entity's detail.
      *
-     * @param detail
+     * @param detail the entity for which to send a new classification event
      */
     private void sendNewClassification(EntityDetail detail) {
         repositoryEventProcessor.processClassifiedEntityEvent(
@@ -1380,7 +1408,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     /**
      * Send an event for an existing classification being changed on an entity's detail.
      *
-     * @param detail
+     * @param detail the entity for which to send a changed classification event
      */
     private void sendChangedClassification(EntityDetail detail) {
         repositoryEventProcessor.processReclassifiedEntityEvent(
@@ -1396,7 +1424,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     /**
      * Send an event for a classification having been removed from an entity's detail.
      *
-     * @param detail
+     * @param detail the entity for which to send a removed classification event
      */
     private void sendRemovedClassification(EntityDetail detail) {
         repositoryEventProcessor.processDeclassifiedEntityEvent(
@@ -1468,7 +1496,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     @Override
     public void disconnect() throws ConnectorCheckedException {
         super.disconnect();
-        // TODO: stop Kafka consumption thread?
+        igcKafkaConsumer.stop();
     }
 
 }
