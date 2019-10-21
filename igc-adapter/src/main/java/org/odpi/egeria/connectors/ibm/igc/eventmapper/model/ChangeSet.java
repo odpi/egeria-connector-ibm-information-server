@@ -85,9 +85,9 @@ public class ChangeSet {
                     // Skip any paging information changes
                     if (changePath.endsWith("/_id") && !changePath.equals("/_id")) {
                         // This is likely an exclusive relationship (eg. 'parent_category')
-                        log.info("Found an exclusive relationship change: {}", change.toString());
+                        if (log.isDebugEnabled()) { log.debug("Found an exclusive relationship change: {}", change.toString()); }
                         JsonNode consolidatedChange = consolidateChangedObject(change, changePath, currentAsset);
-                        log.info(" ... consolidated to: {}", consolidatedChange.toString());
+                        if (log.isDebugEnabled()) { log.debug(" ... consolidated to: {}", consolidatedChange.toString()); }
                         theChange = new Change(consolidatedChange, stubPayload);
                     } else {
                         // Otherwise add simple changes
@@ -132,7 +132,7 @@ public class ChangeSet {
      * @return JsonNode
      */
     private JsonNode getObjectFromIndex(String objectPath, JsonNode asset) {
-        log.info(" ... retrieving object from index at path: {}", objectPath);
+        if (log.isDebugEnabled()) { log.debug(" ... retrieving object from index at path: {}", objectPath); }
         if (objectPath.contains("/items")) {
             // If we have an items array, determine the right index and retrieve the object
             String arrayIndex = objectPath.substring(objectPath.lastIndexOf('/') + 1);
@@ -144,7 +144,7 @@ public class ChangeSet {
             // Otherwise just return the object directly (there is only one)
             // We need to remove the leading '/' before doing so...
             String relationshipPath = objectPath.substring(1);
-            log.info(" ... returning object: {}", asset.path(relationshipPath).toString());
+            if (log.isDebugEnabled()) { log.debug(" ... returning object: {}", asset.path(relationshipPath).toString()); }
             return asset.path(relationshipPath);
         }
     }
