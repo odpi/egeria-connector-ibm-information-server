@@ -141,55 +141,70 @@ public abstract class AttributeMapping {
                             );
                             break;
                         case OM_PRIMITIVE_TYPE_INT:
-                            int intValue;
+                            Integer intValue = null;
                             if (propertyValue instanceof Integer) {
                                 intValue = (Integer) propertyValue;
                             } else if (propertyValue instanceof Number) {
                                 intValue = ((Number) propertyValue).intValue();
                             } else {
-                                intValue = Integer.valueOf(propertyValue.toString());
+                                String propertyVal = propertyValue.toString();
+                                if (!propertyVal.equals("")) {
+                                    intValue = Integer.valueOf(propertyVal);
+                                }
                             }
-                            resultingProperties = omrsRepositoryHelper.addIntPropertyToInstance(
-                                    sourceName,
-                                    properties,
-                                    propertyName,
-                                    intValue,
-                                    methodName
-                            );
+                            if (intValue != null) {
+                                resultingProperties = omrsRepositoryHelper.addIntPropertyToInstance(
+                                        sourceName,
+                                        properties,
+                                        propertyName,
+                                        intValue,
+                                        methodName
+                                );
+                            }
                             break;
                         case OM_PRIMITIVE_TYPE_LONG:
-                            long longValue;
+                            Long longValue = null;
                             if (propertyValue instanceof Long) {
                                 longValue = (Long) propertyValue;
                             } else if (propertyValue instanceof Number) {
                                 longValue = ((Number) propertyValue).longValue();
                             } else {
-                                longValue = Long.valueOf(propertyValue.toString());
+                                String propertyVal = propertyValue.toString();
+                                if (!propertyVal.equals("")) {
+                                    longValue = Long.valueOf(propertyVal);
+                                }
                             }
-                            resultingProperties = omrsRepositoryHelper.addLongPropertyToInstance(
-                                    sourceName,
-                                    properties,
-                                    propertyName,
-                                    longValue,
-                                    methodName
-                            );
+                            if (longValue != null) {
+                                resultingProperties = omrsRepositoryHelper.addLongPropertyToInstance(
+                                        sourceName,
+                                        properties,
+                                        propertyName,
+                                        longValue,
+                                        methodName
+                                );
+                            }
                             break;
                         case OM_PRIMITIVE_TYPE_FLOAT:
-                            float floatValue;
+                            Float floatValue = null;
                             if (propertyValue instanceof Float) {
                                 floatValue = (Float) propertyValue;
                             } else if (propertyValue instanceof Number) {
                                 floatValue = ((Number) propertyValue).floatValue();
                             } else {
-                                floatValue = Float.valueOf(propertyValue.toString());
+                                String propertyVal = propertyValue.toString();
+                                if (!propertyVal.equals("")) {
+                                    floatValue = Float.valueOf(propertyVal);
+                                }
                             }
-                            resultingProperties = omrsRepositoryHelper.addFloatPropertyToInstance(
-                                    sourceName,
-                                    properties,
-                                    propertyName,
-                                    floatValue,
-                                    methodName
-                            );
+                            if (floatValue != null) {
+                                resultingProperties = omrsRepositoryHelper.addFloatPropertyToInstance(
+                                        sourceName,
+                                        properties,
+                                        propertyName,
+                                        floatValue,
+                                        methodName
+                                );
+                            }
                             break;
                         case OM_PRIMITIVE_TYPE_STRING:
                             String stringValue;
