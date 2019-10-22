@@ -5,6 +5,9 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 import org.odpi.openmetadata.frameworks.connectors.properties.beans.ConnectorType;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryConnectorProviderBase;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * In the Open Connector Framework (OCF), a ConnectorProvider is a factory for a specific type of connector.
  * The IGCOMRSRepositoryConnectorProvider is the connector provider for the IGCOMRSRepositoryConnector.
@@ -21,13 +24,17 @@ public class IGCOMRSRepositoryConnectorProvider extends OMRSRepositoryConnectorP
     static final String  connectorTypeName = "OMRS IGC Repository Connector";
     static final String  connectorTypeDescription = "OMRS IGC Repository Connector that processes events from the IBM InfoSphere Information Governance Catalog repository store.";
 
+    protected static final String defaultZones = "defaultZones";
+
     /**
      * Constructor used to initialize the ConnectorProviderBase with the Java class name of the specific
      * OMRS Connector implementation.
      */
     public IGCOMRSRepositoryConnectorProvider() {
+
         Class connectorClass = IGCOMRSRepositoryConnector.class;
         super.setConnectorClassName(connectorClass.getName());
+
         ConnectorType connectorType = new ConnectorType();
         connectorType.setType(ConnectorType.getConnectorTypeType());
         connectorType.setGUID(connectorTypeGUID);
@@ -35,6 +42,12 @@ public class IGCOMRSRepositoryConnectorProvider extends OMRSRepositoryConnectorP
         connectorType.setDisplayName(connectorTypeName);
         connectorType.setDescription(connectorTypeDescription);
         connectorType.setConnectorProviderClassName(this.getClass().getName());
+
+        List<String> recognizedConfigurationProperties = new ArrayList<>();
+        recognizedConfigurationProperties.add(defaultZones);
+        connectorType.setRecognizedConfigurationProperties(recognizedConfigurationProperties);
+
         super.connectorTypeBean = connectorType;
+
     }
 }

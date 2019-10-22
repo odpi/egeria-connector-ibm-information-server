@@ -78,19 +78,21 @@ public class ChangeSet {
                     // Otherwise see if there is a set of individual changes we should consolidate (where _id will
                     // always be different if the relationship itself has changed)
                     } else if (changePath.endsWith("_id")) {
-                        // Consolidate /items/n/_id entries into objects rather than separate changes
-                        ObjectNode consolidatedChange = (ObjectNode) change;
-                        String indexPath = changePath.substring(0, changePath.indexOf("/_id"));
-                        consolidatedChange.put("path", indexPath);
-                        // Add the complete Reference (_id, _name, _type, _url) as an object value
-                        // Consolidate this new object from the current asset, not the stub
-                        JsonNode relatedAsset = getObjectFromIndex(indexPath, currentAsset);
-                        consolidatedChange.set("value", relatedAsset);
+                        JsonNode consolidatedChange = consolidateChangedObject(change, changePath, currentAsset);
                         theChange = new Change(consolidatedChange, stubPayload);
                     }
                 } else if (!changePath.contains("/paging/")) {
-                    // Otherwise add simple changes, but skip any paging information
-                    theChange = new Change(change, stubPayload);
+                    // Skip any paging information changes
+                    if (changePath.endsWith("/_id") && !changePath.equals("/_id")) {
+                        // This is likely an exclusive relationship (eg. 'parent_category')
+                        if (log.isDebugEnabled()) { log.debug("Found an exclusive relationship change: {}", change.toString()); }
+                        JsonNode consolidatedChange = consolidateChangedObject(change, changePath, currentAsset);
+                        if (log.isDebugEnabled()) { log.debug(" ... consolidated to: {}", consolidatedChange.toString()); }
+                        theChange = new Change(consolidatedChange, stubPayload);
+                    } else {
+                        // Otherwise add simple changes
+                        theChange = new Change(change, stubPayload);
+                    }
                 }
                 if (theChange != null) {
                     String igcProperty = theChange.getIgcPropertyName();
@@ -130,11 +132,41 @@ public class ChangeSet {
      * @return JsonNode
      */
     private JsonNode getObjectFromIndex(String objectPath, JsonNode asset) {
-        String arrayIndex = objectPath.substring(objectPath.lastIndexOf('/') + 1);
-        String listPath = objectPath.substring(1, objectPath.indexOf("/items"));
-        int idx = Integer.parseInt(arrayIndex);
-        ArrayNode references = (ArrayNode) asset.path(listPath).path("items");
-        return references.get(idx);
+        if (log.isDebugEnabled()) { log.debug(" ... retrieving object from index at path: {}", objectPath); }
+        if (objectPath.contains("/items")) {
+            // If we have an items array, determine the right index and retrieve the object
+            String arrayIndex = objectPath.substring(objectPath.lastIndexOf('/') + 1);
+            String listPath = objectPath.substring(1, objectPath.indexOf("/items"));
+            int idx = Integer.parseInt(arrayIndex);
+            ArrayNode references = (ArrayNode) asset.path(listPath).path("items");
+            return references.get(idx);
+        } else {
+            // Otherwise just return the object directly (there is only one)
+            // We need to remove the leading '/' before doing so...
+            String relationshipPath = objectPath.substring(1);
+            if (log.isDebugEnabled()) { log.debug(" ... returning object: {}", asset.path(relationshipPath).toString()); }
+            return asset.path(relationshipPath);
+        }
+    }
+
+    /**
+     * Consolidate an individual '_id' into a full object change.
+     *
+     * @param change the change in which the '_id' piece is found
+     * @param changePath the path of the change (ending with /_id)
+     * @param currentAsset the JSON representation of the asset from which to retrieve the path
+     * @return JsonNode
+     */
+    private JsonNode consolidateChangedObject(JsonNode change, String changePath, JsonNode currentAsset) {
+        // Consolidate [/items/n]/_id entries into objects rather than separate changes
+        ObjectNode consolidatedChange = (ObjectNode) change;
+        String indexPath = changePath.substring(0, changePath.indexOf("/_id"));
+        consolidatedChange.put("path", indexPath);
+        // Add the complete Reference (_id, _name, _type, _url) as an object value
+        // Consolidate this new object from the current asset, not the stub
+        JsonNode relatedAsset = getObjectFromIndex(indexPath, currentAsset);
+        consolidatedChange.set("value", relatedAsset);
+        return consolidatedChange;
     }
 
     /**
@@ -153,12 +185,6 @@ public class ChangeSet {
             this.path = patch.get("path").asText();
             this.value = patch.get("value");
         }
-
-/*        public Change(String op, String path, JsonNode value) {
-            this.op = op;
-            this.path = path;
-            this.value = value;
-        } */
 
         /**
          * Retrieve the 'op'eration indicated by the JSON Patch entry. Will be one of "replace", "add" or "remove".
@@ -224,7 +250,11 @@ public class ChangeSet {
                     JsonNode obj = getObjectFromIndex(path, this.from);
                     oldValue = getValueFromJSON(obj, referenceListProperties, path);
                 } else {
-                    oldValue = getValueFromJSON(this.from.path(path), referenceListProperties, path);
+                    String candidatePath = path;
+                    if (candidatePath.startsWith("/")) {
+                        candidatePath = candidatePath.substring(1);
+                    }
+                    oldValue = getValueFromJSON(this.from.path(candidatePath), referenceListProperties, path);
                 }
             }
 

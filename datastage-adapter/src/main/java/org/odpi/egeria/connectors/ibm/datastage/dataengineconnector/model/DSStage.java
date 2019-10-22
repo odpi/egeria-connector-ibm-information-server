@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Utility class for interacting with 'ds_stage' information via IGC's REST API.
+ */
 public class DSStage {
 
     private static final List<String> SEARCH_PROPERTIES = createSearchProperties();

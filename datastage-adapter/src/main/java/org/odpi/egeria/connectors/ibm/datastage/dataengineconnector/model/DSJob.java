@@ -9,6 +9,9 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceLi
 
 import java.util.*;
 
+/**
+ * Utility class for interacting with 'ds_job' information via IGC's REST API.
+ */
 public class DSJob {
 
     private static final List<String> SEARCH_PROPERTIES = createSearchProperties();

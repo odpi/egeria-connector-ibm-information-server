@@ -2,13 +2,16 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes;
 
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.PropertyErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * The base class for all mappings between OMRS AttributeTypeDefs and IGC properties.
@@ -138,55 +141,70 @@ public abstract class AttributeMapping {
                             );
                             break;
                         case OM_PRIMITIVE_TYPE_INT:
-                            int intValue;
+                            Integer intValue = null;
                             if (propertyValue instanceof Integer) {
                                 intValue = (Integer) propertyValue;
                             } else if (propertyValue instanceof Number) {
                                 intValue = ((Number) propertyValue).intValue();
                             } else {
-                                intValue = Integer.valueOf(propertyValue.toString());
+                                String propertyVal = propertyValue.toString();
+                                if (!propertyVal.equals("")) {
+                                    intValue = Integer.valueOf(propertyVal);
+                                }
                             }
-                            resultingProperties = omrsRepositoryHelper.addIntPropertyToInstance(
-                                    sourceName,
-                                    properties,
-                                    propertyName,
-                                    intValue,
-                                    methodName
-                            );
+                            if (intValue != null) {
+                                resultingProperties = omrsRepositoryHelper.addIntPropertyToInstance(
+                                        sourceName,
+                                        properties,
+                                        propertyName,
+                                        intValue,
+                                        methodName
+                                );
+                            }
                             break;
                         case OM_PRIMITIVE_TYPE_LONG:
-                            long longValue;
+                            Long longValue = null;
                             if (propertyValue instanceof Long) {
                                 longValue = (Long) propertyValue;
                             } else if (propertyValue instanceof Number) {
                                 longValue = ((Number) propertyValue).longValue();
                             } else {
-                                longValue = Long.valueOf(propertyValue.toString());
+                                String propertyVal = propertyValue.toString();
+                                if (!propertyVal.equals("")) {
+                                    longValue = Long.valueOf(propertyVal);
+                                }
                             }
-                            resultingProperties = omrsRepositoryHelper.addLongPropertyToInstance(
-                                    sourceName,
-                                    properties,
-                                    propertyName,
-                                    longValue,
-                                    methodName
-                            );
+                            if (longValue != null) {
+                                resultingProperties = omrsRepositoryHelper.addLongPropertyToInstance(
+                                        sourceName,
+                                        properties,
+                                        propertyName,
+                                        longValue,
+                                        methodName
+                                );
+                            }
                             break;
                         case OM_PRIMITIVE_TYPE_FLOAT:
-                            float floatValue;
+                            Float floatValue = null;
                             if (propertyValue instanceof Float) {
                                 floatValue = (Float) propertyValue;
                             } else if (propertyValue instanceof Number) {
                                 floatValue = ((Number) propertyValue).floatValue();
                             } else {
-                                floatValue = Float.valueOf(propertyValue.toString());
+                                String propertyVal = propertyValue.toString();
+                                if (!propertyVal.equals("")) {
+                                    floatValue = Float.valueOf(propertyVal);
+                                }
                             }
-                            resultingProperties = omrsRepositoryHelper.addFloatPropertyToInstance(
-                                    sourceName,
-                                    properties,
-                                    propertyName,
-                                    floatValue,
-                                    methodName
-                            );
+                            if (floatValue != null) {
+                                resultingProperties = omrsRepositoryHelper.addFloatPropertyToInstance(
+                                        sourceName,
+                                        properties,
+                                        propertyName,
+                                        floatValue,
+                                        methodName
+                                );
+                            }
                             break;
                         case OM_PRIMITIVE_TYPE_STRING:
                             String stringValue;
@@ -232,6 +250,76 @@ public abstract class AttributeMapping {
         }
 
         return resultingProperties;
+
+    }
+
+    /**
+     * Retrieve the provided OMRS value as a mapped IGC value.
+     *
+     * @param value the value to translate from an OMRS instance property value to an IGC value
+     * @return String
+     * @throws PropertyErrorException if the value cannot be translated to an IGC value
+     */
+    public static String getIgcValueFromPropertyValue(InstancePropertyValue value) throws PropertyErrorException {
+
+        final String methodName = "getIgcValueFromPropertyValue";
+        String igcValue = null;
+        InstancePropertyCategory category = value.getInstancePropertyCategory();
+        switch (category) {
+            case PRIMITIVE:
+                PrimitivePropertyValue actualValue = (PrimitivePropertyValue) value;
+                PrimitiveDefCategory primitiveType = actualValue.getPrimitiveDefCategory();
+                switch (primitiveType) {
+                    case OM_PRIMITIVE_TYPE_DATE:
+                        Date date = (Date) actualValue.getPrimitiveValue();
+                        igcValue = "" + date.getTime();
+                        break;
+                    case OM_PRIMITIVE_TYPE_BOOLEAN:
+                    case OM_PRIMITIVE_TYPE_BYTE:
+                    case OM_PRIMITIVE_TYPE_CHAR:
+                    case OM_PRIMITIVE_TYPE_SHORT:
+                    case OM_PRIMITIVE_TYPE_INT:
+                    case OM_PRIMITIVE_TYPE_LONG:
+                    case OM_PRIMITIVE_TYPE_FLOAT:
+                    case OM_PRIMITIVE_TYPE_DOUBLE:
+                    case OM_PRIMITIVE_TYPE_BIGINTEGER:
+                    case OM_PRIMITIVE_TYPE_BIGDECIMAL:
+                    case OM_PRIMITIVE_TYPE_STRING:
+                    default:
+                        igcValue = actualValue.getPrimitiveValue().toString();
+                        break;
+                }
+                break;
+            case ENUM:
+                igcValue = ((EnumPropertyValue) value).getSymbolicName();
+                break;
+            case ARRAY:
+                igcValue = "[ ";
+                Map<String, InstancePropertyValue> arrayValues = ((ArrayPropertyValue) value).getArrayValues().getInstanceProperties();
+                for (Map.Entry<String, InstancePropertyValue> nextEntry : arrayValues.entrySet()) {
+                    igcValue += "\"" + getIgcValueFromPropertyValue(nextEntry.getValue()) + "\",";
+                }
+                if (igcValue.endsWith(",")) {
+                    igcValue = igcValue.substring(0, igcValue.length() - 1);
+                }
+                igcValue += " ]";
+                break;
+            case STRUCT:
+            case MAP:
+            default:
+                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.PROPERTY_CANNOT_BE_TRANSLATED;
+                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                        value.toString(),
+                        category.getName());
+                throw new PropertyErrorException(errorCode.getHTTPErrorCode(),
+                        AttributeMapping.class.getName(),
+                        methodName,
+                        errorMessage,
+                        errorCode.getSystemAction(),
+                        errorCode.getUserAction());
+        }
+
+        return igcValue;
 
     }
 

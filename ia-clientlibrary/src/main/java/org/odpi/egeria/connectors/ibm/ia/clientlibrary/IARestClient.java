@@ -348,7 +348,7 @@ public class IARestClient {
      * Retrieve a list of all the (qualified) names of tables within the specified project.
      *
      * @param details the project details as retrieved from getProjectDetails
-     * @return {@List<String>}
+     * @return {@code List<String>}
      * @see #getProjectDetails(String)
      */
     public List<String> getTablesInProject(Project details) {
@@ -368,7 +368,7 @@ public class IARestClient {
      * Retrieve a list of all the (qualified) names of columns within the specified project.
      *
      * @param details the project details as retrieved from getProjectDetails
-     * @return {@List<String>}
+     * @return {@code List<String>}
      * @see #getProjectDetails(String)
      */
     public List<String> getColumnsInProject(Project details) {

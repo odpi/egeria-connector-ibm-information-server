@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Utility class for interacting with 'ds_link' information via IGC's REST API.
+ */
 public class DSLink {
 
     private static final List<String> SEARCH_PROPERTIES = createSearchProperties();
