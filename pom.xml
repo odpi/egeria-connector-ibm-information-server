@@ -93,7 +93,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Versions of dependent libraries -->
         <slf4j.version>1.7.28</slf4j.version>
-        <jackson.version>2.9.9</jackson.version>
+        <jackson.version>2.10.0</jackson.version>
         <jackson.databind.version>2.9.9.3</jackson.databind.version>
         <woodstox.version>6.0.2</woodstox.version>
         <spring.version>5.1.5.RELEASE</spring.version>
