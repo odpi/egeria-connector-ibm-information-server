@@ -6,7 +6,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
@@ -15,11 +15,13 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMapp
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefAttribute;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.EntityNotKnownException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,10 +55,10 @@ public abstract class EntityMapping extends InstanceMapping {
 
     private ArrayList<InstanceStatus> omrsSupportedStatuses;
 
-    public EntityMapping(String igcAssetType,
-                         String igcAssetTypeDisplayName,
-                         String omrsTypeDefName,
-                         String igcRidPrefix) {
+    EntityMapping(String igcAssetType,
+                  String igcAssetTypeDisplayName,
+                  String omrsTypeDefName,
+                  String igcRidPrefix) {
 
         this.igcAssetType = igcAssetType;
         this.igcAssetTypeDisplayName = igcAssetTypeDisplayName;
@@ -102,7 +104,7 @@ public abstract class EntityMapping extends InstanceMapping {
      *
      * @param status a status that is supported by the mapping
      */
-    public final void addSupportedStatus(InstanceStatus status) { this.omrsSupportedStatuses.add(status); }
+    private void addSupportedStatus(InstanceStatus status) { this.omrsSupportedStatuses.add(status); }
 
     /**
      * Retrieve the list of statuses that are supported by the entity mapping.
@@ -143,7 +145,7 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param assetType the IGC REST API's JSON representation
      * @return Class
      */
-    private final Class getIgcPOJO(IGCOMRSRepositoryConnector igcomrsRepositoryConnector, String assetType) {
+    private Class getIgcPOJO(IGCOMRSRepositoryConnector igcomrsRepositoryConnector, String assetType) {
         Class igcPOJO = null;
         if (assetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
             StringBuilder sbPojoName = new StringBuilder();
@@ -194,7 +196,7 @@ public abstract class EntityMapping extends InstanceMapping {
      * @return boolean
      */
     public final boolean matchesAssetType(String igcAssetType) {
-        String matchType = Reference.getAssetTypeForSearch(igcAssetType);
+        String matchType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
         if (log.isDebugEnabled()) { log.debug("checking for matching asset between {} and {}", this.igcAssetType, matchType); }
         return (
                 this.igcAssetType.equals(matchType)
@@ -207,7 +209,7 @@ public abstract class EntityMapping extends InstanceMapping {
      *
      * @param igcAssetTypeName name of additional IGC asset
      */
-    public final void addOtherIGCAssetType(String igcAssetTypeName) {
+    final void addOtherIGCAssetType(String igcAssetTypeName) {
         this.otherIgcTypes.add(igcAssetTypeName);
     }
 
@@ -261,7 +263,7 @@ public abstract class EntityMapping extends InstanceMapping {
      *
      * @param omrsPropertyName the OMRS property name
      */
-    public final void addComplexOmrsProperty(String omrsPropertyName) {
+    final void addComplexOmrsProperty(String omrsPropertyName) {
         complexOmrsProperties.add(omrsPropertyName);
     }
 
@@ -270,7 +272,7 @@ public abstract class EntityMapping extends InstanceMapping {
      *
      * @return {@code Set<String>}
      */
-    public final Set<String> getSimpleMappedIgcProperties() {
+    private Set<String> getSimpleMappedIgcProperties() {
         return mappingByIgcProperty.keySet();
     }
 
@@ -299,7 +301,7 @@ public abstract class EntityMapping extends InstanceMapping {
      *
      * @return {@code Set<String>}
      */
-    public final Set<String> getSimpleMappedOmrsProperties() {
+    private Set<String> getSimpleMappedOmrsProperties() {
         return mappingByOmrsProperty.keySet();
     }
 
@@ -308,7 +310,7 @@ public abstract class EntityMapping extends InstanceMapping {
      *
      * @return {@code Set<String>}
      */
-    public final Set<String> getComplexMappedOmrsProperties() {
+    private Set<String> getComplexMappedOmrsProperties() {
         return complexOmrsProperties;
     }
 
@@ -373,7 +375,7 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param igcPropertyName the IGC property name to check for a simple mapping
      * @return boolean
      */
-    public final boolean isIgcPropertySimpleMapped(String igcPropertyName) {
+    private boolean isIgcPropertySimpleMapped(String igcPropertyName) {
         return mappingByIgcProperty.containsKey(igcPropertyName);
     }
 
@@ -383,7 +385,7 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param igcPropertyName the IGC property name to check for a complex mapping
      * @return boolean
      */
-    public final boolean isIgcPropertyComplexMapped(String igcPropertyName) {
+    private boolean isIgcPropertyComplexMapped(String igcPropertyName) {
         return complexIgcProperties.contains(igcPropertyName);
     }
 
@@ -393,7 +395,7 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param omrsPropertyName the OMRS property name to check for a simple mapping
      * @return boolean
      */
-    public final boolean isOmrsPropertySimpleMapped(String omrsPropertyName) {
+    private boolean isOmrsPropertySimpleMapped(String omrsPropertyName) {
         return mappingByOmrsProperty.containsKey(omrsPropertyName);
     }
 
@@ -403,14 +405,14 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param omrsPropertyName the OMRS property name to check for a complex mapping
      * @return boolean
      */
-    public final boolean isOmrsPropertyComplexMapped(String omrsPropertyName) {
+    private boolean isOmrsPropertyComplexMapped(String omrsPropertyName) {
         return complexOmrsProperties.contains(omrsPropertyName);
     }
 
     /**
      * Add the provided relationship mapping as one that describes relationships for this entity.
      *
-     * @param relationshipMapping
+     * @param relationshipMapping the relationship mapping to add
      */
     public final void addRelationshipMapper(RelationshipMapping relationshipMapping) {
         relationshipMappers.add(relationshipMapping);
@@ -426,7 +428,7 @@ public abstract class EntityMapping extends InstanceMapping {
     /**
      * Add the provided classification mapping as one that describes classifications for this entity.
      *
-     * @param classificationMapping
+     * @param classificationMapping the classification mapping to add
      */
     public final void addClassificationMapper(ClassificationMapping classificationMapping) {
         classificationMappers.add(classificationMapping);
@@ -440,17 +442,25 @@ public abstract class EntityMapping extends InstanceMapping {
     public final List<ClassificationMapping> getClassificationMappers() { return this.classificationMappers; }
 
     /**
-     * Retrieve the base IGC asset expected for the mapper from one of its alternative assets. By default, and in the
-     * vast majority of cases, there are no alternatives so will simply return the asset as-is. Override this method
+     * Retrieve the base IGC 'asset' expected for the mapper from one of its alternative assets. By default, and in the
+     * vast majority of cases, there are no alternatives so will simply return the 'asset' as-is. Override this method
      * in any mappers where alternative assets are defined.
      *
-     * @param otherAsset the alternative asset to translate into a base asset
+     * Note as well that the 'asset' returned will only have its ID (RID) and Type populated, it is not a "real" IGC
+     * asset.
+     *
+     * @param igcAssetType the IGC asset type of the alternative asset to translate into a base asset
+     * @param igcRid the IGC Repository ID (RID) of the alternative asset to translate into a base asset
      * @param igcomrsRepositoryConnector connectivity to IGC repository
-     * @return Reference - the base asset
+     * @return Reference - a stripped-down base asset containing only the ID and Type
      */
-    public Reference getBaseIgcAssetFromAlternative(Reference otherAsset,
+    public Reference getBaseIgcAssetFromAlternative(String igcAssetType,
+                                                    String igcRid,
                                                     IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
-        return otherAsset;
+        Reference simple = new Reference();
+        simple.setId(igcRid);
+        simple.setType(igcAssetType);
+        return simple;
     }
 
     /**
@@ -477,7 +487,6 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
-     * @param igcProperties the list of IGC properties to which to add for inclusion in the IGC search
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
      */
@@ -487,7 +496,6 @@ public abstract class EntityMapping extends InstanceMapping {
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
-                                                 List<String> igcProperties,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
         // Nothing to do -- no complex properties by default
     }
@@ -497,8 +505,8 @@ public abstract class EntityMapping extends InstanceMapping {
      *
      * @param entityMap the instantiation of a mapping to carry out
      */
-    private static final void setupEntityObj(EntityMappingInstance entityMap,
-                                             EntitySummary omrsObj) {
+    private static void setupEntityObj(EntityMappingInstance entityMap,
+                                       EntitySummary omrsObj) {
 
         Reference igcEntity = entityMap.getIgcEntity();
         EntityMapping mapping = entityMap.getMapping();
@@ -537,6 +545,21 @@ public abstract class EntityMapping extends InstanceMapping {
     }
 
     /**
+     * Retrieve a listing of all of the properties we want to retrieve to have a complete EntitySummary for this
+     * mapping.
+     *
+     * @return {@code List<String>}
+     */
+    public final List<String> getAllPropertiesForEntitySummary() {
+        Set<String> allProperties = new HashSet<>();
+        for (ClassificationMapping classificationMapping : getClassificationMappers()) {
+            allProperties.addAll(classificationMapping.getMappedIgcPropertyNames());
+        }
+        allProperties.addAll(getAllMappedIgcProperties());
+        return new ArrayList<>(allProperties);
+    }
+
+    /**
      * Map the IGC entity to an OMRS EntitySummary object.
      *
      * @param entityMap the instantiation of a mapping to carry out
@@ -546,25 +569,33 @@ public abstract class EntityMapping extends InstanceMapping {
 
         EntityMapping mapping = entityMap.getMapping();
 
-        // Merge together all the properties we want to map
-        ArrayList<String> allProperties = new ArrayList<>();
-        for (ClassificationMapping classificationMapping : mapping.getClassificationMappers()) {
-            allProperties.addAll(classificationMapping.getMappedIgcPropertyNames());
+        if (!entityMap.isIgcEntityAlreadyRetrieved()) {
+            entityMap.setPropertiesToRetrieveForIgcEntity(mapping.getAllPropertiesForEntitySummary());
         }
-
-        allProperties.addAll(mapping.getAllMappedIgcProperties());
-
-        // Retrieve the full details we'll require for summary BEFORE handing off to superclass,
-        // but only if the asset we've been initialised with was not already fully-retrieved
-        entityMap.updateIgcEntityWithProperties(allProperties);
-
-        // Handle any super-generic mappings first
         entityMap.initializeEntitySummary();
 
-        // Then handle generic mappings and classifications
         setupEntityObj(entityMap, entityMap.getOmrsSummary());
         return entityMap.getOmrsSummary();
 
+    }
+
+    /**
+     * Retrieve a listing of all of the properties we want to retrieve to have a complete EntityDetail for this
+     * mapping.
+     *
+     * @param igcRestClient REST connectivity to the IGC environment
+     * @param igcAssetType the asset type for which to retrieve properties
+     * @return {@code List<String>}
+     */
+    public final List<String> getAllPropertiesForEntityDetail(IGCRestClient igcRestClient,
+                                                              String igcAssetType) {
+        Set<String> allProperties = new HashSet<>(getAllMappedIgcProperties());
+        for (ClassificationMapping classificationMapping : getClassificationMappers()) {
+            allProperties.addAll(classificationMapping.getMappedIgcPropertyNames());
+        }
+        List<String> nonRelationshipProperties = igcRestClient.getNonRelationshipPropertiesFromPOJO(igcAssetType);
+        allProperties.addAll(nonRelationshipProperties);
+        return new ArrayList<>(allProperties);
     }
 
     /**
@@ -575,24 +606,17 @@ public abstract class EntityMapping extends InstanceMapping {
      */
     public static final EntityDetail getEntityDetail(EntityMappingInstance entityMap) {
 
-        Reference igcEntity = entityMap.getIgcEntity();
         EntityMapping mapping = entityMap.getMapping();
         IGCRestClient igcRestClient = entityMap.getRepositoryConnector().getIGCRestClient();
 
-        // Retrieve the set of non-relationship properties for the asset
-        List<String> nonRelationshipProperties = igcRestClient.getNonRelationshipPropertiesFromPOJO(igcEntity.getType());
-
-        // Merge the detailed properties together (generic and more specific POJO mappings that were passed in)
-        ArrayList<String> allProperties = new ArrayList<>();
-        allProperties.addAll(mapping.getAllMappedIgcProperties());
-        for (ClassificationMapping classificationMapping : mapping.getClassificationMappers()) {
-            allProperties.addAll(classificationMapping.getMappedIgcPropertyNames());
+        if (!entityMap.isIgcEntityAlreadyRetrieved()) {
+            // Retrieve only this set of properties for the object (no more, no less)
+            entityMap.setPropertiesToRetrieveForIgcEntity(
+                    mapping.getAllPropertiesForEntityDetail(
+                            igcRestClient,
+                            entityMap.getIgcEntityType())
+            );
         }
-        allProperties.addAll(nonRelationshipProperties);
-
-        // Retrieve only this set of properties for the object (no more, no less)
-        // but only if the asset we've been initialised with was not already fully-retrieved
-        entityMap.updateIgcEntityWithProperties(allProperties);
 
         // Handle any super-generic mappings first
         entityMap.initializeEntityDetail();
@@ -614,7 +638,7 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param entityMap the instantiation of a mapping to carry out
      * @return InstanceProperties
      */
-    private static final InstanceProperties getMappedInstanceProperties(EntityMappingInstance entityMap) {
+    private static InstanceProperties getMappedInstanceProperties(EntityMappingInstance entityMap) {
 
         final String methodName = "getMappedInstanceProperties";
 
@@ -682,6 +706,7 @@ public abstract class EntityMapping extends InstanceMapping {
     /**
      * Retrieves the mapped relationships for the entity.
      *
+     * @param igcGuid the IGC GUID of the entity for which to retrieve the mapped relationships
      * @param entityMap the instantiation of a mapping to carry out
      * @param relationshipTypeGUID String GUID of the the type of relationship required (null for all).
      * @param fromRelationshipElement the starting element number of the relationships to return.
@@ -691,52 +716,54 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
      *                 unrestricted return results size.
      * @return {@code List<Relationship>}
+     * @throws EntityNotKnownException if the entity for which we are looking for relationships is not known to IGC
      */
-    public static final List<Relationship> getMappedRelationships(EntityMappingInstance entityMap,
+    public static final List<Relationship> getMappedRelationships(IGCEntityGuid igcGuid,
+                                                                  EntityMappingInstance entityMap,
                                                                   String relationshipTypeGUID,
                                                                   int fromRelationshipElement,
                                                                   SequencingOrder sequencingOrder,
-                                                                  int pageSize) {
+                                                                  int pageSize) throws EntityNotKnownException {
+
+        final String methodName = "getMappedRelationships";
 
         // TODO: handle multi-page results with different starting points (ie. fromRelationshipElement != 0)
 
+        // Initialize our mapping instance with the full details we'll require for the relationships
+        entityMap.initializeWithRelationships(sequencingOrder, pageSize);
+
         Reference igcEntity = entityMap.getIgcEntity();
-        EntityMapping entityMapping = entityMap.getMapping();
-        IGCOMRSRepositoryConnector igcomrsRepositoryConnector = entityMap.getRepositoryConnector();
-        String userId = entityMap.getUserId();
-        List<Relationship> omrsRelationships = entityMap.getOmrsRelationships();
 
-        List<RelationshipMapping> relationshipMappers = entityMapping.getRelationshipMappers();
+        if (igcEntity == null) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    igcGuid.asGuid(),
+                    "null",
+                    entityMap.getRepositoryConnector().getRepositoryName());
+            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
+                    EntityMapping.class.getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        } else {
+            EntityMapping entityMapping = entityMap.getMapping();
+            IGCOMRSRepositoryConnector igcomrsRepositoryConnector = entityMap.getRepositoryConnector();
+            String userId = entityMap.getUserId();
+            List<Relationship> omrsRelationships = entityMap.getOmrsRelationships();
 
-        // Retrieve the full details we'll require for the relationships
-        // but only if the asset we've been initialised with was not already fully-retrieved
-        if (!igcEntity.isFullyRetrieved()) {
-            // Merge together all the properties we want to map
-            ArrayList<String> allProperties = new ArrayList<>();
-            for (RelationshipMapping mapping : relationshipMappers) {
-                if (log.isDebugEnabled()) { log.debug("Adding properties from mapping: {}", mapping); }
-                allProperties.addAll(mapping.getIgcRelationshipPropertiesForType(igcEntity.getType()));
-            }
-            allProperties.addAll(IGCRestConstants.getModificationProperties());
-            IGCSearchSorting sort = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
-            igcEntity = igcEntity.getAssetWithSubsetOfProperties(
-                    igcomrsRepositoryConnector.getIGCRestClient(),
-                    allProperties.toArray(new String[0]),
-                    pageSize,
-                    sort
+            List<RelationshipMapping> relationshipMappers = entityMapping.getRelationshipMappers();
+
+            RelationshipMapping.getMappedRelationships(
+                    igcomrsRepositoryConnector,
+                    omrsRelationships,
+                    relationshipMappers,
+                    relationshipTypeGUID,
+                    igcEntity,
+                    userId
             );
+            return omrsRelationships;
         }
-
-        RelationshipMapping.getMappedRelationships(
-                igcomrsRepositoryConnector,
-                omrsRelationships,
-                relationshipMappers,
-                relationshipTypeGUID,
-                igcEntity,
-                userId
-        );
-
-        return omrsRelationships;
 
     }
 

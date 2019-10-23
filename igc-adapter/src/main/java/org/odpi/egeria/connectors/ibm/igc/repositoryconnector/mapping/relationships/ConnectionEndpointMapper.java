@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
@@ -63,7 +64,9 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
         String otherAssetType = connectorAsset.getType();
         ArrayList<Reference> asList = new ArrayList<>();
         if (otherAssetType.equals("connector")) {
-            Reference withHost = connectorAsset.getAssetWithSubsetOfProperties(igcRestClient,
+            Reference withHost = igcRestClient.getAssetWithSubsetOfProperties(
+                    connectorAsset.getId(),
+                    connectorAsset.getType(),
                     new String[]{ "host", "data_connections" });
             asList.add((Reference) igcRestClient.getPropertyByName(withHost, "host"));
         } else {
@@ -84,7 +87,9 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
     public List<Reference> getProxyTwoAssetFromAsset(Reference connectorAsset, IGCRestClient igcRestClient) {
         String otherAssetType = connectorAsset.getType();
         if (otherAssetType.equals("connector")) {
-            Reference withDataConnections = connectorAsset.getAssetWithSubsetOfProperties(igcRestClient,
+            Reference withDataConnections = igcRestClient.getAssetWithSubsetOfProperties(
+                    connectorAsset.getId(),
+                    connectorAsset.getType(),
                     new String[]{ "host", "data_connections" });
             ReferenceList dataConnections = (ReferenceList) igcRestClient.getPropertyByName(withDataConnections, "data_connections");
             dataConnections.getAllPages(igcRestClient);
@@ -113,7 +118,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                                                  Reference fromIgcObject,
                                                  String userId) {
 
-        String assetType = Reference.getAssetTypeForSearch(fromIgcObject.getType());
+        String assetType = IGCRestConstants.getAssetTypeForSearch(fromIgcObject.getType());
 
         if (assetType.equals("host")) {
             addMappedOMRSRelationships_host(

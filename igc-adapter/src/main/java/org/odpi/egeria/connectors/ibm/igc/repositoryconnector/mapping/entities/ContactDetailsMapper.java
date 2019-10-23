@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class ContactDetailsMapper extends ReferenceableMapper {
 
-    public static final String IGC_RID_PREFIX = IGCRepositoryHelper.generateTypePrefix("CD");
+    public static final String IGC_RID_PREFIX = "CD";
 
     private static class Singleton {
         private static final ContactDetailsMapper INSTANCE = new ContactDetailsMapper();
@@ -105,7 +105,6 @@ public class ContactDetailsMapper extends ReferenceableMapper {
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
-     * @param igcProperties the list of IGC properties to which to add for inclusion in the IGC search
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is used for the search which is not supported
      */
@@ -116,10 +115,9 @@ public class ContactDetailsMapper extends ReferenceableMapper {
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
-                                                 List<String> igcProperties,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
 
-        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, igcProperties, value);
+        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, value);
 
         final String methodName = "addComplexPropertySearchCriteria";
 

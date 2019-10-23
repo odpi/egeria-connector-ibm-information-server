@@ -72,16 +72,17 @@ public class EndpointMapper extends ReferenceableMapper {
     /**
      * Retrieve the base host asset expected for the mapper from a host_(engine) asset.
      *
-     * @param otherAsset the host_(engine) asset to translate into a host asset
+     * @param otherAssetType the type of the host_(engine) asset to translate into a host asset
+     * @param otherAssetRid the RID of the host_(engine) asset to translate into a host asset
      * @param igcomrsRepositoryConnector connectivity to IGC repository
      * @return Reference - the host asset
      */
     @Override
-    public Reference getBaseIgcAssetFromAlternative(Reference otherAsset,
+    public Reference getBaseIgcAssetFromAlternative(String otherAssetType,
+                                                    String otherAssetRid,
                                                     IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
-        String otherAssetType = otherAsset.getType();
         if (otherAssetType.equals("host_(engine)")) {
-            IGCSearchCondition igcSearchCondition = new IGCSearchCondition("_id", "=", otherAsset.getId());
+            IGCSearchCondition igcSearchCondition = new IGCSearchCondition("_id", "=", otherAssetRid);
             IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(igcSearchCondition);
             IGCSearch igcSearch = new IGCSearch("host", igcSearchConditionSet);
             igcSearch.setPageSize(2);
@@ -90,12 +91,12 @@ public class EndpointMapper extends ReferenceableMapper {
                 // As long as there is at least one result, return the first
                 return hosts.getItems().get(0);
             } else {
-                if (log.isWarnEnabled()) { log.warn("Unable to translate host_(engine) to host, returning host_(engine): {}", otherAsset); }
-                return otherAsset;
+                if (log.isWarnEnabled()) { log.warn("Unable to translate host_(engine) to host, returning host_(engine)."); }
+                return super.getBaseIgcAssetFromAlternative(otherAssetType, otherAssetRid, igcomrsRepositoryConnector);
             }
         } else {
-            if (log.isDebugEnabled()) { log.debug("Not a host_(engine) asset, just returning as-is: {}", otherAsset); }
-            return otherAsset;
+            if (log.isDebugEnabled()) { log.debug("Not a host_(engine) asset, just returning as-is: {}", otherAssetType); }
+            return super.getBaseIgcAssetFromAlternative(otherAssetType, otherAssetRid, igcomrsRepositoryConnector);
         }
     }
 
@@ -141,7 +142,6 @@ public class EndpointMapper extends ReferenceableMapper {
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
-     * @param igcProperties the list of IGC properties to which to add for inclusion in the IGC search
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
      */
@@ -152,10 +152,9 @@ public class EndpointMapper extends ReferenceableMapper {
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
-                                                 List<String> igcProperties,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
 
-        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, igcProperties, value);
+        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, value);
 
         final String methodName = "addComplexPropertySearchCriteria";
 

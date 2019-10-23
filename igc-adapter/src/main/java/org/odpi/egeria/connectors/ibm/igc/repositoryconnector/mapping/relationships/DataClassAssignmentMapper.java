@@ -13,7 +13,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.DataClassAssignmentStatusMapper;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.DataClassMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.EnumPropertyValue;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Relationship;
@@ -32,7 +31,7 @@ import java.util.List;
  */
 public class DataClassAssignmentMapper extends RelationshipMapping {
 
-    private static final Logger log = LoggerFactory.getLogger(DataClassMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(DataClassAssignmentMapper.class);
 
     private static final String R_DATA_CLASS_ASSIGNMENT = "DataClassAssignment";
     private static final String P_THRESHOLD = "threshold";
@@ -80,9 +79,14 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         String otherAssetType = relationshipAsset.getType();
         ArrayList<Reference> asList = new ArrayList<>();
         if (otherAssetType.equals("classification")) {
-            Reference withDataClass = relationshipAsset.getAssetWithSubsetOfProperties(igcRestClient,
-                    new String[]{ "data_class", "classifies_asset" });
-            Reference classifiedObj = (Reference) igcRestClient.getPropertyByName(withDataClass, "classifies_asset");
+            Reference classifiedObj;
+            Object co = igcRestClient.getPropertyByName(relationshipAsset, "classifies_asset");
+            if (co == null || co.equals("") || co.equals("null")) {
+                Reference classification = igcRestClient.getAssetById(relationshipAsset.getId());
+                classifiedObj = (Reference) igcRestClient.getPropertyByName(classification, "classifies_asset");
+            } else {
+                classifiedObj = (Reference) co;
+            }
             asList.add(classifiedObj);
         } else {
             if (log.isDebugEnabled()) { log.debug("Not a classification asset, just returning as-is: {}", relationshipAsset); }
@@ -103,9 +107,14 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         String otherAssetType = relationshipAsset.getType();
         ArrayList<Reference> asList = new ArrayList<>();
         if (otherAssetType.equals("classification")) {
-            Reference withAsset = relationshipAsset.getAssetWithSubsetOfProperties(igcRestClient,
-                    new String[]{ "data_class", "classifies_asset" });
-            Reference dataClass = (Reference) igcRestClient.getPropertyByName(withAsset, "data_class");
+            Reference dataClass;
+            Object dc = igcRestClient.getPropertyByName(relationshipAsset,"data_class");
+            if (dc == null || dc.equals("") || dc.equals("null")) {
+                Reference classification = igcRestClient.getAssetById(relationshipAsset.getId());
+                dataClass = (Reference) igcRestClient.getPropertyByName(classification, "data_class");
+            } else {
+                dataClass = (Reference) dc;
+            }
             asList.add(dataClass);
         } else {
             if (log.isDebugEnabled()) { log.debug("Not a classification asset, just returning as-is: {}", relationshipAsset); }
@@ -130,7 +139,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                                            Reference fromIgcObject,
                                            String userId) {
 
-        String assetType = Reference.getAssetTypeForSearch(fromIgcObject.getType());
+        String assetType = IGCRestConstants.getAssetTypeForSearch(fromIgcObject.getType());
 
         if (assetType.equals("data_class")) {
             mapDetectedClassifications_fromDataClass(
@@ -495,8 +504,9 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                                                           String userId) {
 
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
-        Reference withSelectedClassification = fromIgcObject.getAssetWithSubsetOfProperties(
-                igcomrsRepositoryConnector.getIGCRestClient(),
+        Reference withSelectedClassification = igcRestClient.getAssetWithSubsetOfProperties(
+                fromIgcObject.getId(),
+                fromIgcObject.getType(),
                 new String[]{"selected_classification"});
 
         Reference selectedClassification = (Reference) igcRestClient.getPropertyByName(withSelectedClassification, "selected_classification");

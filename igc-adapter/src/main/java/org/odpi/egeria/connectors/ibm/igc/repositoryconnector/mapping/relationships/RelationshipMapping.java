@@ -16,6 +16,8 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelpe
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.InstanceMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCRelationshipGuid;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
@@ -61,18 +63,14 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("RelationshipMapping: ");
-        sb.append("omrsRelationshipType=");
-        sb.append(omrsRelationshipType);
-        sb.append(", ");
-        sb.append("one={ ");
-        sb.append(one);
-        sb.append(" }, ");
-        sb.append("two={ ");
-        sb.append(two);
-        sb.append(" }");
-        return sb.toString();
+        return "RelationshipMapping: " +
+                "omrsRelationshipType=" +
+                omrsRelationshipType +
+                ", one={ " +
+                one +
+                " }, two={ " +
+                two +
+                " }";
     }
 
     protected RelationshipMapping(String igcAssetTypeProxyOne,
@@ -130,7 +128,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @param status a status that is supported by the mapping
      */
-    public void addSupportedStatus(InstanceStatus status) { this.omrsSupportedStatuses.add(status); }
+    private void addSupportedStatus(InstanceStatus status) { this.omrsSupportedStatuses.add(status); }
 
     /**
      * Retrieve the list of statuses that are supported by the relationship mapping.
@@ -144,7 +142,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @param name the name of the OMRS property supported by the mapping
      */
-    public void addMappedOmrsProperty(String name) { this.mappedOmrsPropertyNames.add(name); }
+    void addMappedOmrsProperty(String name) { this.mappedOmrsPropertyNames.add(name); }
 
     /**
      * Retrieve the set of OMRS properties that are supported by the relationship mapping.
@@ -162,7 +160,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @param igcAssetType the name of the IGC asset that represents this relationship in IGC
      */
-    public void setRelationshipLevelIgcAsset(String igcAssetType) { this.relationshipLevelIgcAsset = igcAssetType; }
+    void setRelationshipLevelIgcAsset(String igcAssetType) { this.relationshipLevelIgcAsset = igcAssetType; }
 
     /**
      * Indicates whether this mapping has an IGC asset that represents the relationship directly (true) or not (false).
@@ -183,7 +181,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @param igcAssetType the IGC asset type that links together the two endpoints of the relationship
      */
-    public void setLinkingAssetType(String igcAssetType) { this.linkingAssetType = igcAssetType; }
+    void setLinkingAssetType(String igcAssetType) { this.linkingAssetType = igcAssetType; }
 
     /**
      * Indicates whether this mapping needs an IGC asset linking the endpoints (true) or not (false).
@@ -230,6 +228,44 @@ public abstract class RelationshipMapping extends InstanceMapping {
     }
 
     /**
+     * Retrieve the IGC entity GUID for the first endpoint from the provided relationship GUID.
+     *
+     * @param igcRepositoryHelper repository helper for the IGC environment
+     * @param igcRelationshipGuid the IGC relationship GUID from which to retrieve the first endpoint's entity GUID
+     * @return IGCEntityGuid
+     */
+    public static IGCEntityGuid getProxyOneGuidFromRelationship(IGCRepositoryHelper igcRepositoryHelper,
+                                                                IGCRelationshipGuid igcRelationshipGuid) {
+        if (igcRelationshipGuid == null || igcRepositoryHelper == null) {
+            return null;
+        } else {
+            return igcRepositoryHelper.getEntityGuid(
+                    igcRelationshipGuid.getAssetType1(),
+                    igcRelationshipGuid.getGeneratedPrefix1(),
+                    igcRelationshipGuid.getRid1());
+        }
+    }
+
+    /**
+     * Retrieve the IGC entity GUID for the second endpoint from the provided relationship GUID.
+     *
+     * @param igcRepositoryHelper repository helper for the IGC environment
+     * @param igcRelationshipGuid the IGC relationship GUID from which to retrieve the second endpoint's entity GUID
+     * @return IGCEntityGuid
+     */
+    public static IGCEntityGuid getProxyTwoGuidFromRelationship(IGCRepositoryHelper igcRepositoryHelper,
+                                                                IGCRelationshipGuid igcRelationshipGuid) {
+        if (igcRelationshipGuid == null || igcRepositoryHelper == null) {
+            return null;
+        } else {
+            return igcRepositoryHelper.getEntityGuid(
+                    igcRelationshipGuid.getAssetType2(),
+                    igcRelationshipGuid.getGeneratedPrefix2(),
+                    igcRelationshipGuid.getRid2());
+        }
+    }
+
+    /**
      * Indicates whether this relationship mapping has subtypes (true) or not (false).
      * Subtypes can be used where the same relationship may represent relationships between a number of different
      * IGC objects and each needs to be distinguished to appropriately apply a mapping.
@@ -245,7 +281,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @param subRelationshipMapping the relationship mapping that defines a subtype of this mapping
      */
-    public void addSubType(RelationshipMapping subRelationshipMapping) {
+    void addSubType(RelationshipMapping subRelationshipMapping) {
         this.subtypes.add(subRelationshipMapping);
     }
 
@@ -262,10 +298,10 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * Must be implemented to define how to map the relationships defined by the mapper, if there are any complex
      * custom mappings to be done for relationships. (Simple mappings are handled automatically by the class.)
      *
-     * @param igcomrsRepositoryConnector
-     * @param relationships
-     * @param fromIgcObject
-     * @param userId
+     * @param igcomrsRepositoryConnector connection to the IGC environment
+     * @param relationships list of relationships to which to append
+     * @param fromIgcObject the entity starting point for the relationship
+     * @param userId the userId doing the mapping
      */
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                            List<Relationship> relationships,
@@ -284,30 +320,30 @@ public abstract class RelationshipMapping extends InstanceMapping {
     /**
      * Set the optimal starting point for traversing this relationship.
      *
-     * @param optimalStart
+     * @param optimalStart the optimal starting point
      */
-    public void setOptimalStart(OptimalStart optimalStart) { this.optimalStart = optimalStart; }
+    void setOptimalStart(OptimalStart optimalStart) { this.optimalStart = optimalStart; }
 
     /**
      * Get the optimal starting point for traversing this relationship.
      *
      * @return OptimalStart
      */
-    public OptimalStart getOptimalStart() { return this.optimalStart; }
+    private OptimalStart getOptimalStart() { return this.optimalStart; }
 
     /**
      * Add an alternative IGC property that can be used to traverse the relationship from proxy one to proxy two.
      *
      * @param property the name of the additional IGC relationship property
      */
-    public void addAlternativePropertyFromOne(String property) { this.one.addAlternativeIgcRelationshipProperty(property); }
+    void addAlternativePropertyFromOne(String property) { this.one.addAlternativeIgcRelationshipProperty(property); }
 
     /**
      * Add an alternative IGC property that can be used to traverse the relationship from proxy two to proxy one.
      *
      * @param property the name of the additional IGC relationship property
      */
-    public void addAlternativePropertyFromTwo(String property) { this.two.addAlternativeIgcRelationshipProperty(property); }
+    void addAlternativePropertyFromTwo(String property) { this.two.addAlternativeIgcRelationshipProperty(property); }
 
     /**
      * Indicates whether the relationship references the same IGC object (true) or not (false). This is useful for
@@ -316,7 +352,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @return boolean
      */
-    public boolean isSelfReferencing() { return (this.one.isSelfReferencing() || this.two.isSelfReferencing()); }
+    private boolean isSelfReferencing() { return (this.one.isSelfReferencing() || this.two.isSelfReferencing()); }
 
     /**
      * Retrieves the mapping details for endpoint 1 (proxy 1) of the OMRS relationship.
@@ -337,7 +373,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @return boolean
      */
-    public boolean sameTypeOnBothEnds() {
+    private boolean sameTypeOnBothEnds() {
         return one.getIgcAssetType().equals(two.getIgcAssetType());
     }
 
@@ -346,7 +382,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @return boolean
      */
-    public boolean samePropertiesOnBothEnds() {
+    private boolean samePropertiesOnBothEnds() {
         List<String> pOneProperties = one.getIgcRelationshipProperties();
         List<String> pTwoProperties = two.getIgcRelationshipProperties();
         return new HashSet<>(pOneProperties).equals(new HashSet<>(pTwoProperties));
@@ -358,14 +394,14 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcAssetType the IGC asset type for which to find the same side of the relationship
      * @return ProxyMapping
      */
-    public ProxyMapping getProxyFromType(String igcAssetType) {
+    private ProxyMapping getProxyFromType(String igcAssetType) {
 
         ProxyMapping same = null;
 
         if (igcAssetType == null) {
-            if (log.isErrorEnabled()) { log.error("No asset type provided: {}", igcAssetType); }
+            if (log.isErrorEnabled()) { log.error("No asset type provided."); }
         } else {
-            String simpleType = Reference.getAssetTypeForSearch(igcAssetType);
+            String simpleType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
             if (simpleType.equals(one.getIgcAssetType())) {
                 same = this.one;
             } else if (simpleType.equals(two.getIgcAssetType())) {
@@ -389,14 +425,14 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcAssetType the IGC asset type for which to find the other side of the relationship
      * @return ProxyMapping
      */
-    public ProxyMapping getOtherProxyFromType(String igcAssetType) {
+    private ProxyMapping getOtherProxyFromType(String igcAssetType) {
 
         ProxyMapping other = null;
 
         if (igcAssetType == null) {
-            if (log.isErrorEnabled()) { log.error("No asset type provided: {}", igcAssetType); }
+            if (log.isErrorEnabled()) { log.error("No asset type provided."); }
         } else {
-            String simpleType = Reference.getAssetTypeForSearch(igcAssetType);
+            String simpleType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
             if (simpleType.equals(one.getIgcAssetType())) {
                 other = this.two;
             } else if (simpleType.equals(two.getIgcAssetType())) {
@@ -425,9 +461,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
         List<String> properties = new ArrayList<>();
 
         if (igcAssetType == null) {
-            if (log.isErrorEnabled()) { log.error("No asset type provided: {}", igcAssetType); }
+            if (log.isErrorEnabled()) { log.error("No asset type provided."); }
         } else {
-            String simpleType = Reference.getAssetTypeForSearch(igcAssetType);
+            String simpleType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
             if (sameTypeOnBothEnds() && simpleType.equals(one.getIgcAssetType())) {
                 addRealPropertiesToList(one.getIgcRelationshipProperties(), properties);
                 addRealPropertiesToList(two.getIgcRelationshipProperties(), properties);
@@ -473,10 +509,10 @@ public abstract class RelationshipMapping extends InstanceMapping {
         private String igcRidPrefix;
         private Set<String> excludeIgcAssetType;
 
-        public ProxyMapping(String igcAssetType,
-                            String igcRelationshipProperty,
-                            String omrsRelationshipProperty,
-                            String igcRidPrefix) {
+        ProxyMapping(String igcAssetType,
+                     String igcRelationshipProperty,
+                     String omrsRelationshipProperty,
+                     String igcRidPrefix) {
 
             this.igcAssetType = igcAssetType;
             this.igcRelationshipProperties = new ArrayList<>();
@@ -509,7 +545,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
          *
          * @param igcRelationshipProperty the name of the additional IGC relationship property
          */
-        public void addAlternativeIgcRelationshipProperty(String igcRelationshipProperty) { this.igcRelationshipProperties.add(igcRelationshipProperty); }
+        void addAlternativeIgcRelationshipProperty(String igcRelationshipProperty) { this.igcRelationshipProperties.add(igcRelationshipProperty); }
 
         /**
          * Retrieve the prefix that should be added to the IGC Repository ID (RID) in order to make this side of the
@@ -526,7 +562,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
          *
          * @return boolean
          */
-        public boolean isSelfReferencing() { return this.igcRelationshipProperties.contains(SELF_REFERENCE_SENTINEL); }
+        boolean isSelfReferencing() { return this.igcRelationshipProperties.contains(SELF_REFERENCE_SENTINEL); }
 
         /**
          * When the asset this applies to is a 'main_object', use this method to add any objects that should NOT be
@@ -534,7 +570,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
          *
          * @param igcAssetType the IGC asset type to exclude from 'main_object' consideration
          */
-        public void addExcludedIgcAssetType(String igcAssetType) { this.excludeIgcAssetType.add(igcAssetType); }
+        void addExcludedIgcAssetType(String igcAssetType) { this.excludeIgcAssetType.add(igcAssetType); }
 
         /**
          * Indicates whether this side of the relationship matches the provided IGC asset type: that is, this side of
@@ -544,7 +580,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
          * @return boolean
          */
         public boolean matchesAssetType(String igcAssetType) {
-            String simplifiedType = Reference.getAssetTypeForSearch(igcAssetType);
+            String simplifiedType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
             if (log.isDebugEnabled()) { log.debug("checking for matching asset between {} and {}", this.igcAssetType, simplifiedType); }
             return (
                     this.igcAssetType.equals(simplifiedType)
@@ -555,16 +591,14 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("igcAssetType=");
-            sb.append(igcAssetType);
-            sb.append(", omrsRelationshipProperty=");
-            sb.append(omrsRelationshipProperty);
-            sb.append(", igcRidPrefix=");
-            sb.append(igcRidPrefix);
-            sb.append(", igcRelationshipProperties=");
-            sb.append(igcRelationshipProperties);
-            return sb.toString();
+            return "igcAssetType=" +
+                    igcAssetType +
+                    ", omrsRelationshipProperty=" +
+                    omrsRelationshipProperty +
+                    ", igcRidPrefix=" +
+                    igcRidPrefix +
+                    ", igcRelationshipProperties=" +
+                    igcRelationshipProperties;
         }
 
     }
@@ -579,19 +613,22 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * the relationship was traversed. For example: an IGC 'parent_category' relationship from B to A for a
      * CategoryHierarchyLink should result in the same GUID as an IGC 'subcategories' relationship from A to B.
      *
+     * @param igcRepositoryHelper the helper connected to the IGC environment
      * @param relationshipMapping the relationship mapping defining how an IGC relationship maps to an OMRS relationship
      * @param endOne the candidate to consider for endpoint 1 of the relationship
      * @param endTwo the candidate to consider for endpoint 2 of the relationship
      * @param igcPropertyName the name of the IGC property for which the relationship is being generated
      * @param relationshipLevelRid the relationship-level RID (if any) within IGC (these are very rare)
-     * @return String - the unique GUID for the relationship
+     * @return IGCRelationshipGuid - the unique GUID for the relationship
      */
-    public static String getRelationshipRID(RelationshipMapping relationshipMapping,
-                                            Reference endOne,
-                                            Reference endTwo,
-                                            String igcPropertyName,
-                                            String relationshipLevelRid) {
-        return getRelationshipRID(
+    public static IGCRelationshipGuid getRelationshipGUID(IGCRepositoryHelper igcRepositoryHelper,
+                                                          RelationshipMapping relationshipMapping,
+                                                          Reference endOne,
+                                                          Reference endTwo,
+                                                          String igcPropertyName,
+                                                          String relationshipLevelRid) {
+        return getRelationshipGUID(
+                igcRepositoryHelper,
                 relationshipMapping,
                 endOne,
                 endTwo,
@@ -612,32 +649,35 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * the relationship was traversed. For example: an IGC 'parent_category' relationship from B to A for a
      * CategoryHierarchyLink should result in the same GUID as an IGC 'subcategories' relationship from A to B.
      *
+     * @param igcRepositoryHelper the helper connected to the IGC environment
      * @param relationshipMapping the relationship mapping defining how an IGC relationship maps to an OMRS relationship
      * @param endOne the candidate to consider for endpoint 1 of the relationship
      * @param endTwo the candidate to consider for endpoint 2 of the relationship
      * @param igcPropertyName the name of the IGC property for which the relationship is being generated
      * @param relationshipLevelRid the relationship-level RID (if any) within IGC (these are very rare)
      * @param proxyOrderKnown should be true iff the provided candidate proxies are known to be in the correct order
-     * @return String - the unique GUID for the relationship
+     * @return IGCRelationshipGuid - the unique GUID for the relationship
      */
-    public static String getRelationshipRID(RelationshipMapping relationshipMapping,
-                                            Reference endOne,
-                                            Reference endTwo,
-                                            String igcPropertyName,
-                                            String relationshipLevelRid,
-                                            boolean proxyOrderKnown) {
+    public static IGCRelationshipGuid getRelationshipGUID(IGCRepositoryHelper igcRepositoryHelper,
+                                                          RelationshipMapping relationshipMapping,
+                                                          Reference endOne,
+                                                          Reference endTwo,
+                                                          String igcPropertyName,
+                                                          String relationshipLevelRid,
+                                                          boolean proxyOrderKnown) {
 
         String omrsRelationshipName = relationshipMapping.getOmrsRelationshipType();
         // Lookup types via this helper function, to translate any alias types (eg. host_(engine) and host)
-        String endOneType = Reference.getAssetTypeForSearch(endOne.getType());
-        String endTwoType = Reference.getAssetTypeForSearch(endTwo.getType());
+        String endOneType = IGCRestConstants.getAssetTypeForSearch(endOne.getType());
+        String endTwoType = IGCRestConstants.getAssetTypeForSearch(endTwo.getType());
 
         if (log.isDebugEnabled()) { log.debug("Calculating relationship GUID from {} to {} via {} for {} (with mapper: {})", endOneType, endTwoType, igcPropertyName, omrsRelationshipName, relationshipMapping.getClass().getCanonicalName()); }
 
         // If the relationship mapping includes a relationship-level asset, check if either provided endpoint is one
         // (and if so, setup the relationshipLevelRid based on its ID)
+        String relationshipLevelType = null;
         if (relationshipMapping.hasRelationshipLevelAsset()) {
-            String relationshipLevelType = relationshipMapping.getRelationshipLevelIgcAsset();
+            relationshipLevelType = relationshipMapping.getRelationshipLevelIgcAsset();
             if (endOneType.equals(relationshipLevelType)) {
                 relationshipLevelRid = endOne.getId();
             } else if (endTwoType.equals(relationshipLevelType)) {
@@ -687,29 +727,34 @@ public abstract class RelationshipMapping extends InstanceMapping {
             } else {
                 // Otherwise if only the types are the same on both ends, the property is key to determining which
                 // end is which, and also relies on the direction in which they were retrieved
-                switch (relationshipMapping.getOptimalStart()) {
-                    case OPPOSITE:
-                        if (pmOneProperties.contains(igcPropertyName)) {
-                            if (log.isDebugEnabled()) { log.debug(" ... same types, opposite lookup, property matches one: reversing RIDs."); }
-                            proxyOneRid = endTwo.getId();
-                            proxyTwoRid = endOne.getId();
-                        } else if (pmTwoProperties.contains(igcPropertyName)) {
-                            if (log.isDebugEnabled()) { log.debug(" ... same types, opposite lookup, property matches two: keeping RID direction."); }
-                            proxyOneRid = endOne.getId();
-                            proxyTwoRid = endTwo.getId();
+                if (relationshipMapping.getOptimalStart().equals(OptimalStart.OPPOSITE)) {
+                    if (pmOneProperties.contains(igcPropertyName)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(" ... same types, opposite lookup, property matches one: reversing RIDs.");
                         }
-                        break;
-                    default:
-                        if (pmOneProperties.contains(igcPropertyName)) {
-                            if (log.isDebugEnabled()) { log.debug(" ... same types, direct lookup, property matches one: keeping RID direction."); }
-                            proxyOneRid = endOne.getId();
-                            proxyTwoRid = endTwo.getId();
-                        } else if (pmTwoProperties.contains(igcPropertyName)) {
-                            if (log.isDebugEnabled()) { log.debug(" ... same types, direct lookup, property matches two: reversing RIDs."); }
-                            proxyOneRid = endTwo.getId();
-                            proxyTwoRid = endOne.getId();
+                        proxyOneRid = endTwo.getId();
+                        proxyTwoRid = endOne.getId();
+                    } else if (pmTwoProperties.contains(igcPropertyName)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(" ... same types, opposite lookup, property matches two: keeping RID direction.");
                         }
-                        break;
+                        proxyOneRid = endOne.getId();
+                        proxyTwoRid = endTwo.getId();
+                    }
+                } else {
+                    if (pmOneProperties.contains(igcPropertyName)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(" ... same types, direct lookup, property matches one: keeping RID direction.");
+                        }
+                        proxyOneRid = endOne.getId();
+                        proxyTwoRid = endTwo.getId();
+                    } else if (pmTwoProperties.contains(igcPropertyName)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(" ... same types, direct lookup, property matches two: reversing RIDs.");
+                        }
+                        proxyOneRid = endTwo.getId();
+                        proxyTwoRid = endOne.getId();
+                    }
                 }
             }
         } else if (pmOne.matchesAssetType(endOneType)
@@ -727,6 +772,10 @@ public abstract class RelationshipMapping extends InstanceMapping {
             if (log.isDebugEnabled()) { log.debug(" ... two matches one, one matches two: reversing RIDs."); }
             proxyOneRid = endTwo.getId();
             proxyTwoRid = endOne.getId();
+            // We also need to reverse the types
+            String tempType = endOneType;
+            endOneType = endTwoType;
+            endTwoType = tempType;
         } else if (relationshipLevelRid == null) {
             // Otherwise indicate something appears to be wrong
             if (log.isErrorEnabled()) { log.error("Unable to find matching ends for relationship {} from {} to {} via {}", omrsRelationshipName, endOne.getId(), endTwo.getId(), igcPropertyName); }
@@ -735,78 +784,32 @@ public abstract class RelationshipMapping extends InstanceMapping {
         String proxyOnePrefix = pmOne.getIgcRidPrefix();
         String proxyTwoPrefix = pmTwo.getIgcRidPrefix();
 
-        // For relationship-specific RIDs (very rare) we'll output only the relationship-level RID
-        StringBuilder sbGUID = new StringBuilder();
+        IGCRelationshipGuid igcRelationshipGuid;
+
         if (relationshipLevelRid != null) {
-            sbGUID.append(relationshipLevelRid);
-            sbGUID.append("::");
-            sbGUID.append(omrsRelationshipName);
-            sbGUID.append("::");
-            sbGUID.append(relationshipLevelRid);
+            igcRelationshipGuid = igcRepositoryHelper.getRelationshipGuid(
+                    relationshipLevelType,
+                    relationshipLevelType,
+                    null,
+                    null,
+                    relationshipLevelRid,
+                    relationshipLevelRid,
+                    omrsRelationshipName
+            );
         } else {
-            if (proxyOnePrefix != null) {
-                proxyOneRid = proxyOnePrefix + proxyOneRid;
-            }
-            if (proxyTwoPrefix != null) {
-                proxyTwoRid = proxyTwoPrefix + proxyTwoRid;
-            }
-            sbGUID.append(proxyOneRid);
-            sbGUID.append("::");
-            sbGUID.append(omrsRelationshipName);
-            sbGUID.append("::");
-            sbGUID.append(proxyTwoRid);
+            igcRelationshipGuid = igcRepositoryHelper.getRelationshipGuid(
+                    endOneType,
+                    endTwoType,
+                    proxyOnePrefix,
+                    proxyTwoPrefix,
+                    proxyOneRid,
+                    proxyTwoRid,
+                    omrsRelationshipName
+            );
         }
-        return sbGUID.toString();
 
-    }
+        return igcRelationshipGuid;
 
-    /**
-     * Retrieve the portion of the provided relationship RID that represents the RID for proxy one of the relationship.
-     *
-     * @param relationshipRID the relationship RID
-     * @return String - giving just the RID for proxy one of the relationship
-     */
-    public static String getProxyOneRIDFromRelationshipRID(String relationshipRID) {
-        return getRelationshipRIDToken(relationshipRID, 0);
-    }
-
-    /**
-     * Retrieve the portion of the provided relationship RID that represents the RID for proxy two of the relationship.
-     *
-     * @param relationshipRID the relationship RID
-     * @return String - giving just the RID for proxy two of the relationship
-     */
-    public static String getProxyTwoRIDFromRelationshipRID(String relationshipRID) {
-        return getRelationshipRIDToken(relationshipRID, 2);
-    }
-
-    /**
-     * Retrieve the portion of the provided relationship RID that represents the OMRS relationship type.
-     * @param relationshipRID the relationship RID
-     * @return String - giving just the name of the OMRS relationship type
-     */
-    public static String getRelationshipTypeFromRelationshipRID(String relationshipRID) {
-        return getRelationshipRIDToken(relationshipRID, 1);
-    }
-
-    /**
-     * Utility method to parse the different portions of a relationship RID.
-     *
-     * @param relationshipRID the relationship RID
-     * @param index which token to retrieve from the relationship RID
-     * @return String - the string at the token provided of the provided relationship RID
-     */
-    private static String getRelationshipRIDToken(String relationshipRID, int index) {
-        String[] aTokens = relationshipRID.split("::");
-        if (aTokens.length != 3) {
-            if (log.isWarnEnabled()) { log.warn("Unexpected number of tokens from relationship RID: {}", relationshipRID); }
-        }
-        if (aTokens.length >= index) {
-            return aTokens[index];
-        } else {
-            if (log.isErrorEnabled()) { log.error("Unable to translate provided relationship RID: {}", relationshipRID); }
-            return null;
-        }
     }
 
     /**
@@ -818,10 +821,10 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param ridPrefix any prefix required on the object's ID to make it unique
      * @return EntityProxy
      */
-    public static EntityProxy getEntityProxyForObject(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                      Reference igcObj,
-                                                      String userId,
-                                                      String ridPrefix) {
+    private static EntityProxy getEntityProxyForObject(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                       Reference igcObj,
+                                                       String userId,
+                                                       String ridPrefix) {
 
         final String methodName = "getEntityProxyForObject";
 
@@ -834,14 +837,18 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
             IGCOMRSMetadataCollection igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
             IGCRepositoryHelper igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
-            EntityMappingInstance entityMap = igcRepositoryHelper.getMappingInstanceForParameters(igcObj, ridPrefix, userId);
+            EntityMappingInstance entityMap = igcRepositoryHelper.getMappingInstanceForParameters(
+                    igcObj.getType(),
+                    igcObj.getId(),
+                    ridPrefix,
+                    userId);
 
             if (entityMap != null) {
 
                 // Construct 'qualifiedName' from the Identity of the object
                 String identity = igcObj.getIdentity(igcRestClient).toString();
                 if (ridPrefix != null) {
-                    identity = ridPrefix + identity;
+                    identity = IGCRepositoryHelper.getQualifiedNameForGeneratedEntity(ridPrefix, identity);
                 }
 
                 InstanceProperties uniqueProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(
@@ -862,11 +869,13 @@ public abstract class RelationshipMapping extends InstanceMapping {
                             uniqueProperties,
                             null
                     );
+                    IGCEntityGuid igcEntityGuid;
                     if (ridPrefix != null) {
-                        entityProxy.setGUID(igcRepositoryHelper.getGuidForRid(ridPrefix + igcObj.getId()));
+                        igcEntityGuid = igcRepositoryHelper.getEntityGuid(igcObj.getType(), ridPrefix, igcObj.getId());
                     } else {
-                        entityProxy.setGUID(igcRepositoryHelper.getGuidForRid(igcObj.getId()));
+                        igcEntityGuid = igcRepositoryHelper.getEntityGuid(igcObj.getType(), null, igcObj.getId());
                     }
+                    entityProxy.setGUID(igcEntityGuid.asGuid());
 
                     if (igcRestClient.hasModificationDetails(igcObj.getType())) {
                         igcObj.populateModificationDetails(igcRestClient);
@@ -903,7 +912,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param mappings the mappings to use for retrieving the relationships
      * @param relationshipTypeGUID String GUID of the the type of relationship required (null for all).
      * @param fromIgcObject the IGC object that is the source of the relationships
-     * @param userId
+     * @param userId the user retrieving the mapped relationships
      */
     public static void getMappedRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                               List<Relationship> relationships,
@@ -932,9 +941,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 if (mapping.isSelfReferencing()) {
                     addSelfReferencingRelationship(igcomrsRepositoryConnector, mapping, relationships, fromIgcObject, userId);
                 } else if (!optimalStart.equals(RelationshipMapping.OptimalStart.CUSTOM)) {
-                    if (fromIgcObject == null) {
-                        if (log.isErrorEnabled()) { log.error("Object received to lookup {} relationship was null, cannot proceed.", relationshipTypeGUID); }
-                    } else if (fromIgcObject.isFullyRetrieved()
+                    if (fromIgcObject.isFullyRetrieved()
                             || (optimalStart.equals(OptimalStart.ONE) && pmOne.matchesAssetType(fromAssetType) )
                             || (optimalStart.equals(OptimalStart.TWO) && pmTwo.matchesAssetType(fromAssetType)) ) {
                         addDirectRelationship(igcomrsRepositoryConnector, mapping, relationships, fromIgcObject, userId);
@@ -967,7 +974,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param mapping the mapping for the self-referencing relationship
      * @param relationships the list of relationships to append to
      * @param fromIgcObject the IGC object that is the source (and target) of the self-referencing relationship
-     * @param userId
+     * @param userId the user retrieving the mapped relationship
      */
     private static void addSelfReferencingRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                        RelationshipMapping mapping,
@@ -997,7 +1004,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param mapping the mapping for the direct relationship
      * @param relationships the list of relationships to append to
      * @param fromIgcObject the IGC object that is the source of the direct relationship
-     * @param userId
+     * @param userId the user retrieving the mapped relationship
      */
     private static void addDirectRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                               RelationshipMapping mapping,
@@ -1054,7 +1061,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param mapping the mapping for the inverted relationship
      * @param relationships the list of relationships to append to
      * @param fromIgcObject the IGC object that is the source of the inverted relationship (or really the target)
-     * @param userId
+     * @param userId the user retrieving the mapped relationship
      */
     private static void addInvertedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                 RelationshipMapping mapping,
@@ -1129,7 +1136,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcSearchConditionSet the search criteria to use for the search
      * @param assetType the type of IGC asset for which to search
      * @param igcPropertyName the name of the IGC property to search against
-     * @param userId
+     * @param userId the user retrieving the mapped relationship
      */
     private static void addSearchResultsToRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                         RelationshipMapping mapping,
@@ -1168,7 +1175,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param fromIgcObject the asset that is the source of the IGC relationship
      * @param igcRelationships the list of IGC relationships
      * @param igcPropertyName the name of the IGC relationship property
-     * @param userId
+     * @param userId the user retrieving the mapped relationship
      */
     private static void addListOfMappedRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                      RelationshipMapping mapping,
@@ -1208,7 +1215,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param fromIgcObject the asset that is the source of the IGC relationship
      * @param igcRelationship the IGC relationship
      * @param igcPropertyName the name of the IGC relationship property
-     * @param userId
+     * @param userId the user retrieving the mapped relationship
      */
     private static void addSingleMappedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                     RelationshipMapping mapping,
@@ -1251,7 +1258,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param fromIgcObject the asset that is the source of the IGC relationship
      * @param relation the related IGC object
      * @param igcPropertyName the name of the IGC relationship property
-     * @param userId
+     * @param userId the user retrieving the mapped relationship
      * @return Relationship
      * @throws RepositoryErrorException
      */
@@ -1288,7 +1295,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param proxyOne the IGC asset to use for endpoint 1 of the relationship
      * @param proxyTwo the IGC asset to use for endpoint 2 of the relationship
      * @param igcPropertyName the name of the IGC relationship property
-     * @param userId
+     * @param userId the user retrieving the mapped relationship
      * @return Relationship
      * @throws RepositoryErrorException
      */
@@ -1320,7 +1327,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param proxyOne the IGC asset to consider for endpoint 1 of the relationship
      * @param proxyTwo the IGC asset to consider for endpoint 2 of the relationship
      * @param igcPropertyName the name of the IGC relationship property
-     * @param userId
+     * @param userId the user retrieving the mapped relationship
      * @param relationshipLevelRid the IGC RID for the relationship itself (in rare instances where it exists)
      * @return Relationship
      * @throws RepositoryErrorException
@@ -1355,7 +1362,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param proxyOne the IGC asset to consider for endpoint 1 of the relationship
      * @param proxyTwo the IGC asset to consider for endpoint 2 of the relationship
      * @param igcPropertyName the name of the IGC relationship property
-     * @param userId
+     * @param userId the user retrieving the mapped relationship
      * @param relationshipLevelRid the IGC RID for the relationship itself (in rare instances where it exists)
      * @param proxyOrderKnown should be true iff the provided candidate proxies are known to be in the correct order
      * @return Relationship
@@ -1402,7 +1409,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
         if (proxyOne != null && proxyTwo != null) {
 
-            String relationshipRID = RelationshipMapping.getRelationshipRID(
+            IGCRelationshipGuid igcRelationshipGuid = RelationshipMapping.getRelationshipGUID(
+                    igcRepositoryHelper,
                     relationshipMapping,
                     proxyOne,
                     proxyTwo,
@@ -1411,7 +1419,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     proxyOrderKnown
             );
 
-            if (relationshipRID == null) {
+            if (igcRelationshipGuid == null) {
                 if (log.isErrorEnabled()) { log.error("Unable to construct relationship GUID -- skipping relationship: {}", omrsRelationshipName); }
                 String omrsEndOneProperty = omrsRelationshipDef.getEndDef1().getAttributeName();
                 String omrsEndTwoProperty = omrsRelationshipDef.getEndDef2().getAttributeName();
@@ -1429,15 +1437,13 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         errorCode.getUserAction());
             }
 
-            relationship.setGUID(igcRepositoryHelper.getGuidForRid(relationshipRID));
+            relationship.setGUID(igcRelationshipGuid.asGuid());
             relationship.setMetadataCollectionId(igcomrsRepositoryConnector.getMetadataCollectionId());
             relationship.setStatus(InstanceStatus.ACTIVE);
             relationship.setInstanceProvenanceType(InstanceProvenanceType.LOCAL_COHORT);
 
-            String guidForEP1 = RelationshipMapping.getProxyOneRIDFromRelationshipRID(relationshipRID);
-            String guidForEP2 = RelationshipMapping.getProxyTwoRIDFromRelationshipRID(relationshipRID);
-            String ridForEP1 = IGCRepositoryHelper.getRidFromGeneratedId(guidForEP1);
-            String ridForEP2 = IGCRepositoryHelper.getRidFromGeneratedId(guidForEP2);
+            String ridForEP1 = igcRelationshipGuid.getRid1();
+            String ridForEP2 = igcRelationshipGuid.getRid2();
 
             EntityProxy ep1 = null;
             EntityProxy ep2 = null;
@@ -1576,7 +1582,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                   String userId) throws RepositoryErrorException {
 
         String omrsRelationshipType = relationshipMapping.getOmrsRelationshipType();
-        String propertyUsed = null;
+        String propertyUsed;
         Map<String, InstancePropertyValue> relationshipProperties = null;
         if (initialProperties != null) {
             relationshipProperties = initialProperties.getInstanceProperties();

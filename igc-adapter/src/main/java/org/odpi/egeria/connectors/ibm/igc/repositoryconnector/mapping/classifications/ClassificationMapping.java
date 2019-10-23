@@ -17,7 +17,6 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefAttribute;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.OMRSErrorCode;
-import org.odpi.openmetadata.repositoryservices.ffdc.exception.EntityNotKnownException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.TypeErrorException;
 import org.slf4j.Logger;
@@ -278,7 +277,7 @@ public abstract class ClassificationMapping extends InstanceMapping {
      * @return boolean
      */
     public boolean matchesAssetType(String igcAssetType) {
-        String simplifiedType = Reference.getAssetTypeForSearch(igcAssetType);
+        String simplifiedType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
         if (log.isDebugEnabled()) { log.debug("checking for matching asset between {} and {}", this.igcAssetType, simplifiedType); }
         return (
                 this.igcAssetType.equals(simplifiedType)

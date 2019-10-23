@@ -12,7 +12,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
  */
 public class RelationalDBSchemaTypeMapper extends ReferenceableMapper {
 
-    public static final String IGC_RID_PREFIX = IGCRepositoryHelper.generateTypePrefix("RDBST");
+    public static final String IGC_RID_PREFIX = "RDBST";
 
     private static class Singleton {
         private static final RelationalDBSchemaTypeMapper INSTANCE = new RelationalDBSchemaTypeMapper();

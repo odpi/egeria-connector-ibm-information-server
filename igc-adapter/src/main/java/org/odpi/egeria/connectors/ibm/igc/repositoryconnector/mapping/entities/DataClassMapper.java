@@ -97,15 +97,25 @@ public class DataClassMapper extends ReferenceableMapper {
     /**
      * Retrieve the base data_class asset expected for the mapper from a classification asset.
      *
-     * @param otherAsset the classification asset to translate into a data_class asset
+     * @param igcAssetType the type of the classification asset to translate into a data_class asset
+     * @param igcRid the RID of the classification asset to translate into a data_class asset
      * @param igcomrsRepositoryConnector connectivity to IGC repository
      * @return Reference - the data_class asset
      */
     @Override
-    public Reference getBaseIgcAssetFromAlternative(Reference otherAsset,
+    public Reference getBaseIgcAssetFromAlternative(String igcAssetType,
+                                                    String igcRid,
                                                     IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
-        return DataClassAssignmentMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()).getProxyTwoAssetFromAsset(
-                otherAsset, igcomrsRepositoryConnector.getIGCRestClient()).get(0);
+        IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
+        if (igcAssetType.equals("classification")) {
+            // In some versions it is not possible to search for 'classification' assets, so generally will be safer
+            // to retrieve the entire object by ID (they are small objects anyway so hopefully no significant negative
+            // performance impact of doing so)
+            return DataClassAssignmentMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()).getProxyTwoAssetFromAsset(
+                    igcRestClient.getAssetById(igcRid), igcRestClient).get(0);
+        } else {
+            return igcRestClient.getAssetRefById(igcRid);
+        }
     }
 
     /**
@@ -243,7 +253,6 @@ public class DataClassMapper extends ReferenceableMapper {
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
-     * @param igcProperties the list of IGC properties to which to add for inclusion in the IGC search
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is provided for the search that is not supported
      */
@@ -254,10 +263,9 @@ public class DataClassMapper extends ReferenceableMapper {
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
-                                                 List<String> igcProperties,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
 
-        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, igcProperties, value);
+        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, value);
 
         // TODO: handle the various complex-mapped properties above from a search perspective
 

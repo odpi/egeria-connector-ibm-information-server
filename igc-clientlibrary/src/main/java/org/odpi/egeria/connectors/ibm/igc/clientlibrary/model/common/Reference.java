@@ -65,7 +65,7 @@ public class Reference extends ObjectPrinter {
      * almost all IGC assets, it is not present on absolutely all of them -- also be aware that without
      * v11.7.0.2+ and an optional parameter it uses, this will always be 'null' in a ReferenceList
      */
-    protected ArrayList<Reference> _context = new ArrayList<>();
+    protected List<Reference> _context;
 
     /**
      * The '_name' property of a Reference is equivalent to its 'name' property, but will always be
@@ -93,23 +93,23 @@ public class Reference extends ObjectPrinter {
      */
     protected String _url;
 
-    /** @see #_context */ @JsonProperty("_context") public ArrayList<Reference> getContext() { return this._context; }
-    /** @see #_context */ @JsonProperty("_context") public void setContext(ArrayList<Reference> _context) { this._context = _context; }
+    /** @see #_context */ @JsonProperty("_context") public List<Reference> getContext() { return _context; }
+    /** @see #_context */ @JsonProperty("_context") public void setContext(List<Reference> _context) { this._context = _context; }
 
-    /** @see #_name */ @JsonProperty("_name") public String getName() { return this._name; }
+    /** @see #_name */ @JsonProperty("_name") public String getName() { return _name; }
     /** @see #_name */ @JsonProperty("_name") public void setName(String _name) { this._name = _name; }
 
-    /** @see #_type */ @JsonProperty("_type") public String getType() { return this._type; }
+    /** @see #_type */ @JsonProperty("_type") public String getType() { return _type; }
     /** @see #_type */ @JsonProperty("_type") public void setType(String _type) { this._type = _type; }
 
-    /** @see #_id */ @JsonProperty("_id") public String getId() { return this._id; }
+    /** @see #_id */ @JsonProperty("_id") public String getId() { return _id; }
     /** @see #_id */ @JsonProperty("_id") public void setId(String _id) { this._id = _id; }
 
-    /** @see #_url */ @JsonProperty("_url") public String getUrl() { return this._url; }
+    /** @see #_url */ @JsonProperty("_url") public String getUrl() { return _url; }
     /** @see #_url */ @JsonProperty("_url") public void setUrl(String _url) { this._url = _url; }
 
-    @JsonIgnore public boolean isFullyRetrieved() { return this.fullyRetrieved; }
-    @JsonIgnore public void setFullyRetrieved() { this.fullyRetrieved = true; }
+    @JsonIgnore public boolean isFullyRetrieved() { return fullyRetrieved; }
+    @JsonIgnore public void setFullyRetrieved() { fullyRetrieved = true; }
 
     @JsonIgnore private static final List<String> NON_RELATIONAL_PROPERTIES = Arrays.asList(
             "name"
@@ -117,78 +117,6 @@ public class Reference extends ObjectPrinter {
     @JsonIgnore public static List<String> getNonRelationshipProperties() { return NON_RELATIONAL_PROPERTIES; }
 
     @JsonIgnore public static Boolean includesModificationDetails() { return false; }
-
-    /**
-     * This will generally be the most performant method by which to retrieve asset information, when only
-     * some subset of properties is required
-     *
-     * @param igcrest the IGCRestClient connection to use to retrieve the details
-     * @param properties a list of the properties to retrieve
-     * @param pageSize the maximum number of each of the asset's relationships to return on this request
-     * @param sorting the sorting criteria to use for the results
-     * @return Reference - the object including only the subset of properties specified
-     */
-    public Reference getAssetWithSubsetOfProperties(IGCRestClient igcrest,
-                                                    String[] properties,
-                                                    int pageSize,
-                                                    IGCSearchSorting sorting) {
-        Reference assetWithProperties = null;
-        IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", this._id);
-        IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
-        IGCSearch igcSearch = new IGCSearch(Reference.getAssetTypeForSearch(this.getType()), properties, idOnlySet);
-        if (pageSize > 0) {
-            igcSearch.setPageSize(pageSize);
-        }
-        if (sorting != null) {
-            igcSearch.addSortingCriteria(sorting);
-        }
-        ReferenceList assetsWithProperties = igcrest.search(igcSearch);
-        if (!assetsWithProperties.getItems().isEmpty()) {
-            assetWithProperties = assetsWithProperties.getItems().get(0);
-        }
-        return assetWithProperties;
-    }
-
-    /**
-     * This will generally be the most performant method by which to retrieve asset information, when only
-     * some subset of properties is required
-     *
-     * @param igcrest the IGCRestClient connection to use to retrieve the details
-     * @param properties a list of the properties to retrieve
-     * @param pageSize the maximum number of each of the asset's relationships to return on this request
-     * @return Reference - the object including only the subset of properties specified
-     */
-    public Reference getAssetWithSubsetOfProperties(IGCRestClient igcrest, String[] properties, int pageSize) {
-        return getAssetWithSubsetOfProperties(igcrest, properties, pageSize, null);
-    }
-
-    /**
-     * This will generally be the most performant method by which to retrieve asset information, when only
-     * some subset of properties is required
-     *
-     * @param igcrest the IGCRestClient connection to use to retrieve the details
-     * @param properties a list of the properties to retrieve
-     * @return Reference - the object including only the subset of properties specified
-     */
-    public Reference getAssetWithSubsetOfProperties(IGCRestClient igcrest, String[] properties) {
-        return getAssetWithSubsetOfProperties(igcrest, properties, igcrest.getDefaultPageSize());
-    }
-
-    /**
-     * Retrieve the asset details from a minimal reference stub.
-     * <br><br>
-     * Be sure to first use the IGCRestClient "registerPOJO" method to register your POJO(s) for interpretting the
-     * type(s) for which you're interested in retrieving details.
-     * <br><br>
-     * Note that this will only include the first page of any relationships -- to also retrieve all
-     * relationships see getFullAssetDetails.
-     *
-     * @param igcrest the IGCRestClient connection to use to retrieve the details
-     * @return Reference - the object including all of its details
-     */
-    public Reference getAssetDetails(IGCRestClient igcrest) {
-        return igcrest.getAssetById(this._id);
-    }
 
     /**
      * Returns true iff the provided object is a relationship (ie. of class Reference or one of its offspring).
@@ -236,14 +164,16 @@ public class Reference extends ObjectPrinter {
         boolean success = true;
         // Only bother retrieving the details if the object supports them and they aren't already present
 
-        boolean bHasModificationDetails = igcrest.hasModificationDetails(this.getType());
+        boolean bHasModificationDetails = igcrest.hasModificationDetails(getType());
         String createdBy = (String) igcrest.getPropertyByName(this, IGCRestConstants.MOD_CREATED_BY);
 
         if (bHasModificationDetails && createdBy == null) {
 
-            IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", this.getId());
+            if (log.isDebugEnabled()) { log.debug("Populating modification details that were missing..."); }
+
+            IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", getId());
             IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
-            IGCSearch igcSearch = new IGCSearch(this.getType(), idOnlySet);
+            IGCSearch igcSearch = new IGCSearch(getType(), idOnlySet);
             igcSearch.addProperties(IGCRestConstants.getModificationProperties());
             igcSearch.setPageSize(2);
             ReferenceList assetsWithModDetails = igcrest.search(igcSearch);
@@ -271,18 +201,20 @@ public class Reference extends ObjectPrinter {
      * @param igcrest a REST API connection to use in populating the context
      * @return boolean indicating whether _context was successfully / already populated (true) or not (false)
      */
-    public boolean populateContext(IGCRestClient igcrest) {
+    private boolean populateContext(IGCRestClient igcrest) {
 
         boolean success = true;
         // Only bother retrieving the context if it isn't already present
 
-        if (this._context.isEmpty()) {
+        if (_context == null || _context.isEmpty()) {
 
-            boolean bHasModificationDetails = igcrest.hasModificationDetails(this.getType());
+            if (log.isDebugEnabled()) { log.debug("Context is empty, populating..."); }
 
-            IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", this.getId());
+            boolean bHasModificationDetails = igcrest.hasModificationDetails(getType());
+
+            IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", getId());
             IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
-            IGCSearch igcSearch = new IGCSearch(this.getType(), idOnlySet);
+            IGCSearch igcSearch = new IGCSearch(getType(), idOnlySet);
             if (bHasModificationDetails) {
                 igcSearch.addProperties(IGCRestConstants.getModificationProperties());
             }
@@ -292,7 +224,7 @@ public class Reference extends ObjectPrinter {
             if (success) {
 
                 Reference assetWithCtx = assetsWithCtx.getItems().get(0);
-                this._context = new ArrayList(assetWithCtx.getContext());
+                _context = assetWithCtx.getContext();
 
                 if (bHasModificationDetails) {
                     igcrest.setPropertyByName(this, IGCRestConstants.MOD_CREATED_ON, igcrest.getPropertyByName(assetWithCtx, IGCRestConstants.MOD_CREATED_ON));
@@ -316,36 +248,11 @@ public class Reference extends ObjectPrinter {
      * @return Identity
      */
     public Identity getIdentity(IGCRestClient igcrest) {
-        if (this.identity == null) {
-            this.populateContext(igcrest);
-            this.identity = new Identity(this._context, this.getType(), this.getName(), this.getId());
+        if (identity == null) {
+            populateContext(igcrest);
+            identity = new Identity(_context, getType(), getName(), getId());
         }
-        return this.identity;
-    }
-
-    /**
-     * Translates the type of asset into what should be used for searching.
-     * This is necessary for certain types that are actually pseudo-aliases for other types, to ensure all
-     * properties of that asset can be retrieved.
-     *
-     * @param assetType the asset type for which to retrieve the search type
-     * @return String
-     */
-    public static String getAssetTypeForSearch(String assetType) {
-        String typeForSearch = null;
-        switch(assetType) {
-            case "host_(engine)":
-                typeForSearch = "host";
-                break;
-            case "non_steward_user":
-            case "steward_user":
-                typeForSearch = "user";
-                break;
-            default:
-                typeForSearch = assetType;
-                break;
-        }
-        return typeForSearch;
+        return identity;
     }
 
     // TODO: eventually handle the '_expand' that exists for data classifications

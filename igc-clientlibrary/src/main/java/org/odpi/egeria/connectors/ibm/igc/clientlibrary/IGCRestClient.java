@@ -23,6 +23,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.slf4j.Logger;
@@ -79,12 +80,12 @@ public class IGCRestClient {
 
     private ObjectMapper mapper;
 
-    public static final String EP_TYPES = "/ibm/iis/igc-rest/v1/types";
-    public static final String EP_ASSET = "/ibm/iis/igc-rest/v1/assets";
-    public static final String EP_SEARCH = "/ibm/iis/igc-rest/v1/search";
-    public static final String EP_LOGOUT  = "/ibm/iis/igc-rest/v1/logout";
-    public static final String EP_BUNDLES = "/ibm/iis/igc-rest/v1/bundles";
-    public static final String EP_BUNDLE_ASSETS = EP_BUNDLES + "/assets";
+    private static final String EP_TYPES = "/ibm/iis/igc-rest/v1/types";
+    private static final String EP_ASSET = "/ibm/iis/igc-rest/v1/assets";
+    private static final String EP_SEARCH = "/ibm/iis/igc-rest/v1/search";
+    private static final String EP_LOGOUT  = "/ibm/iis/igc-rest/v1/logout";
+    private static final String EP_BUNDLES = "/ibm/iis/igc-rest/v1/bundles";
+    private static final String EP_BUNDLE_ASSETS = EP_BUNDLES + "/assets";
 
     /**
      * Default constructor used by the IGCRestClient.
@@ -156,7 +157,7 @@ public class IGCRestClient {
                 try {
                     this.workflowEnabled = tmpMapper.readValue(response, ReferenceList.class).getPaging().getNumTotal() > 0;
                 } catch (IOException e) {
-                    if (log.isErrorEnabled()) { log.error("Unable to determine if workflow is enabled: {}", e); }
+                    if (log.isErrorEnabled()) { log.error("Unable to determine if workflow is enabled.", e); }
                 }
                 // Register the non-generated types
                 this.registerPOJO(Paging.class);
@@ -195,7 +196,7 @@ public class IGCRestClient {
      * session (forceLogin = true).
      *
      * @param forceLogin indicates whether to create a new session by forcing login (true), or reuse existing session (false)
-     * @return
+     * @return HttpHeaders
      */
     private HttpHeaders getHttpHeaders(boolean forceLogin) {
 
@@ -373,7 +374,7 @@ public class IGCRestClient {
      * @param password password to encode
      * @return String of appropriately-encoded credentials for authorization
      */
-    public static String encodeBasicAuth(String username, String password) {
+    private static String encodeBasicAuth(String username, String password) {
         return Base64Utils.encodeToString((username + ":" + password).getBytes(UTF_8));
     }
 
@@ -607,6 +608,72 @@ public class IGCRestClient {
 
         return reference;
 
+    }
+
+    /**
+     * This will generally be the most performant method by which to retrieve asset information, when only
+     * some subset of properties is required
+     *
+     * @param rid the repository ID (RID) of the asset to retrieve
+     * @param assetType the IGC asset type of the asset to retrieve
+     * @param properties a list of the properties to retrieve
+     * @return Reference - the object including only the subset of properties specified
+     */
+    public Reference getAssetWithSubsetOfProperties(String rid,
+                                                    String assetType,
+                                                    String[] properties) {
+        return getAssetWithSubsetOfProperties(rid, assetType, properties, defaultPageSize, null);
+    }
+
+    /**
+     * This will generally be the most performant method by which to retrieve asset information, when only
+     * some subset of properties is required
+     *
+     * @param rid the repository ID (RID) of the asset to retrieve
+     * @param assetType the IGC asset type of the asset to retrieve
+     * @param properties a list of the properties to retrieve
+     * @param pageSize the maximum number of each of the asset's relationships to return on this request
+     * @return Reference - the object including only the subset of properties specified
+     */
+    public Reference getAssetWithSubsetOfProperties(String rid,
+                                                    String assetType,
+                                                    String[] properties,
+                                                    int pageSize) {
+        return getAssetWithSubsetOfProperties(rid, assetType, properties, pageSize, null);
+    }
+
+    /**
+     * This will generally be the most performant method by which to retrieve asset information, when only
+     * some subset of properties is required
+     *
+     * @param rid the repository ID (RID) of the asset to retrieve
+     * @param assetType the IGC asset type of the asset to retrieve
+     * @param properties a list of the properties to retrieve
+     * @param pageSize the maximum number of each of the asset's relationships to return on this request
+     * @param sorting the sorting criteria to use for the results
+     * @return Reference - the object including only the subset of properties specified
+     */
+    public Reference getAssetWithSubsetOfProperties(String rid,
+                                                    String assetType,
+                                                    String[] properties,
+                                                    int pageSize,
+                                                    IGCSearchSorting sorting) {
+        if (log.isDebugEnabled()) { log.debug("Retrieving asset {} with subset of details: {}", rid, properties); }
+        Reference assetWithProperties = null;
+        IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", rid);
+        IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
+        IGCSearch igcSearch = new IGCSearch(IGCRestConstants.getAssetTypeForSearch(assetType), properties, idOnlySet);
+        if (pageSize > 0) {
+            igcSearch.setPageSize(pageSize);
+        }
+        if (sorting != null) {
+            igcSearch.addSortingCriteria(sorting);
+        }
+        ReferenceList assetsWithProperties = search(igcSearch);
+        if (!assetsWithProperties.getItems().isEmpty()) {
+            assetWithProperties = assetsWithProperties.getItems().get(0);
+        }
+        return assetWithProperties;
     }
 
     /**

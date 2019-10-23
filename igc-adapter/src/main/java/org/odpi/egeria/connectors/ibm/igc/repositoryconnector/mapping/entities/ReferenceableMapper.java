@@ -20,7 +20,6 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
-import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,7 +124,7 @@ public class ReferenceableMapper extends EntityMapping {
         String qualifiedName = igcEntity.getIdentity(igcomrsRepositoryConnector.getIGCRestClient()).toString();
 
         if (mapping.igcRidNeedsPrefix()) {
-            qualifiedName = mapping.getIgcRidPrefix() + qualifiedName;
+            qualifiedName = IGCRepositoryHelper.getQualifiedNameForGeneratedEntity(mapping.getIgcRidPrefix(), qualifiedName);
         }
 
         instanceProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(
@@ -200,7 +199,6 @@ public class ReferenceableMapper extends EntityMapping {
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
-     * @param igcProperties the list of IGC properties to which to add for inclusion in the IGC search
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
      */
@@ -211,7 +209,6 @@ public class ReferenceableMapper extends EntityMapping {
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
-                                                 List<String> igcProperties,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
 
         final String methodName = "addComplexPropertySearchCriteria";
@@ -224,9 +221,7 @@ public class ReferenceableMapper extends EntityMapping {
             String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedName);
 
             // Check if the qualifiedName has a generated prefix -- need to remove prior to next steps, if so...
-            if (IGCRepositoryHelper.isGeneratedRID(unqualifiedName)) {
-                unqualifiedName = IGCRepositoryHelper.getRidFromGeneratedId(unqualifiedName);
-            }
+            unqualifiedName = IGCRepositoryHelper.getSearchableQualifiedName(unqualifiedName);
             if (log.isDebugEnabled()) { log.debug("Looking up identity: {}", unqualifiedName); }
             Identity identity = Identity.getFromString(unqualifiedName, igcRestClient);
             boolean skip = false;

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A representation of the unique characteristics of a particular asset, without relying on a unique ID string.
@@ -66,16 +67,6 @@ public class Identity {
     }
 
     /**
-     * Returns true iff this identity is equivalent to the provided identity.
-     *
-     * @param identity the identity to compare against
-     * @return boolean
-     */
-    public boolean sameas(Identity identity) {
-        return this.toString().equals(identity.toString());
-    }
-
-    /**
      * Returns the Identity of the parent that contains the entity identified by this Identity.
      * <br><br>
      * If there is no parent identity (ie. this Identity represents a root-level asset with no
@@ -86,7 +77,7 @@ public class Identity {
     public Identity getParentIdentity() {
         Identity parent = null;
         if (!context.isEmpty()) {
-            Integer lastIndex = context.size() - 1;
+            int lastIndex = context.size() - 1;
             Reference endOfCtx = context.get(lastIndex);
             List<Reference> parentCtx = context.subList(0, lastIndex);
             parent = new Identity(parentCtx, endOfCtx.getType(), endOfCtx.getName(), endOfCtx.getId());
@@ -122,7 +113,7 @@ public class Identity {
      * @param assetType the IGC asset type to check
      * @return boolean
      */
-    private static final boolean requiresRidToBeUnique(String assetType) {
+    private static boolean requiresRidToBeUnique(String assetType) {
         return (assetType.equals("data_connection"));
     }
 
@@ -134,7 +125,7 @@ public class Identity {
      * @param name the name of the IGC asset
      * @param id the Repository ID (RID) of the IGC asset
      */
-    private static final void composeString(StringBuilder sb, String type, String name, String id) {
+    private static void composeString(StringBuilder sb, String type, String name, String id) {
         sb.append("(");
         sb.append(type);
         sb.append(")=");
@@ -153,7 +144,7 @@ public class Identity {
      * @param pathSoFar the path that has been built-up so far
      * @return String
      */
-    private static final String getPropertyPath(String assetType, String ctxAssetType, String pathSoFar) {
+    private static String getPropertyPath(String assetType, String ctxAssetType, String pathSoFar) {
         if (pathSoFar.length() > 0) {
             pathSoFar = pathSoFar + ".";
         }
@@ -162,7 +153,7 @@ public class Identity {
         } else if (ctxAssetType.equals("category")) {
             pathSoFar = pathSoFar + "parent_category";
         } else {
-            pathSoFar = pathSoFar + Reference.getAssetTypeForSearch(ctxAssetType);
+            pathSoFar = pathSoFar + IGCRestConstants.getAssetTypeForSearch(ctxAssetType);
         }
         return pathSoFar;
     }
@@ -177,11 +168,11 @@ public class Identity {
      * @param ctxId the RID of the context asset for which to add the search condition (only needed if required to
      *              uniquely identify that type of asset)
      */
-    private final void addSearchCondition(IGCSearchConditionSet igcSearchConditionSet,
-                                          String propertyPath,
-                                          String ctxType,
-                                          String ctxName,
-                                          String ctxId) {
+    private void addSearchCondition(IGCSearchConditionSet igcSearchConditionSet,
+                                    String propertyPath,
+                                    String ctxType,
+                                    String ctxName,
+                                    String ctxId) {
         if (requiresRidToBeUnique(ctxType)) {
             if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", (propertyPath == null ? "_id" : propertyPath), "=", ctxId); }
             IGCSearchCondition condition = new IGCSearchCondition(
@@ -289,7 +280,7 @@ public class Identity {
      * @return Identity
      * @see #toString()
      */
-    public static final Identity getFromString(String identity, IGCRestClient igcRestClient) {
+    public static Identity getFromString(String identity, IGCRestClient igcRestClient) {
 
         List<Reference> context = new ArrayList<>();
 
@@ -329,6 +320,25 @@ public class Identity {
 
     }
 
+    /**
+     * Returns true iff this identity is equivalent to the provided identity.
+     *
+     * @param obj the identity to compare against
+     * @return boolean
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Identity)) return false;
+        Identity that = (Identity) obj;
+        return Objects.equals(toString(), that.toString());
+    }
+
+    /**
+     * Returns a unique string representation of the identity.
+     *
+     * @return String
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
