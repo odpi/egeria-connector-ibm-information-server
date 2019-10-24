@@ -254,6 +254,16 @@
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.8.5</version>
                 </plugin>
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>3.1.12.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <version>3.12.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -271,9 +281,9 @@
             </testResource>
         </testResources>
 
-    	<!-- Default compiler options - enable deprecation information -->
-    	<plugins>
-    	    <plugin>
+        <!-- Default compiler options - enable deprecation information -->
+        <plugins>
+            <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler.version}</version>
                 <configuration>
@@ -301,7 +311,7 @@
                                 <requireMavenVersion>
                                     <version>[3.5.0,)</version>
                                     <message>** MAVEN VERSION ERROR ** Maven 3.5.0 or above is required. See
-                                            https://maven.apache.org/install.html
+                                        https://maven.apache.org/install.html
                                     </message>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
@@ -524,6 +534,96 @@
                         </configuration>
                     </plugin>
 
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>findBugs</id>
+            <activation>
+                <property>
+                    <name>findBugs</name>
+                </property>
+            </activation>
+            <!-- Build reports - findBugs security checks -->
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.spotbugs</groupId>
+                        <artifactId>spotbugs-maven-plugin</artifactId>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.github.spotbugs</groupId>
+                                <artifactId>spotbugs</artifactId>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <effort>Max</effort>
+                            <threshold>Low</threshold>
+                            <failOnError>false</failOnError>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <includeFilterFile>${maven.multiModuleProjectDirectory}/spotbugs-security-include.xml</includeFilterFile>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <excludeFilterFile>${maven.multiModuleProjectDirectory}/spotbugs-security-exclude.xml</excludeFilterFile>
+                            <plugins>
+                                <plugin>
+                                    <groupId>com.h3xstream.findsecbugs</groupId>
+                                    <artifactId>findsecbugs-plugin</artifactId>
+                                    <version>LATEST</version> <!-- Auto-update to the latest stable -->
+                                </plugin>
+                            </plugins>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>spotbugs</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Optional PMD scan - static code analysis -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-pmd-plugin</artifactId>
+                        <configuration>
+                            <failOnViolation>false</failOnViolation>
+                            <printFailingErrors>true</printFailingErrors>
+                            <linkXRef>false</linkXRef>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
+                        <configuration>
+                            <skipSystemScope>true</skipSystemScope>
+                            <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                            <enableExperimental>true</enableExperimental>
+                            <rubygemsAnalyzerEnabled>false</rubygemsAnalyzerEnabled>
+                            <cmakeAnalyzerEnabled>false</cmakeAnalyzerEnabled>
+                            <autoconfAnalyzerEnabled>false</autoconfAnalyzerEnabled>
+                            <composerAnalyzerEnabled>false</composerAnalyzerEnabled>
+                            <cocoapodsAnalyzerEnabled>false</cocoapodsAnalyzerEnabled>
+                            <bundleAuditAnalyzerEnabled>false</bundleAuditAnalyzerEnabled>
+                            <swiftPackageManagerAnalyzerEnabled>false</swiftPackageManagerAnalyzerEnabled>
+                            <nuspecAnalyzerEnabled>false</nuspecAnalyzerEnabled>
+                            <nugetconfAnalyzerEnabled>false</nugetconfAnalyzerEnabled>
+                            <retireJsAnalyzerEnabled>true</retireJsAnalyzerEnabled>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
