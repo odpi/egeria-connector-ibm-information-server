@@ -84,13 +84,15 @@ public class SchemaAttribute_Mapper extends ReferenceableMapper {
 
         // setup the OMRS 'minCardinality' property
         Boolean allowsNulls = (Boolean) igcRestClient.getPropertyByName(igcEntity, "allows_null_values");
-        instanceProperties = repositoryHelper.addIntPropertyToInstance(
-                repositoryName,
-                instanceProperties,
-                "minCardinality",
-                allowsNulls ? 0 : 1,
-                methodName
-        );
+        if (allowsNulls != null) {
+            instanceProperties = repositoryHelper.addIntPropertyToInstance(
+                    repositoryName,
+                    instanceProperties,
+                    "minCardinality",
+                    allowsNulls ? 0 : 1,
+                    methodName
+            );
+        }
 
         return instanceProperties;
 
@@ -105,7 +107,6 @@ public class SchemaAttribute_Mapper extends ReferenceableMapper {
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
-     * @param igcProperties the list of IGC properties to which to add for inclusion in the IGC search
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is used for the search which is not supported
      */
@@ -116,15 +117,14 @@ public class SchemaAttribute_Mapper extends ReferenceableMapper {
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
-                                                 List<String> igcProperties,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
 
-        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, igcProperties, value);
+        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, value);
 
         if (omrsPropertyName.equals("minCardinality")) {
 
             Object minCardinality = ((PrimitivePropertyValue) value).getPrimitiveValue();
-            boolean optional = (minCardinality == null ? true : ((Integer) minCardinality) <= 0);
+            boolean optional = (minCardinality == null || ((Integer) minCardinality) <= 0);
 
             IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
                     "allows_null_values",

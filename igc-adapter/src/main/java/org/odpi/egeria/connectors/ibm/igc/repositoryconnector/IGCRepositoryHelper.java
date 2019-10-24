@@ -13,6 +13,8 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMapp
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCRelationshipGuid;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.OMRSStub;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.stores.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
@@ -39,8 +41,8 @@ public class IGCRepositoryHelper {
     public static final String DEFAULT_IGC_TYPE = "main_object";
     public static final String DEFAULT_IGC_TYPE_DISPLAY_NAME = "Main Object";
 
-    private static final String GENERATED_TYPE_PREFIX = "__|";
-    private static final String GENERATED_TYPE_POSTFIX = "|__";
+    private static final String GENERATED_ENTITY_QNAME_PREFIX = "gen!";
+    private static final String GENERATED_ENTITY_QNAME_POSTFIX = "@";
 
     private IGCOMRSRepositoryConnector igcomrsRepositoryConnector;
     private OMRSRepositoryHelper repositoryHelper;
@@ -298,9 +300,8 @@ public class IGCRepositoryHelper {
             IGCSearch igcSearch = new IGCSearch();
             igcSearch.addType(igcAssetType);
 
-            /* Provided there is a mapping, build up a list of IGC-specific properties
-             * and search criteria, based on the values of the InstanceProperties provided */
-            ArrayList<String> properties = new ArrayList<>();
+            /* Provided there is a mapping, build up a list of IGC-specific search criteria,
+             * based on the values of the InstanceProperties provided */
             IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
             String qualifiedNameRegex = null;
@@ -316,7 +317,6 @@ public class IGCRepositoryHelper {
                     addSearchConditionFromValue(
                             igcSearchConditionSet,
                             omrsPropertyName,
-                            properties,
                             mapping,
                             value
                     );
@@ -347,7 +347,7 @@ public class IGCRepositoryHelper {
                 }
             }
 
-            igcSearch.addProperties(properties);
+            igcSearch.addProperties(mapping.getAllPropertiesForEntityDetail(igcRestClient, igcAssetType));
             igcSearch.addConditions(igcSearchConditionSet);
 
             setPagingForSearch(igcSearch, fromEntityElement, pageSize);
@@ -365,7 +365,7 @@ public class IGCRepositoryHelper {
                     && (repositoryHelper.isStartsWithRegex(qualifiedNameRegex) || repositoryHelper.isExactMatchRegex(qualifiedNameRegex))) {
                 String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedNameRegex);
                 String prefix = mapping.getIgcRidPrefix();
-                boolean generatedQN = isGeneratedRID(unqualifiedName);
+                boolean generatedQN = isQualifiedNameOfGeneratedEntity(unqualifiedName);
                 includeResult = (generatedQN && prefix != null) || (!generatedQN && prefix == null);
             }
 
@@ -448,16 +448,16 @@ public class IGCRepositoryHelper {
                 EntityDetail ed = null;
 
                 if (log.isDebugEnabled()) { log.debug("processResults with mapper: {}", mapper.getClass().getCanonicalName()); }
-                String idToLookup;
+                IGCEntityGuid idToLookup;
                 if (mapper.igcRidNeedsPrefix()) {
                     if (log.isDebugEnabled()) { log.debug(" ... prefix required, getEntityDetail with: {}", mapper.getIgcRidPrefix() + reference.getId()); }
-                    idToLookup = mapper.getIgcRidPrefix() + reference.getId();
+                    idToLookup = new IGCEntityGuid(metadataCollectionId, reference.getType(), mapper.getIgcRidPrefix(), reference.getId());
                 } else {
                     if (log.isDebugEnabled()) { log.debug(" ... no prefix required, getEntityDetail with: {}", reference.getId()); }
-                    idToLookup = reference.getId();
+                    idToLookup = new IGCEntityGuid(metadataCollectionId, reference.getType(), reference.getId());
                 }
                 try {
-                    ed = getEntityDetail(userId, getGuidForRid(idToLookup), reference);
+                    ed = getEntityDetailFromFullAsset(userId, idToLookup, reference);
                 } catch (EntityNotKnownException e) {
                     if (log.isErrorEnabled()) { log.error("Unable to find entity: {}", idToLookup); }
                 }
@@ -529,27 +529,123 @@ public class IGCRepositoryHelper {
     }
 
     /**
+     * Create a new IGC GUID that has a prefix (for an OMRS entity type that does not actually exist in IGC but is
+     * generated from another entity type in IGC)
+     *
+     * @param assetType the IGC asset type
+     * @param prefix the prefix to use to uniquely identify this generated entity's GUID
+     * @param rid the Repository ID (RID) of the IGC asset
+     */
+    public IGCEntityGuid getEntityGuid(String assetType, String prefix, String rid) {
+        return new IGCEntityGuid(metadataCollectionId, assetType, prefix, rid);
+    }
+
+    /**
+     * Create a new IGC GUID that has a prefix (for an OMRS entity type that does not actually exist in IGC but is
+     * generated from another entity type in IGC)
+     *
+     * @param assetType1 the IGC asset type of the first endpoint of the relationship
+     * @param assetType2 the IGC asset type of the second endpoint of the relationship
+     * @param prefix1 the prefix to use to uniquely identify the generated entity's GUID at the first endpoint of the relationship
+     * @param prefix2 the prefix to use to uniquely identify the generated entity's GUID at the second endpoint of the relationship
+     * @param rid1 the Repository ID (RID) of the IGC asset at the first endpoint of the relationship
+     * @param rid2 the Repository ID (RID) of the IGC asset at the second endpoint of the relationship
+     * @param relationshipType the OMRS type name of the relationship
+     */
+    public IGCRelationshipGuid getRelationshipGuid(String assetType1,
+                                                   String assetType2,
+                                                   String prefix1,
+                                                   String prefix2,
+                                                   String rid1,
+                                                   String rid2,
+                                                   String relationshipType) {
+        return new IGCRelationshipGuid(
+                metadataCollectionId,
+                assetType1,
+                assetType2,
+                prefix1,
+                prefix2,
+                rid1,
+                rid2,
+                relationshipType);
+    }
+
+    /**
+     * Indicates whether the provided qualified name is one for a generated entity (true) or not (false).
+     *
+     * @param qualifiedName the qualified name to check
+     * @return boolean
+     */
+    public static boolean isQualifiedNameOfGeneratedEntity(String qualifiedName) {
+        return qualifiedName.startsWith(GENERATED_ENTITY_QNAME_PREFIX);
+    }
+
+    /**
+     * Create a unique qualified name for a generated entity.
+     *
+     * @param prefix the prefix to use to make the generated entity unique
+     * @param qualifiedName the base qualified name for the entity from which this entity is generated
+     * @return String
+     */
+    public static String getQualifiedNameForGeneratedEntity(String prefix, String qualifiedName) {
+        return GENERATED_ENTITY_QNAME_PREFIX + prefix + GENERATED_ENTITY_QNAME_POSTFIX + qualifiedName;
+    }
+
+    /**
+     * Retrieve an IGC-searchable form of the qualified name from the provided qualified name, which may be for a
+     * generated entity.
+     *
+     * @param qualifiedName the qualified name to make searchable
+     * @return String
+     */
+    public static String getSearchableQualifiedName(String qualifiedName) {
+        if (isQualifiedNameOfGeneratedEntity(qualifiedName)) {
+            return qualifiedName.substring(qualifiedName.indexOf(GENERATED_ENTITY_QNAME_POSTFIX) + 1);
+        } else {
+            return qualifiedName;
+        }
+    }
+
+    /**
+     * Retrieve the prefix from the qualified name of a potentially-generated entity.  Will return null if there is
+     * no prefix (in the case that the provided qualified name is not for a generated entity).
+     *
+     * @param qualifiedName the qualified name from which to retrieve the prefix
+     * @return String
+     */
+    public static String getPrefixFromGeneratedQualifiedName(String qualifiedName) {
+        if (isQualifiedNameOfGeneratedEntity(qualifiedName)) {
+            return qualifiedName.substring(qualifiedName.indexOf(GENERATED_ENTITY_QNAME_PREFIX) + GENERATED_ENTITY_QNAME_PREFIX.length() + 1, qualifiedName.indexOf(GENERATED_ENTITY_QNAME_POSTFIX));
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Return the header, classifications and properties of a specific entity, using the provided IGC asset.
      *
+     * Note: this method assumes that the provided IGC object is already fully-populated for an EntityDetail,
+     * so will avoid any further retrieval of information.
+     *
      * @param userId unique identifier for requesting user.
-     * @param guid String unique identifier for the entity.
+     * @param guid unique IGC identifier for the entity.
      * @param asset the IGC asset for which an EntityDetail should be constructed.
      * @return EntityDetail structure.
      * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
      *                                  the metadata collection is stored.
+     * @throws EntityNotKnownException the entity cannot be found in IGC
      */
-    public EntityDetail getEntityDetail(String userId, String guid, Reference asset)
+    public EntityDetail getEntityDetailFromFullAsset(String userId, IGCEntityGuid guid, Reference asset)
             throws RepositoryErrorException, EntityNotKnownException {
 
-        final String methodName = "getEntityDetail";
+        final String methodName = "getEntityDetailFromFullAsset";
 
-        if (log.isDebugEnabled()) { log.debug("getEntityDetail with guid = {}", guid); }
+        if (log.isDebugEnabled()) { log.debug("getEntityDetailFromFullAsset with guid = {}", guid); }
 
         EntityDetail detail;
-        String possiblyPrefixedRid = getRidFromGuid(guid);
-        if (possiblyPrefixedRid == null) {
+        if (guid == null) {
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(guid,
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("null",
                     "null",
                     repositoryName);
             throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
@@ -559,29 +655,18 @@ public class IGCRepositoryHelper {
                     errorCode.getSystemAction(),
                     errorCode.getUserAction());
         }
-        String prefix = getPrefixFromGeneratedId(possiblyPrefixedRid);
+        String prefix = guid.getGeneratedPrefix();
+        String igcType = guid.getAssetType();
 
         // If we could not find any asset by the provided guid, throw an ENTITY_NOT_KNOWN exception
-        if (asset == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    guid,
-                    getRidFromGuid(guid),
-                    repositoryName);
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        } else if (asset.getType().equals(DEFAULT_IGC_TYPE)) {
+        if (igcType.equals(DEFAULT_IGC_TYPE)) {
             /* If the asset type returned has an IGC-listed type of 'main_object', it isn't one that the REST API
              * of IGC supports (eg. a data rule detail object, a column analysis master object, etc)...
              * Trying to further process it will result in failed REST API requests; so we should skip these objects */
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.UNSUPPORTED_OBJECT_TYPE;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    guid,
-                    asset.getType(),
+                    guid.asGuid(),
+                    igcType,
                     repositoryName);
             throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
                     this.getClass().getName(),
@@ -592,7 +677,10 @@ public class IGCRepositoryHelper {
         } else {
 
             // Otherwise, retrieve the mapping dynamically based on the type of asset
-            EntityMappingInstance entityMap = getMappingInstanceForParameters(asset, prefix, userId);
+            EntityMappingInstance entityMap = getMappingInstanceForParameters(
+                    guid,
+                    asset,
+                    userId);
 
             if (entityMap != null) {
                 // 2. Apply the mapping to the object, and retrieve the resulting EntityDetail
@@ -600,7 +688,87 @@ public class IGCRepositoryHelper {
             } else {
                 IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        (prefix == null ? "" : prefix) + asset.getType(),
+                        (prefix == null ? "" : prefix) + igcType,
+                        repositoryName);
+                throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+                        this.getClass().getName(),
+                        methodName,
+                        errorMessage,
+                        errorCode.getSystemAction(),
+                        errorCode.getUserAction());
+            }
+
+        }
+
+        return detail;
+
+    }
+
+    /**
+     * Return the header, classifications and properties of a specific entity, using the provided IGC GUID.
+     *
+     * @param userId unique identifier for requesting user.
+     * @param guid unique IGC identifier for the entity.
+     * @return EntityDetail structure.
+     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
+     *                                  the metadata collection is stored.
+     * @throws EntityNotKnownException the entity cannot be found in IGC
+     */
+    public EntityDetail getEntityDetail(String userId, IGCEntityGuid guid)
+            throws RepositoryErrorException, EntityNotKnownException {
+
+        final String methodName = "getEntityDetail";
+
+        if (log.isDebugEnabled()) { log.debug("getEntityDetail with guid = {}", guid); }
+
+        EntityDetail detail;
+        if (guid == null) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("null",
+                    "null",
+                    repositoryName);
+            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        }
+        String prefix = guid.getGeneratedPrefix();
+        String igcType = guid.getAssetType();
+
+        // If we could not find any asset by the provided guid, throw an ENTITY_NOT_KNOWN exception
+        if (igcType.equals(DEFAULT_IGC_TYPE)) {
+            /* If the asset type returned has an IGC-listed type of 'main_object', it isn't one that the REST API
+             * of IGC supports (eg. a data rule detail object, a column analysis master object, etc)...
+             * Trying to further process it will result in failed REST API requests; so we should skip these objects */
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.UNSUPPORTED_OBJECT_TYPE;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    guid.asGuid(),
+                    igcType,
+                    repositoryName);
+            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        } else {
+
+            // Otherwise, retrieve the mapping dynamically based on the type of asset
+            EntityMappingInstance entityMap = getMappingInstanceForParameters(
+                    igcType,
+                    guid.getRid(),
+                    prefix,
+                    userId);
+
+            if (entityMap != null) {
+                // 2. Apply the mapping to the object, and retrieve the resulting EntityDetail
+                detail = EntityMapping.getEntityDetail(entityMap);
+            } else {
+                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
+                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                        (prefix == null ? "" : prefix) + igcType,
                         repositoryName);
                 throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
                         this.getClass().getName(),
@@ -620,7 +788,7 @@ public class IGCRepositoryHelper {
      * Add the specified classification to the provided entity.
      *
      * @param userId the user requesting the addition of the classification
-     * @param entityGUID the GUID of the entity to which to add the classification
+     * @param entityGUID the GUID of the IGC entity to which to add the classification
      * @param classificationTypeDef the TypeDef of the classification to add
      * @param classificationProperties the properties to set on the classification that is to be added
      * @return Reference - the IGC asset that was classified
@@ -640,8 +808,8 @@ public class IGCRepositoryHelper {
 
         String classificationName = classificationTypeDef.getName();
 
-        String possiblyPrefixedRid = getRidFromGuid(entityGUID);
-        if (possiblyPrefixedRid == null) {
+        IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(entityGUID);
+        if (igcGuid == null) {
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     entityGUID,
@@ -654,7 +822,7 @@ public class IGCRepositoryHelper {
                     errorCode.getSystemAction(),
                     errorCode.getUserAction());
         }
-        String rid = IGCRepositoryHelper.getRidFromGeneratedId(possiblyPrefixedRid);
+        String rid = igcGuid.getRid();
         Reference igcEntity = this.igcRestClient.getAssetRefById(rid);
 
         if (igcEntity == null) {
@@ -704,7 +872,7 @@ public class IGCRepositoryHelper {
      * Remove the specified classification from the provided entity.
      *
      * @param userId the user requesting the classification removal
-     * @param entityGUID the GUID of the entity from which classification should be removed
+     * @param entityGUID the GUID of the IGC entity from which classification should be removed
      * @param classificationTypeDef the TypeDef of the classification that should be removed
      * @return Reference - the IGC asset that was declassified
      * @throws RepositoryErrorException
@@ -722,8 +890,8 @@ public class IGCRepositoryHelper {
 
         String classificationName = classificationTypeDef.getName();
 
-        String possiblyPrefixedRid = getRidFromGuid(entityGUID);
-        if (possiblyPrefixedRid == null) {
+        IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(entityGUID);
+        if (igcGuid == null) {
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     entityGUID,
@@ -736,7 +904,7 @@ public class IGCRepositoryHelper {
                     errorCode.getSystemAction(),
                     errorCode.getUserAction());
         }
-        String rid = IGCRepositoryHelper.getRidFromGeneratedId(possiblyPrefixedRid);
+        String rid = igcGuid.getRid();
         Reference igcEntity = this.igcRestClient.getAssetRefById(rid);
 
         if (igcEntity == null) {
@@ -784,14 +952,44 @@ public class IGCRepositoryHelper {
     /**
      * Retrieves an instance of a mapping that can be used for the provided parameters (or null if none exists).
      *
-     * @param igcObject the IGC asset to be mapped
+     * @param guid the IGC GUID for the entity to be mapped
+     * @param asset the IGC object to be mapped
+     * @param userId the user making the request
+     * @return EntityMappingInstance
+     */
+    private EntityMappingInstance getMappingInstanceForParameters(IGCEntityGuid guid,
+                                                                  Reference asset,
+                                                                  String userId) {
+        if (log.isDebugEnabled()) { log.debug("Looking for mapper for retrieved asset with guid {}", guid.asGuid()); }
+
+        EntityMappingInstance entityMap = null;
+        EntityMapping found = entityMappingStore.getMappingByIgcAssetTypeAndPrefix(asset.getType(), guid.getGeneratedPrefix());
+        if (found != null) {
+            if (log.isDebugEnabled()) { log.debug("Found mapper class: {} ({})", found.getClass().getCanonicalName(), found); }
+            entityMap = new EntityMappingInstance(
+                    found,
+                    igcomrsRepositoryConnector,
+                    asset,
+                    userId
+            );
+        } else {
+            if (log.isDebugEnabled()) { log.debug("No mapper class found!"); }
+        }
+
+        return entityMap;
+
+    }
+
+    /**
+     * Retrieves an instance of a mapping that can be used for the provided parameters (or null if none exists).
+     *
+     * @param igcAssetType the type of IGC asset to be mapped
+     * @param rid the Repository ID (RID) of the IGC asset to be mapped
      * @param prefix the prefix used for the asset (if any; null otherwise)
      * @param userId the user making the request
      * @return EntityMappingInstance
      */
-    public EntityMappingInstance getMappingInstanceForParameters(Reference igcObject, String prefix, String userId) {
-
-        String igcAssetType = igcObject.getType();
+    public EntityMappingInstance getMappingInstanceForParameters(String igcAssetType, String rid, String prefix, String userId) {
 
         if (log.isDebugEnabled()) { log.debug("Looking for mapper for type {} with prefix {}", igcAssetType, prefix); }
 
@@ -799,12 +997,11 @@ public class IGCRepositoryHelper {
         EntityMapping found = entityMappingStore.getMappingByIgcAssetTypeAndPrefix(igcAssetType, prefix);
         if (found != null) {
             if (log.isDebugEnabled()) { log.debug("Found mapper class: {} ({})", found.getClass().getCanonicalName(), found); }
-            // Translate the provided asset to a base asset type for the mapper, if needed
-            // (if not needed the 'getBaseIgcAssetFromAlternative' is effectively a NOOP and gives back same object)
             entityMap = new EntityMappingInstance(
                     found,
                     igcomrsRepositoryConnector,
-                    found.getBaseIgcAssetFromAlternative(igcObject, igcomrsRepositoryConnector),
+                    igcAssetType,
+                    rid,
                     userId
             );
         } else {
@@ -861,14 +1058,12 @@ public class IGCRepositoryHelper {
      *
      * @param igcSearchConditionSet the search conditions to which to add the criteria
      * @param omrsPropertyName the OMRS property name to search
-     * @param igcProperties the list of IGC properties to which to add for inclusion in the IGC search
      * @param mapping the mapping definition for the entity for which we're searching
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
      */
     private void addSearchConditionFromValue(IGCSearchConditionSet igcSearchConditionSet,
                                              String omrsPropertyName,
-                                             List<String> igcProperties,
                                              EntityMapping mapping,
                                              InstancePropertyValue value) throws FunctionNotSupportedException {
 
@@ -890,12 +1085,10 @@ public class IGCRepositoryHelper {
                             igcSearchConditionSet,
                             igcPropertyName,
                             omrsPropertyName,
-                            igcProperties,
                             value);
 
                 } else {
 
-                    igcProperties.add(igcPropertyName);
                     addIGCSearchConditionFromValue(
                             repositoryHelper,
                             repositoryName,
@@ -1013,7 +1206,6 @@ public class IGCRepositoryHelper {
                     addSearchConditionFromValue(
                             igcSearchConditionSet,
                             nextEntry.getKey(),
-                            igcProperties,
                             mapping,
                             nextEntry.getValue()
                     );
@@ -1049,85 +1241,6 @@ public class IGCRepositoryHelper {
                 break;
         }
 
-    }
-
-    /**
-     * Generate a GUID for the provided internal IGC repository ID (RID) of an instance.
-     *
-     * @param rid an internal IGC repository ID (RID)
-     * @return String - a globally unique ID (GUID)
-     */
-    public String getGuidForRid(String rid) {
-        // TODO: may need to be re-worked if we eventually handle reference copies in the connector
-        return metadataCollectionId + "_" + rid;
-    }
-
-    /**
-     * Retrieve the internal IGC repository ID (RID) of an instance from its GUID.
-     *
-     * @param guid a globally unique ID (GUID)
-     * @return String - the internal IGC repository ID (RID)
-     */
-    public String getRidFromGuid(String guid) {
-        // TODO: needs to be re-worked if we eventually handle reference copies in the connector
-        if (!guid.startsWith(metadataCollectionId)) {
-            // If the GUID is not from this metadata collection, it should not logically match any RID in the
-            // environment (since we do not handle reference copies)
-            return null;
-        } else {
-            // Otherwise, just strip off the metadata collection portion at the beginning to get the RID
-            return guid.substring(metadataCollectionId.length() + 1);
-        }
-    }
-
-    /**
-     * Retrieves the RID from a generated RID (or the RID if it is not generated).
-     *
-     * @param rid the rid to translate
-     * @return String
-     */
-    public static String getRidFromGeneratedId(String rid) {
-        if (isGeneratedRID(rid)) {
-            return rid
-                    .substring(rid.indexOf(GENERATED_TYPE_POSTFIX) + GENERATED_TYPE_POSTFIX.length());
-        } else {
-            return rid;
-        }
-    }
-
-    /**
-     * Retrieves the generated prefix from a generated RID (or null if the RID is not generated).
-     *
-     * @param rid the rid from which to retrieve the prefix
-     * @return String
-     */
-    public static String getPrefixFromGeneratedId(String rid) {
-        if (isGeneratedRID(rid)) {
-            return rid
-                    .substring(0, rid.indexOf(GENERATED_TYPE_POSTFIX) + GENERATED_TYPE_POSTFIX.length());
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Indicates whether the provided RID was generated (true) or not (false).
-     *
-     * @param rid the rid to test
-     * @return boolean
-     */
-    public static boolean isGeneratedRID(String rid) {
-        return rid.startsWith(GENERATED_TYPE_PREFIX);
-    }
-
-    /**
-     * Generates a unique type prefix for RIDs based on the provided moniker.
-     *
-     * @param moniker a repeatable way by which to refer to the type
-     * @return String
-     */
-    public static String generateTypePrefix(String moniker) {
-        return GENERATED_TYPE_PREFIX + moniker + GENERATED_TYPE_POSTFIX;
     }
 
     /**
@@ -1339,52 +1452,69 @@ public class IGCRepositoryHelper {
      * large object; to simply retrieve the details without all relationships, see getAssetDetails.
      *
      * @param rid the Repository ID (RID) of the asset for which to retrieve all details
+     * @param assetType the type of IGC asset
      * @return Reference - the object including all of its details and relationships
      */
-    public Reference getFullAssetDetails(String rid) {
+    public Reference getFullAssetDetails(String rid, String assetType) {
 
-        // Start by retrieving the asset header, so we can introspect the class itself
-        Reference assetRef = igcRestClient.getAssetRefById(rid);
         Reference fullAsset = null;
 
-        if (assetRef != null) {
+        if (assetType != null) {
 
-            // Introspect the full list of properties from the POJO of the asset
-            String assetType = assetRef.getType();
-            Class pojoClass = igcRestClient.getPOJOForType(assetType);
-            if (pojoClass != null) {
-                List<String> allProps = igcRestClient.getAllPropertiesFromPOJO(assetType);
-
-                // Retrieve all asset properties, via search, as this will allow larger page
-                // retrievals (and therefore be overall more efficient) than going by the GET of the asset
-                fullAsset = assetRef.getAssetWithSubsetOfProperties(
-                        igcRestClient,
-                        allProps.toArray(new String[0]),
-                        igcRestClient.getDefaultPageSize()
-                );
-
+            if (assetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
+                if (log.isDebugEnabled()) { log.debug("Received 'main_object' as type, looking up basic ref to determine actual type."); }
+                fullAsset = igcRestClient.getAssetRefById(rid);
                 if (fullAsset != null) {
+                    assetType = fullAsset.getType();
+                }
+            }
 
-                    // Iterate through all the paged properties and retrieve all pages for each
-                    List<String> allPaged = igcRestClient.getPagedRelationalPropertiesFromPOJO(assetType);
-                    for (String pagedProperty : allPaged) {
-                        ReferenceList pagedValue = (ReferenceList) igcRestClient.getPropertyByName(fullAsset, pagedProperty);
-                        if (pagedValue != null) {
-                            pagedValue.getAllPages(igcRestClient);
+            if (!assetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
+                // Introspect the full list of properties from the POJO of the asset
+                Class pojoClass = igcRestClient.getPOJOForType(assetType);
+                if (pojoClass != null) {
+                    List<String> allProps = igcRestClient.getAllPropertiesFromPOJO(assetType);
+
+                    // Retrieve all asset properties, via search, as this will allow larger page
+                    // retrievals (and therefore be overall more efficient) than going by the GET of the asset
+
+                    fullAsset = igcRestClient.getAssetWithSubsetOfProperties(
+                            rid,
+                            assetType,
+                            allProps.toArray(new String[0]),
+                            igcRestClient.getDefaultPageSize()
+                    );
+
+                    if (fullAsset != null) {
+
+                        // Iterate through all the paged properties and retrieve all pages for each
+                        List<String> allPaged = igcRestClient.getPagedRelationalPropertiesFromPOJO(assetType);
+                        for (String pagedProperty : allPaged) {
+                            ReferenceList pagedValue = (ReferenceList) igcRestClient.getPropertyByName(fullAsset, pagedProperty);
+                            if (pagedValue != null) {
+                                pagedValue.getAllPages(igcRestClient);
+                            }
                         }
+
+                        // Set the asset as fully retrieved, so we do not attempt to retrieve parts of it again
+                        fullAsset.setFullyRetrieved();
+
                     }
-
-                    // Set the asset as fully retrieved, so we do not attempt to retrieve parts of it again
-                    fullAsset.setFullyRetrieved();
-
+                } else {
+                    if (log.isInfoEnabled()) { log.info("No registered POJO for asset type {} -- returning basic reference.", assetType); }
+                    fullAsset = igcRestClient.getAssetRefById(rid);
                 }
             } else {
-                if (log.isDebugEnabled()) { log.debug("No registered POJO for asset type {} -- returning basic reference.", assetRef.getType()); }
-                fullAsset = assetRef;
+                if (log.isInfoEnabled()) { log.info("Object retrieved remained 'main_object' -- returning: {}", fullAsset); }
             }
 
         } else {
-            if (log.isInfoEnabled()) { log.info("Unable to retrieve any asset with RID {} -- assume it was deleted.", rid); }
+            fullAsset = igcRestClient.getAssetRefById(rid);
+            if (fullAsset == null) {
+                if (log.isInfoEnabled()) { log.info("Unable to retrieve any asset with RID {} -- assume it was deleted.", rid); }
+            } else {
+                if (log.isInfoEnabled()) { log.info("No asset type provided -- returning basic reference."); }
+            }
         }
 
         return fullAsset;

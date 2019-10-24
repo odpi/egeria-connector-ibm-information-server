@@ -16,6 +16,8 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCRelationshipGuid;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.stores.*;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping;
@@ -708,8 +710,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         if (log.isDebugEnabled()) { log.debug("getEntitySummary with guid = {}", guid); }
 
         // Lookup the basic asset based on the RID (strip off prefix (indicating a generated type), if there)
-        String possiblyPrefixedRid = igcRepositoryHelper.getRidFromGuid(guid);
-        if (possiblyPrefixedRid == null) {
+        IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(guid);
+        if (igcGuid == null) {
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     guid,
@@ -722,33 +724,19 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     errorCode.getSystemAction(),
                     errorCode.getUserAction());
         }
-        String rid = IGCRepositoryHelper.getRidFromGeneratedId(possiblyPrefixedRid);
-        Reference asset = this.igcRestClient.getAssetRefById(rid);
 
         EntitySummary summary;
-        String prefix = IGCRepositoryHelper.getPrefixFromGeneratedId(possiblyPrefixedRid);
+        String igcType = igcGuid.getAssetType();
+        String prefix = igcGuid.getGeneratedPrefix();
 
-        // If we could not find any asset by the provided guid, throw an ENTITY_NOT_KNOWN exception
-        if (asset == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    guid,
-                    rid,
-                    repositoryName);
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        } else if (asset.getType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
+        if (igcType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
             /* If the asset type returned has an IGC-listed type of 'main_object', it isn't one that the REST API
              * of IGC supports (eg. a data rule detail object, a column analysis master object, etc)...
              * Trying to further process it will result in failed REST API requests; so we should skip these objects */
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.UNSUPPORTED_OBJECT_TYPE;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     guid,
-                    asset.getType(),
+                    igcType,
                     repositoryName);
             throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
                     this.getClass().getName(),
@@ -759,7 +747,11 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         } else {
 
             // Otherwise, retrieve the mapping dynamically based on the type of asset
-            EntityMappingInstance entityMap = igcRepositoryHelper.getMappingInstanceForParameters(asset, prefix, userId);
+            EntityMappingInstance entityMap = igcRepositoryHelper.getMappingInstanceForParameters(
+                    igcGuid.getAssetType(),
+                    igcGuid.getRid(),
+                    prefix,
+                    userId);
 
             if (entityMap != null) {
                 // 2. Apply the mapping to the object, and retrieve the resulting EntityDetail
@@ -767,7 +759,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             } else {
                 IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        prefix + asset.getType(),
+                        prefix + igcType,
                         repositoryName);
                 throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
                         this.getClass().getName(),
@@ -796,8 +788,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         super.getInstanceParameterValidation(userId, guid, methodName);
 
         // Lookup the basic asset based on the RID (strip off prefix (indicating a generated type), if there)
-        String possiblyPrefixedRid = igcRepositoryHelper.getRidFromGuid(guid);
-        if (possiblyPrefixedRid == null) {
+        IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(guid);
+        if (igcGuid == null) {
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     guid,
@@ -810,10 +802,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     errorCode.getSystemAction(),
                     errorCode.getUserAction());
         }
-        String rid = IGCRepositoryHelper.getRidFromGeneratedId(possiblyPrefixedRid);
-        Reference asset = this.igcRestClient.getAssetRefById(rid);
 
-        return igcRepositoryHelper.getEntityDetail(userId, guid, asset);
+        return igcRepositoryHelper.getEntityDetail(userId, igcGuid);
 
     }
 
@@ -910,8 +900,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             // will just return an empty list
 
             // 0. see if the entityGUID has a prefix (indicating a generated type)
-            String possiblyPrefixedRid = igcRepositoryHelper.getRidFromGuid(entityGUID);
-            if (possiblyPrefixedRid == null) {
+            IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(entityGUID);
+            if (igcGuid == null) {
                 IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                         entityGUID,
@@ -924,52 +914,39 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         errorCode.getSystemAction(),
                         errorCode.getUserAction());
             }
-            String rid = IGCRepositoryHelper.getRidFromGeneratedId(possiblyPrefixedRid);
-            String prefix = IGCRepositoryHelper.getPrefixFromGeneratedId(possiblyPrefixedRid);
-
-            // 1. retrieve entity from IGC by GUID (RID)
-            Reference asset = this.igcRestClient.getAssetRefById(rid);
+            String rid = igcGuid.getRid();
+            String prefix = igcGuid.getGeneratedPrefix();
+            String igcType = igcGuid.getAssetType();
 
             // Ensure the entity actually exists (if not, throw error to that effect)
-            if (asset == null) {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        entityGUID,
-                        rid,
-                        repositoryName);
-                throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
+            EntityMappingInstance entityMap = igcRepositoryHelper.getMappingInstanceForParameters(
+                    igcType,
+                    rid,
+                    prefix,
+                    userId);
+
+            if (entityMap != null) {
+                // 2. Apply the mapping to the object, and retrieve the resulting relationships
+                alRelationships.addAll(
+                        EntityMapping.getMappedRelationships(
+                                igcGuid,
+                                entityMap,
+                                relationshipTypeGUID,
+                                fromRelationshipElement,
+                                sequencingOrder,
+                                pageSize)
+                );
             } else {
-
-                EntityMappingInstance entityMap = igcRepositoryHelper.getMappingInstanceForParameters(asset, prefix, userId);
-
-                if (entityMap != null) {
-                    // 2. Apply the mapping to the object, and retrieve the resulting relationships
-                    alRelationships.addAll(
-                            EntityMapping.getMappedRelationships(
-                                    entityMap,
-                                    relationshipTypeGUID,
-                                    fromRelationshipElement,
-                                    sequencingOrder,
-                                    pageSize)
-                    );
-                } else {
-                    IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-                    String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                            prefix + asset.getType(),
-                            repositoryName);
+                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
+                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                        prefix + igcType,
+                        repositoryName);
                     throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
                             this.getClass().getName(),
                             methodName,
                             errorMessage,
                             errorCode.getSystemAction(),
                             errorCode.getUserAction());
-                }
-
             }
 
         }
@@ -1077,10 +1054,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedNameToFind);
                     String qualifiedName = unqualifiedName;
                     String prefix = null;
-                    // We are overloading the use of the generated RIDs and prefixes here for qualified names as well...
-                    if (IGCRepositoryHelper.isGeneratedRID(unqualifiedName)) {
-                        prefix = IGCRepositoryHelper.getPrefixFromGeneratedId(unqualifiedName);
-                        qualifiedName = IGCRepositoryHelper.getRidFromGeneratedId(unqualifiedName);
+                    if (IGCRepositoryHelper.isQualifiedNameOfGeneratedEntity(unqualifiedName)) {
+                        prefix = IGCRepositoryHelper.getPrefixFromGeneratedQualifiedName(unqualifiedName);
+                        qualifiedName = IGCRepositoryHelper.getSearchableQualifiedName(unqualifiedName);
                     }
                     Identity identity = Identity.getFromString(qualifiedName, igcRestClient);
                     if (identity != null) {
@@ -1271,9 +1247,6 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     igcSearch.addType(mapping.getIgcAssetType());
                     IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
-                    // Retrieve the list of property names we need for the classification
-                    Set<String> igcClassificationProperties = foundMapping.getMappedIgcPropertyNames();
-
                     // Compose the search criteria for the classification as a set of nested conditions, so that
                     // matchCriteria does not change the meaning of what we're searching
                     IGCSearchConditionSet baseCriteria = foundMapping.getIGCSearchCriteria(matchClassificationProperties);
@@ -1299,8 +1272,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         }
                     }
 
-                    List<String> igcClassificationPropertiesList = new ArrayList<>(igcClassificationProperties);
-                    igcSearch.addProperties(igcClassificationPropertiesList);
+                    igcSearch.addProperties(mapping.getAllPropertiesForEntityDetail(igcRestClient, mapping.getIgcAssetType()));
                     igcSearch.addConditions(igcSearchConditionSet);
 
                     igcRepositoryHelper.setPagingForSearch(igcSearch, fromEntityElement, pageSize);
@@ -1416,7 +1388,6 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
             // Otherwise, only bother searching if we are after ACTIVE (or "all") entities -- non-ACTIVE means we
             // will just return an empty list
-
             List<EntityMapping> mappingsToSearch = getMappingsToSearch(entityTypeGUID, userId);
 
             // Now iterate through all of the mappings we need to search, construct and run an appropriate search
@@ -1524,6 +1495,10 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                             igcSearch.addSortingCriteria(igcSearchSorting);
                         }
 
+                        // Add properties for this IGC asset type to the search, since ultimately we will
+                        // be retrieving EntityDetails for each result
+                        igcSearch.addProperties(mapping.getAllPropertiesForEntityDetail(igcRestClient, igcAssetType));
+
                         igcRepositoryHelper.processResults(
                                 mapping,
                                 this.igcRestClient.search(igcSearch),
@@ -1582,8 +1557,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         if (log.isDebugEnabled()) { log.debug("Looking up relationship: {}", guid); }
 
         // Translate the key properties of the GUID into IGC-retrievables
-        String relationshipRid = igcRepositoryHelper.getRidFromGuid(guid);
-        if (relationshipRid == null) {
+        IGCRelationshipGuid igcRelationshipGuid = IGCRelationshipGuid.fromGuid(guid);
+        if (igcRelationshipGuid == null) {
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     guid,
@@ -1595,28 +1570,20 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     errorCode.getSystemAction(),
                     errorCode.getUserAction());
         }
-        String proxyOneRid = RelationshipMapping.getProxyOneRIDFromRelationshipRID(relationshipRid);
-        String proxyTwoRid = RelationshipMapping.getProxyTwoRIDFromRelationshipRID(relationshipRid);
-        String omrsRelationshipName = RelationshipMapping.getRelationshipTypeFromRelationshipRID(relationshipRid);
-
-        String proxyOneIgcRid = proxyOneRid;
-        String proxyTwoIgcRid = proxyTwoRid;
-
-        if (IGCRepositoryHelper.isGeneratedRID(proxyOneRid)) {
-            proxyOneIgcRid = IGCRepositoryHelper.getRidFromGeneratedId(proxyOneRid);
-        }
-        if (IGCRepositoryHelper.isGeneratedRID(proxyTwoRid)) {
-            proxyTwoIgcRid = IGCRepositoryHelper.getRidFromGeneratedId(proxyTwoRid);
-        }
+        String proxyOneRid = igcRelationshipGuid.getRid1();
+        String proxyTwoRid = igcRelationshipGuid.getRid2();
+        String proxyOneType = igcRelationshipGuid.getAssetType1();
+        String proxyTwoType = igcRelationshipGuid.getAssetType2();
+        String omrsRelationshipName = igcRelationshipGuid.getRelationshipType();
 
         // Should not need to translate from proxyone / proxytwo to alternative assets, as the RIDs provided
         // in the relationship GUID should already be pointing to the correct assets
-        String relationshipLevelRid = (proxyOneRid.equals(proxyTwoRid)) ? proxyOneRid : null;
+        String relationshipLevelRid = igcRelationshipGuid.isRelationshipLevelObject() ? proxyOneRid : null;
         Reference proxyOne;
         Reference proxyTwo;
         RelationshipMapping relationshipMapping;
         if (relationshipLevelRid != null) {
-            Reference relationshipAsset = igcRestClient.getAssetRefById(proxyOneIgcRid);
+            Reference relationshipAsset = igcRestClient.getAssetRefById(relationshipLevelRid);
             String relationshipAssetType = relationshipAsset.getType();
             relationshipMapping = igcRepositoryHelper.getRelationshipMappingByTypes(
                     omrsRelationshipName,
@@ -1624,15 +1591,17 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     relationshipAssetType
             );
             // Only need to translate if the RIDs are relationship-level RIDs
+            // TODO: replace with singular retrieval?
             proxyOne = relationshipMapping.getProxyOneAssetFromAsset(relationshipAsset, igcRestClient).get(0);
             proxyTwo = relationshipMapping.getProxyTwoAssetFromAsset(relationshipAsset, igcRestClient).get(0);
         } else {
-            proxyOne = igcRestClient.getAssetRefById(proxyOneIgcRid);
-            proxyTwo = igcRestClient.getAssetRefById(proxyTwoIgcRid);
+            // TODO: replace with singular retrieval?
+            proxyOne = igcRestClient.getAssetRefById(proxyOneRid);
+            proxyTwo = igcRestClient.getAssetRefById(proxyTwoRid);
             relationshipMapping = igcRepositoryHelper.getRelationshipMappingByTypes(
                     omrsRelationshipName,
-                    proxyOne.getType(),
-                    proxyTwo.getType()
+                    proxyOneType,
+                    proxyTwoType
             );
         }
 
@@ -1875,7 +1844,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 assetRid = igcRestClient.create(creationObj);
 
                 if (assetRid != null) {
-                    guid = igcRepositoryHelper.getGuidForRid(assetRid);
+                    IGCEntityGuid igcGuid = new IGCEntityGuid(metadataCollectionId, igcTypeName, assetRid);
+                    guid = igcGuid.asGuid();
                     // Then update the entity with the classifications (which cannot be set during creation)
                     List<String> classificationNames = new ArrayList<>();
                     try {
@@ -1953,8 +1923,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         EntityDetail detail;
 
-        String possiblyPrefixedRid = igcRepositoryHelper.getRidFromGuid(entityGUID);
-        if (possiblyPrefixedRid == null) {
+        IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(entityGUID);
+        if (igcGuid == null) {
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     entityGUID,
@@ -1968,25 +1938,11 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     errorCode.getUserAction());
         }
 
-        String rid = IGCRepositoryHelper.getRidFromGeneratedId(possiblyPrefixedRid);
-        String prefix = IGCRepositoryHelper.getPrefixFromGeneratedId(possiblyPrefixedRid);
-        Reference igcObj = igcRestClient.getAssetRefById(rid);
+        String rid = igcGuid.getRid();
+        String prefix = igcGuid.getGeneratedPrefix();
+        String igcType = igcGuid.getAssetType();
 
-        if (igcObj == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    entityGUID,
-                    rid,
-                    repositoryName);
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        }
-
-        EntityMapping mapping = igcRepositoryHelper.getEntityMappingByIgcType(igcObj.getType(), prefix);
+        EntityMapping mapping = igcRepositoryHelper.getEntityMappingByIgcType(igcType, prefix);
 
         if (mapping == null) {
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
@@ -2037,7 +1993,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         errorCode.getSystemAction(),
                         errorCode.getUserAction());
             } else {
-                detail = igcRepositoryHelper.getEntityDetail(userId, entityGUID, igcObj);
+                detail = igcRepositoryHelper.getEntityDetail(userId, igcGuid);
             }
 
         }
@@ -2067,8 +2023,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 guidParameterName,
                 methodName);
 
-        String possiblyPrefixedRid = igcRepositoryHelper.getRidFromGuid(deletedEntityGUID);
-        if (possiblyPrefixedRid == null) {
+        IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(deletedEntityGUID);
+        if (igcGuid == null) {
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     deletedEntityGUID,
@@ -2082,7 +2038,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     errorCode.getUserAction());
         }
 
-        String rid = IGCRepositoryHelper.getRidFromGeneratedId(possiblyPrefixedRid);
+        String rid = igcGuid.getRid();
         Reference igcObj = igcRestClient.getAssetRefById(rid);
 
         if (igcObj == null) {
@@ -2144,7 +2100,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             TypeDef classificationTypeDef = getTypeDefByName(userId, classificationName);
             if (classificationTypeDef != null) {
                 Reference igcEntity = igcRepositoryHelper.classifyEntity(userId, entityGUID, classificationTypeDef, classificationProperties);
-                entityDetail = igcRepositoryHelper.getEntityDetail(userId, entityGUID, igcEntity);
+                IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(entityGUID);
+                entityDetail = igcRepositoryHelper.getEntityDetail(userId, igcGuid);
             } else {
                 IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
@@ -2210,7 +2167,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             TypeDef classificationTypeDef = getTypeDefByName(userId, classificationName);
             if (classificationTypeDef != null) {
                 Reference igcEntity = igcRepositoryHelper.declassifyEntity(userId, entityGUID, classificationTypeDef);
-                entityDetail = igcRepositoryHelper.getEntityDetail(userId, entityGUID, igcEntity);
+                IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(entityGUID);
+                entityDetail = igcRepositoryHelper.getEntityDetail(userId, igcGuid);
             } else {
                 IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
@@ -2294,9 +2252,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             if (relationshipTypeDef != null) {
 
                 String relationshipTypeName = relationshipTypeDef.getName();
-                String entityOneRid = igcRepositoryHelper.getRidFromGuid(entityOneGUID);
-                String entityTwoRid = igcRepositoryHelper.getRidFromGuid(entityTwoGUID);
-                if (entityOneRid == null) {
+                IGCEntityGuid igcGuid1 = IGCEntityGuid.fromGuid(entityOneGUID);
+                IGCEntityGuid igcGuid2 = IGCEntityGuid.fromGuid(entityTwoGUID);
+                if (igcGuid1 == null) {
                     IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
                     String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                             entityOneGUID,
@@ -2309,7 +2267,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                             errorCode.getSystemAction(),
                             errorCode.getUserAction());
                 }
-                if (entityTwoRid == null) {
+                if (igcGuid2 == null) {
                     IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
                     String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                             entityTwoGUID,
@@ -2322,7 +2280,14 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                             errorCode.getSystemAction(),
                             errorCode.getUserAction());
                 }
+                String entityOneRid = igcGuid1.getRid();
+                String entityTwoRid = igcGuid2.getRid();
+                String entityOneType = igcGuid1.getAssetType();
+                String entityTwoType = igcGuid2.getAssetType();
+
                 // TODO: do we need to handle potentially prefixed RIDs, because we are not at the moment?
+                // Will not replace these with singular retrievals as probably worth ensuring both ends of the
+                // relationship exist before attempting to create the relationship
                 Reference entityOne = this.igcRestClient.getAssetRefById(entityOneRid);
                 Reference entityTwo = this.igcRestClient.getAssetRefById(entityTwoRid);
 
@@ -2355,8 +2320,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
                 RelationshipMapping relationshipMapping = igcRepositoryHelper.getRelationshipMappingByTypes(
                         relationshipTypeName,
-                        entityOne.getType(),
-                        entityTwo.getType()
+                        entityOneType,
+                        entityTwoType
                 );
 
                 if (relationshipMapping != null) {
@@ -2444,9 +2409,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             if (relationshipTypeDef != null) {
 
                 String relationshipTypeName = relationshipTypeDef.getName();
-                String relationshipRid = igcRepositoryHelper.getRidFromGuid(deletedRelationshipGUID);
+                IGCRelationshipGuid igcRelationshipGuid = IGCRelationshipGuid.fromGuid(deletedRelationshipGUID);
 
-                if (relationshipRid == null) {
+                if (igcRelationshipGuid == null) {
                     IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN;
                     String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                             deletedRelationshipGUID,
@@ -2459,7 +2424,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                             errorCode.getUserAction());
                 }
 
-                String relationshipType = RelationshipMapping.getRelationshipTypeFromRelationshipRID(relationshipRid);
+                String relationshipType = igcRelationshipGuid.getRelationshipType();
 
                 if (!relationshipType.equals(relationshipTypeName)) {
                     IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN;
@@ -2477,10 +2442,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 RelationshipMapping mapping = igcRepositoryHelper.getRelationshipMappingByGUID(typeDefGUID);
 
                 // pull back the object on one end of the relationship
-                String possiblyPrefixedOne = RelationshipMapping.getProxyOneRIDFromRelationshipRID(relationshipRid);
-                String possiblyPrefixedTwo = RelationshipMapping.getProxyTwoRIDFromRelationshipRID(relationshipRid);
-                String proxyOneRid = IGCRepositoryHelper.getRidFromGeneratedId(possiblyPrefixedOne);
-                String proxyTwoRid = IGCRepositoryHelper.getRidFromGeneratedId(possiblyPrefixedTwo);
+                String proxyOneRid = igcRelationshipGuid.getRid1();
+                String proxyTwoRid = igcRelationshipGuid.getRid2();
                 RelationshipMapping.ProxyMapping proxyOneMapping = mapping.getProxyOneMapping();
                 List<String> proxyOneRelationships = proxyOneMapping.getIgcRelationshipProperties();
 

@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.stores;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
@@ -133,7 +134,7 @@ public class EntityMappingStore {
      * @return {@code List<EntityMapping>}
      */
     public List<EntityMapping> getMappingsByIgcAssetType(String assetType) {
-        String simpleType = Reference.getAssetTypeForSearch(assetType);
+        String simpleType = IGCRestConstants.getAssetTypeForSearch(assetType);
         if (igcAssetTypeToOmrsGuids.containsKey(simpleType)) {
             List<String> guids = igcAssetTypeToOmrsGuids.get(simpleType);
             ArrayList<EntityMapping> mappings = new ArrayList<>();
@@ -171,7 +172,7 @@ public class EntityMappingStore {
      * @return EntityMapping
      */
     public EntityMapping getMappingByIgcAssetTypeAndPrefix(String assetType, String prefix) {
-        String simpleType = Reference.getAssetTypeForSearch(assetType);
+        String simpleType = IGCRestConstants.getAssetTypeForSearch(assetType);
         String key = (prefix == null ? "" : prefix) + simpleType;
         if (igcAssetTypeAndPrefixToOmrsGuid.containsKey(key)) {
             String guid = igcAssetTypeAndPrefixToOmrsGuid.get(key);

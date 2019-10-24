@@ -46,65 +46,118 @@ public class ChangeSet {
         this.changesByProperty = new HashMap<>();
         this.igcRestClient = igcRestClient;
 
+        boolean bNoStub = false;
         // If we receive a null stub (eg. a new entity without any stub)
         if (stub == null) {
             // ... initialise an empty stub payload that we can (hopefully) use for the comparison
             stub = new OMRSStub();
             stub.setPayload("{}");
+            bNoStub = true;
         }
 
         // Calculate the delta between the latest version and the previous saved stub
         try {
-            EnumSet<DiffFlags> flags = DiffFlags.dontNormalizeOpIntoMoveAndCopy().clone();
             JsonNode stubPayload = objectMapper.readTree(stub.getPayload());
-            JsonNode currentAsset = objectMapper.readTree(this.igcRestClient.getValueAsJSON(asset));
-            this.patch = JsonDiff.asJson(
-                    stubPayload,
-                    currentAsset,
-                    flags
-            );
-            if (log.isDebugEnabled()) { log.debug("Found the following changes: {}", this.patch.toString()); }
-            ArrayNode changes = (ArrayNode) this.patch;
-            for (int i = 0; i < changes.size(); i++) {
-                JsonNode change = changes.get(i);
-                // Only add the change if it refers to a non-paging node (ie. it is /items/ or a basic property)
-                // (Otherwise we end up with many changes for the same set of relationships)
-                String changePath = change.path("path").asText();
-                Change theChange = null;
-                if (changePath.contains("/items/")) {
-                    // If we already have an object, use it directly
-                    if (change.path("value").getNodeType().equals(JsonNodeType.OBJECT)) {
-                        theChange = new Change(change, stubPayload);
-                    // Otherwise see if there is a set of individual changes we should consolidate (where _id will
-                    // always be different if the relationship itself has changed)
-                    } else if (changePath.endsWith("_id")) {
-                        JsonNode consolidatedChange = consolidateChangedObject(change, changePath, currentAsset);
-                        theChange = new Change(consolidatedChange, stubPayload);
-                    }
-                } else if (!changePath.contains("/paging/")) {
-                    // Skip any paging information changes
-                    if (changePath.endsWith("/_id") && !changePath.equals("/_id")) {
-                        // This is likely an exclusive relationship (eg. 'parent_category')
-                        if (log.isDebugEnabled()) { log.debug("Found an exclusive relationship change: {}", change.toString()); }
-                        JsonNode consolidatedChange = consolidateChangedObject(change, changePath, currentAsset);
-                        if (log.isDebugEnabled()) { log.debug(" ... consolidated to: {}", consolidatedChange.toString()); }
-                        theChange = new Change(consolidatedChange, stubPayload);
+            if (bNoStub) {
+                if (log.isDebugEnabled()) { log.debug("No existing stub -- calculating differences."); }
+                calculateDelta(asset, stubPayload);
+            } else {
+                Long stubModified = stubPayload.path("modified_on").asLong(0);
+                if (stubModified == 0) {
+                    if (log.isDebugEnabled()) { log.debug("No timestamp inside stub -- calculating differences."); }
+                    calculateDelta(asset, stubPayload);
+                } else {
+                    // Short-circuit the delta calculation if the modification date inside the stub's payload is equal
+                    // to the modification date of the asset itself.  This way we avoid updating the stub simply because
+                    // in one case we had the inner context of a relationship and in another case we did not
+                    Date assetModified = (Date) this.igcRestClient.getPropertyByName(asset, "modified_on");
+                    if (assetModified == null) {
+                        if (log.isDebugEnabled()) { log.debug("No timestamp inside asset -- calculating differences."); }
+                        calculateDelta(asset, stubPayload);
+                    } else if (!stubModified.equals(assetModified.getTime())) {
+                        if (log.isDebugEnabled()) { log.debug("Modification timestamp of stub ({}) does not match asset ({}) -- calculating differences.", stubModified, assetModified.getTime()); }
+                        calculateDelta(asset, stubPayload);
                     } else {
-                        // Otherwise add simple changes
-                        theChange = new Change(change, stubPayload);
+                        if (this.igcRestClient.getPagedRelationalPropertiesFromPOJO(asset.getType()).contains("detected_classifications")) {
+                            // One exception we must handle where the timestamps will match but there could still be
+                            // changes is when there is the potential for a classification: data class detection does NOT
+                            // update the modification timestamp of the entity that was classified
+                            if (log.isDebugEnabled()) { log.debug("Modification timestamps matched, but may be classifications -- calculating differences."); }
+                            calculateDelta(asset, stubPayload);
+                        } else {
+                            if (log.isDebugEnabled()) { log.debug("Modification timestamps between stub and asset matched -- skipping change calculation."); }
+                        }
                     }
-                }
-                if (theChange != null) {
-                    String igcProperty = theChange.getIgcPropertyName();
-                    if (!this.changesByProperty.containsKey(igcProperty)) {
-                        this.changesByProperty.put(igcProperty, new ArrayList<>());
-                    }
-                    this.changesByProperty.get(igcProperty).add(theChange);
                 }
             }
 
         } catch (IOException e) {
             if (log.isErrorEnabled()) { log.error("Unable to parse JSON for diff operation: {}, {}", asset, stub, e); }
+        }
+
+    }
+
+    /**
+     * Calculate the differences between the provided IGC entity and the payload of an OMRS stub representing a previous
+     * version of the same entity
+     *
+     * @param asset the latest version of the IGC entity to compare
+     * @param stubPayload the payload of a previous version of the IGC entity to compare
+     * @throws IOException if there are any errors processing the information as JSON
+     */
+    private void calculateDelta(Reference asset, JsonNode stubPayload) throws IOException {
+
+        EnumSet<DiffFlags> flags = DiffFlags.dontNormalizeOpIntoMoveAndCopy().clone();
+        JsonNode currentAsset = objectMapper.readTree(this.igcRestClient.getValueAsJSON(asset));
+        this.patch = JsonDiff.asJson(
+                stubPayload,
+                currentAsset,
+                flags
+        );
+        if (log.isDebugEnabled()) {
+            log.debug("Found the following changes: {}", this.patch.toString());
+        }
+        ArrayNode changes = (ArrayNode) this.patch;
+        for (int i = 0; i < changes.size(); i++) {
+            JsonNode change = changes.get(i);
+            // Only add the change if it refers to a non-paging node (ie. it is /items/ or a basic property)
+            // (Otherwise we end up with many changes for the same set of relationships)
+            String changePath = change.path("path").asText();
+            Change theChange = null;
+            if (changePath.contains("/items/")) {
+                // If we already have an object, use it directly
+                if (change.path("value").getNodeType().equals(JsonNodeType.OBJECT)) {
+                    theChange = new Change(change, stubPayload);
+                    // Otherwise see if there is a set of individual changes we should consolidate (where _id will
+                    // always be different if the relationship itself has changed)
+                } else if (changePath.endsWith("_id")) {
+                    JsonNode consolidatedChange = consolidateChangedObject(change, changePath, currentAsset);
+                    theChange = new Change(consolidatedChange, stubPayload);
+                }
+            } else if (!changePath.contains("/paging/")) {
+                // Skip any paging information changes
+                if (changePath.endsWith("/_id") && !changePath.equals("/_id")) {
+                    // This is likely an exclusive relationship (eg. 'parent_category')
+                    if (log.isDebugEnabled()) {
+                        log.debug("Found an exclusive relationship change: {}", change.toString());
+                    }
+                    JsonNode consolidatedChange = consolidateChangedObject(change, changePath, currentAsset);
+                    if (log.isDebugEnabled()) {
+                        log.debug(" ... consolidated to: {}", consolidatedChange.toString());
+                    }
+                    theChange = new Change(consolidatedChange, stubPayload);
+                } else {
+                    // Otherwise add simple changes
+                    theChange = new Change(change, stubPayload);
+                }
+            }
+            if (theChange != null) {
+                String igcProperty = theChange.getIgcPropertyName();
+                if (!this.changesByProperty.containsKey(igcProperty)) {
+                    this.changesByProperty.put(igcProperty, new ArrayList<>());
+                }
+                this.changesByProperty.get(igcProperty).add(theChange);
+            }
         }
 
     }
