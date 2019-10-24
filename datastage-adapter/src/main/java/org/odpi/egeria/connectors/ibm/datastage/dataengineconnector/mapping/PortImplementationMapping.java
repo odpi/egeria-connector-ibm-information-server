@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Mappings for creating a PortImplementation.
  */
-public class PortImplementationMapping extends BaseMapping {
+class PortImplementationMapping extends BaseMapping {
 
     private PortImplementation portImplementation;
 
@@ -24,7 +24,7 @@ public class PortImplementationMapping extends BaseMapping {
      * @param portType the port type to use
      * @param stageNameSuffix the unique suffix (based on the stage name) to ensure each schema is unique
      */
-    public PortImplementationMapping(DSJob job, Reference link, PortType portType, String stageNameSuffix) {
+    PortImplementationMapping(DSJob job, Reference link, PortType portType, String stageNameSuffix) {
         super(job.getIgcRestClient());
         portImplementation = null;
         if (link != null) {
@@ -46,7 +46,7 @@ public class PortImplementationMapping extends BaseMapping {
      * @param fields the data store fields from which to create the PortImplementation's schema
      * @param fullyQualifiedStageName the qualified name of the stage to ensure each schema is unique
      */
-    public PortImplementationMapping(DSJob job, Reference stage, PortType portType, List<Reference> fields, String fullyQualifiedStageName) {
+    PortImplementationMapping(DSJob job, Reference stage, PortType portType, List<Reference> fields, String fullyQualifiedStageName) {
         super(job.getIgcRestClient());
         portImplementation = null;
         if (stage != null && fields != null && !fields.isEmpty()) {
@@ -66,6 +66,6 @@ public class PortImplementationMapping extends BaseMapping {
      *
      * @return PortImplementation
      */
-    public PortImplementation getPortImplementation() { return portImplementation; }
+    PortImplementation getPortImplementation() { return portImplementation; }
 
 }

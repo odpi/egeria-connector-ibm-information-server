@@ -2,7 +2,6 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DSJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
@@ -53,7 +52,7 @@ public class ProcessMapping extends BaseMapping {
                     }
                 }
                 if (!lineageMappings.isEmpty()) {
-                    process.getProcess().setLineageMappings(lineageMappings.stream().collect(Collectors.toList()));
+                    process.getProcess().setLineageMappings(new ArrayList<>(lineageMappings));
                 }
             }
         } else {
@@ -85,7 +84,7 @@ public class ProcessMapping extends BaseMapping {
                         }
                     }
                 }
-                process.getProcess().setPortAliases(portAliases.stream().collect(Collectors.toList()));
+                process.getProcess().setPortAliases(new ArrayList<>(portAliases));
             }
         } else {
             log.error("Unable to create a sequence mapping for a job: {}", sequence);
@@ -132,7 +131,7 @@ public class ProcessMapping extends BaseMapping {
             Process process = new Process();
             process.setName(igcObj.getName());
             process.setDisplayName(igcObj.getName());
-            process.setQualifiedName(igcObj.getId());
+            process.setQualifiedName(getFullyQualifiedName(igcObj));
             process.setDescription(getDescription(igcObj));
             process.setOwner((String)igcRestClient.getPropertyByName(igcObj, "created_by"));
             String modifiedBy = (String)igcRestClient.getPropertyByName(igcObj, "modified_by");

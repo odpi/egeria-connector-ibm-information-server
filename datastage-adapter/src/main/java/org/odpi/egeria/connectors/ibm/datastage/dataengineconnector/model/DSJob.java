@@ -6,6 +6,8 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -13,6 +15,8 @@ import java.util.*;
  * Utility class for interacting with 'ds_job' information via IGC's REST API.
  */
 public class DSJob {
+
+    private static final Logger log = LoggerFactory.getLogger(DSJob.class);
 
     private static final List<String> SEARCH_PROPERTIES = createSearchProperties();
 
@@ -36,7 +40,7 @@ public class DSJob {
      *
      * @return {@code List<String>}
      */
-    public static final List<String> getSearchProperties() { return SEARCH_PROPERTIES; }
+    public static List<String> getSearchProperties() { return SEARCH_PROPERTIES; }
 
     private IGCRestClient igcRestClient;
     private Reference job;
@@ -65,6 +69,7 @@ public class DSJob {
      * @param fields a listing of data store fields (including database columns) from IGC
      */
     public DSJob(IGCRestClient igcRestClient, Reference job, ReferenceList stages, ReferenceList links, ReferenceList columns, List<Reference> fields) {
+        if (log.isDebugEnabled()) { log.debug("Creating new job..."); }
         this.igcRestClient = igcRestClient;
         this.job = job;
         this.type = job.getType().equals("sequence_job") ? JobType.SEQUENCE : JobType.JOB;
@@ -77,7 +82,9 @@ public class DSJob {
         this.inputStageRIDs = new ArrayList<>();
         this.outputStageRIDs = new ArrayList<>();
         classifyStages(stages);
+        if (log.isDebugEnabled()) { log.debug("... building link map"); }
         buildMap(linkMap, links);
+        if (log.isDebugEnabled()) { log.debug("... building column map"); }
         buildMap(columnMap, columns);
         classifyFields(fields);
     }
@@ -188,6 +195,7 @@ public class DSJob {
      * @return Reference
      */
     public Reference getLinkByRid(String rid) {
+        if (log.isDebugEnabled()) { log.debug("Looking up cached link: {}", rid); }
         return linkMap.getOrDefault(rid, null);
     }
 
@@ -198,6 +206,7 @@ public class DSJob {
      * @return Reference
      */
     public Reference getStageColumnByRid(String rid) {
+        if (log.isDebugEnabled()) { log.debug("Looking up cached stage column: {}", rid); }
         return columnMap.getOrDefault(rid, null);
     }
 
@@ -208,6 +217,7 @@ public class DSJob {
      * @return Reference
      */
     public Reference getDataStoreFieldByRid(String rid) {
+        if (log.isDebugEnabled()) { log.debug("Looking up cached data store field: {}", rid); }
         return fieldMap.getOrDefault(rid, null);
     }
 
@@ -225,6 +235,7 @@ public class DSJob {
         List<Reference> listOfObjects = objects.getItems();
         for (Reference candidateObject : listOfObjects) {
             String rid = candidateObject.getId();
+            if (log.isDebugEnabled()) { log.debug("...... caching RID: {}", rid); }
             map.put(rid, candidateObject);
         }
     }
