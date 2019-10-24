@@ -92,19 +92,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Versions of dependent libraries -->
-        <slf4j.version>1.7.28</slf4j.version>
         <jackson.version>2.10.0</jackson.version>
-        <jackson.databind.version>2.9.9.3</jackson.databind.version>
-        <woodstox.version>6.0.2</woodstox.version>
+        <slf4j.version>1.7.28</slf4j.version>
         <spring.version>5.1.5.RELEASE</spring.version>
-        <maven-source-plugin.version>3.1.0</maven-source-plugin.version>
-        <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
-        <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
-        <maven-download.version>1.4.1</maven-download.version>
-        <maven-antrun.version>1.8</maven-antrun.version>
-        <maven-install.version>3.0.0-M1</maven-install.version>
-        <maven-shade.version>3.2.1</maven-shade.version>
+        <testng.version>6.14.3</testng.version>
+        <woodstox.version>6.0.2</woodstox.version>
         <maven-compiler.version>3.8.1</maven-compiler.version>
+        <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
+        <maven-shade.version>3.2.1</maven-shade.version>
+        <maven-source-plugin.version>3.1.0</maven-source-plugin.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.jacoco.reportPaths>${maven.multiModuleProjectDirectory}/target/jacoco.exec</sonar.jacoco.reportPaths>
@@ -114,19 +110,9 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-web</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-core</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>2.3.0</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -135,12 +121,12 @@
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.databind.version}</version>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
+                <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
             <dependency>
@@ -154,9 +140,46 @@
                 <version>${woodstox.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.kafka</groupId>
-                <artifactId>kafka-clients</artifactId>
-                <version>2.3.0</version>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <scope>test</scope>
+                <version>${testng.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flipkart.zjsonpatch</groupId>
+                <artifactId>zjsonpatch</artifactId>
+                <version>0.4.9</version>
+                <exclusions>
+                    <!-- Ensure Jackson remains in line with rest of Egeria (not overridden by zjsonpatch embedded version) -->
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-databind</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
+                <scope>compile</scope>
             </dependency>
             <!-- TODO: use below instead of more detailed dependencies, once it actually builds as a package
             <dependency>
@@ -188,27 +211,6 @@
                 <groupId>org.odpi.egeria</groupId>
                 <artifactId>data-engine-proxy-connector</artifactId>
                 <version>${open-metadata.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.flipkart.zjsonpatch</groupId>
-                <artifactId>zjsonpatch</artifactId>
-                <version>0.4.9</version>
-                <exclusions>
-                    <!-- Ensure Jackson remains in line with rest of Egeria (not overridden by zjsonpatch embedded version) -->
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.core</groupId>
-                        <artifactId>jackson-databind</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.core</groupId>
-                        <artifactId>jackson-core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.core</groupId>
-                        <artifactId>jackson-annotations</artifactId>
-                    </exclusion>
-                </exclusions>
-                <scope>compile</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -252,6 +254,16 @@
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.8.5</version>
                 </plugin>
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>3.1.12.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <version>3.12.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -269,9 +281,9 @@
             </testResource>
         </testResources>
 
-    	<!-- Default compiler options - enable deprecation information -->
-    	<plugins>
-    	    <plugin>
+        <!-- Default compiler options - enable deprecation information -->
+        <plugins>
+            <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler.version}</version>
                 <configuration>
@@ -299,7 +311,7 @@
                                 <requireMavenVersion>
                                     <version>[3.5.0,)</version>
                                     <message>** MAVEN VERSION ERROR ** Maven 3.5.0 or above is required. See
-                                            https://maven.apache.org/install.html
+                                        https://maven.apache.org/install.html
                                     </message>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
@@ -522,6 +534,96 @@
                         </configuration>
                     </plugin>
 
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>findBugs</id>
+            <activation>
+                <property>
+                    <name>findBugs</name>
+                </property>
+            </activation>
+            <!-- Build reports - findBugs security checks -->
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.spotbugs</groupId>
+                        <artifactId>spotbugs-maven-plugin</artifactId>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.github.spotbugs</groupId>
+                                <artifactId>spotbugs</artifactId>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <effort>Max</effort>
+                            <threshold>Low</threshold>
+                            <failOnError>false</failOnError>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <includeFilterFile>${maven.multiModuleProjectDirectory}/spotbugs-security-include.xml</includeFilterFile>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <excludeFilterFile>${maven.multiModuleProjectDirectory}/spotbugs-security-exclude.xml</excludeFilterFile>
+                            <plugins>
+                                <plugin>
+                                    <groupId>com.h3xstream.findsecbugs</groupId>
+                                    <artifactId>findsecbugs-plugin</artifactId>
+                                    <version>LATEST</version> <!-- Auto-update to the latest stable -->
+                                </plugin>
+                            </plugins>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>spotbugs</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Optional PMD scan - static code analysis -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-pmd-plugin</artifactId>
+                        <configuration>
+                            <failOnViolation>false</failOnViolation>
+                            <printFailingErrors>true</printFailingErrors>
+                            <linkXRef>false</linkXRef>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
+                        <configuration>
+                            <skipSystemScope>true</skipSystemScope>
+                            <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                            <enableExperimental>true</enableExperimental>
+                            <rubygemsAnalyzerEnabled>false</rubygemsAnalyzerEnabled>
+                            <cmakeAnalyzerEnabled>false</cmakeAnalyzerEnabled>
+                            <autoconfAnalyzerEnabled>false</autoconfAnalyzerEnabled>
+                            <composerAnalyzerEnabled>false</composerAnalyzerEnabled>
+                            <cocoapodsAnalyzerEnabled>false</cocoapodsAnalyzerEnabled>
+                            <bundleAuditAnalyzerEnabled>false</bundleAuditAnalyzerEnabled>
+                            <swiftPackageManagerAnalyzerEnabled>false</swiftPackageManagerAnalyzerEnabled>
+                            <nuspecAnalyzerEnabled>false</nuspecAnalyzerEnabled>
+                            <nugetconfAnalyzerEnabled>false</nugetconfAnalyzerEnabled>
+                            <retireJsAnalyzerEnabled>true</retireJsAnalyzerEnabled>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>

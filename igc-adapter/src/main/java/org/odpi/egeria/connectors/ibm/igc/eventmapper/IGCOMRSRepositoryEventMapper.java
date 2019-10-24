@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -51,6 +52,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     private List<OpenMetadataTopicConnector> eventBusConnectors = new ArrayList<>();
 
     private static final Logger log = LoggerFactory.getLogger(IGCOMRSRepositoryEventMapper.class);
+    private static final Duration pollDuration = Duration.ofMillis(100);
 
     private String sourceName;
     private IGCOMRSRepositoryConnector igcomrsRepositoryConnector;
@@ -217,7 +219,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             //  (see: https://kafka.apache.org/0110/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html)
             while (running.get()) {
                 try {
-                    ConsumerRecords<Long, String> events = consumer.poll(100);
+                    ConsumerRecords<Long, String> events = consumer.poll(pollDuration);
                     for (ConsumerRecord<Long, String> event : events) {
                         processEvent(event.value());
                     }
