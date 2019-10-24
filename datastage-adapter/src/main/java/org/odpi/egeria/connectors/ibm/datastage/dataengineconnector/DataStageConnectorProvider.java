@@ -20,11 +20,11 @@ import java.util.List;
  */
 public class DataStageConnectorProvider extends DataEngineConnectorProviderBase {
 
-    static final String  connectorTypeGUID = "f71e6c48-fa06-4016-8437-7f0e8efcfb39";
-    static final String  connectorTypeName = "DataStage Data Engine Connector";
-    static final String  connectorTypeDescription = "DataStage Data Engine Connector that processes job information from the IBM DataStage ETL engine.";
+    private static final String connectorTypeGUID = "f71e6c48-fa06-4016-8437-7f0e8efcfb39";
+    private static final String connectorTypeName = "DataStage Data Engine Connector";
+    private static final String connectorTypeDescription = "DataStage Data Engine Connector that processes job information from the IBM DataStage ETL engine.";
 
-    protected static final String pageSize = "pageSize";
+    private static final String pageSize = "pageSize";
 
     /**
      * Constructor used to initialize the ConnectorProviderBase with the Java class name of the specific

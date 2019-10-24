@@ -6,11 +6,11 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 
-public class BaseMapping {
+class BaseMapping {
 
-    protected IGCRestClient igcRestClient;
+    IGCRestClient igcRestClient;
 
-    public BaseMapping(IGCRestClient igcRestClient) {
+    BaseMapping(IGCRestClient igcRestClient) {
         this.igcRestClient = igcRestClient;
     }
 
@@ -21,7 +21,7 @@ public class BaseMapping {
      * @param igcObj the IGC object for which to retrieve the description
      * @return String
      */
-    public String getDescription(Reference igcObj) {
+    String getDescription(Reference igcObj) {
         Object desc = igcRestClient.getPropertyByName(igcObj, "long_description");
         String description = null;
         if (desc == null) {
@@ -39,7 +39,7 @@ public class BaseMapping {
      * @param igcObj the IGC object for which to retrieve the fully-qualified name
      * @return String
      */
-    public String getFullyQualifiedName(Reference igcObj) {
+    String getFullyQualifiedName(Reference igcObj) {
         return igcObj.getIdentity(igcRestClient).toString();
     }
 
@@ -49,7 +49,7 @@ public class BaseMapping {
      * @param igcObj the IGC object for which to retrieve the parent's fully-qualified name
      * @return String
      */
-    public String getParentQualifiedName(Reference igcObj) {
+    String getParentQualifiedName(Reference igcObj) {
         String parentQN = null;
         if (igcObj != null) {
             Identity thisObjIdentity = igcObj.getIdentity(igcRestClient);
@@ -67,7 +67,7 @@ public class BaseMapping {
      * @param igcObj the IGC object for which to retrieve the parent's display name
      * @return String
      */
-    public String getParentDisplayName(Reference igcObj) {
+    String getParentDisplayName(Reference igcObj) {
         String parentDN = null;
         if (igcObj != null) {
             Identity thisObjIdentity = igcObj.getIdentity(igcRestClient);

@@ -4,7 +4,6 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.LineageMappingMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.ProcessMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.SchemaTypeMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.*;
@@ -34,8 +33,8 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
     private static final Logger log = LoggerFactory.getLogger(DataStageConnector.class);
 
-    public static final String SYNC_RULE_NAME = "Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS";
-    public static final String SYNC_RULE_DESC = "GENERATED -- DO NOT UPDATE: last synced at ";
+    private static final String SYNC_RULE_NAME = "Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS";
+    private static final String SYNC_RULE_DESC = "GENERATED -- DO NOT UPDATE: last synced at ";
 
     private static final SimpleDateFormat SYNC_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     private static final List<String> LINEAGE_ASSET_TYPES = createLineageAssetTypes();
@@ -62,10 +61,9 @@ public class DataStageConnector extends DataEngineConnectorBase {
      *
      * @return {@code List<String>}
      */
-    public static final List<String> getLineageAssetTypes() { return LINEAGE_ASSET_TYPES; }
+    private static List<String> getLineageAssetTypes() { return LINEAGE_ASSET_TYPES; }
 
     private IGCRestClient igcRestClient;
-    private IGCVersionEnum igcVersion;
     private ObjectMapper objectMapper;
     private DataEngineSoftwareServerCapability dataEngine;
 
@@ -133,11 +131,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
         this.defaultUserId = igcUser;
 
+        IGCVersionEnum igcVersion;
         // Create new REST API client (opens a new session)
         this.igcRestClient = new IGCRestClient("https://" + address, igcUser, igcPass);
         if (this.igcRestClient.isSuccessfullyInitialised()) {
             // Set the version based on the IGC client's auto-determination of the IGC environment's version
-            this.igcVersion = this.igcRestClient.getIgcVersion();
+            igcVersion = this.igcRestClient.getIgcVersion();
             // Set the default page size to whatever is provided as part of config parameters (default to 100)
             if (igcPage != null) {
                 this.igcRestClient.setDefaultPageSize(igcPage);
@@ -165,7 +164,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
         // Create a new SoftwareServerCapability representing this Data Engine
         SoftwareServerCapability sscDataEngine = new SoftwareServerCapability();
         sscDataEngine.setEngineType("IBM InfoSphere DataStage");
-        sscDataEngine.setEngineVersion(igcRestClient.getIgcVersion().getVersionString());
+        sscDataEngine.setEngineVersion(igcVersion.getVersionString());
         sscDataEngine.setQualifiedName("ibm-datastage@" + address);
         sscDataEngine.setDisplayName(address);
         dataEngine = new DataEngineSoftwareServerCapability(sscDataEngine, defaultUserId);
@@ -214,7 +213,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     /**
      * Persist the date and time at which changes were last successfully synchronized.
      *
-     * @param time
+     * @param time the date and time at which changes were last successfully synchronized
      * @throws OCFRuntimeException if there is any problem persisting the date and time
      */
     @Override
@@ -323,11 +322,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      */
     @Override
     public List<DataEngineProcess> getChangedProcesses(Date from, Date to) {
-
-        List<DataEngineProcess> changedProcesses = new ArrayList<>();
-        changedProcesses.addAll(getProcessesForJobs());
-        return changedProcesses;
-
+        return new ArrayList<>(getProcessesForJobs());
     }
 
     /**
@@ -366,14 +361,13 @@ public class DataStageConnector extends DataEngineConnectorBase {
         }
         if (log.isInfoEnabled()) { log.info(" ... searching for changed jobs > {} and <= {}", fromTime, toTime); }
         igcSearch.addConditions(conditionSet);
-        ReferenceList changedJobs = igcRestClient.search(igcSearch);
-        return changedJobs;
+        return igcRestClient.search(igcSearch);
     }
 
     /**
      * Build up the cache of changed job details for use by the other methods (minimizing re-retrieval of details)
      *
-     * @param jobs
+     * @param jobs the changed job details to cache
      */
     private void cacheChangedJobs(ReferenceList jobs) {
 
@@ -396,7 +390,9 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param job the DataStage job for which to retrieve details
      * @return DSJob
      */
-    public DSJob getJobDetails(Reference job) {
+    private DSJob getJobDetails(Reference job) {
+
+        if (log.isDebugEnabled()) { log.debug("Retrieving job details for: {}", job.getId()); }
 
         String jobRid = job.getId();
         ReferenceList stages = getStageDetailsForJob(jobRid);
@@ -412,9 +408,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
         // Flatten the list of data store details
         List<Reference> dataStoreDetails = new ArrayList<>();
         for (ReferenceList referenceList : dataStoreDetailsMap.values()) {
-            for (Reference item : referenceList.getItems()) {
-                dataStoreDetails.add(item);
-            }
+            dataStoreDetails.addAll(referenceList.getItems());
         }
 
         return new DSJob(igcRestClient, job, stages, links, stageCols, dataStoreDetails);
@@ -458,7 +452,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     /**
      * Translate the detailed stages of the provided DataStage job into Processes.
      *
-     * @param job
+     * @param job the job for which to translate detailed stages
      * @return {@code List<DataEngineProcess>}
      */
     private List<DataEngineProcess> getProcessesForEachStage(DSJob job) {
@@ -537,6 +531,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @return ReferenceList
      */
     private ReferenceList getStageDetailsForJob(String jobRid) {
+        if (log.isDebugEnabled()) { log.debug("Retrieving stage details for job: {}", jobRid); }
         IGCSearch igcSearch = new IGCSearch("stage");
         igcSearch.addProperties(DSStage.getSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("job_or_container", "=", jobRid);
@@ -554,6 +549,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @return ReferenceList
      */
     private ReferenceList getLinkDetailsForJob(String jobRid) {
+        if (log.isDebugEnabled()) { log.debug("Retrieving link details for job: {}", jobRid); }
         IGCSearch igcSearch = new IGCSearch("link");
         igcSearch.addProperties(DSLink.getSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("job_or_container", "=", jobRid);
@@ -571,6 +567,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @return ReferenceList
      */
     private ReferenceList getStageColumnDetailsForLinks(String jobRid) {
+        if (log.isDebugEnabled()) { log.debug("Retrieving stage column details for job: {}", jobRid); }
         IGCSearch igcSearch = new IGCSearch("ds_stage_column");
         igcSearch.addProperties(DSStageColumn.getSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("link.job_or_container", "=", jobRid);
@@ -588,6 +585,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @return ReferenceList
      */
     private ReferenceList getColumnsForTable(String tableRid) {
+        if (log.isDebugEnabled()) { log.debug("Retrieving column details for table: {}", tableRid); }
         IGCSearch igcSearch = new IGCSearch("database_column");
         igcSearch.addProperties(DatabaseColumn.getSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("database_table_or_view", "=", tableRid);
@@ -605,6 +603,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @return ReferenceList
      */
     private ReferenceList getFieldsForRecord(String recordRid) {
+        if (log.isDebugEnabled()) { log.debug("Retrieving field details for data file record: {}", recordRid); }
         IGCSearch igcSearch = new IGCSearch("data_file_field");
         igcSearch.addProperties(DataFileField.getSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("data_file_record", "=", recordRid);

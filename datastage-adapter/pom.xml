@@ -46,7 +46,7 @@
             <artifactId>data-engine-api</artifactId>
             <scope>compile</scope>
         </dependency>
-        <!-- TODO: temporary only... -->
+        <!-- TODO: only used for logging simplicity, could eventually be removed... -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>

@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Mappings for creating a set of PortAliases.
  */
-public class PortAliasMapping extends BaseMapping {
+class PortAliasMapping extends BaseMapping {
 
     private static final Logger log = LoggerFactory.getLogger(PortAliasMapping.class);
 
@@ -35,7 +35,7 @@ public class PortAliasMapping extends BaseMapping {
      * @param stages the stages from which to create PortAliases
      * @param relationshipProperty the relationship property on each stage from which to draw PortAlias details
      */
-    public PortAliasMapping(DSJob job, List<Reference> stages, String relationshipProperty) {
+    PortAliasMapping(DSJob job, List<Reference> stages, String relationshipProperty) {
 
         this(job.getIgcRestClient());
 
@@ -66,6 +66,6 @@ public class PortAliasMapping extends BaseMapping {
      *
      * @return {@code List<PortAlias>}
      */
-    public List<PortAlias> getPortAliases() { return portAliases; }
+    List<PortAlias> getPortAliases() { return portAliases; }
 
 }
