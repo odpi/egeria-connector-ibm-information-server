@@ -23,6 +23,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -117,8 +118,12 @@ public class IARestClient {
         this.mapper = new XmlMapper(xf);
         this.mapper.setDefaultPropertyInclusion(JsonInclude.Value.construct(JsonInclude.Include.NON_EMPTY, JsonInclude.Include.NON_EMPTY));
         try {
-            this.xmlParser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            this.xmlTransformer = TransformerFactory.newInstance().newTransformer();
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            this.xmlParser = documentBuilderFactory.newDocumentBuilder();
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            this.xmlTransformer = transformerFactory.newTransformer();
         } catch (ParserConfigurationException e) {
             log.error("Unable to instantiate an XML parser.", e);
         } catch (TransformerConfigurationException e) {
