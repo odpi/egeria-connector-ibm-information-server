@@ -105,6 +105,7 @@
         <!--suppress UnresolvedMavenProperty -->
         <sonar.jacoco.reportPaths>${maven.multiModuleProjectDirectory}/target/jacoco.exec</sonar.jacoco.reportPaths>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+        <spotbugs.version>4.0.0-beta4</spotbugs.version>
     </properties>
 
     <dependencyManagement>
@@ -559,6 +560,7 @@
                             <dependency>
                                 <groupId>com.github.spotbugs</groupId>
                                 <artifactId>spotbugs</artifactId>
+                                <version>${spotbugs.version}</version>
                             </dependency>
                         </dependencies>
                         <configuration>
