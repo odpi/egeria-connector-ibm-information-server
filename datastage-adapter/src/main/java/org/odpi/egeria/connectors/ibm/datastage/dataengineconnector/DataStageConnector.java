@@ -36,7 +36,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private static final String SYNC_RULE_NAME = "Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS";
     private static final String SYNC_RULE_DESC = "GENERATED -- DO NOT UPDATE: last synced at ";
 
-    private static final SimpleDateFormat SYNC_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    private final SimpleDateFormat SYNC_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     private static final List<String> LINEAGE_ASSET_TYPES = createLineageAssetTypes();
 
     private static List<String> createLineageAssetTypes() {

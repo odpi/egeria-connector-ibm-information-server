@@ -1104,22 +1104,26 @@ public abstract class RelationshipMapping extends InstanceMapping {
             String anIgcRelationshipProperty = null;
             IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
             igcSearchConditionSet.setMatchAnyCondition(true);
-            for (String igcRelationshipName : otherSide.getIgcRelationshipProperties()) {
-                IGCSearchCondition condition = new IGCSearchCondition(igcRelationshipName, "=", fromIgcObject.getId());
-                igcSearchConditionSet.addCondition(condition);
-                anIgcRelationshipProperty = igcRelationshipName;
+            if (otherSide != null) {
+                for (String igcRelationshipName : otherSide.getIgcRelationshipProperties()) {
+                    IGCSearchCondition condition = new IGCSearchCondition(igcRelationshipName, "=", fromIgcObject.getId());
+                    igcSearchConditionSet.addCondition(condition);
+                    anIgcRelationshipProperty = igcRelationshipName;
+                }
+                String sourceAssetType = otherSide.getIgcAssetType();
+                addSearchResultsToRelationships(
+                        igcomrsRepositoryConnector,
+                        mapping,
+                        relationships,
+                        fromIgcObject,
+                        igcSearchConditionSet,
+                        sourceAssetType,
+                        anIgcRelationshipProperty,
+                        userId
+                );
+            } else {
+                log.error("Unable to determine other side of relationship -- cannot process inverted relationship.");
             }
-            String sourceAssetType = otherSide.getIgcAssetType();
-            addSearchResultsToRelationships(
-                    igcomrsRepositoryConnector,
-                    mapping,
-                    relationships,
-                    fromIgcObject,
-                    igcSearchConditionSet,
-                    sourceAssetType,
-                    anIgcRelationshipProperty,
-                    userId
-            );
 
         }
 

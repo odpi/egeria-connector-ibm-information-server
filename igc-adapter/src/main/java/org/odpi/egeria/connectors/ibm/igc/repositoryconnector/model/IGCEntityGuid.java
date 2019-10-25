@@ -89,10 +89,7 @@ public class IGCEntityGuid extends IGCGuidHeader {
     }
 
     /**
-     * Indicates whether the provided object is equivalent to this IGC GUID (true) or not (false).
-     *
-     * @param obj the object to test for equivalency
-     * @return boolean
+     * {@inheritDoc}
      */
     @Override
     public boolean equals(Object obj) {
@@ -103,6 +100,14 @@ public class IGCEntityGuid extends IGCGuidHeader {
                 Objects.equals(getAssetType(), that.getAssetType()) &&
                 Objects.equals(getGeneratedPrefix(), that.getGeneratedPrefix()) &&
                 Objects.equals(getRid(), that.getRid());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(getMetadataCollectionId(), getAssetType(), getGeneratedPrefix(), getRid());
     }
 
     /**

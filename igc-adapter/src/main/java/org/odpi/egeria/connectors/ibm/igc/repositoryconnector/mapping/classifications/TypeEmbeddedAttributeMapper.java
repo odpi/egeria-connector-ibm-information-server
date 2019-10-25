@@ -76,7 +76,7 @@ public class TypeEmbeddedAttributeMapper extends ClassificationMapping {
             classificationProperties = initialProperties.getInstanceProperties();
         }
 
-        if (classificationProperties != null || !classificationProperties.isEmpty()) {
+        if (classificationProperties != null && !classificationProperties.isEmpty()) {
 
             log.error("Classification properties are immutable in IGC.");
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_EXCEEDS_REPOSITORY;

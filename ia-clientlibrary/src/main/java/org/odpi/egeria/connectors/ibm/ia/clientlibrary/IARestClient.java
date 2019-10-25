@@ -505,11 +505,13 @@ public class IARestClient {
      */
     public Map<String, Date> getPublishedResults(String projectName) {
         Project publishedResults = makeColumnBasedRequest(projectName, null, EP_PUBLISHED_RESULTS, "getPublishedResults");
-        List<Table> results = publishedResults.getPublishedResults();
         Map<String, Date> map = new HashMap<>();
-        if (results != null) {
-            for (Table table : results) {
-                map.put(table.getName(), table.getPublicationDateOfAnalysisResults());
+        if (publishedResults != null) {
+            List<Table> results = publishedResults.getPublishedResults();
+            if (results != null) {
+                for (Table table : results) {
+                    map.put(table.getName(), table.getPublicationDateOfAnalysisResults());
+                }
             }
         }
         return map;
