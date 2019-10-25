@@ -22,11 +22,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGui
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCRelationshipGuid;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.OMRSStub;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping;
-import org.odpi.openmetadata.frameworks.connectors.Connector;
-import org.odpi.openmetadata.frameworks.connectors.VirtualConnectorExtension;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
-import org.odpi.openmetadata.repositoryservices.auditlog.OMRSAuditCode;
-import org.odpi.openmetadata.repositoryservices.connectors.openmetadatatopic.OpenMetadataTopicConnector;
 import org.odpi.openmetadata.repositoryservices.connectors.openmetadatatopic.OpenMetadataTopicListener;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Classification;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.EntityDetail;
@@ -49,10 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * when used as an open metadata repository.
  */
 public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
-        implements VirtualConnectorExtension, OpenMetadataTopicListener {
-
-    private List<Connector> embeddedConnectors = null;
-    private List<OpenMetadataTopicConnector> eventBusConnectors = new ArrayList<>();
+        implements OpenMetadataTopicListener {
 
     private static final Logger log = LoggerFactory.getLogger(IGCOMRSRepositoryEventMapper.class);
     private static final Duration pollDuration = Duration.ofMillis(100);
@@ -146,15 +139,14 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      */
     private class IGCKafkaConsumerThread implements Runnable {
 
-        private Thread worker;
         private final AtomicBoolean running = new AtomicBoolean(false);
 
-        public void start() {
-            worker = new Thread(this);
+        void start() {
+            Thread worker = new Thread(this);
             worker.start();
         }
 
-        public void stop() {
+        void stop() {
             running.set(false);
         }
 
@@ -166,36 +158,24 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
             running.set(true);
             log.info("Starting IGC Event Mapper consumer thread.");
-            final Consumer<Long, String> consumer = new KafkaConsumer<>(igcKafkaProperties);
-            consumer.subscribe(Collections.singletonList(igcKafkaTopic));
-
-            // TODO: Likely need to tweak these settings to give further processing time for large events
-            //  like IMAM shares -- or even switch to manual offset management rather than auto-commits
-            //  (see: https://kafka.apache.org/0110/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html)
-            while (running.get()) {
-                try {
-                    ConsumerRecords<Long, String> events = consumer.poll(pollDuration);
-                    for (ConsumerRecord<Long, String> event : events) {
-                        processEvent(event.value());
+            try (final Consumer<Long, String> consumer = new KafkaConsumer<>(igcKafkaProperties)) {
+                consumer.subscribe(Collections.singletonList(igcKafkaTopic));
+                // TODO: Likely need to tweak these settings to give further processing time for large events
+                //  like IMAM shares -- or even switch to manual offset management rather than auto-commits
+                //  (see: https://kafka.apache.org/0110/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html)
+                while (running.get()) {
+                    try {
+                        ConsumerRecords<Long, String> events = consumer.poll(pollDuration);
+                        for (ConsumerRecord<Long, String> event : events) {
+                            processEvent(event.value());
+                        }
+                    } catch (Exception e) {
+                        log.error("Failed trying to consume IGC events from Kafka.", e);
                     }
-                } catch (Exception e) {
-                    log.error("Failed trying to consume IGC events from Kafka.", e);
                 }
             }
         }
 
-    }
-
-
-    /**
-     * Registers itself as a listener of any OpenMetadataTopicConnectors that are passed as
-     * embedded connectors.
-     *
-     * @param embeddedConnectors  list of connectors
-     */
-    @Override
-    public void initializeEmbeddedConnectors(List<Connector> embeddedConnectors) {
-        this.embeddedConnectors = embeddedConnectors;
     }
 
 
@@ -289,12 +269,12 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         // Start by creating any entities needed by the new RIDs
         for (Map.Entry<String, String> entry : createdRIDs.entrySet()) {
-            processAsset(entry.getKey(), entry.getValue(), null);
+            processAsset(entry.getKey(), entry.getValue());
         }
 
         // Then iterate through any updated entities
         for (Map.Entry<String, String> entry : updatedRIDs.entrySet()) {
-            processAsset(entry.getKey(), entry.getValue(), null);
+            processAsset(entry.getKey(), entry.getValue());
         }
 
         // Then iterate through any deleted entities
@@ -314,10 +294,10 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         switch(action) {
             case InfosphereEventsDCEvent.ACTION_CREATE:
-                processAsset(event.getCreatedRID(), "data_connection", null);
+                processAsset(event.getCreatedRID(), "data_connection");
                 break;
             case InfosphereEventsDCEvent.ACTION_MODIFY:
-                processAsset(event.getMergedRID(), "data_connection", null);
+                processAsset(event.getMergedRID(), "data_connection");
                 break;
             default:
                 if (log.isWarnEnabled()) { log.warn("Found unhandled action type '{}' for data connection on event: {}", action, event); }
@@ -344,7 +324,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 String igcAssetDisplayName = event.getAssetType();
                 if (igcAssetDisplayName != null && !igcAssetDisplayName.equals("OMRS Stub")) {
                     String igcAssetType = igcRepositoryHelper.getIgcAssetTypeForAssetName(igcAssetDisplayName);
-                    processAsset(assetRid, igcAssetType, null);
+                    processAsset(assetRid, igcAssetType);
                 }
                 break;
             case InfosphereEventsAssetEvent.ACTION_ASSIGNED_RELATIONSHIP:
@@ -395,7 +375,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         break;
                 }
                 // First process the containing asset itself
-                processAsset(containerRid, containerAsset.getType(), null);
+                processAsset(containerRid, containerAsset.getType());
                 // We should also check the columns / file fields within the table / file for changes to be processed,
                 // as the relationship itself between column and table may not change but there may be
                 // new classifications on the columns / fields from the publication
@@ -407,7 +387,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     subAssets.getAllPages(igcRestClient);
                     if (log.isDebugEnabled()) { log.debug("Processing {} child assets from IA publication: {}", subAssets.getPaging().getNumTotal(), containerRid); }
                     for (Reference child : subAssets.getItems()) {
-                        processAsset(child.getId(), child.getType(), null);
+                        processAsset(child.getId(), child.getType());
                     }
                 } else {
                     if (log.isWarnEnabled()) { log.warn("Unable to find any sub-assets for IA published container '{}': {}", containerRid, event); }
@@ -548,11 +528,9 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      *
      * @param rid the Repository ID (RID) of the asset in question
      * @param assetType the type of asset (ie. if provided in the event payload)
-     * @param relationshipGUID the relationship GUID that triggered this asset to be processed (or null if not triggered
-     *                         by relationship being processed)
      */
-    private void processAsset(String rid, String assetType, IGCRelationshipGuid relationshipGUID) {
-        processAsset(rid, assetType, relationshipGUID, null);
+    private void processAsset(String rid, String assetType) {
+        processAsset(rid, assetType, null, null);
     }
 
     /**
