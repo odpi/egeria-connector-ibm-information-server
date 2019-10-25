@@ -321,10 +321,7 @@ public class Identity {
     }
 
     /**
-     * Returns true iff this identity is equivalent to the provided identity.
-     *
-     * @param obj the identity to compare against
-     * @return boolean
+     * {@inheritDoc}
      */
     @Override
     public boolean equals(Object obj) {
@@ -332,6 +329,14 @@ public class Identity {
         if (!(obj instanceof Identity)) return false;
         Identity that = (Identity) obj;
         return Objects.equals(toString(), that.toString());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(context, assetName, getAssetType(), getRid());
     }
 
     /**

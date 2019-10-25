@@ -121,10 +121,7 @@ public class IGCRelationshipGuid extends IGCGuidHeader {
     }
 
     /**
-     * Indicates whether the provided object is equivalent to this IGC GUID (true) or not (false).
-     *
-     * @param obj the object to test for equivalency
-     * @return boolean
+     * {@inheritDoc}
      */
     @Override
     public boolean equals(Object obj) {
@@ -139,6 +136,16 @@ public class IGCRelationshipGuid extends IGCGuidHeader {
                 Objects.equals(getRid1(), that.getRid1()) &&
                 Objects.equals(getRid2(), that.getRid2()) &&
                 Objects.equals(getRelationshipType(), that.getRelationshipType());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(getMetadataCollectionId(), getRelationshipType(),
+                getAssetType1(), getGeneratedPrefix1(), getRid1(),
+                getAssetType2(), getGeneratedPrefix2(), getRid2());
     }
 
     /**

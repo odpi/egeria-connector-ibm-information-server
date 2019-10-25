@@ -2,12 +2,10 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Basic utility class to provide a standard mechanism through which to print out all of an asset's
@@ -18,57 +16,19 @@ public abstract class ObjectPrinter {
     private static final Logger log = LoggerFactory.getLogger(ObjectPrinter.class);
 
     /**
-     * Recurse up the class hierarchy to retrieve all fields that might hold data on an object.
-     *
-     * @param clazz starting point for recursive retrieval of Fields
-     * @return ArrayList of all Fields
-     */
-    protected ArrayList<Field> getAllFields(Class clazz) {
-        ArrayList<Field> al;
-        Class superClazz = clazz.getSuperclass();
-        if (superClazz != null) {
-            al = getAllFields(superClazz);
-        } else {
-            al = new ArrayList<>();
-        }
-        al.addAll(Arrays.asList(clazz.getDeclaredFields()));
-        return al;
-    }
-
-    /**
      * Provides a string representation of the object that can be easily read and formatted in JSON-esque fashion.
      *
      * @return String
      */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{ \"" + getClass().getName() + "\"");
-        sb.append(": { ");
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            for (Field f : getAllFields(getClass())) {
-                if (!f.isAccessible()) {
-                    f.setAccessible(true);
-                }
-                sb.append("\"" + f.getName() + "\"");
-                sb.append(": ");
-                Object value = f.get(this);
-                if (value == null) {
-                    sb.append("\"null\"");
-                } else if (Reference.isSimpleType(value)) {
-                    sb.append("\"" + value + "\"");
-                } else {
-                    sb.append(value);
-                }
-                sb.append(", ");
-            }
-            // Get rid of the extra comma left at the end
-            sb.deleteCharAt(sb.length() - 2);
-        } catch (IllegalAccessException e) {
-            log.error("Unable to access all fields.", e);
+            return objectMapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            if (log.isInfoEnabled()) { log.info("Unable to translate to JSON representation.", e); }
+            return super.toString();
         }
-        sb.append("}}");
-        return sb.toString();
     }
 
 }
