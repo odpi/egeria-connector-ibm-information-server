@@ -64,12 +64,12 @@ public class IGCRestModelGenerator {
         System.out.println("  IGCRestModelGenerator hostname port username password directory");
     }
 
-    public static final Set<String> IGNORE_TYPES = createIgnoreTypes();
-    public static final Set<String> IGNORE_PROPERTIES = createIgnoreProperties();
-    public static final Set<String> RESERVED_WORDS = createReservedWords();
-    public static final Set<String> QUALIFY_PROPERTIES = createQualifyProperties();
-    public static final Map<String, String> ALIAS_OBJECTS = createAliasObjects();
-    public static final Map<String, String> BASIC_TYPE_TO_JAVA_TYPE = createBasicTypeToJavaType();
+    private static final Set<String> IGNORE_TYPES = createIgnoreTypes();
+    private static final Set<String> IGNORE_PROPERTIES = createIgnoreProperties();
+    private static final Set<String> RESERVED_WORDS = createReservedWords();
+    private static final Set<String> QUALIFY_PROPERTIES = createQualifyProperties();
+    private static final Map<String, String> ALIAS_OBJECTS = createAliasObjects();
+    private static final Map<String, String> BASIC_TYPE_TO_JAVA_TYPE = createBasicTypeToJavaType();
 
     private static Set<String> createIgnoreTypes() {
         Set<String> set = new HashSet<>();
