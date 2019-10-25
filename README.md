@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 <!-- Copyright Contributors to the ODPi Egeria project. -->
 
-[![GitHub](https://img.shields.io/github/license/odpi/egeria-connector-ibm-information-server)](LICENSE) [![Azure](https://dev.azure.com/odpi/egeria/_apis/build/status/odpi.egeria-connector-ibm-information-server)](https://dev.azure.com/odpi/Egeria/_build)
+[![GitHub](https://img.shields.io/github/license/odpi/egeria-connector-ibm-information-server)](LICENSE) [![Azure](https://dev.azure.com/odpi/egeria/_apis/build/status/odpi.egeria-connector-ibm-information-server)](https://dev.azure.com/odpi/Egeria/_build) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=egeria-connector-ibm-information-server&metric=alert_status)](https://sonarcloud.io/dashboard?id=egeria-connector-ibm-information-server)
 
 # IBM InfoSphere Information Server Connectors
 
