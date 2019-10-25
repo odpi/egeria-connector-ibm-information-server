@@ -47,7 +47,7 @@ public class DSStage {
      *
      * @return {@code List<String>}
      */
-    public static final List<String> getSearchProperties() { return SEARCH_PROPERTIES; }
+    public static List<String> getSearchProperties() { return SEARCH_PROPERTIES; }
 
     /**
      * Check whether the provided stage is an input stage (true) or not (false).
@@ -56,9 +56,9 @@ public class DSStage {
      * @param stage the stage to check
      * @return boolean
      */
-    public static final boolean isInputStage(IGCRestClient igcRestClient, Reference stage) {
+    static boolean isInputStage(IGCRestClient igcRestClient, Reference stage) {
         ReferenceList inputLinks = getLinkDetails(igcRestClient, stage, "input_links");
-        return inputLinks == null ? false : inputLinks.getPaging().getNumTotal() == 0;
+        return inputLinks != null && inputLinks.getPaging().getNumTotal() == 0;
     }
 
     /**
@@ -68,9 +68,9 @@ public class DSStage {
      * @param stage the stage to check
      * @return boolean
      */
-    public static final boolean isOutputStage(IGCRestClient igcRestClient, Reference stage) {
+    static boolean isOutputStage(IGCRestClient igcRestClient, Reference stage) {
         ReferenceList outputLinks = getLinkDetails(igcRestClient, stage, "output_links");
-        return outputLinks == null ? false : outputLinks.getPaging().getNumTotal() == 0;
+        return outputLinks != null && outputLinks.getPaging().getNumTotal() == 0;
     }
 
     /**

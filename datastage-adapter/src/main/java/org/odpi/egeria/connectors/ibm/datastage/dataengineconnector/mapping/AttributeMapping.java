@@ -6,6 +6,8 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DSJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.openmetadata.accessservices.dataengine.model.Attribute;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +15,9 @@ import java.util.List;
 /**
  * Mappings for creating a set of Attributes.
  */
-public class AttributeMapping extends BaseMapping {
+class AttributeMapping extends BaseMapping {
+
+    private static final Logger log = LoggerFactory.getLogger(AttributeMapping.class);
 
     private List<Attribute> attributes;
 
@@ -24,8 +28,9 @@ public class AttributeMapping extends BaseMapping {
      * @param link the link containing stage column detail for the Attributes
      * @param stageNameSuffix the unique suffix (based on the stage name) to ensure each attribute is unique
      */
-    public AttributeMapping(DSJob job, Reference link, String stageNameSuffix) {
+    AttributeMapping(DSJob job, Reference link, String stageNameSuffix) {
         super(job.getIgcRestClient());
+        if (log.isDebugEnabled()) { log.debug("Creating new AttributeMapping from job and link..."); }
         attributes = new ArrayList<>();
         if (link != null) {
             ReferenceList stageColumns = (ReferenceList) igcRestClient.getPropertyByName(link, "stage_columns");
@@ -51,8 +56,9 @@ public class AttributeMapping extends BaseMapping {
      * @param fields the data store fields containing detail for the Attributes
      * @param fullyQualifiedStageName the qualified name of the stage to ensure each attribute is unique
      */
-    public AttributeMapping(DSJob job, List<Reference> fields, String fullyQualifiedStageName) {
+    AttributeMapping(DSJob job, List<Reference> fields, String fullyQualifiedStageName) {
         super(job.getIgcRestClient());
+        if (log.isDebugEnabled()) { log.debug("Creating new AttributeMapping from job and fields..."); }
         attributes = new ArrayList<>();
         if (fields != null && !fields.isEmpty()) {
             for (Reference field : fields) {
@@ -81,7 +87,7 @@ public class AttributeMapping extends BaseMapping {
      * @param job the job for which to create the Attributes
      * @param fields the data store fields containing detail for the Attributes
      */
-    public AttributeMapping(DSJob job, List<Reference> fields) {
+    AttributeMapping(DSJob job, List<Reference> fields) {
         this(job, fields, "");
     }
 
@@ -90,6 +96,6 @@ public class AttributeMapping extends BaseMapping {
      *
      * @return {@code List<Attribute>}
      */
-    public List<Attribute> getAttributes() { return attributes; }
+    List<Attribute> getAttributes() { return attributes; }
 
 }

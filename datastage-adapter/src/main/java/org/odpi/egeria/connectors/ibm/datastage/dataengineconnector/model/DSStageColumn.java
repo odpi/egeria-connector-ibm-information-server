@@ -39,6 +39,6 @@ public class DSStageColumn {
      *
      * @return {@code List<String>}
      */
-    public static final List<String> getSearchProperties() { return SEARCH_PROPERTIES; }
+    public static List<String> getSearchProperties() { return SEARCH_PROPERTIES; }
 
 }

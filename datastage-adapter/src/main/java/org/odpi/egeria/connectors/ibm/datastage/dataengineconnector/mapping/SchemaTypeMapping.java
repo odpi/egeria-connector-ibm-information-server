@@ -28,7 +28,7 @@ public class SchemaTypeMapping extends BaseMapping {
         schemaType = null;
         if (storeIdentity != null) {
             schemaType = new SchemaType();
-            schemaType.setQualifiedName(storeIdentity.getRid());
+            schemaType.setQualifiedName(storeIdentity.toString());
             schemaType.setDisplayName(storeIdentity.getName());
             AttributeMapping attributeMapping = new AttributeMapping(job, fields);
             schemaType.setAttributeList(attributeMapping.getAttributes());
@@ -42,7 +42,7 @@ public class SchemaTypeMapping extends BaseMapping {
      * @param link the link from which to retrieve stage columns for the SchemaType's attributes
      * @param stageNameSuffix the unique suffix (based on the stage name) to ensure each attribute is unique
      */
-    public SchemaTypeMapping(DSJob job, Reference link, String stageNameSuffix) {
+    SchemaTypeMapping(DSJob job, Reference link, String stageNameSuffix) {
         super(job.getIgcRestClient());
         schemaType = null;
         if (link != null) {
@@ -65,7 +65,7 @@ public class SchemaTypeMapping extends BaseMapping {
      * @param fields the fields from the data store to use in creating the SchemaType
      * @param fullyQualifiedStageName the fully-qualified name of the stage
      */
-    public SchemaTypeMapping(DSJob job, Reference stage, String storeName, String storeQualifiedName, List<Reference> fields, String fullyQualifiedStageName) {
+    SchemaTypeMapping(DSJob job, Reference stage, String storeName, String storeQualifiedName, List<Reference> fields, String fullyQualifiedStageName) {
         super(job.getIgcRestClient());
         schemaType = null;
         if (stage != null) {
