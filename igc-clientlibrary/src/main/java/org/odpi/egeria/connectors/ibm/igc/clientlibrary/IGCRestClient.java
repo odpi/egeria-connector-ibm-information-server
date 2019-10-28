@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -136,6 +139,11 @@ public class IGCRestClient {
         this.typeAndPropertyToWriter = new HashMap<>();
         this.typeToIntrospector = new HashMap<>();
         this.restTemplate = new RestTemplate();
+
+        // Ensure that the REST template always uses UTF-8
+        List<HttpMessageConverter<?>> converters = restTemplate.getMessageConverters();
+        converters.removeIf(httpMessageConverter -> httpMessageConverter instanceof StringHttpMessageConverter);
+        converters.add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
 
         if (log.isDebugEnabled()) { log.debug("Constructing IGCRestClient..."); }
 
