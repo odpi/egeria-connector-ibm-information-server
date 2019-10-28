@@ -13,6 +13,8 @@ import org.odpi.egeria.connectors.ibm.ia.clientlibrary.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
@@ -42,6 +44,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -130,6 +133,11 @@ public class IARestClient {
             log.error("Unable to instantiate an XML transformer.", e);
         }
         this.restTemplate = new RestTemplate();
+
+        // Ensure that the REST template always uses UTF-8
+        List<HttpMessageConverter<?>> converters = restTemplate.getMessageConverters();
+        converters.removeIf(httpMessageConverter -> httpMessageConverter instanceof StringHttpMessageConverter);
+        converters.add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
 
         if (log.isDebugEnabled()) { log.debug("Constructing IARestClient..."); }
 
