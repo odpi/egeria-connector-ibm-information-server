@@ -11,6 +11,8 @@ variables:
   - group: SonarCloud
   - name: projectKey
     value: 'egeria-connector-ibm-information-server'
+  - name: projectName
+    value: 'Egeria - Connector IBM Information Server'
 
 stages:
   - stage: Sonar
