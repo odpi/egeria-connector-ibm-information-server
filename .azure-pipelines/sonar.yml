@@ -63,5 +63,6 @@ stages:
                   -Dsonar.login="$(apiKey)"
                   -Dsonar.java.spotbugs.reportPaths="target/spotbugsXml.xml"
                   -Dsonar.java.pmd.reportPaths="target/pmd.xml"
+                  -Dsonar.exclusions='**/generated/*'
           - task: SonarCloudPublish@1
             displayName: 'Publish SonarCloud quality gate results'
