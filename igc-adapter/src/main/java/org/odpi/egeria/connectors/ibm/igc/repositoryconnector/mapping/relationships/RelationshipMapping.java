@@ -311,6 +311,21 @@ public abstract class RelationshipMapping extends InstanceMapping {
     }
 
     /**
+     * Indicates whether to include a relationship for the provided IGC object, in case there are any complex overrides
+     * that need to be applied.
+     *
+     * @param igcomrsRepositoryConnector connection to the IGC environment
+     * @param oneObject the IGC object to consider for inclusion on one end of the relationship
+     * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
+     * @return boolean
+     */
+    public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                    Reference oneObject,
+                                                    Reference otherObject) {
+        return true;
+    }
+
+    /**
      * Retrieve the type of OMRS relationship this mapping handles.
      *
      * @return String
@@ -939,7 +954,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 ProxyMapping pmTwo = mapping.getProxyTwoMapping();
 
                 if (mapping.isSelfReferencing()) {
-                    addSelfReferencingRelationship(igcomrsRepositoryConnector, mapping, relationships, fromIgcObject, userId);
+                    if (mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, fromIgcObject, fromIgcObject)) {
+                        addSelfReferencingRelationship(igcomrsRepositoryConnector, mapping, relationships, fromIgcObject, userId);
+                    }
                 } else if (!optimalStart.equals(RelationshipMapping.OptimalStart.CUSTOM)) {
                     if (fromIgcObject.isFullyRetrieved()
                             || (optimalStart.equals(OptimalStart.ONE) && pmOne.matchesAssetType(fromAssetType) )
@@ -1024,15 +1041,18 @@ public abstract class RelationshipMapping extends InstanceMapping {
             // Handle single instance relationship one way
             if (directRelationships != null && Reference.isReference(directRelationships)) {
 
-                addSingleMappedRelationship(
-                        igcomrsRepositoryConnector,
-                        mapping,
-                        relationships,
-                        fromIgcObject,
-                        (Reference) directRelationships,
-                        igcRelationshipName,
-                        userId
-                );
+                Reference singleRelationship = (Reference) directRelationships;
+                if (mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, fromIgcObject, singleRelationship)) {
+                    addSingleMappedRelationship(
+                            igcomrsRepositoryConnector,
+                            mapping,
+                            relationships,
+                            fromIgcObject,
+                            singleRelationship,
+                            igcRelationshipName,
+                            userId
+                    );
+                }
 
             } else if (directRelationships != null && Reference.isReferenceList(directRelationships)) { // and list of relationships another
 
@@ -1197,15 +1217,17 @@ public abstract class RelationshipMapping extends InstanceMapping {
         // Iterate through all of the existing IGC relationships of that type to create an OMRS relationship
         // for each one
         for (Reference relation : igcRelationships.getItems()) {
-            addSingleMappedRelationship(
-                    igcomrsRepositoryConnector,
-                    mapping,
-                    relationships,
-                    fromIgcObject,
-                    relation,
-                    igcPropertyName,
-                    userId
-            );
+            if (mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, fromIgcObject, relation)) {
+                addSingleMappedRelationship(
+                        igcomrsRepositoryConnector,
+                        mapping,
+                        relationships,
+                        fromIgcObject,
+                        relation,
+                        igcPropertyName,
+                        userId
+                );
+            }
         }
 
     }

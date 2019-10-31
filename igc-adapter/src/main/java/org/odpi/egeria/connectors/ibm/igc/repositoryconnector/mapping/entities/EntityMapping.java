@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.generated.v11502sp5.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
@@ -498,6 +499,19 @@ public abstract class EntityMapping extends InstanceMapping {
                                                  String omrsPropertyName,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
         // Nothing to do -- no complex properties by default
+    }
+
+    /**
+     * Implement this method to define how IGC entities can be searched.
+     *
+     * In most cases, no special conditions are required and therefore this simply returns an empty set of conditions
+     * by default.  However, in cases where an IGC asset type is overloaded (mapped to multiple OMRS types), this
+     * method must be overridden to define how to limit the OMRS results to one type or another.
+     *
+     * @return IGCSearchConditionSet - the IGC search criteria to find entities based on this classification
+     */
+    public IGCSearchConditionSet getIGCSearchCriteria() {
+        return new IGCSearchConditionSet();
     }
 
     /**

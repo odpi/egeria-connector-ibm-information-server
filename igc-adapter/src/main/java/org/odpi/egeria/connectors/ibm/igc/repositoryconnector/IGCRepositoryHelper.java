@@ -304,6 +304,12 @@ public class IGCRepositoryHelper {
              * based on the values of the InstanceProperties provided */
             IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
+            IGCSearchConditionSet typeSpecificConditions = mapping.getIGCSearchCriteria();
+            if (typeSpecificConditions.size() > 0) {
+                igcSearchConditionSet.addNestedConditionSet(typeSpecificConditions);
+                igcSearchConditionSet.setMatchAnyCondition(false);
+            }
+
             String qualifiedNameRegex = null;
             if (matchProperties != null) {
                 Iterator iPropertyNames = matchProperties.getPropertyNames();
