@@ -86,6 +86,24 @@ public class Identity {
     }
 
     /**
+     * Returns the Identity of the ultimate parent (top-level ancestor) that contains the entity
+     * identified by this Identity.
+     * <br><br>
+     * If there is no parent identity (ie. this Identity represents a root-level asset with no
+     * container above it), will return itself.
+     *
+     * @return Identity
+     */
+    public Identity getUltimateParentIdentity() {
+        Identity ultimate = this;
+        if (!context.isEmpty()) {
+            Reference top = context.get(0);
+            ultimate = new Identity(new ArrayList<>(), top.getType(), top.getName(), top.getId());
+        }
+        return ultimate;
+    }
+
+    /**
      * Returns the Repository ID (RID) of this identity (if available), or null.
      *
      * @return String

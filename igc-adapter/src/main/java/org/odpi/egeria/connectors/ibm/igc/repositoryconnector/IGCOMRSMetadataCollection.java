@@ -1247,6 +1247,12 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     igcSearch.addType(mapping.getIgcAssetType());
                     IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
+                    IGCSearchConditionSet typeSpecificConditions = mapping.getIGCSearchCriteria();
+                    if (typeSpecificConditions.size() > 0) {
+                        igcSearchConditionSet.addNestedConditionSet(typeSpecificConditions);
+                        igcSearchConditionSet.setMatchAnyCondition(false);
+                    }
+
                     // Compose the search criteria for the classification as a set of nested conditions, so that
                     // matchCriteria does not change the meaning of what we're searching
                     IGCSearchConditionSet baseCriteria = foundMapping.getIGCSearchCriteria(matchClassificationProperties);
@@ -1413,6 +1419,11 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     } else {
 
                         IGCSearchConditionSet outerConditions = new IGCSearchConditionSet();
+                        IGCSearchConditionSet typeSpecificConditions = mapping.getIGCSearchCriteria();
+                        if (typeSpecificConditions.size() > 0) {
+                            outerConditions.addNestedConditionSet(typeSpecificConditions);
+                            outerConditions.setMatchAnyCondition(false);
+                        }
 
                         // If the searchCriteria is empty, retrieve all entities of the type (no conditions)
                         if (searchCriteria != null && !searchCriteria.equals("")) {
@@ -1732,6 +1743,11 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         String igcTypeName;
         String guid = null;
 
+        // Default the status to ACTIVE if none was provided
+        if (initialStatus == null) {
+            initialStatus = InstanceStatus.ACTIVE;
+        }
+
         // First ensure the TypeDef is mapped and that we support the requested status
         try {
             TypeDef typeDef = getTypeDefByGUID(userId, entityTypeGUID);
@@ -1795,48 +1811,67 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 IGCCreate creationObj = new IGCCreate(igcTypeName);
 
                 // Then ensure that we support all of the properties that we will attempt to set
-                Set<String> mappedOmrsProperties = mapping.getWriteableMappedOmrsProperties();
-                for (Map.Entry<String, InstancePropertyValue> entry : initialProperties.getInstanceProperties().entrySet()) {
-                    String omrsPropertyName = entry.getKey();
-                    InstancePropertyValue value = entry.getValue();
-                    if (!mappedOmrsProperties.contains(omrsPropertyName)) {
-                        IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CREATION_NOT_SUPPORTED;
-                        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                                entityTypeGUID,
-                                igcTypeName,
-                                repositoryName);
-                        throw new PropertyErrorException(errorCode.getHTTPErrorCode(),
-                                this.getClass().getName(),
-                                methodName,
-                                errorMessage,
-                                errorCode.getSystemAction(),
-                                errorCode.getUserAction());
-                    } else {
-                        String igcPropertyName = mapping.getIgcPropertyName(omrsPropertyName);
-                        creationObj.addProperty(igcPropertyName, AttributeMapping.getIgcValueFromPropertyValue(value));
+                if (initialProperties != null) {
+                    Set<String> mappedOmrsProperties = mapping.getWriteableMappedOmrsProperties();
+                    for (Map.Entry<String, InstancePropertyValue> entry : initialProperties.getInstanceProperties().entrySet()) {
+                        String omrsPropertyName = entry.getKey();
+                        InstancePropertyValue value = entry.getValue();
+                        if (!mappedOmrsProperties.contains(omrsPropertyName)) {
+                            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CREATION_NOT_SUPPORTED;
+                            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                                    entityTypeGUID,
+                                    igcTypeName,
+                                    repositoryName);
+                            throw new PropertyErrorException(errorCode.getHTTPErrorCode(),
+                                    this.getClass().getName(),
+                                    methodName,
+                                    errorMessage,
+                                    errorCode.getSystemAction(),
+                                    errorCode.getUserAction());
+                        } else {
+                            String igcPropertyName = mapping.getIgcPropertyName(omrsPropertyName);
+                            creationObj.addProperty(igcPropertyName, AttributeMapping.getIgcValueFromPropertyValue(value));
+                        }
                     }
+                    // TODO: probably also need to cycle through all 'additionalProperties' and attempt to set these
+                    //  against IGC object itself?
                 }
 
                 // Then ensure that we support all of the classifications (and their properties) that we will attempt to set
-                List<ClassificationMapping> classificationMappings = mapping.getClassificationMappers();
-                HashMap<String, ClassificationMapping> omrsNameToMapping = new HashMap<>();
-                for (ClassificationMapping classificationMapping : classificationMappings) {
-                    String omrsClassification = classificationMapping.getOmrsClassificationType();
-                    omrsNameToMapping.put(omrsClassification, classificationMapping);
+                if (initialClassifications != null) {
+                    List<ClassificationMapping> classificationMappings = mapping.getClassificationMappers();
+                    HashMap<String, ClassificationMapping> omrsNameToMapping = new HashMap<>();
+                    for (ClassificationMapping classificationMapping : classificationMappings) {
+                        String omrsClassification = classificationMapping.getOmrsClassificationType();
+                        omrsNameToMapping.put(omrsClassification, classificationMapping);
+                    }
+                    for (Classification classification : initialClassifications) {
+                        String omrsClassification = classification.getName();
+                        if (!omrsNameToMapping.containsKey(omrsClassification)) {
+                            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_NOT_APPLICABLE;
+                            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                                    omrsClassification,
+                                    igcTypeName);
+                            throw new ClassificationErrorException(errorCode.getHTTPErrorCode(),
+                                    this.getClass().getName(),
+                                    methodName,
+                                    errorMessage,
+                                    errorCode.getSystemAction(),
+                                    errorCode.getUserAction());
+                        }
+                    }
                 }
-                for (Classification classification : initialClassifications) {
-                    String omrsClassification = classification.getName();
-                    if (!omrsNameToMapping.containsKey(omrsClassification)) {
-                        IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_NOT_APPLICABLE;
-                        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                                omrsClassification,
-                                igcTypeName);
-                        throw new ClassificationErrorException(errorCode.getHTTPErrorCode(),
-                                this.getClass().getName(),
-                                methodName,
-                                errorMessage,
-                                errorCode.getSystemAction(),
-                                errorCode.getUserAction());
+
+                // If the object being created is a term, we need to set certain mandatory fields (which we can do
+                // using default values provided in the connector configuration)
+                if (igcTypeName.equals("term")) {
+                    // the IGC-specific status is a mandatory field
+                    if (!creationObj.hasProperty("status")) {
+                        creationObj.addProperty("status", igcomrsRepositoryConnector.getDefaultTermStatus());
+                    }
+                    // having a parent_category is mandatory - default to the "default glossary" as a starting point
+                    if (!creationObj.hasProperty("parent_category")) {
+                        creationObj.addProperty("parent_category", igcomrsRepositoryConnector.getDefaultGlossaryRID());
                     }
                 }
 
@@ -1847,26 +1882,28 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     IGCEntityGuid igcGuid = new IGCEntityGuid(metadataCollectionId, igcTypeName, assetRid);
                     guid = igcGuid.asGuid();
                     // Then update the entity with the classifications (which cannot be set during creation)
-                    List<String> classificationNames = new ArrayList<>();
-                    try {
-                        for (Classification classification : initialClassifications) {
-                            classificationNames.add(classification.getName());
-                            TypeDef classificationTypeDef = getTypeDefByGUID(userId, classification.getType().getTypeDefGUID());
-                            igcRepositoryHelper.classifyEntity(userId, guid, classificationTypeDef, classification.getProperties());
+                    if (initialClassifications != null) {
+                        List<String> classificationNames = new ArrayList<>();
+                        try {
+                            for (Classification classification : initialClassifications) {
+                                classificationNames.add(classification.getName());
+                                TypeDef classificationTypeDef = getTypeDefByGUID(userId, classification.getType().getTypeDefGUID());
+                                igcRepositoryHelper.classifyEntity(userId, guid, classificationTypeDef, classification.getProperties());
+                            }
+                        } catch (TypeDefNotKnownException | EntityNotKnownException | RepositoryErrorException e) {
+                            // If there is any failure, cleanup after ourselves by deleting the IGC asset that was created
+                            igcRestClient.delete(assetRid);
+                            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_ERROR_UNKNOWN;
+                            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                                    classificationNames.toString(),
+                                    assetRid);
+                            throw new ClassificationErrorException(errorCode.getHTTPErrorCode(),
+                                    this.getClass().getName(),
+                                    methodName,
+                                    errorMessage,
+                                    errorCode.getSystemAction(),
+                                    errorCode.getUserAction());
                         }
-                    } catch (TypeDefNotKnownException | EntityNotKnownException | RepositoryErrorException e) {
-                        // If there is any failure, cleanup after ourselves by deleting the IGC asset that was created
-                        igcRestClient.delete(assetRid);
-                        IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_ERROR_UNKNOWN;
-                        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                                classificationNames.toString(),
-                                assetRid);
-                        throw new ClassificationErrorException(errorCode.getHTTPErrorCode(),
-                                this.getClass().getName(),
-                                methodName,
-                                errorMessage,
-                                errorCode.getSystemAction(),
-                                errorCode.getUserAction());
                     }
                 }
             }

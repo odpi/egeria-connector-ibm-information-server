@@ -7,6 +7,438 @@
 	},
 	"item": [
 		{
+			"name": "00.1 - Search glossaries (byPropertyValue)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f343804f-3cf9-46bd-bb20-6f189cf0b856",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"2 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(2);",
+							"});",
+							"pm.test(\"Proper Glossary entities\", function() {",
+							"    for (let i = 0; i < 2; i++) {",
+							"        pm.expect(jsonData.entities[i].type.typeDefName).to.equal(\"Glossary\");",
+							"        pm.expect(jsonData.entities[i].version).to.be.above(1);",
+							"        pm.expect(jsonData.entities[i].properties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"gen!GL@(category)=\");",
+							"    }",
+							"});",
+							"",
+							"const cocoPharmaGuid = jsonData.entities[0].guid;",
+							"pm.environment.set('rid_glossary', cocoPharmaGuid);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"36f66863-9726-4b41-97ee-714fd0dc6fe4\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property-value?searchCriteria=.%2A%5CQa%5CE.%2A",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entities",
+						"by-property-value"
+					],
+					"query": [
+						{
+							"key": "searchCriteria",
+							"value": ".%2A%5CQa%5CE.%2A"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "00.1 - Get Glossary (Detail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is Glossary\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"Glossary\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper Glossary entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"Coco Pharmaceuticals\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"gen!GL@(category)=Coco Pharmaceuticals\");",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_glossary}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "00.1 - Get Relationships: Glossary",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"65 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(65);",
+							"});",
+							"pm.test(\"Proper CategoryAnchor relationship\", function() {",
+							"    for (let i = 0; i < 22; i++) {",
+							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"CategoryAnchor\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.equal(\"Glossary\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryCategory\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"gen!GL@(category)=Coco Pharmaceuticals\");",
+							"    }",
+							"});",
+							"pm.test(\"Proper TermAnchor relationship\", function() {",
+							"    for (let i = 22; i < 65; i++) {",
+							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"TermAnchor\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.equal(\"Glossary\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"gen!GL@(category)=Coco Pharmaceuticals\");",
+							"    }",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_glossary}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "00.2 - Search categories (byPropertyValue)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f343804f-3cf9-46bd-bb20-6f189cf0b856",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"2 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(22);",
+							"});",
+							"pm.test(\"Proper GlossaryCategory entities\", function() {",
+							"    for (let i = 0; i < 22; i++) {",
+							"        pm.expect(jsonData.entities[i].type.typeDefName).to.equal(\"GlossaryCategory\");",
+							"        pm.expect(jsonData.entities[i].version).to.be.above(1);",
+							"        pm.expect(jsonData.entities[i].properties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(category)=\");",
+							"        if (jsonData.entities[i].properties.instanceProperties.displayName.primitiveValue === \"Employee\") {",
+							"            const empGuid = jsonData.entities[i].guid;",
+							"            pm.environment.set('rid_employee_category', empGuid);",
+							"        }",
+							"    }",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"e507485b-9b5a-44c9-8a28-6967f7ff3672\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property-value?searchCriteria=.%2A%5CQa%5CE.%2A",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entities",
+						"by-property-value"
+					],
+					"query": [
+						{
+							"key": "searchCriteria",
+							"value": ".%2A%5CQa%5CE.%2A"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "00.2 - Get Category (Detail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"TypeDef is GlossaryCategory\", function () {",
+							"    pm.expect(jsonData.entity.type.typeDefName).to.equal(\"GlossaryCategory\");",
+							"});",
+							"pm.test(\"Version is > 1\", function() {",
+							"    pm.expect(jsonData.entity.version).to.be.above(1);",
+							"});",
+							"pm.test(\"Proper GlossaryCategory entity\", function() {",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"Employee\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Person::(category)=Employee\");",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_employee_category}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "00.2 - Get Relationships: Category",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30418654-3f98-4563-a066-5fbe893737a8",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"11 total relationships\", function () {",
+							"    pm.expect(jsonData.relationships).to.have.lengthOf(12);",
+							"});",
+							"pm.test(\"Proper CategoryAnchor relationship\", function() {",
+							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"CategoryAnchor\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"Glossary\");",
+							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"gen!GL@(category)=Coco Pharmaceuticals\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryCategory\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Person::(category)=Employee\");",
+							"});",
+							"pm.test(\"Proper CategoryHierarchyLink relationship\", function() {",
+							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"CategoryHierarchyLink\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.type.typeDefName).to.equal(\"GlossaryCategory\");",
+							"    pm.expect(jsonData.relationships[1].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Person\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryCategory\");",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationships[1].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Person::(category)=Employee\");",
+							"});",
+							"pm.test(\"Proper TermCategorization relationships\", function() {",
+							"    for (let i = 2; i < 12; i++) {",
+							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"TermCategorization\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.equal(\"GlossaryCategory\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Person::(category)=Employee\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(category)=Coco Pharmaceuticals::\");",
+							"    }",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"entity",
+						":guid",
+						"relationships"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{rid_employee_category}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "01.1 - Search (byPropertyValue)",
 			"event": [
 				{
@@ -218,7 +650,7 @@
 							"pm.test(\"Proper GlossaryTerm entity\", function() {",
 							"    pm.expect(jsonData.entities[0].type.typeDefName).to.equal(\"GlossaryTerm\");",
 							"    pm.expect(jsonData.entities[0].version).to.be.above(1);",
-							"    pm.expect(jsonData.entities[0].properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Address Line 1\");",
+							"    pm.expect(jsonData.entities[0].properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(term)=Address Line 1\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -548,7 +980,7 @@
 							"pm.test(\"Proper GlossaryTerm entity\", function() {",
 							"    pm.expect(jsonData.entity.properties.instanceProperties.summary.primitiveValue).to.equal(\"Street and street number\");",
 							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"Address Line 1\");",
-							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Address Line 1\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(term)=Address Line 1\");",
 							"});",
 							"pm.test(\"Classified as Sensitive\", function() {",
 							"    pm.expect(jsonData.entity.classifications[0].type.typeDefName).to.equal(\"Confidentiality\");",
@@ -667,21 +1099,18 @@
 							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.be.oneOf([\"RelationalColumn\",\"TabularColumn\"]);",
 							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
 							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
-							"        pm.expect(jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Address Line 1\");",
+							"        pm.expect(jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(term)=Address Line 1\");",
 							"    }",
 							"});",
-							"pm.test(\"Proper TermCategorization relationship\", function() {",
-							"    pm.expect(jsonData.relationships[2].type.typeDefName).to.equal(\"TermCategorization\");",
-							"    pm.expect(jsonData.relationships[2].entityOneProxy.type.typeDefName).to.equal(\"GlossaryCategory\");",
+							"pm.test(\"Proper TermAnchor relationship\", function() {",
+							"    pm.expect(jsonData.relationships[2].type.typeDefName).to.equal(\"TermAnchor\");",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.type.typeDefName).to.equal(\"Glossary\");",
 							"    pm.expect(jsonData.relationships[2].entityOneProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[2].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms\");",
+							"    pm.expect(jsonData.relationships[2].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"gen!GL@(category)=Coco Pharmaceuticals\");",
 							"    pm.expect(jsonData.relationships[2].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
 							"    pm.expect(jsonData.relationships[2].entityTwoProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[2].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Address Line 1\");",
+							"    pm.expect(jsonData.relationships[2].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(term)=Address Line 1\");",
 							"});",
-							"",
-							"const categoryGuid = jsonData.relationships[2].entityOneProxy.guid;",
-							"pm.environment.set('rid_category', categoryGuid);",
 							""
 						],
 						"type": "text/javascript"
@@ -723,89 +1152,6 @@
 						{
 							"key": "guid",
 							"value": "{{rid_term_al1}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "04.0 - Get Relationships for Category",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "7b6531c8-2204-4021-ad93-2eb59e7a4a43",
-						"exec": [
-							"const jsonData = pm.response.json();",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.test(\"43 total relationships\", function () {",
-							"    pm.expect(jsonData.relationships).to.have.lengthOf(43);",
-							"});",
-							"pm.test(\"Proper CategoryHierarchyLink relationship\", function() {",
-							"    pm.expect(jsonData.relationships[0].type.typeDefName).to.equal(\"CategoryHierarchyLink\");",
-							"    pm.expect(jsonData.relationships[0].entityOneProxy.type.typeDefName).to.equal(\"GlossaryCategory\");",
-							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals\");",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryCategory\");",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms\");",
-							"});",
-							"pm.test(\"Proper TermCategorization relationships\", function() {",
-							"    var jsonData = pm.response.json();",
-							"    for (let i = 1; i < 43; i++) {",
-							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"TermCategorization\");",
-							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.equal(\"GlossaryCategory\");",
-							"        pm.expect(jsonData.relationships[i].entityOneProxy.version).to.be.above(1);",
-							"        pm.expect(jsonData.relationships[i].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms\");",
-							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
-							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
-							"        pm.expect(jsonData.relationships[i].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=\");",
-							"    }",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"class\": \"TypeLimitedFindRequest\",\n\t\"pageSize\": 100\n}"
-				},
-				"url": {
-					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entity/:guid/relationships",
-					"host": [
-						"{{baseURL}}"
-					],
-					"path": [
-						"servers",
-						"{{server}}",
-						"open-metadata",
-						"repository-services",
-						"users",
-						"{{user}}",
-						"instances",
-						"entity",
-						":guid",
-						"relationships"
-					],
-					"variable": [
-						{
-							"key": "guid",
-							"value": "{{rid_category}}"
 						}
 					]
 				}
@@ -1319,7 +1665,7 @@
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"RelationalDBSchemaType\");",
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
 							"    const rdbstGuid = jsonData.relationships[0].entityTwoProxy.guid;",
-							"    pm.expect(rdbstGuid).to.contain(\"__|RDBST|__\");",
+							"    pm.expect(rdbstGuid).to.contain(\":RDBST!\");",
 							"    pm.environment.set('rid_rdbst', rdbstGuid);",
 							"});",
 							"pm.test(\"Proper DataContentForDataSet relationship\", function() {",
@@ -1454,14 +1800,14 @@
 							"    pm.expect(jsonData.relationships[0].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database)=COMPDIR::(database_schema)=\");",
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"RelationalDBSchemaType\");",
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.guid).to.contain(\"__|RDBST|__\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.guid).to.contain(\":RDBST!\");",
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database)=COMPDIR::(database_schema)=\");",
 							"});",
 							"pm.test(\"Proper AttributeForSchema relationship\", function() {",
 							"    for (let i = 1; i < 4; i++) {",
 							"        pm.expect(jsonData.relationships[i].type.typeDefName).to.equal(\"AttributeForSchema\");",
 							"        pm.expect(jsonData.relationships[i].entityOneProxy.type.typeDefName).to.equal(\"RelationalDBSchemaType\");",
-							"        pm.expect(jsonData.relationships[i].entityOneProxy.guid).to.contain(\"__|RDBST|__\");",
+							"        pm.expect(jsonData.relationships[i].entityOneProxy.guid).to.contain(\":RDBST!\");",
 							"        pm.expect(jsonData.relationships[i].entityOneProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(database)=COMPDIR::(database_schema)=\");",
 							"        pm.expect(jsonData.relationships[i].entityTwoProxy.type.typeDefName).to.equal(\"RelationalTable\");",
 							"        pm.expect(jsonData.relationships[i].entityTwoProxy.version).to.be.above(1);",
@@ -1739,7 +2085,7 @@
 							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Email Address\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(term)=Email Address\");",
 							"});",
 							"pm.test(\"Proper DataClassAssignment detected relationships\", function() {",
 							"    for (let i = 1; i < 4; i++) {",
@@ -2860,7 +3206,7 @@
 							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"GlossaryTerm\");",
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Terms::(term)=Email Address\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(term)=Email Address\");",
 							"});",
 							"pm.test(\"Proper AttributeForSchema relationship\", function() {",
 							"    pm.expect(jsonData.relationships[1].type.typeDefName).to.equal(\"AttributeForSchema\");",
@@ -3002,7 +3348,7 @@
 							"});",
 							"pm.test(\"Proper GlossaryTerm entity\", function() {",
 							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"Employee\");",
-							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Spine Objects::(term)=Employee\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(term)=Employee\");",
 							"});",
 							"pm.test(\"Classified as SpineObject\", function() {",
 							"    pm.expect(jsonData.entity.classifications[0].type.typeDefName).to.equal(\"SpineObject\");",
@@ -3083,7 +3429,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"e507485b-9b5a-44c9-8a28-6967f7ff3672\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ALL\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"displayName\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\QHospital\\\\E.*\"\n\t\t\t}\n\t\t}\n\t}\n}"
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"e507485b-9b5a-44c9-8a28-6967f7ff3672\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ALL\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"displayName\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\QOrganization\\\\E.*\"\n\t\t\t}\n\t\t}\n\t}\n}"
 				},
 				"url": {
 					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property",
@@ -3125,8 +3471,8 @@
 							"    pm.expect(jsonData.entity.version).to.be.above(1);",
 							"});",
 							"pm.test(\"Proper GlossaryCategory entity\", function() {",
-							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"Hospital\");",
-							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Subject Areas::(category)=Organization::(category)=Hospital\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.displayName.primitiveValue).to.equal(\"Organization\");",
+							"    pm.expect(jsonData.entity.properties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(category)=Coco Pharmaceuticals::(category)=Organization\");",
 							"});",
 							"pm.test(\"Classified as SubjectArea\", function() {",
 							"    pm.expect(jsonData.entity.classifications[0].type.typeDefName).to.equal(\"SubjectArea\");",
@@ -3309,9 +3655,9 @@
 							"",
 							"const userGuid = jsonData.entities[0].guid;",
 							"pm.environment.set('rid_user', userGuid);",
-							"const mdColId = userGuid.substring(0, userGuid.indexOf(\"_\"));",
-							"const userRid = userGuid.substring(userGuid.indexOf(\"_\") + 1);",
-							"const cdGuid = mdColId + \"___|CD|__\" + userRid;",
+							"const mdColId = userGuid.substring(userGuid.indexOf(\"@\") + 1, userGuid.indexOf(\":\"));",
+							"const userRid = userGuid.substring(userGuid.indexOf(\":\") + 1);",
+							"const cdGuid = \"user@\" + mdColId + \":CD!\" + userRid;",
 							"pm.environment.set('rid_cd', cdGuid);",
 							""
 						],
@@ -3493,8 +3839,8 @@
 							"    pm.expect(jsonData.relationships[0].entityOneProxy.version).to.be.above(1);",
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.type.typeDefName).to.equal(\"ContactDetails\");",
 							"    pm.expect(jsonData.relationships[0].entityTwoProxy.version).to.be.above(1);",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.guid).to.contain(\"__|CD|__\");",
-							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"__|CD|__(steward_user)=Mr. Gary Geeke\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.guid).to.contain(\":CD!\");",
+							"    pm.expect(jsonData.relationships[0].entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"gen!CD@(steward_user)=Mr. Gary Geeke\");",
 							"});"
 						],
 						"type": "text/javascript"

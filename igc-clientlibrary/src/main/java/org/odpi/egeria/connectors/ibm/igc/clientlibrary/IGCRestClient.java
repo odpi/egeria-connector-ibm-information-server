@@ -548,7 +548,7 @@ public class IGCRestClient {
             List<String> instanceURLs = headers.get("Location");
             if (instanceURLs != null && instanceURLs.size() == 1) {
                 String instanceURL = instanceURLs.get(0);
-                rid = instanceURL.substring(instanceURL.lastIndexOf("/"));
+                rid = instanceURL.substring(instanceURL.lastIndexOf("/") + 1);
             }
         }
         return rid;

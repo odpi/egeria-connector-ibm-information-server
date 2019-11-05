@@ -4,6 +4,11 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.OMRSStub;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
 import org.odpi.openmetadata.frameworks.connectors.properties.EndpointProperties;
@@ -26,6 +31,9 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
     private IGCVersionEnum igcVersion;
 
     private List<String> defaultZones;
+    private String defaultGlossaryName;
+    private String defaultTermStatus;
+    private String defaultGlossaryRID;
 
     private boolean successfulInit;
 
@@ -69,12 +77,24 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
         String igcUser = connectionProperties.getUserId();
         String igcPass = connectionProperties.getClearPassword();
 
+        // Setup meaningful defaults if nothing was provided (these will be overwritten below if they are provided)
+        this.defaultGlossaryName = "Default Glossary";
+        this.defaultTermStatus = "CANDIDATE";
+
         // Retrieve connection details
         Map<String, Object> proxyProperties = this.connectionBean.getConfigurationProperties();
         if (proxyProperties != null) {
-            Object zones = proxyProperties.get("defaultZones");
+            Object zones = proxyProperties.get(IGCOMRSRepositoryConnectorProvider.DEFAULT_ZONES);
             if (zones != null) {
                 this.defaultZones = (List<String>) zones;
+            }
+            Object defaultGlossaryName = proxyProperties.get(IGCOMRSRepositoryConnectorProvider.DEFAULT_GLOSSARY_NAME);
+            if (defaultGlossaryName != null && !defaultGlossaryName.equals("")) {
+                this.defaultGlossaryName = (String) defaultGlossaryName;
+            }
+            Object defaultTermStatus = proxyProperties.get(IGCOMRSRepositoryConnectorProvider.DEFAULT_TERM_STATUS);
+            if (defaultTermStatus != null && !defaultTermStatus.equals("")) {
+                this.defaultTermStatus = (String) defaultTermStatus;
             }
         }
 
@@ -188,6 +208,44 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      * @return {@code List<String>}
      */
     public List<String> getDefaultZones() { return this.defaultZones; }
+
+    /**
+     * Retrieve the default IGC status to use when creating a new IGC term.
+     *
+     * @return String
+     */
+    public String getDefaultTermStatus() { return this.defaultTermStatus; }
+
+    /**
+     * Retrieve the IGC Repository ID (RID) of the default glossary.  Note: this method will also create the default
+     * glossary if it does not yet already exist.
+     *
+     * @return String - the RID of the default glossary
+     */
+    public String getDefaultGlossaryRID() {
+        if (defaultGlossaryRID == null) {
+            // Search for the default glossary
+            IGCSearchCondition byName = new IGCSearchCondition("name", "=", defaultGlossaryName);
+            IGCSearchCondition noParent = new IGCSearchCondition("parent_category", "isNull", false);
+            IGCSearchConditionSet conditions = new IGCSearchConditionSet(byName);
+            conditions.addCondition(noParent);
+            IGCSearch igcSearch = new IGCSearch("category", conditions);
+            ReferenceList results = igcRestClient.search(igcSearch);
+            if (results == null || results.getItems().isEmpty()) {
+                // If the default glossary was not found, create it
+                IGCCreate igcCreate = new IGCCreate("category");
+                igcCreate.addProperty("name", defaultGlossaryName);
+                defaultGlossaryRID = igcRestClient.create(igcCreate);
+            } else {
+                // Otherwise set the RID to the default glossary that was found
+                if (results.getItems().size() > 1 && log.isWarnEnabled()) {
+                    log.warn("Found multiple entries for default glossary named '{}', returning only the first.", defaultGlossaryName);
+                }
+                defaultGlossaryRID = results.getItems().get(0).getId();
+            }
+        }
+        return defaultGlossaryRID;
+    }
 
     /**
      * Generates a zip file for the OMRS OpenIGC bundle, needed to enable change tracking for the event mapper.

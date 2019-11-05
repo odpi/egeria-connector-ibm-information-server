@@ -3,14 +3,10 @@
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.update;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,6 +33,14 @@ public class IGCCreate {
     public void addProperty(String propertyName, String value) {
         properties.put(propertyName, value);
     }
+
+    /**
+     * Indicates whether the provided property has already been specified for the create (true) or not (false).
+     *
+     * @param propertyName the name of the property to check
+     * @return boolean
+     */
+    public boolean hasProperty(String propertyName) { return properties.containsKey(propertyName); }
 
     /**
      * Retrieves the create string for this create object.

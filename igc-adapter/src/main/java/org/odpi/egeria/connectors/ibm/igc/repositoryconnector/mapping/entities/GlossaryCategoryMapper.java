@@ -3,6 +3,9 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.CategoryAnchorMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.TermCategorizationMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.SubjectAreaMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.CategoryHierarchyLinkMapper;
@@ -33,12 +36,28 @@ public class GlossaryCategoryMapper extends ReferenceableMapper {
         addSimplePropertyMapping("short_description", "description");
 
         // The classes to use for mapping any relationships
+        addRelationshipMapper(CategoryAnchorMapper.getInstance(null));
         addRelationshipMapper(CategoryHierarchyLinkMapper.getInstance(null));
         addRelationshipMapper(TermCategorizationMapper.getInstance(null));
 
         // The classes to use for mapping any classifications
         addClassificationMapper(SubjectAreaMapper.getInstance(null));
 
+    }
+
+    /**
+     * Search for GlossaryCategories by looking for a category with a parent category.
+     *
+     * @return IGCSearchConditionSet - the IGC search criteria to find GlossaryCategory entities
+     */
+    @Override
+    public IGCSearchConditionSet getIGCSearchCriteria() {
+        IGCSearchCondition notRootLevel = new IGCSearchCondition("parent_category", "isNull", true);
+        IGCSearchCondition notClassification = new IGCSearchCondition("category_path.name", "=", "Classifications", true);
+        IGCSearchConditionSet conditions = new IGCSearchConditionSet(notRootLevel);
+        conditions.addCondition(notClassification);
+        conditions.setMatchAnyCondition(false);
+        return conditions;
     }
 
 }

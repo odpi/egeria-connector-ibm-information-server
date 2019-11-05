@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classific
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
@@ -61,6 +62,26 @@ public abstract class ClassificationMapping extends InstanceMapping {
         this.subtypes = new ArrayList<>();
         addSupportedStatus(InstanceStatus.ACTIVE);
         addSupportedStatus(InstanceStatus.DELETED);
+    }
+
+    /**
+     * Utility method to check if the provided IGC object should be treated as being a reserved Classification (true)
+     * or not (false).
+     *
+     * @param igcRestClient connectivity to the IGC environment
+     * @param igcObject the IGC object to check
+     * @return boolean
+     */
+    public static boolean isClassification(IGCRestClient igcRestClient, Reference igcObject) {
+        String assetType = IGCRestConstants.getAssetTypeForSearch(igcObject.getType());
+        if (assetType.equals("category") || assetType.equals("term")) {
+            Identity identity = igcObject.getIdentity(igcRestClient);
+            Identity rootIdentity = identity.getUltimateParentIdentity();
+            if (rootIdentity != null) {
+                return rootIdentity.getName().equals("Classifications");
+            }
+        }
+        return false;
     }
 
     /**

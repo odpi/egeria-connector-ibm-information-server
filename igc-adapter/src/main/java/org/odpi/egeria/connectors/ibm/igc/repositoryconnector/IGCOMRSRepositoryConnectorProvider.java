@@ -24,7 +24,9 @@ public class IGCOMRSRepositoryConnectorProvider extends OMRSRepositoryConnectorP
     static final String  connectorTypeName = "OMRS IGC Repository Connector";
     static final String  connectorTypeDescription = "OMRS IGC Repository Connector that processes events from the IBM InfoSphere Information Governance Catalog repository store.";
 
-    protected static final String defaultZones = "defaultZones";
+    public static final String DEFAULT_ZONES = "defaultZones";
+    public static final String DEFAULT_GLOSSARY_NAME = "defaultGlossaryName";
+    public static final String DEFAULT_TERM_STATUS = "defaultTermStatus";
 
     /**
      * Constructor used to initialize the ConnectorProviderBase with the Java class name of the specific
@@ -44,7 +46,9 @@ public class IGCOMRSRepositoryConnectorProvider extends OMRSRepositoryConnectorP
         connectorType.setConnectorProviderClassName(this.getClass().getName());
 
         List<String> recognizedConfigurationProperties = new ArrayList<>();
-        recognizedConfigurationProperties.add(defaultZones);
+        recognizedConfigurationProperties.add(DEFAULT_ZONES);
+        recognizedConfigurationProperties.add(DEFAULT_GLOSSARY_NAME);
+        recognizedConfigurationProperties.add(DEFAULT_TERM_STATUS);
         connectorType.setRecognizedConfigurationProperties(recognizedConfigurationProperties);
 
         super.connectorTypeBean = connectorType;

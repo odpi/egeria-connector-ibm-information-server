@@ -11,10 +11,8 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
-import org.odpi.openmetadata.repositoryservices.ffdc.exception.EntityNotKnownException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +37,8 @@ public class SubjectAreaMapper extends ClassificationMapping {
     private SubjectAreaMapper() {
         super(
                 "category",
-                "category_path",
-                "GlossaryCategory",
+                "assigned_to_terms",
+                "Referenceable",
                 "SubjectArea"
         );
         addMappedOmrsProperty("name");
@@ -66,20 +64,20 @@ public class SubjectAreaMapper extends ClassificationMapping {
 
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
-        // Retrieve all ancestral category relationships from this IGC object
-        ReferenceList categoryPath = (ReferenceList) igcRestClient.getPropertyByName(fromIgcObject, "category_path");
+        // Retrieve all terms this category is assigned to
+        ReferenceList assignedToTerms = (ReferenceList) igcRestClient.getPropertyByName(fromIgcObject, "assigned_to_terms");
 
-        // Only need to continue if there are any parent categories in the path
-        if (categoryPath != null) {
-            categoryPath.getAllPages(igcRestClient);
+        // Only need to continue if there are any terms
+        if (assignedToTerms != null) {
+            assignedToTerms.getAllPages(igcRestClient);
+            if (log.isDebugEnabled()) { log.debug("Looking for SubjectArea mapping within {} candidate terms.", assignedToTerms.getItems().size()); }
 
             boolean isSubjectArea = false;
 
             // For each such relationship:
-            for (Reference category : categoryPath.getItems()) {
-                String categoryName = category.getName();
+            for (Reference termCandidate : assignedToTerms.getItems()) {
                 // As soon as we find one that starts with Subject Area we can short-circuit out
-                if (categoryName != null && categoryName.startsWith("Subject Area")) {
+                if (termCandidate.getName().equals(getOmrsClassificationType())) {
                     isSubjectArea = true;
                     break;
                 }
@@ -87,6 +85,7 @@ public class SubjectAreaMapper extends ClassificationMapping {
 
             if (isSubjectArea) {
 
+                if (log.isDebugEnabled()) { log.debug(" ... found SubjectArea classification."); }
                 InstanceProperties classificationProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(
                         igcomrsRepositoryConnector.getRepositoryName(),
                         null,
@@ -123,18 +122,11 @@ public class SubjectAreaMapper extends ClassificationMapping {
         IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
         IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
-                "parent_category.parent_category.name",
+                "assigned_to_terms.name",
                 "=",
-                "Subject Area"
+                getOmrsClassificationType()
         );
-        IGCSearchConditionSet subjectAreaAncestor = new IGCSearchConditionSet(igcSearchCondition);
-        IGCSearchCondition igcSearchCondition2 = new IGCSearchCondition(
-                "parent_category.parent_category.parent_category.name",
-                "=",
-                "Subject Area"
-        );
-        subjectAreaAncestor.addCondition(igcSearchCondition2);
-        subjectAreaAncestor.setMatchAnyCondition(true);
+        IGCSearchConditionSet subjectArea = new IGCSearchConditionSet(igcSearchCondition);
 
         IGCSearchConditionSet byName = new IGCSearchConditionSet();
         // We can only search by name, so we will ignore all other properties
@@ -159,12 +151,12 @@ public class SubjectAreaMapper extends ClassificationMapping {
             }
         }
         if (byName.size() > 0) {
-            igcSearchConditionSet.addNestedConditionSet(subjectAreaAncestor);
+            igcSearchConditionSet.addNestedConditionSet(subjectArea);
             igcSearchConditionSet.addNestedConditionSet(byName);
             igcSearchConditionSet.setMatchAnyCondition(false);
             return igcSearchConditionSet;
         } else {
-            return subjectAreaAncestor;
+            return subjectArea;
         }
 
     }
@@ -185,6 +177,12 @@ public class SubjectAreaMapper extends ClassificationMapping {
         if (initialProperties != null) {
             classificationProperties = initialProperties.getInstanceProperties();
         }
+
+        // TODO: don't think this is actually implementing what we want...
+        //  - should add SubjectArea term assignment to category that already exists (when name matches category name)
+        //  - should just add SubjectArea term assignment to category when no name is provided
+        //  - should create a new category with subject area name, assign that to SubjectArea term, and put this
+        //    category underneath it when the names do not match (?)  or throw an error?
 
         if (classificationProperties == null || classificationProperties.isEmpty()) {
 
@@ -220,19 +218,11 @@ public class SubjectAreaMapper extends ClassificationMapping {
             );
             IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(findCategory);
             IGCSearchCondition inSubjectArea = new IGCSearchCondition(
-                    "parent_category.name",
+                    "assigned_to_terms.name",
                     "=",
-                    "Subject Areas"
+                    getOmrsClassificationType()
             );
-            IGCSearchCondition inSubjectArea2 = new IGCSearchCondition(
-                    "parent_category.parent_category.name",
-                    "=",
-                    "Subject Areas"
-            );
-            IGCSearchConditionSet inSubjectAreas = new IGCSearchConditionSet(inSubjectArea);
-            inSubjectAreas.addCondition(inSubjectArea2);
-            inSubjectAreas.setMatchAnyCondition(true);
-            igcSearchConditionSet.addNestedConditionSet(inSubjectAreas);
+            igcSearchConditionSet.addCondition(inSubjectArea);
             igcSearchConditionSet.setMatchAnyCondition(false);
 
             IGCSearch igcSearch = new IGCSearch("category", igcSearchConditionSet);
@@ -257,8 +247,7 @@ public class SubjectAreaMapper extends ClassificationMapping {
             }
             String subjectAreaCatRid = results.getItems().get(0).getId();
             IGCUpdate igcUpdate = new IGCUpdate(igcEntity.getId());
-            igcUpdate.addRelationship("referencing_categories", subjectAreaCatRid);
-            igcUpdate.setRelationshipUpdateMode(IGCUpdate.UpdateMode.APPEND);
+            igcUpdate.addExclusiveRelationship("parent_category", subjectAreaCatRid);
             if (!igcRestClient.update(igcUpdate)) {
                 if (log.isErrorEnabled()) { log.error("Unable to update entity {} to add classification {}.", entityGUID, getOmrsClassificationType()); }
             }

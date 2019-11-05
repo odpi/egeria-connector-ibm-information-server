@@ -2,14 +2,22 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.TermAssignmentStatusMapper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Singleton to map the OMRS "SemanticAssignment" relationship for IGC "term" assets.
  */
 public class SemanticAssignmentMapper extends RelationshipMapping {
+
+    private static final Logger log = LoggerFactory.getLogger(SemanticAssignmentMapper.class);
 
     private static class Singleton {
         private static final SemanticAssignmentMapper INSTANCE = new SemanticAssignmentMapper();
@@ -49,6 +57,29 @@ public class SemanticAssignmentMapper extends RelationshipMapping {
         addLiteralPropertyMapping("steward", null);
         addLiteralPropertyMapping("source", null);
 
+    }
+
+    /**
+     * If the object is a term under the Classifications category, do not include it as a relationship. In all other
+     * scenarios, include a relationship for it.
+     *
+     * @param igcomrsRepositoryConnector connection to the IGC environment
+     * @param oneObject the IGC object to consider for inclusion on one end of the relationship
+     * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
+     * @return boolean
+     */
+    @Override
+    public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                    Reference oneObject,
+                                                    Reference otherObject) {
+        if (log.isDebugEnabled()) { log.debug("Considering inclusion of objects:\n... {}\n... {}", oneObject, otherObject); }
+        IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
+        boolean isClassification = ClassificationMapping.isClassification(igcRestClient, oneObject)
+                || ClassificationMapping.isClassification(igcRestClient, otherObject);
+        if (isClassification) {
+            if (log.isDebugEnabled()) { log.debug(" ... skipping, reserved Classification object."); }
+        }
+        return !isClassification;
     }
 
 }

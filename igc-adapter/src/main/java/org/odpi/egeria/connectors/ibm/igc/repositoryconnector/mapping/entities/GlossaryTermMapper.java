@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.SpineAttributeMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.*;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ConfidentialityMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.SpineObjectMapper;
@@ -37,6 +38,7 @@ public class GlossaryTermMapper extends ReferenceableMapper {
         addSimplePropertyMapping("usage", "usage");
 
         // The classes to use for mapping any relationships
+        addRelationshipMapper(TermAnchorMapper.getInstance(null));
         addRelationshipMapper(TermCategorizationMapper.getInstance(null));
         addRelationshipMapper(SynonymMapper.getInstance(null));
         addRelationshipMapper(RelatedTermMapper.getInstance(null));
@@ -48,6 +50,7 @@ public class GlossaryTermMapper extends ReferenceableMapper {
         // The classes to use for mapping any classifications
         addClassificationMapper(ConfidentialityMapper.getInstance(null));
         addClassificationMapper(SpineObjectMapper.getInstance(null));
+        addClassificationMapper(SpineAttributeMapper.getInstance(null));
 
     }
 
