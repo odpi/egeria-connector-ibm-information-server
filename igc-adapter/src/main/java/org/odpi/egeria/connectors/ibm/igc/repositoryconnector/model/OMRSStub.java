@@ -2,18 +2,22 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.MainObject;
+import com.fasterxml.jackson.annotation.*;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.MainObject;
 
-import java.util.Arrays;
-import java.util.List;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 
+/**
+ * POJO for a simple object in IGC to track previous versions of each instance of an entity, primarily for use in
+ * detecting changes to an object to determine which events to send.
+ */
+@JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("$OMRS-Stub")
 public class OMRSStub extends MainObject {
     
-    public static String getIgcTypeDisplayName() { return "OMRS Stub"; }
-
     /**
      * The 'sourceType' property, displayed as 'IGC Type' in the IGC UI.
      * <br><br>
@@ -37,30 +41,58 @@ public class OMRSStub extends MainObject {
 
     // TODO: add notes object reference
 
-    /** @see #$sourceType */ @JsonProperty("$sourceType") public String getSourceType() { return this.$sourceType; }
-    /** @see #$sourceType */ @JsonProperty("$sourceType") public void setSourceType(String sourceType) { this.$sourceType = sourceType; }
+    /**
+     * Retrieve the type of asset for which this stub represents a shadow copy.
+     *
+     * @return String
+     * @see #$sourceType
+     */
+    @JsonProperty("$sourceType")
+    public String getSourceType() { return this.$sourceType; }
 
-    /** @see #$sourceRID */ @JsonProperty("$sourceRID") public String getSourceRID() { return this.$sourceRID; }
-    /** @see #$sourceRID */ @JsonProperty("$sourceRID") public void setSourceRID(String sourceRID) { this.$sourceRID = sourceRID; }
+    /**
+     * Set the type of asset for which this stub represents a shadow copy.
+     *
+     * @param sourceType of asset for which this stub represents a shadow copy
+     * @see #$sourceType
+     */
+    @JsonProperty("$sourceType")
+    public void setSourceType(String sourceType) { this.$sourceType = sourceType; }
 
-    /** @see #$payload */ @JsonProperty("$payload") public String getPayload() { return this.$payload; }
-    /** @see #$payload */ @JsonProperty("$payload") public void setPayload(String payload) { this.$payload = payload; }
+    /**
+     * Retrieve the Repository ID (RID) of the asset for which this stub represents a shadow copy.
+     *
+     * @return String
+     * @see #$sourceRID
+     */
+    @JsonProperty("$sourceRID")
+    public String getSourceRID() { return this.$sourceRID; }
 
-    public static Boolean canBeCreated() { return true; }
-    public static Boolean includesModificationDetails() { return true; }
-    private static final List<String> NON_RELATIONAL_PROPERTIES = Arrays.asList(
-            "name",
-            "short_description",
-            "long_description",
-            "created_by",
-            "created_on",
-            "modified_by",
-            "modified_on",
-            "$sourceType",
-            "$sourceRID",
-            "$payload"
-    );
-    public static List<String> getNonRelationshipProperties() { return NON_RELATIONAL_PROPERTIES; }
-    public static Boolean isOMRSStub(Object obj) { return (obj.getClass() == OMRSStub.class); }
+    /**
+     * Set the Repository ID (RID) of the asset for which this stub represents a shadow copy.
+     *
+     * @param sourceRID of the asset for which this stub represents a shadow copy
+     * @see #$sourceRID
+     */
+    @JsonProperty("$sourceRID")
+    public void setSourceRID(String sourceRID) { this.$sourceRID = sourceRID; }
+
+    /**
+     * Retrieve the JSON payload of the last version of the asset for which this stub represents a shadow copy.
+     *
+     * @return String
+     * @see #$payload
+     */
+    @JsonProperty("$payload")
+    public String getPayload() { return this.$payload; }
+
+    /**
+     * Set the JSON payload of the last version of the asset for which this stub represents a shadow copy.
+     *
+     * @param payload of the last version of the asset for which this stub represents a shadow copy
+     * @see #$payload
+     */
+    @JsonProperty("$payload")
+    public void setPayload(String payload) { this.$payload = payload; }
 
 }

@@ -3,18 +3,15 @@
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common;
 
 import com.fasterxml.jackson.annotation.*;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.MainObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 
 /**
  * The ultimate parent object for all IGC assets, it contains only the most basic information common to every single
@@ -31,34 +28,27 @@ import java.util.List;
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="_type", visible=true, defaultImpl=Reference.class)
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = MainObject.class, name = "main_object")
+        @JsonSubTypes.Type(value = MainObject.class, name = "main_object"),
 })
+@JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class Reference extends ObjectPrinter {
 
-    public Reference() {}
-
-    public Reference(String name, String type) {
-        this(name, type, null);
-    }
-
-    public Reference(String name, String type, String id) {
-        this._name = name;
-        this._type = type;
-        this._id = id;
-    }
-
-    @JsonIgnore private static final Logger log = LoggerFactory.getLogger(Reference.class);
+    @JsonIgnore
+    private static final Logger log = LoggerFactory.getLogger(Reference.class);
 
     /**
      * Used to uniquely identify the object without relying on its ID (RID) remaining static.
      */
-    @JsonIgnore private Identity identity = null;
+    @JsonIgnore
+    private Identity identity = null;
 
     /**
      * Used to indicate whether this asset has been fully retrieved already (true) or not (false).
      */
-    @JsonIgnore private boolean fullyRetrieved = false;
+    @JsonIgnore
+    private boolean fullyRetrieved = false;
 
     /**
      * Provides the context to the unique identity of this asset. Note that while this will exist on
@@ -93,30 +83,137 @@ public class Reference extends ObjectPrinter {
      */
     protected String _url;
 
-    /** @see #_context */ @JsonProperty("_context") public List<Reference> getContext() { return _context; }
-    /** @see #_context */ @JsonProperty("_context") public void setContext(List<Reference> _context) { this._context = _context; }
+    /**
+     * Default constructor
+     */
+    public Reference() {}
 
-    /** @see #_name */ @JsonProperty("_name") public String getName() { return _name; }
-    /** @see #_name */ @JsonProperty("_name") public void setName(String _name) { this._name = _name; }
+    /**
+     * Construct a simple stub representing an object instance in IGC.
+     *
+     * @param name name of the object instance
+     * @param type type of the object instance
+     */
+    public Reference(String name, String type) {
+        this(name, type, null);
+    }
 
-    /** @see #_type */ @JsonProperty("_type") public String getType() { return _type; }
-    /** @see #_type */ @JsonProperty("_type") public void setType(String _type) { this._type = _type; }
+    /**
+     * Construct a simple stub representing an object instance in IGC.
+     *
+     * @param name name of the object instance
+     * @param type type of the object instance
+     * @param id repository ID (RID) of the object instance
+     */
+    public Reference(String name, String type, String id) {
+        this._name = name;
+        this._type = type;
+        this._id = id;
+    }
 
-    /** @see #_id */ @JsonProperty("_id") public String getId() { return _id; }
-    /** @see #_id */ @JsonProperty("_id") public void setId(String _id) { this._id = _id; }
+    /**
+     * Retrieve the context of the IGC object instance.
+     *
+     * @return {@code List<Reference>}
+     * @see #_context
+     */
+    @JsonProperty("_context")
+    public List<Reference> getContext() { return _context; }
 
-    /** @see #_url */ @JsonProperty("_url") public String getUrl() { return _url; }
-    /** @see #_url */ @JsonProperty("_url") public void setUrl(String _url) { this._url = _url; }
+    /**
+     * Set the context of the IGC object instance.
+     *
+     * @param _context of the IGC object instance
+     * @see #_context
+     */
+    @JsonProperty("_context")
+    public void setContext(List<Reference> _context) { this._context = _context; }
 
-    @JsonIgnore public boolean isFullyRetrieved() { return fullyRetrieved; }
-    @JsonIgnore public void setFullyRetrieved() { fullyRetrieved = true; }
+    /**
+     * Retrieve the name of the IGC object instance.
+     *
+     * @return String
+     * @see #_name
+     */
+    @JsonProperty("_name")
+    public String getName() { return _name; }
 
-    @JsonIgnore private static final List<String> NON_RELATIONAL_PROPERTIES = Arrays.asList(
-            "name"
-    );
-    @JsonIgnore public static List<String> getNonRelationshipProperties() { return NON_RELATIONAL_PROPERTIES; }
+    /**
+     * Set the name of the IGC object instance.
+     *
+     * @param _name of the IGC object instance
+     * @see #_name
+     */
+    @JsonProperty("_name")
+    public void setName(String _name) { this._name = _name; }
 
-    @JsonIgnore public static Boolean includesModificationDetails() { return false; }
+    /**
+     * Retrieve the type of the IGC object instance.
+     *
+     * @return String
+     * @see #_type
+     */
+    @JsonProperty("_type")
+    public String getType() { return _type; }
+
+    /**
+     * Set the type of the IGC object instance.
+     *
+     * @param _type of the IGC object instance
+     * @see #_type
+     */
+    @JsonProperty("_type")
+    public void setType(String _type) { this._type = _type; }
+
+    /**
+     * Retrieve the Repository ID (RID) of the object instance.
+     *
+     * @return String
+     * @see #_id
+     */
+    @JsonProperty("_id")
+    public String getId() { return _id; }
+
+    /**
+     * Set the Repository ID (RID) of the object instance.
+     *
+     * @param _id of the IGC object instance
+     * @see #_id
+     */
+    @JsonProperty("_id")
+    public void setId(String _id) { this._id = _id; }
+
+    /**
+     * Retrieve the IGC REST API URL to the object instance's details.
+     *
+     * @return String
+     * @see #_url
+     */
+    @JsonProperty("_url")
+    public String getUrl() { return _url; }
+
+    /**
+     * Set the IGC REST API URL of the object instance's details.
+     *
+     * @param _url of the IGC object instance
+     * @see #_url
+     */
+    @JsonProperty("_url")
+    public void setUrl(String _url) { this._url = _url; }
+
+    /**
+     * Determine whether this object instance is fully retrieved (true) or only partially (false).
+     *
+     * @return boolean
+     */
+    @JsonIgnore
+    public boolean isFullyRetrieved() { return fullyRetrieved; }
+
+    /**
+     * Mark this object instance as fully-retrieved from IGC.
+     */
+    @JsonIgnore
+    public void setFullyRetrieved() { fullyRetrieved = true; }
 
     /**
      * Returns true iff the provided object is a relationship (ie. of class Reference or one of its offspring).
@@ -124,7 +221,7 @@ public class Reference extends ObjectPrinter {
      * @param obj the object to check
      * @return Boolean
      */
-    public static final Boolean isReference(Object obj) {
+    public static boolean isReference(Object obj) {
         Class clazz = obj.getClass();
         while (clazz != null && clazz != Reference.class) {
             clazz = clazz.getSuperclass();
@@ -138,7 +235,7 @@ public class Reference extends ObjectPrinter {
      * @param obj the object to check
      * @return Boolean
      */
-    public static final Boolean isReferenceList(Object obj) {
+    public static boolean isReferenceList(Object obj) {
         return (obj.getClass() == ReferenceList.class);
     }
 
@@ -148,97 +245,8 @@ public class Reference extends ObjectPrinter {
      * @param obj the object to check
      * @return Boolean
      */
-    public static final Boolean isSimpleType(Object obj) {
+    public static boolean isSimpleType(Object obj) {
         return (!Reference.isReference(obj) && !Reference.isReferenceList(obj));
-    }
-
-    /**
-     * Ensures that the modification details of the asset are populated (takes no action if already populated or
-     * the asset does not support them).
-     *
-     * @param igcrest a REST API connection to use in populating the modification details
-     * @return boolean indicating whether details were successfully / already populated (true) or not (false)
-     */
-    public boolean populateModificationDetails(IGCRestClient igcrest) {
-
-        boolean success = true;
-        // Only bother retrieving the details if the object supports them and they aren't already present
-
-        boolean bHasModificationDetails = igcrest.hasModificationDetails(getType());
-        String createdBy = (String) igcrest.getPropertyByName(this, IGCRestConstants.MOD_CREATED_BY);
-
-        if (bHasModificationDetails && createdBy == null) {
-
-            if (log.isDebugEnabled()) { log.debug("Populating modification details that were missing..."); }
-
-            IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", getId());
-            IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
-            IGCSearch igcSearch = new IGCSearch(getType(), idOnlySet);
-            igcSearch.addProperties(IGCRestConstants.getModificationProperties());
-            igcSearch.setPageSize(2);
-            ReferenceList assetsWithModDetails = igcrest.search(igcSearch);
-            success = (!assetsWithModDetails.getItems().isEmpty());
-            if (success) {
-
-                Reference assetWithModDetails = assetsWithModDetails.getItems().get(0);
-                igcrest.setPropertyByName(this, IGCRestConstants.MOD_CREATED_ON, igcrest.getPropertyByName(assetWithModDetails, IGCRestConstants.MOD_CREATED_ON));
-                igcrest.setPropertyByName(this, IGCRestConstants.MOD_CREATED_BY, igcrest.getPropertyByName(assetWithModDetails, IGCRestConstants.MOD_CREATED_BY));
-                igcrest.setPropertyByName(this, IGCRestConstants.MOD_MODIFIED_ON, igcrest.getPropertyByName(assetWithModDetails, IGCRestConstants.MOD_MODIFIED_ON));
-                igcrest.setPropertyByName(this, IGCRestConstants.MOD_MODIFIED_BY, igcrest.getPropertyByName(assetWithModDetails, IGCRestConstants.MOD_MODIFIED_BY));
-
-            }
-
-        }
-
-        return success;
-
-    }
-
-    /**
-     * Ensures that the _context of the asset is populated (takes no action if already populated).
-     * In addition, if the asset type supports them, will also retrieve and set modification details.
-     *
-     * @param igcrest a REST API connection to use in populating the context
-     * @return boolean indicating whether _context was successfully / already populated (true) or not (false)
-     */
-    private boolean populateContext(IGCRestClient igcrest) {
-
-        boolean success = true;
-        // Only bother retrieving the context if it isn't already present
-
-        if (_context == null || _context.isEmpty()) {
-
-            if (log.isDebugEnabled()) { log.debug("Context is empty, populating..."); }
-
-            boolean bHasModificationDetails = igcrest.hasModificationDetails(getType());
-
-            IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", getId());
-            IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
-            IGCSearch igcSearch = new IGCSearch(getType(), idOnlySet);
-            if (bHasModificationDetails) {
-                igcSearch.addProperties(IGCRestConstants.getModificationProperties());
-            }
-            igcSearch.setPageSize(2);
-            ReferenceList assetsWithCtx = igcrest.search(igcSearch);
-            success = (!assetsWithCtx.getItems().isEmpty());
-            if (success) {
-
-                Reference assetWithCtx = assetsWithCtx.getItems().get(0);
-                _context = assetWithCtx.getContext();
-
-                if (bHasModificationDetails) {
-                    igcrest.setPropertyByName(this, IGCRestConstants.MOD_CREATED_ON, igcrest.getPropertyByName(assetWithCtx, IGCRestConstants.MOD_CREATED_ON));
-                    igcrest.setPropertyByName(this, IGCRestConstants.MOD_CREATED_BY, igcrest.getPropertyByName(assetWithCtx, IGCRestConstants.MOD_CREATED_BY));
-                    igcrest.setPropertyByName(this, IGCRestConstants.MOD_MODIFIED_ON, igcrest.getPropertyByName(assetWithCtx, IGCRestConstants.MOD_MODIFIED_ON));
-                    igcrest.setPropertyByName(this, IGCRestConstants.MOD_MODIFIED_BY, igcrest.getPropertyByName(assetWithCtx, IGCRestConstants.MOD_MODIFIED_BY));
-                }
-
-            }
-
-        }
-
-        return success;
-
     }
 
     /**
@@ -249,7 +257,7 @@ public class Reference extends ObjectPrinter {
      */
     public Identity getIdentity(IGCRestClient igcrest) {
         if (identity == null) {
-            populateContext(igcrest);
+            igcrest.populateContext(this);
             identity = new Identity(_context, getType(), getName(), getId());
         }
         return identity;

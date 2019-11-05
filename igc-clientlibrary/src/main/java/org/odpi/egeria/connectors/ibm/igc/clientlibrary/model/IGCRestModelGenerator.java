@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Type;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeHeader;
 import org.odpi.openmetadata.http.HttpHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -164,8 +164,8 @@ public class IGCRestModelGenerator {
 
         // Then generate the POJOs within that directory
         System.out.println("Generating POJOs for IGC version: " + igcVersion);
-        List<Type> types = igcRestClient.getTypes(mapper);
-        for (Type igcType : types) {
+        List<TypeHeader> types = igcRestClient.getTypes(mapper);
+        for (TypeHeader igcType : types) {
             String type = igcType.getId();
             String properties = igcRestClient.makeRequest(
                     "/ibm/iis/igc-rest/v1/types/" + type + "?showViewProperties=true&showCreateProperties=true",

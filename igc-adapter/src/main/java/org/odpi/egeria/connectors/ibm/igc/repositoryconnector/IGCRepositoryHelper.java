@@ -1479,7 +1479,7 @@ public class IGCRepositoryHelper {
                 // Introspect the full list of properties from the POJO of the asset
                 Class pojoClass = igcRestClient.getPOJOForType(assetType);
                 if (pojoClass != null) {
-                    List<String> allProps = igcRestClient.getAllPropertiesFromPOJO(assetType);
+                    List<String> allProps = igcRestClient.getAllPropertiesForType(assetType);
 
                     // Retrieve all asset properties, via search, as this will allow larger page
                     // retrievals (and therefore be overall more efficient) than going by the GET of the asset
@@ -1494,7 +1494,7 @@ public class IGCRepositoryHelper {
                     if (fullAsset != null) {
 
                         // Iterate through all the paged properties and retrieve all pages for each
-                        List<String> allPaged = igcRestClient.getPagedRelationalPropertiesFromPOJO(assetType);
+                        List<String> allPaged = igcRestClient.getPagedRelationshipPropertiesForType(assetType);
                         for (String pagedProperty : allPaged) {
                             ReferenceList pagedValue = (ReferenceList) igcRestClient.getPropertyByName(fullAsset, pagedProperty);
                             if (pagedValue != null) {

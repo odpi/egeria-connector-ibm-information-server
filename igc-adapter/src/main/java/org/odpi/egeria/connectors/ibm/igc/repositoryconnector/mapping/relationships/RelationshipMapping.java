@@ -893,7 +893,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     entityProxy.setGUID(igcEntityGuid.asGuid());
 
                     if (igcRestClient.hasModificationDetails(igcObj.getType())) {
-                        igcObj.populateModificationDetails(igcRestClient);
+                        igcRestClient.populateModificationDetails(igcObj);
                         entityProxy.setCreatedBy((String) igcRestClient.getPropertyByName(igcObj, IGCRestConstants.MOD_CREATED_BY));
                         entityProxy.setCreateTime((Date) igcRestClient.getPropertyByName(igcObj, IGCRestConstants.MOD_CREATED_ON));
                         entityProxy.setUpdatedBy((String) igcRestClient.getPropertyByName(igcObj, IGCRestConstants.MOD_MODIFIED_BY));
@@ -1624,7 +1624,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             // If there is a relationship-level asset, these cannot be created, so we need to simply fail
             if (relationshipMapping.hasRelationshipLevelAsset()) {
                 String relationshipLevelAssetType = relationshipMapping.getRelationshipLevelIgcAsset();
-                if (igcRestClient.isCreatableFromPOJO(relationshipLevelAssetType)) {
+                if (igcRestClient.isCreatable(relationshipLevelAssetType)) {
                     // TODO: for creatable relationship-level assets, create a new one to represent this relationship
                     //  (this should never be reached as there currently are no such assets in IGC)
                     if (log.isInfoEnabled()) { log.info("Creating a relationship-level asset for IGC type {} is not yet implemented.", relationshipLevelAssetType); }

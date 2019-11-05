@@ -144,10 +144,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 this.igcRestClient.setDefaultPageSize(100);
             }
             // Register the types we'll use as part of job processing
-            for (String lineageAssetType : getLineageAssetTypes()) {
+            /*for (String lineageAssetType : getLineageAssetTypes()) {
                 Class pojo = igcRestClient.findPOJOForType(lineageAssetType);
                 igcRestClient.registerPOJO(pojo);
-            }
+            }*/
         } else {
             DataStageErrorCode errorCode = DataStageErrorCode.CONNECTION_FAILURE;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);

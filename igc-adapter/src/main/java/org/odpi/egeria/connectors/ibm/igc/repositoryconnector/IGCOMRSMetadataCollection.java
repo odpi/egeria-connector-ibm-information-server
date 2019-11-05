@@ -1428,7 +1428,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         // If the searchCriteria is empty, retrieve all entities of the type (no conditions)
                         if (searchCriteria != null && !searchCriteria.equals("")) {
 
-                            List<String> properties = igcRestClient.getStringPropertiesFromPOJO(igcAssetType);
+                            List<String> properties = igcRestClient.getAllStringPropertiesForType(igcAssetType);
                             // POST'd search to IGC doesn't work on v11.7.0.2 using long_description
                             // Using "searchText" requires using "searchProperties" (no "where" conditions) -- but does not
                             // work with 'main_object', must be used with a specific asset type
@@ -1794,7 +1794,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         } else {
             igcTypeName = mapping.getIgcAssetType();
             // Next ensure that we actually support creation of this entity type
-            if (!igcRestClient.isCreatableFromPOJO(igcTypeName)) {
+            if (!igcRestClient.isCreatable(igcTypeName)) {
                 IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CREATION_NOT_SUPPORTED;
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                         entityTypeGUID,
@@ -2499,7 +2499,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     Reference proxyOne = results.getItems().get(0);
 
                     String proxyOneType = proxyOne.getType();
-                    List<String> pagedRelationships = igcRestClient.getPagedRelationalPropertiesFromPOJO(proxyOneType);
+                    List<String> pagedRelationships = igcRestClient.getPagedRelationshipPropertiesForType(proxyOneType);
 
                     // null every property that holds the relationship, but retain the rest of the relationships that
                     // do not refer to the specific one we have been asked to purge

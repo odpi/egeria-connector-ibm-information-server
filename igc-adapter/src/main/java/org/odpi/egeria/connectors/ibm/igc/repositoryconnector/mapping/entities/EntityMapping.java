@@ -5,7 +5,6 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.generated.v11502sp5.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
@@ -607,7 +606,7 @@ public abstract class EntityMapping extends InstanceMapping {
         for (ClassificationMapping classificationMapping : getClassificationMappers()) {
             allProperties.addAll(classificationMapping.getMappedIgcPropertyNames());
         }
-        List<String> nonRelationshipProperties = igcRestClient.getNonRelationshipPropertiesFromPOJO(igcAssetType);
+        List<String> nonRelationshipProperties = igcRestClient.getNonRelationshipPropertiesForType(igcAssetType);
         allProperties.addAll(nonRelationshipProperties);
         return new ArrayList<>(allProperties);
     }

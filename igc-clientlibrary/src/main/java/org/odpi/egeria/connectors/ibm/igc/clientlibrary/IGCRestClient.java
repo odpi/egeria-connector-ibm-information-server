@@ -4,10 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -21,6 +18,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.*;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.PropertyGrouping;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeDetails;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeHeader;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -77,11 +78,19 @@ public class IGCRestClient {
     private HashMap<String, Class> registeredPojosByType;
     private HashMap<String, DynamicPropertyReader> typeAndPropertyToAccessor;
     private HashMap<String, DynamicPropertyWriter> typeAndPropertyToWriter;
-    private HashMap<String, PojoIntrospector> typeToIntrospector;
+
+    private Set<String> typesThatCanBeCreated;
+    private Set<String> typesThatIncludeModificationDetails;
+    private Map<String, String> typeToDisplayName;
+    private Map<String, List<String>> typeToNonRelationshipProperties;
+    private Map<String, List<String>> typeToStringProperties;
+    private Map<String, List<String>> typeToAllProperties;
+    private Map<String, List<String>> typeToPagedRelationshipProperties;
 
     private int defaultPageSize = 100;
 
     private ObjectMapper mapper;
+    private ObjectMapper typeMapper;
 
     private static final String EP_TYPES = "/ibm/iis/igc-rest/v1/types";
     private static final String EP_ASSET = "/ibm/iis/igc-rest/v1/assets";
@@ -134,16 +143,24 @@ public class IGCRestClient {
         this.baseURL = baseURL;
         this.authorization = authorization;
         this.mapper = new ObjectMapper();
+        this.typeMapper = new ObjectMapper();
         this.registeredPojosByType = new HashMap<>();
         this.typeAndPropertyToAccessor = new HashMap<>();
         this.typeAndPropertyToWriter = new HashMap<>();
-        this.typeToIntrospector = new HashMap<>();
         this.restTemplate = new RestTemplate();
 
         // Ensure that the REST template always uses UTF-8
         List<HttpMessageConverter<?>> converters = restTemplate.getMessageConverters();
         converters.removeIf(httpMessageConverter -> httpMessageConverter instanceof StringHttpMessageConverter);
         converters.add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+
+        this.typesThatCanBeCreated = new HashSet<>();
+        this.typesThatIncludeModificationDetails = new HashSet<>();
+        this.typeToDisplayName = new HashMap<>();
+        this.typeToNonRelationshipProperties = new HashMap<>();
+        this.typeToStringProperties = new HashMap<>();
+        this.typeToAllProperties = new HashMap<>();
+        this.typeToPagedRelationshipProperties = new HashMap<>();
 
         if (log.isDebugEnabled()) { log.debug("Constructing IGCRestClient..."); }
 
@@ -168,12 +185,12 @@ public class IGCRestClient {
                     if (log.isErrorEnabled()) { log.error("Unable to determine if workflow is enabled.", e); }
                 }
                 // Register the non-generated types
-                this.registerPOJO(Paging.class);
+                //this.registerPOJO(Paging.class);
 
                 // Start with lowest version supported
                 this.igcVersion = IGCVersionEnum.values()[0];
-                List<Type> igcTypes = getTypes(tmpMapper);
-                Set<String> typeNames = igcTypes.stream().map(Type::getId).collect(Collectors.toSet());
+                List<TypeHeader> igcTypes = getTypes(tmpMapper);
+                Set<String> typeNames = igcTypes.stream().map(TypeHeader::getId).collect(Collectors.toSet());
                 for (IGCVersionEnum aVersion : IGCVersionEnum.values()) {
                     if (aVersion.isHigherThan(this.igcVersion)
                             && typeNames.contains(aVersion.getTypeNameFirstAvailableInThisVersion())
@@ -559,17 +576,34 @@ public class IGCRestClient {
      *
      * @param objectMapper an ObjectMapper to use for translating the types list
      *
-     * @return ArrayNode the list of types supported by IGC, as a JSON structure
+     * @return {@code List<TypeHeader>} the list of types supported by IGC
      */
-    public List<Type> getTypes(ObjectMapper objectMapper) {
+    public List<TypeHeader> getTypes(ObjectMapper objectMapper) {
         String response = makeRequest(EP_TYPES, HttpMethod.GET, null,null);
-        List<Type> alTypes = new ArrayList<>();
+        List<TypeHeader> alTypes = new ArrayList<>();
         try {
-            alTypes = objectMapper.readValue(response, new TypeReference<List<Type>>(){});
+            alTypes = objectMapper.readValue(response, new TypeReference<List<TypeHeader>>(){});
         } catch (IOException e) {
             if (log.isErrorEnabled()) { log.error("Unable to parse types response: {}", response, e); }
         }
         return alTypes;
+    }
+
+    /**
+     * Retrieves the type details (all properties and their details) for the provided type name in IGC.
+     *
+     * @param typeName the IGC type name for which to retrieve details
+     * @return TypeDetails
+     */
+    public TypeDetails getTypeDetails(String typeName) {
+        String response = makeRequest(EP_TYPES + "/" + typeName + "?showViewProperties=true&showCreateProperties=true&showEditProperties=true", HttpMethod.GET, null, null);
+        TypeDetails typeDetails = null;
+        try {
+            typeDetails = typeMapper.readValue(response, TypeDetails.class);
+        } catch (IOException e) {
+            if (log.isErrorEnabled()) { log.error("Unable to parse type details response: {}", response, e); }
+        }
+        return typeDetails;
     }
 
     /**
@@ -986,6 +1020,136 @@ public class IGCRestClient {
     }
 
     /**
+     * Cache detailed information about the IGC object type.
+     *
+     * @param typeName name of the IGC object type to cache
+     */
+    public void cacheTypeDetails(String typeName) {
+
+        // Only continue if the information is not already cached
+        if (!typeToDisplayName.containsKey(typeName)) {
+            TypeDetails typeDetails = getTypeDetails(typeName);
+
+            // Cache whether the type supports creation or not
+            if (typeDetails.getCreateInfo() != null) {
+                List<TypeProperty> create = typeDetails.getCreateInfo().getProperties();
+                if (create != null && !create.isEmpty()) {
+                    typesThatCanBeCreated.add(typeName);
+                }
+            }
+
+            // Cache property details
+            List<TypeProperty> view = typeDetails.getViewInfo().getProperties();
+            if (view != null) {
+                List<String> allProperties = new ArrayList<>();
+                List<String> nonRelationship = new ArrayList<>();
+                List<String> stringProperties = new ArrayList<>();
+                List<String> pagedRelationship = new ArrayList<>();
+                for (TypeProperty property : view) {
+                    String propertyName = property.getName();
+                    if (propertyName.equals("created_on")) {
+                        typesThatIncludeModificationDetails.add(typeName);
+                        // Instantiate and cache generic property update mechanisms
+                        cacheWriter(typeName, propertyName);
+                    }
+                    org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeReference type = property.getType();
+                    String propertyType = type.getName();
+                    if (propertyType.equals("string") || propertyType.equals("enum")) {
+                        stringProperties.add(propertyName);
+                        nonRelationship.add(propertyName);
+                    } else if (type.getUrl() != null) {
+                        if (property.getMaxCardinality() < 0) {
+                            pagedRelationship.add(propertyName);
+                        }
+                    } else {
+                        nonRelationship.add(propertyName);
+                    }
+                    allProperties.add(propertyName);
+
+                    // Instantiate and cache generic property retrieval mechanisms
+                    cacheAccessor(typeName, propertyName);
+
+                }
+                typeToAllProperties.put(typeName, allProperties);
+                typeToNonRelationshipProperties.put(typeName, nonRelationship);
+                typeToStringProperties.put(typeName, stringProperties);
+                typeToPagedRelationshipProperties.put(typeName, pagedRelationship);
+
+            }
+            typeToDisplayName.put(typeName, typeDetails.getName());
+
+        }
+
+    }
+
+    /**
+     * Indicates whether the IGC object type can be created (true) or not (false).
+     *
+     * @param typeName the name of the IGC object type
+     * @return boolean
+     */
+    public boolean isCreatable(String typeName) {
+        cacheTypeDetails(typeName);
+        return typesThatCanBeCreated.contains(typeName);
+    }
+
+    /**
+     * Indicates whether assets of this type include modification details (true) or not (false).
+     *
+     * @param typeName the name of the IGC asset type for which to check whether it tracks modification details
+     * @return boolean
+     */
+    public boolean hasModificationDetails(String typeName) {
+        return typesThatIncludeModificationDetails.contains(typeName);
+    }
+
+    /**
+     * Retrieve the names of all properties for the provided IGC object type, or null if the type is unknown.
+     *
+     * @param typeName the name of the IGC object type
+     * @return {@code List<String>}
+     */
+    public List<String> getAllPropertiesForType(String typeName) {
+        cacheTypeDetails(typeName);
+        return typeToAllProperties.getOrDefault(typeName, null);
+    }
+
+    /**
+     * Retrieve the names of all non-relationship properties for the provided IGC object type, or null if the type is
+     * unknown.
+     *
+     * @param typeName the name of the IGC object type
+     * @return {@code List<String>}
+     */
+    public List<String> getNonRelationshipPropertiesForType(String typeName) {
+        cacheTypeDetails(typeName);
+        return typeToNonRelationshipProperties.getOrDefault(typeName, null);
+    }
+
+    /**
+     * Retrieve the names of all string properties for the provided IGC object type, or null if the type is unknown.
+     *
+     * @param typeName the name of the IGC object type
+     * @return {@code List<String>}
+     */
+    public List<String> getAllStringPropertiesForType(String typeName) {
+        cacheTypeDetails(typeName);
+        return typeToStringProperties.getOrDefault(typeName, null);
+    }
+
+    /**
+     * Retrieve the names of all paged relationship properties for the provided IGC object type, or null if the type is
+     * unknown.
+     *
+     * @param typeName the name of the IGC object type
+     * @return {@code List<String>}
+     */
+    public List<String> getPagedRelationshipPropertiesForType(String typeName) {
+        cacheTypeDetails(typeName);
+        return typeToPagedRelationshipProperties.getOrDefault(typeName, null);
+    }
+
+    /**
      * Register a POJO as an object to handle serde of JSON objects.<br>
      * Note that this MUST be done BEFORE any object mappingRemoved (translation) is done!
      * <br><br>
@@ -1023,7 +1187,8 @@ public class IGCRestClient {
      * @see #registerPOJO(Class)
      */
     public Class getPOJOForType(String typeName) {
-        return this.registeredPojosByType.get(typeName);
+        return findPOJOForType(typeName);
+        //return this.registeredPojosByType.get(typeName);
     }
 
     /**
@@ -1035,9 +1200,7 @@ public class IGCRestClient {
     public final Class findPOJOForType(String assetType) {
         Class igcPOJO = null;
         StringBuilder sbPojoName = new StringBuilder();
-        sbPojoName.append(IGCRestConstants.IGC_REST_GENERATED_MODEL_PKG);
-        sbPojoName.append(".");
-        sbPojoName.append(getIgcVersion().getVersionString());
+        sbPojoName.append(IGCRestConstants.IGC_REST_BASE_MODEL_PKG);
         sbPojoName.append(".");
         sbPojoName.append(IGCRestConstants.getClassNameForAssetType(assetType));
         try {
@@ -1058,14 +1221,28 @@ public class IGCRestClient {
     }
 
     /**
-     * Cache a dynamic property reader to access properties from the provided asset type.
+     * Construct a unique key for dynamic reading and writing of a given type's specific property.
      *
-     * @param type the IGC asset type from which to retrieve the property
-     * @param property the name of the property to retrieve
-     * @param accessor the dynamic property reader that will retrieve it
+     * @param typeName the name of the IGC object type
+     * @param propertyName the name of the property within the object
+     * @return String
      */
-    private void addAccessor(String type, String property, DynamicPropertyReader accessor) {
-        typeAndPropertyToAccessor.put(type + "$" + property, accessor);
+    private String getDynamicPropertyKey(String typeName, String propertyName) {
+        return typeName + "$" + propertyName;
+    }
+
+    /**
+     * Cache a dynamic property reader to access the specified property for the specified IGC object type.
+     *
+     * @param type the name of the IGC object type
+     * @param property the name of the property within the IGC object type
+     */
+    private void cacheAccessor(String type, String property) {
+        String key = getDynamicPropertyKey(type, property);
+        if (!typeAndPropertyToAccessor.containsKey(key)) {
+            DynamicPropertyReader reader = new DynamicPropertyReader(getPOJOForType(type), property);
+            typeAndPropertyToAccessor.put(key, reader);
+        }
     }
 
     /**
@@ -1077,23 +1254,22 @@ public class IGCRestClient {
      * @return DynamicPropertyReader
      */
     private DynamicPropertyReader getAccessor(String type, String property) {
-        DynamicPropertyReader accessor = typeAndPropertyToAccessor.getOrDefault(type + "$" + property, null);
-        if (accessor == null) {
-            accessor = new DynamicPropertyReader(getPOJOForType(type), property);
-            addAccessor(type, property, accessor);
-        }
-        return accessor;
+        cacheAccessor(type, property);
+        return typeAndPropertyToAccessor.getOrDefault(getDynamicPropertyKey(type, property), null);
     }
 
     /**
-     * Cache a dynamic property writer to update properties for the provided asset type.
+     * Cache a dynamic property writer to update the specified property for the specified IGC object type.
      *
-     * @param type the IGC asset type for which to update a property
-     * @param property the name of the property to update
-     * @param writer the dynamic property writer that will update it
+     * @param type the name of the IGC object type
+     * @param property the name of the property within the IGC object type
      */
-    private void addWriter(String type, String property, DynamicPropertyWriter writer) {
-        typeAndPropertyToWriter.put(type + "$" + property, writer);
+    private void cacheWriter(String type, String property) {
+        String key = getDynamicPropertyKey(type, property);
+        if (!typeAndPropertyToWriter.containsKey(key)) {
+            DynamicPropertyWriter writer = new DynamicPropertyWriter(getPOJOForType(type), property);
+            typeAndPropertyToWriter.put(key, writer);
+        }
     }
 
     /**
@@ -1105,38 +1281,8 @@ public class IGCRestClient {
      * @return DynamicPropertyWriter
      */
     private DynamicPropertyWriter getWriter(String type, String property) {
-        DynamicPropertyWriter writer = typeAndPropertyToWriter.getOrDefault(type + "$" + property, null);
-        if (writer == null) {
-            writer = new DynamicPropertyWriter(getPOJOForType(type), property);
-            addWriter(type, property, writer);
-        }
-        return writer;
-    }
-
-    /**
-     * Cache a dynamic POJO introspector to retrieve static details about the POJO.
-     *
-     * @param type the IGC asset type for which to access static details
-     * @param introspector the dynamic POJO introspector
-     */
-    private void addIntrospector(String type, PojoIntrospector introspector) {
-        typeToIntrospector.put(type, introspector);
-    }
-
-    /**
-     * Retrieve a dynamic POJO introspector to retrieve static details about the provided asset type, and create one if
-     * it does not already exist.
-     *
-     * @param type the IGC asse type for which to access static details
-     * @return PojoIntrospector
-     */
-    private PojoIntrospector getIntrospector(String type) {
-        PojoIntrospector introspector = typeToIntrospector.getOrDefault(type, null);
-        if (introspector == null) {
-            introspector = new PojoIntrospector(getPOJOForType(type));
-            addIntrospector(type, introspector);
-        }
-        return introspector;
+        cacheWriter(type, property);
+        return typeAndPropertyToWriter.getOrDefault(getDynamicPropertyKey(type, property), null);
     }
 
     /**
@@ -1170,73 +1316,102 @@ public class IGCRestClient {
     }
 
     /**
-     * Indicates whether IGC assets of the provided type are capable of being created (true) or not (false).
+     * Ensures that the modification details of the asset are populated (takes no action if already populated or
+     * the asset does not support them).
      *
-     * @param typeName the name of the IGC asset type for which to check an asset's create-ability
-     * @return boolean
+     * @param object the IGC object for which to populate modification details
+     * @return boolean indicating whether details were successfully / already populated (true) or not (false)
      */
-    public boolean isCreatableFromPOJO(String typeName) {
-        return getIntrospector(typeName).canBeCreated();
+    public boolean populateModificationDetails(Reference object) {
+
+        boolean success = true;
+
+        if (object != null) {
+
+            // Only bother retrieving the details if the object supports them and they aren't already present
+            boolean bHasModificationDetails = hasModificationDetails(object.getType());
+            String createdBy = (String) getPropertyByName(object, IGCRestConstants.MOD_CREATED_BY);
+
+            if (bHasModificationDetails && createdBy == null) {
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Populating modification details that were missing...");
+                }
+
+                IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", object.getId());
+                IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
+                IGCSearch igcSearch = new IGCSearch(object.getType(), idOnlySet);
+                igcSearch.addProperties(IGCRestConstants.getModificationProperties());
+                igcSearch.setPageSize(2);
+                ReferenceList assetsWithModDetails = search(igcSearch);
+                success = (!assetsWithModDetails.getItems().isEmpty());
+                if (success) {
+
+                    Reference assetWithModDetails = assetsWithModDetails.getItems().get(0);
+                    setPropertyByName(object, IGCRestConstants.MOD_CREATED_ON, getPropertyByName(assetWithModDetails, IGCRestConstants.MOD_CREATED_ON));
+                    setPropertyByName(object, IGCRestConstants.MOD_CREATED_BY, getPropertyByName(assetWithModDetails, IGCRestConstants.MOD_CREATED_BY));
+                    setPropertyByName(object, IGCRestConstants.MOD_MODIFIED_ON, getPropertyByName(assetWithModDetails, IGCRestConstants.MOD_MODIFIED_ON));
+                    setPropertyByName(object, IGCRestConstants.MOD_MODIFIED_BY, getPropertyByName(assetWithModDetails, IGCRestConstants.MOD_MODIFIED_BY));
+
+                }
+            }
+        }
+
+        return success;
+
     }
 
     /**
-     * Retrieves the IGC asset display name from the provided POJO.
+     * Ensures that the _context of the asset is populated (takes no action if already populated).
+     * In addition, if the asset type supports them, will also retrieve and set modification details.
      *
-     * @param typeName the name of the IGC asset type for which to retrieve the display name
-     * @return String
+     * @param object the IGC object for which to populate the context
+     * @return boolean indicating whether _context was successfully / already populated (true) or not (false)
      */
-    public String getDisplayNameFromPOJO(String typeName) {
-        return getIntrospector(typeName).getIgcTypeDisplayName();
-    }
+    public boolean populateContext(Reference object) {
 
-    /**
-     * Retrieves the list of property names for the asset that are not relationships to other assets.
-     *
-     * @param typeName the name of the IGC asset type for which to retrieve the list of properties
-     * @return {@code List<String>}
-     */
-    public List<String> getNonRelationshipPropertiesFromPOJO(String typeName) {
-        return getIntrospector(typeName).getNonRelationshipProperties();
-    }
+        boolean success = true;
 
-    /**
-     * Retrieves the list of property names for the asset that are string-valued.
-     *
-     * @param typeName the name of the IGC asset type for which to retrieve the list of properties
-     * @return {@code List<String>}
-     */
-    public List<String> getStringPropertiesFromPOJO(String typeName) {
-        return getIntrospector(typeName).getStringProperties();
-    }
+        if (object != null) {
 
-    /**
-     * Retrieves the list of all property names for the asset.
-     *
-     * @param typeName the name of the IGC asset type for which to retrieve the list of properties
-     * @return {@code List<String>}
-     */
-    public List<String> getAllPropertiesFromPOJO(String typeName) {
-        return getIntrospector(typeName).getAllProperties();
-    }
+            // Only bother retrieving the context if it isn't already present
+            List<Reference> ctx = object.getContext();
+            if (ctx == null || ctx.isEmpty()) {
 
-    /**
-     * Retrieves the list of all paged relationship property names for the asset.
-     *
-     * @param typeName the name of the IGC asset type for which to retrieve the list of properties
-     * @return {@code List<String>}
-     */
-    public List<String> getPagedRelationalPropertiesFromPOJO(String typeName) {
-        return getIntrospector(typeName).getPagedRelationshipProperties();
-    }
+                if (log.isDebugEnabled()) {
+                    log.debug("Context is empty, populating...");
+                }
 
-    /**
-     * Indicates whether assets of this type include modification details (true) or not (false).
-     *
-     * @param typeName the name of the IGC asset type for which to check whether it tracks modification details
-     * @return boolean
-     */
-    public boolean hasModificationDetails(String typeName) {
-        return getIntrospector(typeName).includesModificationDetails();
+                boolean bHasModificationDetails = hasModificationDetails(object.getType());
+
+                IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", object.getId());
+                IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
+                IGCSearch igcSearch = new IGCSearch(object.getType(), idOnlySet);
+                if (bHasModificationDetails) {
+                    igcSearch.addProperties(IGCRestConstants.getModificationProperties());
+                }
+                igcSearch.setPageSize(2);
+                ReferenceList assetsWithCtx = search(igcSearch);
+                success = (!assetsWithCtx.getItems().isEmpty());
+                if (success) {
+
+                    Reference assetWithCtx = assetsWithCtx.getItems().get(0);
+                    object.setContext(assetWithCtx.getContext());
+
+                    if (bHasModificationDetails) {
+                        setPropertyByName(object, IGCRestConstants.MOD_CREATED_ON, getPropertyByName(assetWithCtx, IGCRestConstants.MOD_CREATED_ON));
+                        setPropertyByName(object, IGCRestConstants.MOD_CREATED_BY, getPropertyByName(assetWithCtx, IGCRestConstants.MOD_CREATED_BY));
+                        setPropertyByName(object, IGCRestConstants.MOD_MODIFIED_ON, getPropertyByName(assetWithCtx, IGCRestConstants.MOD_MODIFIED_ON));
+                        setPropertyByName(object, IGCRestConstants.MOD_MODIFIED_BY, getPropertyByName(assetWithCtx, IGCRestConstants.MOD_MODIFIED_BY));
+                    }
+
+                }
+
+            }
+        }
+
+        return success;
+
     }
 
 }

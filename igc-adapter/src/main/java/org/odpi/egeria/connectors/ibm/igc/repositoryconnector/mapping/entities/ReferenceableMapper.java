@@ -138,7 +138,7 @@ public class ReferenceableMapper extends EntityMapping {
         // And map any other simple (non-relationship) properties that are not otherwise mapped into 'additionalProperties'
         Map<String, String> additionalProperties = new HashMap<>();
 
-        List<String> nonRelationshipProperties = igcRestClient.getNonRelationshipPropertiesFromPOJO(igcEntity.getType());
+        List<String> nonRelationshipProperties = igcRestClient.getNonRelationshipPropertiesForType(igcEntity.getType());
         Set<String> alreadyMapped = mapping.getAllMappedIgcProperties();
         for (ClassificationMapping classificationMapping : mapping.getClassificationMappers()) {
             alreadyMapped.addAll(classificationMapping.getMappedIgcPropertyNames());

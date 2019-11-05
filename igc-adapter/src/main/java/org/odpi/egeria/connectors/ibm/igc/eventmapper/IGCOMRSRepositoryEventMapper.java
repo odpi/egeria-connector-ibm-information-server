@@ -673,7 +673,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             String assetType = latestVersion.getType();
             Class pojo = igcRestClient.getPOJOForType(assetType);
             if (pojo != null) {
-                List<String> referenceListProperties = igcRestClient.getPagedRelationalPropertiesFromPOJO(assetType);
+                List<String> referenceListProperties = igcRestClient.getPagedRelationshipPropertiesForType(assetType);
 
                 Object relatedValue = change.getNewValue(referenceListProperties);
                 if (log.isDebugEnabled()) { log.debug(" ... found value: {}", relatedValue); }
