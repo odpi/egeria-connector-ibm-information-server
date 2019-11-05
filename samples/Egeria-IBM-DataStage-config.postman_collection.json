@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "ea4e5723-8f2a-45c6-a2a5-8ff645856407",
-		"name": "Egeria DataStage proxy",
+		"name": "Egeria-IBM-DataStage-config",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [

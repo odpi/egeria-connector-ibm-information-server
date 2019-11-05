@@ -1,26 +1,25 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <!-- Copyright Contributors to the ODPi Egeria project. -->
 
-# Egeria IGC Connector.postman_environment.json
+# Samples
 
-Provides an example environment definition, with all the variables needed pre-defined (you simply need to provide values specific to your own environment).
+These sample Postman collections illustrate configuring and using the IBM Information Server connectors
+for ODPi Egeria.
 
-# Egeria IGC repo connector.postman_collection.json
+Each should be used with the
+[environment defined in the Egeria Core samples](https://github.com/odpi/egeria/blob/master/open-metadata-resources/open-metadata-samples/postman-rest-samples/README.md),
+which has all of the needed variables defined within it.
+
+# Egeria-IBM-IGC-config.postman_collection.json
 
 This script can be used to configure Egeria for use with an existing IBM Information Governance Catalog ("IGC") environment.
 
 Prerequisites:
 
-- an existing IBM IGC environment, running v11.5.0.1 or later
-- kafka running with the queue specified below created. 
+- an existing IBM IGC environment, running v11.5.0.2 or later
 
-Variables:
+IGC-specific variables:
 
-- `baseURL` the egeria URL
-- `user` the userName to pass to Egeria
-- `server` the server name for Egeria
-- `cohort` the name of the cohort: used as the kafka queue name for OMRS
-- `kafkaep` kafka endpoint for the cohort
 - `igc_host` the hostname (or IP address) of the existing IGC environment (domain / servics tier)
 - `igc_port` the port number of the domain tier console of the existing IGC environment
 - `igc_user` the username of a user to access IGC's REST API
@@ -29,7 +28,7 @@ Variables:
 
 Each step is sequentially numbered so that they can be executed in-order as part of a Postman "Runner", if desired.
 
-# Egeria READ tests.postman_collection.json
+# Egeria-IBM-IGC-read.postman_collection.json
 
 This script can be used to run through a number of different tests of the connector, assuming the IGC environment
 has first been populated with the Coco Pharmaceutical samples and column analysis has been run (either automatically
@@ -38,25 +37,21 @@ in v11.7.x or manually in v11.5.x).
 Prerequisites:
 
 - an existing IBM IGC environment, running v11.5.0.1 or later
-- kafka running with the queue specified below created.
-- samples loaded for Coco Pharmaceuticals
+- [samples loaded for Coco Pharmaceuticals](https://github.com/odpi/egeria/blob/master/open-metadata-resources/open-metadata-deployment/sample-data/coco-pharmaceuticals/README.md)
 - column analysis run against the tables in the Coco Pharmaceuticals sample databases
-- connector configured (eg. using `Egeria IGC repo connector.postman_collection.json` above)
+- connector configured (eg. using `Egeria-IBM-IGC-config.postman_collection.json` above)
 
-# Egeria DataStage proxy.postman_collection.json
+# Egeria-IBM-DataStage-config.postman_collection.json
 
 This script can be used to configure Egeria for use with an existing IBM InfoSphere DataStage environment.
 
 Prerequisites:
 
-- an existing IBM InfoSphere DataStage environment, running v11.5.0.1 or later
+- an existing IBM InfoSphere DataStage environment, running v11.5.0.2 or later
 - IBM Information Governance Catalog also running within that same environment
 
-Variables:
+DataStage-specific variables:
 
-- `baseURL` the egeria URL
-- `user` the userName to pass to Egeria
-- `kafkaep` kafka endpoint for the cohort
 - `igc_host` the hostname (or IP address) of the existing IGC environment (domain / servics tier)
 - `igc_port` the port number of the domain tier console of the existing IGC environment
 - `igc_user` the username of a user to access IGC's REST API
