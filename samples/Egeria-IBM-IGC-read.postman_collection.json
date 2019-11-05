@@ -1,8 +1,8 @@
 {
 	"info": {
 		"_postman_id": "a1bc6690-f8f4-47ec-b34e-fe11a5a7f850",
-		"name": "Egeria READ tests simplified",
-		"description": "Collection to run tests against Egeria's Information Server (IGC) integration for v11.5",
+		"name": "Egeria-IBM-IGC-read",
+		"description": "Collection to run tests against Egeria's IBM Information Server (IGC) integration",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
