@@ -2,7 +2,9 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -18,11 +20,22 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
  *  If modifications are needed, eg. to handle custom attributes,
  *  extending from this class in your own custom class is the best approach.)
  */
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=Datagroup.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = DataFileRecord.class, name = "data_file_record"),
+        @JsonSubTypes.Type(value = DatabaseAlias.class, name = "database_alias"),
+        @JsonSubTypes.Type(value = DatabaseTable.class, name = "database_table"),
+        @JsonSubTypes.Type(value = DesignStoredProcedure.class, name = "design_stored_procedure"),
+        @JsonSubTypes.Type(value = DesignTable.class, name = "design_table"),
+        @JsonSubTypes.Type(value = DesignView.class, name = "design_view"),
+        @JsonSubTypes.Type(value = StoredProcedure.class, name = "stored_procedure"),
+        @JsonSubTypes.Type(value = View.class, name = "view"),
+})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("datagroup")
-public class Datagroup extends MainObject {
+public class Datagroup extends InformationAsset {
 
     @JsonProperty("database_schema")
     protected DatabaseSchema databaseSchema;

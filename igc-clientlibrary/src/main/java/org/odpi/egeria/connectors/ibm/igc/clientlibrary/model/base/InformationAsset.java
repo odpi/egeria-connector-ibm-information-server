@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -19,6 +20,7 @@ import java.util.Date;
  *  If modifications are needed, eg. to handle custom attributes,
  *  extending from this class in your own custom class is the best approach.)
  */
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=InformationAsset.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = AmazonS3Bucket.class, name = "amazon_s3_bucket"),
@@ -42,30 +44,23 @@ import java.util.Date;
         @JsonSubTypes.Type(value = Blueprint.class, name = "blueprint"),
         @JsonSubTypes.Type(value = Category.class, name = "category"),
         @JsonSubTypes.Type(value = CdcMappingDocument.class, name = "cdc_mapping_document"),
-        @JsonSubTypes.Type(value = ColumnDefinition.class, name = "column_definition"),
         @JsonSubTypes.Type(value = CompositeView.class, name = "composite_view"),
         @JsonSubTypes.Type(value = DataClass.class, name = "data_class"),
         @JsonSubTypes.Type(value = DataFile.class, name = "data_file"),
         @JsonSubTypes.Type(value = DataFileDefinition.class, name = "data_file_definition"),
         @JsonSubTypes.Type(value = DataFileDefinitionField.class, name = "data_file_definition_field"),
         @JsonSubTypes.Type(value = DataFileDefinitionRecord.class, name = "data_file_definition_record"),
-        @JsonSubTypes.Type(value = DataFileField.class, name = "data_file_field"),
         @JsonSubTypes.Type(value = DataFileFolder.class, name = "data_file_folder"),
-        @JsonSubTypes.Type(value = DataFileRecord.class, name = "data_file_record"),
+        @JsonSubTypes.Type(value = DataItem.class, name = "data_item"),
         @JsonSubTypes.Type(value = DataRule.class, name = "data_rule"),
         @JsonSubTypes.Type(value = DataRuleDefinition.class, name = "data_rule_definition"),
         @JsonSubTypes.Type(value = DataRuleSet.class, name = "data_rule_set"),
         @JsonSubTypes.Type(value = DataRuleSetDefinition.class, name = "data_rule_set_definition"),
         @JsonSubTypes.Type(value = Database.class, name = "database"),
-        @JsonSubTypes.Type(value = DatabaseColumn.class, name = "database_column"),
         @JsonSubTypes.Type(value = DatabaseSchema.class, name = "database_schema"),
-        @JsonSubTypes.Type(value = DatabaseTable.class, name = "database_table"),
+        @JsonSubTypes.Type(value = Datagroup.class, name = "datagroup"),
         @JsonSubTypes.Type(value = DesignColumn.class, name = "design_column"),
-        @JsonSubTypes.Type(value = DesignStoredProcedure.class, name = "design_stored_procedure"),
         @JsonSubTypes.Type(value = DesignStoredProcedureParameter.class, name = "design_stored_procedure_parameter"),
-        @JsonSubTypes.Type(value = DesignTable.class, name = "design_table"),
-        @JsonSubTypes.Type(value = DesignView.class, name = "design_view"),
-        @JsonSubTypes.Type(value = DsStageColumn.class, name = "ds_stage_column"),
         @JsonSubTypes.Type(value = Dsjob.class, name = "dsjob"),
         @JsonSubTypes.Type(value = DsstageType.class, name = "dsstage_type"),
         @JsonSubTypes.Type(value = Endpoint.class, name = "endpoint"),
@@ -113,15 +108,12 @@ import java.util.Date;
         @JsonSubTypes.Type(value = StageColumn.class, name = "stage_column"),
         @JsonSubTypes.Type(value = StageVariable.class, name = "stage_variable"),
         @JsonSubTypes.Type(value = StandardizationRuleSet.class, name = "standardization_rule_set"),
-        @JsonSubTypes.Type(value = StoredProcedure.class, name = "stored_procedure"),
         @JsonSubTypes.Type(value = StoredProcedureDefinition.class, name = "stored_procedure_definition"),
         @JsonSubTypes.Type(value = StoredProcedureParameter.class, name = "stored_procedure_parameter"),
         @JsonSubTypes.Type(value = SubjectArea.class, name = "subject_area"),
-        @JsonSubTypes.Type(value = TableDefinition.class, name = "table_definition"),
         @JsonSubTypes.Type(value = Term.class, name = "term"),
         @JsonSubTypes.Type(value = TransformationProject.class, name = "transformation_project"),
         @JsonSubTypes.Type(value = TupleAttribute.class, name = "tuple_attribute"),
-        @JsonSubTypes.Type(value = View.class, name = "view"),
         @JsonSubTypes.Type(value = WarehouseMappingDocument.class, name = "warehouse_mapping_document"),
         @JsonSubTypes.Type(value = XmlSchemaDefinition.class, name = "xml_schema_definition"),
         @JsonSubTypes.Type(value = XmlSchemaLibrary.class, name = "xml_schema_library"),

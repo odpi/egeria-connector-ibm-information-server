@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -19,11 +20,12 @@ import java.util.Date;
  *  If modifications are needed, eg. to handle custom attributes,
  *  extending from this class in your own custom class is the best approach.)
  */
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=DesignStoredProcedure.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("design_stored_procedure")
-public class DesignStoredProcedure extends InformationAsset {
+public class DesignStoredProcedure extends Datagroup {
 
     @JsonProperty("alias_(business_name)")
     protected String aliasBusinessName;
@@ -45,9 +47,6 @@ public class DesignStoredProcedure extends InformationAsset {
 
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
-
-    @JsonProperty("name_qualifier")
-    protected String nameQualifier;
 
     @JsonProperty("physical_data_model")
     protected PhysicalDataModel physicalDataModel;
@@ -152,20 +151,6 @@ public class DesignStoredProcedure extends InformationAsset {
      */
     @JsonProperty("in_collections")
     public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
-     * Retrieve the {@code name_qualifier} property (displayed as '{@literal Name Qualifier}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("name_qualifier")
-    public String getNameQualifier() { return this.nameQualifier; }
-
-    /**
-     * Set the {@code name_qualifier} property (displayed as {@code Name Qualifier}) of the object.
-     * @param nameQualifier the value to set
-     */
-    @JsonProperty("name_qualifier")
-    public void setNameQualifier(String nameQualifier) { this.nameQualifier = nameQualifier; }
 
     /**
      * Retrieve the {@code physical_data_model} property (displayed as '{@literal Physical Data Model}') of the object.

@@ -2,16 +2,19 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common;
 
-import com.fasterxml.jackson.annotation.*;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.MainObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
+
+import java.util.List;
 
 /**
  * The ultimate parent object for all IGC assets, it contains only the most basic information common to every single
@@ -27,16 +30,180 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
  *  POJOs to represent user-defined objects (OpenIGC) should not extend this class directly, but the MainObject class.
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="_type", visible=true, defaultImpl=Reference.class)
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = MainObject.class, name = "main_object"),
-})
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Acl.class, name = "acl"),
+        @JsonSubTypes.Type(value = Aclentry.class, name = "aclentry"),
+        @JsonSubTypes.Type(value = Actiondescriptor.class, name = "actiondescriptor"),
+        @JsonSubTypes.Type(value = AnalysisProject.class, name = "analysis_project"),
+        @JsonSubTypes.Type(value = Applicationfunction.class, name = "applicationfunction"),
+        @JsonSubTypes.Type(value = Applicationsetting.class, name = "applicationsetting"),
+        @JsonSubTypes.Type(value = Archivedtask.class, name = "archivedtask"),
+        @JsonSubTypes.Type(value = AsclSteward.class, name = "ascl_steward"),
+        @JsonSubTypes.Type(value = Associativeobject.class, name = "associativeobject"),
+        @JsonSubTypes.Type(value = BiFilter.class, name = "bi_filter"),
+        @JsonSubTypes.Type(value = BiFolder.class, name = "bi_folder"),
+        @JsonSubTypes.Type(value = BiHierarchyMember.class, name = "bi_hierarchy_member"),
+        @JsonSubTypes.Type(value = BiOlapLevelElement.class, name = "bi_olap_level_element"),
+        @JsonSubTypes.Type(value = BiReportDataItemSource.class, name = "bi_report_data_item_source"),
+        @JsonSubTypes.Type(value = BiReportSection.class, name = "bi_report_section"),
+        @JsonSubTypes.Type(value = BiRootFolder.class, name = "bi_root_folder"),
+        @JsonSubTypes.Type(value = BlueprintElementLink.class, name = "blueprint_element_link"),
+        @JsonSubTypes.Type(value = CandidateKey.class, name = "candidate_key"),
+        @JsonSubTypes.Type(value = CdcMapping.class, name = "cdc_mapping"),
+        @JsonSubTypes.Type(value = ChangedProperties.class, name = "changed_properties"),
+        @JsonSubTypes.Type(value = Classdescriptor.class, name = "classdescriptor"),
+        @JsonSubTypes.Type(value = Classification.class, name = "classification"),
+        @JsonSubTypes.Type(value = Classificationtask.class, name = "classificationtask"),
+        @JsonSubTypes.Type(value = Collection.class, name = "collection"),
+        @JsonSubTypes.Type(value = ColumnAnalysis.class, name = "column_analysis"),
+        @JsonSubTypes.Type(value = ColumnAnalysisSummary.class, name = "column_analysis_summary"),
+        @JsonSubTypes.Type(value = Connector.class, name = "connector"),
+        @JsonSubTypes.Type(value = Credential.class, name = "credential"),
+        @JsonSubTypes.Type(value = Credentials.class, name = "credentials"),
+        @JsonSubTypes.Type(value = CustomAttribute.class, name = "custom_attribute"),
+        @JsonSubTypes.Type(value = Customattributedef.class, name = "customattributedef"),
+        @JsonSubTypes.Type(value = Customattributeval.class, name = "customattributeval"),
+        @JsonSubTypes.Type(value = DataConnection.class, name = "data_connection"),
+        @JsonSubTypes.Type(value = DataConnectionMapping.class, name = "data_connection_mapping"),
+        @JsonSubTypes.Type(value = DataItemProperties.class, name = "data_item_properties"),
+        @JsonSubTypes.Type(value = DataItemValue.class, name = "data_item_value"),
+        @JsonSubTypes.Type(value = DataPolicy.class, name = "data_policy"),
+        @JsonSubTypes.Type(value = DataRuleResults.class, name = "data_rule_results"),
+        @JsonSubTypes.Type(value = DatabaseDomain.class, name = "database_domain"),
+        @JsonSubTypes.Type(value = DatabaseIndex.class, name = "database_index"),
+        @JsonSubTypes.Type(value = Datasourcealiasgroup.class, name = "datasourcealiasgroup"),
+        @JsonSubTypes.Type(value = DatastageItem.class, name = "datastage_item"),
+        @JsonSubTypes.Type(value = Derivation.class, name = "derivation"),
+        @JsonSubTypes.Type(value = DesignForeignKey.class, name = "design_foreign_key"),
+        @JsonSubTypes.Type(value = DesignKey.class, name = "design_key"),
+        @JsonSubTypes.Type(value = Directoryproviderconfiguration.class, name = "directoryproviderconfiguration"),
+        @JsonSubTypes.Type(value = Directoryproviderproperty.class, name = "directoryproviderproperty"),
+        @JsonSubTypes.Type(value = Dsargumentmap.class, name = "dsargumentmap"),
+        @JsonSubTypes.Type(value = DsdataConnection.class, name = "dsdata_connection"),
+        @JsonSubTypes.Type(value = Dsexternaldependency.class, name = "dsexternaldependency"),
+        @JsonSubTypes.Type(value = Dsfolder.class, name = "dsfolder"),
+        @JsonSubTypes.Type(value = Dsmetabag.class, name = "dsmetabag"),
+        @JsonSubTypes.Type(value = Dsmfcolumninfo.class, name = "dsmfcolumninfo"),
+        @JsonSubTypes.Type(value = Dsparameter.class, name = "dsparameter"),
+        @JsonSubTypes.Type(value = DsparameterJob.class, name = "dsparameter_job"),
+        @JsonSubTypes.Type(value = DsparameterSet.class, name = "dsparameter_set"),
+        @JsonSubTypes.Type(value = ExtensionMapping.class, name = "extension_mapping"),
+        @JsonSubTypes.Type(value = FieldAnalysis.class, name = "field_analysis"),
+        @JsonSubTypes.Type(value = FileRecordAnalysis.class, name = "file_record_analysis"),
+        @JsonSubTypes.Type(value = Folder.class, name = "folder"),
+        @JsonSubTypes.Type(value = ForeignKey.class, name = "foreign_key"),
+        @JsonSubTypes.Type(value = ForeignKeyDefinition.class, name = "foreign_key_definition"),
+        @JsonSubTypes.Type(value = FunctionCall.class, name = "function_call"),
+        @JsonSubTypes.Type(value = FunctionCall2.class, name = "functioncall"),
+        @JsonSubTypes.Type(value = Group.class, name = "group"),
+        @JsonSubTypes.Type(value = IndexMember.class, name = "index_member"),
+        @JsonSubTypes.Type(value = InferredForeignKey.class, name = "inferred_foreign_key"),
+        @JsonSubTypes.Type(value = InferredKey.class, name = "inferred_key"),
+        @JsonSubTypes.Type(value = InformationServerReport.class, name = "information_server_report"),
+        @JsonSubTypes.Type(value = InformationServerReportAnalysisProject.class, name = "information_server_report_(analysis_project)"),
+        @JsonSubTypes.Type(value = InformationServerReportDatabase.class, name = "information_server_report_(database)"),
+        @JsonSubTypes.Type(value = InformationServerReportJob.class, name = "information_server_report_(job)"),
+        @JsonSubTypes.Type(value = InformationServerReportMappingProject.class, name = "information_server_report_(mapping_project)"),
+        @JsonSubTypes.Type(value = InformationServerReportMappingSpecification.class, name = "information_server_report_(mapping_specification)"),
+        @JsonSubTypes.Type(value = InformationServerReportSteward.class, name = "information_server_report_(steward)"),
+        @JsonSubTypes.Type(value = InformationServerReportParamJob.class, name = "information_server_report_param_(job)"),
+        @JsonSubTypes.Type(value = InformationServerReportParameters.class, name = "information_server_report_parameters"),
+        @JsonSubTypes.Type(value = InformationServicesArgument.class, name = "information_services_argument"),
+        @JsonSubTypes.Type(value = Inputpin.class, name = "inputpin"),
+        @JsonSubTypes.Type(value = InvDataRule.class, name = "inv_data_rule"),
+        @JsonSubTypes.Type(value = InvDataRuleDefinition.class, name = "inv_data_rule_definition"),
+        @JsonSubTypes.Type(value = InvDataRuleSet.class, name = "inv_data_rule_set"),
+        @JsonSubTypes.Type(value = InvDataRuleSetDefinition.class, name = "inv_data_rule_set_definition"),
+        @JsonSubTypes.Type(value = JobConstraint.class, name = "job_constraint"),
+        @JsonSubTypes.Type(value = JobFailEvent.class, name = "job_fail_event"),
+        @JsonSubTypes.Type(value = JobInputPin.class, name = "job_input_pin"),
+        @JsonSubTypes.Type(value = JobOutputPin.class, name = "job_output_pin"),
+        @JsonSubTypes.Type(value = JobParameter.class, name = "job_parameter"),
+        @JsonSubTypes.Type(value = JobReadEvent.class, name = "job_read_event"),
+        @JsonSubTypes.Type(value = JobRun.class, name = "job_run"),
+        @JsonSubTypes.Type(value = JobRunActivity.class, name = "job_run_activity"),
+        @JsonSubTypes.Type(value = JobStageParameters.class, name = "job_stage_parameters"),
+        @JsonSubTypes.Type(value = JobWriteEvent.class, name = "job_write_event"),
+        @JsonSubTypes.Type(value = Keycomponent.class, name = "keycomponent"),
+        @JsonSubTypes.Type(value = Label.class, name = "label"),
+        @JsonSubTypes.Type(value = LineageReportTemplate.class, name = "lineage_report_template"),
+        @JsonSubTypes.Type(value = Lineagefilter.class, name = "lineagefilter"),
+        @JsonSubTypes.Type(value = Link.class, name = "link"),
+        @JsonSubTypes.Type(value = Linktype.class, name = "linktype"),
+        @JsonSubTypes.Type(value = LocalContainer.class, name = "local_container"),
+        @JsonSubTypes.Type(value = LogicalDomain.class, name = "logical_domain"),
+        @JsonSubTypes.Type(value = LogicalForeignKey.class, name = "logical_foreign_key"),
+        @JsonSubTypes.Type(value = LogicalInversionKey.class, name = "logical_inversion_key"),
+        @JsonSubTypes.Type(value = LogicalKey.class, name = "logical_key"),
+        @JsonSubTypes.Type(value = LogicalValidationList.class, name = "logical_validation_list"),
+        @JsonSubTypes.Type(value = LogicalValidationRange.class, name = "logical_validation_range"),
+        @JsonSubTypes.Type(value = LogicalValidationRule.class, name = "logical_validation_rule"),
+        @JsonSubTypes.Type(value = LogicalVariable.class, name = "logical_variable"),
+        @JsonSubTypes.Type(value = MainObject.class, name = "main_object"),
+        @JsonSubTypes.Type(value = Mapping.class, name = "mapping"),
+        @JsonSubTypes.Type(value = MappingComponent.class, name = "mapping_component"),
+        @JsonSubTypes.Type(value = MappingFilter.class, name = "mapping_filter"),
+        @JsonSubTypes.Type(value = MappingJoin.class, name = "mapping_join"),
+        @JsonSubTypes.Type(value = MwbDatabaseAlias.class, name = "mwb_database_alias"),
+        @JsonSubTypes.Type(value = Navigationdescriptor.class, name = "navigationdescriptor"),
+        @JsonSubTypes.Type(value = NonStewardUser.class, name = "non_steward_user"),
+        @JsonSubTypes.Type(value = OlapJoin.class, name = "olap_join"),
+        @JsonSubTypes.Type(value = OlapMemberSource.class, name = "olap_member_source"),
+        @JsonSubTypes.Type(value = Olapjoinref.class, name = "olapjoinref"),
+        @JsonSubTypes.Type(value = OslcLink.class, name = "oslc_link"),
+        @JsonSubTypes.Type(value = Outputpin.class, name = "outputpin"),
+        @JsonSubTypes.Type(value = ParameterSetDefinition.class, name = "parameter_set_definition"),
+        @JsonSubTypes.Type(value = Parameterval.class, name = "parameterval"),
+        @JsonSubTypes.Type(value = PhysicalDomain.class, name = "physical_domain"),
+        @JsonSubTypes.Type(value = Primarycategory.class, name = "primarycategory"),
+        @JsonSubTypes.Type(value = Propdescriptor.class, name = "propdescriptor"),
+        @JsonSubTypes.Type(value = Providerpropertyinfo.class, name = "providerpropertyinfo"),
+        @JsonSubTypes.Type(value = Providerpropertyinfoextended.class, name = "providerpropertyinfoextended"),
+        @JsonSubTypes.Type(value = Providerpropertytype.class, name = "providerpropertytype"),
+        @JsonSubTypes.Type(value = QualityProblem.class, name = "quality_problem"),
+        @JsonSubTypes.Type(value = ReferenceKey.class, name = "reference_key"),
+        @JsonSubTypes.Type(value = ReferencedContainer.class, name = "referenced_container"),
+        @JsonSubTypes.Type(value = RoleAssignment.class, name = "role_assignment"),
+        @JsonSubTypes.Type(value = RoleContext.class, name = "role_context"),
+        @JsonSubTypes.Type(value = RootTuple.class, name = "root_tuple"),
+        @JsonSubTypes.Type(value = SapConnection.class, name = "sap_connection"),
+        @JsonSubTypes.Type(value = SessionConfiguration.class, name = "session_configuration"),
+        @JsonSubTypes.Type(value = StageDataRuleDefinition.class, name = "stage_data_rule_definition"),
+        @JsonSubTypes.Type(value = StageType.class, name = "stage_type"),
+        @JsonSubTypes.Type(value = StandardizationObject.class, name = "standardization_object"),
+        @JsonSubTypes.Type(value = StandardizationRule.class, name = "standardization_rule"),
+        @JsonSubTypes.Type(value = Steward.class, name = "steward"),
+        @JsonSubTypes.Type(value = StewardGroup.class, name = "steward_group"),
+        @JsonSubTypes.Type(value = StewardUser.class, name = "steward_user"),
+        @JsonSubTypes.Type(value = TableAnalysis.class, name = "table_analysis"),
+        @JsonSubTypes.Type(value = TableAnalysisSummary.class, name = "table_analysis_summary"),
+        @JsonSubTypes.Type(value = TableDefinitionProperties.class, name = "table_definition_properties"),
+        @JsonSubTypes.Type(value = TermHistory.class, name = "term_history"),
+        @JsonSubTypes.Type(value = TransformsFunction.class, name = "transforms_function"),
+        @JsonSubTypes.Type(value = Tuple.class, name = "tuple"),
+        @JsonSubTypes.Type(value = User.class, name = "user"),
+        @JsonSubTypes.Type(value = UserGroup.class, name = "user_group"),
+        @JsonSubTypes.Type(value = UserRole.class, name = "user_role"),
+        @JsonSubTypes.Type(value = ValidValue.class, name = "valid_value"),
+        @JsonSubTypes.Type(value = ValidValueList.class, name = "valid_value_list"),
+        @JsonSubTypes.Type(value = ValidValueRange.class, name = "valid_value_range"),
+        @JsonSubTypes.Type(value = ValidityTable.class, name = "validity_table"),
+        @JsonSubTypes.Type(value = ValidValueList2.class, name = "validvaluelist"),
+        @JsonSubTypes.Type(value = ValidValueRange2.class, name = "validvaluerange"),
+        @JsonSubTypes.Type(value = Validvaluerule.class, name = "validvaluerule"),
+        @JsonSubTypes.Type(value = Validvalues.class, name = "validvalues"),
+        @JsonSubTypes.Type(value = WarehouseMapping.class, name = "warehouse_mapping"),
+        @JsonSubTypes.Type(value = XsdAttributeReference.class, name = "xsd_attribute_reference"),
+        @JsonSubTypes.Type(value = XsdElementGroupReference.class, name = "xsd_element_group_reference"),
+        @JsonSubTypes.Type(value = XsdElementReference.class, name = "xsd_element_reference"),
+        @JsonSubTypes.Type(value = XsdForeignKey.class, name = "xsd_foreign_key"),
+        @JsonSubTypes.Type(value = XsdPrimaryKey.class, name = "xsd_primary_key"),
+        @JsonSubTypes.Type(value = XsdUniqueKey.class, name = "xsd_unique_key"),
+})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class Reference extends ObjectPrinter {
-
-    @JsonIgnore
-    private static final Logger log = LoggerFactory.getLogger(Reference.class);
 
     /**
      * Used to uniquely identify the object without relying on its ID (RID) remaining static.
@@ -230,13 +397,13 @@ public class Reference extends ObjectPrinter {
     }
 
     /**
-     * Returns true iff the provided object is a list of relationships (ie. of class ReferenceList).
+     * Returns true iff the provided object is a list of relationships (ie. of class ItemList).
      *
      * @param obj the object to check
      * @return Boolean
      */
-    public static boolean isReferenceList(Object obj) {
-        return (obj.getClass() == ReferenceList.class);
+    public static boolean isItemList(Object obj) {
+        return (obj.getClass() == ItemList.class);
     }
 
     /**
@@ -246,7 +413,7 @@ public class Reference extends ObjectPrinter {
      * @return Boolean
      */
     public static boolean isSimpleType(Object obj) {
-        return (!Reference.isReference(obj) && !Reference.isReferenceList(obj));
+        return (!Reference.isReference(obj) && !Reference.isItemList(obj));
     }
 
     /**

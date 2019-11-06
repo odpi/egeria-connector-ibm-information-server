@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -20,11 +21,12 @@ import java.util.List;
  *  If modifications are needed, eg. to handle custom attributes,
  *  extending from this class in your own custom class is the best approach.)
  */
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=DatabaseTable.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("database_table")
-public class DatabaseTable extends InformationAsset {
+public class DatabaseTable extends Datagroup {
 
     @JsonProperty("alias_(business_name)")
     protected String aliasBusinessName;
@@ -49,9 +51,6 @@ public class DatabaseTable extends InformationAsset {
 
     @JsonProperty("database_columns")
     protected ItemList<DatabaseColumn> databaseColumns;
-
-    @JsonProperty("database_schema")
-    protected DatabaseSchema databaseSchema;
 
     @JsonProperty("defined_foreign_key")
     protected ItemList<DatabaseColumn> definedForeignKey;
@@ -245,20 +244,6 @@ public class DatabaseTable extends InformationAsset {
      */
     @JsonProperty("database_columns")
     public void setDatabaseColumns(ItemList<DatabaseColumn> databaseColumns) { this.databaseColumns = databaseColumns; }
-
-    /**
-     * Retrieve the {@code database_schema} property (displayed as '{@literal Database Schema}') of the object.
-     * @return {@code DatabaseSchema}
-     */
-    @JsonProperty("database_schema")
-    public DatabaseSchema getDatabaseSchema() { return this.databaseSchema; }
-
-    /**
-     * Set the {@code database_schema} property (displayed as {@code Database Schema}) of the object.
-     * @param databaseSchema the value to set
-     */
-    @JsonProperty("database_schema")
-    public void setDatabaseSchema(DatabaseSchema databaseSchema) { this.databaseSchema = databaseSchema; }
 
     /**
      * Retrieve the {@code defined_foreign_key} property (displayed as '{@literal Defined Foreign Key}') of the object.

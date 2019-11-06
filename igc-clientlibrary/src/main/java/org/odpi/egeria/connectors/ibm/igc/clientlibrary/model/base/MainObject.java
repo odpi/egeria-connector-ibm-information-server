@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,6 +21,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
  *  If modifications are needed, eg. to handle custom attributes,
  *  extending from this class in your own custom class is the best approach.)
  */
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=MainObject.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Analysissummaryobject.class, name = "analysissummaryobject"),
@@ -30,8 +32,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
         @JsonSubTypes.Type(value = BiHierarchy.class, name = "bi_hierarchy"),
         @JsonSubTypes.Type(value = BiLevel.class, name = "bi_level"),
         @JsonSubTypes.Type(value = DataClassOld.class, name = "data_class_old"),
-        @JsonSubTypes.Type(value = DataItem.class, name = "data_item"),
-        @JsonSubTypes.Type(value = Datagroup.class, name = "datagroup"),
         @JsonSubTypes.Type(value = Directory.class, name = "directory"),
         @JsonSubTypes.Type(value = DsdesignView.class, name = "dsdesign_view"),
         @JsonSubTypes.Type(value = Dsjcltemplate.class, name = "dsjcltemplate"),
@@ -47,7 +47,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
         @JsonSubTypes.Type(value = Olaphierarchyassociation.class, name = "olaphierarchyassociation"),
         @JsonSubTypes.Type(value = Olapmodelgroup.class, name = "olapmodelgroup"),
         @JsonSubTypes.Type(value = Olapobject.class, name = "olapobject"),
-        @JsonSubTypes.Type(value = Parameter.class, name = "parameter"),
         @JsonSubTypes.Type(value = ParameterSet2.class, name = "parameterset"),
         @JsonSubTypes.Type(value = Reportobject.class, name = "reportobject"),
         @JsonSubTypes.Type(value = SystemRole.class, name = "system_role"),

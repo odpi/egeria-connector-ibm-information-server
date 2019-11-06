@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -20,14 +21,12 @@ import java.util.List;
  *  If modifications are needed, eg. to handle custom attributes,
  *  extending from this class in your own custom class is the best approach.)
  */
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=DsStageColumn.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("ds_stage_column")
-public class DsStageColumn extends InformationAsset {
-
-    @JsonProperty("allows_null_values")
-    protected Boolean allowsNullValues;
+public class DsStageColumn extends DataItem {
 
     @JsonProperty("constraints")
     protected ItemList<JobConstraint> constraints;
@@ -47,49 +46,11 @@ public class DsStageColumn extends InformationAsset {
     @JsonProperty("key")
     protected Boolean key;
 
-    @JsonProperty("length")
-    protected Number length;
-
     @JsonProperty("link")
     protected Link link;
 
-    @JsonProperty("minimum_length")
-    protected Number minimumLength;
-
     @JsonProperty("next_stage_columns")
     protected ItemList<DataItem> nextStageColumns;
-
-    /**
-     * Valid values are:
-     * <ul>
-     *   <li>CHAR (displayed in the UI as 'CHAR')</li>
-     *   <li>VARCHAR (displayed in the UI as 'VARCHAR')</li>
-     *   <li>LONGVARCHAR (displayed in the UI as 'LONGVARCHAR')</li>
-     *   <li>WCHAR (displayed in the UI as 'WCHAR')</li>
-     *   <li>WVARCHAR (displayed in the UI as 'WVARCHAR')</li>
-     *   <li>WLONGVARCHAR (displayed in the UI as 'WLONGVARCHAR')</li>
-     *   <li>DECIMAL (displayed in the UI as 'DECIMAL')</li>
-     *   <li>NUMERIC (displayed in the UI as 'NUMERIC')</li>
-     *   <li>SMALLINT (displayed in the UI as 'SMALLINT')</li>
-     *   <li>INTEGER (displayed in the UI as 'INTEGER')</li>
-     *   <li>REAL (displayed in the UI as 'REAL')</li>
-     *   <li>FLOAT (displayed in the UI as 'FLOAT')</li>
-     *   <li>DOUBLE (displayed in the UI as 'DOUBLE')</li>
-     *   <li>BIT (displayed in the UI as 'BIT')</li>
-     *   <li>TINYINT (displayed in the UI as 'TINYINT')</li>
-     *   <li>BIGINT (displayed in the UI as 'BIGINT')</li>
-     *   <li>BINARY (displayed in the UI as 'BINARY')</li>
-     *   <li>VARBINARY (displayed in the UI as 'VARBINARY')</li>
-     *   <li>LONGVARBINARY (displayed in the UI as 'LONGVARBINARY')</li>
-     *   <li>DATE (displayed in the UI as 'DATE')</li>
-     *   <li>TIME (displayed in the UI as 'TIME')</li>
-     *   <li>TIMESTAMP (displayed in the UI as 'TIMESTAMP')</li>
-     *   <li>GUID (displayed in the UI as 'GUID')</li>
-     *   <li>UNKNOWN (displayed in the UI as 'UNKNOWN')</li>
-     * </ul>
-     */
-    @JsonProperty("odbc_type")
-    protected String odbcType;
 
     @JsonProperty("previous_stage_columns")
     protected ItemList<DataItem> previousStageColumns;
@@ -117,20 +78,6 @@ public class DsStageColumn extends InformationAsset {
 
     @JsonProperty("writes_to_(user_defined)")
     protected ItemList<InformationAsset> writesToUserDefined;
-
-    /**
-     * Retrieve the {@code allows_null_values} property (displayed as '{@literal Allow Null Values}') of the object.
-     * @return {@code Boolean}
-     */
-    @JsonProperty("allows_null_values")
-    public Boolean getAllowsNullValues() { return this.allowsNullValues; }
-
-    /**
-     * Set the {@code allows_null_values} property (displayed as {@code Allow Null Values}) of the object.
-     * @param allowsNullValues the value to set
-     */
-    @JsonProperty("allows_null_values")
-    public void setAllowsNullValues(Boolean allowsNullValues) { this.allowsNullValues = allowsNullValues; }
 
     /**
      * Retrieve the {@code constraints} property (displayed as '{@literal Constraints}') of the object.
@@ -217,20 +164,6 @@ public class DsStageColumn extends InformationAsset {
     public void setKey(Boolean key) { this.key = key; }
 
     /**
-     * Retrieve the {@code length} property (displayed as '{@literal Length}') of the object.
-     * @return {@code Number}
-     */
-    @JsonProperty("length")
-    public Number getLength() { return this.length; }
-
-    /**
-     * Set the {@code length} property (displayed as {@code Length}) of the object.
-     * @param length the value to set
-     */
-    @JsonProperty("length")
-    public void setLength(Number length) { this.length = length; }
-
-    /**
      * Retrieve the {@code link} property (displayed as '{@literal Link}') of the object.
      * @return {@code Link}
      */
@@ -245,20 +178,6 @@ public class DsStageColumn extends InformationAsset {
     public void setLink(Link link) { this.link = link; }
 
     /**
-     * Retrieve the {@code minimum_length} property (displayed as '{@literal Minimum Length}') of the object.
-     * @return {@code Number}
-     */
-    @JsonProperty("minimum_length")
-    public Number getMinimumLength() { return this.minimumLength; }
-
-    /**
-     * Set the {@code minimum_length} property (displayed as {@code Minimum Length}) of the object.
-     * @param minimumLength the value to set
-     */
-    @JsonProperty("minimum_length")
-    public void setMinimumLength(Number minimumLength) { this.minimumLength = minimumLength; }
-
-    /**
      * Retrieve the {@code next_stage_columns} property (displayed as '{@literal Next Stage Columns or Variables}') of the object.
      * @return {@code ItemList<DataItem>}
      */
@@ -271,20 +190,6 @@ public class DsStageColumn extends InformationAsset {
      */
     @JsonProperty("next_stage_columns")
     public void setNextStageColumns(ItemList<DataItem> nextStageColumns) { this.nextStageColumns = nextStageColumns; }
-
-    /**
-     * Retrieve the {@code odbc_type} property (displayed as '{@literal SQL Type}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("odbc_type")
-    public String getOdbcType() { return this.odbcType; }
-
-    /**
-     * Set the {@code odbc_type} property (displayed as {@code SQL Type}) of the object.
-     * @param odbcType the value to set
-     */
-    @JsonProperty("odbc_type")
-    public void setOdbcType(String odbcType) { this.odbcType = odbcType; }
 
     /**
      * Retrieve the {@code previous_stage_columns} property (displayed as '{@literal Previous Stage Columns or Variables}') of the object.

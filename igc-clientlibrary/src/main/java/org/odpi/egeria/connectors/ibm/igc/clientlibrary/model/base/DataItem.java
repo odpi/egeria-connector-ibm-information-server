@@ -2,7 +2,9 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -18,11 +20,22 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
  *  If modifications are needed, eg. to handle custom attributes,
  *  extending from this class in your own custom class is the best approach.)
  */
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=DataItem.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Classificationenabledgroup.class, name = "classificationenabledgroup"),
+        @JsonSubTypes.Type(value = ColumnDefinition.class, name = "column_definition"),
+        @JsonSubTypes.Type(value = DataItemDefinition.class, name = "data_item_definition"),
+        @JsonSubTypes.Type(value = DsStageColumn.class, name = "ds_stage_column"),
+        @JsonSubTypes.Type(value = Parameter.class, name = "parameter"),
+        @JsonSubTypes.Type(value = RoutineArgument.class, name = "routine_argument"),
+        @JsonSubTypes.Type(value = StageTypeDetail.class, name = "stage_type_detail"),
+        @JsonSubTypes.Type(value = TransformArgument.class, name = "transform_argument"),
+})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("data_item")
-public class DataItem extends MainObject {
+public class DataItem extends InformationAsset {
 
     @JsonProperty("allow_null_values")
     protected String allowNullValues;
