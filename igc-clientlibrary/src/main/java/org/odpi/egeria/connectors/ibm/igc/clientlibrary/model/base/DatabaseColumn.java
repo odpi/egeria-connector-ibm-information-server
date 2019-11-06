@@ -28,8 +28,15 @@ import java.util.List;
 @JsonTypeName("database_column")
 public class DatabaseColumn extends Classificationenabledgroup {
 
+    /**
+     * No longer applicable from 11.5.0.2sp3 onwards.
+     */
+    @Deprecated
     @JsonProperty("analysis")
     protected ItemList<ColumnAnalysis> analysis;
+
+    @JsonProperty("averageValue")
+    protected List<String> averagevalue;
 
     @JsonProperty("bi_collection_members")
     protected ItemList<BiCollectionMember> biCollectionMembers;
@@ -42,6 +49,9 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     @JsonProperty("column_definitions")
     protected ItemList<ColumnDefinition> columnDefinitions;
+
+    @JsonProperty("constantFlag")
+    protected Boolean constantflag;
 
     @JsonProperty("data_policies")
     protected ItemList<DataPolicy> dataPolicies;
@@ -58,8 +68,17 @@ public class DatabaseColumn extends Classificationenabledgroup {
     @JsonProperty("data_rules")
     protected ItemList<DataRule> dataRules;
 
+    @JsonProperty("database_alias")
+    protected DatabaseAlias databaseAlias;
+
     @JsonProperty("database_domains")
     protected DatabaseDomain databaseDomains;
+
+    @JsonProperty("database_indexes")
+    protected ItemList<DatabaseIndex> databaseIndexes;
+
+    @JsonProperty("database_table")
+    protected DatabaseTable databaseTable;
 
     @JsonProperty("database_table_or_view")
     protected Datagroup databaseTableOrView;
@@ -79,6 +98,12 @@ public class DatabaseColumn extends Classificationenabledgroup {
     @JsonProperty("detected_classifications")
     protected ItemList<Classification> detectedClassifications;
 
+    @JsonProperty("domainType")
+    protected List<String> domaintype;
+
+    @JsonProperty("has_DataClassifications")
+    protected ItemList<Classification> hasDataclassifications;
+
     @JsonProperty("impacted_by")
     protected ItemList<InformationAsset> impactedBy;
 
@@ -97,11 +122,89 @@ public class DatabaseColumn extends Classificationenabledgroup {
     @JsonProperty("index")
     protected ItemList<DatabaseIndex> index;
 
+    /**
+     * Valid values are:
+     * <ul>
+     *   <li>INT8 (displayed in the UI as 'INT8')</li>
+     *   <li>INT16 (displayed in the UI as 'INT16')</li>
+     *   <li>INT32 (displayed in the UI as 'INT32')</li>
+     *   <li>INT64 (displayed in the UI as 'INT64')</li>
+     *   <li>SFLOAT (displayed in the UI as 'SFLOAT')</li>
+     *   <li>DFLOAT (displayed in the UI as 'DFLOAT')</li>
+     *   <li>QFLOAT (displayed in the UI as 'QFLOAT')</li>
+     *   <li>DECIMAL (displayed in the UI as 'DECIMAL')</li>
+     *   <li>STRING (displayed in the UI as 'STRING')</li>
+     *   <li>BINARY (displayed in the UI as 'BINARY')</li>
+     *   <li>BOOLEAN (displayed in the UI as 'BOOLEAN')</li>
+     *   <li>DATE (displayed in the UI as 'DATE')</li>
+     *   <li>TIME (displayed in the UI as 'TIME')</li>
+     *   <li>DATETIME (displayed in the UI as 'DATETIME')</li>
+     *   <li>DURATION (displayed in the UI as 'DURATION')</li>
+     *   <li>CHOICE (displayed in the UI as 'CHOICE')</li>
+     *   <li>ORDERED_GROUP (displayed in the UI as 'ORDERED_GROUP')</li>
+     *   <li>UNORDERED_GROUP (displayed in the UI as 'UNORDERED_GROUP')</li>
+     *   <li>GUID (displayed in the UI as 'GUID')</li>
+     *   <li>UNKNOWN (displayed in the UI as 'UNKNOWN')</li>
+     *   <li>JSON (displayed in the UI as 'JSON')</li>
+     *   <li>XML (displayed in the UI as 'XML')</li>
+     * </ul>
+     */
+    @JsonProperty("inferredDataType")
+    protected List<String> inferreddatatype;
+
+    @JsonProperty("inferredFormat")
+    protected List<String> inferredformat;
+
+    @JsonProperty("inferredLength")
+    protected List<Number> inferredlength;
+
+    @JsonProperty("inferredPrecision")
+    protected List<Number> inferredprecision;
+
+    @JsonProperty("inferredScale")
+    protected List<Number> inferredscale;
+
+    @JsonProperty("isInferredForeignKey")
+    protected Boolean isinferredforeignkey;
+
+    @JsonProperty("isInferredPrimaryKey")
+    protected Boolean isinferredprimarykey;
+
     @JsonProperty("mapped_to_physical_object_attributes")
     protected ItemList<PhysicalObjectAttribute> mappedToPhysicalObjectAttributes;
 
+    @JsonProperty("nbRecordsTested")
+    protected List<Number> nbrecordstested;
+
+    @JsonProperty("nullabilityFlag")
+    protected Boolean nullabilityflag;
+
+    @JsonProperty("numberCompleteValues")
+    protected List<Number> numbercompletevalues;
+
+    @JsonProperty("numberDistinctValues")
+    protected List<Number> numberdistinctvalues;
+
+    @JsonProperty("numberEmptyValues")
+    protected List<Number> numberemptyvalues;
+
+    @JsonProperty("numberFormats")
+    protected List<Number> numberformats;
+
+    @JsonProperty("numberNullValues")
+    protected List<Number> numbernullvalues;
+
+    @JsonProperty("numberValidValues")
+    protected List<Number> numbervalidvalues;
+
+    @JsonProperty("numberZeroValues")
+    protected List<Number> numberzerovalues;
+
     @JsonProperty("occurs")
     protected List<String> occurs;
+
+    @JsonProperty("qualityScore")
+    protected String qualityscore;
 
     @JsonProperty("read_by_(design)")
     protected ItemList<InformationAsset> readByDesign;
@@ -156,8 +259,14 @@ public class DatabaseColumn extends Classificationenabledgroup {
     @JsonProperty("suggested_term_assignments")
     protected ItemList<TermAssignment> suggestedTermAssignments;
 
+    @JsonProperty("uniqueFlag")
+    protected Boolean uniqueflag;
+
     @JsonProperty("validity_tables")
     protected ItemList<ValidityTable> validityTables;
+
+    @JsonProperty("view")
+    protected ItemList<View> view;
 
     @JsonProperty("written_by_(design)")
     protected ItemList<InformationAsset> writtenByDesign;
@@ -173,17 +282,37 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     /**
      * Retrieve the {@code analysis} property (displayed as '{@literal Analysis}') of the object.
+     * No longer applicable from 11.5.0.2sp3 onwards.
+     *
      * @return {@code ItemList<ColumnAnalysis>}
      */
+    @Deprecated
     @JsonProperty("analysis")
     public ItemList<ColumnAnalysis> getAnalysis() { return this.analysis; }
 
     /**
      * Set the {@code analysis} property (displayed as {@code Analysis}) of the object.
+     * No longer applicable from 11.5.0.2sp3 onwards.
+     *
      * @param analysis the value to set
      */
+    @Deprecated
     @JsonProperty("analysis")
     public void setAnalysis(ItemList<ColumnAnalysis> analysis) { this.analysis = analysis; }
+
+    /**
+     * Retrieve the {@code averageValue} property (displayed as '{@literal Average Value}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("averageValue")
+    public List<String> getAveragevalue() { return this.averagevalue; }
+
+    /**
+     * Set the {@code averageValue} property (displayed as {@code Average Value}) of the object.
+     * @param averagevalue the value to set
+     */
+    @JsonProperty("averageValue")
+    public void setAveragevalue(List<String> averagevalue) { this.averagevalue = averagevalue; }
 
     /**
      * Retrieve the {@code bi_collection_members} property (displayed as '{@literal BI Collection Members}') of the object.
@@ -240,6 +369,20 @@ public class DatabaseColumn extends Classificationenabledgroup {
      */
     @JsonProperty("column_definitions")
     public void setColumnDefinitions(ItemList<ColumnDefinition> columnDefinitions) { this.columnDefinitions = columnDefinitions; }
+
+    /**
+     * Retrieve the {@code constantFlag} property (displayed as '{@literal Include Constant Values}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("constantFlag")
+    public Boolean getConstantflag() { return this.constantflag; }
+
+    /**
+     * Set the {@code constantFlag} property (displayed as {@code Include Constant Values}) of the object.
+     * @param constantflag the value to set
+     */
+    @JsonProperty("constantFlag")
+    public void setConstantflag(Boolean constantflag) { this.constantflag = constantflag; }
 
     /**
      * Retrieve the {@code data_policies} property (displayed as '{@literal Data Policies}') of the object.
@@ -312,6 +455,20 @@ public class DatabaseColumn extends Classificationenabledgroup {
     public void setDataRules(ItemList<DataRule> dataRules) { this.dataRules = dataRules; }
 
     /**
+     * Retrieve the {@code database_alias} property (displayed as '{@literal Database Alias}') of the object.
+     * @return {@code DatabaseAlias}
+     */
+    @JsonProperty("database_alias")
+    public DatabaseAlias getDatabaseAlias() { return this.databaseAlias; }
+
+    /**
+     * Set the {@code database_alias} property (displayed as {@code Database Alias}) of the object.
+     * @param databaseAlias the value to set
+     */
+    @JsonProperty("database_alias")
+    public void setDatabaseAlias(DatabaseAlias databaseAlias) { this.databaseAlias = databaseAlias; }
+
+    /**
      * Retrieve the {@code database_domains} property (displayed as '{@literal Database Domains}') of the object.
      * @return {@code DatabaseDomain}
      */
@@ -324,6 +481,34 @@ public class DatabaseColumn extends Classificationenabledgroup {
      */
     @JsonProperty("database_domains")
     public void setDatabaseDomains(DatabaseDomain databaseDomains) { this.databaseDomains = databaseDomains; }
+
+    /**
+     * Retrieve the {@code database_indexes} property (displayed as '{@literal Index}') of the object.
+     * @return {@code ItemList<DatabaseIndex>}
+     */
+    @JsonProperty("database_indexes")
+    public ItemList<DatabaseIndex> getDatabaseIndexes() { return this.databaseIndexes; }
+
+    /**
+     * Set the {@code database_indexes} property (displayed as {@code Index}) of the object.
+     * @param databaseIndexes the value to set
+     */
+    @JsonProperty("database_indexes")
+    public void setDatabaseIndexes(ItemList<DatabaseIndex> databaseIndexes) { this.databaseIndexes = databaseIndexes; }
+
+    /**
+     * Retrieve the {@code database_table} property (displayed as '{@literal Database Table}') of the object.
+     * @return {@code DatabaseTable}
+     */
+    @JsonProperty("database_table")
+    public DatabaseTable getDatabaseTable() { return this.databaseTable; }
+
+    /**
+     * Set the {@code database_table} property (displayed as {@code Database Table}) of the object.
+     * @param databaseTable the value to set
+     */
+    @JsonProperty("database_table")
+    public void setDatabaseTable(DatabaseTable databaseTable) { this.databaseTable = databaseTable; }
 
     /**
      * Retrieve the {@code database_table_or_view} property (displayed as '{@literal Database Table or View}') of the object.
@@ -410,6 +595,34 @@ public class DatabaseColumn extends Classificationenabledgroup {
     public void setDetectedClassifications(ItemList<Classification> detectedClassifications) { this.detectedClassifications = detectedClassifications; }
 
     /**
+     * Retrieve the {@code domainType} property (displayed as '{@literal Domain}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("domainType")
+    public List<String> getDomaintype() { return this.domaintype; }
+
+    /**
+     * Set the {@code domainType} property (displayed as {@code Domain}) of the object.
+     * @param domaintype the value to set
+     */
+    @JsonProperty("domainType")
+    public void setDomaintype(List<String> domaintype) { this.domaintype = domaintype; }
+
+    /**
+     * Retrieve the {@code has_DataClassifications} property (displayed as '{@literal Detected data Classifications}') of the object.
+     * @return {@code ItemList<Classification>}
+     */
+    @JsonProperty("has_DataClassifications")
+    public ItemList<Classification> getHasDataclassifications() { return this.hasDataclassifications; }
+
+    /**
+     * Set the {@code has_DataClassifications} property (displayed as {@code Detected data Classifications}) of the object.
+     * @param hasDataclassifications the value to set
+     */
+    @JsonProperty("has_DataClassifications")
+    public void setHasDataclassifications(ItemList<Classification> hasDataclassifications) { this.hasDataclassifications = hasDataclassifications; }
+
+    /**
      * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
      * @return {@code ItemList<InformationAsset>}
      */
@@ -494,6 +707,104 @@ public class DatabaseColumn extends Classificationenabledgroup {
     public void setIndex(ItemList<DatabaseIndex> index) { this.index = index; }
 
     /**
+     * Retrieve the {@code inferredDataType} property (displayed as '{@literal Inferred Data Type}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("inferredDataType")
+    public List<String> getInferreddatatype() { return this.inferreddatatype; }
+
+    /**
+     * Set the {@code inferredDataType} property (displayed as {@code Inferred Data Type}) of the object.
+     * @param inferreddatatype the value to set
+     */
+    @JsonProperty("inferredDataType")
+    public void setInferreddatatype(List<String> inferreddatatype) { this.inferreddatatype = inferreddatatype; }
+
+    /**
+     * Retrieve the {@code inferredFormat} property (displayed as '{@literal Inferred Format}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("inferredFormat")
+    public List<String> getInferredformat() { return this.inferredformat; }
+
+    /**
+     * Set the {@code inferredFormat} property (displayed as {@code Inferred Format}) of the object.
+     * @param inferredformat the value to set
+     */
+    @JsonProperty("inferredFormat")
+    public void setInferredformat(List<String> inferredformat) { this.inferredformat = inferredformat; }
+
+    /**
+     * Retrieve the {@code inferredLength} property (displayed as '{@literal Inferred Length}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("inferredLength")
+    public List<Number> getInferredlength() { return this.inferredlength; }
+
+    /**
+     * Set the {@code inferredLength} property (displayed as {@code Inferred Length}) of the object.
+     * @param inferredlength the value to set
+     */
+    @JsonProperty("inferredLength")
+    public void setInferredlength(List<Number> inferredlength) { this.inferredlength = inferredlength; }
+
+    /**
+     * Retrieve the {@code inferredPrecision} property (displayed as '{@literal Inferred Precision}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("inferredPrecision")
+    public List<Number> getInferredprecision() { return this.inferredprecision; }
+
+    /**
+     * Set the {@code inferredPrecision} property (displayed as {@code Inferred Precision}) of the object.
+     * @param inferredprecision the value to set
+     */
+    @JsonProperty("inferredPrecision")
+    public void setInferredprecision(List<Number> inferredprecision) { this.inferredprecision = inferredprecision; }
+
+    /**
+     * Retrieve the {@code inferredScale} property (displayed as '{@literal Inferred Scale}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("inferredScale")
+    public List<Number> getInferredscale() { return this.inferredscale; }
+
+    /**
+     * Set the {@code inferredScale} property (displayed as {@code Inferred Scale}) of the object.
+     * @param inferredscale the value to set
+     */
+    @JsonProperty("inferredScale")
+    public void setInferredscale(List<Number> inferredscale) { this.inferredscale = inferredscale; }
+
+    /**
+     * Retrieve the {@code isInferredForeignKey} property (displayed as '{@literal Inferred Foreign Key}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("isInferredForeignKey")
+    public Boolean getIsinferredforeignkey() { return this.isinferredforeignkey; }
+
+    /**
+     * Set the {@code isInferredForeignKey} property (displayed as {@code Inferred Foreign Key}) of the object.
+     * @param isinferredforeignkey the value to set
+     */
+    @JsonProperty("isInferredForeignKey")
+    public void setIsinferredforeignkey(Boolean isinferredforeignkey) { this.isinferredforeignkey = isinferredforeignkey; }
+
+    /**
+     * Retrieve the {@code isInferredPrimaryKey} property (displayed as '{@literal Inferred Primary Key}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("isInferredPrimaryKey")
+    public Boolean getIsinferredprimarykey() { return this.isinferredprimarykey; }
+
+    /**
+     * Set the {@code isInferredPrimaryKey} property (displayed as {@code Inferred Primary Key}) of the object.
+     * @param isinferredprimarykey the value to set
+     */
+    @JsonProperty("isInferredPrimaryKey")
+    public void setIsinferredprimarykey(Boolean isinferredprimarykey) { this.isinferredprimarykey = isinferredprimarykey; }
+
+    /**
      * Retrieve the {@code mapped_to_physical_object_attributes} property (displayed as '{@literal Mapped to Physical Object Attributes}') of the object.
      * @return {@code ItemList<PhysicalObjectAttribute>}
      */
@@ -508,6 +819,132 @@ public class DatabaseColumn extends Classificationenabledgroup {
     public void setMappedToPhysicalObjectAttributes(ItemList<PhysicalObjectAttribute> mappedToPhysicalObjectAttributes) { this.mappedToPhysicalObjectAttributes = mappedToPhysicalObjectAttributes; }
 
     /**
+     * Retrieve the {@code nbRecordsTested} property (displayed as '{@literal Number of Records Tested}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("nbRecordsTested")
+    public List<Number> getNbrecordstested() { return this.nbrecordstested; }
+
+    /**
+     * Set the {@code nbRecordsTested} property (displayed as {@code Number of Records Tested}) of the object.
+     * @param nbrecordstested the value to set
+     */
+    @JsonProperty("nbRecordsTested")
+    public void setNbrecordstested(List<Number> nbrecordstested) { this.nbrecordstested = nbrecordstested; }
+
+    /**
+     * Retrieve the {@code nullabilityFlag} property (displayed as '{@literal Include Null Values}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("nullabilityFlag")
+    public Boolean getNullabilityflag() { return this.nullabilityflag; }
+
+    /**
+     * Set the {@code nullabilityFlag} property (displayed as {@code Include Null Values}) of the object.
+     * @param nullabilityflag the value to set
+     */
+    @JsonProperty("nullabilityFlag")
+    public void setNullabilityflag(Boolean nullabilityflag) { this.nullabilityflag = nullabilityflag; }
+
+    /**
+     * Retrieve the {@code numberCompleteValues} property (displayed as '{@literal Number of Complete Values}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("numberCompleteValues")
+    public List<Number> getNumbercompletevalues() { return this.numbercompletevalues; }
+
+    /**
+     * Set the {@code numberCompleteValues} property (displayed as {@code Number of Complete Values}) of the object.
+     * @param numbercompletevalues the value to set
+     */
+    @JsonProperty("numberCompleteValues")
+    public void setNumbercompletevalues(List<Number> numbercompletevalues) { this.numbercompletevalues = numbercompletevalues; }
+
+    /**
+     * Retrieve the {@code numberDistinctValues} property (displayed as '{@literal Number of Distinct Values}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("numberDistinctValues")
+    public List<Number> getNumberdistinctvalues() { return this.numberdistinctvalues; }
+
+    /**
+     * Set the {@code numberDistinctValues} property (displayed as {@code Number of Distinct Values}) of the object.
+     * @param numberdistinctvalues the value to set
+     */
+    @JsonProperty("numberDistinctValues")
+    public void setNumberdistinctvalues(List<Number> numberdistinctvalues) { this.numberdistinctvalues = numberdistinctvalues; }
+
+    /**
+     * Retrieve the {@code numberEmptyValues} property (displayed as '{@literal Number of Empty Values}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("numberEmptyValues")
+    public List<Number> getNumberemptyvalues() { return this.numberemptyvalues; }
+
+    /**
+     * Set the {@code numberEmptyValues} property (displayed as {@code Number of Empty Values}) of the object.
+     * @param numberemptyvalues the value to set
+     */
+    @JsonProperty("numberEmptyValues")
+    public void setNumberemptyvalues(List<Number> numberemptyvalues) { this.numberemptyvalues = numberemptyvalues; }
+
+    /**
+     * Retrieve the {@code numberFormats} property (displayed as '{@literal Number of Distinct Formats}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("numberFormats")
+    public List<Number> getNumberformats() { return this.numberformats; }
+
+    /**
+     * Set the {@code numberFormats} property (displayed as {@code Number of Distinct Formats}) of the object.
+     * @param numberformats the value to set
+     */
+    @JsonProperty("numberFormats")
+    public void setNumberformats(List<Number> numberformats) { this.numberformats = numberformats; }
+
+    /**
+     * Retrieve the {@code numberNullValues} property (displayed as '{@literal Number of Null Values}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("numberNullValues")
+    public List<Number> getNumbernullvalues() { return this.numbernullvalues; }
+
+    /**
+     * Set the {@code numberNullValues} property (displayed as {@code Number of Null Values}) of the object.
+     * @param numbernullvalues the value to set
+     */
+    @JsonProperty("numberNullValues")
+    public void setNumbernullvalues(List<Number> numbernullvalues) { this.numbernullvalues = numbernullvalues; }
+
+    /**
+     * Retrieve the {@code numberValidValues} property (displayed as '{@literal Number of Valid Values}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("numberValidValues")
+    public List<Number> getNumbervalidvalues() { return this.numbervalidvalues; }
+
+    /**
+     * Set the {@code numberValidValues} property (displayed as {@code Number of Valid Values}) of the object.
+     * @param numbervalidvalues the value to set
+     */
+    @JsonProperty("numberValidValues")
+    public void setNumbervalidvalues(List<Number> numbervalidvalues) { this.numbervalidvalues = numbervalidvalues; }
+
+    /**
+     * Retrieve the {@code numberZeroValues} property (displayed as '{@literal Number of Zero Values}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("numberZeroValues")
+    public List<Number> getNumberzerovalues() { return this.numberzerovalues; }
+
+    /**
+     * Set the {@code numberZeroValues} property (displayed as {@code Number of Zero Values}) of the object.
+     * @param numberzerovalues the value to set
+     */
+    @JsonProperty("numberZeroValues")
+    public void setNumberzerovalues(List<Number> numberzerovalues) { this.numberzerovalues = numberzerovalues; }
+
+    /**
      * Retrieve the {@code occurs} property (displayed as '{@literal Occurs}') of the object.
      * @return {@code List<String>}
      */
@@ -520,6 +957,20 @@ public class DatabaseColumn extends Classificationenabledgroup {
      */
     @JsonProperty("occurs")
     public void setOccurs(List<String> occurs) { this.occurs = occurs; }
+
+    /**
+     * Retrieve the {@code qualityScore} property (displayed as '{@literal Quality Score}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("qualityScore")
+    public String getQualityscore() { return this.qualityscore; }
+
+    /**
+     * Set the {@code qualityScore} property (displayed as {@code Quality Score}) of the object.
+     * @param qualityscore the value to set
+     */
+    @JsonProperty("qualityScore")
+    public void setQualityscore(String qualityscore) { this.qualityscore = qualityscore; }
 
     /**
      * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.
@@ -754,6 +1205,20 @@ public class DatabaseColumn extends Classificationenabledgroup {
     public void setSuggestedTermAssignments(ItemList<TermAssignment> suggestedTermAssignments) { this.suggestedTermAssignments = suggestedTermAssignments; }
 
     /**
+     * Retrieve the {@code uniqueFlag} property (displayed as '{@literal Require Unique Values}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("uniqueFlag")
+    public Boolean getUniqueflag() { return this.uniqueflag; }
+
+    /**
+     * Set the {@code uniqueFlag} property (displayed as {@code Require Unique Values}) of the object.
+     * @param uniqueflag the value to set
+     */
+    @JsonProperty("uniqueFlag")
+    public void setUniqueflag(Boolean uniqueflag) { this.uniqueflag = uniqueflag; }
+
+    /**
      * Retrieve the {@code validity_tables} property (displayed as '{@literal Validity Tables}') of the object.
      * @return {@code ItemList<ValidityTable>}
      */
@@ -766,6 +1231,20 @@ public class DatabaseColumn extends Classificationenabledgroup {
      */
     @JsonProperty("validity_tables")
     public void setValidityTables(ItemList<ValidityTable> validityTables) { this.validityTables = validityTables; }
+
+    /**
+     * Retrieve the {@code view} property (displayed as '{@literal Database View}') of the object.
+     * @return {@code ItemList<View>}
+     */
+    @JsonProperty("view")
+    public ItemList<View> getView() { return this.view; }
+
+    /**
+     * Set the {@code view} property (displayed as {@code Database View}) of the object.
+     * @param view the value to set
+     */
+    @JsonProperty("view")
+    public void setView(ItemList<View> view) { this.view = view; }
 
     /**
      * Retrieve the {@code written_by_(design)} property (displayed as '{@literal Written by (Design)}') of the object.

@@ -37,6 +37,9 @@ public class DataClass extends InformationAsset {
     @JsonProperty("classified_assets_detected")
     protected ItemList<Classification> classifiedAssetsDetected;
 
+    @JsonProperty("columnNameMatch")
+    protected String columnnamematch;
+
     @JsonProperty("contains_data_classes")
     protected ItemList<DataClass> containsDataClasses;
 
@@ -45,6 +48,7 @@ public class DataClass extends InformationAsset {
      * <ul>
      *   <li>Undefined (displayed in the UI as 'Unspecified')</li>
      *   <li>Regex (displayed in the UI as 'Regex')</li>
+     *   <li>Java (displayed in the UI as 'Java')</li>
      *   <li>ValidValues (displayed in the UI as 'Valid Values')</li>
      * </ul>
      */
@@ -144,6 +148,20 @@ public class DataClass extends InformationAsset {
      */
     @JsonProperty("classified_assets_detected")
     public void setClassifiedAssetsDetected(ItemList<Classification> classifiedAssetsDetected) { this.classifiedAssetsDetected = classifiedAssetsDetected; }
+
+    /**
+     * Retrieve the {@code columnNameMatch} property (displayed as '{@literal Column Name Match}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("columnNameMatch")
+    public String getColumnnamematch() { return this.columnnamematch; }
+
+    /**
+     * Set the {@code columnNameMatch} property (displayed as {@code Column Name Match}) of the object.
+     * @param columnnamematch the value to set
+     */
+    @JsonProperty("columnNameMatch")
+    public void setColumnnamematch(String columnnamematch) { this.columnnamematch = columnnamematch; }
 
     /**
      * Retrieve the {@code contains_data_classes} property (displayed as '{@literal Contains Data Classes}') of the object.

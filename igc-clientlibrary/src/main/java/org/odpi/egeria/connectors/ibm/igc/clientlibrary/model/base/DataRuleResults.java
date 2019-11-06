@@ -28,6 +28,9 @@ import java.util.Date;
 @JsonTypeName("data_rule_results")
 public class DataRuleResults extends Reference {
 
+    @JsonProperty("benchmark")
+    protected String benchmark;
+
     @JsonProperty("created_by")
     protected String createdBy;
 
@@ -56,10 +59,24 @@ public class DataRuleResults extends Reference {
     protected Number numberOfRecordsTested;
 
     @JsonProperty("rule_results")
-    protected ItemList<InformationAsset> ruleResults;
+    protected ItemList<RuleExecutionResult> ruleResults;
 
     @JsonProperty("start_time")
     protected Date startTime;
+
+    /**
+     * Retrieve the {@code benchmark} property (displayed as '{@literal Benchmark}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("benchmark")
+    public String getBenchmark() { return this.benchmark; }
+
+    /**
+     * Set the {@code benchmark} property (displayed as {@code Benchmark}) of the object.
+     * @param benchmark the value to set
+     */
+    @JsonProperty("benchmark")
+    public void setBenchmark(String benchmark) { this.benchmark = benchmark; }
 
     /**
      * Retrieve the {@code created_by} property (displayed as '{@literal Created By}') of the object.
@@ -189,17 +206,17 @@ public class DataRuleResults extends Reference {
 
     /**
      * Retrieve the {@code rule_results} property (displayed as '{@literal Rule Results}') of the object.
-     * @return {@code ItemList<InformationAsset>}
+     * @return {@code ItemList<RuleExecutionResult>}
      */
     @JsonProperty("rule_results")
-    public ItemList<InformationAsset> getRuleResults() { return this.ruleResults; }
+    public ItemList<RuleExecutionResult> getRuleResults() { return this.ruleResults; }
 
     /**
      * Set the {@code rule_results} property (displayed as {@code Rule Results}) of the object.
      * @param ruleResults the value to set
      */
     @JsonProperty("rule_results")
-    public void setRuleResults(ItemList<InformationAsset> ruleResults) { this.ruleResults = ruleResults; }
+    public void setRuleResults(ItemList<RuleExecutionResult> ruleResults) { this.ruleResults = ruleResults; }
 
     /**
      * Retrieve the {@code start_time} property (displayed as '{@literal Start Time}') of the object.

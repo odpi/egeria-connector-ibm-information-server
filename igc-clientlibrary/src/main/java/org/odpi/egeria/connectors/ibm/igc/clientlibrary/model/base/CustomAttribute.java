@@ -38,11 +38,17 @@ public class CustomAttribute extends Reference {
      *   <li>STRING (displayed in the UI as 'Predefined Values')</li>
      *   <li>DATE (displayed in the UI as 'Date')</li>
      *   <li>TEXT (displayed in the UI as 'Text')</li>
-     *   <li>REFERENCE (displayed in the UI as 'REFERENCE')</li>
+     *   <li>REFERENCE (displayed in the UI as 'Relationship')</li>
      * </ul>
      */
     @JsonProperty("custom_attribute_type")
     protected String customAttributeType;
+
+    @JsonProperty("description")
+    protected String description;
+
+    @JsonProperty("name")
+    protected String name;
 
     /**
      * Retrieve the {@code applies_to} property (displayed as '{@literal Applies To}') of the object.
@@ -71,5 +77,33 @@ public class CustomAttribute extends Reference {
      */
     @JsonProperty("custom_attribute_type")
     public void setCustomAttributeType(String customAttributeType) { this.customAttributeType = customAttributeType; }
+
+    /**
+     * Retrieve the {@code description} property (displayed as '{@literal Description}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("description")
+    public String getDescription() { return this.description; }
+
+    /**
+     * Set the {@code description} property (displayed as {@code Description}) of the object.
+     * @param description the value to set
+     */
+    @JsonProperty("description")
+    public void setDescription(String description) { this.description = description; }
+
+    /**
+     * Retrieve the {@code name} property (displayed as '{@literal Name}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("name")
+    public String getTheName() { return this.name; }
+
+    /**
+     * Set the {@code name} property (displayed as {@code Name}) of the object.
+     * @param name the value to set
+     */
+    @JsonProperty("name")
+    public void setTheName(String name) { this.name = name; }
 
 }

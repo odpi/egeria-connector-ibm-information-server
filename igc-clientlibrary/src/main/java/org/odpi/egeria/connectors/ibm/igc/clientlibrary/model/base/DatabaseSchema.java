@@ -96,6 +96,9 @@ public class DatabaseSchema extends InformationAsset {
     @JsonProperty("stored_procedures")
     protected ItemList<StoredProcedure> storedProcedures;
 
+    @JsonProperty("suggested_term_assignments")
+    protected ItemList<TermAssignment> suggestedTermAssignments;
+
     @JsonProperty("views")
     protected ItemList<View> views;
 
@@ -432,6 +435,20 @@ public class DatabaseSchema extends InformationAsset {
      */
     @JsonProperty("stored_procedures")
     public void setStoredProcedures(ItemList<StoredProcedure> storedProcedures) { this.storedProcedures = storedProcedures; }
+
+    /**
+     * Retrieve the {@code suggested_term_assignments} property (displayed as '{@literal Suggested Term Assignments}') of the object.
+     * @return {@code ItemList<TermAssignment>}
+     */
+    @JsonProperty("suggested_term_assignments")
+    public ItemList<TermAssignment> getSuggestedTermAssignments() { return this.suggestedTermAssignments; }
+
+    /**
+     * Set the {@code suggested_term_assignments} property (displayed as {@code Suggested Term Assignments}) of the object.
+     * @param suggestedTermAssignments the value to set
+     */
+    @JsonProperty("suggested_term_assignments")
+    public void setSuggestedTermAssignments(ItemList<TermAssignment> suggestedTermAssignments) { this.suggestedTermAssignments = suggestedTermAssignments; }
 
     /**
      * Retrieve the {@code views} property (displayed as '{@literal Views}') of the object.

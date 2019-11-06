@@ -47,7 +47,7 @@ public class DataRule extends InformationAsset {
     protected List<String> expression;
 
     @JsonProperty("implemented_bindings")
-    protected ItemList<DatabaseColumn> implementedBindings;
+    protected ItemList<DataItem> implementedBindings;
 
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
@@ -160,17 +160,17 @@ public class DataRule extends InformationAsset {
 
     /**
      * Retrieve the {@code implemented_bindings} property (displayed as '{@literal Implemented Bindings}') of the object.
-     * @return {@code ItemList<DatabaseColumn>}
+     * @return {@code ItemList<DataItem>}
      */
     @JsonProperty("implemented_bindings")
-    public ItemList<DatabaseColumn> getImplementedBindings() { return this.implementedBindings; }
+    public ItemList<DataItem> getImplementedBindings() { return this.implementedBindings; }
 
     /**
      * Set the {@code implemented_bindings} property (displayed as {@code Implemented Bindings}) of the object.
      * @param implementedBindings the value to set
      */
     @JsonProperty("implemented_bindings")
-    public void setImplementedBindings(ItemList<DatabaseColumn> implementedBindings) { this.implementedBindings = implementedBindings; }
+    public void setImplementedBindings(ItemList<DataItem> implementedBindings) { this.implementedBindings = implementedBindings; }
 
     /**
      * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.

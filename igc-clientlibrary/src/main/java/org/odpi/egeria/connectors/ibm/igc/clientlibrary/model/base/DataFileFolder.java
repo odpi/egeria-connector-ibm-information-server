@@ -58,7 +58,7 @@ public class DataFileFolder extends InformationAsset {
     protected MainObject parentFolder;
 
     @JsonProperty("parent_folder_or_host")
-    protected ItemList<MainObject> parentFolderOrHost;
+    protected MainObject parentFolderOrHost;
 
     @JsonProperty("read_by_(design)")
     protected ItemList<InformationAsset> readByDesign;
@@ -83,6 +83,9 @@ public class DataFileFolder extends InformationAsset {
 
     @JsonProperty("store_type")
     protected String storeType;
+
+    @JsonProperty("suggested_term_assignments")
+    protected ItemList<TermAssignment> suggestedTermAssignments;
 
     @JsonProperty("type")
     protected String type;
@@ -244,17 +247,17 @@ public class DataFileFolder extends InformationAsset {
 
     /**
      * Retrieve the {@code parent_folder_or_host} property (displayed as '{@literal Parent Folder or Host}') of the object.
-     * @return {@code ItemList<MainObject>}
+     * @return {@code MainObject}
      */
     @JsonProperty("parent_folder_or_host")
-    public ItemList<MainObject> getParentFolderOrHost() { return this.parentFolderOrHost; }
+    public MainObject getParentFolderOrHost() { return this.parentFolderOrHost; }
 
     /**
      * Set the {@code parent_folder_or_host} property (displayed as {@code Parent Folder or Host}) of the object.
      * @param parentFolderOrHost the value to set
      */
     @JsonProperty("parent_folder_or_host")
-    public void setParentFolderOrHost(ItemList<MainObject> parentFolderOrHost) { this.parentFolderOrHost = parentFolderOrHost; }
+    public void setParentFolderOrHost(MainObject parentFolderOrHost) { this.parentFolderOrHost = parentFolderOrHost; }
 
     /**
      * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.
@@ -367,6 +370,20 @@ public class DataFileFolder extends InformationAsset {
      */
     @JsonProperty("store_type")
     public void setStoreType(String storeType) { this.storeType = storeType; }
+
+    /**
+     * Retrieve the {@code suggested_term_assignments} property (displayed as '{@literal Suggested Term Assignments}') of the object.
+     * @return {@code ItemList<TermAssignment>}
+     */
+    @JsonProperty("suggested_term_assignments")
+    public ItemList<TermAssignment> getSuggestedTermAssignments() { return this.suggestedTermAssignments; }
+
+    /**
+     * Set the {@code suggested_term_assignments} property (displayed as {@code Suggested Term Assignments}) of the object.
+     * @param suggestedTermAssignments the value to set
+     */
+    @JsonProperty("suggested_term_assignments")
+    public void setSuggestedTermAssignments(ItemList<TermAssignment> suggestedTermAssignments) { this.suggestedTermAssignments = suggestedTermAssignments; }
 
     /**
      * Retrieve the {@code type} property (displayed as '{@literal Type}') of the object.

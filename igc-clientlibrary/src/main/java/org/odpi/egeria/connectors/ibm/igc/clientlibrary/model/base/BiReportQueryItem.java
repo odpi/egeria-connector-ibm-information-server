@@ -33,6 +33,9 @@ public class BiReportQueryItem extends Reportobject {
     @JsonProperty("contains_bi_report_query_items")
     protected ItemList<Reportobject> containsBiReportQueryItems;
 
+    @JsonProperty("display_name")
+    protected String displayName;
+
     @JsonProperty("expression")
     protected String expression;
 
@@ -111,6 +114,20 @@ public class BiReportQueryItem extends Reportobject {
      */
     @JsonProperty("contains_bi_report_query_items")
     public void setContainsBiReportQueryItems(ItemList<Reportobject> containsBiReportQueryItems) { this.containsBiReportQueryItems = containsBiReportQueryItems; }
+
+    /**
+     * Retrieve the {@code display_name} property (displayed as '{@literal Display Name}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("display_name")
+    public String getDisplayName() { return this.displayName; }
+
+    /**
+     * Set the {@code display_name} property (displayed as {@code Display Name}) of the object.
+     * @param displayName the value to set
+     */
+    @JsonProperty("display_name")
+    public void setDisplayName(String displayName) { this.displayName = displayName; }
 
     /**
      * Retrieve the {@code expression} property (displayed as '{@literal Expression}') of the object.

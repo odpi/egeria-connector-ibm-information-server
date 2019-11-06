@@ -99,6 +99,9 @@ public class Database extends InformationAsset {
     @JsonProperty("read_by_(user_defined)")
     protected ItemList<InformationAsset> readByUserDefined;
 
+    @JsonProperty("suggested_term_assignments")
+    protected ItemList<TermAssignment> suggestedTermAssignments;
+
     @JsonProperty("written_by_(design)")
     protected ItemList<InformationAsset> writtenByDesign;
 
@@ -446,6 +449,20 @@ public class Database extends InformationAsset {
      */
     @JsonProperty("read_by_(user_defined)")
     public void setReadByUserDefined(ItemList<InformationAsset> readByUserDefined) { this.readByUserDefined = readByUserDefined; }
+
+    /**
+     * Retrieve the {@code suggested_term_assignments} property (displayed as '{@literal Suggested Term Assignments}') of the object.
+     * @return {@code ItemList<TermAssignment>}
+     */
+    @JsonProperty("suggested_term_assignments")
+    public ItemList<TermAssignment> getSuggestedTermAssignments() { return this.suggestedTermAssignments; }
+
+    /**
+     * Set the {@code suggested_term_assignments} property (displayed as {@code Suggested Term Assignments}) of the object.
+     * @param suggestedTermAssignments the value to set
+     */
+    @JsonProperty("suggested_term_assignments")
+    public void setSuggestedTermAssignments(ItemList<TermAssignment> suggestedTermAssignments) { this.suggestedTermAssignments = suggestedTermAssignments; }
 
     /**
      * Retrieve the {@code written_by_(design)} property (displayed as '{@literal Written by (Design)}') of the object.

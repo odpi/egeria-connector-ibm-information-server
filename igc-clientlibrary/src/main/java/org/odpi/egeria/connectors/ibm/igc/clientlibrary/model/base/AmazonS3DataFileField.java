@@ -12,6 +12,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * POJO for the {@code amazon_s3_data_file_field} asset type in IGC, displayed as '{@literal Amazon S3 Data File Field}' in the IGC UI.
@@ -30,8 +31,18 @@ public class AmazonS3DataFileField extends InformationAsset {
     @JsonProperty("allows_null_values")
     protected Boolean allowsNullValues;
 
+    /**
+     * No longer applicable from 11.5.0.2sp3 onwards.
+     */
+    @Deprecated
     @JsonProperty("analysis")
     protected ItemList<FieldAnalysis> analysis;
+
+    @JsonProperty("averageValue")
+    protected List<String> averagevalue;
+
+    @JsonProperty("constantFlag")
+    protected Boolean constantflag;
 
     @JsonProperty("data_file_record")
     protected DataFileRecord dataFileRecord;
@@ -69,8 +80,14 @@ public class AmazonS3DataFileField extends InformationAsset {
     @JsonProperty("detected_classifications")
     protected ItemList<Classification> detectedClassifications;
 
+    @JsonProperty("domainType")
+    protected List<String> domaintype;
+
     @JsonProperty("fraction")
     protected Number fraction;
+
+    @JsonProperty("hasDataClassification")
+    protected ItemList<Classification> hasdataclassification;
 
     @JsonProperty("impacted_by")
     protected ItemList<InformationAsset> impactedBy;
@@ -87,6 +104,54 @@ public class AmazonS3DataFileField extends InformationAsset {
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
 
+    /**
+     * Valid values are:
+     * <ul>
+     *   <li>INT8 (displayed in the UI as 'INT8')</li>
+     *   <li>INT16 (displayed in the UI as 'INT16')</li>
+     *   <li>INT32 (displayed in the UI as 'INT32')</li>
+     *   <li>INT64 (displayed in the UI as 'INT64')</li>
+     *   <li>SFLOAT (displayed in the UI as 'SFLOAT')</li>
+     *   <li>DFLOAT (displayed in the UI as 'DFLOAT')</li>
+     *   <li>QFLOAT (displayed in the UI as 'QFLOAT')</li>
+     *   <li>DECIMAL (displayed in the UI as 'DECIMAL')</li>
+     *   <li>STRING (displayed in the UI as 'STRING')</li>
+     *   <li>BINARY (displayed in the UI as 'BINARY')</li>
+     *   <li>BOOLEAN (displayed in the UI as 'BOOLEAN')</li>
+     *   <li>DATE (displayed in the UI as 'DATE')</li>
+     *   <li>TIME (displayed in the UI as 'TIME')</li>
+     *   <li>DATETIME (displayed in the UI as 'DATETIME')</li>
+     *   <li>DURATION (displayed in the UI as 'DURATION')</li>
+     *   <li>CHOICE (displayed in the UI as 'CHOICE')</li>
+     *   <li>ORDERED_GROUP (displayed in the UI as 'ORDERED_GROUP')</li>
+     *   <li>UNORDERED_GROUP (displayed in the UI as 'UNORDERED_GROUP')</li>
+     *   <li>GUID (displayed in the UI as 'GUID')</li>
+     *   <li>UNKNOWN (displayed in the UI as 'UNKNOWN')</li>
+     *   <li>JSON (displayed in the UI as 'JSON')</li>
+     *   <li>XML (displayed in the UI as 'XML')</li>
+     * </ul>
+     */
+    @JsonProperty("inferredDataType")
+    protected List<String> inferreddatatype;
+
+    @JsonProperty("inferredFormat")
+    protected List<String> inferredformat;
+
+    @JsonProperty("inferredLength")
+    protected List<Number> inferredlength;
+
+    @JsonProperty("inferredPrecision")
+    protected List<Number> inferredprecision;
+
+    @JsonProperty("inferredScale")
+    protected List<Number> inferredscale;
+
+    @JsonProperty("isInferredForeignKey")
+    protected Boolean isinferredforeignkey;
+
+    @JsonProperty("isInferredPrimaryKey")
+    protected Boolean isinferredprimarykey;
+
     @JsonProperty("length")
     protected Number length;
 
@@ -95,6 +160,33 @@ public class AmazonS3DataFileField extends InformationAsset {
 
     @JsonProperty("minimum_length")
     protected Number minimumLength;
+
+    @JsonProperty("nbRecordsTested")
+    protected List<Number> nbrecordstested;
+
+    @JsonProperty("nullabilityFlag")
+    protected Boolean nullabilityflag;
+
+    @JsonProperty("numberCompleteValues")
+    protected List<Number> numbercompletevalues;
+
+    @JsonProperty("numberDistinctValues")
+    protected List<Number> numberdistinctvalues;
+
+    @JsonProperty("numberEmptyValues")
+    protected List<Number> numberemptyvalues;
+
+    @JsonProperty("numberFormats")
+    protected List<Number> numberformats;
+
+    @JsonProperty("numberNullValues")
+    protected List<Number> numbernullvalues;
+
+    @JsonProperty("numberValidValues")
+    protected List<Number> numbervalidvalues;
+
+    @JsonProperty("numberZeroValues")
+    protected List<Number> numberzerovalues;
 
     /**
      * Valid values are:
@@ -131,6 +223,9 @@ public class AmazonS3DataFileField extends InformationAsset {
     @JsonProperty("position")
     protected Number position;
 
+    @JsonProperty("qualityScore")
+    protected String qualityscore;
+
     @JsonProperty("read_by_(design)")
     protected ItemList<InformationAsset> readByDesign;
 
@@ -151,6 +246,9 @@ public class AmazonS3DataFileField extends InformationAsset {
 
     @JsonProperty("unique")
     protected Boolean unique;
+
+    @JsonProperty("uniqueFlag")
+    protected Boolean uniqueflag;
 
     @JsonProperty("written_by_(design)")
     protected ItemList<InformationAsset> writtenByDesign;
@@ -180,17 +278,51 @@ public class AmazonS3DataFileField extends InformationAsset {
 
     /**
      * Retrieve the {@code analysis} property (displayed as '{@literal Analysis}') of the object.
+     * No longer applicable from 11.5.0.2sp3 onwards.
+     *
      * @return {@code ItemList<FieldAnalysis>}
      */
+    @Deprecated
     @JsonProperty("analysis")
     public ItemList<FieldAnalysis> getAnalysis() { return this.analysis; }
 
     /**
      * Set the {@code analysis} property (displayed as {@code Analysis}) of the object.
+     * No longer applicable from 11.5.0.2sp3 onwards.
+     *
      * @param analysis the value to set
      */
+    @Deprecated
     @JsonProperty("analysis")
     public void setAnalysis(ItemList<FieldAnalysis> analysis) { this.analysis = analysis; }
+
+    /**
+     * Retrieve the {@code averageValue} property (displayed as '{@literal Average Value}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("averageValue")
+    public List<String> getAveragevalue() { return this.averagevalue; }
+
+    /**
+     * Set the {@code averageValue} property (displayed as {@code Average Value}) of the object.
+     * @param averagevalue the value to set
+     */
+    @JsonProperty("averageValue")
+    public void setAveragevalue(List<String> averagevalue) { this.averagevalue = averagevalue; }
+
+    /**
+     * Retrieve the {@code constantFlag} property (displayed as '{@literal Include Constant Values}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("constantFlag")
+    public Boolean getConstantflag() { return this.constantflag; }
+
+    /**
+     * Set the {@code constantFlag} property (displayed as {@code Include Constant Values}) of the object.
+     * @param constantflag the value to set
+     */
+    @JsonProperty("constantFlag")
+    public void setConstantflag(Boolean constantflag) { this.constantflag = constantflag; }
 
     /**
      * Retrieve the {@code data_file_record} property (displayed as '{@literal Data File Record}') of the object.
@@ -235,6 +367,20 @@ public class AmazonS3DataFileField extends InformationAsset {
     public void setDetectedClassifications(ItemList<Classification> detectedClassifications) { this.detectedClassifications = detectedClassifications; }
 
     /**
+     * Retrieve the {@code domainType} property (displayed as '{@literal Domain}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("domainType")
+    public List<String> getDomaintype() { return this.domaintype; }
+
+    /**
+     * Set the {@code domainType} property (displayed as {@code Domain}) of the object.
+     * @param domaintype the value to set
+     */
+    @JsonProperty("domainType")
+    public void setDomaintype(List<String> domaintype) { this.domaintype = domaintype; }
+
+    /**
      * Retrieve the {@code fraction} property (displayed as '{@literal Scale}') of the object.
      * @return {@code Number}
      */
@@ -247,6 +393,20 @@ public class AmazonS3DataFileField extends InformationAsset {
      */
     @JsonProperty("fraction")
     public void setFraction(Number fraction) { this.fraction = fraction; }
+
+    /**
+     * Retrieve the {@code hasDataClassification} property (displayed as '{@literal Detected Data Classifications}') of the object.
+     * @return {@code ItemList<Classification>}
+     */
+    @JsonProperty("hasDataClassification")
+    public ItemList<Classification> getHasdataclassification() { return this.hasdataclassification; }
+
+    /**
+     * Set the {@code hasDataClassification} property (displayed as {@code Detected Data Classifications}) of the object.
+     * @param hasdataclassification the value to set
+     */
+    @JsonProperty("hasDataClassification")
+    public void setHasdataclassification(ItemList<Classification> hasdataclassification) { this.hasdataclassification = hasdataclassification; }
 
     /**
      * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
@@ -319,6 +479,104 @@ public class AmazonS3DataFileField extends InformationAsset {
     public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
+     * Retrieve the {@code inferredDataType} property (displayed as '{@literal Inferred Data Type}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("inferredDataType")
+    public List<String> getInferreddatatype() { return this.inferreddatatype; }
+
+    /**
+     * Set the {@code inferredDataType} property (displayed as {@code Inferred Data Type}) of the object.
+     * @param inferreddatatype the value to set
+     */
+    @JsonProperty("inferredDataType")
+    public void setInferreddatatype(List<String> inferreddatatype) { this.inferreddatatype = inferreddatatype; }
+
+    /**
+     * Retrieve the {@code inferredFormat} property (displayed as '{@literal Inferred Format}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("inferredFormat")
+    public List<String> getInferredformat() { return this.inferredformat; }
+
+    /**
+     * Set the {@code inferredFormat} property (displayed as {@code Inferred Format}) of the object.
+     * @param inferredformat the value to set
+     */
+    @JsonProperty("inferredFormat")
+    public void setInferredformat(List<String> inferredformat) { this.inferredformat = inferredformat; }
+
+    /**
+     * Retrieve the {@code inferredLength} property (displayed as '{@literal Inferred Length}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("inferredLength")
+    public List<Number> getInferredlength() { return this.inferredlength; }
+
+    /**
+     * Set the {@code inferredLength} property (displayed as {@code Inferred Length}) of the object.
+     * @param inferredlength the value to set
+     */
+    @JsonProperty("inferredLength")
+    public void setInferredlength(List<Number> inferredlength) { this.inferredlength = inferredlength; }
+
+    /**
+     * Retrieve the {@code inferredPrecision} property (displayed as '{@literal Inferred Precision}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("inferredPrecision")
+    public List<Number> getInferredprecision() { return this.inferredprecision; }
+
+    /**
+     * Set the {@code inferredPrecision} property (displayed as {@code Inferred Precision}) of the object.
+     * @param inferredprecision the value to set
+     */
+    @JsonProperty("inferredPrecision")
+    public void setInferredprecision(List<Number> inferredprecision) { this.inferredprecision = inferredprecision; }
+
+    /**
+     * Retrieve the {@code inferredScale} property (displayed as '{@literal Inferred Scale}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("inferredScale")
+    public List<Number> getInferredscale() { return this.inferredscale; }
+
+    /**
+     * Set the {@code inferredScale} property (displayed as {@code Inferred Scale}) of the object.
+     * @param inferredscale the value to set
+     */
+    @JsonProperty("inferredScale")
+    public void setInferredscale(List<Number> inferredscale) { this.inferredscale = inferredscale; }
+
+    /**
+     * Retrieve the {@code isInferredForeignKey} property (displayed as '{@literal Inferred Foreign Key}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("isInferredForeignKey")
+    public Boolean getIsinferredforeignkey() { return this.isinferredforeignkey; }
+
+    /**
+     * Set the {@code isInferredForeignKey} property (displayed as {@code Inferred Foreign Key}) of the object.
+     * @param isinferredforeignkey the value to set
+     */
+    @JsonProperty("isInferredForeignKey")
+    public void setIsinferredforeignkey(Boolean isinferredforeignkey) { this.isinferredforeignkey = isinferredforeignkey; }
+
+    /**
+     * Retrieve the {@code isInferredPrimaryKey} property (displayed as '{@literal Inferred Primary Key}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("isInferredPrimaryKey")
+    public Boolean getIsinferredprimarykey() { return this.isinferredprimarykey; }
+
+    /**
+     * Set the {@code isInferredPrimaryKey} property (displayed as {@code Inferred Primary Key}) of the object.
+     * @param isinferredprimarykey the value to set
+     */
+    @JsonProperty("isInferredPrimaryKey")
+    public void setIsinferredprimarykey(Boolean isinferredprimarykey) { this.isinferredprimarykey = isinferredprimarykey; }
+
+    /**
      * Retrieve the {@code length} property (displayed as '{@literal Length}') of the object.
      * @return {@code Number}
      */
@@ -361,6 +619,132 @@ public class AmazonS3DataFileField extends InformationAsset {
     public void setMinimumLength(Number minimumLength) { this.minimumLength = minimumLength; }
 
     /**
+     * Retrieve the {@code nbRecordsTested} property (displayed as '{@literal Number of Records Tested}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("nbRecordsTested")
+    public List<Number> getNbrecordstested() { return this.nbrecordstested; }
+
+    /**
+     * Set the {@code nbRecordsTested} property (displayed as {@code Number of Records Tested}) of the object.
+     * @param nbrecordstested the value to set
+     */
+    @JsonProperty("nbRecordsTested")
+    public void setNbrecordstested(List<Number> nbrecordstested) { this.nbrecordstested = nbrecordstested; }
+
+    /**
+     * Retrieve the {@code nullabilityFlag} property (displayed as '{@literal Include Null Values}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("nullabilityFlag")
+    public Boolean getNullabilityflag() { return this.nullabilityflag; }
+
+    /**
+     * Set the {@code nullabilityFlag} property (displayed as {@code Include Null Values}) of the object.
+     * @param nullabilityflag the value to set
+     */
+    @JsonProperty("nullabilityFlag")
+    public void setNullabilityflag(Boolean nullabilityflag) { this.nullabilityflag = nullabilityflag; }
+
+    /**
+     * Retrieve the {@code numberCompleteValues} property (displayed as '{@literal Number of Complete Values}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("numberCompleteValues")
+    public List<Number> getNumbercompletevalues() { return this.numbercompletevalues; }
+
+    /**
+     * Set the {@code numberCompleteValues} property (displayed as {@code Number of Complete Values}) of the object.
+     * @param numbercompletevalues the value to set
+     */
+    @JsonProperty("numberCompleteValues")
+    public void setNumbercompletevalues(List<Number> numbercompletevalues) { this.numbercompletevalues = numbercompletevalues; }
+
+    /**
+     * Retrieve the {@code numberDistinctValues} property (displayed as '{@literal Number of Distinct Values}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("numberDistinctValues")
+    public List<Number> getNumberdistinctvalues() { return this.numberdistinctvalues; }
+
+    /**
+     * Set the {@code numberDistinctValues} property (displayed as {@code Number of Distinct Values}) of the object.
+     * @param numberdistinctvalues the value to set
+     */
+    @JsonProperty("numberDistinctValues")
+    public void setNumberdistinctvalues(List<Number> numberdistinctvalues) { this.numberdistinctvalues = numberdistinctvalues; }
+
+    /**
+     * Retrieve the {@code numberEmptyValues} property (displayed as '{@literal Number of Empty Values}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("numberEmptyValues")
+    public List<Number> getNumberemptyvalues() { return this.numberemptyvalues; }
+
+    /**
+     * Set the {@code numberEmptyValues} property (displayed as {@code Number of Empty Values}) of the object.
+     * @param numberemptyvalues the value to set
+     */
+    @JsonProperty("numberEmptyValues")
+    public void setNumberemptyvalues(List<Number> numberemptyvalues) { this.numberemptyvalues = numberemptyvalues; }
+
+    /**
+     * Retrieve the {@code numberFormats} property (displayed as '{@literal Number of Distinct Formats}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("numberFormats")
+    public List<Number> getNumberformats() { return this.numberformats; }
+
+    /**
+     * Set the {@code numberFormats} property (displayed as {@code Number of Distinct Formats}) of the object.
+     * @param numberformats the value to set
+     */
+    @JsonProperty("numberFormats")
+    public void setNumberformats(List<Number> numberformats) { this.numberformats = numberformats; }
+
+    /**
+     * Retrieve the {@code numberNullValues} property (displayed as '{@literal Number of Null Values}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("numberNullValues")
+    public List<Number> getNumbernullvalues() { return this.numbernullvalues; }
+
+    /**
+     * Set the {@code numberNullValues} property (displayed as {@code Number of Null Values}) of the object.
+     * @param numbernullvalues the value to set
+     */
+    @JsonProperty("numberNullValues")
+    public void setNumbernullvalues(List<Number> numbernullvalues) { this.numbernullvalues = numbernullvalues; }
+
+    /**
+     * Retrieve the {@code numberValidValues} property (displayed as '{@literal Number of Valid Values}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("numberValidValues")
+    public List<Number> getNumbervalidvalues() { return this.numbervalidvalues; }
+
+    /**
+     * Set the {@code numberValidValues} property (displayed as {@code Number of Valid Values}) of the object.
+     * @param numbervalidvalues the value to set
+     */
+    @JsonProperty("numberValidValues")
+    public void setNumbervalidvalues(List<Number> numbervalidvalues) { this.numbervalidvalues = numbervalidvalues; }
+
+    /**
+     * Retrieve the {@code numberZeroValues} property (displayed as '{@literal Number of Zero Values}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("numberZeroValues")
+    public List<Number> getNumberzerovalues() { return this.numberzerovalues; }
+
+    /**
+     * Set the {@code numberZeroValues} property (displayed as {@code Number of Zero Values}) of the object.
+     * @param numberzerovalues the value to set
+     */
+    @JsonProperty("numberZeroValues")
+    public void setNumberzerovalues(List<Number> numberzerovalues) { this.numberzerovalues = numberzerovalues; }
+
+    /**
      * Retrieve the {@code odbc_type} property (displayed as '{@literal ODBC Type}') of the object.
      * @return {@code String}
      */
@@ -387,6 +771,20 @@ public class AmazonS3DataFileField extends InformationAsset {
      */
     @JsonProperty("position")
     public void setPosition(Number position) { this.position = position; }
+
+    /**
+     * Retrieve the {@code qualityScore} property (displayed as '{@literal Quality Score}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("qualityScore")
+    public String getQualityscore() { return this.qualityscore; }
+
+    /**
+     * Set the {@code qualityScore} property (displayed as {@code Quality Score}) of the object.
+     * @param qualityscore the value to set
+     */
+    @JsonProperty("qualityScore")
+    public void setQualityscore(String qualityscore) { this.qualityscore = qualityscore; }
 
     /**
      * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.
@@ -485,6 +883,20 @@ public class AmazonS3DataFileField extends InformationAsset {
      */
     @JsonProperty("unique")
     public void setUnique(Boolean unique) { this.unique = unique; }
+
+    /**
+     * Retrieve the {@code uniqueFlag} property (displayed as '{@literal Require Unique Values}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("uniqueFlag")
+    public Boolean getUniqueflag() { return this.uniqueflag; }
+
+    /**
+     * Set the {@code uniqueFlag} property (displayed as {@code Require Unique Values}) of the object.
+     * @param uniqueflag the value to set
+     */
+    @JsonProperty("uniqueFlag")
+    public void setUniqueflag(Boolean uniqueflag) { this.uniqueflag = uniqueflag; }
 
     /**
      * Retrieve the {@code written_by_(design)} property (displayed as '{@literal Written by (Design)}') of the object.

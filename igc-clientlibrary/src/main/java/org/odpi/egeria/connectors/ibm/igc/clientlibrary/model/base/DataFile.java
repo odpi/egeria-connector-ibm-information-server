@@ -87,6 +87,9 @@ public class DataFile extends InformationAsset {
     @JsonProperty("store_type")
     protected String storeType;
 
+    @JsonProperty("suggested_term_assignments")
+    protected ItemList<TermAssignment> suggestedTermAssignments;
+
     @JsonProperty("written_by_(design)")
     protected ItemList<InformationAsset> writtenByDesign;
 
@@ -378,6 +381,20 @@ public class DataFile extends InformationAsset {
      */
     @JsonProperty("store_type")
     public void setStoreType(String storeType) { this.storeType = storeType; }
+
+    /**
+     * Retrieve the {@code suggested_term_assignments} property (displayed as '{@literal Suggested Term Assignments}') of the object.
+     * @return {@code ItemList<TermAssignment>}
+     */
+    @JsonProperty("suggested_term_assignments")
+    public ItemList<TermAssignment> getSuggestedTermAssignments() { return this.suggestedTermAssignments; }
+
+    /**
+     * Set the {@code suggested_term_assignments} property (displayed as {@code Suggested Term Assignments}) of the object.
+     * @param suggestedTermAssignments the value to set
+     */
+    @JsonProperty("suggested_term_assignments")
+    public void setSuggestedTermAssignments(ItemList<TermAssignment> suggestedTermAssignments) { this.suggestedTermAssignments = suggestedTermAssignments; }
 
     /**
      * Retrieve the {@code written_by_(design)} property (displayed as '{@literal Written by (Design)}') of the object.

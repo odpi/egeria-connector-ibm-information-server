@@ -27,6 +27,9 @@ import java.util.Date;
 @JsonTypeName("column_definition")
 public class ColumnDefinition extends DataItem {
 
+    @JsonProperty("apt_field_properties")
+    protected String aptFieldProperties;
+
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
 
@@ -38,6 +41,20 @@ public class ColumnDefinition extends DataItem {
 
     @JsonProperty("used_by_stage_columns")
     protected ItemList<DataItem> usedByStageColumns;
+
+    /**
+     * Retrieve the {@code apt_field_properties} property (displayed as '{@literal APT Field Properties}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("apt_field_properties")
+    public String getAptFieldProperties() { return this.aptFieldProperties; }
+
+    /**
+     * Set the {@code apt_field_properties} property (displayed as {@code APT Field Properties}) of the object.
+     * @param aptFieldProperties the value to set
+     */
+    @JsonProperty("apt_field_properties")
+    public void setAptFieldProperties(String aptFieldProperties) { this.aptFieldProperties = aptFieldProperties; }
 
     /**
      * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.

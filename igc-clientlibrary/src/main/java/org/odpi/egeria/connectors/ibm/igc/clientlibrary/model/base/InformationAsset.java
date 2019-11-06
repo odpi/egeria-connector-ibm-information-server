@@ -23,6 +23,7 @@ import java.util.Date;
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=InformationAsset.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
 @JsonSubTypes({
+        @JsonSubTypes.Type(value = RuleExecutionResult.class, name = "Rule_Execution_Result"),
         @JsonSubTypes.Type(value = AmazonS3Bucket.class, name = "amazon_s3_bucket"),
         @JsonSubTypes.Type(value = AmazonS3DataFile.class, name = "amazon_s3_data_file"),
         @JsonSubTypes.Type(value = AmazonS3DataFileField.class, name = "amazon_s3_data_file_field"),

@@ -28,9 +28,19 @@ import java.util.List;
 @JsonTypeName("database_table")
 public class DatabaseTable extends Datagroup {
 
+    @JsonProperty("FKViolationCount")
+    protected List<Number> fkviolationcount;
+
+    @JsonProperty("PKDuplicateCount")
+    protected List<Number> pkduplicatecount;
+
     @JsonProperty("alias_(business_name)")
     protected String aliasBusinessName;
 
+    /**
+     * No longer applicable from 11.5.0.2sp3 onwards.
+     */
+    @Deprecated
     @JsonProperty("analysis")
     protected ItemList<TableAnalysis> analysis;
 
@@ -52,11 +62,17 @@ public class DatabaseTable extends Datagroup {
     @JsonProperty("database_columns")
     protected ItemList<DatabaseColumn> databaseColumns;
 
+    @JsonProperty("database_indexes")
+    protected ItemList<DatabaseIndex> databaseIndexes;
+
     @JsonProperty("defined_foreign_key")
     protected ItemList<DatabaseColumn> definedForeignKey;
 
     @JsonProperty("defined_primary_key")
     protected ItemList<CandidateKey> definedPrimaryKey;
+
+    @JsonProperty("fieldCount")
+    protected List<Number> fieldcount;
 
     @JsonProperty("impacted_by")
     protected ItemList<InformationAsset> impactedBy;
@@ -85,6 +101,12 @@ public class DatabaseTable extends Datagroup {
     @JsonProperty("multi_column_analysis")
     protected List<String> multiColumnAnalysis;
 
+    @JsonProperty("nbRecordTested")
+    protected List<Number> nbrecordtested;
+
+    @JsonProperty("qualityScore")
+    protected String qualityscore;
+
     @JsonProperty("read_by_(design)")
     protected ItemList<InformationAsset> readByDesign;
 
@@ -99,6 +121,12 @@ public class DatabaseTable extends Datagroup {
 
     @JsonProperty("referenced_by_views")
     protected ItemList<View> referencedByViews;
+
+    @JsonProperty("reviewDate")
+    protected List<Date> reviewdate;
+
+    @JsonProperty("rowCount")
+    protected List<Number> rowcount;
 
     @JsonProperty("same_as_data_sources")
     protected ItemList<Datagroup> sameAsDataSources;
@@ -137,6 +165,34 @@ public class DatabaseTable extends Datagroup {
     protected ItemList<InformationAsset> writtenByUserDefined;
 
     /**
+     * Retrieve the {@code FKViolationCount} property (displayed as '{@literal Foreign Key Violations}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("FKViolationCount")
+    public List<Number> getFkviolationcount() { return this.fkviolationcount; }
+
+    /**
+     * Set the {@code FKViolationCount} property (displayed as {@code Foreign Key Violations}) of the object.
+     * @param fkviolationcount the value to set
+     */
+    @JsonProperty("FKViolationCount")
+    public void setFkviolationcount(List<Number> fkviolationcount) { this.fkviolationcount = fkviolationcount; }
+
+    /**
+     * Retrieve the {@code PKDuplicateCount} property (displayed as '{@literal Primary Key Duplicates}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("PKDuplicateCount")
+    public List<Number> getPkduplicatecount() { return this.pkduplicatecount; }
+
+    /**
+     * Set the {@code PKDuplicateCount} property (displayed as {@code Primary Key Duplicates}) of the object.
+     * @param pkduplicatecount the value to set
+     */
+    @JsonProperty("PKDuplicateCount")
+    public void setPkduplicatecount(List<Number> pkduplicatecount) { this.pkduplicatecount = pkduplicatecount; }
+
+    /**
      * Retrieve the {@code alias_(business_name)} property (displayed as '{@literal Alias (Business Name)}') of the object.
      * @return {@code String}
      */
@@ -152,15 +208,21 @@ public class DatabaseTable extends Datagroup {
 
     /**
      * Retrieve the {@code analysis} property (displayed as '{@literal Analysis}') of the object.
+     * No longer applicable from 11.5.0.2sp3 onwards.
+     *
      * @return {@code ItemList<TableAnalysis>}
      */
+    @Deprecated
     @JsonProperty("analysis")
     public ItemList<TableAnalysis> getAnalysis() { return this.analysis; }
 
     /**
      * Set the {@code analysis} property (displayed as {@code Analysis}) of the object.
+     * No longer applicable from 11.5.0.2sp3 onwards.
+     *
      * @param analysis the value to set
      */
+    @Deprecated
     @JsonProperty("analysis")
     public void setAnalysis(ItemList<TableAnalysis> analysis) { this.analysis = analysis; }
 
@@ -249,6 +311,20 @@ public class DatabaseTable extends Datagroup {
     public void setDatabaseColumns(ItemList<DatabaseColumn> databaseColumns) { this.databaseColumns = databaseColumns; }
 
     /**
+     * Retrieve the {@code database_indexes} property (displayed as '{@literal Indexes}') of the object.
+     * @return {@code ItemList<DatabaseIndex>}
+     */
+    @JsonProperty("database_indexes")
+    public ItemList<DatabaseIndex> getDatabaseIndexes() { return this.databaseIndexes; }
+
+    /**
+     * Set the {@code database_indexes} property (displayed as {@code Indexes}) of the object.
+     * @param databaseIndexes the value to set
+     */
+    @JsonProperty("database_indexes")
+    public void setDatabaseIndexes(ItemList<DatabaseIndex> databaseIndexes) { this.databaseIndexes = databaseIndexes; }
+
+    /**
      * Retrieve the {@code defined_foreign_key} property (displayed as '{@literal Defined Foreign Key}') of the object.
      * @return {@code ItemList<DatabaseColumn>}
      */
@@ -275,6 +351,20 @@ public class DatabaseTable extends Datagroup {
      */
     @JsonProperty("defined_primary_key")
     public void setDefinedPrimaryKey(ItemList<CandidateKey> definedPrimaryKey) { this.definedPrimaryKey = definedPrimaryKey; }
+
+    /**
+     * Retrieve the {@code fieldCount} property (displayed as '{@literal Number of Fields}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("fieldCount")
+    public List<Number> getFieldcount() { return this.fieldcount; }
+
+    /**
+     * Set the {@code fieldCount} property (displayed as {@code Number of Fields}) of the object.
+     * @param fieldcount the value to set
+     */
+    @JsonProperty("fieldCount")
+    public void setFieldcount(List<Number> fieldcount) { this.fieldcount = fieldcount; }
 
     /**
      * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
@@ -403,6 +493,34 @@ public class DatabaseTable extends Datagroup {
     public void setMultiColumnAnalysis(List<String> multiColumnAnalysis) { this.multiColumnAnalysis = multiColumnAnalysis; }
 
     /**
+     * Retrieve the {@code nbRecordTested} property (displayed as '{@literal Number of Records Tested}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("nbRecordTested")
+    public List<Number> getNbrecordtested() { return this.nbrecordtested; }
+
+    /**
+     * Set the {@code nbRecordTested} property (displayed as {@code Number of Records Tested}) of the object.
+     * @param nbrecordtested the value to set
+     */
+    @JsonProperty("nbRecordTested")
+    public void setNbrecordtested(List<Number> nbrecordtested) { this.nbrecordtested = nbrecordtested; }
+
+    /**
+     * Retrieve the {@code qualityScore} property (displayed as '{@literal Quality Score}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("qualityScore")
+    public String getQualityscore() { return this.qualityscore; }
+
+    /**
+     * Set the {@code qualityScore} property (displayed as {@code Quality Score}) of the object.
+     * @param qualityscore the value to set
+     */
+    @JsonProperty("qualityScore")
+    public void setQualityscore(String qualityscore) { this.qualityscore = qualityscore; }
+
+    /**
      * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.
      * @return {@code ItemList<InformationAsset>}
      */
@@ -471,6 +589,34 @@ public class DatabaseTable extends Datagroup {
      */
     @JsonProperty("referenced_by_views")
     public void setReferencedByViews(ItemList<View> referencedByViews) { this.referencedByViews = referencedByViews; }
+
+    /**
+     * Retrieve the {@code reviewDate} property (displayed as '{@literal Review Date}') of the object.
+     * @return {@code List<Date>}
+     */
+    @JsonProperty("reviewDate")
+    public List<Date> getReviewdate() { return this.reviewdate; }
+
+    /**
+     * Set the {@code reviewDate} property (displayed as {@code Review Date}) of the object.
+     * @param reviewdate the value to set
+     */
+    @JsonProperty("reviewDate")
+    public void setReviewdate(List<Date> reviewdate) { this.reviewdate = reviewdate; }
+
+    /**
+     * Retrieve the {@code rowCount} property (displayed as '{@literal Number of Rows}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("rowCount")
+    public List<Number> getRowcount() { return this.rowcount; }
+
+    /**
+     * Set the {@code rowCount} property (displayed as {@code Number of Rows}) of the object.
+     * @param rowcount the value to set
+     */
+    @JsonProperty("rowCount")
+    public void setRowcount(List<Number> rowcount) { this.rowcount = rowcount; }
 
     /**
      * Retrieve the {@code same_as_data_sources} property (displayed as '{@literal Same as Data Sources}') of the object.
