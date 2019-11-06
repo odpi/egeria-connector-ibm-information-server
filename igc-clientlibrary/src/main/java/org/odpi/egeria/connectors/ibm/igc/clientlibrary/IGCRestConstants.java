@@ -118,7 +118,6 @@ public class IGCRestConstants {
     private static final Set<String> IGNORE_TYPES = createIgnoreTypes();
     private static Set<String> createIgnoreTypes() {
         Set<String> set = new HashSet<>();
-        set.add("classificationenabledgroup");
         return set;
     }
 
@@ -147,13 +146,13 @@ public class IGCRestConstants {
     private static Set<String> createDataItemTypes() {
         Set<String> set = new HashSet<>();
         set.add("column_definition");
-        set.add("data_file_field");
-        set.add("database_column");
         set.add("ds_stage_column");
         set.add("parameter");
         set.add("routine_argument");
         set.add("stage_type_detail");
         set.add("transform_argument");
+        set.add("data_item_definition");
+        set.add("classificationenabledgroup");
         return set;
     }
 
@@ -162,6 +161,14 @@ public class IGCRestConstants {
         Set<String> set = new HashSet<>();
         set.add("data_element");
         set.add("table_definition");
+        return set;
+    }
+
+    private static final Set<String> CLASSIFICATION_ENABLED_GROUP_TYPES = createClassificationEnabledGroupTypes();
+    private static Set<String> createClassificationEnabledGroupTypes() {
+        Set<String> set = new HashSet();
+        set.add("database_column");
+        set.add("data_file_field");
         return set;
     }
 
@@ -228,6 +235,13 @@ public class IGCRestConstants {
      * @return {@code Set<String>}
      */
     public static Set<String> getDataItemDefinitionTypes() { return DATA_ITEM_DEFINITION_TYPES; }
+
+    /**
+     * Retrieve the set of IGC object types that should be subtypes of the 'classificationenabledgroup' type.
+     *
+     * @return {@code Set<String>}
+     */
+    public static Set<String> getClassificationEnabledGroupTypes() { return CLASSIFICATION_ENABLED_GROUP_TYPES; }
 
     /**
      * Retrieve the name of the Java type for the provided IGC type.

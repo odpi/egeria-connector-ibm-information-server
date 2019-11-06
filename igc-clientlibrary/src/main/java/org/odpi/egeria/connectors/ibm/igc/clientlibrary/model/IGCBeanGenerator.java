@@ -71,6 +71,7 @@ public class IGCBeanGenerator {
     private TreeMap<String, String> typeToDatagroupClassNames;
     private TreeMap<String, String> typeToDataItemClassNames;
     private TreeMap<String, String> typeToDataItemDefinitionClassNames;
+    private TreeMap<String, String> typeToClassificationEnabledGroupClassNames;
 
     private Map<String, Set<String>> superTypeToProperties;
 
@@ -82,6 +83,7 @@ public class IGCBeanGenerator {
         typeToDatagroupClassNames = new TreeMap<>();
         typeToDataItemClassNames = new TreeMap<>();
         typeToDataItemDefinitionClassNames = new TreeMap<>();
+        typeToClassificationEnabledGroupClassNames = new TreeMap<>();
         superTypeToProperties = new HashMap<>();
     }
 
@@ -130,6 +132,8 @@ public class IGCBeanGenerator {
         injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + "DataItem.java"), typeToDataItemClassNames);
         System.out.println("Injecting subtype information into DataItemDefinition...");
         injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + "DataItemDefinition.java"), typeToDataItemDefinitionClassNames);
+        System.out.println("Injecting subtype information into Classificationenabledgroup...");
+        injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + "Classificationenabledgroup.java"), typeToClassificationEnabledGroupClassNames);
 
         // Before injecting into Reference we need to remove any previous injections (since this file is not
         // actually generated)
@@ -274,6 +278,8 @@ public class IGCBeanGenerator {
                     typeToDataItemClassNames.put(id, className);
                 } else if (classToExtend.equals("DataItemDefinition")) {
                     typeToDataItemDefinitionClassNames.put(id, className);
+                } else if (classToExtend.equals("Classificationenabledgroup")) {
+                    typeToClassificationEnabledGroupClassNames.put(id, className);
                 } else {
                     typeToReferenceClassNames.put(id, className);
                 }
@@ -503,14 +509,11 @@ public class IGCBeanGenerator {
             } else if (IGCRestConstants.getDataItemDefinitionTypes().contains(typeName)) {
                 extendClass = "DataItemDefinition";
                 knownClass = true;
-            } else if (typeName.equals("datagroup")) {
-                extendClass = "InformationAsset";
+            } else if (IGCRestConstants.getClassificationEnabledGroupTypes().contains(typeName)) {
+                extendClass = "Classificationenabledgroup";
                 knownClass = true;
-            } else if (typeName.equals("data_item")) {
+            } else if (typeName.equals("datagroup") || typeName.equals("data_item")) {
                 extendClass = "InformationAsset";
-                knownClass = true;
-            } else if (typeName.equals("data_item_definition")) {
-                extendClass = "DataItem";
                 knownClass = true;
             } else if (typeName.equals("information_asset")) {
                 extendClass = "MainObject";
@@ -557,7 +560,7 @@ public class IGCBeanGenerator {
                 removeAllSuperTypeProperties("main_object");
                 removeAllSuperTypeProperties("information_asset");
                 removeAllSuperTypeProperties("datagroup");
-            } else if (extendClass.equals("DataItem")) {
+            } else if (extendClass.equals("DataItem") || extendClass.equals("Classificationenabledgroup")) {
                 removeAllSuperTypeProperties("main_object");
                 removeAllSuperTypeProperties("information_asset");
                 removeAllSuperTypeProperties("data_item");
