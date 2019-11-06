@@ -65,25 +65,13 @@ public class IGCBeanGenerator {
     }
 
     private IGCRestClient igcRestClient;
-    private TreeMap<String, String> typeToReferenceClassNames;
-    private TreeMap<String, String> typeToMainObjectClassNames;
-    private TreeMap<String, String> typeToInformationAssetClassNames;
-    private TreeMap<String, String> typeToDatagroupClassNames;
-    private TreeMap<String, String> typeToDataItemClassNames;
-    private TreeMap<String, String> typeToDataItemDefinitionClassNames;
-    private TreeMap<String, String> typeToClassificationEnabledGroupClassNames;
+    private TreeMap<String, TreeMap<String, String>> superTypeToSubTypeToClassName;
 
     private Map<String, Set<String>> superTypeToProperties;
 
     private IGCBeanGenerator(String hostname, String port, String username, String password) {
         igcRestClient = new IGCRestClient(hostname, port, username, password);
-        typeToReferenceClassNames = new TreeMap<>();
-        typeToMainObjectClassNames = new TreeMap<>();
-        typeToInformationAssetClassNames = new TreeMap<>();
-        typeToDatagroupClassNames = new TreeMap<>();
-        typeToDataItemClassNames = new TreeMap<>();
-        typeToDataItemDefinitionClassNames = new TreeMap<>();
-        typeToClassificationEnabledGroupClassNames = new TreeMap<>();
+        superTypeToSubTypeToClassName = new TreeMap<>();
         superTypeToProperties = new HashMap<>();
     }
 
@@ -101,7 +89,7 @@ public class IGCBeanGenerator {
         // Before generating any other types, generate the supertypes from which they will extend
         // and as part of this keep a list of their properties, so any classes that extend them can skip
         // including the same properties and getter / setter methods as overrides
-        for (String typeName : SUPER_TYPES) {
+        for (String typeName : IGCRestConstants.getSuperTypes()) {
             TypeDetails details = igcRestClient.getTypeDetails(typeName);
             createPOJOForType(details);
         }
@@ -115,50 +103,27 @@ public class IGCBeanGenerator {
         for (TypeHeader igcType : types) {
             String type = igcType.getId();
             // No need to re-generate the supertypes
-            if (!SUPER_TYPES.contains(type)) {
+            if (!IGCRestConstants.getSuperTypes().contains(type)) {
                 TypeDetails typeDetails = igcRestClient.getTypeDetails(type);
                 createPOJOForType(typeDetails);
             }
         }
 
         // Finally update the supertypes with their subtypes
-        System.out.println("Injecting subtype information into MainObject...");
-        injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + "MainObject.java"), typeToMainObjectClassNames);
-        System.out.println("Injecting subtype information into InformationAsset...");
-        injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + "InformationAsset.java"), typeToInformationAssetClassNames);
-        System.out.println("Injecting subtype information into Datagroup...");
-        injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + "Datagroup.java"), typeToDatagroupClassNames);
-        System.out.println("Injecting subtype information into DataItem...");
-        injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + "DataItem.java"), typeToDataItemClassNames);
-        System.out.println("Injecting subtype information into DataItemDefinition...");
-        injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + "DataItemDefinition.java"), typeToDataItemDefinitionClassNames);
-        System.out.println("Injecting subtype information into Classificationenabledgroup...");
-        injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + "Classificationenabledgroup.java"), typeToClassificationEnabledGroupClassNames);
+        for (String superTypeName : IGCRestConstants.getSuperTypes()) {
+            String superTypeClassName = IGCRestConstants.getClassNameForAssetType(superTypeName);
+            if (!superTypeClassName.equals("Reference")) {
+                System.out.println("Injecting subtype information into " + superTypeClassName + "...");
+                injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + superTypeClassName + ".java"), superTypeToSubTypeToClassName.get(superTypeName));
+            }
+        }
 
         // Before injecting into Reference we need to remove any previous injections (since this file is not
         // actually generated)
         Path refPath = Paths.get(COMMON_DIRECTORY + File.separator + "Reference.java");
         removeInjectedSubtypes(refPath);
         System.out.println("Injecting subtype information into Reference...");
-        injectSubTypes(refPath, typeToReferenceClassNames);
-
-        // And do the same for any alias objects (after creating the mappings we need first)
-        Map<String, Map<String, String>> superClassToSubTypeMappings = new HashMap<>();
-        for (Map.Entry<String, String> entry : IGCRestConstants.getAliasObjects().entrySet()) {
-            String subTypeName = entry.getKey();
-            String superTypeName = entry.getValue();
-            String superClassName = IGCRestConstants.getClassNameForAssetType(superTypeName);
-            if (!superClassToSubTypeMappings.containsKey(superClassName)) {
-                superClassToSubTypeMappings.put(superClassName, new HashMap<>());
-            }
-            superClassToSubTypeMappings.get(superClassName).put(subTypeName, IGCRestConstants.getClassNameForAssetType(subTypeName));
-        }
-        for (Map.Entry<String, Map<String, String>> entry : superClassToSubTypeMappings.entrySet()) {
-            String superClassName = entry.getKey();
-            Map<String, String> mappings = entry.getValue();
-            Path aliasPath = Paths.get(BASE_DIRECTORY + File.separator + superClassName + ".java");
-            injectSubTypes(aliasPath, mappings);
-        }
+        injectSubTypes(refPath, superTypeToSubTypeToClassName.get("reference"));
 
         igcRestClient.disconnect();
 
@@ -203,12 +168,13 @@ public class IGCBeanGenerator {
 
             TypeCharacteristics typeCharacteristics = new TypeCharacteristics(id, typeDetails.getViewInfo().getProperties());
             Collection<PropertyDetail> propertyDetails = typeCharacteristics.getPropertyDetails();
+            String superType = typeCharacteristics.getTypeToExtend();
 
-            if (!IGCRestConstants.getAliasObjects().containsKey(id)) {
+            if (!propertyDetails.isEmpty()) {
                 fs.append("import com.fasterxml.jackson.annotation.JsonProperty;");
                 fs.append(System.lineSeparator());
                 Set<String> dataTypes = typeCharacteristics.getDataTypes();
-                if (typeCharacteristics.getClassToExtend().equals("Reference")
+                if (superType.equals("reference")
                         || dataTypes.contains("Reference")) {
                     fs.append("import " + IGCRestConstants.IGC_REST_COMMON_MODEL_PKG + ".Reference;");
                     fs.append(System.lineSeparator());
@@ -225,6 +191,9 @@ public class IGCBeanGenerator {
                     fs.append("import java.util.List;");
                     fs.append(System.lineSeparator());
                 }
+            } else if (superType.equals("reference")) {
+                fs.append("import " + IGCRestConstants.IGC_REST_COMMON_MODEL_PKG + ".Reference;");
+                fs.append(System.lineSeparator());
             }
 
             fs.append(System.lineSeparator());
@@ -240,51 +209,33 @@ public class IGCBeanGenerator {
             fs.append("@JsonTypeName(\"").append(id).append("\")");
             fs.append(System.lineSeparator());
 
-            if (IGCRestConstants.getAliasObjects().containsKey(id)) {
-                fs.append("public class ").append(className).append(" extends ").append(IGCRestConstants.getClassNameForAssetType(IGCRestConstants.getAliasObjects().get(id))).append(" {");
-                fs.append(System.lineSeparator()).append(System.lineSeparator());
-            } else {
+            String classToExtend = IGCRestConstants.getClassNameForAssetType(superType);
 
-                String classToExtend = typeCharacteristics.getClassToExtend();
+            // Only add the list of properties if this object isn't simply an alias for another
+            fs.append("public class ").append(className).append(" extends ").append(classToExtend).append(" {");
+            fs.append(System.lineSeparator()).append(System.lineSeparator());
 
-                // Only add the list of properties if this object isn't simply an alias for another
-                fs.append("public class ").append(className).append(" extends ").append(classToExtend).append(" {");
-                fs.append(System.lineSeparator()).append(System.lineSeparator());
-
-                try {
-                    // First output all of the members
-                    for (PropertyDetail detail : propertyDetails) {
-                        fs.append(detail.getMember());
-                        fs.append(System.lineSeparator());
-                    }
-                    // Then the getters and setters for each
-                    for (PropertyDetail detail : propertyDetails) {
-                        fs.append(detail.getGetSet());
-                        fs.append(System.lineSeparator());
-                        fs.append(System.lineSeparator());
-                    }
-                } catch (IOException e) {
-                    System.err.println("Unable to append property details.");
-                    e.printStackTrace();
+            try {
+                // First output all of the members
+                for (PropertyDetail detail : propertyDetails) {
+                    fs.append(detail.getMember());
+                    fs.append(System.lineSeparator());
                 }
-
-                if (classToExtend.equals("InformationAsset")) {
-                    typeToInformationAssetClassNames.put(id, className);
-                } else if (classToExtend.equals("MainObject")) {
-                    typeToMainObjectClassNames.put(id, className);
-                } else if (classToExtend.equals("Datagroup")) {
-                    typeToDatagroupClassNames.put(id, className);
-                } else if (classToExtend.equals("DataItem")) {
-                    typeToDataItemClassNames.put(id, className);
-                } else if (classToExtend.equals("DataItemDefinition")) {
-                    typeToDataItemDefinitionClassNames.put(id, className);
-                } else if (classToExtend.equals("Classificationenabledgroup")) {
-                    typeToClassificationEnabledGroupClassNames.put(id, className);
-                } else {
-                    typeToReferenceClassNames.put(id, className);
+                // Then the getters and setters for each
+                for (PropertyDetail detail : propertyDetails) {
+                    fs.append(detail.getGetSet());
+                    fs.append(System.lineSeparator());
+                    fs.append(System.lineSeparator());
                 }
-
+            } catch (IOException e) {
+                System.err.println("Unable to append property details.");
+                e.printStackTrace();
             }
+
+            if (!superTypeToSubTypeToClassName.containsKey(superType)) {
+                superTypeToSubTypeToClassName.put(superType, new TreeMap<>());
+            }
+            superTypeToSubTypeToClassName.get(superType).put(id, className);
 
             fs.append("}");
             fs.append(System.lineSeparator());
@@ -432,20 +383,8 @@ public class IGCBeanGenerator {
         return getSetter.toString();
     }
 
-    private static final List<String> SUPER_TYPES = createSuperTypes();
     private static final Set<String> RESERVED_WORDS = createReservedWords();
-    private static final Set<String> MAIN_OBJECT_PROPERTIES = createMainObjectProperties();
     private static final Set<String> CORE_TO_IGNORE = createCoreToIgnoreProperties();
-
-    private static List<String> createSuperTypes() {
-        List<String> list = new ArrayList<>();
-        list.add("main_object");
-        list.add("information_asset");
-        list.add("datagroup");
-        list.add("data_item");
-        list.add("data_item_definition");
-        return list;
-    }
 
     private static Set<String> createReservedWords() {
         Set<String> set = new HashSet<>();
@@ -453,19 +392,6 @@ public class IGCBeanGenerator {
         set.add("final");
         set.add("abstract");
         set.add("default");
-        return set;
-    }
-
-    private static Set<String> createMainObjectProperties() {
-        Set<String> set = new HashSet<>();
-        set.add("name");
-        set.add("short_description");
-        set.add("long_description");
-        set.add("labels");
-        set.add("stewards");
-        set.add("assigned_to_terms");
-        set.add("implements_rules");
-        set.add("governed_by_rules");
         return set;
     }
 
@@ -482,7 +408,7 @@ public class IGCBeanGenerator {
     protected class TypeCharacteristics {
 
         // Default everything to a simple Reference as the base class
-        private String extendClass = "Reference";
+        private String typeToExtend = "reference";
         private TreeMap<String, PropertyDetail> propertyDetails;
         private Set<String> dataTypes;
 
@@ -499,26 +425,8 @@ public class IGCBeanGenerator {
         private void initialize(String typeName, List<TypeProperty> properties) {
 
             // Set known supertypes up-front
-            boolean knownClass = false;
-            if (IGCRestConstants.getDatagroupTypes().contains(typeName)) {
-                extendClass = "Datagroup";
-                knownClass = true;
-            } else if (IGCRestConstants.getDataItemTypes().contains(typeName)) {
-                extendClass = "DataItem";
-                knownClass = true;
-            } else if (IGCRestConstants.getDataItemDefinitionTypes().contains(typeName)) {
-                extendClass = "DataItemDefinition";
-                knownClass = true;
-            } else if (IGCRestConstants.getClassificationEnabledGroupTypes().contains(typeName)) {
-                extendClass = "Classificationenabledgroup";
-                knownClass = true;
-            } else if (typeName.equals("datagroup") || typeName.equals("data_item")) {
-                extendClass = "InformationAsset";
-                knownClass = true;
-            } else if (typeName.equals("information_asset")) {
-                extendClass = "MainObject";
-                knownClass = true;
-            }
+            typeToExtend = IGCRestConstants.getSubTypeToSuperType().getOrDefault(typeName, "reference");
+            boolean knownClass = !typeToExtend.equals("reference");
 
             // Iterate through all the properties to detect the data types in use, and the supertype for the class
             Set<String> allPropertyNames = new HashSet<>();
@@ -533,43 +441,27 @@ public class IGCBeanGenerator {
                                 && propertyType.equals("collection")
                                 && !knownClass) {
                             // If the object can be put into a collection, is not itself a collection, and is not
-                            // already a more specific type, treat it as an InformationAsset
-                            extendClass = "InformationAsset";
+                            // already a more specific type, treat it as an information_asset
+                            typeToExtend = "information_asset";
                         } else if (propertyName.equals("labels")
                                 && propertyType.equals("label")
                                 && !typeName.equals("main_object")
                                 && !knownClass) {
                             // If the object can be assigned a label, and is not already a more specific type, treat it
-                            // as a MainObject
-                            extendClass = "MainObject";
+                            // as a main_object
+                            typeToExtend = "main_object";
                         }
                     }
                     dataTypes.addAll(detail.getJavaTypes());
                 }
                 allPropertyNames.add(property.getName());
             }
-            if (SUPER_TYPES.contains(typeName)) {
+            if (IGCRestConstants.getSuperTypes().contains(typeName)) {
                 superTypeToProperties.put(typeName, allPropertyNames);
             }
-            if (extendClass.equals("MainObject")) {
-                removeAllSuperTypeProperties("main_object");
-            } else if (extendClass.equals("InformationAsset")) {
-                removeAllSuperTypeProperties("main_object");
-                removeAllSuperTypeProperties("information_asset");
-            } else if (extendClass.equals("Datagroup")) {
-                removeAllSuperTypeProperties("main_object");
-                removeAllSuperTypeProperties("information_asset");
-                removeAllSuperTypeProperties("datagroup");
-            } else if (extendClass.equals("DataItem") || extendClass.equals("Classificationenabledgroup")) {
-                removeAllSuperTypeProperties("main_object");
-                removeAllSuperTypeProperties("information_asset");
-                removeAllSuperTypeProperties("data_item");
-            } else if (extendClass.equals("DataItemDefinition")) {
-                removeAllSuperTypeProperties("main_object");
-                removeAllSuperTypeProperties("information_asset");
-                removeAllSuperTypeProperties("data_item");
-                removeAllSuperTypeProperties("data_item_definition");
-            }
+
+            // Remove all super type properties for the type we are extending
+            removeAllSuperTypeProperties(typeToExtend);
 
         }
 
@@ -582,8 +474,17 @@ public class IGCBeanGenerator {
         }
 
         private void removeAllSuperTypeProperties(String superTypeName) {
-            for (String propertyName : superTypeToProperties.get(superTypeName)) {
-                removePropertyDetail(propertyName);
+            if (!superTypeName.equals("reference")) {
+                for (String propertyName : superTypeToProperties.get(superTypeName)) {
+                    removePropertyDetail(propertyName);
+                }
+                for (Map.Entry<String, String> entry : IGCRestConstants.getSubTypeToSuperType().entrySet()) {
+                    String subTypeName = entry.getKey();
+                    String mappedSuperType = entry.getValue();
+                    if (subTypeName.equals(superTypeName)) {
+                        removeAllSuperTypeProperties(mappedSuperType);
+                    }
+                }
             }
         }
 
@@ -591,8 +492,8 @@ public class IGCBeanGenerator {
             return propertyDetails.values();
         }
 
-        String getClassToExtend() {
-            return extendClass;
+        String getTypeToExtend() {
+            return typeToExtend;
         }
 
         Set<String> getDataTypes() {

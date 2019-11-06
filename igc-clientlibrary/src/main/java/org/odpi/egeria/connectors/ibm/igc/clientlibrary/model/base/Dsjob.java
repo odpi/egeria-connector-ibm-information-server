@@ -49,11 +49,28 @@ public class Dsjob extends InformationAsset {
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
 
+    @JsonProperty("include_for_lineage")
+    protected Boolean includeForLineage;
+
+    /**
+     * Valid values are:
+     * <ul>
+     *   <li>setToTrue (displayed in the UI as 'True')</li>
+     *   <li>setToFalse (displayed in the UI as 'False')</li>
+     *   <li>defaultToProject (displayed in the UI as 'Default (Transformation Project)')</li>
+     * </ul>
+     */
+    @JsonProperty("include_for_lineage__edit")
+    protected String includeForLineageEdit;
+
     @JsonProperty("include_for_lineage_description")
     protected String includeForLineageDescription;
 
     @JsonProperty("information_services_operations")
     protected ItemList<InformationServicesOperation> informationServicesOperations;
+
+    @JsonProperty("inherits_lineage_setting_from_transformation_project")
+    protected Boolean inheritsLineageSettingFromTransformationProject;
 
     @JsonProperty("job_runs")
     protected ItemList<JobRun> jobRuns;
@@ -226,6 +243,34 @@ public class Dsjob extends InformationAsset {
     public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
+     * Retrieve the {@code include_for_lineage} property (displayed as '{@literal Include for Lineage}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("include_for_lineage")
+    public Boolean getIncludeForLineage() { return this.includeForLineage; }
+
+    /**
+     * Set the {@code include_for_lineage} property (displayed as {@code Include for Lineage}) of the object.
+     * @param includeForLineage the value to set
+     */
+    @JsonProperty("include_for_lineage")
+    public void setIncludeForLineage(Boolean includeForLineage) { this.includeForLineage = includeForLineage; }
+
+    /**
+     * Retrieve the {@code include_for_lineage__edit} property (displayed as '{@literal Include for Lineage}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("include_for_lineage__edit")
+    public String getIncludeForLineageEdit() { return this.includeForLineageEdit; }
+
+    /**
+     * Set the {@code include_for_lineage__edit} property (displayed as {@code Include for Lineage}) of the object.
+     * @param includeForLineageEdit the value to set
+     */
+    @JsonProperty("include_for_lineage__edit")
+    public void setIncludeForLineageEdit(String includeForLineageEdit) { this.includeForLineageEdit = includeForLineageEdit; }
+
+    /**
      * Retrieve the {@code include_for_lineage_description} property (displayed as '{@literal Include for Lineage}') of the object.
      * @return {@code String}
      */
@@ -252,6 +297,20 @@ public class Dsjob extends InformationAsset {
      */
     @JsonProperty("information_services_operations")
     public void setInformationServicesOperations(ItemList<InformationServicesOperation> informationServicesOperations) { this.informationServicesOperations = informationServicesOperations; }
+
+    /**
+     * Retrieve the {@code inherits_lineage_setting_from_transformation_project} property (displayed as '{@literal Inherits Lineage Setting from Transformation Project}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("inherits_lineage_setting_from_transformation_project")
+    public Boolean getInheritsLineageSettingFromTransformationProject() { return this.inheritsLineageSettingFromTransformationProject; }
+
+    /**
+     * Set the {@code inherits_lineage_setting_from_transformation_project} property (displayed as {@code Inherits Lineage Setting from Transformation Project}) of the object.
+     * @param inheritsLineageSettingFromTransformationProject the value to set
+     */
+    @JsonProperty("inherits_lineage_setting_from_transformation_project")
+    public void setInheritsLineageSettingFromTransformationProject(Boolean inheritsLineageSettingFromTransformationProject) { this.inheritsLineageSettingFromTransformationProject = inheritsLineageSettingFromTransformationProject; }
 
     /**
      * Retrieve the {@code job_runs} property (displayed as '{@literal Job Runs}') of the object.

@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -21,10 +22,13 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=Reportobject.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = BiReportQueryItem.class, name = "bi_report_query_item"),
+})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("reportobject")
-public class Reportobject extends MainObject {
+public class Reportobject extends InformationAsset {
 
     @JsonProperty("alias_(business_name)")
     protected String aliasBusinessName;

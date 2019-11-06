@@ -12,6 +12,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * POJO for the {@code term} asset type in IGC, displayed as '{@literal Term}' in the IGC UI.
@@ -42,11 +43,17 @@ public class Term extends InformationAsset {
     @JsonProperty("blueprint_elements")
     protected ItemList<BlueprintElementLink> blueprintElements;
 
+    @JsonProperty("category_path")
+    protected ItemList<Category> categoryPath;
+
     @JsonProperty("example")
     protected String example;
 
     @JsonProperty("has_a")
     protected Term hasA;
+
+    @JsonProperty("has_a_term")
+    protected ItemList<Term> hasATerm;
 
     @JsonProperty("has_types")
     protected ItemList<Term> hasTypes;
@@ -115,6 +122,17 @@ public class Term extends InformationAsset {
 
     @JsonProperty("usage")
     protected String usage;
+
+    /**
+     * Valid values are:
+     * <ul>
+     *   <li>DRAFT (displayed in the UI as 'DRAFT')</li>
+     *   <li>WAITING_APPROVAL (displayed in the UI as 'WAITING_APPROVAL')</li>
+     *   <li>APPROVED (displayed in the UI as 'APPROVED')</li>
+     * </ul>
+     */
+    @JsonProperty("workflow_current_state")
+    protected List<String> workflowCurrentState;
 
     /**
      * Retrieve the {@code abbreviation} property (displayed as '{@literal Abbreviation}') of the object.
@@ -187,6 +205,20 @@ public class Term extends InformationAsset {
     public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
 
     /**
+     * Retrieve the {@code category_path} property (displayed as '{@literal Category Path}') of the object.
+     * @return {@code ItemList<Category>}
+     */
+    @JsonProperty("category_path")
+    public ItemList<Category> getCategoryPath() { return this.categoryPath; }
+
+    /**
+     * Set the {@code category_path} property (displayed as {@code Category Path}) of the object.
+     * @param categoryPath the value to set
+     */
+    @JsonProperty("category_path")
+    public void setCategoryPath(ItemList<Category> categoryPath) { this.categoryPath = categoryPath; }
+
+    /**
      * Retrieve the {@code example} property (displayed as '{@literal Example}') of the object.
      * @return {@code String}
      */
@@ -213,6 +245,20 @@ public class Term extends InformationAsset {
      */
     @JsonProperty("has_a")
     public void setHasA(Term hasA) { this.hasA = hasA; }
+
+    /**
+     * Retrieve the {@code has_a_term} property (displayed as '{@literal Has A}') of the object.
+     * @return {@code ItemList<Term>}
+     */
+    @JsonProperty("has_a_term")
+    public ItemList<Term> getHasATerm() { return this.hasATerm; }
+
+    /**
+     * Set the {@code has_a_term} property (displayed as {@code Has A}) of the object.
+     * @param hasATerm the value to set
+     */
+    @JsonProperty("has_a_term")
+    public void setHasATerm(ItemList<Term> hasATerm) { this.hasATerm = hasATerm; }
 
     /**
      * Retrieve the {@code has_types} property (displayed as '{@literal Has Types}') of the object.
@@ -451,5 +497,19 @@ public class Term extends InformationAsset {
      */
     @JsonProperty("usage")
     public void setUsage(String usage) { this.usage = usage; }
+
+    /**
+     * Retrieve the {@code workflow_current_state} property (displayed as '{@literal Workflow Current State}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("workflow_current_state")
+    public List<String> getWorkflowCurrentState() { return this.workflowCurrentState; }
+
+    /**
+     * Set the {@code workflow_current_state} property (displayed as {@code Workflow Current State}) of the object.
+     * @param workflowCurrentState the value to set
+     */
+    @JsonProperty("workflow_current_state")
+    public void setWorkflowCurrentState(List<String> workflowCurrentState) { this.workflowCurrentState = workflowCurrentState; }
 
 }

@@ -63,6 +63,9 @@ public class DataFileField extends Classificationenabledgroup {
     @JsonProperty("read_by_(user_defined)")
     protected ItemList<InformationAsset> readByUserDefined;
 
+    @JsonProperty("same_as_data_sources")
+    protected ItemList<DataItem> sameAsDataSources;
+
     @JsonProperty("selected_classification")
     protected DataClass selectedClassification;
 
@@ -245,6 +248,20 @@ public class DataFileField extends Classificationenabledgroup {
      */
     @JsonProperty("read_by_(user_defined)")
     public void setReadByUserDefined(ItemList<InformationAsset> readByUserDefined) { this.readByUserDefined = readByUserDefined; }
+
+    /**
+     * Retrieve the {@code same_as_data_sources} property (displayed as '{@literal Same as Data Sources}') of the object.
+     * @return {@code ItemList<DataItem>}
+     */
+    @JsonProperty("same_as_data_sources")
+    public ItemList<DataItem> getSameAsDataSources() { return this.sameAsDataSources; }
+
+    /**
+     * Set the {@code same_as_data_sources} property (displayed as {@code Same as Data Sources}) of the object.
+     * @param sameAsDataSources the value to set
+     */
+    @JsonProperty("same_as_data_sources")
+    public void setSameAsDataSources(ItemList<DataItem> sameAsDataSources) { this.sameAsDataSources = sameAsDataSources; }
 
     /**
      * Retrieve the {@code selected_classification} property (displayed as '{@literal Selected Data Classification}') of the object.

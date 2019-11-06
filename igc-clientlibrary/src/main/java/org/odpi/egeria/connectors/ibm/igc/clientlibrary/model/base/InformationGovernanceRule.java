@@ -12,6 +12,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * POJO for the {@code information_governance_rule} asset type in IGC, displayed as '{@literal Information Governance Rule}' in the IGC UI.
@@ -44,6 +45,17 @@ public class InformationGovernanceRule extends InformationAsset {
 
     @JsonProperty("related_rules")
     protected ItemList<InformationGovernanceRule> relatedRules;
+
+    /**
+     * Valid values are:
+     * <ul>
+     *   <li>DRAFT (displayed in the UI as 'DRAFT')</li>
+     *   <li>WAITING_APPROVAL (displayed in the UI as 'WAITING_APPROVAL')</li>
+     *   <li>APPROVED (displayed in the UI as 'APPROVED')</li>
+     * </ul>
+     */
+    @JsonProperty("workflow_current_state")
+    protected List<String> workflowCurrentState;
 
     /**
      * Retrieve the {@code governs_assets} property (displayed as '{@literal Governs Assets}') of the object.
@@ -128,5 +140,19 @@ public class InformationGovernanceRule extends InformationAsset {
      */
     @JsonProperty("related_rules")
     public void setRelatedRules(ItemList<InformationGovernanceRule> relatedRules) { this.relatedRules = relatedRules; }
+
+    /**
+     * Retrieve the {@code workflow_current_state} property (displayed as '{@literal Workflow Current State}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("workflow_current_state")
+    public List<String> getWorkflowCurrentState() { return this.workflowCurrentState; }
+
+    /**
+     * Set the {@code workflow_current_state} property (displayed as {@code Workflow Current State}) of the object.
+     * @param workflowCurrentState the value to set
+     */
+    @JsonProperty("workflow_current_state")
+    public void setWorkflowCurrentState(List<String> workflowCurrentState) { this.workflowCurrentState = workflowCurrentState; }
 
 }

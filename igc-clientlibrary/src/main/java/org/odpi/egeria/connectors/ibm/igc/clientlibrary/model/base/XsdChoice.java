@@ -64,9 +64,25 @@ public class XsdChoice extends InformationAsset {
     @JsonProperty("is_abstract")
     protected Boolean isAbstract;
 
+    @JsonProperty("is_maximum_range_inclusive")
+    protected Boolean isMaximumRangeInclusive;
+
+    /**
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     * @see #isMaximumRangeInclusive
+     */
+    @Deprecated
     @JsonProperty("is_maximum_range_inclusive_string")
     protected List<String> isMaximumRangeInclusiveString;
 
+    @JsonProperty("is_minimum_range_inclusive")
+    protected Boolean isMinimumRangeInclusive;
+
+    /**
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     * @see #isMinimumRangeInclusive
+     */
+    @Deprecated
     @JsonProperty("is_minimum_range_inclusive_string")
     protected List<String> isMinimumRangeInclusiveString;
 
@@ -331,30 +347,74 @@ public class XsdChoice extends InformationAsset {
     public void setIsAbstract(Boolean isAbstract) { this.isAbstract = isAbstract; }
 
     /**
-     * Retrieve the {@code is_maximum_range_inclusive_string} property (displayed as '{@literal Maximum Range Inclusive}') of the object.
-     * @return {@code List<String>}
+     * Retrieve the {@code is_maximum_range_inclusive} property (displayed as '{@literal Maximum Range Inclusive}') of the object.
+     * @return {@code Boolean}
      */
+    @JsonProperty("is_maximum_range_inclusive")
+    public Boolean getIsMaximumRangeInclusive() { return this.isMaximumRangeInclusive; }
+
+    /**
+     * Set the {@code is_maximum_range_inclusive} property (displayed as {@code Maximum Range Inclusive}) of the object.
+     * @param isMaximumRangeInclusive the value to set
+     */
+    @JsonProperty("is_maximum_range_inclusive")
+    public void setIsMaximumRangeInclusive(Boolean isMaximumRangeInclusive) { this.isMaximumRangeInclusive = isMaximumRangeInclusive; }
+
+    /**
+     * Retrieve the {@code is_maximum_range_inclusive_string} property (displayed as '{@literal Maximum Range Inclusive}') of the object.
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     *
+     * @return {@code List<String>}
+     * @see #isMaximumRangeInclusive
+     */
+    @Deprecated
     @JsonProperty("is_maximum_range_inclusive_string")
     public List<String> getIsMaximumRangeInclusiveString() { return this.isMaximumRangeInclusiveString; }
 
     /**
      * Set the {@code is_maximum_range_inclusive_string} property (displayed as {@code Maximum Range Inclusive}) of the object.
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     *
      * @param isMaximumRangeInclusiveString the value to set
+     * @see #setIsMaximumRangeInclusive(Boolean)
      */
+    @Deprecated
     @JsonProperty("is_maximum_range_inclusive_string")
     public void setIsMaximumRangeInclusiveString(List<String> isMaximumRangeInclusiveString) { this.isMaximumRangeInclusiveString = isMaximumRangeInclusiveString; }
 
     /**
-     * Retrieve the {@code is_minimum_range_inclusive_string} property (displayed as '{@literal Minimum Range Inclusive}') of the object.
-     * @return {@code List<String>}
+     * Retrieve the {@code is_minimum_range_inclusive} property (displayed as '{@literal Minimum Range Inclusive}') of the object.
+     * @return {@code Boolean}
      */
+    @JsonProperty("is_minimum_range_inclusive")
+    public Boolean getIsMinimumRangeInclusive() { return this.isMinimumRangeInclusive; }
+
+    /**
+     * Set the {@code is_minimum_range_inclusive} property (displayed as {@code Minimum Range Inclusive}) of the object.
+     * @param isMinimumRangeInclusive the value to set
+     */
+    @JsonProperty("is_minimum_range_inclusive")
+    public void setIsMinimumRangeInclusive(Boolean isMinimumRangeInclusive) { this.isMinimumRangeInclusive = isMinimumRangeInclusive; }
+
+    /**
+     * Retrieve the {@code is_minimum_range_inclusive_string} property (displayed as '{@literal Minimum Range Inclusive}') of the object.
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     *
+     * @return {@code List<String>}
+     * @see #isMinimumRangeInclusive
+     */
+    @Deprecated
     @JsonProperty("is_minimum_range_inclusive_string")
     public List<String> getIsMinimumRangeInclusiveString() { return this.isMinimumRangeInclusiveString; }
 
     /**
      * Set the {@code is_minimum_range_inclusive_string} property (displayed as {@code Minimum Range Inclusive}) of the object.
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     *
      * @param isMinimumRangeInclusiveString the value to set
+     * @see #setIsMinimumRangeInclusive(Boolean)
      */
+    @Deprecated
     @JsonProperty("is_minimum_range_inclusive_string")
     public void setIsMinimumRangeInclusiveString(List<String> isMinimumRangeInclusiveString) { this.isMinimumRangeInclusiveString = isMinimumRangeInclusiveString; }
 

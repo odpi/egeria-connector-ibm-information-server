@@ -31,6 +31,9 @@ public class BiCollection extends InformationAsset {
     @JsonProperty("alias_(business_name)")
     protected String aliasBusinessName;
 
+    @JsonProperty("bi_collection")
+    protected BiCollection biCollection;
+
     @JsonProperty("bi_collection_members")
     protected ItemList<BiCollectionMember> biCollectionMembers;
 
@@ -42,6 +45,9 @@ public class BiCollection extends InformationAsset {
 
     @JsonProperty("bi_levels")
     protected ItemList<BiLevel> biLevels;
+
+    @JsonProperty("bi_model")
+    protected BiModel biModel;
 
     @JsonProperty("bi_model_or_bi_collection")
     protected ItemList<Olapobject> biModelOrBiCollection;
@@ -136,6 +142,20 @@ public class BiCollection extends InformationAsset {
     public void setAliasBusinessName(String aliasBusinessName) { this.aliasBusinessName = aliasBusinessName; }
 
     /**
+     * Retrieve the {@code bi_collection} property (displayed as '{@literal BI Collection}') of the object.
+     * @return {@code BiCollection}
+     */
+    @JsonProperty("bi_collection")
+    public BiCollection getBiCollection() { return this.biCollection; }
+
+    /**
+     * Set the {@code bi_collection} property (displayed as {@code BI Collection}) of the object.
+     * @param biCollection the value to set
+     */
+    @JsonProperty("bi_collection")
+    public void setBiCollection(BiCollection biCollection) { this.biCollection = biCollection; }
+
+    /**
      * Retrieve the {@code bi_collection_members} property (displayed as '{@literal BI Collection Members}') of the object.
      * @return {@code ItemList<BiCollectionMember>}
      */
@@ -190,6 +210,20 @@ public class BiCollection extends InformationAsset {
      */
     @JsonProperty("bi_levels")
     public void setBiLevels(ItemList<BiLevel> biLevels) { this.biLevels = biLevels; }
+
+    /**
+     * Retrieve the {@code bi_model} property (displayed as '{@literal BI Model}') of the object.
+     * @return {@code BiModel}
+     */
+    @JsonProperty("bi_model")
+    public BiModel getBiModel() { return this.biModel; }
+
+    /**
+     * Set the {@code bi_model} property (displayed as {@code BI Model}) of the object.
+     * @param biModel the value to set
+     */
+    @JsonProperty("bi_model")
+    public void setBiModel(BiModel biModel) { this.biModel = biModel; }
 
     /**
      * Retrieve the {@code bi_model_or_bi_collection} property (displayed as '{@literal BI Model or BI Collection}') of the object.

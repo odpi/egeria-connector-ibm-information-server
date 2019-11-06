@@ -77,6 +77,7 @@ import java.util.List;
         @JsonSubTypes.Type(value = Derivation.class, name = "derivation"),
         @JsonSubTypes.Type(value = DesignForeignKey.class, name = "design_foreign_key"),
         @JsonSubTypes.Type(value = DesignKey.class, name = "design_key"),
+        @JsonSubTypes.Type(value = DevelopmentLog.class, name = "development_log"),
         @JsonSubTypes.Type(value = Directoryproviderconfiguration.class, name = "directoryproviderconfiguration"),
         @JsonSubTypes.Type(value = Directoryproviderproperty.class, name = "directoryproviderproperty"),
         @JsonSubTypes.Type(value = Dsargumentmap.class, name = "dsargumentmap"),

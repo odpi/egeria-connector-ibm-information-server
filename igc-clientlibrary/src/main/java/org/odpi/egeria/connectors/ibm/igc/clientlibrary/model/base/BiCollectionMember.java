@@ -79,7 +79,7 @@ public class BiCollectionMember extends InformationAsset {
     protected ItemList<BiCube> usedByBiCubes;
 
     @JsonProperty("used_by_bi_report_query_items")
-    protected ItemList<BiReportQueryItem> usedByBiReportQueryItems;
+    protected ItemList<Reportobject> usedByBiReportQueryItems;
 
     @JsonProperty("uses_database_columns")
     protected ItemList<DatabaseColumn> usesDatabaseColumns;
@@ -336,17 +336,17 @@ public class BiCollectionMember extends InformationAsset {
 
     /**
      * Retrieve the {@code used_by_bi_report_query_items} property (displayed as '{@literal Used by BI Report Query Items}') of the object.
-     * @return {@code ItemList<BiReportQueryItem>}
+     * @return {@code ItemList<Reportobject>}
      */
     @JsonProperty("used_by_bi_report_query_items")
-    public ItemList<BiReportQueryItem> getUsedByBiReportQueryItems() { return this.usedByBiReportQueryItems; }
+    public ItemList<Reportobject> getUsedByBiReportQueryItems() { return this.usedByBiReportQueryItems; }
 
     /**
      * Set the {@code used_by_bi_report_query_items} property (displayed as {@code Used by BI Report Query Items}) of the object.
      * @param usedByBiReportQueryItems the value to set
      */
     @JsonProperty("used_by_bi_report_query_items")
-    public void setUsedByBiReportQueryItems(ItemList<BiReportQueryItem> usedByBiReportQueryItems) { this.usedByBiReportQueryItems = usedByBiReportQueryItems; }
+    public void setUsedByBiReportQueryItems(ItemList<Reportobject> usedByBiReportQueryItems) { this.usedByBiReportQueryItems = usedByBiReportQueryItems; }
 
     /**
      * Retrieve the {@code uses_database_columns} property (displayed as '{@literal Uses Database Columns}') of the object.

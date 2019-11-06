@@ -39,6 +39,16 @@ public class TransformationProject extends InformationAsset {
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
 
+    /**
+     * Valid values are:
+     * <ul>
+     *   <li>setToTrue (displayed in the UI as 'True')</li>
+     *   <li>setToFalse (displayed in the UI as 'False')</li>
+     * </ul>
+     */
+    @JsonProperty("include_for_lineage")
+    protected String includeForLineage;
+
     @JsonProperty("include_for_lineage_desc")
     protected Boolean includeForLineageDesc;
 
@@ -124,6 +134,20 @@ public class TransformationProject extends InformationAsset {
      */
     @JsonProperty("in_collections")
     public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
+
+    /**
+     * Retrieve the {@code include_for_lineage} property (displayed as '{@literal Include for Lineage}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("include_for_lineage")
+    public String getIncludeForLineage() { return this.includeForLineage; }
+
+    /**
+     * Set the {@code include_for_lineage} property (displayed as {@code Include for Lineage}) of the object.
+     * @param includeForLineage the value to set
+     */
+    @JsonProperty("include_for_lineage")
+    public void setIncludeForLineage(String includeForLineage) { this.includeForLineage = includeForLineage; }
 
     /**
      * Retrieve the {@code include_for_lineage_desc} property (displayed as '{@literal Include for Lineage}') of the object.

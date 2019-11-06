@@ -42,8 +42,14 @@ public class AmazonS3Bucket extends InformationAsset {
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
 
+    @JsonProperty("include_for_business_lineage")
+    protected Boolean includeForBusinessLineage;
+
     @JsonProperty("location")
     protected String location;
+
+    @JsonProperty("same_as_data_sources")
+    protected ItemList<MainObject> sameAsDataSources;
 
     @JsonProperty("source_creation_date")
     protected Date sourceCreationDate;
@@ -125,6 +131,20 @@ public class AmazonS3Bucket extends InformationAsset {
     public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
+     * Retrieve the {@code include_for_business_lineage} property (displayed as '{@literal Include for Business Lineage}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("include_for_business_lineage")
+    public Boolean getIncludeForBusinessLineage() { return this.includeForBusinessLineage; }
+
+    /**
+     * Set the {@code include_for_business_lineage} property (displayed as {@code Include for Business Lineage}) of the object.
+     * @param includeForBusinessLineage the value to set
+     */
+    @JsonProperty("include_for_business_lineage")
+    public void setIncludeForBusinessLineage(Boolean includeForBusinessLineage) { this.includeForBusinessLineage = includeForBusinessLineage; }
+
+    /**
      * Retrieve the {@code location} property (displayed as '{@literal Location}') of the object.
      * @return {@code String}
      */
@@ -137,6 +157,20 @@ public class AmazonS3Bucket extends InformationAsset {
      */
     @JsonProperty("location")
     public void setLocation(String location) { this.location = location; }
+
+    /**
+     * Retrieve the {@code same_as_data_sources} property (displayed as '{@literal Same as Data Sources}') of the object.
+     * @return {@code ItemList<MainObject>}
+     */
+    @JsonProperty("same_as_data_sources")
+    public ItemList<MainObject> getSameAsDataSources() { return this.sameAsDataSources; }
+
+    /**
+     * Set the {@code same_as_data_sources} property (displayed as {@code Same as Data Sources}) of the object.
+     * @param sameAsDataSources the value to set
+     */
+    @JsonProperty("same_as_data_sources")
+    public void setSameAsDataSources(ItemList<MainObject> sameAsDataSources) { this.sameAsDataSources = sameAsDataSources; }
 
     /**
      * Retrieve the {@code source_creation_date} property (displayed as '{@literal Source Creation Date}') of the object.

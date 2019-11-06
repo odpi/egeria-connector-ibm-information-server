@@ -54,6 +54,9 @@ public class MemberType extends InformationAsset {
     @JsonProperty("mdm_model")
     protected MdmModel mdmModel;
 
+    @JsonProperty("mdm_model_for_query")
+    protected MdmModel mdmModelForQuery;
+
     @JsonProperty("member_type_label")
     protected String memberTypeLabel;
 
@@ -206,6 +209,20 @@ public class MemberType extends InformationAsset {
      */
     @JsonProperty("mdm_model")
     public void setMdmModel(MdmModel mdmModel) { this.mdmModel = mdmModel; }
+
+    /**
+     * Retrieve the {@code mdm_model_for_query} property (displayed as '{@literal MDM Model}') of the object.
+     * @return {@code MdmModel}
+     */
+    @JsonProperty("mdm_model_for_query")
+    public MdmModel getMdmModelForQuery() { return this.mdmModelForQuery; }
+
+    /**
+     * Set the {@code mdm_model_for_query} property (displayed as {@code MDM Model}) of the object.
+     * @param mdmModelForQuery the value to set
+     */
+    @JsonProperty("mdm_model_for_query")
+    public void setMdmModelForQuery(MdmModel mdmModelForQuery) { this.mdmModelForQuery = mdmModelForQuery; }
 
     /**
      * Retrieve the {@code member_type_label} property (displayed as '{@literal Member Type Label}') of the object.

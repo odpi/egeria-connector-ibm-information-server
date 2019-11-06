@@ -48,6 +48,12 @@ public class TupleAttribute extends InformationAsset {
     @JsonProperty("read_by_(user_defined)")
     protected ItemList<InformationAsset> readByUserDefined;
 
+    @JsonProperty("tuple")
+    protected RootTuple tuple;
+
+    @JsonProperty("tuple_attribute")
+    protected ItemList<TupleAttribute> tupleAttribute;
+
     @JsonProperty("tuple_or_tuple_attribute")
     protected ItemList<MainObject> tupleOrTupleAttribute;
 
@@ -160,6 +166,34 @@ public class TupleAttribute extends InformationAsset {
      */
     @JsonProperty("read_by_(user_defined)")
     public void setReadByUserDefined(ItemList<InformationAsset> readByUserDefined) { this.readByUserDefined = readByUserDefined; }
+
+    /**
+     * Retrieve the {@code tuple} property (displayed as '{@literal Tuple}') of the object.
+     * @return {@code RootTuple}
+     */
+    @JsonProperty("tuple")
+    public RootTuple getTuple() { return this.tuple; }
+
+    /**
+     * Set the {@code tuple} property (displayed as {@code Tuple}) of the object.
+     * @param tuple the value to set
+     */
+    @JsonProperty("tuple")
+    public void setTuple(RootTuple tuple) { this.tuple = tuple; }
+
+    /**
+     * Retrieve the {@code tuple_attribute} property (displayed as '{@literal Tuple Attribute}') of the object.
+     * @return {@code ItemList<TupleAttribute>}
+     */
+    @JsonProperty("tuple_attribute")
+    public ItemList<TupleAttribute> getTupleAttribute() { return this.tupleAttribute; }
+
+    /**
+     * Set the {@code tuple_attribute} property (displayed as {@code Tuple Attribute}) of the object.
+     * @param tupleAttribute the value to set
+     */
+    @JsonProperty("tuple_attribute")
+    public void setTupleAttribute(ItemList<TupleAttribute> tupleAttribute) { this.tupleAttribute = tupleAttribute; }
 
     /**
      * Retrieve the {@code tuple_or_tuple_attribute} property (displayed as '{@literal Tuple or Tuple Attribute}') of the object.

@@ -38,6 +38,7 @@ public class CustomAttribute extends Reference {
      *   <li>STRING (displayed in the UI as 'Predefined Values')</li>
      *   <li>DATE (displayed in the UI as 'Date')</li>
      *   <li>TEXT (displayed in the UI as 'Text')</li>
+     *   <li>REFERENCE (displayed in the UI as 'REFERENCE')</li>
      * </ul>
      */
     @JsonProperty("custom_attribute_type")

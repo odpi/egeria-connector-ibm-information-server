@@ -51,6 +51,9 @@ public class Attribute extends InformationAsset {
     @JsonProperty("member_type")
     protected MemberType memberType;
 
+    @JsonProperty("member_type_for_query")
+    protected MemberType memberTypeForQuery;
+
     @JsonProperty("read_by_(design)")
     protected ItemList<InformationAsset> readByDesign;
 
@@ -189,6 +192,20 @@ public class Attribute extends InformationAsset {
      */
     @JsonProperty("member_type")
     public void setMemberType(MemberType memberType) { this.memberType = memberType; }
+
+    /**
+     * Retrieve the {@code member_type_for_query} property (displayed as '{@literal Member Type}') of the object.
+     * @return {@code MemberType}
+     */
+    @JsonProperty("member_type_for_query")
+    public MemberType getMemberTypeForQuery() { return this.memberTypeForQuery; }
+
+    /**
+     * Set the {@code member_type_for_query} property (displayed as {@code Member Type}) of the object.
+     * @param memberTypeForQuery the value to set
+     */
+    @JsonProperty("member_type_for_query")
+    public void setMemberTypeForQuery(MemberType memberTypeForQuery) { this.memberTypeForQuery = memberTypeForQuery; }
 
     /**
      * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.

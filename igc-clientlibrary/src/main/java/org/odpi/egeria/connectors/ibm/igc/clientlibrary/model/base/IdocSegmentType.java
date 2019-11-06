@@ -61,6 +61,9 @@ public class IdocSegmentType extends InformationAsset {
     @JsonProperty("idoc_segment_type")
     protected ItemList<MainObject> idocSegmentType;
 
+    @JsonProperty("idoc_type")
+    protected IdocType idocType;
+
     @JsonProperty("impacted_by")
     protected ItemList<InformationAsset> impactedBy;
 
@@ -75,6 +78,9 @@ public class IdocSegmentType extends InformationAsset {
 
     @JsonProperty("min_/_max")
     protected List<String> minMax;
+
+    @JsonProperty("of_idoc_segment_type")
+    protected DataItemDefinition ofIdocSegmentType;
 
     @JsonProperty("of_idoc_type")
     protected ItemList<IdocType> ofIdocType;
@@ -133,6 +139,20 @@ public class IdocSegmentType extends InformationAsset {
      */
     @JsonProperty("idoc_segment_type")
     public void setIdocSegmentType(ItemList<MainObject> idocSegmentType) { this.idocSegmentType = idocSegmentType; }
+
+    /**
+     * Retrieve the {@code idoc_type} property (displayed as '{@literal IDoc Type}') of the object.
+     * @return {@code IdocType}
+     */
+    @JsonProperty("idoc_type")
+    public IdocType getIdocType() { return this.idocType; }
+
+    /**
+     * Set the {@code idoc_type} property (displayed as {@code IDoc Type}) of the object.
+     * @param idocType the value to set
+     */
+    @JsonProperty("idoc_type")
+    public void setIdocType(IdocType idocType) { this.idocType = idocType; }
 
     /**
      * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
@@ -203,6 +223,20 @@ public class IdocSegmentType extends InformationAsset {
      */
     @JsonProperty("min_/_max")
     public void setMinMax(List<String> minMax) { this.minMax = minMax; }
+
+    /**
+     * Retrieve the {@code of_idoc_segment_type} property (displayed as '{@literal IDoc Segment Type}') of the object.
+     * @return {@code DataItemDefinition}
+     */
+    @JsonProperty("of_idoc_segment_type")
+    public DataItemDefinition getOfIdocSegmentType() { return this.ofIdocSegmentType; }
+
+    /**
+     * Set the {@code of_idoc_segment_type} property (displayed as {@code IDoc Segment Type}) of the object.
+     * @param ofIdocSegmentType the value to set
+     */
+    @JsonProperty("of_idoc_segment_type")
+    public void setOfIdocSegmentType(DataItemDefinition ofIdocSegmentType) { this.ofIdocSegmentType = ofIdocSegmentType; }
 
     /**
      * Retrieve the {@code of_idoc_type} property (displayed as '{@literal IDoc Type}') of the object.

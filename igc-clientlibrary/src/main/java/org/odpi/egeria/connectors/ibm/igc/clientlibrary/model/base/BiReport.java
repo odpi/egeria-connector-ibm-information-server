@@ -34,8 +34,17 @@ public class BiReport extends InformationAsset {
     @JsonProperty("author")
     protected String author;
 
+    @JsonProperty("bi_cube")
+    protected BiCube biCube;
+
+    @JsonProperty("bi_folder")
+    protected BiFolder biFolder;
+
     @JsonProperty("bi_folder_or_bi_model_or_cube")
     protected ItemList<MainObject> biFolderOrBiModelOrCube;
+
+    @JsonProperty("bi_model")
+    protected BiModel biModel;
 
     @JsonProperty("bi_report_creation_date")
     protected Date biReportCreationDate;
@@ -144,6 +153,34 @@ public class BiReport extends InformationAsset {
     public void setAuthor(String author) { this.author = author; }
 
     /**
+     * Retrieve the {@code bi_cube} property (displayed as '{@literal BI Cube}') of the object.
+     * @return {@code BiCube}
+     */
+    @JsonProperty("bi_cube")
+    public BiCube getBiCube() { return this.biCube; }
+
+    /**
+     * Set the {@code bi_cube} property (displayed as {@code BI Cube}) of the object.
+     * @param biCube the value to set
+     */
+    @JsonProperty("bi_cube")
+    public void setBiCube(BiCube biCube) { this.biCube = biCube; }
+
+    /**
+     * Retrieve the {@code bi_folder} property (displayed as '{@literal BI Folder}') of the object.
+     * @return {@code BiFolder}
+     */
+    @JsonProperty("bi_folder")
+    public BiFolder getBiFolder() { return this.biFolder; }
+
+    /**
+     * Set the {@code bi_folder} property (displayed as {@code BI Folder}) of the object.
+     * @param biFolder the value to set
+     */
+    @JsonProperty("bi_folder")
+    public void setBiFolder(BiFolder biFolder) { this.biFolder = biFolder; }
+
+    /**
      * Retrieve the {@code bi_folder_or_bi_model_or_cube} property (displayed as '{@literal BI Folder or BI Model or Cube}') of the object.
      * @return {@code ItemList<MainObject>}
      */
@@ -156,6 +193,20 @@ public class BiReport extends InformationAsset {
      */
     @JsonProperty("bi_folder_or_bi_model_or_cube")
     public void setBiFolderOrBiModelOrCube(ItemList<MainObject> biFolderOrBiModelOrCube) { this.biFolderOrBiModelOrCube = biFolderOrBiModelOrCube; }
+
+    /**
+     * Retrieve the {@code bi_model} property (displayed as '{@literal BI Model}') of the object.
+     * @return {@code BiModel}
+     */
+    @JsonProperty("bi_model")
+    public BiModel getBiModel() { return this.biModel; }
+
+    /**
+     * Set the {@code bi_model} property (displayed as {@code BI Model}) of the object.
+     * @param biModel the value to set
+     */
+    @JsonProperty("bi_model")
+    public void setBiModel(BiModel biModel) { this.biModel = biModel; }
 
     /**
      * Retrieve the {@code bi_report_creation_date} property (displayed as '{@literal BI Report Creation Date}') of the object.

@@ -64,8 +64,16 @@ public class FileRecordAnalysis extends Reference {
     @JsonProperty("project")
     protected String project;
 
+    /**
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     * @see #qualityScorePercent
+     */
+    @Deprecated
     @JsonProperty("quality_score")
     protected Number qualityScore;
+
+    @JsonProperty("quality_score_percent")
+    protected String qualityScorePercent;
 
     @JsonProperty("quality_score_problems")
     protected ItemList<QualityProblem> qualityScoreProblems;
@@ -181,14 +189,14 @@ public class FileRecordAnalysis extends Reference {
     public void setTheName(String name) { this.name = name; }
 
     /**
-     * Retrieve the {@code nb_record_tested} property (displayed as '{@literal Number of Record Tested}') of the object.
+     * Retrieve the {@code nb_record_tested} property (displayed as '{@literal Number of Records Tested}') of the object.
      * @return {@code Number}
      */
     @JsonProperty("nb_record_tested")
     public Number getNbRecordTested() { return this.nbRecordTested; }
 
     /**
-     * Set the {@code nb_record_tested} property (displayed as {@code Number of Record Tested}) of the object.
+     * Set the {@code nb_record_tested} property (displayed as {@code Number of Records Tested}) of the object.
      * @param nbRecordTested the value to set
      */
     @JsonProperty("nb_record_tested")
@@ -252,17 +260,39 @@ public class FileRecordAnalysis extends Reference {
 
     /**
      * Retrieve the {@code quality_score} property (displayed as '{@literal Quality Score}') of the object.
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     *
      * @return {@code Number}
+     * @see #getQualityScorePercent()
      */
+    @Deprecated
     @JsonProperty("quality_score")
     public Number getQualityScore() { return this.qualityScore; }
 
     /**
      * Set the {@code quality_score} property (displayed as {@code Quality Score}) of the object.
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     *
      * @param qualityScore the value to set
+     * @see #setQualityScorePercent(String)
      */
+    @Deprecated
     @JsonProperty("quality_score")
     public void setQualityScore(Number qualityScore) { this.qualityScore = qualityScore; }
+
+    /**
+     * Retrieve the {@code quality_score_percent} property (displayed as '{@literal Quality Score}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("quality_score_percent")
+    public String getQualityScorePercent() { return this.qualityScorePercent; }
+
+    /**
+     * Set the {@code quality_score_percent} property (displayed as {@code Quality Score}) of the object.
+     * @param qualityScorePercent the value to set
+     */
+    @JsonProperty("quality_score_percent")
+    public void setQualityScorePercent(String qualityScorePercent) { this.qualityScorePercent = qualityScorePercent; }
 
     /**
      * Retrieve the {@code quality_score_problems} property (displayed as '{@literal Quality Score Problems}') of the object.

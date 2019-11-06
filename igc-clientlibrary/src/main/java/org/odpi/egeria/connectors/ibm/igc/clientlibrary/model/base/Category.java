@@ -12,6 +12,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * POJO for the {@code category} asset type in IGC, displayed as '{@literal Category}' in the IGC UI.
@@ -27,6 +28,9 @@ import java.util.Date;
 @JsonTypeName("category")
 public class Category extends InformationAsset {
 
+    @JsonProperty("category_path")
+    protected ItemList<Category> categoryPath;
+
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
 
@@ -41,6 +45,31 @@ public class Category extends InformationAsset {
 
     @JsonProperty("terms")
     protected ItemList<Term> terms;
+
+    /**
+     * Valid values are:
+     * <ul>
+     *   <li>DRAFT (displayed in the UI as 'DRAFT')</li>
+     *   <li>WAITING_APPROVAL (displayed in the UI as 'WAITING_APPROVAL')</li>
+     *   <li>APPROVED (displayed in the UI as 'APPROVED')</li>
+     * </ul>
+     */
+    @JsonProperty("workflow_current_state")
+    protected List<String> workflowCurrentState;
+
+    /**
+     * Retrieve the {@code category_path} property (displayed as '{@literal Category Path}') of the object.
+     * @return {@code ItemList<Category>}
+     */
+    @JsonProperty("category_path")
+    public ItemList<Category> getCategoryPath() { return this.categoryPath; }
+
+    /**
+     * Set the {@code category_path} property (displayed as {@code Category Path}) of the object.
+     * @param categoryPath the value to set
+     */
+    @JsonProperty("category_path")
+    public void setCategoryPath(ItemList<Category> categoryPath) { this.categoryPath = categoryPath; }
 
     /**
      * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
@@ -111,5 +140,19 @@ public class Category extends InformationAsset {
      */
     @JsonProperty("terms")
     public void setTerms(ItemList<Term> terms) { this.terms = terms; }
+
+    /**
+     * Retrieve the {@code workflow_current_state} property (displayed as '{@literal Workflow Current State}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("workflow_current_state")
+    public List<String> getWorkflowCurrentState() { return this.workflowCurrentState; }
+
+    /**
+     * Set the {@code workflow_current_state} property (displayed as {@code Workflow Current State}) of the object.
+     * @param workflowCurrentState the value to set
+     */
+    @JsonProperty("workflow_current_state")
+    public void setWorkflowCurrentState(List<String> workflowCurrentState) { this.workflowCurrentState = workflowCurrentState; }
 
 }

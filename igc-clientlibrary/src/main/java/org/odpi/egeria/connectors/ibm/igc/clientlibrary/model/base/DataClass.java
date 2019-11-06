@@ -76,6 +76,9 @@ public class DataClass extends InformationAsset {
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
 
+    @JsonProperty("java_class_name_single")
+    protected String javaClassNameSingle;
+
     @JsonProperty("length_filter_max")
     protected Number lengthFilterMax;
 
@@ -84,6 +87,15 @@ public class DataClass extends InformationAsset {
 
     @JsonProperty("parent_data_class")
     protected DataClass parentDataClass;
+
+    @JsonProperty("regular_expression_single")
+    protected String regularExpressionSingle;
+
+    @JsonProperty("valid_value_strings")
+    protected List<String> validValueStrings;
+
+    @JsonProperty("valid_values_case_sensitive")
+    protected Boolean validValuesCaseSensitive;
 
     /**
      * Retrieve the {@code class_code} property (displayed as '{@literal Class Code}') of the object.
@@ -226,6 +238,20 @@ public class DataClass extends InformationAsset {
     public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
+     * Retrieve the {@code java_class_name_single} property (displayed as '{@literal JAVA Class}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("java_class_name_single")
+    public String getJavaClassNameSingle() { return this.javaClassNameSingle; }
+
+    /**
+     * Set the {@code java_class_name_single} property (displayed as {@code JAVA Class}) of the object.
+     * @param javaClassNameSingle the value to set
+     */
+    @JsonProperty("java_class_name_single")
+    public void setJavaClassNameSingle(String javaClassNameSingle) { this.javaClassNameSingle = javaClassNameSingle; }
+
+    /**
      * Retrieve the {@code length_filter_max} property (displayed as '{@literal Maximum Data Length}') of the object.
      * @return {@code Number}
      */
@@ -266,5 +292,47 @@ public class DataClass extends InformationAsset {
      */
     @JsonProperty("parent_data_class")
     public void setParentDataClass(DataClass parentDataClass) { this.parentDataClass = parentDataClass; }
+
+    /**
+     * Retrieve the {@code regular_expression_single} property (displayed as '{@literal Regular Expression}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("regular_expression_single")
+    public String getRegularExpressionSingle() { return this.regularExpressionSingle; }
+
+    /**
+     * Set the {@code regular_expression_single} property (displayed as {@code Regular Expression}) of the object.
+     * @param regularExpressionSingle the value to set
+     */
+    @JsonProperty("regular_expression_single")
+    public void setRegularExpressionSingle(String regularExpressionSingle) { this.regularExpressionSingle = regularExpressionSingle; }
+
+    /**
+     * Retrieve the {@code valid_value_strings} property (displayed as '{@literal Valid Values}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("valid_value_strings")
+    public List<String> getValidValueStrings() { return this.validValueStrings; }
+
+    /**
+     * Set the {@code valid_value_strings} property (displayed as {@code Valid Values}) of the object.
+     * @param validValueStrings the value to set
+     */
+    @JsonProperty("valid_value_strings")
+    public void setValidValueStrings(List<String> validValueStrings) { this.validValueStrings = validValueStrings; }
+
+    /**
+     * Retrieve the {@code valid_values_case_sensitive} property (displayed as '{@literal Case Sensitive}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("valid_values_case_sensitive")
+    public Boolean getValidValuesCaseSensitive() { return this.validValuesCaseSensitive; }
+
+    /**
+     * Set the {@code valid_values_case_sensitive} property (displayed as {@code Case Sensitive}) of the object.
+     * @param validValuesCaseSensitive the value to set
+     */
+    @JsonProperty("valid_values_case_sensitive")
+    public void setValidValuesCaseSensitive(Boolean validValuesCaseSensitive) { this.validValuesCaseSensitive = validValuesCaseSensitive; }
 
 }

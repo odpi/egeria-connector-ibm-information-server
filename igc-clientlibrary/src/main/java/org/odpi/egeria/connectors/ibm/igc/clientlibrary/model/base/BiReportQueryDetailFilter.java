@@ -14,33 +14,30 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import java.util.Date;
 
 /**
- * POJO for the {@code physical_object} asset type in IGC, displayed as '{@literal Physical Object}' in the IGC UI.
+ * POJO for the {@code bi_report_query_detail_filter} asset type in IGC, displayed as '{@literal Detail Filter}' in the IGC UI.
  * <br><br>
  * (this code has been created based on out-of-the-box IGC metadata types.
  *  If modifications are needed, eg. to handle custom attributes,
  *  extending from this class in your own custom class is the best approach.)
  */
-@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=PhysicalObject.class)
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=BiReportQueryDetailFilter.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
-@JsonTypeName("physical_object")
-public class PhysicalObject extends InformationAsset {
+@JsonTypeName("bi_report_query_detail_filter")
+public class BiReportQueryDetailFilter extends InformationAsset {
 
-    @JsonProperty("alias_(business_name)")
-    protected String aliasBusinessName;
+    @JsonProperty("bi_report_query")
+    protected BiReportQuery biReportQuery;
 
-    @JsonProperty("blueprint_elements")
-    protected ItemList<BlueprintElementLink> blueprintElements;
+    @JsonProperty("contains_bi_report_query_items")
+    protected ItemList<Reportobject> containsBiReportQueryItems;
 
-    @JsonProperty("contains_physical_object_attributes")
-    protected ItemList<PhysicalObjectAttribute> containsPhysicalObjectAttributes;
+    @JsonProperty("expression")
+    protected String expression;
 
-    @JsonProperty("contains_physical_objects")
-    protected ItemList<PhysicalObject> containsPhysicalObjects;
-
-    @JsonProperty("context")
-    protected ItemList<MainObject> context;
+    @JsonProperty("expression_in_title")
+    protected String expressionInTitle;
 
     @JsonProperty("impacted_by")
     protected ItemList<InformationAsset> impactedBy;
@@ -51,14 +48,8 @@ public class PhysicalObject extends InformationAsset {
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
 
-    @JsonProperty("maps_database_tables_or_views")
-    protected ItemList<Datagroup> mapsDatabaseTablesOrViews;
-
-    @JsonProperty("mdm_model")
-    protected MdmModel mdmModel;
-
-    @JsonProperty("physical_object")
-    protected ItemList<PhysicalObject> physicalObject;
+    @JsonProperty("namespace")
+    protected String namespace;
 
     @JsonProperty("read_by_(design)")
     protected ItemList<InformationAsset> readByDesign;
@@ -71,6 +62,18 @@ public class PhysicalObject extends InformationAsset {
 
     @JsonProperty("read_by_(user_defined)")
     protected ItemList<InformationAsset> readByUserDefined;
+
+    @JsonProperty("src_contains_bi_report_query_items")
+    protected ItemList<Reportobject> srcContainsBiReportQueryItems;
+
+    @JsonProperty("type")
+    protected String type;
+
+    @JsonProperty("uses_bi_collection_members")
+    protected ItemList<BiCollectionMember> usesBiCollectionMembers;
+
+    @JsonProperty("uses_database_columns")
+    protected ItemList<DataItem> usesDatabaseColumns;
 
     @JsonProperty("written_by_(design)")
     protected ItemList<InformationAsset> writtenByDesign;
@@ -85,74 +88,60 @@ public class PhysicalObject extends InformationAsset {
     protected ItemList<InformationAsset> writtenByUserDefined;
 
     /**
-     * Retrieve the {@code alias_(business_name)} property (displayed as '{@literal Alias (Business Name)}') of the object.
+     * Retrieve the {@code bi_report_query} property (displayed as '{@literal BI Report Query}') of the object.
+     * @return {@code BiReportQuery}
+     */
+    @JsonProperty("bi_report_query")
+    public BiReportQuery getBiReportQuery() { return this.biReportQuery; }
+
+    /**
+     * Set the {@code bi_report_query} property (displayed as {@code BI Report Query}) of the object.
+     * @param biReportQuery the value to set
+     */
+    @JsonProperty("bi_report_query")
+    public void setBiReportQuery(BiReportQuery biReportQuery) { this.biReportQuery = biReportQuery; }
+
+    /**
+     * Retrieve the {@code contains_bi_report_query_items} property (displayed as '{@literal References BI Report Query Items}') of the object.
+     * @return {@code ItemList<Reportobject>}
+     */
+    @JsonProperty("contains_bi_report_query_items")
+    public ItemList<Reportobject> getContainsBiReportQueryItems() { return this.containsBiReportQueryItems; }
+
+    /**
+     * Set the {@code contains_bi_report_query_items} property (displayed as {@code References BI Report Query Items}) of the object.
+     * @param containsBiReportQueryItems the value to set
+     */
+    @JsonProperty("contains_bi_report_query_items")
+    public void setContainsBiReportQueryItems(ItemList<Reportobject> containsBiReportQueryItems) { this.containsBiReportQueryItems = containsBiReportQueryItems; }
+
+    /**
+     * Retrieve the {@code expression} property (displayed as '{@literal Expression}') of the object.
      * @return {@code String}
      */
-    @JsonProperty("alias_(business_name)")
-    public String getAliasBusinessName() { return this.aliasBusinessName; }
+    @JsonProperty("expression")
+    public String getExpression() { return this.expression; }
 
     /**
-     * Set the {@code alias_(business_name)} property (displayed as {@code Alias (Business Name)}) of the object.
-     * @param aliasBusinessName the value to set
+     * Set the {@code expression} property (displayed as {@code Expression}) of the object.
+     * @param expression the value to set
      */
-    @JsonProperty("alias_(business_name)")
-    public void setAliasBusinessName(String aliasBusinessName) { this.aliasBusinessName = aliasBusinessName; }
+    @JsonProperty("expression")
+    public void setExpression(String expression) { this.expression = expression; }
 
     /**
-     * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * @return {@code ItemList<BlueprintElementLink>}
+     * Retrieve the {@code expression_in_title} property (displayed as '{@literal Expression}') of the object.
+     * @return {@code String}
      */
-    @JsonProperty("blueprint_elements")
-    public ItemList<BlueprintElementLink> getBlueprintElements() { return this.blueprintElements; }
+    @JsonProperty("expression_in_title")
+    public String getExpressionInTitle() { return this.expressionInTitle; }
 
     /**
-     * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * @param blueprintElements the value to set
+     * Set the {@code expression_in_title} property (displayed as {@code Expression}) of the object.
+     * @param expressionInTitle the value to set
      */
-    @JsonProperty("blueprint_elements")
-    public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
-
-    /**
-     * Retrieve the {@code contains_physical_object_attributes} property (displayed as '{@literal Contains Physical Object Attributes}') of the object.
-     * @return {@code ItemList<PhysicalObjectAttribute>}
-     */
-    @JsonProperty("contains_physical_object_attributes")
-    public ItemList<PhysicalObjectAttribute> getContainsPhysicalObjectAttributes() { return this.containsPhysicalObjectAttributes; }
-
-    /**
-     * Set the {@code contains_physical_object_attributes} property (displayed as {@code Contains Physical Object Attributes}) of the object.
-     * @param containsPhysicalObjectAttributes the value to set
-     */
-    @JsonProperty("contains_physical_object_attributes")
-    public void setContainsPhysicalObjectAttributes(ItemList<PhysicalObjectAttribute> containsPhysicalObjectAttributes) { this.containsPhysicalObjectAttributes = containsPhysicalObjectAttributes; }
-
-    /**
-     * Retrieve the {@code contains_physical_objects} property (displayed as '{@literal Contains Physical Objects}') of the object.
-     * @return {@code ItemList<PhysicalObject>}
-     */
-    @JsonProperty("contains_physical_objects")
-    public ItemList<PhysicalObject> getContainsPhysicalObjects() { return this.containsPhysicalObjects; }
-
-    /**
-     * Set the {@code contains_physical_objects} property (displayed as {@code Contains Physical Objects}) of the object.
-     * @param containsPhysicalObjects the value to set
-     */
-    @JsonProperty("contains_physical_objects")
-    public void setContainsPhysicalObjects(ItemList<PhysicalObject> containsPhysicalObjects) { this.containsPhysicalObjects = containsPhysicalObjects; }
-
-    /**
-     * Retrieve the {@code context} property (displayed as '{@literal Context}') of the object.
-     * @return {@code ItemList<MainObject>}
-     */
-    @JsonProperty("context")
-    public ItemList<MainObject> getTheContext() { return this.context; }
-
-    /**
-     * Set the {@code context} property (displayed as {@code Context}) of the object.
-     * @param context the value to set
-     */
-    @JsonProperty("context")
-    public void setTheContext(ItemList<MainObject> context) { this.context = context; }
+    @JsonProperty("expression_in_title")
+    public void setExpressionInTitle(String expressionInTitle) { this.expressionInTitle = expressionInTitle; }
 
     /**
      * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
@@ -197,46 +186,18 @@ public class PhysicalObject extends InformationAsset {
     public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
-     * Retrieve the {@code maps_database_tables_or_views} property (displayed as '{@literal Maps Database Tables or Views}') of the object.
-     * @return {@code ItemList<Datagroup>}
+     * Retrieve the {@code namespace} property (displayed as '{@literal Namespace}') of the object.
+     * @return {@code String}
      */
-    @JsonProperty("maps_database_tables_or_views")
-    public ItemList<Datagroup> getMapsDatabaseTablesOrViews() { return this.mapsDatabaseTablesOrViews; }
+    @JsonProperty("namespace")
+    public String getNamespace() { return this.namespace; }
 
     /**
-     * Set the {@code maps_database_tables_or_views} property (displayed as {@code Maps Database Tables or Views}) of the object.
-     * @param mapsDatabaseTablesOrViews the value to set
+     * Set the {@code namespace} property (displayed as {@code Namespace}) of the object.
+     * @param namespace the value to set
      */
-    @JsonProperty("maps_database_tables_or_views")
-    public void setMapsDatabaseTablesOrViews(ItemList<Datagroup> mapsDatabaseTablesOrViews) { this.mapsDatabaseTablesOrViews = mapsDatabaseTablesOrViews; }
-
-    /**
-     * Retrieve the {@code mdm_model} property (displayed as '{@literal MDM Model}') of the object.
-     * @return {@code MdmModel}
-     */
-    @JsonProperty("mdm_model")
-    public MdmModel getMdmModel() { return this.mdmModel; }
-
-    /**
-     * Set the {@code mdm_model} property (displayed as {@code MDM Model}) of the object.
-     * @param mdmModel the value to set
-     */
-    @JsonProperty("mdm_model")
-    public void setMdmModel(MdmModel mdmModel) { this.mdmModel = mdmModel; }
-
-    /**
-     * Retrieve the {@code physical_object} property (displayed as '{@literal Physical Object}') of the object.
-     * @return {@code ItemList<PhysicalObject>}
-     */
-    @JsonProperty("physical_object")
-    public ItemList<PhysicalObject> getPhysicalObject() { return this.physicalObject; }
-
-    /**
-     * Set the {@code physical_object} property (displayed as {@code Physical Object}) of the object.
-     * @param physicalObject the value to set
-     */
-    @JsonProperty("physical_object")
-    public void setPhysicalObject(ItemList<PhysicalObject> physicalObject) { this.physicalObject = physicalObject; }
+    @JsonProperty("namespace")
+    public void setNamespace(String namespace) { this.namespace = namespace; }
 
     /**
      * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.
@@ -293,6 +254,62 @@ public class PhysicalObject extends InformationAsset {
      */
     @JsonProperty("read_by_(user_defined)")
     public void setReadByUserDefined(ItemList<InformationAsset> readByUserDefined) { this.readByUserDefined = readByUserDefined; }
+
+    /**
+     * Retrieve the {@code src_contains_bi_report_query_items} property (displayed as '{@literal Referenced by BI Report Query Item}') of the object.
+     * @return {@code ItemList<Reportobject>}
+     */
+    @JsonProperty("src_contains_bi_report_query_items")
+    public ItemList<Reportobject> getSrcContainsBiReportQueryItems() { return this.srcContainsBiReportQueryItems; }
+
+    /**
+     * Set the {@code src_contains_bi_report_query_items} property (displayed as {@code Referenced by BI Report Query Item}) of the object.
+     * @param srcContainsBiReportQueryItems the value to set
+     */
+    @JsonProperty("src_contains_bi_report_query_items")
+    public void setSrcContainsBiReportQueryItems(ItemList<Reportobject> srcContainsBiReportQueryItems) { this.srcContainsBiReportQueryItems = srcContainsBiReportQueryItems; }
+
+    /**
+     * Retrieve the {@code type} property (displayed as '{@literal Type}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("type")
+    public String getTheType() { return this.type; }
+
+    /**
+     * Set the {@code type} property (displayed as {@code Type}) of the object.
+     * @param type the value to set
+     */
+    @JsonProperty("type")
+    public void setTheType(String type) { this.type = type; }
+
+    /**
+     * Retrieve the {@code uses_bi_collection_members} property (displayed as '{@literal Uses BI Collection Members}') of the object.
+     * @return {@code ItemList<BiCollectionMember>}
+     */
+    @JsonProperty("uses_bi_collection_members")
+    public ItemList<BiCollectionMember> getUsesBiCollectionMembers() { return this.usesBiCollectionMembers; }
+
+    /**
+     * Set the {@code uses_bi_collection_members} property (displayed as {@code Uses BI Collection Members}) of the object.
+     * @param usesBiCollectionMembers the value to set
+     */
+    @JsonProperty("uses_bi_collection_members")
+    public void setUsesBiCollectionMembers(ItemList<BiCollectionMember> usesBiCollectionMembers) { this.usesBiCollectionMembers = usesBiCollectionMembers; }
+
+    /**
+     * Retrieve the {@code uses_database_columns} property (displayed as '{@literal Uses Database Columns}') of the object.
+     * @return {@code ItemList<DataItem>}
+     */
+    @JsonProperty("uses_database_columns")
+    public ItemList<DataItem> getUsesDatabaseColumns() { return this.usesDatabaseColumns; }
+
+    /**
+     * Set the {@code uses_database_columns} property (displayed as {@code Uses Database Columns}) of the object.
+     * @param usesDatabaseColumns the value to set
+     */
+    @JsonProperty("uses_database_columns")
+    public void setUsesDatabaseColumns(ItemList<DataItem> usesDatabaseColumns) { this.usesDatabaseColumns = usesDatabaseColumns; }
 
     /**
      * Retrieve the {@code written_by_(design)} property (displayed as '{@literal Written by (Design)}') of the object.

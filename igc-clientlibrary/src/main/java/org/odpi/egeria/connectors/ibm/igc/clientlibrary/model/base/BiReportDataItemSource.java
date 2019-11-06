@@ -34,7 +34,7 @@ public class BiReportDataItemSource extends Reference {
     protected BiCollectionMember definedByOlapMember;
 
     @JsonProperty("defined_in_report_data_item")
-    protected BiReportQueryItem definedInReportDataItem;
+    protected Reportobject definedInReportDataItem;
 
     @JsonProperty("defined_of_report_field")
     protected ItemList<Reportobject> definedOfReportField;
@@ -69,17 +69,17 @@ public class BiReportDataItemSource extends Reference {
 
     /**
      * Retrieve the {@code defined_in_report_data_item} property (displayed as '{@literal Defined in Report Data Item}') of the object.
-     * @return {@code BiReportQueryItem}
+     * @return {@code Reportobject}
      */
     @JsonProperty("defined_in_report_data_item")
-    public BiReportQueryItem getDefinedInReportDataItem() { return this.definedInReportDataItem; }
+    public Reportobject getDefinedInReportDataItem() { return this.definedInReportDataItem; }
 
     /**
      * Set the {@code defined_in_report_data_item} property (displayed as {@code Defined in Report Data Item}) of the object.
      * @param definedInReportDataItem the value to set
      */
     @JsonProperty("defined_in_report_data_item")
-    public void setDefinedInReportDataItem(BiReportQueryItem definedInReportDataItem) { this.definedInReportDataItem = definedInReportDataItem; }
+    public void setDefinedInReportDataItem(Reportobject definedInReportDataItem) { this.definedInReportDataItem = definedInReportDataItem; }
 
     /**
      * Retrieve the {@code defined_of_report_field} property (displayed as '{@literal Defined of Report Field}') of the object.

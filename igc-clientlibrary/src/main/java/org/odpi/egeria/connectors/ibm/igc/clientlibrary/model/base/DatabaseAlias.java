@@ -30,8 +30,20 @@ public class DatabaseAlias extends Datagroup {
     @JsonProperty("alias_of_database_tables_or_views")
     protected Datagroup aliasOfDatabaseTablesOrViews;
 
+    @JsonProperty("database_columns")
+    protected ItemList<DataItem> databaseColumns;
+
+    @JsonProperty("defined_foreign_key")
+    protected ItemList<DatabaseColumn> definedForeignKey;
+
+    @JsonProperty("defined_primary_key")
+    protected ItemList<CandidateKey> definedPrimaryKey;
+
     @JsonProperty("imported_from")
     protected String importedFrom;
+
+    @JsonProperty("indexes")
+    protected ItemList<DatabaseIndex> indexes;
 
     /**
      * Retrieve the {@code alias_of_database_tables_or_views} property (displayed as '{@literal Alias of Database Tables or Views}') of the object.
@@ -48,6 +60,48 @@ public class DatabaseAlias extends Datagroup {
     public void setAliasOfDatabaseTablesOrViews(Datagroup aliasOfDatabaseTablesOrViews) { this.aliasOfDatabaseTablesOrViews = aliasOfDatabaseTablesOrViews; }
 
     /**
+     * Retrieve the {@code database_columns} property (displayed as '{@literal Database Columns}') of the object.
+     * @return {@code ItemList<DataItem>}
+     */
+    @JsonProperty("database_columns")
+    public ItemList<DataItem> getDatabaseColumns() { return this.databaseColumns; }
+
+    /**
+     * Set the {@code database_columns} property (displayed as {@code Database Columns}) of the object.
+     * @param databaseColumns the value to set
+     */
+    @JsonProperty("database_columns")
+    public void setDatabaseColumns(ItemList<DataItem> databaseColumns) { this.databaseColumns = databaseColumns; }
+
+    /**
+     * Retrieve the {@code defined_foreign_key} property (displayed as '{@literal Defined Foreign Key}') of the object.
+     * @return {@code ItemList<DatabaseColumn>}
+     */
+    @JsonProperty("defined_foreign_key")
+    public ItemList<DatabaseColumn> getDefinedForeignKey() { return this.definedForeignKey; }
+
+    /**
+     * Set the {@code defined_foreign_key} property (displayed as {@code Defined Foreign Key}) of the object.
+     * @param definedForeignKey the value to set
+     */
+    @JsonProperty("defined_foreign_key")
+    public void setDefinedForeignKey(ItemList<DatabaseColumn> definedForeignKey) { this.definedForeignKey = definedForeignKey; }
+
+    /**
+     * Retrieve the {@code defined_primary_key} property (displayed as '{@literal Defined Primary Key}') of the object.
+     * @return {@code ItemList<CandidateKey>}
+     */
+    @JsonProperty("defined_primary_key")
+    public ItemList<CandidateKey> getDefinedPrimaryKey() { return this.definedPrimaryKey; }
+
+    /**
+     * Set the {@code defined_primary_key} property (displayed as {@code Defined Primary Key}) of the object.
+     * @param definedPrimaryKey the value to set
+     */
+    @JsonProperty("defined_primary_key")
+    public void setDefinedPrimaryKey(ItemList<CandidateKey> definedPrimaryKey) { this.definedPrimaryKey = definedPrimaryKey; }
+
+    /**
      * Retrieve the {@code imported_from} property (displayed as '{@literal Imported From}') of the object.
      * @return {@code String}
      */
@@ -60,5 +114,19 @@ public class DatabaseAlias extends Datagroup {
      */
     @JsonProperty("imported_from")
     public void setImportedFrom(String importedFrom) { this.importedFrom = importedFrom; }
+
+    /**
+     * Retrieve the {@code indexes} property (displayed as '{@literal Indexes}') of the object.
+     * @return {@code ItemList<DatabaseIndex>}
+     */
+    @JsonProperty("indexes")
+    public ItemList<DatabaseIndex> getIndexes() { return this.indexes; }
+
+    /**
+     * Set the {@code indexes} property (displayed as {@code Indexes}) of the object.
+     * @param indexes the value to set
+     */
+    @JsonProperty("indexes")
+    public void setIndexes(ItemList<DatabaseIndex> indexes) { this.indexes = indexes; }
 
 }

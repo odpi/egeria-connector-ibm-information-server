@@ -25,13 +25,13 @@ import java.util.Date;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("bi_report_query_item")
-public class BiReportQueryItem extends InformationAsset {
+public class BiReportQueryItem extends Reportobject {
 
     @JsonProperty("bi_report_query")
     protected BiReportQuery biReportQuery;
 
     @JsonProperty("contains_bi_report_query_items")
-    protected ItemList<BiReportQueryItem> containsBiReportQueryItems;
+    protected ItemList<Reportobject> containsBiReportQueryItems;
 
     @JsonProperty("expression")
     protected String expression;
@@ -61,7 +61,7 @@ public class BiReportQueryItem extends InformationAsset {
     protected ItemList<InformationAsset> readByUserDefined;
 
     @JsonProperty("src_contains_bi_report_query_items")
-    protected ItemList<BiReportQueryItem> srcContainsBiReportQueryItems;
+    protected ItemList<Reportobject> srcContainsBiReportQueryItems;
 
     @JsonProperty("type")
     protected String type;
@@ -100,17 +100,17 @@ public class BiReportQueryItem extends InformationAsset {
 
     /**
      * Retrieve the {@code contains_bi_report_query_items} property (displayed as '{@literal References BI Report Query Items}') of the object.
-     * @return {@code ItemList<BiReportQueryItem>}
+     * @return {@code ItemList<Reportobject>}
      */
     @JsonProperty("contains_bi_report_query_items")
-    public ItemList<BiReportQueryItem> getContainsBiReportQueryItems() { return this.containsBiReportQueryItems; }
+    public ItemList<Reportobject> getContainsBiReportQueryItems() { return this.containsBiReportQueryItems; }
 
     /**
      * Set the {@code contains_bi_report_query_items} property (displayed as {@code References BI Report Query Items}) of the object.
      * @param containsBiReportQueryItems the value to set
      */
     @JsonProperty("contains_bi_report_query_items")
-    public void setContainsBiReportQueryItems(ItemList<BiReportQueryItem> containsBiReportQueryItems) { this.containsBiReportQueryItems = containsBiReportQueryItems; }
+    public void setContainsBiReportQueryItems(ItemList<Reportobject> containsBiReportQueryItems) { this.containsBiReportQueryItems = containsBiReportQueryItems; }
 
     /**
      * Retrieve the {@code expression} property (displayed as '{@literal Expression}') of the object.
@@ -240,17 +240,17 @@ public class BiReportQueryItem extends InformationAsset {
 
     /**
      * Retrieve the {@code src_contains_bi_report_query_items} property (displayed as '{@literal Referenced by BI Report Query Item}') of the object.
-     * @return {@code ItemList<BiReportQueryItem>}
+     * @return {@code ItemList<Reportobject>}
      */
     @JsonProperty("src_contains_bi_report_query_items")
-    public ItemList<BiReportQueryItem> getSrcContainsBiReportQueryItems() { return this.srcContainsBiReportQueryItems; }
+    public ItemList<Reportobject> getSrcContainsBiReportQueryItems() { return this.srcContainsBiReportQueryItems; }
 
     /**
      * Set the {@code src_contains_bi_report_query_items} property (displayed as {@code Referenced by BI Report Query Item}) of the object.
      * @param srcContainsBiReportQueryItems the value to set
      */
     @JsonProperty("src_contains_bi_report_query_items")
-    public void setSrcContainsBiReportQueryItems(ItemList<BiReportQueryItem> srcContainsBiReportQueryItems) { this.srcContainsBiReportQueryItems = srcContainsBiReportQueryItems; }
+    public void setSrcContainsBiReportQueryItems(ItemList<Reportobject> srcContainsBiReportQueryItems) { this.srcContainsBiReportQueryItems = srcContainsBiReportQueryItems; }
 
     /**
      * Retrieve the {@code type} property (displayed as '{@literal Type}') of the object.

@@ -100,8 +100,8 @@ public class DatabaseTable extends Datagroup {
     @JsonProperty("referenced_by_views")
     protected ItemList<View> referencedByViews;
 
-    @JsonProperty("same_as_database_tables")
-    protected ItemList<DatabaseTable> sameAsDatabaseTables;
+    @JsonProperty("same_as_data_sources")
+    protected ItemList<Datagroup> sameAsDataSources;
 
     @JsonProperty("selected_foreign_key")
     protected ItemList<DatabaseColumn> selectedForeignKey;
@@ -470,18 +470,18 @@ public class DatabaseTable extends Datagroup {
     public void setReferencedByViews(ItemList<View> referencedByViews) { this.referencedByViews = referencedByViews; }
 
     /**
-     * Retrieve the {@code same_as_database_tables} property (displayed as '{@literal Same as Database Tables}') of the object.
-     * @return {@code ItemList<DatabaseTable>}
+     * Retrieve the {@code same_as_data_sources} property (displayed as '{@literal Same as Data Sources}') of the object.
+     * @return {@code ItemList<Datagroup>}
      */
-    @JsonProperty("same_as_database_tables")
-    public ItemList<DatabaseTable> getSameAsDatabaseTables() { return this.sameAsDatabaseTables; }
+    @JsonProperty("same_as_data_sources")
+    public ItemList<Datagroup> getSameAsDataSources() { return this.sameAsDataSources; }
 
     /**
-     * Set the {@code same_as_database_tables} property (displayed as {@code Same as Database Tables}) of the object.
-     * @param sameAsDatabaseTables the value to set
+     * Set the {@code same_as_data_sources} property (displayed as {@code Same as Data Sources}) of the object.
+     * @param sameAsDataSources the value to set
      */
-    @JsonProperty("same_as_database_tables")
-    public void setSameAsDatabaseTables(ItemList<DatabaseTable> sameAsDatabaseTables) { this.sameAsDatabaseTables = sameAsDatabaseTables; }
+    @JsonProperty("same_as_data_sources")
+    public void setSameAsDataSources(ItemList<Datagroup> sameAsDataSources) { this.sameAsDataSources = sameAsDataSources; }
 
     /**
      * Retrieve the {@code selected_foreign_key} property (displayed as '{@literal User Selected Foreign Key}') of the object.

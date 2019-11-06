@@ -115,8 +115,8 @@ public class View extends Datagroup {
     @JsonProperty("referenced_by_views")
     protected ItemList<View> referencedByViews;
 
-    @JsonProperty("same_as_database_views")
-    protected ItemList<View> sameAsDatabaseViews;
+    @JsonProperty("same_as_data_sources")
+    protected ItemList<Datagroup> sameAsDataSources;
 
     @JsonProperty("selected_foreign_key")
     protected ItemList<DatabaseColumn> selectedForeignKey;
@@ -555,18 +555,18 @@ public class View extends Datagroup {
     public void setReferencedByViews(ItemList<View> referencedByViews) { this.referencedByViews = referencedByViews; }
 
     /**
-     * Retrieve the {@code same_as_database_views} property (displayed as '{@literal Same as Database Views}') of the object.
-     * @return {@code ItemList<View>}
+     * Retrieve the {@code same_as_data_sources} property (displayed as '{@literal Same as Data Sources}') of the object.
+     * @return {@code ItemList<Datagroup>}
      */
-    @JsonProperty("same_as_database_views")
-    public ItemList<View> getSameAsDatabaseViews() { return this.sameAsDatabaseViews; }
+    @JsonProperty("same_as_data_sources")
+    public ItemList<Datagroup> getSameAsDataSources() { return this.sameAsDataSources; }
 
     /**
-     * Set the {@code same_as_database_views} property (displayed as {@code Same as Database Views}) of the object.
-     * @param sameAsDatabaseViews the value to set
+     * Set the {@code same_as_data_sources} property (displayed as {@code Same as Data Sources}) of the object.
+     * @param sameAsDataSources the value to set
      */
-    @JsonProperty("same_as_database_views")
-    public void setSameAsDatabaseViews(ItemList<View> sameAsDatabaseViews) { this.sameAsDatabaseViews = sameAsDatabaseViews; }
+    @JsonProperty("same_as_data_sources")
+    public void setSameAsDataSources(ItemList<Datagroup> sameAsDataSources) { this.sameAsDataSources = sameAsDataSources; }
 
     /**
      * Retrieve the {@code selected_foreign_key} property (displayed as '{@literal User Selected Foreign Key}') of the object.

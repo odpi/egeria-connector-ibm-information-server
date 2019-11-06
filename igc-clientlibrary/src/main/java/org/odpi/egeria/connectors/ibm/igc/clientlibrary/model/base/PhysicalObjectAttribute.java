@@ -48,6 +48,9 @@ public class PhysicalObjectAttribute extends InformationAsset {
     @JsonProperty("physical_object")
     protected PhysicalObject physicalObject;
 
+    @JsonProperty("physical_object_for_query")
+    protected PhysicalObject physicalObjectForQuery;
+
     @JsonProperty("read_by_(design)")
     protected ItemList<InformationAsset> readByDesign;
 
@@ -169,6 +172,20 @@ public class PhysicalObjectAttribute extends InformationAsset {
      */
     @JsonProperty("physical_object")
     public void setPhysicalObject(PhysicalObject physicalObject) { this.physicalObject = physicalObject; }
+
+    /**
+     * Retrieve the {@code physical_object_for_query} property (displayed as '{@literal Physical Object}') of the object.
+     * @return {@code PhysicalObject}
+     */
+    @JsonProperty("physical_object_for_query")
+    public PhysicalObject getPhysicalObjectForQuery() { return this.physicalObjectForQuery; }
+
+    /**
+     * Set the {@code physical_object_for_query} property (displayed as {@code Physical Object}) of the object.
+     * @param physicalObjectForQuery the value to set
+     */
+    @JsonProperty("physical_object_for_query")
+    public void setPhysicalObjectForQuery(PhysicalObject physicalObjectForQuery) { this.physicalObjectForQuery = physicalObjectForQuery; }
 
     /**
      * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.

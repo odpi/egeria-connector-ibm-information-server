@@ -75,6 +75,9 @@ public class DataFileRecord extends Datagroup {
     @JsonProperty("read_by_(user_defined)")
     protected ItemList<InformationAsset> readByUserDefined;
 
+    @JsonProperty("same_as_data_sources")
+    protected ItemList<Datagroup> sameAsDataSources;
+
     @JsonProperty("written_by_(design)")
     protected ItemList<InformationAsset> writtenByDesign;
 
@@ -130,14 +133,14 @@ public class DataFileRecord extends Datagroup {
     public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
 
     /**
-     * Retrieve the {@code data_file} property (displayed as '{@literal Data File}') of the object.
+     * Retrieve the {@code data_file} property (displayed as '{@literal Default Data File}') of the object.
      * @return {@code MainObject}
      */
     @JsonProperty("data_file")
     public MainObject getDataFile() { return this.dataFile; }
 
     /**
-     * Set the {@code data_file} property (displayed as {@code Data File}) of the object.
+     * Set the {@code data_file} property (displayed as {@code Default Data File}) of the object.
      * @param dataFile the value to set
      */
     @JsonProperty("data_file")
@@ -310,6 +313,20 @@ public class DataFileRecord extends Datagroup {
      */
     @JsonProperty("read_by_(user_defined)")
     public void setReadByUserDefined(ItemList<InformationAsset> readByUserDefined) { this.readByUserDefined = readByUserDefined; }
+
+    /**
+     * Retrieve the {@code same_as_data_sources} property (displayed as '{@literal Same as Data Sources}') of the object.
+     * @return {@code ItemList<Datagroup>}
+     */
+    @JsonProperty("same_as_data_sources")
+    public ItemList<Datagroup> getSameAsDataSources() { return this.sameAsDataSources; }
+
+    /**
+     * Set the {@code same_as_data_sources} property (displayed as {@code Same as Data Sources}) of the object.
+     * @param sameAsDataSources the value to set
+     */
+    @JsonProperty("same_as_data_sources")
+    public void setSameAsDataSources(ItemList<Datagroup> sameAsDataSources) { this.sameAsDataSources = sameAsDataSources; }
 
     /**
      * Retrieve the {@code written_by_(design)} property (displayed as '{@literal Written by (Design)}') of the object.

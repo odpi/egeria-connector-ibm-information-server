@@ -27,6 +27,15 @@ import java.util.Date;
 @JsonTypeName("stage")
 public class Stage extends InformationAsset {
 
+    @JsonProperty("after_sql")
+    protected String afterSql;
+
+    @JsonProperty("all_sql_statements")
+    protected String allSqlStatements;
+
+    @JsonProperty("before_sql")
+    protected String beforeSql;
+
     @JsonProperty("blueprint_elements")
     protected ItemList<BlueprintElementLink> blueprintElements;
 
@@ -38,6 +47,9 @@ public class Stage extends InformationAsset {
 
     @JsonProperty("data_source_or_server")
     protected String dataSourceOrServer;
+
+    @JsonProperty("delete_sql")
+    protected String deleteSql;
 
     @JsonProperty("file")
     protected String file;
@@ -57,8 +69,17 @@ public class Stage extends InformationAsset {
     @JsonProperty("input_links")
     protected ItemList<Link> inputLinks;
 
+    @JsonProperty("insert_sql")
+    protected String insertSql;
+
+    @JsonProperty("job")
+    protected ItemList<Dsjob> job;
+
     @JsonProperty("job_or_container")
     protected ItemList<MainObject> jobOrContainer;
+
+    @JsonProperty("manually_bound_to")
+    protected ItemList<MainObject> manuallyBoundTo;
 
     @JsonProperty("match_specifications")
     protected ItemList<MatchSpecification> matchSpecifications;
@@ -99,6 +120,9 @@ public class Stage extends InformationAsset {
     @JsonProperty("schema")
     protected String schema;
 
+    @JsonProperty("shared_or_local_container")
+    protected ReferencedContainer sharedOrLocalContainer;
+
     @JsonProperty("sql_statement")
     protected String sqlStatement;
 
@@ -117,6 +141,9 @@ public class Stage extends InformationAsset {
     @JsonProperty("type_definition")
     protected String typeDefinition;
 
+    @JsonProperty("update_sql")
+    protected String updateSql;
+
     @JsonProperty("writes_to_(design)")
     protected ItemList<InformationAsset> writesToDesign;
 
@@ -128,6 +155,48 @@ public class Stage extends InformationAsset {
 
     @JsonProperty("writes_to_(user_defined)")
     protected ItemList<InformationAsset> writesToUserDefined;
+
+    /**
+     * Retrieve the {@code after_sql} property (displayed as '{@literal After SQL}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("after_sql")
+    public String getAfterSql() { return this.afterSql; }
+
+    /**
+     * Set the {@code after_sql} property (displayed as {@code After SQL}) of the object.
+     * @param afterSql the value to set
+     */
+    @JsonProperty("after_sql")
+    public void setAfterSql(String afterSql) { this.afterSql = afterSql; }
+
+    /**
+     * Retrieve the {@code all_sql_statements} property (displayed as '{@literal All SQL Statements}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("all_sql_statements")
+    public String getAllSqlStatements() { return this.allSqlStatements; }
+
+    /**
+     * Set the {@code all_sql_statements} property (displayed as {@code All SQL Statements}) of the object.
+     * @param allSqlStatements the value to set
+     */
+    @JsonProperty("all_sql_statements")
+    public void setAllSqlStatements(String allSqlStatements) { this.allSqlStatements = allSqlStatements; }
+
+    /**
+     * Retrieve the {@code before_sql} property (displayed as '{@literal Before SQL}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("before_sql")
+    public String getBeforeSql() { return this.beforeSql; }
+
+    /**
+     * Set the {@code before_sql} property (displayed as {@code Before SQL}) of the object.
+     * @param beforeSql the value to set
+     */
+    @JsonProperty("before_sql")
+    public void setBeforeSql(String beforeSql) { this.beforeSql = beforeSql; }
 
     /**
      * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
@@ -184,6 +253,20 @@ public class Stage extends InformationAsset {
      */
     @JsonProperty("data_source_or_server")
     public void setDataSourceOrServer(String dataSourceOrServer) { this.dataSourceOrServer = dataSourceOrServer; }
+
+    /**
+     * Retrieve the {@code delete_sql} property (displayed as '{@literal Delete SQL}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("delete_sql")
+    public String getDeleteSql() { return this.deleteSql; }
+
+    /**
+     * Set the {@code delete_sql} property (displayed as {@code Delete SQL}) of the object.
+     * @param deleteSql the value to set
+     */
+    @JsonProperty("delete_sql")
+    public void setDeleteSql(String deleteSql) { this.deleteSql = deleteSql; }
 
     /**
      * Retrieve the {@code file} property (displayed as '{@literal File}') of the object.
@@ -270,6 +353,34 @@ public class Stage extends InformationAsset {
     public void setInputLinks(ItemList<Link> inputLinks) { this.inputLinks = inputLinks; }
 
     /**
+     * Retrieve the {@code insert_sql} property (displayed as '{@literal Insert SQL}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("insert_sql")
+    public String getInsertSql() { return this.insertSql; }
+
+    /**
+     * Set the {@code insert_sql} property (displayed as {@code Insert SQL}) of the object.
+     * @param insertSql the value to set
+     */
+    @JsonProperty("insert_sql")
+    public void setInsertSql(String insertSql) { this.insertSql = insertSql; }
+
+    /**
+     * Retrieve the {@code job} property (displayed as '{@literal Job}') of the object.
+     * @return {@code ItemList<Dsjob>}
+     */
+    @JsonProperty("job")
+    public ItemList<Dsjob> getJob() { return this.job; }
+
+    /**
+     * Set the {@code job} property (displayed as {@code Job}) of the object.
+     * @param job the value to set
+     */
+    @JsonProperty("job")
+    public void setJob(ItemList<Dsjob> job) { this.job = job; }
+
+    /**
      * Retrieve the {@code job_or_container} property (displayed as '{@literal Job or Container}') of the object.
      * @return {@code ItemList<MainObject>}
      */
@@ -282,6 +393,20 @@ public class Stage extends InformationAsset {
      */
     @JsonProperty("job_or_container")
     public void setJobOrContainer(ItemList<MainObject> jobOrContainer) { this.jobOrContainer = jobOrContainer; }
+
+    /**
+     * Retrieve the {@code manually_bound_to} property (displayed as '{@literal Manually Bound To}') of the object.
+     * @return {@code ItemList<MainObject>}
+     */
+    @JsonProperty("manually_bound_to")
+    public ItemList<MainObject> getManuallyBoundTo() { return this.manuallyBoundTo; }
+
+    /**
+     * Set the {@code manually_bound_to} property (displayed as {@code Manually Bound To}) of the object.
+     * @param manuallyBoundTo the value to set
+     */
+    @JsonProperty("manually_bound_to")
+    public void setManuallyBoundTo(ItemList<MainObject> manuallyBoundTo) { this.manuallyBoundTo = manuallyBoundTo; }
 
     /**
      * Retrieve the {@code match_specifications} property (displayed as '{@literal Match Specifications}') of the object.
@@ -466,6 +591,20 @@ public class Stage extends InformationAsset {
     public void setSchema(String schema) { this.schema = schema; }
 
     /**
+     * Retrieve the {@code shared_or_local_container} property (displayed as '{@literal Shared or Local Container}') of the object.
+     * @return {@code ReferencedContainer}
+     */
+    @JsonProperty("shared_or_local_container")
+    public ReferencedContainer getSharedOrLocalContainer() { return this.sharedOrLocalContainer; }
+
+    /**
+     * Set the {@code shared_or_local_container} property (displayed as {@code Shared or Local Container}) of the object.
+     * @param sharedOrLocalContainer the value to set
+     */
+    @JsonProperty("shared_or_local_container")
+    public void setSharedOrLocalContainer(ReferencedContainer sharedOrLocalContainer) { this.sharedOrLocalContainer = sharedOrLocalContainer; }
+
+    /**
      * Retrieve the {@code sql_statement} property (displayed as '{@literal SQL Statement}') of the object.
      * @return {@code String}
      */
@@ -548,6 +687,20 @@ public class Stage extends InformationAsset {
      */
     @JsonProperty("type_definition")
     public void setTypeDefinition(String typeDefinition) { this.typeDefinition = typeDefinition; }
+
+    /**
+     * Retrieve the {@code update_sql} property (displayed as '{@literal Update SQL}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("update_sql")
+    public String getUpdateSql() { return this.updateSql; }
+
+    /**
+     * Set the {@code update_sql} property (displayed as {@code Update SQL}) of the object.
+     * @param updateSql the value to set
+     */
+    @JsonProperty("update_sql")
+    public void setUpdateSql(String updateSql) { this.updateSql = updateSql; }
 
     /**
      * Retrieve the {@code writes_to_(design)} property (displayed as '{@literal Writes to (Design)}') of the object.

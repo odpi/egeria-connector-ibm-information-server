@@ -30,11 +30,17 @@ public class DataFile extends InformationAsset {
     @JsonProperty("alias_(business_name)")
     protected String aliasBusinessName;
 
+    @JsonProperty("amazon_s3_data_files")
+    protected AmazonS3DataFile amazonS3DataFiles;
+
     @JsonProperty("blueprint_elements")
     protected ItemList<BlueprintElementLink> blueprintElements;
 
     @JsonProperty("data_file_records")
     protected ItemList<DataFileRecord> dataFileRecords;
+
+    @JsonProperty("host")
+    protected Host host;
 
     @JsonProperty("impacted_by")
     protected ItemList<InformationAsset> impactedBy;
@@ -56,6 +62,9 @@ public class DataFile extends InformationAsset {
 
     @JsonProperty("include_for_business_lineage")
     protected Boolean includeForBusinessLineage;
+
+    @JsonProperty("parent_folder")
+    protected MainObject parentFolder;
 
     @JsonProperty("parent_folder_or_host")
     protected ItemList<MainObject> parentFolderOrHost;
@@ -105,6 +114,20 @@ public class DataFile extends InformationAsset {
     public void setAliasBusinessName(String aliasBusinessName) { this.aliasBusinessName = aliasBusinessName; }
 
     /**
+     * Retrieve the {@code amazon_s3_data_files} property (displayed as '{@literal Amazon S3 Data Files}') of the object.
+     * @return {@code AmazonS3DataFile}
+     */
+    @JsonProperty("amazon_s3_data_files")
+    public AmazonS3DataFile getAmazonS3DataFiles() { return this.amazonS3DataFiles; }
+
+    /**
+     * Set the {@code amazon_s3_data_files} property (displayed as {@code Amazon S3 Data Files}) of the object.
+     * @param amazonS3DataFiles the value to set
+     */
+    @JsonProperty("amazon_s3_data_files")
+    public void setAmazonS3DataFiles(AmazonS3DataFile amazonS3DataFiles) { this.amazonS3DataFiles = amazonS3DataFiles; }
+
+    /**
      * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
      * @return {@code ItemList<BlueprintElementLink>}
      */
@@ -131,6 +154,20 @@ public class DataFile extends InformationAsset {
      */
     @JsonProperty("data_file_records")
     public void setDataFileRecords(ItemList<DataFileRecord> dataFileRecords) { this.dataFileRecords = dataFileRecords; }
+
+    /**
+     * Retrieve the {@code host} property (displayed as '{@literal Host}') of the object.
+     * @return {@code Host}
+     */
+    @JsonProperty("host")
+    public Host getHost() { return this.host; }
+
+    /**
+     * Set the {@code host} property (displayed as {@code Host}) of the object.
+     * @param host the value to set
+     */
+    @JsonProperty("host")
+    public void setHost(Host host) { this.host = host; }
 
     /**
      * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
@@ -229,6 +266,20 @@ public class DataFile extends InformationAsset {
      */
     @JsonProperty("include_for_business_lineage")
     public void setIncludeForBusinessLineage(Boolean includeForBusinessLineage) { this.includeForBusinessLineage = includeForBusinessLineage; }
+
+    /**
+     * Retrieve the {@code parent_folder} property (displayed as '{@literal Parent Folder}') of the object.
+     * @return {@code MainObject}
+     */
+    @JsonProperty("parent_folder")
+    public MainObject getParentFolder() { return this.parentFolder; }
+
+    /**
+     * Set the {@code parent_folder} property (displayed as {@code Parent Folder}) of the object.
+     * @param parentFolder the value to set
+     */
+    @JsonProperty("parent_folder")
+    public void setParentFolder(MainObject parentFolder) { this.parentFolder = parentFolder; }
 
     /**
      * Retrieve the {@code parent_folder_or_host} property (displayed as '{@literal Parent Folder or Host}') of the object.

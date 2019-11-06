@@ -36,6 +36,9 @@ public class DataFileFolder extends InformationAsset {
     @JsonProperty("data_files")
     protected ItemList<DataFile> dataFiles;
 
+    @JsonProperty("host")
+    protected Host host;
+
     @JsonProperty("impacted_by")
     protected ItemList<InformationAsset> impactedBy;
 
@@ -45,8 +48,14 @@ public class DataFileFolder extends InformationAsset {
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
 
+    @JsonProperty("include_for_business_lineage")
+    protected Boolean includeForBusinessLineage;
+
     @JsonProperty("location")
     protected String location;
+
+    @JsonProperty("parent_folder")
+    protected MainObject parentFolder;
 
     @JsonProperty("parent_folder_or_host")
     protected ItemList<MainObject> parentFolderOrHost;
@@ -62,6 +71,9 @@ public class DataFileFolder extends InformationAsset {
 
     @JsonProperty("read_by_(user_defined)")
     protected ItemList<InformationAsset> readByUserDefined;
+
+    @JsonProperty("same_as_data_sources")
+    protected ItemList<MainObject> sameAsDataSources;
 
     @JsonProperty("source_creation_date")
     protected Date sourceCreationDate;
@@ -133,6 +145,20 @@ public class DataFileFolder extends InformationAsset {
     public void setDataFiles(ItemList<DataFile> dataFiles) { this.dataFiles = dataFiles; }
 
     /**
+     * Retrieve the {@code host} property (displayed as '{@literal Host}') of the object.
+     * @return {@code Host}
+     */
+    @JsonProperty("host")
+    public Host getHost() { return this.host; }
+
+    /**
+     * Set the {@code host} property (displayed as {@code Host}) of the object.
+     * @param host the value to set
+     */
+    @JsonProperty("host")
+    public void setHost(Host host) { this.host = host; }
+
+    /**
      * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
      * @return {@code ItemList<InformationAsset>}
      */
@@ -175,6 +201,20 @@ public class DataFileFolder extends InformationAsset {
     public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
+     * Retrieve the {@code include_for_business_lineage} property (displayed as '{@literal Include for Business Lineage}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("include_for_business_lineage")
+    public Boolean getIncludeForBusinessLineage() { return this.includeForBusinessLineage; }
+
+    /**
+     * Set the {@code include_for_business_lineage} property (displayed as {@code Include for Business Lineage}) of the object.
+     * @param includeForBusinessLineage the value to set
+     */
+    @JsonProperty("include_for_business_lineage")
+    public void setIncludeForBusinessLineage(Boolean includeForBusinessLineage) { this.includeForBusinessLineage = includeForBusinessLineage; }
+
+    /**
      * Retrieve the {@code location} property (displayed as '{@literal Location}') of the object.
      * @return {@code String}
      */
@@ -187,6 +227,20 @@ public class DataFileFolder extends InformationAsset {
      */
     @JsonProperty("location")
     public void setLocation(String location) { this.location = location; }
+
+    /**
+     * Retrieve the {@code parent_folder} property (displayed as '{@literal Parent Folder}') of the object.
+     * @return {@code MainObject}
+     */
+    @JsonProperty("parent_folder")
+    public MainObject getParentFolder() { return this.parentFolder; }
+
+    /**
+     * Set the {@code parent_folder} property (displayed as {@code Parent Folder}) of the object.
+     * @param parentFolder the value to set
+     */
+    @JsonProperty("parent_folder")
+    public void setParentFolder(MainObject parentFolder) { this.parentFolder = parentFolder; }
 
     /**
      * Retrieve the {@code parent_folder_or_host} property (displayed as '{@literal Parent Folder or Host}') of the object.
@@ -257,6 +311,20 @@ public class DataFileFolder extends InformationAsset {
      */
     @JsonProperty("read_by_(user_defined)")
     public void setReadByUserDefined(ItemList<InformationAsset> readByUserDefined) { this.readByUserDefined = readByUserDefined; }
+
+    /**
+     * Retrieve the {@code same_as_data_sources} property (displayed as '{@literal Same as Data Sources}') of the object.
+     * @return {@code ItemList<MainObject>}
+     */
+    @JsonProperty("same_as_data_sources")
+    public ItemList<MainObject> getSameAsDataSources() { return this.sameAsDataSources; }
+
+    /**
+     * Set the {@code same_as_data_sources} property (displayed as {@code Same as Data Sources}) of the object.
+     * @param sameAsDataSources the value to set
+     */
+    @JsonProperty("same_as_data_sources")
+    public void setSameAsDataSources(ItemList<MainObject> sameAsDataSources) { this.sameAsDataSources = sameAsDataSources; }
 
     /**
      * Retrieve the {@code source_creation_date} property (displayed as '{@literal Source Creation Date}') of the object.

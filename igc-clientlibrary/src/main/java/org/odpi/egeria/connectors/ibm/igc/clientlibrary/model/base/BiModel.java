@@ -39,11 +39,17 @@ public class BiModel extends InformationAsset {
     @JsonProperty("bi_filters")
     protected ItemList<BiFilter> biFilters;
 
+    @JsonProperty("bi_folder")
+    protected BiFolder biFolder;
+
     @JsonProperty("bi_folder_or_bi_model")
     protected ItemList<MainObject> biFolderOrBiModel;
 
     @JsonProperty("bi_hierarchies")
     protected ItemList<BiHierarchy> biHierarchies;
+
+    @JsonProperty("bi_model")
+    protected BiModel biModel;
 
     @JsonProperty("bi_model_creation_date")
     protected Date biModelCreationDate;
@@ -168,6 +174,20 @@ public class BiModel extends InformationAsset {
     public void setBiFilters(ItemList<BiFilter> biFilters) { this.biFilters = biFilters; }
 
     /**
+     * Retrieve the {@code bi_folder} property (displayed as '{@literal BI Folder}') of the object.
+     * @return {@code BiFolder}
+     */
+    @JsonProperty("bi_folder")
+    public BiFolder getBiFolder() { return this.biFolder; }
+
+    /**
+     * Set the {@code bi_folder} property (displayed as {@code BI Folder}) of the object.
+     * @param biFolder the value to set
+     */
+    @JsonProperty("bi_folder")
+    public void setBiFolder(BiFolder biFolder) { this.biFolder = biFolder; }
+
+    /**
      * Retrieve the {@code bi_folder_or_bi_model} property (displayed as '{@literal BI Folder or BI Model}') of the object.
      * @return {@code ItemList<MainObject>}
      */
@@ -194,6 +214,20 @@ public class BiModel extends InformationAsset {
      */
     @JsonProperty("bi_hierarchies")
     public void setBiHierarchies(ItemList<BiHierarchy> biHierarchies) { this.biHierarchies = biHierarchies; }
+
+    /**
+     * Retrieve the {@code bi_model} property (displayed as '{@literal BI Model}') of the object.
+     * @return {@code BiModel}
+     */
+    @JsonProperty("bi_model")
+    public BiModel getBiModel() { return this.biModel; }
+
+    /**
+     * Set the {@code bi_model} property (displayed as {@code BI Model}) of the object.
+     * @param biModel the value to set
+     */
+    @JsonProperty("bi_model")
+    public void setBiModel(BiModel biModel) { this.biModel = biModel; }
 
     /**
      * Retrieve the {@code bi_model_creation_date} property (displayed as '{@literal BI Model Creation Date}') of the object.

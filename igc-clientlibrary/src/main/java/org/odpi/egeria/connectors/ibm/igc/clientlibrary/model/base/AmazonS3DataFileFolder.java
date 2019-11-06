@@ -27,6 +27,12 @@ import java.util.Date;
 @JsonTypeName("amazon_s3_data_file_folder")
 public class AmazonS3DataFileFolder extends InformationAsset {
 
+    @JsonProperty("amazon_s3_bucket")
+    protected AmazonS3Bucket amazonS3Bucket;
+
+    @JsonProperty("amazon_s3_data_file_folder")
+    protected AmazonS3DataFileFolder amazonS3DataFileFolder;
+
     @JsonProperty("contains_amazon_s3_data_file_folders")
     protected ItemList<MainObject> containsAmazonS3DataFileFolders;
 
@@ -45,6 +51,9 @@ public class AmazonS3DataFileFolder extends InformationAsset {
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
 
+    @JsonProperty("include_for_business_lineage")
+    protected Boolean includeForBusinessLineage;
+
     @JsonProperty("location")
     protected String location;
 
@@ -62,6 +71,9 @@ public class AmazonS3DataFileFolder extends InformationAsset {
 
     @JsonProperty("read_by_(user_defined)")
     protected ItemList<InformationAsset> readByUserDefined;
+
+    @JsonProperty("same_as_data_sources")
+    protected ItemList<MainObject> sameAsDataSources;
 
     @JsonProperty("source_creation_date")
     protected Date sourceCreationDate;
@@ -83,6 +95,34 @@ public class AmazonS3DataFileFolder extends InformationAsset {
 
     @JsonProperty("written_by_(user_defined)")
     protected ItemList<InformationAsset> writtenByUserDefined;
+
+    /**
+     * Retrieve the {@code amazon_s3_bucket} property (displayed as '{@literal Amazon S3 Bucket}') of the object.
+     * @return {@code AmazonS3Bucket}
+     */
+    @JsonProperty("amazon_s3_bucket")
+    public AmazonS3Bucket getAmazonS3Bucket() { return this.amazonS3Bucket; }
+
+    /**
+     * Set the {@code amazon_s3_bucket} property (displayed as {@code Amazon S3 Bucket}) of the object.
+     * @param amazonS3Bucket the value to set
+     */
+    @JsonProperty("amazon_s3_bucket")
+    public void setAmazonS3Bucket(AmazonS3Bucket amazonS3Bucket) { this.amazonS3Bucket = amazonS3Bucket; }
+
+    /**
+     * Retrieve the {@code amazon_s3_data_file_folder} property (displayed as '{@literal Amazon S3 Data File Folder}') of the object.
+     * @return {@code AmazonS3DataFileFolder}
+     */
+    @JsonProperty("amazon_s3_data_file_folder")
+    public AmazonS3DataFileFolder getAmazonS3DataFileFolder() { return this.amazonS3DataFileFolder; }
+
+    /**
+     * Set the {@code amazon_s3_data_file_folder} property (displayed as {@code Amazon S3 Data File Folder}) of the object.
+     * @param amazonS3DataFileFolder the value to set
+     */
+    @JsonProperty("amazon_s3_data_file_folder")
+    public void setAmazonS3DataFileFolder(AmazonS3DataFileFolder amazonS3DataFileFolder) { this.amazonS3DataFileFolder = amazonS3DataFileFolder; }
 
     /**
      * Retrieve the {@code contains_amazon_s3_data_file_folders} property (displayed as '{@literal Contains Amazon S3 Data File Folders}') of the object.
@@ -169,6 +209,20 @@ public class AmazonS3DataFileFolder extends InformationAsset {
     public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
+     * Retrieve the {@code include_for_business_lineage} property (displayed as '{@literal Include for Business Lineage}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("include_for_business_lineage")
+    public Boolean getIncludeForBusinessLineage() { return this.includeForBusinessLineage; }
+
+    /**
+     * Set the {@code include_for_business_lineage} property (displayed as {@code Include for Business Lineage}) of the object.
+     * @param includeForBusinessLineage the value to set
+     */
+    @JsonProperty("include_for_business_lineage")
+    public void setIncludeForBusinessLineage(Boolean includeForBusinessLineage) { this.includeForBusinessLineage = includeForBusinessLineage; }
+
+    /**
      * Retrieve the {@code location} property (displayed as '{@literal Location}') of the object.
      * @return {@code String}
      */
@@ -251,6 +305,20 @@ public class AmazonS3DataFileFolder extends InformationAsset {
      */
     @JsonProperty("read_by_(user_defined)")
     public void setReadByUserDefined(ItemList<InformationAsset> readByUserDefined) { this.readByUserDefined = readByUserDefined; }
+
+    /**
+     * Retrieve the {@code same_as_data_sources} property (displayed as '{@literal Same as Data Sources}') of the object.
+     * @return {@code ItemList<MainObject>}
+     */
+    @JsonProperty("same_as_data_sources")
+    public ItemList<MainObject> getSameAsDataSources() { return this.sameAsDataSources; }
+
+    /**
+     * Set the {@code same_as_data_sources} property (displayed as {@code Same as Data Sources}) of the object.
+     * @param sameAsDataSources the value to set
+     */
+    @JsonProperty("same_as_data_sources")
+    public void setSameAsDataSources(ItemList<MainObject> sameAsDataSources) { this.sameAsDataSources = sameAsDataSources; }
 
     /**
      * Retrieve the {@code source_creation_date} property (displayed as '{@literal Source Creation Date}') of the object.

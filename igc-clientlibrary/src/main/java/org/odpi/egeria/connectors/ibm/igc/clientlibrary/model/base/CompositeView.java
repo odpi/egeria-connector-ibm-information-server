@@ -33,6 +33,9 @@ public class CompositeView extends InformationAsset {
     @JsonProperty("blueprint_elements")
     protected ItemList<BlueprintElementLink> blueprintElements;
 
+    @JsonProperty("composite_view")
+    protected MemberType compositeView;
+
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
 
@@ -76,6 +79,20 @@ public class CompositeView extends InformationAsset {
      */
     @JsonProperty("blueprint_elements")
     public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
+
+    /**
+     * Retrieve the {@code composite_view} property (displayed as '{@literal Composite View}') of the object.
+     * @return {@code MemberType}
+     */
+    @JsonProperty("composite_view")
+    public MemberType getCompositeView() { return this.compositeView; }
+
+    /**
+     * Set the {@code composite_view} property (displayed as {@code Composite View}) of the object.
+     * @param compositeView the value to set
+     */
+    @JsonProperty("composite_view")
+    public void setCompositeView(MemberType compositeView) { this.compositeView = compositeView; }
 
     /**
      * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.

@@ -73,12 +73,28 @@ public class XsdSimpleType extends InformationAsset {
     @JsonProperty("restriction_enumeration_values")
     protected List<String> restrictionEnumerationValues;
 
+    @JsonProperty("restriction_maximum_inclusive")
+    protected Boolean restrictionMaximumInclusive;
+
+    /**
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     * @see #restrictionMaximumInclusive
+     */
+    @Deprecated
     @JsonProperty("restriction_maximum_inclusive_string")
     protected List<String> restrictionMaximumInclusiveString;
 
     @JsonProperty("restriction_maximum_value")
     protected String restrictionMaximumValue;
 
+    @JsonProperty("restriction_minimum_inclusive")
+    protected Boolean restrictionMinimumInclusive;
+
+    /**
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     * @see #restrictionMinimumInclusive
+     */
+    @Deprecated
     @JsonProperty("restriction_minimum_inclusive_string")
     protected List<String> restrictionMinimumInclusiveString;
 
@@ -317,18 +333,41 @@ public class XsdSimpleType extends InformationAsset {
     public void setRestrictionEnumerationValues(List<String> restrictionEnumerationValues) { this.restrictionEnumerationValues = restrictionEnumerationValues; }
 
     /**
-     * Retrieve the {@code restriction_maximum_inclusive_string} property (displayed as '{@literal Maximum Range Inclusive}') of the object.
-     * @return {@code List<String>}
+     * Retrieve the {@code restriction_maximum_inclusive} property (displayed as '{@literal Maximum Range Inclusive}') of the object.
+     * @return {@code Boolean}
      */
+    @JsonProperty("restriction_maximum_inclusive")
+    public Boolean getRestrictionMaximumInclusive() { return this.restrictionMaximumInclusive; }
+
+    /**
+     * Set the {@code restriction_maximum_inclusive} property (displayed as {@code Maximum Range Inclusive}) of the object.
+     * @param restrictionMaximumInclusive the value to set
+     */
+    @JsonProperty("restriction_maximum_inclusive")
+    public void setRestrictionMaximumInclusive(Boolean restrictionMaximumInclusive) { this.restrictionMaximumInclusive = restrictionMaximumInclusive; }
+
+    /**
+     * Retrieve the {@code restriction_maximum_inclusive_string} property (displayed as '{@literal Maximum Range Inclusive}') of the object.
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     *
+     * @return {@code List<String>}
+     * @see #getRestrictionMaximumInclusive()
+     */
+    @Deprecated
     @JsonProperty("restriction_maximum_inclusive_string")
     public List<String> getRestrictionMaximumInclusiveString() { return this.restrictionMaximumInclusiveString; }
 
     /**
      * Set the {@code restriction_maximum_inclusive_string} property (displayed as {@code Maximum Range Inclusive}) of the object.
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     *
      * @param restrictionMaximumInclusiveString the value to set
+     * @see #setRestrictionMaximumInclusive(Boolean)
      */
+    @Deprecated
     @JsonProperty("restriction_maximum_inclusive_string")
     public void setRestrictionMaximumInclusiveString(List<String> restrictionMaximumInclusiveString) { this.restrictionMaximumInclusiveString = restrictionMaximumInclusiveString; }
+
 
     /**
      * Retrieve the {@code restriction_maximum_value} property (displayed as '{@literal Maximum Range}') of the object.
@@ -345,16 +384,38 @@ public class XsdSimpleType extends InformationAsset {
     public void setRestrictionMaximumValue(String restrictionMaximumValue) { this.restrictionMaximumValue = restrictionMaximumValue; }
 
     /**
-     * Retrieve the {@code restriction_minimum_inclusive_string} property (displayed as '{@literal Minimum Range Inclusive}') of the object.
-     * @return {@code List<String>}
+     * Retrieve the {@code restriction_minimum_inclusive} property (displayed as '{@literal Minimum Range Inclusive}') of the object.
+     * @return {@code Boolean}
      */
+    @JsonProperty("restriction_minimum_inclusive")
+    public Boolean getRestrictionMinimumInclusive() { return this.restrictionMinimumInclusive; }
+
+    /**
+     * Set the {@code restriction_minimum_inclusive} property (displayed as {@code Minimum Range Inclusive}) of the object.
+     * @param restrictionMinimumInclusive the value to set
+     */
+    @JsonProperty("restriction_minimum_inclusive")
+    public void setRestrictionMinimumInclusive(Boolean restrictionMinimumInclusive) { this.restrictionMinimumInclusive = restrictionMinimumInclusive; }
+
+    /**
+     * Retrieve the {@code restriction_minimum_inclusive_string} property (displayed as '{@literal Minimum Range Inclusive}') of the object.
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     *
+     * @return {@code List<String>}
+     * @see #getRestrictionMinimumInclusive()
+     */
+    @Deprecated
     @JsonProperty("restriction_minimum_inclusive_string")
     public List<String> getRestrictionMinimumInclusiveString() { return this.restrictionMinimumInclusiveString; }
 
     /**
      * Set the {@code restriction_minimum_inclusive_string} property (displayed as {@code Minimum Range Inclusive}) of the object.
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     *
      * @param restrictionMinimumInclusiveString the value to set
+     * @see #setRestrictionMinimumInclusive(Boolean)
      */
+    @Deprecated
     @JsonProperty("restriction_minimum_inclusive_string")
     public void setRestrictionMinimumInclusiveString(List<String> restrictionMinimumInclusiveString) { this.restrictionMinimumInclusiveString = restrictionMinimumInclusiveString; }
 

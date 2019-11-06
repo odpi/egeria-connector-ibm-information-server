@@ -121,55 +121,52 @@ public class IGCRestConstants {
         return set;
     }
 
-    private static final Map<String, String> ALIAS_OBJECTS = createAliasObjects();
-    private static Map<String, String> createAliasObjects() {
+    private static final List<String> SUPER_TYPES = createSuperTypes();
+    private static List<String> createSuperTypes() {
+        List<String> list = new ArrayList<>();
+        list.add("main_object");
+        list.add("information_asset");
+        list.add("host");
+        list.add("datagroup");
+        list.add("data_item");
+        list.add("data_item_definition");
+        list.add("classificationenabledgroup");
+        list.add("reportobject");
+        return list;
+    }
+
+    private static final Map<String, String> SUB_TYPE_TO_SUPER_TYPE = createSubTypeToSuperType();
+    private static Map<String, String> createSubTypeToSuperType() {
         Map<String, String> map = new HashMap<>();
+        map.put("main_object", "reference");
         map.put("host_(engine)", "host");
+        map.put("host", "information_asset");
+        map.put("information_asset", "main_object");
+        map.put("database_alias", "datagroup");
+        map.put("database_table", "datagroup");
+        map.put("data_file_record", "datagroup");
+        map.put("view", "datagroup");
+        map.put("design_table", "datagroup");
+        map.put("design_view", "datagroup");
+        map.put("stored_procedure", "datagroup");
+        map.put("design_stored_procedure", "datagroup");
+        map.put("datagroup", "information_asset");
+        map.put("column_definition", "data_item");
+        map.put("ds_stage_column", "data_item");
+        map.put("parameter", "data_item");
+        map.put("routine_argument", "data_item");
+        map.put("stage_type_detail", "data_item");
+        map.put("transform_argument", "data_item");
+        map.put("data_item", "information_asset");
+        map.put("data_element", "data_item_definition");
+        map.put("table_definition", "data_item_definition");
+        map.put("data_item_definition", "data_item");
+        map.put("database_column", "classificationenabledgroup");
+        map.put("data_file_field", "classificationenabledgroup");
+        map.put("classificationenabledgroup", "data_item");
+        map.put("bi_report_query_item", "reportobject");
+        map.put("reportobject", "information_asset");
         return map;
-    }
-
-    private static final Set<String> DATAGROUP_TYPES = createDataGroupTypes();
-    private static Set<String> createDataGroupTypes() {
-        Set<String> set = new HashSet<>();
-        set.add("database_alias");
-        set.add("database_table");
-        set.add("data_file_record");
-        set.add("view");
-        set.add("design_table");
-        set.add("design_view");
-        set.add("stored_procedure");
-        set.add("design_stored_procedure");
-        return set;
-    }
-
-    private static final Set<String> DATA_ITEM_TYPES = createDataItemTypes();
-    private static Set<String> createDataItemTypes() {
-        Set<String> set = new HashSet<>();
-        set.add("column_definition");
-        set.add("ds_stage_column");
-        set.add("parameter");
-        set.add("routine_argument");
-        set.add("stage_type_detail");
-        set.add("transform_argument");
-        set.add("data_item_definition");
-        set.add("classificationenabledgroup");
-        return set;
-    }
-
-    private static final Set<String> DATA_ITEM_DEFINITION_TYPES = createDataItemDefinitionTypes();
-    private static Set<String> createDataItemDefinitionTypes() {
-        Set<String> set = new HashSet<>();
-        set.add("data_element");
-        set.add("table_definition");
-        return set;
-    }
-
-    private static final Set<String> CLASSIFICATION_ENABLED_GROUP_TYPES = createClassificationEnabledGroupTypes();
-    private static Set<String> createClassificationEnabledGroupTypes() {
-        Set<String> set = new HashSet();
-        set.add("database_column");
-        set.add("data_file_field");
-        return set;
     }
 
     /**
@@ -208,40 +205,19 @@ public class IGCRestConstants {
     public static Set<String> getPropertiesToIgnore() { return IGNORE_PROPERTIES; }
 
     /**
-     * Retrieve a map of object types that are in fact aliases for other object types. The key will be the name
-     * of the object type that is an alias, and its value will be the object type for which it is an alias.
+     * Retrieve the list of IGC object super types, in order from the highest level of abstraction to lower levels
+     * of granularity.
      *
-     * @return {@code Map<String, String>}
+     * @return {@code List<String>}
      */
-    public static Map<String, String> getAliasObjects() { return ALIAS_OBJECTS; }
+    public static List<String> getSuperTypes() { return SUPER_TYPES; }
 
     /**
-     * Retrieve the set of IGC object types that should be subtypes of the 'datagroup' type.
+     * Retrieve the mapping of IGC object sub-types to granular super-types.
      *
-     * @return {@code Set<String>}
+     * @return {@Map<String, String>}
      */
-    public static Set<String> getDatagroupTypes() { return DATAGROUP_TYPES; }
-
-    /**
-     * Retrieve the set of IGC object types that should be subtypes of the 'data_item' type.
-     *
-     * @return {@code Set<String>}
-     */
-    public static Set<String> getDataItemTypes() { return DATA_ITEM_TYPES; }
-
-    /**
-     * Retrieve the set of IGC object types that should be subtypes of the 'data_item_definition' type.
-     *
-     * @return {@code Set<String>}
-     */
-    public static Set<String> getDataItemDefinitionTypes() { return DATA_ITEM_DEFINITION_TYPES; }
-
-    /**
-     * Retrieve the set of IGC object types that should be subtypes of the 'classificationenabledgroup' type.
-     *
-     * @return {@code Set<String>}
-     */
-    public static Set<String> getClassificationEnabledGroupTypes() { return CLASSIFICATION_ENABLED_GROUP_TYPES; }
+    public static Map<String, String> getSubTypeToSuperType() { return SUB_TYPE_TO_SUPER_TYPE; }
 
     /**
      * Retrieve the name of the Java type for the provided IGC type.

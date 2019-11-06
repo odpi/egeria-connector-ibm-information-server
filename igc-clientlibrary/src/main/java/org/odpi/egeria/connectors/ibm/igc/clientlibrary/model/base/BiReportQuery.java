@@ -27,8 +27,26 @@ import java.util.Date;
 @JsonTypeName("bi_report_query")
 public class BiReportQuery extends InformationAsset {
 
+    @JsonProperty("bi_collection")
+    protected BiCollection biCollection;
+
+    @JsonProperty("bi_model")
+    protected BiModel biModel;
+
+    @JsonProperty("bi_report")
+    protected BiReport biReport;
+
+    @JsonProperty("bi_report_query_detail_filters")
+    protected ItemList<BiReportQueryDetailFilter> biReportQueryDetailFilters;
+
     @JsonProperty("bi_report_query_items")
     protected ItemList<BiReportQueryItem> biReportQueryItems;
+
+    @JsonProperty("bi_report_query_summary_filters")
+    protected ItemList<BiReportQuerySummaryFilter> biReportQuerySummaryFilters;
+
+    @JsonProperty("condition")
+    protected String condition;
 
     @JsonProperty("contained_by_bi_report_queries")
     protected ItemList<BiReportQuery> containedByBiReportQueries;
@@ -88,6 +106,62 @@ public class BiReportQuery extends InformationAsset {
     protected ItemList<InformationAsset> writtenByUserDefined;
 
     /**
+     * Retrieve the {@code bi_collection} property (displayed as '{@literal BI Collection}') of the object.
+     * @return {@code BiCollection}
+     */
+    @JsonProperty("bi_collection")
+    public BiCollection getBiCollection() { return this.biCollection; }
+
+    /**
+     * Set the {@code bi_collection} property (displayed as {@code BI Collection}) of the object.
+     * @param biCollection the value to set
+     */
+    @JsonProperty("bi_collection")
+    public void setBiCollection(BiCollection biCollection) { this.biCollection = biCollection; }
+
+    /**
+     * Retrieve the {@code bi_model} property (displayed as '{@literal BI Model}') of the object.
+     * @return {@code BiModel}
+     */
+    @JsonProperty("bi_model")
+    public BiModel getBiModel() { return this.biModel; }
+
+    /**
+     * Set the {@code bi_model} property (displayed as {@code BI Model}) of the object.
+     * @param biModel the value to set
+     */
+    @JsonProperty("bi_model")
+    public void setBiModel(BiModel biModel) { this.biModel = biModel; }
+
+    /**
+     * Retrieve the {@code bi_report} property (displayed as '{@literal BI Report}') of the object.
+     * @return {@code BiReport}
+     */
+    @JsonProperty("bi_report")
+    public BiReport getBiReport() { return this.biReport; }
+
+    /**
+     * Set the {@code bi_report} property (displayed as {@code BI Report}) of the object.
+     * @param biReport the value to set
+     */
+    @JsonProperty("bi_report")
+    public void setBiReport(BiReport biReport) { this.biReport = biReport; }
+
+    /**
+     * Retrieve the {@code bi_report_query_detail_filters} property (displayed as '{@literal BI Query Detail Filters}') of the object.
+     * @return {@code ItemList<BiReportQueryDetailFilter>}
+     */
+    @JsonProperty("bi_report_query_detail_filters")
+    public ItemList<BiReportQueryDetailFilter> getBiReportQueryDetailFilters() { return this.biReportQueryDetailFilters; }
+
+    /**
+     * Set the {@code bi_report_query_detail_filters} property (displayed as {@code BI Query Detail Filters}) of the object.
+     * @param biReportQueryDetailFilters the value to set
+     */
+    @JsonProperty("bi_report_query_detail_filters")
+    public void setBiReportQueryDetailFilters(ItemList<BiReportQueryDetailFilter> biReportQueryDetailFilters) { this.biReportQueryDetailFilters = biReportQueryDetailFilters; }
+
+    /**
      * Retrieve the {@code bi_report_query_items} property (displayed as '{@literal BI Report Query Items}') of the object.
      * @return {@code ItemList<BiReportQueryItem>}
      */
@@ -100,6 +174,34 @@ public class BiReportQuery extends InformationAsset {
      */
     @JsonProperty("bi_report_query_items")
     public void setBiReportQueryItems(ItemList<BiReportQueryItem> biReportQueryItems) { this.biReportQueryItems = biReportQueryItems; }
+
+    /**
+     * Retrieve the {@code bi_report_query_summary_filters} property (displayed as '{@literal BI Query Summary Filters}') of the object.
+     * @return {@code ItemList<BiReportQuerySummaryFilter>}
+     */
+    @JsonProperty("bi_report_query_summary_filters")
+    public ItemList<BiReportQuerySummaryFilter> getBiReportQuerySummaryFilters() { return this.biReportQuerySummaryFilters; }
+
+    /**
+     * Set the {@code bi_report_query_summary_filters} property (displayed as {@code BI Query Summary Filters}) of the object.
+     * @param biReportQuerySummaryFilters the value to set
+     */
+    @JsonProperty("bi_report_query_summary_filters")
+    public void setBiReportQuerySummaryFilters(ItemList<BiReportQuerySummaryFilter> biReportQuerySummaryFilters) { this.biReportQuerySummaryFilters = biReportQuerySummaryFilters; }
+
+    /**
+     * Retrieve the {@code condition} property (displayed as '{@literal Condition}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("condition")
+    public String getCondition() { return this.condition; }
+
+    /**
+     * Set the {@code condition} property (displayed as {@code Condition}) of the object.
+     * @param condition the value to set
+     */
+    @JsonProperty("condition")
+    public void setCondition(String condition) { this.condition = condition; }
 
     /**
      * Retrieve the {@code contained_by_bi_report_queries} property (displayed as '{@literal Contained by BI Report Queries}') of the object.

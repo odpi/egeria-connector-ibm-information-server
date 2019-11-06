@@ -90,8 +90,8 @@ public class DatabaseSchema extends InformationAsset {
     @JsonProperty("read_by_(user_defined)")
     protected ItemList<InformationAsset> readByUserDefined;
 
-    @JsonProperty("same_as_database_schemas")
-    protected ItemList<DatabaseSchema> sameAsDatabaseSchemas;
+    @JsonProperty("same_as_data_sources")
+    protected ItemList<MainObject> sameAsDataSources;
 
     @JsonProperty("stored_procedures")
     protected ItemList<StoredProcedure> storedProcedures;
@@ -406,18 +406,18 @@ public class DatabaseSchema extends InformationAsset {
     public void setReadByUserDefined(ItemList<InformationAsset> readByUserDefined) { this.readByUserDefined = readByUserDefined; }
 
     /**
-     * Retrieve the {@code same_as_database_schemas} property (displayed as '{@literal Same as Database Schemas}') of the object.
-     * @return {@code ItemList<DatabaseSchema>}
+     * Retrieve the {@code same_as_data_sources} property (displayed as '{@literal Same as Data Sources}') of the object.
+     * @return {@code ItemList<MainObject>}
      */
-    @JsonProperty("same_as_database_schemas")
-    public ItemList<DatabaseSchema> getSameAsDatabaseSchemas() { return this.sameAsDatabaseSchemas; }
+    @JsonProperty("same_as_data_sources")
+    public ItemList<MainObject> getSameAsDataSources() { return this.sameAsDataSources; }
 
     /**
-     * Set the {@code same_as_database_schemas} property (displayed as {@code Same as Database Schemas}) of the object.
-     * @param sameAsDatabaseSchemas the value to set
+     * Set the {@code same_as_data_sources} property (displayed as {@code Same as Data Sources}) of the object.
+     * @param sameAsDataSources the value to set
      */
-    @JsonProperty("same_as_database_schemas")
-    public void setSameAsDatabaseSchemas(ItemList<DatabaseSchema> sameAsDatabaseSchemas) { this.sameAsDatabaseSchemas = sameAsDatabaseSchemas; }
+    @JsonProperty("same_as_data_sources")
+    public void setSameAsDataSources(ItemList<MainObject> sameAsDataSources) { this.sameAsDataSources = sameAsDataSources; }
 
     /**
      * Retrieve the {@code stored_procedures} property (displayed as '{@literal Stored Procedures}') of the object.

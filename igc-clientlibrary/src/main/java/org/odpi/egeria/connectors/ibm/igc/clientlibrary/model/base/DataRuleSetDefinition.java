@@ -36,6 +36,9 @@ public class DataRuleSetDefinition extends InformationAsset {
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
 
+    @JsonProperty("non_published_data_rule_set_definitions")
+    protected NonPublishedDataRuleSet nonPublishedDataRuleSetDefinitions;
+
     @JsonProperty("project")
     protected String project;
 
@@ -44,6 +47,9 @@ public class DataRuleSetDefinition extends InformationAsset {
 
     @JsonProperty("published")
     protected Boolean published;
+
+    @JsonProperty("published_data_rule_set_definitions")
+    protected PublishedDataRuleSet publishedDataRuleSetDefinitions;
 
     /**
      * Valid values are:
@@ -104,6 +110,20 @@ public class DataRuleSetDefinition extends InformationAsset {
     public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
+     * Retrieve the {@code non_published_data_rule_set_definitions} property (displayed as '{@literal Non Published Data Rule Set Definitions}') of the object.
+     * @return {@code NonPublishedDataRuleSet}
+     */
+    @JsonProperty("non_published_data_rule_set_definitions")
+    public NonPublishedDataRuleSet getNonPublishedDataRuleSetDefinitions() { return this.nonPublishedDataRuleSetDefinitions; }
+
+    /**
+     * Set the {@code non_published_data_rule_set_definitions} property (displayed as {@code Non Published Data Rule Set Definitions}) of the object.
+     * @param nonPublishedDataRuleSetDefinitions the value to set
+     */
+    @JsonProperty("non_published_data_rule_set_definitions")
+    public void setNonPublishedDataRuleSetDefinitions(NonPublishedDataRuleSet nonPublishedDataRuleSetDefinitions) { this.nonPublishedDataRuleSetDefinitions = nonPublishedDataRuleSetDefinitions; }
+
+    /**
      * Retrieve the {@code project} property (displayed as '{@literal Project}') of the object.
      * @return {@code String}
      */
@@ -144,6 +164,20 @@ public class DataRuleSetDefinition extends InformationAsset {
      */
     @JsonProperty("published")
     public void setPublished(Boolean published) { this.published = published; }
+
+    /**
+     * Retrieve the {@code published_data_rule_set_definitions} property (displayed as '{@literal Published Data Rule Set Definitions}') of the object.
+     * @return {@code PublishedDataRuleSet}
+     */
+    @JsonProperty("published_data_rule_set_definitions")
+    public PublishedDataRuleSet getPublishedDataRuleSetDefinitions() { return this.publishedDataRuleSetDefinitions; }
+
+    /**
+     * Set the {@code published_data_rule_set_definitions} property (displayed as {@code Published Data Rule Set Definitions}) of the object.
+     * @param publishedDataRuleSetDefinitions the value to set
+     */
+    @JsonProperty("published_data_rule_set_definitions")
+    public void setPublishedDataRuleSetDefinitions(PublishedDataRuleSet publishedDataRuleSetDefinitions) { this.publishedDataRuleSetDefinitions = publishedDataRuleSetDefinitions; }
 
     /**
      * Retrieve the {@code status} property (displayed as '{@literal Status}') of the object.

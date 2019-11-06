@@ -33,6 +33,9 @@ public class AttributeTypeField extends InformationAsset {
     @JsonProperty("attribute_type")
     protected AttributeType attributeType;
 
+    @JsonProperty("attribute_type_for_query")
+    protected AttributeType attributeTypeForQuery;
+
     @JsonProperty("blueprint_elements")
     protected ItemList<BlueprintElementLink> blueprintElements;
 
@@ -86,6 +89,20 @@ public class AttributeTypeField extends InformationAsset {
      */
     @JsonProperty("attribute_type")
     public void setAttributeType(AttributeType attributeType) { this.attributeType = attributeType; }
+
+    /**
+     * Retrieve the {@code attribute_type_for_query} property (displayed as '{@literal Attribute Type}') of the object.
+     * @return {@code AttributeType}
+     */
+    @JsonProperty("attribute_type_for_query")
+    public AttributeType getAttributeTypeForQuery() { return this.attributeTypeForQuery; }
+
+    /**
+     * Set the {@code attribute_type_for_query} property (displayed as {@code Attribute Type}) of the object.
+     * @param attributeTypeForQuery the value to set
+     */
+    @JsonProperty("attribute_type_for_query")
+    public void setAttributeTypeForQuery(AttributeType attributeTypeForQuery) { this.attributeTypeForQuery = attributeTypeForQuery; }
 
     /**
      * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.

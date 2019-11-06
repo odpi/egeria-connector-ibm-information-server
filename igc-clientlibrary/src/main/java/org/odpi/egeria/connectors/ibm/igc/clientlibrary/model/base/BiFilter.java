@@ -28,6 +28,12 @@ import java.util.Date;
 @JsonTypeName("bi_filter")
 public class BiFilter extends Reference {
 
+    @JsonProperty("bi_collection")
+    protected BiCollection biCollection;
+
+    @JsonProperty("bi_model")
+    protected BiModel biModel;
+
     @JsonProperty("context")
     protected ItemList<Olapobject> context;
 
@@ -54,6 +60,34 @@ public class BiFilter extends Reference {
 
     @JsonProperty("short_description")
     protected String shortDescription;
+
+    /**
+     * Retrieve the {@code bi_collection} property (displayed as '{@literal BI Collection}') of the object.
+     * @return {@code BiCollection}
+     */
+    @JsonProperty("bi_collection")
+    public BiCollection getBiCollection() { return this.biCollection; }
+
+    /**
+     * Set the {@code bi_collection} property (displayed as {@code BI Collection}) of the object.
+     * @param biCollection the value to set
+     */
+    @JsonProperty("bi_collection")
+    public void setBiCollection(BiCollection biCollection) { this.biCollection = biCollection; }
+
+    /**
+     * Retrieve the {@code bi_model} property (displayed as '{@literal BI Model}') of the object.
+     * @return {@code BiModel}
+     */
+    @JsonProperty("bi_model")
+    public BiModel getBiModel() { return this.biModel; }
+
+    /**
+     * Set the {@code bi_model} property (displayed as {@code BI Model}) of the object.
+     * @param biModel the value to set
+     */
+    @JsonProperty("bi_model")
+    public void setBiModel(BiModel biModel) { this.biModel = biModel; }
 
     /**
      * Retrieve the {@code context} property (displayed as '{@literal Context}') of the object.

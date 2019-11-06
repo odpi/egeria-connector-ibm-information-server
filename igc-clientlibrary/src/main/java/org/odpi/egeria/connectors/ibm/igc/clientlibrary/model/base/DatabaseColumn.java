@@ -12,6 +12,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * POJO for the {@code database_column} asset type in IGC, displayed as '{@literal Database Column}' in the IGC UI.
@@ -34,7 +35,7 @@ public class DatabaseColumn extends Classificationenabledgroup {
     protected ItemList<BiCollectionMember> biCollectionMembers;
 
     @JsonProperty("bi_report_query_items")
-    protected ItemList<BiReportQueryItem> biReportQueryItems;
+    protected ItemList<Reportobject> biReportQueryItems;
 
     @JsonProperty("blueprint_elements")
     protected ItemList<BlueprintElementLink> blueprintElements;
@@ -99,6 +100,9 @@ public class DatabaseColumn extends Classificationenabledgroup {
     @JsonProperty("mapped_to_physical_object_attributes")
     protected ItemList<PhysicalObjectAttribute> mappedToPhysicalObjectAttributes;
 
+    @JsonProperty("occurs")
+    protected List<String> occurs;
+
     @JsonProperty("read_by_(design)")
     protected ItemList<InformationAsset> readByDesign;
 
@@ -117,8 +121,16 @@ public class DatabaseColumn extends Classificationenabledgroup {
     @JsonProperty("references_database_columns")
     protected ItemList<DatabaseColumn> referencesDatabaseColumns;
 
+    /**
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     * @see #sameAsDataSources
+     */
+    @Deprecated
     @JsonProperty("same_as_database_columns")
     protected ItemList<DatabaseColumn> sameAsDatabaseColumns;
+
+    @JsonProperty("same_as_data_sources")
+    protected ItemList<DataItem> sameAsDataSources;
 
     @JsonProperty("selected_classification")
     protected DataClass selectedClassification;
@@ -137,6 +149,9 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     @JsonProperty("selected_primary_key")
     protected Boolean selectedPrimaryKey;
+
+    @JsonProperty("start_end_columns")
+    protected String startEndColumns;
 
     @JsonProperty("validity_tables")
     protected ItemList<ValidityTable> validityTables;
@@ -183,17 +198,17 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     /**
      * Retrieve the {@code bi_report_query_items} property (displayed as '{@literal BI Report Query Items}') of the object.
-     * @return {@code ItemList<BiReportQueryItem>}
+     * @return {@code ItemList<Reportobject>}
      */
     @JsonProperty("bi_report_query_items")
-    public ItemList<BiReportQueryItem> getBiReportQueryItems() { return this.biReportQueryItems; }
+    public ItemList<Reportobject> getBiReportQueryItems() { return this.biReportQueryItems; }
 
     /**
      * Set the {@code bi_report_query_items} property (displayed as {@code BI Report Query Items}) of the object.
      * @param biReportQueryItems the value to set
      */
     @JsonProperty("bi_report_query_items")
-    public void setBiReportQueryItems(ItemList<BiReportQueryItem> biReportQueryItems) { this.biReportQueryItems = biReportQueryItems; }
+    public void setBiReportQueryItems(ItemList<Reportobject> biReportQueryItems) { this.biReportQueryItems = biReportQueryItems; }
 
     /**
      * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
@@ -490,6 +505,20 @@ public class DatabaseColumn extends Classificationenabledgroup {
     public void setMappedToPhysicalObjectAttributes(ItemList<PhysicalObjectAttribute> mappedToPhysicalObjectAttributes) { this.mappedToPhysicalObjectAttributes = mappedToPhysicalObjectAttributes; }
 
     /**
+     * Retrieve the {@code occurs} property (displayed as '{@literal Occurs}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("occurs")
+    public List<String> getOccurs() { return this.occurs; }
+
+    /**
+     * Set the {@code occurs} property (displayed as {@code Occurs}) of the object.
+     * @param occurs the value to set
+     */
+    @JsonProperty("occurs")
+    public void setOccurs(List<String> occurs) { this.occurs = occurs; }
+
+    /**
      * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.
      * @return {@code ItemList<InformationAsset>}
      */
@@ -575,17 +604,39 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     /**
      * Retrieve the {@code same_as_database_columns} property (displayed as '{@literal Same as Database Columns}') of the object.
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     *
      * @return {@code ItemList<DatabaseColumn>}
+     * @see #getSameAsDataSources()
      */
+    @Deprecated
     @JsonProperty("same_as_database_columns")
     public ItemList<DatabaseColumn> getSameAsDatabaseColumns() { return this.sameAsDatabaseColumns; }
 
     /**
      * Set the {@code same_as_database_columns} property (displayed as {@code Same as Database Columns}) of the object.
+     * No longer applicable from 11.5.0.1ru5 onwards.
+     *
      * @param sameAsDatabaseColumns the value to set
+     * @see #setSameAsDataSources(ItemList)
      */
+    @Deprecated
     @JsonProperty("same_as_database_columns")
     public void setSameAsDatabaseColumns(ItemList<DatabaseColumn> sameAsDatabaseColumns) { this.sameAsDatabaseColumns = sameAsDatabaseColumns; }
+
+    /**
+     * Retrieve the {@code same_as_data_sources} property (displayed as '{@literal Same as Data Sources}') of the object.
+     * @return {@code ItemList<DataItem>}
+     */
+    @JsonProperty("same_as_data_sources")
+    public ItemList<DataItem> getSameAsDataSources() { return this.sameAsDataSources; }
+
+    /**
+     * Set the {@code same_as_data_sources} property (displayed as {@code Same as Data Sources}) of the object.
+     * @param sameAsDataSources the value to set
+     */
+    @JsonProperty("same_as_data_sources")
+    public void setSameAsDataSources(ItemList<DataItem> sameAsDataSources) { this.sameAsDataSources = sameAsDataSources; }
 
     /**
      * Retrieve the {@code selected_classification} property (displayed as '{@literal Selected Data Classification}') of the object.
@@ -670,6 +721,20 @@ public class DatabaseColumn extends Classificationenabledgroup {
      */
     @JsonProperty("selected_primary_key")
     public void setSelectedPrimaryKey(Boolean selectedPrimaryKey) { this.selectedPrimaryKey = selectedPrimaryKey; }
+
+    /**
+     * Retrieve the {@code start_end_columns} property (displayed as '{@literal Starting .. Ending Columns}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("start_end_columns")
+    public String getStartEndColumns() { return this.startEndColumns; }
+
+    /**
+     * Set the {@code start_end_columns} property (displayed as {@code Starting .. Ending Columns}) of the object.
+     * @param startEndColumns the value to set
+     */
+    @JsonProperty("start_end_columns")
+    public void setStartEndColumns(String startEndColumns) { this.startEndColumns = startEndColumns; }
 
     /**
      * Retrieve the {@code validity_tables} property (displayed as '{@literal Validity Tables}') of the object.

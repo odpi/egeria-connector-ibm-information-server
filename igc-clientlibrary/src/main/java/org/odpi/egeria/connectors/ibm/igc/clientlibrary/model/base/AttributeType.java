@@ -42,6 +42,9 @@ public class AttributeType extends InformationAsset {
     @JsonProperty("mdm_model")
     protected MdmModel mdmModel;
 
+    @JsonProperty("mdm_model_for_query")
+    protected MdmModel mdmModelForQuery;
+
     @JsonProperty("referenced_by_attributes")
     protected ItemList<Attribute> referencedByAttributes;
 
@@ -114,6 +117,20 @@ public class AttributeType extends InformationAsset {
      */
     @JsonProperty("mdm_model")
     public void setMdmModel(MdmModel mdmModel) { this.mdmModel = mdmModel; }
+
+    /**
+     * Retrieve the {@code mdm_model_for_query} property (displayed as '{@literal MDM Model}') of the object.
+     * @return {@code MdmModel}
+     */
+    @JsonProperty("mdm_model_for_query")
+    public MdmModel getMdmModelForQuery() { return this.mdmModelForQuery; }
+
+    /**
+     * Set the {@code mdm_model_for_query} property (displayed as {@code MDM Model}) of the object.
+     * @param mdmModelForQuery the value to set
+     */
+    @JsonProperty("mdm_model_for_query")
+    public void setMdmModelForQuery(MdmModel mdmModelForQuery) { this.mdmModelForQuery = mdmModelForQuery; }
 
     /**
      * Retrieve the {@code referenced_by_attributes} property (displayed as '{@literal Referenced by Attributes}') of the object.

@@ -48,7 +48,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
         @JsonSubTypes.Type(value = Olapmodelgroup.class, name = "olapmodelgroup"),
         @JsonSubTypes.Type(value = Olapobject.class, name = "olapobject"),
         @JsonSubTypes.Type(value = ParameterSet2.class, name = "parameterset"),
-        @JsonSubTypes.Type(value = Reportobject.class, name = "reportobject"),
         @JsonSubTypes.Type(value = SystemRole.class, name = "system_role"),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
