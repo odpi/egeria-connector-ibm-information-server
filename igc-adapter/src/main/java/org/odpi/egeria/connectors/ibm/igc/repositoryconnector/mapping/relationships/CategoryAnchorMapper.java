@@ -5,9 +5,10 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relations
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -121,11 +122,11 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                 IGCSearch igcSearch = new IGCSearch("category",
                         IGCRestConstants.getModificationProperties().toArray(new String[0]),
                         conditionSet);
-                ReferenceList children = igcRestClient.search(igcSearch);
+                ItemList<Category> children = igcRestClient.search(igcSearch);
                 if (children != null) {
                     children.getAllPages(igcRestClient);
                     if (log.isDebugEnabled()) { log.debug(" ... found a total of {} offspring categories.", children.getItems().size()); }
-                    for (Reference child : children.getItems()) {
+                    for (Category child : children.getItems()) {
                         try {
                             Relationship relationship = getMappedRelationship(
                                     igcomrsRepositoryConnector,

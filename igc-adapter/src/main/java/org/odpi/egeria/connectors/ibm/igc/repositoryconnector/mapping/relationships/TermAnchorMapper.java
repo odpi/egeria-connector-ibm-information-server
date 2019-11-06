@@ -5,9 +5,10 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relations
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -122,11 +123,11 @@ public class TermAnchorMapper extends RelationshipMapping {
             IGCSearch igcSearch = new IGCSearch("term",
                     IGCRestConstants.getModificationProperties().toArray(new String[0]),
                     conditionSet);
-            ReferenceList terms = igcRestClient.search(igcSearch);
+            ItemList<Term> terms = igcRestClient.search(igcSearch);
             if (terms != null) {
                 terms.getAllPages(igcRestClient);
                 if (log.isDebugEnabled()) { log.debug(" ... found a total of {} offspring terms.", terms.getItems().size()); }
-                for (Reference term : terms.getItems()) {
+                for (Term term : terms.getItems()) {
                     try {
                         Relationship relationship = getMappedRelationship(
                                 igcomrsRepositoryConnector,

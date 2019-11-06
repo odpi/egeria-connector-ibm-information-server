@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.*;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.PropertyGrouping;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeDetails;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeHeader;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeProperty;
@@ -180,7 +179,7 @@ public class IGCRestClient {
                 if (log.isDebugEnabled()) { log.debug("Checking for workflow and registering version..."); }
                 ObjectMapper tmpMapper = new ObjectMapper();
                 try {
-                    this.workflowEnabled = tmpMapper.readValue(response, ReferenceList.class).getPaging().getNumTotal() > 0;
+                    this.workflowEnabled = tmpMapper.readValue(response, new TypeReference<ItemList<Reference>>(){}).getPaging().getNumTotal() > 0;
                 } catch (IOException e) {
                     if (log.isErrorEnabled()) { log.error("Unable to determine if workflow is enabled.", e); }
                 }
@@ -333,19 +332,19 @@ public class IGCRestClient {
     }
 
     /**
-     * Attempt to convert the JSON string into a ReferenceList.
+     * Attempt to convert the JSON string into an ItemList.
      *
      * @param json the JSON string to convert
-     * @return ReferenceList
+     * @return {@ItemList<T>}
      */
-    public ReferenceList readJSONIntoReferenceList(String json) {
-        ReferenceList referenceList = null;
+    public <T extends Reference> ItemList<T> readJSONIntoItemList(String json) {
+        ItemList<T> itemList = null;
         try {
-            referenceList = this.mapper.readValue(json, ReferenceList.class);
+            itemList = this.mapper.readValue(json, new TypeReference<ItemList<T>>(){});
         } catch (IOException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to translate JSON into ReferenceList: {}", json, e); }
+            if (log.isErrorEnabled()) { log.error("Unable to translate JSON into ItemList: {}", json, e); }
         }
-        return referenceList;
+        return itemList;
     }
 
     /**
@@ -642,7 +641,7 @@ public class IGCRestClient {
         igcSearch.addType("label");
         igcSearch.addType("user");
         igcSearch.addType("group");
-        ReferenceList results = search(igcSearch);
+        ItemList<Reference> results = search(igcSearch);
         Reference reference = null;
         if (results.getPaging().getNumTotal() > 0) {
             if (results.getPaging().getNumTotal() > 1) {
@@ -664,7 +663,7 @@ public class IGCRestClient {
      * @param properties a list of the properties to retrieve
      * @return Reference - the object including only the subset of properties specified
      */
-    public Reference getAssetWithSubsetOfProperties(String rid,
+    public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
                                                     String assetType,
                                                     String[] properties) {
         return getAssetWithSubsetOfProperties(rid, assetType, properties, defaultPageSize, null);
@@ -680,7 +679,7 @@ public class IGCRestClient {
      * @param pageSize the maximum number of each of the asset's relationships to return on this request
      * @return Reference - the object including only the subset of properties specified
      */
-    public Reference getAssetWithSubsetOfProperties(String rid,
+    public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
                                                     String assetType,
                                                     String[] properties,
                                                     int pageSize) {
@@ -698,13 +697,13 @@ public class IGCRestClient {
      * @param sorting the sorting criteria to use for the results
      * @return Reference - the object including only the subset of properties specified
      */
-    public Reference getAssetWithSubsetOfProperties(String rid,
+    public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
                                                     String assetType,
                                                     String[] properties,
                                                     int pageSize,
                                                     IGCSearchSorting sorting) {
         if (log.isDebugEnabled()) { log.debug("Retrieving asset {} with subset of details: {}", rid, properties); }
-        Reference assetWithProperties = null;
+        T assetWithProperties = null;
         IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", rid);
         IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
         IGCSearch igcSearch = new IGCSearch(IGCRestConstants.getAssetTypeForSearch(assetType), properties, idOnlySet);
@@ -714,7 +713,7 @@ public class IGCRestClient {
         if (sorting != null) {
             igcSearch.addSortingCriteria(sorting);
         }
-        ReferenceList assetsWithProperties = search(igcSearch);
+        ItemList<T> assetsWithProperties = search(igcSearch);
         if (!assetsWithProperties.getItems().isEmpty()) {
             assetWithProperties = assetsWithProperties.getItems().get(0);
         }
@@ -735,17 +734,17 @@ public class IGCRestClient {
      * Retrieve all assets that match the provided search criteria from IGC.
      *
      * @param igcSearch search conditions and criteria to use
-     * @return ReferenceList - the first page of results from the search
+     * @return {@code ItemList<T>} - the first page of results from the search
      */
-    public ReferenceList search(IGCSearch igcSearch) {
-        ReferenceList referenceList = null;
+    public <T extends Reference> ItemList<T> search(IGCSearch igcSearch) {
+        ItemList<T> itemList = null;
         String results = searchJson(igcSearch);
         try {
-            referenceList = this.mapper.readValue(results, ReferenceList.class);
+            itemList = this.mapper.readValue(results, new TypeReference<ItemList<T>>(){});
         } catch (IOException e) {
             if (log.isErrorEnabled()) { log.error("Unable to translate JSON results: {}", results, e); }
         }
-        return referenceList;
+        return itemList;
     }
 
     /**
@@ -957,15 +956,15 @@ public class IGCRestClient {
 
     /**
      * Retrieve the next page of results from a set of paging details<br>
-     * ... or if there is no next page, return an empty ReferenceList.
+     * ... or if there is no next page, return an empty ItemList.
      *
      * @param paging the "paging" portion of the JSON response from which to retrieve the next page
-     * @return ReferenceList - the next page of results
+     * @return {@ItemList<T>} - the next page of results
      */
-    public ReferenceList getNextPage(Paging paging) {
-        ReferenceList nextPage = null;
+    public <T extends Reference> ItemList<T> getNextPage(Paging paging) {
+        ItemList<T> nextPage = null;
         try {
-            nextPage = mapper.readValue("{\"items\": []}", ReferenceList.class);
+            nextPage = mapper.readValue("{}", new TypeReference<ItemList<T>>() {});
             String sNextURL = paging.getNextPageURL();
             if (sNextURL != null && !sNextURL.equals("null")) {
                 if (this.workflowEnabled && !sNextURL.contains("workflowMode=draft")) {
@@ -984,7 +983,7 @@ public class IGCRestClient {
                     String attributeName = remainder.substring(remainder.indexOf('/') + 1, remainder.indexOf('?'));
                     nextPageBody = nextPageBody.substring(attributeName.length() + 4, nextPageBody.length() - 1);
                 }
-                nextPage = mapper.readValue(nextPageBody, ReferenceList.class);
+                nextPage = mapper.readValue(nextPageBody, new TypeReference<ItemList<T>>() {});
             }
         } catch (IOException e) {
             if (log.isErrorEnabled()) { log.error("Unable to parse next page from JSON: {}", paging, e); }
@@ -998,12 +997,12 @@ public class IGCRestClient {
      *
      * @param items the List of items for which to retrieve all pages
      * @param paging the Paging object for which to retrieve all pages
-     * @return {@code List<Reference>} - an List containing all items from all pages of results
+     * @return {@code List<Reference>} - a List containing all items from all pages of results
      */
-    public List<Reference> getAllPages(List<Reference> items, Paging paging) {
-        List<Reference> allPages = items;
-        ReferenceList results = getNextPage(paging);
-        List<Reference> resultsItems = results.getItems();
+    public <T extends Reference> List<T> getAllPages(List<T> items, Paging paging) {
+        List<T> allPages = items;
+        ItemList<T> results = getNextPage(paging);
+        List<T> resultsItems = results.getItems();
         if (!resultsItems.isEmpty()) {
             // NOTE: this ordering of addAll is important, to avoid side-effecting the original set of items
             resultsItems.addAll(allPages);
@@ -1047,28 +1046,31 @@ public class IGCRestClient {
                 List<String> pagedRelationship = new ArrayList<>();
                 for (TypeProperty property : view) {
                     String propertyName = property.getName();
-                    if (propertyName.equals("created_on")) {
-                        typesThatIncludeModificationDetails.add(typeName);
-                        // Instantiate and cache generic property update mechanisms
-                        cacheWriter(typeName, propertyName);
-                    }
-                    org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeReference type = property.getType();
-                    String propertyType = type.getName();
-                    if (propertyType.equals("string") || propertyType.equals("enum")) {
-                        stringProperties.add(propertyName);
-                        nonRelationship.add(propertyName);
-                    } else if (type.getUrl() != null) {
-                        if (property.getMaxCardinality() < 0) {
-                            pagedRelationship.add(propertyName);
+                    if (!IGCRestConstants.getPropertiesToIgnore().contains(propertyName)) {
+                        if (propertyName.equals("created_on")) {
+                            typesThatIncludeModificationDetails.add(typeName);
+                            // Instantiate and cache generic property update mechanisms
+                            cacheWriter(typeName, propertyName);
                         }
-                    } else {
-                        nonRelationship.add(propertyName);
+                        org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeReference type = property.getType();
+                        String propertyType = type.getName();
+                        if (propertyType.equals("string")) {
+                            stringProperties.add(propertyName);
+                            nonRelationship.add(propertyName);
+                        } else if (propertyType.equals("enum")) {
+                            nonRelationship.add(propertyName);
+                        } else if (type.getUrl() != null) {
+                            if (property.getMaxCardinality() < 0) {
+                                pagedRelationship.add(propertyName);
+                            }
+                        } else {
+                            nonRelationship.add(propertyName);
+                        }
+                        allProperties.add(propertyName);
+
+                        // Instantiate and cache generic property retrieval mechanisms
+                        cacheAccessor(typeName, propertyName);
                     }
-                    allProperties.add(propertyName);
-
-                    // Instantiate and cache generic property retrieval mechanisms
-                    cacheAccessor(typeName, propertyName);
-
                 }
                 typeToAllProperties.put(typeName, allProperties);
                 typeToNonRelationshipProperties.put(typeName, nonRelationship);
@@ -1343,7 +1345,7 @@ public class IGCRestClient {
                 IGCSearch igcSearch = new IGCSearch(object.getType(), idOnlySet);
                 igcSearch.addProperties(IGCRestConstants.getModificationProperties());
                 igcSearch.setPageSize(2);
-                ReferenceList assetsWithModDetails = search(igcSearch);
+                ItemList<Reference> assetsWithModDetails = search(igcSearch);
                 success = (!assetsWithModDetails.getItems().isEmpty());
                 if (success) {
 
@@ -1391,7 +1393,7 @@ public class IGCRestClient {
                     igcSearch.addProperties(IGCRestConstants.getModificationProperties());
                 }
                 igcSearch.setPageSize(2);
-                ReferenceList assetsWithCtx = search(igcSearch);
+                ItemList<Reference> assetsWithCtx = search(igcSearch);
                 success = (!assetsWithCtx.getItems().isEmpty());
                 if (success) {
 

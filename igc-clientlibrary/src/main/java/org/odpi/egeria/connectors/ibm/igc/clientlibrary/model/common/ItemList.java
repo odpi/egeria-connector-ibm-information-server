@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,6 +82,27 @@ public class ItemList<T extends Reference> extends ObjectPrinter {
      */
     public boolean hasMorePages() {
         return (this.paging.hasMore());
+    }
+
+    /**
+     * Retrieve all pages of relationships that this object represents.
+     *
+     * @param igcrest the IGCRestClient connection to use to retrieve the relationships
+     */
+    public void getAllPages(IGCRestClient igcrest) {
+        this.items = igcrest.getAllPages(this.items, this.paging);
+        this.paging = new Paging(this.items.size());
+    }
+
+    /**
+     * Retrieve the next page of relationships that this object represents.
+     *
+     * @param igcrest the IGCRestClient connection to use to retrieve the relationships
+     */
+    public void getNextPage(IGCRestClient igcrest) {
+        ItemList<T> nextPage = igcrest.getNextPage(this.paging);
+        this.items = nextPage.getItems();
+        this.paging = nextPage.getPaging();
     }
 
 }

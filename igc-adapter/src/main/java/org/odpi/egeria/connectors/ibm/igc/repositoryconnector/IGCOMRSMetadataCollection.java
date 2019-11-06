@@ -5,8 +5,8 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -2489,7 +2489,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
                 IGCSearch igcSearch = new IGCSearch(proxyOneMapping.getIgcAssetType(), igcSearchConditionSet);
                 igcSearch.addProperties(proxyOneRelationships);
-                ReferenceList results = igcRestClient.search(igcSearch);
+                ItemList<Reference> results = igcRestClient.search(igcSearch);
 
                 // only proceed if there is actually anything to remove
                 if (results != null && results.getPaging().getNumTotal() > 0) {
@@ -2505,7 +2505,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     // do not refer to the specific one we have been asked to purge
                     for (String relationshipAttr : proxyOneRelationships) {
                         if (pagedRelationships.contains(relationshipAttr)) {
-                            ReferenceList relations = (ReferenceList) igcRestClient.getPropertyByName(proxyOne, relationshipAttr);
+                            ItemList<Reference> relations = (ItemList<Reference>) igcRestClient.getPropertyByName(proxyOne, relationshipAttr);
                             relations.getAllPages(igcRestClient);
                             for (Reference relation : relations.getItems()) {
                                 String relationId = relation.getId();

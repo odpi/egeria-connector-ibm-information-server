@@ -3,7 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model;
 
 import com.fasterxml.jackson.annotation.*;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.MainObject;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
@@ -16,7 +16,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("$OMRS-Stub")
-public class OMRSStub extends MainObject {
+public class OMRSStub extends InformationAsset {
     
     /**
      * The 'sourceType' property, displayed as 'IGC Type' in the IGC UI.

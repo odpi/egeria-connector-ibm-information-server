@@ -3,8 +3,8 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -436,7 +436,7 @@ public class IGCRepositoryHelper {
      * @param userId the user making the request
      */
     void processResults(EntityMapping mapper,
-                        ReferenceList results,
+                        ItemList<Reference> results,
                         List<EntityDetail> entityDetails,
                         int pageSize,
                         String userId) throws RepositoryErrorException {
@@ -456,7 +456,7 @@ public class IGCRepositoryHelper {
                 if (log.isDebugEnabled()) { log.debug("processResults with mapper: {}", mapper.getClass().getCanonicalName()); }
                 IGCEntityGuid idToLookup;
                 if (mapper.igcRidNeedsPrefix()) {
-                    if (log.isDebugEnabled()) { log.debug(" ... prefix required, getEntityDetail with: {}", mapper.getIgcRidPrefix() + reference.getId()); }
+                    if (log.isDebugEnabled()) { log.debug(" ... prefix required, getEntityDetail with: {}", mapper.getIgcRidPrefix() + "!" + reference.getId()); }
                     idToLookup = new IGCEntityGuid(metadataCollectionId, reference.getType(), mapper.getIgcRidPrefix(), reference.getId());
                 } else {
                     if (log.isDebugEnabled()) { log.debug(" ... no prefix required, getEntityDetail with: {}", reference.getId()); }
@@ -1269,13 +1269,13 @@ public class IGCRepositoryHelper {
         String[] properties = new String[]{ "$sourceRID", "$sourceType", "$payload" };
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         IGCSearch igcSearch = new IGCSearch("$OMRS-Stub", properties, conditionSet);
-        ReferenceList results = igcRestClient.search(igcSearch);
+        ItemList<OMRSStub> results = igcRestClient.search(igcSearch);
         OMRSStub stub = null;
         if (results.getPaging().getNumTotal() > 0) {
             if (results.getPaging().getNumTotal() > 1) {
                 if (log.isWarnEnabled()) { log.warn("Found multiple stubs for asset, taking only the first: {}", stubName); }
             }
-            stub = (OMRSStub) results.getItems().get(0);
+            stub = results.getItems().get(0);
         } else {
             if (log.isInfoEnabled()) { log.info("No stub found for asset: {}", stubName); }
         }
@@ -1496,7 +1496,7 @@ public class IGCRepositoryHelper {
                         // Iterate through all the paged properties and retrieve all pages for each
                         List<String> allPaged = igcRestClient.getPagedRelationshipPropertiesForType(assetType);
                         for (String pagedProperty : allPaged) {
-                            ReferenceList pagedValue = (ReferenceList) igcRestClient.getPropertyByName(fullAsset, pagedProperty);
+                            ItemList<Reference> pagedValue = (ItemList<Reference>) igcRestClient.getPropertyByName(fullAsset, pagedProperty);
                             if (pagedValue != null) {
                                 pagedValue.getAllPages(igcRestClient);
                             }

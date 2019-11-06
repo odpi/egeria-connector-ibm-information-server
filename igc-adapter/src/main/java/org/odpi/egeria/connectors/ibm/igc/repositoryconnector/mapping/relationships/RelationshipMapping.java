@@ -4,8 +4,8 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relations
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -206,8 +206,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcRestClient REST API connectivity
      * @return Reference - the asset to be used for endpoint one of the relationship
      */
-    public List<Reference> getProxyOneAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient) {
-        ArrayList<Reference> referenceAsList = new ArrayList<>();
+    public <T extends Reference> List<T> getProxyOneAssetFromAsset(T relationshipAsset, IGCRestClient igcRestClient) {
+        List<T> referenceAsList = new ArrayList<>();
         referenceAsList.add(relationshipAsset);
         return referenceAsList;
     }
@@ -222,7 +222,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @return Reference - the asset to be used for endpoint two of the relationship
      */
     public List<Reference> getProxyTwoAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient) {
-        ArrayList<Reference> referenceAsList = new ArrayList<>();
+        List<Reference> referenceAsList = new ArrayList<>();
         referenceAsList.add(relationshipAsset);
         return referenceAsList;
     }
@@ -1054,14 +1054,14 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     );
                 }
 
-            } else if (directRelationships != null && Reference.isReferenceList(directRelationships)) { // and list of relationships another
+            } else if (directRelationships != null && Reference.isItemList(directRelationships)) { // and list of relationships another
 
                 addListOfMappedRelationships(
                         igcomrsRepositoryConnector,
                         mapping,
                         relationships,
                         fromIgcObject,
-                        (ReferenceList) directRelationships,
+                        (ItemList<Reference>) directRelationships,
                         igcRelationshipName,
                         userId
                 );
@@ -1177,7 +1177,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 igcSearch.addProperties(IGCRestConstants.getModificationProperties());
             }
         }
-        ReferenceList foundRelationships = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
+        ItemList<Reference> foundRelationships = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
         addListOfMappedRelationships(
                 igcomrsRepositoryConnector,
                 mapping,
@@ -1205,7 +1205,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                      RelationshipMapping mapping,
                                                      List<Relationship> relationships,
                                                      Reference fromIgcObject,
-                                                     ReferenceList igcRelationships,
+                                                     ItemList<Reference> igcRelationships,
                                                      String igcPropertyName,
                                                      String userId) {
 
@@ -1463,6 +1463,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         errorCode.getUserAction());
             }
 
+            if (log.isDebugEnabled()) { log.debug("Mapping relationship with GUID: {}", igcRelationshipGuid); }
+
             relationship.setGUID(igcRelationshipGuid.asGuid());
             relationship.setMetadataCollectionId(igcomrsRepositoryConnector.getMetadataCollectionId());
             relationship.setStatus(InstanceStatus.ACTIVE);
@@ -1471,8 +1473,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
             String ridForEP1 = igcRelationshipGuid.getRid1();
             String ridForEP2 = igcRelationshipGuid.getRid2();
 
-            EntityProxy ep1 = null;
-            EntityProxy ep2 = null;
+            EntityProxy ep1;
+            EntityProxy ep2;
 
             if (relationshipLevelRid != null
                     || (ridForEP1.equals(proxyOne.getId()) && ridForEP2.equals(proxyTwo.getId()))) {

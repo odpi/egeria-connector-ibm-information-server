@@ -22,11 +22,9 @@ public class IGCRestConstants {
     public static final Pattern INVALID_NAMING_CHARS = Pattern.compile("[()/&$\\- ]");
 
     public static final String IGC_REST_COMMON_MODEL_PKG = "org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common";
-    public static final String IGC_REST_GENERATED_MODEL_PKG = "org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.generated";
     public static final String IGC_REST_BASE_MODEL_PKG = "org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base";
 
     private static final List<String> MODIFICATION_DETAILS = createModificationDetails();
-
     private static List<String> createModificationDetails() {
         ArrayList<String> modDetails = new ArrayList<>();
         modDetails.add(MOD_CREATED_BY);
@@ -37,7 +35,6 @@ public class IGCRestConstants {
     }
 
     private static final Map<String, String> NON_UNIQUE_CLASSNAMES = createNonUniqueClassnames();
-
     private static Map<String, String> createNonUniqueClassnames() {
         Map<String, String> map = new HashMap<>();
         map.put("valid_value_list", "ValidValueList");
@@ -52,7 +49,6 @@ public class IGCRestConstants {
     }
 
     private static final List<String> FILE_TYPES = createFileTypes();
-
     private static List<String> createFileTypes() {
         ArrayList<String> fileTypes = new ArrayList<>();
         fileTypes.add("data_file_field");
@@ -63,7 +59,6 @@ public class IGCRestConstants {
     }
 
     private static final Map<String, String> IMAM_TYPE_TO_IGC_TYPE = createImamTypetoIgcType();
-
     private static Map<String, String> createImamTypetoIgcType() {
         Map<String, String> map = new HashMap<>();
         map.put("HostSystem", "host");
@@ -80,7 +75,6 @@ public class IGCRestConstants {
     }
 
     private static final Set<String> RELATIONSHIP_LEVEL_TYPES = createRelationshipLevelTypes();
-
     private static Set<String> createRelationshipLevelTypes() {
         Set<String> set = new HashSet<>();
         set.add("classification");
@@ -88,7 +82,6 @@ public class IGCRestConstants {
     }
 
     private static final Set<String> QUALIFY_PROPERTIES = createQualifyProperties();
-
     private static Set<String> createQualifyProperties() {
         Set<String> set = new HashSet<>();
         set.add("name");
@@ -100,7 +93,6 @@ public class IGCRestConstants {
     }
 
     private static final Map<String, String> BASIC_TYPE_TO_JAVA_TYPE = createBasicTypeToJavaType();
-
     private static Map<String, String> createBasicTypeToJavaType() {
         Map<String, String> map = new HashMap<>();
         map.put("string", "String");
@@ -109,6 +101,68 @@ public class IGCRestConstants {
         map.put("number", "Number");
         map.put("enum", "String");
         return map;
+    }
+
+    private static final Set<String> IGNORE_PROPERTIES = createIgnoreProperties();
+    private static Set<String> createIgnoreProperties() {
+        Set<String> set = new HashSet<>();
+        set.add(null);
+        set.add("null");
+        set.add("notes");
+        set.add("assigned_external_assets");
+        set.add("implemented_by_external_assets");
+        set.add("governs_external_assets");
+        return set;
+    }
+
+    private static final Set<String> IGNORE_TYPES = createIgnoreTypes();
+    private static Set<String> createIgnoreTypes() {
+        Set<String> set = new HashSet<>();
+        set.add("classificationenabledgroup");
+        return set;
+    }
+
+    private static final Map<String, String> ALIAS_OBJECTS = createAliasObjects();
+    private static Map<String, String> createAliasObjects() {
+        Map<String, String> map = new HashMap<>();
+        map.put("host_(engine)", "host");
+        return map;
+    }
+
+    private static final Set<String> DATAGROUP_TYPES = createDataGroupTypes();
+    private static Set<String> createDataGroupTypes() {
+        Set<String> set = new HashSet<>();
+        set.add("database_alias");
+        set.add("database_table");
+        set.add("data_file_record");
+        set.add("view");
+        set.add("design_table");
+        set.add("design_view");
+        set.add("stored_procedure");
+        set.add("design_stored_procedure");
+        return set;
+    }
+
+    private static final Set<String> DATA_ITEM_TYPES = createDataItemTypes();
+    private static Set<String> createDataItemTypes() {
+        Set<String> set = new HashSet<>();
+        set.add("column_definition");
+        set.add("data_file_field");
+        set.add("database_column");
+        set.add("ds_stage_column");
+        set.add("parameter");
+        set.add("routine_argument");
+        set.add("stage_type_detail");
+        set.add("transform_argument");
+        return set;
+    }
+
+    private static final Set<String> DATA_ITEM_DEFINITION_TYPES = createDataItemDefinitionTypes();
+    private static Set<String> createDataItemDefinitionTypes() {
+        Set<String> set = new HashSet<>();
+        set.add("data_element");
+        set.add("table_definition");
+        return set;
     }
 
     /**
@@ -140,6 +194,42 @@ public class IGCRestConstants {
     public static Set<String> getRelationshipLevelTypes() { return RELATIONSHIP_LEVEL_TYPES; }
 
     /**
+     * Retrieve the set of properties that should be ignored for all assets.
+     *
+     * @return {@code Set<String>}
+     */
+    public static Set<String> getPropertiesToIgnore() { return IGNORE_PROPERTIES; }
+
+    /**
+     * Retrieve a map of object types that are in fact aliases for other object types. The key will be the name
+     * of the object type that is an alias, and its value will be the object type for which it is an alias.
+     *
+     * @return {@code Map<String, String>}
+     */
+    public static Map<String, String> getAliasObjects() { return ALIAS_OBJECTS; }
+
+    /**
+     * Retrieve the set of IGC object types that should be subtypes of the 'datagroup' type.
+     *
+     * @return {@code Set<String>}
+     */
+    public static Set<String> getDatagroupTypes() { return DATAGROUP_TYPES; }
+
+    /**
+     * Retrieve the set of IGC object types that should be subtypes of the 'data_item' type.
+     *
+     * @return {@code Set<String>}
+     */
+    public static Set<String> getDataItemTypes() { return DATA_ITEM_TYPES; }
+
+    /**
+     * Retrieve the set of IGC object types that should be subtypes of the 'data_item_definition' type.
+     *
+     * @return {@code Set<String>}
+     */
+    public static Set<String> getDataItemDefinitionTypes() { return DATA_ITEM_DEFINITION_TYPES; }
+
+    /**
      * Retrieve the name of the Java type for the provided IGC type.
      *
      * @param property the IGC property for which to get the type
@@ -165,7 +255,11 @@ public class IGCRestConstants {
         // ... UNLESS the data type is boolean (then there is only one value permitted)
         if (property.getMaxCardinality() < 0) {
             if (nominalType.equals("Reference")) {
-                javaType = "ItemList<" + getClassNameForAssetType(type) + ">";
+                if (IGNORE_TYPES.contains(type)) {
+                    javaType = "ItemList<Reference>";
+                } else {
+                    javaType = "ItemList<" + getClassNameForAssetType(type) + ">";
+                }
             } else if (nominalType.equals("Boolean")) {
                 javaType = nominalType;
             } else {
@@ -173,7 +267,11 @@ public class IGCRestConstants {
             }
         } else if (nominalType.equals("Reference")) {
             // If there is only one, but it is a relationship, determine the correct class name for the type
-            javaType = getClassNameForAssetType(type);
+            if (IGNORE_TYPES.contains(type)) {
+                javaType = "Reference";
+            } else {
+                javaType = getClassNameForAssetType(type);
+            }
         } else {
             // Otherwise it must be a primitive type, so take the earlier translation as-is
             javaType = nominalType;

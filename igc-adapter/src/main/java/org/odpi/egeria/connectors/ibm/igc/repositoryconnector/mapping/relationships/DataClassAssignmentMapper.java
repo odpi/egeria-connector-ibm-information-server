@@ -5,8 +5,10 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relations
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classification;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -203,7 +205,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
             igcSearch.addProperty("value_frequency");
         }
-        ReferenceList detectedClassifications = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
+        ItemList<Classification> detectedClassifications = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
 
         detectedClassifications.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
 
@@ -320,7 +322,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         igcSearch.addType("database_column");
         igcSearch.addProperty("selected_classification");
         igcSearch.addProperties(IGCRestConstants.getModificationProperties());
-        ReferenceList assetsWithSelected = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
+        ItemList<InformationAsset> assetsWithSelected = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
 
         assetsWithSelected.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
 
@@ -396,7 +398,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
             igcSearch.addProperty("value_frequency");
         }
-        ReferenceList detectedClassifications = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
+        ItemList<Classification> detectedClassifications = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
 
         detectedClassifications.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
 

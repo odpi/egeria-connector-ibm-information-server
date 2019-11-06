@@ -39,8 +39,9 @@ public class IGCBeanGenerator {
             + "ibm" + File.separator
             + "igc" + File.separator
             + "clientlibrary" + File.separator
-            + "model" + File.separator
-            + "base";
+            + "model" + File.separator;
+    private static final String COMMON_DIRECTORY = DIRECTORY + File.separator + "common";
+    private static final String BASE_DIRECTORY = DIRECTORY + File.separator + "base";
 
     public static void main(String[] args) {
 
@@ -53,6 +54,7 @@ public class IGCBeanGenerator {
         HttpHelper.noStrictSSL();
 
         IGCBeanGenerator generator = new IGCBeanGenerator(args[0], args[1], args[2], args[3]);
+        generator.generateSuperTypes();
         generator.generateForAllIgcTypesInEnvironment();
 
     }
@@ -63,39 +65,96 @@ public class IGCBeanGenerator {
     }
 
     private IGCRestClient igcRestClient;
+    private TreeMap<String, String> typeToReferenceClassNames;
     private TreeMap<String, String> typeToMainObjectClassNames;
     private TreeMap<String, String> typeToInformationAssetClassNames;
+    private TreeMap<String, String> typeToDatagroupClassNames;
+    private TreeMap<String, String> typeToDataItemClassNames;
+    private TreeMap<String, String> typeToDataItemDefinitionClassNames;
+
+    private Map<String, Set<String>> superTypeToProperties;
 
     private IGCBeanGenerator(String hostname, String port, String username, String password) {
         igcRestClient = new IGCRestClient(hostname, port, username, password);
+        typeToReferenceClassNames = new TreeMap<>();
         typeToMainObjectClassNames = new TreeMap<>();
         typeToInformationAssetClassNames = new TreeMap<>();
+        typeToDatagroupClassNames = new TreeMap<>();
+        typeToDataItemClassNames = new TreeMap<>();
+        typeToDataItemDefinitionClassNames = new TreeMap<>();
+        superTypeToProperties = new HashMap<>();
+    }
+
+    private void generateSuperTypes() {
+
+        // First ensure the target directory has been created / exists
+        File dir = new File(BASE_DIRECTORY);
+        if (!dir.exists()){
+            System.out.println("Creating directory: " + BASE_DIRECTORY);
+            if (!dir.mkdirs()) {
+                System.err.println("Unable to create target directory: " + BASE_DIRECTORY);
+            }
+        }
+
+        // Before generating any other types, generate the supertypes from which they will extend
+        // and as part of this keep a list of their properties, so any classes that extend them can skip
+        // including the same properties and getter / setter methods as overrides
+        for (String typeName : SUPER_TYPES) {
+            TypeDetails details = igcRestClient.getTypeDetails(typeName);
+            createPOJOForType(details);
+        }
+
     }
 
     private void generateForAllIgcTypesInEnvironment() {
-
-        // First ensure the target directory has been created / exists
-        File dir = new File(DIRECTORY);
-        if (!dir.exists()){
-            System.out.println("Creating directory: " + DIRECTORY);
-            if (!dir.mkdirs()) {
-                System.err.println("Unable to create target directory: " + DIRECTORY);
-            }
-        }
 
         // Then generate the POJOs within that directory
         List<TypeHeader> types = igcRestClient.getTypes(mapper);
         for (TypeHeader igcType : types) {
             String type = igcType.getId();
-            TypeDetails typeDetails = igcRestClient.getTypeDetails(type);
-            createPOJOForType(typeDetails);
+            // No need to re-generate the supertypes
+            if (!SUPER_TYPES.contains(type)) {
+                TypeDetails typeDetails = igcRestClient.getTypeDetails(type);
+                createPOJOForType(typeDetails);
+            }
         }
 
-        // Finally update the InformationAsset and MainObject classes with their subtypes
+        // Finally update the supertypes with their subtypes
         System.out.println("Injecting subtype information into MainObject...");
-        injectSubTypes(Paths.get(DIRECTORY + File.separator + "MainObject.java"), typeToMainObjectClassNames);
+        injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + "MainObject.java"), typeToMainObjectClassNames);
         System.out.println("Injecting subtype information into InformationAsset...");
-        injectSubTypes(Paths.get(DIRECTORY + File.separator + "InformationAsset.java"), typeToInformationAssetClassNames);
+        injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + "InformationAsset.java"), typeToInformationAssetClassNames);
+        System.out.println("Injecting subtype information into Datagroup...");
+        injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + "Datagroup.java"), typeToDatagroupClassNames);
+        System.out.println("Injecting subtype information into DataItem...");
+        injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + "DataItem.java"), typeToDataItemClassNames);
+        System.out.println("Injecting subtype information into DataItemDefinition...");
+        injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + "DataItemDefinition.java"), typeToDataItemDefinitionClassNames);
+
+        // Before injecting into Reference we need to remove any previous injections (since this file is not
+        // actually generated)
+        Path refPath = Paths.get(COMMON_DIRECTORY + File.separator + "Reference.java");
+        removeInjectedSubtypes(refPath);
+        System.out.println("Injecting subtype information into Reference...");
+        injectSubTypes(refPath, typeToReferenceClassNames);
+
+        // And do the same for any alias objects (after creating the mappings we need first)
+        Map<String, Map<String, String>> superClassToSubTypeMappings = new HashMap<>();
+        for (Map.Entry<String, String> entry : IGCRestConstants.getAliasObjects().entrySet()) {
+            String subTypeName = entry.getKey();
+            String superTypeName = entry.getValue();
+            String superClassName = IGCRestConstants.getClassNameForAssetType(superTypeName);
+            if (!superClassToSubTypeMappings.containsKey(superClassName)) {
+                superClassToSubTypeMappings.put(superClassName, new HashMap<>());
+            }
+            superClassToSubTypeMappings.get(superClassName).put(subTypeName, IGCRestConstants.getClassNameForAssetType(subTypeName));
+        }
+        for (Map.Entry<String, Map<String, String>> entry : superClassToSubTypeMappings.entrySet()) {
+            String superClassName = entry.getKey();
+            Map<String, String> mappings = entry.getValue();
+            Path aliasPath = Paths.get(BASE_DIRECTORY + File.separator + superClassName + ".java");
+            injectSubTypes(aliasPath, mappings);
+        }
 
         igcRestClient.disconnect();
 
@@ -113,7 +172,7 @@ public class IGCBeanGenerator {
         String className = IGCRestConstants.getClassNameForAssetType(id);
 
         // Write the file for any type that should not be ignored
-        String filename = DIRECTORY + File.separator + className + ".java";
+        String filename = BASE_DIRECTORY + File.separator + className + ".java";
         try (BufferedWriter fs = new BufferedWriter(new FileWriter(filename))) {
 
             fs.append("/* SPDX-License-Identifier: Apache-2.0 */");
@@ -122,6 +181,8 @@ public class IGCBeanGenerator {
             fs.append(System.lineSeparator());
             fs.append("package ").append(packageName).append(";");
             fs.append(System.lineSeparator());
+            fs.append(System.lineSeparator());
+            fs.append("import com.fasterxml.jackson.annotation.JsonTypeInfo;");
             fs.append(System.lineSeparator());
             fs.append("import com.fasterxml.jackson.annotation.JsonAutoDetect;");
             fs.append(System.lineSeparator());
@@ -139,14 +200,15 @@ public class IGCBeanGenerator {
             TypeCharacteristics typeCharacteristics = new TypeCharacteristics(id, typeDetails.getViewInfo().getProperties());
             Collection<PropertyDetail> propertyDetails = typeCharacteristics.getPropertyDetails();
 
-            if (!ALIAS_OBJECTS.containsKey(id)) {
+            if (!IGCRestConstants.getAliasObjects().containsKey(id)) {
                 fs.append("import com.fasterxml.jackson.annotation.JsonProperty;");
                 fs.append(System.lineSeparator());
-                if (typeCharacteristics.getClassToExtend().equals("Reference")) {
+                Set<String> dataTypes = typeCharacteristics.getDataTypes();
+                if (typeCharacteristics.getClassToExtend().equals("Reference")
+                        || dataTypes.contains("Reference")) {
                     fs.append("import " + IGCRestConstants.IGC_REST_COMMON_MODEL_PKG + ".Reference;");
                     fs.append(System.lineSeparator());
                 }
-                Set<String> dataTypes = typeCharacteristics.getDataTypes();
                 if (dataTypes.contains("ItemList")) {
                     fs.append("import " + IGCRestConstants.IGC_REST_COMMON_MODEL_PKG + ".ItemList;");
                     fs.append(System.lineSeparator());
@@ -163,6 +225,8 @@ public class IGCBeanGenerator {
 
             fs.append(System.lineSeparator());
             fs.append(getClassHeading(name, id));
+            fs.append("@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property=\"_type\", visible=true, defaultImpl=").append(className).append(".class)");
+            fs.append(System.lineSeparator());
             fs.append("@JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)");
             fs.append(System.lineSeparator());
             fs.append("@JsonInclude(JsonInclude.Include.NON_NULL)");
@@ -172,8 +236,8 @@ public class IGCBeanGenerator {
             fs.append("@JsonTypeName(\"").append(id).append("\")");
             fs.append(System.lineSeparator());
 
-            if (ALIAS_OBJECTS.containsKey(id)) {
-                fs.append("public class ").append(className).append(" extends ").append(IGCRestConstants.getClassNameForAssetType(ALIAS_OBJECTS.get(id))).append(" {");
+            if (IGCRestConstants.getAliasObjects().containsKey(id)) {
+                fs.append("public class ").append(className).append(" extends ").append(IGCRestConstants.getClassNameForAssetType(IGCRestConstants.getAliasObjects().get(id))).append(" {");
                 fs.append(System.lineSeparator()).append(System.lineSeparator());
             } else {
 
@@ -204,6 +268,14 @@ public class IGCBeanGenerator {
                     typeToInformationAssetClassNames.put(id, className);
                 } else if (classToExtend.equals("MainObject")) {
                     typeToMainObjectClassNames.put(id, className);
+                } else if (classToExtend.equals("Datagroup")) {
+                    typeToDatagroupClassNames.put(id, className);
+                } else if (classToExtend.equals("DataItem")) {
+                    typeToDataItemClassNames.put(id, className);
+                } else if (classToExtend.equals("DataItemDefinition")) {
+                    typeToDataItemDefinitionClassNames.put(id, className);
+                } else {
+                    typeToReferenceClassNames.put(id, className);
                 }
 
             }
@@ -246,20 +318,23 @@ public class IGCBeanGenerator {
         String name = property.getName();
         // Skip properties that have no name or are of type 'external_asset_reference'
         if (name != null
-                && !name.equals("null")
-                && !IGNORE_PROPERTIES.contains(name)
-                && !property.getType().getName().equals("external_asset_reference")) {
-            detail = new PropertyDetail();
+                && !IGCRestConstants.getPropertiesToIgnore().contains(name)
+                && !CORE_TO_IGNORE.contains(name)) {
             //System.out.println(" ... adding property: " + property.getName());
             String javaType = IGCRestConstants.getJavaTypeForProperty(property);
-            String propNameActual = property.getName();
-            String propertyName = IGCRestConstants.getLowerCamelCase(propNameActual);
-            if (RESERVED_WORDS.contains(propertyName)) {
-                propertyName = "z" + propertyName;
+            if (javaType == null) {
+                System.err.println("Unable to determine Java type for: " + property);
+            } else {
+                detail = new PropertyDetail();
+                String propNameActual = property.getName();
+                String propertyName = IGCRestConstants.getLowerCamelCase(propNameActual);
+                if (RESERVED_WORDS.contains(propertyName)) {
+                    propertyName = "z" + propertyName;
+                }
+                detail.setJavaType(javaType);
+                detail.setMember(getMemberDeclaration(property, propNameActual, propertyName, javaType));
+                detail.setGetSet(getGetterAndSetter(property, propNameActual, propertyName, javaType));
             }
-            detail.setJavaType(javaType);
-            detail.setMember(getMemberDeclaration(property, propNameActual, propertyName, javaType));
-            detail.setGetSet(getGetterAndSetter(property, propNameActual, propertyName, javaType));
         }
 
         return detail;
@@ -351,21 +426,19 @@ public class IGCBeanGenerator {
         return getSetter.toString();
     }
 
-    private static final Set<String> IGNORE_PROPERTIES = createIgnoreProperties();
+    private static final List<String> SUPER_TYPES = createSuperTypes();
     private static final Set<String> RESERVED_WORDS = createReservedWords();
-//    private static final Set<String> INFORMATION_ASSETS = createInformationAssets();
-    private static final Map<String, String> ALIAS_OBJECTS = createAliasObjects();
     private static final Set<String> MAIN_OBJECT_PROPERTIES = createMainObjectProperties();
+    private static final Set<String> CORE_TO_IGNORE = createCoreToIgnoreProperties();
 
-    private static Set<String> createIgnoreProperties() {
-        Set<String> set = new HashSet<>();
-        set.add("_name");
-        set.add("_type");
-        set.add("_url");
-        set.add("_id");
-        set.add("_context");
-        set.add("notes");
-        return set;
+    private static List<String> createSuperTypes() {
+        List<String> list = new ArrayList<>();
+        list.add("main_object");
+        list.add("information_asset");
+        list.add("datagroup");
+        list.add("data_item");
+        list.add("data_item_definition");
+        return list;
     }
 
     private static Set<String> createReservedWords() {
@@ -375,12 +448,6 @@ public class IGCBeanGenerator {
         set.add("abstract");
         set.add("default");
         return set;
-    }
-
-    private static Map<String, String> createAliasObjects() {
-        Map<String, String> map = new HashMap<>();
-        map.put("host_(engine)", "host");
-        return map;
     }
 
     private static Set<String> createMainObjectProperties() {
@@ -396,103 +463,15 @@ public class IGCBeanGenerator {
         return set;
     }
 
-/*    private static Set<String> createInformationAssets() {
+    private static Set<String> createCoreToIgnoreProperties() {
         Set<String> set = new HashSet<>();
-        set.add("term");
-        set.add("category");
-        set.add("information_governance_rule");
-        set.add("information_governance_policy");
-        set.add("data_class");
-        set.add("host");
-        set.add("database");
-        set.add("database_alias");
-        set.add("database_schema");
-        set.add("database_table");
-        set.add("view");
-        set.add("database_column");
-        set.add("stored_procedure");
-        set.add("stored_procedure_parameter");
-        set.add("data_file_folder");
-        set.add("data_file");
-        set.add("data_file_record");
-        set.add("data_file_field");
-        set.add("data_file_definition");
-        set.add("data_file_definition_record");
-        set.add("data_file_definition_field");
-        set.add("amazon_s3_bucket");
-        set.add("logical_data_model");
-        set.add("subject_area");
-        set.add("logical_entity");
-        set.add("entity_attribute");
-        set.add("physical_data_model");
-        set.add("design_table");
-        set.add("design_view");
-        set.add("design_column");
-        set.add("design_stored_procedure");
-        set.add("design_stored_procedure_parameter");
-        set.add("xml_schema_definition");
-        set.add("xsd_element");
-        set.add("xsd_attribute");
-        set.add("xsd_complex_type");
-        set.add("xsd_simple_type");
-        set.add("xsd_element_group");
-        set.add("xsd_attribute_group");
-        set.add("mdm_model");
-        set.add("physical_object");
-        set.add("physical_object_attribute");
-        set.add("member_type");
-        set.add("attribute");
-        set.add("composite_view");
-        set.add("entity_type");
-        set.add("attribute_type");
-        set.add("attribute_type_field");
-        set.add("application");
-        set.add("object_type");
-        set.add("method");
-        set.add("input_parameter");
-        set.add("output_value");
-        set.add("file");
-        set.add("stored_procedure_definition");
-        set.add("inout_parameter");
-        set.add("in_parameter");
-        set.add("out_parameter");
-        set.add("result_column");
-        set.add("bi_server");
-        set.add("bi_model");
-        set.add("bi_collection");
-        set.add("bi_collection_member");
-        set.add("bi_cube");
-        set.add("bi_report");
-        set.add("bi_report_query");
-        set.add("bi_report_query_item");
-        set.add("data_rule_definition");
-        set.add("data_rule_set_definition");
-        set.add("data_rule");
-        set.add("data_rule_set");
-        set.add("metric");
-        set.add("standardization_rule_set");
-        set.add("match_specification");
-        set.add("host_(engine)");
-        set.add("dsjob");
-        set.add("shared_container");
-        set.add("table_definition");
-        set.add("column_definition");
-        set.add("stage");
-        set.add("stage_column");
-        set.add("ds_stage_column");
-        set.add("stage_variable");
-        set.add("dsstage_type");
-        set.add("parameter_set");
-        set.add("routine");
-        set.add("machine_profile");
-        set.add("mapping_project");
-        set.add("mapping_specification");
-        set.add("extension_mapping_document");
-        set.add("blueprint");
-        set.add("cdc_mapping_document");
-        set.add("endpoint");
+        set.add("_name");
+        set.add("_type");
+        set.add("_url");
+        set.add("_id");
+        set.add("_context");
         return set;
-    } */
+    }
 
     protected class TypeCharacteristics {
 
@@ -501,9 +480,45 @@ public class IGCBeanGenerator {
         private TreeMap<String, PropertyDetail> propertyDetails;
         private Set<String> dataTypes;
 
-        TypeCharacteristics(String typeName, List<TypeProperty> properties) {
+        TypeCharacteristics() {
             propertyDetails = new TreeMap<>();
             dataTypes = new HashSet<>();
+        }
+
+        TypeCharacteristics(String typeName, List<TypeProperty> properties) {
+            this();
+            initialize(typeName, properties);
+        }
+
+        private void initialize(String typeName, List<TypeProperty> properties) {
+
+            // Set known supertypes up-front
+            boolean knownClass = false;
+            if (IGCRestConstants.getDatagroupTypes().contains(typeName)) {
+                extendClass = "Datagroup";
+                knownClass = true;
+            } else if (IGCRestConstants.getDataItemTypes().contains(typeName)) {
+                extendClass = "DataItem";
+                knownClass = true;
+            } else if (IGCRestConstants.getDataItemDefinitionTypes().contains(typeName)) {
+                extendClass = "DataItemDefinition";
+                knownClass = true;
+            } else if (typeName.equals("datagroup")) {
+                extendClass = "InformationAsset";
+                knownClass = true;
+            } else if (typeName.equals("data_item")) {
+                extendClass = "InformationAsset";
+                knownClass = true;
+            } else if (typeName.equals("data_item_definition")) {
+                extendClass = "DataItem";
+                knownClass = true;
+            } else if (typeName.equals("information_asset")) {
+                extendClass = "MainObject";
+                knownClass = true;
+            }
+
+            // Iterate through all the properties to detect the data types in use, and the supertype for the class
+            Set<String> allPropertyNames = new HashSet<>();
             for (TypeProperty property : properties) {
                 PropertyDetail detail = getPropertyDetail(property);
                 if (detail != null) {
@@ -511,36 +526,48 @@ public class IGCBeanGenerator {
                     if (!typeName.equals("collection")) {
                         String propertyName = property.getName();
                         String propertyType = property.getType().getName();
-                        if (propertyName.equals("in_collections") && propertyType.equals("collection")) {
-                            // If the object can be put into a collection, and is not itself a collection, treat it as an InformationAsset
+                        if (propertyName.equals("in_collections")
+                                && propertyType.equals("collection")
+                                && !knownClass) {
+                            // If the object can be put into a collection, is not itself a collection, and is not
+                            // already a more specific type, treat it as an InformationAsset
                             extendClass = "InformationAsset";
                         } else if (propertyName.equals("labels")
                                 && propertyType.equals("label")
                                 && !typeName.equals("main_object")
-                                && !extendClass.equals("InformationAsset")) {
-                            // If the object is not an InformationAsset, but can be assigned a label, treat it as a MainObject
+                                && !knownClass) {
+                            // If the object can be assigned a label, and is not already a more specific type, treat it
+                            // as a MainObject
                             extendClass = "MainObject";
                         }
                     }
-                    dataTypes.add(detail.getJavaType());
+                    dataTypes.addAll(detail.getJavaTypes());
                 }
+                allPropertyNames.add(property.getName());
             }
-            // Remove any pre-existing properties for InformationAsset / MainObject
-            if (extendClass.equals("InformationAsset")) {
-                for (String propertyName : IGCRestConstants.getModificationProperties()) {
-                    removePropertyDetail(propertyName);
-                }
-                for (String propertyName : MAIN_OBJECT_PROPERTIES) {
-                    removePropertyDetail(propertyName);
-                }
-            } else if (extendClass.equals("MainObject")) {
-                for (String propertyName : MAIN_OBJECT_PROPERTIES) {
-                    removePropertyDetail(propertyName);
-                }
+            if (SUPER_TYPES.contains(typeName)) {
+                superTypeToProperties.put(typeName, allPropertyNames);
             }
-            if (typeName.equals("information_asset")) {
-                extendClass = "MainObject";
+            if (extendClass.equals("MainObject")) {
+                removeAllSuperTypeProperties("main_object");
+            } else if (extendClass.equals("InformationAsset")) {
+                removeAllSuperTypeProperties("main_object");
+                removeAllSuperTypeProperties("information_asset");
+            } else if (extendClass.equals("Datagroup")) {
+                removeAllSuperTypeProperties("main_object");
+                removeAllSuperTypeProperties("information_asset");
+                removeAllSuperTypeProperties("datagroup");
+            } else if (extendClass.equals("DataItem")) {
+                removeAllSuperTypeProperties("main_object");
+                removeAllSuperTypeProperties("information_asset");
+                removeAllSuperTypeProperties("data_item");
+            } else if (extendClass.equals("DataItemDefinition")) {
+                removeAllSuperTypeProperties("main_object");
+                removeAllSuperTypeProperties("information_asset");
+                removeAllSuperTypeProperties("data_item");
+                removeAllSuperTypeProperties("data_item_definition");
             }
+
         }
 
         void addPropertyDetail(String propertyName, PropertyDetail detail) {
@@ -549,6 +576,12 @@ public class IGCBeanGenerator {
 
         void removePropertyDetail(String propertyName) {
             propertyDetails.remove(propertyName);
+        }
+
+        private void removeAllSuperTypeProperties(String superTypeName) {
+            for (String propertyName : superTypeToProperties.get(superTypeName)) {
+                removePropertyDetail(propertyName);
+            }
         }
 
         Collection<PropertyDetail> getPropertyDetails() {
@@ -569,27 +602,29 @@ public class IGCBeanGenerator {
 
         private String member;
         private String getSet;
-        private String javaType;
+        private Set<String> javaTypes;
 
         PropertyDetail() {
-            // Nothing to do by default...
+            javaTypes = new HashSet<>();
         }
 
         void setMember(String member) { this.member = member; }
         void setGetSet(String getSet) { this.getSet = getSet; }
         void setJavaType(String javaType) {
             if (javaType.startsWith("ItemList<")) {
-                this.javaType = "ItemList";
+                this.javaTypes.add("ItemList");
+                this.javaTypes.add(javaType.substring(javaType.indexOf("<") + 1, javaType.indexOf(">")));
             } else if (javaType.startsWith("List<")) {
-                this.javaType = "List";
+                this.javaTypes.add("List");
+                this.javaTypes.add(javaType.substring(javaType.indexOf("<") + 1, javaType.indexOf(">")));
             } else {
-                this.javaType = javaType;
+                this.javaTypes.add(javaType);
             }
         }
 
         String getMember() { return this.member; }
         String getGetSet() { return this.getSet; }
-        String getJavaType() { return this.javaType; }
+        Set<String> getJavaTypes() { return this.javaTypes; }
 
     }
 
@@ -625,6 +660,55 @@ public class IGCBeanGenerator {
             Files.write(path, lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
             System.err.println("Unable to inject subtypes into file: " + path);
+            e.printStackTrace();
+        }
+
+    }
+
+    private void removeInjectedSubtypes(Path path) {
+
+        try {
+            List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
+            int position;
+            boolean bFound = false;
+            for (position = 0; position < lines.size(); position++) {
+                String line = lines.get(position);
+                if (line.startsWith("import com.fasterxml.jackson.annotation.JsonSubTypes;")) {
+                    bFound = true;
+                    break;
+                }
+            }
+            if (bFound) {
+                lines.remove(position);
+                bFound = false;
+            }
+            for ( ; position < lines.size(); position++) {
+                String line = lines.get(position);
+                if (line.startsWith("@JsonSubTypes({")) {
+                    bFound = true;
+                    break;
+                }
+            }
+            if (bFound) {
+                lines.remove(position);
+                bFound = false;
+            }
+            List<String> othersToRemove = new ArrayList<>();
+            for ( ; position < lines.size(); position++) {
+                String line = lines.get(position);
+                if (line.startsWith("})")) {
+                    bFound = true;
+                    break;
+                }
+                othersToRemove.add(line);
+            }
+            if (bFound) {
+                lines.remove(position);
+                lines.removeAll(othersToRemove);
+            }
+            Files.write(path, lines, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            System.err.println("Unable to remove injected subtypes from file: " + path);
             e.printStackTrace();
         }
 

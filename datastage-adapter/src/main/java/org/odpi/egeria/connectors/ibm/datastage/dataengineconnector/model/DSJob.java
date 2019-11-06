@@ -4,8 +4,8 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +68,7 @@ public class DSJob {
      * @param columns a listing of stage columns from IGC
      * @param fields a listing of data store fields (including database columns) from IGC
      */
-    public DSJob(IGCRestClient igcRestClient, Reference job, ReferenceList stages, ReferenceList links, ReferenceList columns, List<Reference> fields) {
+    public DSJob(IGCRestClient igcRestClient, Reference job, ItemList<Reference> stages, ItemList<Reference> links, ItemList<Reference> columns, List<Reference> fields) {
         if (log.isDebugEnabled()) { log.debug("Creating new job..."); }
         this.igcRestClient = igcRestClient;
         this.job = job;
@@ -231,7 +231,7 @@ public class DSJob {
         return storeToFieldsMap.getOrDefault(rid, null);
     }
 
-    private void buildMap(Map<String, Reference> map, ReferenceList objects) {
+    private void buildMap(Map<String, Reference> map, ItemList<Reference> objects) {
         List<Reference> listOfObjects = objects.getItems();
         for (Reference candidateObject : listOfObjects) {
             String rid = candidateObject.getId();
@@ -240,7 +240,7 @@ public class DSJob {
         }
     }
 
-    private void classifyStages(ReferenceList stages) {
+    private void classifyStages(ItemList<Reference> stages) {
         List<Reference> listOfStages = stages.getItems();
         for (Reference candidateStage : listOfStages) {
             String rid = candidateStage.getId();

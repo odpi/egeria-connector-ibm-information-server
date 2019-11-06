@@ -2,7 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common;
 
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.IGCRestModelGenerator;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 
 import java.lang.invoke.*;
 import java.lang.reflect.Method;
@@ -22,7 +22,7 @@ public class DynamicPropertyReader implements DynamicPropertyGetter {
 
     public DynamicPropertyReader(Class<?> pojoClass, String propertyName) {
 
-        String getterName = IGCRestModelGenerator.getGetterNameForProperty(propertyName);
+        String getterName = IGCRestConstants.getGetterNameForProperty(propertyName);
         Method getterMethod;
         try {
             getterMethod = pojoClass.getMethod(getterName);

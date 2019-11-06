@@ -4,8 +4,8 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classific
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
@@ -68,7 +68,7 @@ public class PrimaryKeyMapper extends ClassificationMapping {
 
         // Retrieve all assigned_to_terms relationships from this IGC object
         Boolean bSelectedPK = (Boolean) igcRestClient.getPropertyByName(fromIgcObject, "selected_primary_key");
-        ReferenceList definedPK = (ReferenceList) igcRestClient.getPropertyByName(fromIgcObject, "defined_primary_key");
+        ItemList<Reference> definedPK = (ItemList<Reference>) igcRestClient.getPropertyByName(fromIgcObject, "defined_primary_key");
 
         // If there are no defined PKs, setup a classification only if the user has selected
         // this column as a primary key

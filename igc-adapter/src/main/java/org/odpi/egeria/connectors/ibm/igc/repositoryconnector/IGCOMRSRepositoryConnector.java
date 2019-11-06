@@ -4,7 +4,8 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -230,7 +231,7 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
             IGCSearchConditionSet conditions = new IGCSearchConditionSet(byName);
             conditions.addCondition(noParent);
             IGCSearch igcSearch = new IGCSearch("category", conditions);
-            ReferenceList results = igcRestClient.search(igcSearch);
+            ItemList<Category> results = igcRestClient.search(igcSearch);
             if (results == null || results.getItems().isEmpty()) {
                 // If the default glossary was not found, create it
                 IGCCreate igcCreate = new IGCCreate("category");

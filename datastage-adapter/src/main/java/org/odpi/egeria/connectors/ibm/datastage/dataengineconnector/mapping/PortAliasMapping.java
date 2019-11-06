@@ -4,8 +4,8 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DSJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.openmetadata.accessservices.dataengine.model.PortAlias;
 import org.odpi.openmetadata.accessservices.dataengine.model.PortType;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ class PortAliasMapping extends BaseMapping {
         this(job.getIgcRestClient());
 
         for (Reference stage : stages) {
-            ReferenceList relations = (ReferenceList) igcRestClient.getPropertyByName(stage, relationshipProperty);
+            ItemList<Reference> relations = (ItemList<Reference>) igcRestClient.getPropertyByName(stage, relationshipProperty);
             for (Reference relation : relations.getItems()) {
                 String fullyQualifiedStoreName = job.getQualifiedNameFromStoreRid(relation.getId());
                 String fullyQualifiedStageName = getFullyQualifiedName(stage);
