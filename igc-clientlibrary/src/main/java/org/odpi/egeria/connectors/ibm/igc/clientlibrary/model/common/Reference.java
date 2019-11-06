@@ -180,6 +180,7 @@ import java.util.List;
         @JsonSubTypes.Type(value = TableAnalysis.class, name = "table_analysis"),
         @JsonSubTypes.Type(value = TableAnalysisSummary.class, name = "table_analysis_summary"),
         @JsonSubTypes.Type(value = TableDefinitionProperties.class, name = "table_definition_properties"),
+        @JsonSubTypes.Type(value = TermAssignment.class, name = "term_assignment"),
         @JsonSubTypes.Type(value = TermHistory.class, name = "term_history"),
         @JsonSubTypes.Type(value = TransformsFunction.class, name = "transforms_function"),
         @JsonSubTypes.Type(value = Tuple.class, name = "tuple"),

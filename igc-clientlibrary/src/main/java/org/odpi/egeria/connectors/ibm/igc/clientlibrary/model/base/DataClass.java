@@ -91,6 +91,12 @@ public class DataClass extends InformationAsset {
     @JsonProperty("regular_expression_single")
     protected String regularExpressionSingle;
 
+    @JsonProperty("squeezeConsecutiveWhiteSpaces")
+    protected Boolean squeezeconsecutivewhitespaces;
+
+    @JsonProperty("validValueReferenceFile")
+    protected String validvaluereferencefile;
+
     @JsonProperty("valid_value_strings")
     protected List<String> validValueStrings;
 
@@ -306,6 +312,34 @@ public class DataClass extends InformationAsset {
      */
     @JsonProperty("regular_expression_single")
     public void setRegularExpressionSingle(String regularExpressionSingle) { this.regularExpressionSingle = regularExpressionSingle; }
+
+    /**
+     * Retrieve the {@code squeezeConsecutiveWhiteSpaces} property (displayed as '{@literal Collapse Consecutive White Spaces}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("squeezeConsecutiveWhiteSpaces")
+    public Boolean getSqueezeconsecutivewhitespaces() { return this.squeezeconsecutivewhitespaces; }
+
+    /**
+     * Set the {@code squeezeConsecutiveWhiteSpaces} property (displayed as {@code Collapse Consecutive White Spaces}) of the object.
+     * @param squeezeconsecutivewhitespaces the value to set
+     */
+    @JsonProperty("squeezeConsecutiveWhiteSpaces")
+    public void setSqueezeconsecutivewhitespaces(Boolean squeezeconsecutivewhitespaces) { this.squeezeconsecutivewhitespaces = squeezeconsecutivewhitespaces; }
+
+    /**
+     * Retrieve the {@code validValueReferenceFile} property (displayed as '{@literal Valid Value Reference File}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("validValueReferenceFile")
+    public String getValidvaluereferencefile() { return this.validvaluereferencefile; }
+
+    /**
+     * Set the {@code validValueReferenceFile} property (displayed as {@code Valid Value Reference File}) of the object.
+     * @param validvaluereferencefile the value to set
+     */
+    @JsonProperty("validValueReferenceFile")
+    public void setValidvaluereferencefile(String validvaluereferencefile) { this.validvaluereferencefile = validvaluereferencefile; }
 
     /**
      * Retrieve the {@code valid_value_strings} property (displayed as '{@literal Valid Values}') of the object.

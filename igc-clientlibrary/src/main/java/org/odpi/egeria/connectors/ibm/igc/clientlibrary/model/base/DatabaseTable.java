@@ -115,6 +115,9 @@ public class DatabaseTable extends Datagroup {
     @JsonProperty("source_mapping_specifications")
     protected ItemList<MappingSpecification> sourceMappingSpecifications;
 
+    @JsonProperty("suggested_term_assignments")
+    protected ItemList<TermAssignment> suggestedTermAssignments;
+
     @JsonProperty("table_definitions")
     protected ItemList<TableDefinition> tableDefinitions;
 
@@ -538,6 +541,20 @@ public class DatabaseTable extends Datagroup {
      */
     @JsonProperty("source_mapping_specifications")
     public void setSourceMappingSpecifications(ItemList<MappingSpecification> sourceMappingSpecifications) { this.sourceMappingSpecifications = sourceMappingSpecifications; }
+
+    /**
+     * Retrieve the {@code suggested_term_assignments} property (displayed as '{@literal Suggested Term Assignments}') of the object.
+     * @return {@code ItemList<TermAssignment>}
+     */
+    @JsonProperty("suggested_term_assignments")
+    public ItemList<TermAssignment> getSuggestedTermAssignments() { return this.suggestedTermAssignments; }
+
+    /**
+     * Set the {@code suggested_term_assignments} property (displayed as {@code Suggested Term Assignments}) of the object.
+     * @param suggestedTermAssignments the value to set
+     */
+    @JsonProperty("suggested_term_assignments")
+    public void setSuggestedTermAssignments(ItemList<TermAssignment> suggestedTermAssignments) { this.suggestedTermAssignments = suggestedTermAssignments; }
 
     /**
      * Retrieve the {@code table_definitions} property (displayed as '{@literal Table Definitions}') of the object.

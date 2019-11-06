@@ -37,7 +37,7 @@ public class DataFileRecord extends Datagroup {
     protected ItemList<BlueprintElementLink> blueprintElements;
 
     @JsonProperty("data_file")
-    protected MainObject dataFile;
+    protected DataFile dataFile;
 
     @JsonProperty("data_file_fields")
     protected ItemList<DataFileField> dataFileFields;
@@ -77,6 +77,9 @@ public class DataFileRecord extends Datagroup {
 
     @JsonProperty("same_as_data_sources")
     protected ItemList<Datagroup> sameAsDataSources;
+
+    @JsonProperty("suggested_term_assignments")
+    protected ItemList<TermAssignment> suggestedTermAssignments;
 
     @JsonProperty("written_by_(design)")
     protected ItemList<InformationAsset> writtenByDesign;
@@ -134,17 +137,17 @@ public class DataFileRecord extends Datagroup {
 
     /**
      * Retrieve the {@code data_file} property (displayed as '{@literal Default Data File}') of the object.
-     * @return {@code MainObject}
+     * @return {@code DataFile}
      */
     @JsonProperty("data_file")
-    public MainObject getDataFile() { return this.dataFile; }
+    public DataFile getDataFile() { return this.dataFile; }
 
     /**
      * Set the {@code data_file} property (displayed as {@code Default Data File}) of the object.
      * @param dataFile the value to set
      */
     @JsonProperty("data_file")
-    public void setDataFile(MainObject dataFile) { this.dataFile = dataFile; }
+    public void setDataFile(DataFile dataFile) { this.dataFile = dataFile; }
 
     /**
      * Retrieve the {@code data_file_fields} property (displayed as '{@literal Data File Fields}') of the object.
@@ -327,6 +330,20 @@ public class DataFileRecord extends Datagroup {
      */
     @JsonProperty("same_as_data_sources")
     public void setSameAsDataSources(ItemList<Datagroup> sameAsDataSources) { this.sameAsDataSources = sameAsDataSources; }
+
+    /**
+     * Retrieve the {@code suggested_term_assignments} property (displayed as '{@literal Suggested Term Assignments}') of the object.
+     * @return {@code ItemList<TermAssignment>}
+     */
+    @JsonProperty("suggested_term_assignments")
+    public ItemList<TermAssignment> getSuggestedTermAssignments() { return this.suggestedTermAssignments; }
+
+    /**
+     * Set the {@code suggested_term_assignments} property (displayed as {@code Suggested Term Assignments}) of the object.
+     * @param suggestedTermAssignments the value to set
+     */
+    @JsonProperty("suggested_term_assignments")
+    public void setSuggestedTermAssignments(ItemList<TermAssignment> suggestedTermAssignments) { this.suggestedTermAssignments = suggestedTermAssignments; }
 
     /**
      * Retrieve the {@code written_by_(design)} property (displayed as '{@literal Written by (Design)}') of the object.

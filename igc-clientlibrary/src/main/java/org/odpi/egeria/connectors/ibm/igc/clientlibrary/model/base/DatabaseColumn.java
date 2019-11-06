@@ -153,6 +153,9 @@ public class DatabaseColumn extends Classificationenabledgroup {
     @JsonProperty("start_end_columns")
     protected String startEndColumns;
 
+    @JsonProperty("suggested_term_assignments")
+    protected ItemList<TermAssignment> suggestedTermAssignments;
+
     @JsonProperty("validity_tables")
     protected ItemList<ValidityTable> validityTables;
 
@@ -735,6 +738,20 @@ public class DatabaseColumn extends Classificationenabledgroup {
      */
     @JsonProperty("start_end_columns")
     public void setStartEndColumns(String startEndColumns) { this.startEndColumns = startEndColumns; }
+
+    /**
+     * Retrieve the {@code suggested_term_assignments} property (displayed as '{@literal Suggested Term Assignments}') of the object.
+     * @return {@code ItemList<TermAssignment>}
+     */
+    @JsonProperty("suggested_term_assignments")
+    public ItemList<TermAssignment> getSuggestedTermAssignments() { return this.suggestedTermAssignments; }
+
+    /**
+     * Set the {@code suggested_term_assignments} property (displayed as {@code Suggested Term Assignments}) of the object.
+     * @param suggestedTermAssignments the value to set
+     */
+    @JsonProperty("suggested_term_assignments")
+    public void setSuggestedTermAssignments(ItemList<TermAssignment> suggestedTermAssignments) { this.suggestedTermAssignments = suggestedTermAssignments; }
 
     /**
      * Retrieve the {@code validity_tables} property (displayed as '{@literal Validity Tables}') of the object.

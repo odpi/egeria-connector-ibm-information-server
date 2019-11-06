@@ -39,11 +39,44 @@ public class DatabaseAlias extends Datagroup {
     @JsonProperty("defined_primary_key")
     protected ItemList<CandidateKey> definedPrimaryKey;
 
+    @JsonProperty("impacted_by")
+    protected ItemList<InformationAsset> impactedBy;
+
+    @JsonProperty("impacts_on")
+    protected ItemList<InformationAsset> impactsOn;
+
     @JsonProperty("imported_from")
     protected String importedFrom;
 
+    @JsonProperty("in_collections")
+    protected ItemList<Collection> inCollections;
+
     @JsonProperty("indexes")
     protected ItemList<DatabaseIndex> indexes;
+
+    @JsonProperty("read_by_(design)")
+    protected ItemList<InformationAsset> readByDesign;
+
+    @JsonProperty("read_by_(static)")
+    protected ItemList<InformationAsset> readByStatic;
+
+    @JsonProperty("reads_from_(operational)")
+    protected ItemList<InformationAsset> readsFromOperational;
+
+    @JsonProperty("reads_from_(user_defined)")
+    protected ItemList<InformationAsset> readsFromUserDefined;
+
+    @JsonProperty("written_by_(design)")
+    protected ItemList<InformationAsset> writtenByDesign;
+
+    @JsonProperty("written_by_(operational)")
+    protected ItemList<InformationAsset> writtenByOperational;
+
+    @JsonProperty("written_by_(static)")
+    protected ItemList<InformationAsset> writtenByStatic;
+
+    @JsonProperty("written_by_(user_defined)")
+    protected ItemList<InformationAsset> writtenByUserDefined;
 
     /**
      * Retrieve the {@code alias_of_database_tables_or_views} property (displayed as '{@literal Alias of Database Tables or Views}') of the object.
@@ -102,6 +135,34 @@ public class DatabaseAlias extends Datagroup {
     public void setDefinedPrimaryKey(ItemList<CandidateKey> definedPrimaryKey) { this.definedPrimaryKey = definedPrimaryKey; }
 
     /**
+     * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
+     * @return {@code ItemList<InformationAsset>}
+     */
+    @JsonProperty("impacted_by")
+    public ItemList<InformationAsset> getImpactedBy() { return this.impactedBy; }
+
+    /**
+     * Set the {@code impacted_by} property (displayed as {@code Impacted by}) of the object.
+     * @param impactedBy the value to set
+     */
+    @JsonProperty("impacted_by")
+    public void setImpactedBy(ItemList<InformationAsset> impactedBy) { this.impactedBy = impactedBy; }
+
+    /**
+     * Retrieve the {@code impacts_on} property (displayed as '{@literal Impacts on}') of the object.
+     * @return {@code ItemList<InformationAsset>}
+     */
+    @JsonProperty("impacts_on")
+    public ItemList<InformationAsset> getImpactsOn() { return this.impactsOn; }
+
+    /**
+     * Set the {@code impacts_on} property (displayed as {@code Impacts on}) of the object.
+     * @param impactsOn the value to set
+     */
+    @JsonProperty("impacts_on")
+    public void setImpactsOn(ItemList<InformationAsset> impactsOn) { this.impactsOn = impactsOn; }
+
+    /**
      * Retrieve the {@code imported_from} property (displayed as '{@literal Imported From}') of the object.
      * @return {@code String}
      */
@@ -116,6 +177,20 @@ public class DatabaseAlias extends Datagroup {
     public void setImportedFrom(String importedFrom) { this.importedFrom = importedFrom; }
 
     /**
+     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
+     * @return {@code ItemList<Collection>}
+     */
+    @JsonProperty("in_collections")
+    public ItemList<Collection> getInCollections() { return this.inCollections; }
+
+    /**
+     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
+     * @param inCollections the value to set
+     */
+    @JsonProperty("in_collections")
+    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
+
+    /**
      * Retrieve the {@code indexes} property (displayed as '{@literal Indexes}') of the object.
      * @return {@code ItemList<DatabaseIndex>}
      */
@@ -128,5 +203,117 @@ public class DatabaseAlias extends Datagroup {
      */
     @JsonProperty("indexes")
     public void setIndexes(ItemList<DatabaseIndex> indexes) { this.indexes = indexes; }
+
+    /**
+     * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.
+     * @return {@code ItemList<InformationAsset>}
+     */
+    @JsonProperty("read_by_(design)")
+    public ItemList<InformationAsset> getReadByDesign() { return this.readByDesign; }
+
+    /**
+     * Set the {@code read_by_(design)} property (displayed as {@code Read by (Design)}) of the object.
+     * @param readByDesign the value to set
+     */
+    @JsonProperty("read_by_(design)")
+    public void setReadByDesign(ItemList<InformationAsset> readByDesign) { this.readByDesign = readByDesign; }
+
+    /**
+     * Retrieve the {@code read_by_(static)} property (displayed as '{@literal Read by (Static)}') of the object.
+     * @return {@code ItemList<InformationAsset>}
+     */
+    @JsonProperty("read_by_(static)")
+    public ItemList<InformationAsset> getReadByStatic() { return this.readByStatic; }
+
+    /**
+     * Set the {@code read_by_(static)} property (displayed as {@code Read by (Static)}) of the object.
+     * @param readByStatic the value to set
+     */
+    @JsonProperty("read_by_(static)")
+    public void setReadByStatic(ItemList<InformationAsset> readByStatic) { this.readByStatic = readByStatic; }
+
+    /**
+     * Retrieve the {@code reads_from_(operational)} property (displayed as '{@literal Reads from (Operational)}') of the object.
+     * @return {@code ItemList<InformationAsset>}
+     */
+    @JsonProperty("reads_from_(operational)")
+    public ItemList<InformationAsset> getReadsFromOperational() { return this.readsFromOperational; }
+
+    /**
+     * Set the {@code reads_from_(operational)} property (displayed as {@code Reads from (Operational)}) of the object.
+     * @param readsFromOperational the value to set
+     */
+    @JsonProperty("reads_from_(operational)")
+    public void setReadsFromOperational(ItemList<InformationAsset> readsFromOperational) { this.readsFromOperational = readsFromOperational; }
+
+    /**
+     * Retrieve the {@code reads_from_(user_defined)} property (displayed as '{@literal Reads from (User-Defined)}') of the object.
+     * @return {@code ItemList<InformationAsset>}
+     */
+    @JsonProperty("reads_from_(user_defined)")
+    public ItemList<InformationAsset> getReadsFromUserDefined() { return this.readsFromUserDefined; }
+
+    /**
+     * Set the {@code reads_from_(user_defined)} property (displayed as {@code Reads from (User-Defined)}) of the object.
+     * @param readsFromUserDefined the value to set
+     */
+    @JsonProperty("reads_from_(user_defined)")
+    public void setReadsFromUserDefined(ItemList<InformationAsset> readsFromUserDefined) { this.readsFromUserDefined = readsFromUserDefined; }
+
+    /**
+     * Retrieve the {@code written_by_(design)} property (displayed as '{@literal Written by (Design)}') of the object.
+     * @return {@code ItemList<InformationAsset>}
+     */
+    @JsonProperty("written_by_(design)")
+    public ItemList<InformationAsset> getWrittenByDesign() { return this.writtenByDesign; }
+
+    /**
+     * Set the {@code written_by_(design)} property (displayed as {@code Written by (Design)}) of the object.
+     * @param writtenByDesign the value to set
+     */
+    @JsonProperty("written_by_(design)")
+    public void setWrittenByDesign(ItemList<InformationAsset> writtenByDesign) { this.writtenByDesign = writtenByDesign; }
+
+    /**
+     * Retrieve the {@code written_by_(operational)} property (displayed as '{@literal Written by (Operational)}') of the object.
+     * @return {@code ItemList<InformationAsset>}
+     */
+    @JsonProperty("written_by_(operational)")
+    public ItemList<InformationAsset> getWrittenByOperational() { return this.writtenByOperational; }
+
+    /**
+     * Set the {@code written_by_(operational)} property (displayed as {@code Written by (Operational)}) of the object.
+     * @param writtenByOperational the value to set
+     */
+    @JsonProperty("written_by_(operational)")
+    public void setWrittenByOperational(ItemList<InformationAsset> writtenByOperational) { this.writtenByOperational = writtenByOperational; }
+
+    /**
+     * Retrieve the {@code written_by_(static)} property (displayed as '{@literal Written by (Static)}') of the object.
+     * @return {@code ItemList<InformationAsset>}
+     */
+    @JsonProperty("written_by_(static)")
+    public ItemList<InformationAsset> getWrittenByStatic() { return this.writtenByStatic; }
+
+    /**
+     * Set the {@code written_by_(static)} property (displayed as {@code Written by (Static)}) of the object.
+     * @param writtenByStatic the value to set
+     */
+    @JsonProperty("written_by_(static)")
+    public void setWrittenByStatic(ItemList<InformationAsset> writtenByStatic) { this.writtenByStatic = writtenByStatic; }
+
+    /**
+     * Retrieve the {@code written_by_(user_defined)} property (displayed as '{@literal Written by (User-Defined)}') of the object.
+     * @return {@code ItemList<InformationAsset>}
+     */
+    @JsonProperty("written_by_(user_defined)")
+    public ItemList<InformationAsset> getWrittenByUserDefined() { return this.writtenByUserDefined; }
+
+    /**
+     * Set the {@code written_by_(user_defined)} property (displayed as {@code Written by (User-Defined)}) of the object.
+     * @param writtenByUserDefined the value to set
+     */
+    @JsonProperty("written_by_(user_defined)")
+    public void setWrittenByUserDefined(ItemList<InformationAsset> writtenByUserDefined) { this.writtenByUserDefined = writtenByUserDefined; }
 
 }
