@@ -11,6 +11,8 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
+
 import java.util.Date;
 import java.util.List;
 
@@ -72,7 +74,10 @@ public class View extends Datagroup {
     protected ItemList<DatabaseIndex> databaseIndexes;
 
     @JsonProperty("defined_foreign_key")
-    protected ItemList<DatabaseColumn> definedForeignKey;
+    protected ItemList<Reference> definedForeignKey;
+
+    @JsonProperty("defined_non_primary_key")
+    protected ItemList<CandidateKey> definedNonPrimaryKey;
 
     @JsonProperty("defined_primary_key")
     protected ItemList<CandidateKey> definedPrimaryKey;
@@ -372,18 +377,38 @@ public class View extends Datagroup {
     public void setDatabaseIndexes(ItemList<DatabaseIndex> databaseIndexes) { this.databaseIndexes = databaseIndexes; }
 
     /**
-     * Retrieve the {@code defined_foreign_key} property (displayed as '{@literal Defined Foreign Key}') of the object.
-     * @return {@code ItemList<DatabaseColumn>}
+     * Retrieve the {@code defined_foreign_key} property (displayed as '{@literal Has Foreign Key Implemented}') of the object.
+     * Prior to 11.5.0.2sp5 this will return an {@code ItemList<DatabaseColumn>} while from 11.5.0.2sp5 onwards this
+     * will return an {@code ItemList<ForeignKey>}.
+     *
+     * @return {@code ItemList<Reference>}
      */
     @JsonProperty("defined_foreign_key")
-    public ItemList<DatabaseColumn> getDefinedForeignKey() { return this.definedForeignKey; }
+    public ItemList<Reference> getDefinedForeignKey() { return this.definedForeignKey; }
 
     /**
-     * Set the {@code defined_foreign_key} property (displayed as {@code Defined Foreign Key}) of the object.
+     * Set the {@code defined_foreign_key} property (displayed as {@code Has Foreign Key Implemented}) of the object.
+     * Prior to 11.5.0.2sp5 this required an {@code ItemList<DatabaseColumn>} while from 11.5.0.2sp5 onwards this
+     * requires an {@code ItemList<ForeignKey>}.
+     *
      * @param definedForeignKey the value to set
      */
     @JsonProperty("defined_foreign_key")
-    public void setDefinedForeignKey(ItemList<DatabaseColumn> definedForeignKey) { this.definedForeignKey = definedForeignKey; }
+    public void setDefinedForeignKey(ItemList<Reference> definedForeignKey) { this.definedForeignKey = definedForeignKey; }
+
+    /**
+     * Retrieve the {@code defined_non_primary_key} property (displayed as '{@literal Defined Non Primary Key}') of the object.
+     * @return {@code ItemList<CandidateKey>}
+     */
+    @JsonProperty("defined_non_primary_key")
+    public ItemList<CandidateKey> getDefinedNonPrimaryKey() { return this.definedNonPrimaryKey; }
+
+    /**
+     * Set the {@code defined_non_primary_key} property (displayed as {@code Defined Non Primary Key}) of the object.
+     * @param definedNonPrimaryKey the value to set
+     */
+    @JsonProperty("defined_non_primary_key")
+    public void setDefinedNonPrimaryKey(ItemList<CandidateKey> definedNonPrimaryKey) { this.definedNonPrimaryKey = definedNonPrimaryKey; }
 
     /**
      * Retrieve the {@code defined_primary_key} property (displayed as '{@literal Defined Primary Key}') of the object.

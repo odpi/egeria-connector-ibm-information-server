@@ -92,6 +92,9 @@ public class DatabaseColumn extends Classificationenabledgroup {
     @JsonProperty("defined_foreign_key_references")
     protected ItemList<DatabaseColumn> definedForeignKeyReferences;
 
+    @JsonProperty("defined_non_primary_key")
+    protected ItemList<CandidateKey> definedNonPrimaryKey;
+
     @JsonProperty("defined_primary_key")
     protected ItemList<CandidateKey> definedPrimaryKey;
 
@@ -109,6 +112,9 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     @JsonProperty("impacts_on")
     protected ItemList<InformationAsset> impactsOn;
+
+    @JsonProperty("implemented_key")
+    protected ItemList<CandidateKey> implementedKey;
 
     @JsonProperty("implements_design_columns")
     protected ItemList<DesignColumn> implementsDesignColumns;
@@ -567,6 +573,20 @@ public class DatabaseColumn extends Classificationenabledgroup {
     public void setDefinedForeignKeyReferences(ItemList<DatabaseColumn> definedForeignKeyReferences) { this.definedForeignKeyReferences = definedForeignKeyReferences; }
 
     /**
+     * Retrieve the {@code defined_non_primary_key} property (displayed as '{@literal Defined Non Primary Key}') of the object.
+     * @return {@code ItemList<CandidateKey>}
+     */
+    @JsonProperty("defined_non_primary_key")
+    public ItemList<CandidateKey> getDefinedNonPrimaryKey() { return this.definedNonPrimaryKey; }
+
+    /**
+     * Set the {@code defined_non_primary_key} property (displayed as {@code Defined Non Primary Key}) of the object.
+     * @param definedNonPrimaryKey the value to set
+     */
+    @JsonProperty("defined_non_primary_key")
+    public void setDefinedNonPrimaryKey(ItemList<CandidateKey> definedNonPrimaryKey) { this.definedNonPrimaryKey = definedNonPrimaryKey; }
+
+    /**
      * Retrieve the {@code defined_primary_key} property (displayed as '{@literal Defined Primary Key}') of the object.
      * @return {@code ItemList<CandidateKey>}
      */
@@ -649,6 +669,20 @@ public class DatabaseColumn extends Classificationenabledgroup {
      */
     @JsonProperty("impacts_on")
     public void setImpactsOn(ItemList<InformationAsset> impactsOn) { this.impactsOn = impactsOn; }
+
+    /**
+     * Retrieve the {@code implemented_key} property (displayed as '{@literal Implemented Key}') of the object.
+     * @return {@code ItemList<CandidateKey>}
+     */
+    @JsonProperty("implemented_key")
+    public ItemList<CandidateKey> getImplementedKey() { return this.implementedKey; }
+
+    /**
+     * Set the {@code implemented_key} property (displayed as {@code Implemented Key}) of the object.
+     * @param implementedKey the value to set
+     */
+    @JsonProperty("implemented_key")
+    public void setImplementedKey(ItemList<CandidateKey> implementedKey) { this.implementedKey = implementedKey; }
 
     /**
      * Retrieve the {@code implements_design_columns} property (displayed as '{@literal Implements Design Columns}') of the object.

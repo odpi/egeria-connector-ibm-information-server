@@ -36,6 +36,11 @@ public class DatabaseAlias extends Datagroup {
     @JsonProperty("defined_foreign_key")
     protected ItemList<DatabaseColumn> definedForeignKey;
 
+    /**
+     * No longer applicable from 11.5.0.2sp5 onwards.
+     * @see #implementedKey
+     */
+    @Deprecated
     @JsonProperty("defined_primary_key")
     protected ItemList<CandidateKey> definedPrimaryKey;
 
@@ -44,6 +49,9 @@ public class DatabaseAlias extends Datagroup {
 
     @JsonProperty("impacts_on")
     protected ItemList<InformationAsset> impactsOn;
+
+    @JsonProperty("implemented_key")
+    protected ItemList<CandidateKey> implementedKey;
 
     @JsonProperty("imported_from")
     protected String importedFrom;
@@ -122,15 +130,23 @@ public class DatabaseAlias extends Datagroup {
 
     /**
      * Retrieve the {@code defined_primary_key} property (displayed as '{@literal Defined Primary Key}') of the object.
+     * No longer applicable from 11.5.0.2sp5 onwards.
+     *
      * @return {@code ItemList<CandidateKey>}
+     * @see #getImplementedKey()
      */
+    @Deprecated
     @JsonProperty("defined_primary_key")
     public ItemList<CandidateKey> getDefinedPrimaryKey() { return this.definedPrimaryKey; }
 
     /**
      * Set the {@code defined_primary_key} property (displayed as {@code Defined Primary Key}) of the object.
+     * No longer applicable from 11.5.0.2sp5 onwards.
+     *
      * @param definedPrimaryKey the value to set
+     * @see #setImplementedKey(ItemList)
      */
+    @Deprecated
     @JsonProperty("defined_primary_key")
     public void setDefinedPrimaryKey(ItemList<CandidateKey> definedPrimaryKey) { this.definedPrimaryKey = definedPrimaryKey; }
 
@@ -161,6 +177,20 @@ public class DatabaseAlias extends Datagroup {
      */
     @JsonProperty("impacts_on")
     public void setImpactsOn(ItemList<InformationAsset> impactsOn) { this.impactsOn = impactsOn; }
+
+    /**
+     * Retrieve the {@code implemented_key} property (displayed as '{@literal Defined Primary Key}') of the object.
+     * @return {@code ItemList<CandidateKey>}
+     */
+    @JsonProperty("implemented_key")
+    public ItemList<CandidateKey> getImplementedKey() { return this.implementedKey; }
+
+    /**
+     * Set the {@code implemented_key} property (displayed as {@code Defined Primary Key}) of the object.
+     * @param implementedKey the value to set
+     */
+    @JsonProperty("implemented_key")
+    public void setImplementedKey(ItemList<CandidateKey> implementedKey) { this.implementedKey = implementedKey; }
 
     /**
      * Retrieve the {@code imported_from} property (displayed as '{@literal Imported From}') of the object.

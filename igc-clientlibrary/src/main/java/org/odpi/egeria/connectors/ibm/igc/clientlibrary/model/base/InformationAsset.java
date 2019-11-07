@@ -70,6 +70,7 @@ import java.util.Date;
         @JsonSubTypes.Type(value = EntityType.class, name = "entity_type"),
         @JsonSubTypes.Type(value = ExtensionMappingDocument.class, name = "extension_mapping_document"),
         @JsonSubTypes.Type(value = File.class, name = "file"),
+        @JsonSubTypes.Type(value = HbaseNamespace.class, name = "hbase_namespace"),
         @JsonSubTypes.Type(value = Host.class, name = "host"),
         @JsonSubTypes.Type(value = IdocField.class, name = "idoc_field"),
         @JsonSubTypes.Type(value = IdocSegmentType.class, name = "idoc_segment_type"),
