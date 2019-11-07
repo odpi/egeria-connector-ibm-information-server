@@ -62,6 +62,9 @@ public class Classification extends Reference {
     @JsonProperty("threshold")
     protected Number threshold;
 
+    @JsonProperty("value_frequency")
+    protected Number valueFrequency;
+
     /**
      * Retrieve the {@code classifies_asset} property (displayed as '{@literal Asset}') of the object.
      * @return {@code MainObject}
@@ -187,5 +190,19 @@ public class Classification extends Reference {
      */
     @JsonProperty("threshold")
     public void setThreshold(Number threshold) { this.threshold = threshold; }
+
+    /**
+     * Retrieve the {@code value_frequency} property (displayed as '{@literal Value Frequency}') of the object.
+     * @return {@code Number}
+     */
+    @JsonProperty("value_frequency")
+    public Number getValueFrequency() { return this.valueFrequency; }
+
+    /**
+     * Set the {@code value_frequency} property (displayed as {@code Value Frequency}) of the object.
+     * @param valueFrequency the value to set
+     */
+    @JsonProperty("value_frequency")
+    public void setValueFrequency(Number valueFrequency) { this.valueFrequency = valueFrequency; }
 
 }

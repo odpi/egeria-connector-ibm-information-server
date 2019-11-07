@@ -50,6 +50,10 @@ public class MappingSpecification extends InformationAsset {
     @JsonProperty("include_for_lineage")
     protected String includeForLineage;
 
+    /**
+     * No longer applicable from 11.7.0.1 onwards.
+     */
+    @Deprecated
     @JsonProperty("information_server_reports")
     protected ItemList<InformationServerReportMappingSpecification> informationServerReports;
 
@@ -154,15 +158,21 @@ public class MappingSpecification extends InformationAsset {
 
     /**
      * Retrieve the {@code information_server_reports} property (displayed as '{@literal Information Server Reports}') of the object.
+     * No longer applicable from 11.7.0.1 onwards.
+     *
      * @return {@code ItemList<InformationServerReportMappingSpecification>}
      */
+    @Deprecated
     @JsonProperty("information_server_reports")
     public ItemList<InformationServerReportMappingSpecification> getInformationServerReports() { return this.informationServerReports; }
 
     /**
      * Set the {@code information_server_reports} property (displayed as {@code Information Server Reports}) of the object.
+     * No longer applicable from 11.7.0.1 onwards.
+     *
      * @param informationServerReports the value to set
      */
+    @Deprecated
     @JsonProperty("information_server_reports")
     public void setInformationServerReports(ItemList<InformationServerReportMappingSpecification> informationServerReports) { this.informationServerReports = informationServerReports; }
 

@@ -65,8 +65,10 @@ public class Volume extends InformationAsset {
      * <ul>
      *   <li>Primary (displayed in the UI as 'Primary')</li>
      *   <li>Retention (displayed in the UI as 'Retention')</li>
-     *   <li>Discovery (displayed in the UI as 'Discovery')</li>
-     *   <li>Export (displayed in the UI as 'Export')</li>
+     *   <li>Discovery (displayed in the UI as 'Discovery'), 11.7.0.0 only</li>
+     *   <li>Export (displayed in the UI as 'Export'), 11.7.0.0 only</li>
+     *   <li>DiscoveryExport (displayed in the UI as 'Discovery Export'), 11.7.0.1 onwards</li>
+     *   <li>System (displayed in the UI as 'System'), 11.7.0.1 onwards</li>
      * </ul>
      */
     @JsonProperty("type")

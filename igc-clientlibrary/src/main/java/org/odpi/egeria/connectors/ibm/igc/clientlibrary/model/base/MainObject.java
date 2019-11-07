@@ -25,6 +25,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Analysissummaryobject.class, name = "analysissummaryobject"),
+        @JsonSubTypes.Type(value = AnalyticsScript.class, name = "analytics_script"),
         @JsonSubTypes.Type(value = ApplicationInstall.class, name = "application_install"),
         @JsonSubTypes.Type(value = Array.class, name = "array"),
         @JsonSubTypes.Type(value = BiCollectionDimension.class, name = "bi_collection_dimension"),

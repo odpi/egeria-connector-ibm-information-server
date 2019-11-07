@@ -52,6 +52,10 @@ public class BiCollection extends InformationAsset {
     @JsonProperty("bi_model_or_bi_collection")
     protected ItemList<Olapobject> biModelOrBiCollection;
 
+    /**
+     * No longer applicable from 11.7.0.0 onwards.
+     */
+    @Deprecated
     @JsonProperty("blueprint_elements")
     protected ItemList<BlueprintElementLink> blueprintElements;
 
@@ -241,15 +245,21 @@ public class BiCollection extends InformationAsset {
 
     /**
      * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
+     * No longer applicable from 11.7.0.0 onwards.
+     *
      * @return {@code ItemList<BlueprintElementLink>}
      */
+    @Deprecated
     @JsonProperty("blueprint_elements")
     public ItemList<BlueprintElementLink> getBlueprintElements() { return this.blueprintElements; }
 
     /**
      * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
+     * No longer applicable from 11.7.0.0 onwards.
+     *
      * @param blueprintElements the value to set
      */
+    @Deprecated
     @JsonProperty("blueprint_elements")
     public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
 

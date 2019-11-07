@@ -11,6 +11,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -69,9 +70,6 @@ public class DataFileField extends Classificationenabledgroup {
 
     @JsonProperty("implements_entity_attributes")
     protected ItemList<EntityAttribute> implementsEntityAttributes;
-
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
 
     /**
      * Valid values are:
@@ -374,20 +372,6 @@ public class DataFileField extends Classificationenabledgroup {
      */
     @JsonProperty("implements_entity_attributes")
     public void setImplementsEntityAttributes(ItemList<EntityAttribute> implementsEntityAttributes) { this.implementsEntityAttributes = implementsEntityAttributes; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
      * Retrieve the {@code inferredDataType} property (displayed as '{@literal Inferred Data Type}') of the object.

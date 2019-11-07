@@ -134,9 +134,6 @@ public class DatabaseColumn extends Classificationenabledgroup {
     @JsonProperty("implements_entity_attributes")
     protected ItemList<EntityAttribute> implementsEntityAttributes;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("index")
     protected ItemList<DatabaseIndex> index;
 
@@ -741,20 +738,6 @@ public class DatabaseColumn extends Classificationenabledgroup {
      */
     @JsonProperty("implements_entity_attributes")
     public void setImplementsEntityAttributes(ItemList<EntityAttribute> implementsEntityAttributes) { this.implementsEntityAttributes = implementsEntityAttributes; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
      * Retrieve the {@code index} property (displayed as '{@literal Index}') of the object.

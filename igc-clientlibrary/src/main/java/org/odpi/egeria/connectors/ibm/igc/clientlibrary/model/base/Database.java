@@ -36,6 +36,10 @@ public class Database extends InformationAsset {
     @JsonProperty("bi_reports")
     protected ItemList<BiReport> biReports;
 
+    /**
+     * No longer applicable from 11.7.0.0 onwards.
+     */
+    @Deprecated
     @JsonProperty("blueprint_elements")
     protected ItemList<BlueprintElementLink> blueprintElements;
 
@@ -45,6 +49,10 @@ public class Database extends InformationAsset {
     @JsonProperty("data_connections")
     protected ItemList<DataConnection> dataConnections;
 
+    /**
+     * No longer applicable from 11.7.0.1 onwards.
+     */
+    @Deprecated
     @JsonProperty("data_policies")
     protected ItemList<DataPolicy> dataPolicies;
 
@@ -158,15 +166,21 @@ public class Database extends InformationAsset {
 
     /**
      * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
+     * No longer applicable from 11.7.0.0 onwards.
+     *
      * @return {@code ItemList<BlueprintElementLink>}
      */
+    @Deprecated
     @JsonProperty("blueprint_elements")
     public ItemList<BlueprintElementLink> getBlueprintElements() { return this.blueprintElements; }
 
     /**
      * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
+     * No longer applicable from 11.7.0.0 onwards.
+     *
      * @param blueprintElements the value to set
      */
+    @Deprecated
     @JsonProperty("blueprint_elements")
     public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
 
@@ -200,15 +214,21 @@ public class Database extends InformationAsset {
 
     /**
      * Retrieve the {@code data_policies} property (displayed as '{@literal Data Policies}') of the object.
+     * No longer applicable from 11.7.0.1 onwards.
+     *
      * @return {@code ItemList<DataPolicy>}
      */
+    @Deprecated
     @JsonProperty("data_policies")
     public ItemList<DataPolicy> getDataPolicies() { return this.dataPolicies; }
 
     /**
      * Set the {@code data_policies} property (displayed as {@code Data Policies}) of the object.
+     * No longer applicable from 11.7.0.0 onwards.
+     *
      * @param dataPolicies the value to set
      */
+    @Deprecated
     @JsonProperty("data_policies")
     public void setDataPolicies(ItemList<DataPolicy> dataPolicies) { this.dataPolicies = dataPolicies; }
 

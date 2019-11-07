@@ -64,6 +64,9 @@ public class Collection extends Reference {
     @JsonProperty("short_description")
     protected String shortDescription;
 
+    @JsonProperty("user_id")
+    protected String userId;
+
     @JsonProperty("viewers")
     protected ItemList<Steward> viewers;
 
@@ -237,6 +240,20 @@ public class Collection extends Reference {
      */
     @JsonProperty("short_description")
     public void setShortDescription(String shortDescription) { this.shortDescription = shortDescription; }
+
+    /**
+     * Retrieve the {@code user_id} property (displayed as '{@literal User Id}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("user_id")
+    public String getUserId() { return this.userId; }
+
+    /**
+     * Set the {@code user_id} property (displayed as {@code User Id}) of the object.
+     * @param userId the value to set
+     */
+    @JsonProperty("user_id")
+    public void setUserId(String userId) { this.userId = userId; }
 
     /**
      * Retrieve the {@code viewers} property (displayed as '{@literal Viewers}') of the object.

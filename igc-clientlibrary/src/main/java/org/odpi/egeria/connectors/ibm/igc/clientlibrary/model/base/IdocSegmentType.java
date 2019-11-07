@@ -100,6 +100,9 @@ public class IdocSegmentType extends InformationAsset {
     @JsonProperty("segment_definition")
     protected String segmentDefinition;
 
+    @JsonProperty("used_by_analytics_objects")
+    protected ItemList<AnalyticsObject> usedByAnalyticsObjects;
+
     @JsonProperty("written_by_(design)")
     protected ItemList<InformationAsset> writtenByDesign;
 
@@ -321,6 +324,20 @@ public class IdocSegmentType extends InformationAsset {
      */
     @JsonProperty("segment_definition")
     public void setSegmentDefinition(String segmentDefinition) { this.segmentDefinition = segmentDefinition; }
+
+    /**
+     * Retrieve the {@code used_by_analytics_objects} property (displayed as '{@literal Used By Data Science}') of the object.
+     * @return {@code ItemList<AnalyticsObject>}
+     */
+    @JsonProperty("used_by_analytics_objects")
+    public ItemList<AnalyticsObject> getUsedByAnalyticsObjects() { return this.usedByAnalyticsObjects; }
+
+    /**
+     * Set the {@code used_by_analytics_objects} property (displayed as {@code Used By Data Science}) of the object.
+     * @param usedByAnalyticsObjects the value to set
+     */
+    @JsonProperty("used_by_analytics_objects")
+    public void setUsedByAnalyticsObjects(ItemList<AnalyticsObject> usedByAnalyticsObjects) { this.usedByAnalyticsObjects = usedByAnalyticsObjects; }
 
     /**
      * Retrieve the {@code written_by_(design)} property (displayed as '{@literal Written by (Design)}') of the object.

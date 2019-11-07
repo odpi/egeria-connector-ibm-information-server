@@ -154,7 +154,6 @@ public class IGCRestConstants {
         map.put("stored_procedure", "datagroup");
         map.put("design_stored_procedure", "datagroup");
         map.put("datagroup", "information_asset");
-        map.put("column_definition", "data_item");
         map.put("ds_stage_column", "data_item");
         map.put("parameter", "data_item");
         map.put("routine_argument", "data_item");
@@ -164,9 +163,11 @@ public class IGCRestConstants {
         map.put("data_element", "data_item_definition");
         map.put("table_definition", "data_item_definition");
         map.put("data_item_definition", "data_item");
+        map.put("column_definition", "data_field");
+        map.put("data_field", "data_item");
         map.put("database_column", "classificationenabledgroup");
         map.put("data_file_field", "classificationenabledgroup");
-        map.put("classificationenabledgroup", "data_item");
+        map.put("classificationenabledgroup", "data_field");
         map.put("bi_report_query_item", "reportobject");
         map.put("reportobject", "information_asset");
         return map;

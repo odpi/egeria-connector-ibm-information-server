@@ -23,8 +23,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=DataItem.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = Classificationenabledgroup.class, name = "classificationenabledgroup"),
-        @JsonSubTypes.Type(value = ColumnDefinition.class, name = "column_definition"),
+        @JsonSubTypes.Type(value = DataField.class, name = "data_field"),
         @JsonSubTypes.Type(value = DataItemDefinition.class, name = "data_item_definition"),
         @JsonSubTypes.Type(value = DsStageColumn.class, name = "ds_stage_column"),
         @JsonSubTypes.Type(value = Parameter.class, name = "parameter"),

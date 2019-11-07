@@ -25,13 +25,10 @@ import java.util.Date;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("column_definition")
-public class ColumnDefinition extends DataItem {
+public class ColumnDefinition extends DataField {
 
     @JsonProperty("apt_field_properties")
     protected String aptFieldProperties;
-
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
 
     @JsonProperty("key")
     protected Boolean key;
@@ -55,20 +52,6 @@ public class ColumnDefinition extends DataItem {
      */
     @JsonProperty("apt_field_properties")
     public void setAptFieldProperties(String aptFieldProperties) { this.aptFieldProperties = aptFieldProperties; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
      * Retrieve the {@code key} property (displayed as '{@literal Key}') of the object.
