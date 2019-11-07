@@ -28,6 +28,16 @@ import java.util.List;
 @JsonTypeName("information_governance_rule")
 public class InformationGovernanceRule extends InformationAsset {
 
+    /**
+     * Valid values are:
+     * <ul>
+     *   <li>PUBLISHED (displayed in the UI as 'PUBLISHED')</li>
+     *   <li>DRAFT (displayed in the UI as 'DRAFT')</li>
+     * </ul>
+     */
+    @JsonProperty("glossary_type")
+    protected String glossaryType;
+
     @JsonProperty("governs_assets")
     protected ItemList<InformationAsset> governsAssets;
 
@@ -56,6 +66,31 @@ public class InformationGovernanceRule extends InformationAsset {
      */
     @JsonProperty("workflow_current_state")
     protected List<String> workflowCurrentState;
+
+    /**
+     * Valid values are:
+     * <ul>
+     *   <li>DRAFT (displayed in the UI as 'DRAFT')</li>
+     *   <li>WAITING_APPROVAL (displayed in the UI as 'WAITING_APPROVAL')</li>
+     *   <li>APPROVED (displayed in the UI as 'APPROVED')</li>
+     * </ul>
+     */
+    @JsonProperty("workflow_stored_state")
+    protected List<String> workflowStoredState;
+
+    /**
+     * Retrieve the {@code glossary_type} property (displayed as '{@literal Glossary Type}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("glossary_type")
+    public String getGlossaryType() { return this.glossaryType; }
+
+    /**
+     * Set the {@code glossary_type} property (displayed as {@code Glossary Type}) of the object.
+     * @param glossaryType the value to set
+     */
+    @JsonProperty("glossary_type")
+    public void setGlossaryType(String glossaryType) { this.glossaryType = glossaryType; }
 
     /**
      * Retrieve the {@code governs_assets} property (displayed as '{@literal Governs Assets}') of the object.
@@ -154,5 +189,19 @@ public class InformationGovernanceRule extends InformationAsset {
      */
     @JsonProperty("workflow_current_state")
     public void setWorkflowCurrentState(List<String> workflowCurrentState) { this.workflowCurrentState = workflowCurrentState; }
+
+    /**
+     * Retrieve the {@code workflow_stored_state} property (displayed as '{@literal Workflow Stored State}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("workflow_stored_state")
+    public List<String> getWorkflowStoredState() { return this.workflowStoredState; }
+
+    /**
+     * Set the {@code workflow_stored_state} property (displayed as {@code Workflow Stored State}) of the object.
+     * @param workflowStoredState the value to set
+     */
+    @JsonProperty("workflow_stored_state")
+    public void setWorkflowStoredState(List<String> workflowStoredState) { this.workflowStoredState = workflowStoredState; }
 
 }

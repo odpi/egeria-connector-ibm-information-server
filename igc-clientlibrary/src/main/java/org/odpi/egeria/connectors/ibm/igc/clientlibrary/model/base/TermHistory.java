@@ -44,6 +44,21 @@ public class TermHistory extends Reference {
     @JsonProperty("term")
     protected InformationAsset term;
 
+    @JsonProperty("user_task_key")
+    protected String userTaskKey;
+
+    @JsonProperty("user_task_name")
+    protected String userTaskName;
+
+    @JsonProperty("workflow_event")
+    protected String workflowEvent;
+
+    @JsonProperty("workflow_instance_id")
+    protected String workflowInstanceId;
+
+    @JsonProperty("workflow_new_state")
+    protected String workflowNewState;
+
     /**
      * Retrieve the {@code changed_properties} property (displayed as '{@literal Changed Properties}') of the object.
      * @return {@code ItemList<ChangedProperties>}
@@ -113,5 +128,75 @@ public class TermHistory extends Reference {
      */
     @JsonProperty("term")
     public void setTerm(InformationAsset term) { this.term = term; }
+
+    /**
+     * Retrieve the {@code user_task_key} property (displayed as '{@literal User Task Key}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("user_task_key")
+    public String getUserTaskKey() { return this.userTaskKey; }
+
+    /**
+     * Set the {@code user_task_key} property (displayed as {@code User Task Key}) of the object.
+     * @param userTaskKey the value to set
+     */
+    @JsonProperty("user_task_key")
+    public void setUserTaskKey(String userTaskKey) { this.userTaskKey = userTaskKey; }
+
+    /**
+     * Retrieve the {@code user_task_name} property (displayed as '{@literal User Task Name}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("user_task_name")
+    public String getUserTaskName() { return this.userTaskName; }
+
+    /**
+     * Set the {@code user_task_name} property (displayed as {@code User Task Name}) of the object.
+     * @param userTaskName the value to set
+     */
+    @JsonProperty("user_task_name")
+    public void setUserTaskName(String userTaskName) { this.userTaskName = userTaskName; }
+
+    /**
+     * Retrieve the {@code workflow_event} property (displayed as '{@literal Workflow Event}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("workflow_event")
+    public String getWorkflowEvent() { return this.workflowEvent; }
+
+    /**
+     * Set the {@code workflow_event} property (displayed as {@code Workflow Event}) of the object.
+     * @param workflowEvent the value to set
+     */
+    @JsonProperty("workflow_event")
+    public void setWorkflowEvent(String workflowEvent) { this.workflowEvent = workflowEvent; }
+
+    /**
+     * Retrieve the {@code workflow_instance_id} property (displayed as '{@literal Workflow Instance Id}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("workflow_instance_id")
+    public String getWorkflowInstanceId() { return this.workflowInstanceId; }
+
+    /**
+     * Set the {@code workflow_instance_id} property (displayed as {@code Workflow Instance Id}) of the object.
+     * @param workflowInstanceId the value to set
+     */
+    @JsonProperty("workflow_instance_id")
+    public void setWorkflowInstanceId(String workflowInstanceId) { this.workflowInstanceId = workflowInstanceId; }
+
+    /**
+     * Retrieve the {@code workflow_new_state} property (displayed as '{@literal Workflow New State}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("workflow_new_state")
+    public String getWorkflowNewState() { return this.workflowNewState; }
+
+    /**
+     * Set the {@code workflow_new_state} property (displayed as {@code Workflow New State}) of the object.
+     * @param workflowNewState the value to set
+     */
+    @JsonProperty("workflow_new_state")
+    public void setWorkflowNewState(String workflowNewState) { this.workflowNewState = workflowNewState; }
 
 }

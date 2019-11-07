@@ -12,6 +12,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import java.util.Date;
+import java.util.List;
 
 /**
  * POJO for the {@code development_log} asset type in IGC, displayed as '{@literal DevelopmentLog}' in the IGC UI.
@@ -36,11 +37,29 @@ public class DevelopmentLog extends Reference {
     @JsonProperty("date")
     protected Date date;
 
+    @JsonProperty("development_log")
+    protected List<String> developmentLog;
+
     @JsonProperty("new_state")
     protected String newState;
 
     @JsonProperty("person")
     protected String person;
+
+    @JsonProperty("user_task_key")
+    protected String userTaskKey;
+
+    @JsonProperty("user_task_name")
+    protected String userTaskName;
+
+    @JsonProperty("workflow_event")
+    protected String workflowEvent;
+
+    @JsonProperty("workflow_instance_id")
+    protected String workflowInstanceId;
+
+    @JsonProperty("workflow_new_state")
+    protected String workflowNewState;
 
     @JsonProperty("workflow_task")
     protected String workflowTask;
@@ -88,6 +107,20 @@ public class DevelopmentLog extends Reference {
     public void setDate(Date date) { this.date = date; }
 
     /**
+     * Retrieve the {@code development_log} property (displayed as '{@literal Header}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("development_log")
+    public List<String> getDevelopmentLog() { return this.developmentLog; }
+
+    /**
+     * Set the {@code development_log} property (displayed as {@code Header}) of the object.
+     * @param developmentLog the value to set
+     */
+    @JsonProperty("development_log")
+    public void setDevelopmentLog(List<String> developmentLog) { this.developmentLog = developmentLog; }
+
+    /**
      * Retrieve the {@code new_state} property (displayed as '{@literal New State}') of the object.
      * @return {@code String}
      */
@@ -114,6 +147,76 @@ public class DevelopmentLog extends Reference {
      */
     @JsonProperty("person")
     public void setPerson(String person) { this.person = person; }
+
+    /**
+     * Retrieve the {@code user_task_key} property (displayed as '{@literal User Task Key}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("user_task_key")
+    public String getUserTaskKey() { return this.userTaskKey; }
+
+    /**
+     * Set the {@code user_task_key} property (displayed as {@code User Task Key}) of the object.
+     * @param userTaskKey the value to set
+     */
+    @JsonProperty("user_task_key")
+    public void setUserTaskKey(String userTaskKey) { this.userTaskKey = userTaskKey; }
+
+    /**
+     * Retrieve the {@code user_task_name} property (displayed as '{@literal User Task Name}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("user_task_name")
+    public String getUserTaskName() { return this.userTaskName; }
+
+    /**
+     * Set the {@code user_task_name} property (displayed as {@code User Task Name}) of the object.
+     * @param userTaskName the value to set
+     */
+    @JsonProperty("user_task_name")
+    public void setUserTaskName(String userTaskName) { this.userTaskName = userTaskName; }
+
+    /**
+     * Retrieve the {@code workflow_event} property (displayed as '{@literal Workflow Event}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("workflow_event")
+    public String getWorkflowEvent() { return this.workflowEvent; }
+
+    /**
+     * Set the {@code workflow_event} property (displayed as {@code Workflow Event}) of the object.
+     * @param workflowEvent the value to set
+     */
+    @JsonProperty("workflow_event")
+    public void setWorkflowEvent(String workflowEvent) { this.workflowEvent = workflowEvent; }
+
+    /**
+     * Retrieve the {@code workflow_instance_id} property (displayed as '{@literal Workflow Instance Id}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("workflow_instance_id")
+    public String getWorkflowInstanceId() { return this.workflowInstanceId; }
+
+    /**
+     * Set the {@code workflow_instance_id} property (displayed as {@code Workflow Instance Id}) of the object.
+     * @param workflowInstanceId the value to set
+     */
+    @JsonProperty("workflow_instance_id")
+    public void setWorkflowInstanceId(String workflowInstanceId) { this.workflowInstanceId = workflowInstanceId; }
+
+    /**
+     * Retrieve the {@code workflow_new_state} property (displayed as '{@literal Workflow New State}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("workflow_new_state")
+    public String getWorkflowNewState() { return this.workflowNewState; }
+
+    /**
+     * Set the {@code workflow_new_state} property (displayed as {@code Workflow New State}) of the object.
+     * @param workflowNewState the value to set
+     */
+    @JsonProperty("workflow_new_state")
+    public void setWorkflowNewState(String workflowNewState) { this.workflowNewState = workflowNewState; }
 
     /**
      * Retrieve the {@code workflow_task} property (displayed as '{@literal Workflow Task}') of the object.
