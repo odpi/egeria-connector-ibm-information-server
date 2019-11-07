@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -62,13 +63,23 @@ public class IGCSearch {
      * @param properties the properties to retrieve for each asset
      * @param conditions the set of conditions to use as search criteria
      */
-    public IGCSearch(String type, String[] properties, IGCSearchConditionSet conditions) {
-        this();
-        addType(type);
+    public IGCSearch(String type, List<String> properties, IGCSearchConditionSet conditions) {
+        this(type, conditions);
         for (String property : properties) {
             addProperty(property);
         }
-        addConditions(conditions);
+    }
+
+    /**
+     * Creates a new search for assets of the provided type, based on the provided criteria, retrieving all of the
+     * properties specified for each result.
+     *
+     * @param type the type of assets to retrieve
+     * @param properties the properties to retrieve for each asset
+     * @param conditions the set of conditions to use as search criteria
+     */
+    public IGCSearch(String type, String[] properties, IGCSearchConditionSet conditions) {
+        this(type, Arrays.asList(properties), conditions);
     }
 
     /**

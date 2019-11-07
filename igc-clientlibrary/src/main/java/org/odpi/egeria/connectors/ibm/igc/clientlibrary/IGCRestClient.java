@@ -666,8 +666,24 @@ public class IGCRestClient {
      * @return Reference - the object including only the subset of properties specified
      */
     public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
-                                                    String assetType,
-                                                    String[] properties) {
+                                                                  String assetType,
+                                                                  List<String> properties) {
+        return getAssetWithSubsetOfProperties(rid, assetType, properties, defaultPageSize, null);
+    }
+
+    /**
+     * This will generally be the most performant method by which to retrieve asset information, when only
+     * some subset of properties is required
+     *
+     * @param rid the repository ID (RID) of the asset to retrieve
+     * @param assetType the IGC asset type of the asset to retrieve
+     * @param properties a list of the properties to retrieve
+     * @param <T> the type of Reference to return
+     * @return Reference - the object including only the subset of properties specified
+     */
+    public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
+                                                                  String assetType,
+                                                                  String[] properties) {
         return getAssetWithSubsetOfProperties(rid, assetType, properties, defaultPageSize, null);
     }
 
@@ -683,9 +699,27 @@ public class IGCRestClient {
      * @return Reference - the object including only the subset of properties specified
      */
     public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
-                                                    String assetType,
-                                                    String[] properties,
-                                                    int pageSize) {
+                                                                  String assetType,
+                                                                  List<String> properties,
+                                                                  int pageSize) {
+        return getAssetWithSubsetOfProperties(rid, assetType, properties, pageSize, null);
+    }
+
+    /**
+     * This will generally be the most performant method by which to retrieve asset information, when only
+     * some subset of properties is required
+     *
+     * @param rid the repository ID (RID) of the asset to retrieve
+     * @param assetType the IGC asset type of the asset to retrieve
+     * @param properties a list of the properties to retrieve
+     * @param pageSize the maximum number of each of the asset's relationships to return on this request
+     * @param <T> the type of Reference to return
+     * @return Reference - the object including only the subset of properties specified
+     */
+    public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
+                                                                  String assetType,
+                                                                  String[] properties,
+                                                                  int pageSize) {
         return getAssetWithSubsetOfProperties(rid, assetType, properties, pageSize, null);
     }
 
@@ -702,10 +736,10 @@ public class IGCRestClient {
      * @return Reference - the object including only the subset of properties specified
      */
     public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
-                                                    String assetType,
-                                                    String[] properties,
-                                                    int pageSize,
-                                                    IGCSearchSorting sorting) {
+                                                                  String assetType,
+                                                                  List<String> properties,
+                                                                  int pageSize,
+                                                                  IGCSearchSorting sorting) {
         if (log.isDebugEnabled()) { log.debug("Retrieving asset {} with subset of details: {}", rid, properties); }
         T assetWithProperties = null;
         IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", rid);
@@ -722,6 +756,26 @@ public class IGCRestClient {
             assetWithProperties = assetsWithProperties.getItems().get(0);
         }
         return assetWithProperties;
+    }
+
+    /**
+     * This will generally be the most performant method by which to retrieve asset information, when only
+     * some subset of properties is required
+     *
+     * @param rid the repository ID (RID) of the asset to retrieve
+     * @param assetType the IGC asset type of the asset to retrieve
+     * @param properties a list of the properties to retrieve
+     * @param pageSize the maximum number of each of the asset's relationships to return on this request
+     * @param sorting the sorting criteria to use for the results
+     * @param <T> the type of Reference to return
+     * @return Reference - the object including only the subset of properties specified
+     */
+    public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
+                                                                  String assetType,
+                                                                  String[] properties,
+                                                                  int pageSize,
+                                                                  IGCSearchSorting sorting) {
+        return getAssetWithSubsetOfProperties(rid, assetType, Arrays.asList(properties), pageSize, sorting);
     }
 
     /**

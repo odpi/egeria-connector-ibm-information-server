@@ -1492,7 +1492,7 @@ public class IGCRepositoryHelper {
                     fullAsset = igcRestClient.getAssetWithSubsetOfProperties(
                             rid,
                             assetType,
-                            allProps.toArray(new String[0]),
+                            allProps,
                             igcRestClient.getDefaultPageSize()
                     );
 

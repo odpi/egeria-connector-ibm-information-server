@@ -121,7 +121,7 @@ public class TermAnchorMapper extends RelationshipMapping {
             conditionSet.addCondition(byParent);
             conditionSet.setMatchAnyCondition(true);
             IGCSearch igcSearch = new IGCSearch("term",
-                    IGCRestConstants.getModificationProperties().toArray(new String[0]),
+                    IGCRestConstants.getModificationProperties(),
                     conditionSet);
             ItemList<Term> terms = igcRestClient.search(igcSearch);
             if (terms != null) {
@@ -153,7 +153,7 @@ public class TermAnchorMapper extends RelationshipMapping {
             Reference root = igcRestClient.getAssetWithSubsetOfProperties(
                     rootIdentity.getRid(),
                     rootIdentity.getAssetType(),
-                    IGCRestConstants.getModificationProperties().toArray(new String[0]));
+                    IGCRestConstants.getModificationProperties());
             if (root != null) {
                 if (log.isDebugEnabled()) { log.debug("Mapping ultimate parent category from: {}", fromIgcObject); }
                 try {

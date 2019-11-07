@@ -120,7 +120,7 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                 IGCSearchCondition byCatPath = new IGCSearchCondition("category_path", "=", fromIgcObject.getId());
                 IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(byCatPath);
                 IGCSearch igcSearch = new IGCSearch("category",
-                        IGCRestConstants.getModificationProperties().toArray(new String[0]),
+                        IGCRestConstants.getModificationProperties(),
                         conditionSet);
                 ItemList<Category> children = igcRestClient.search(igcSearch);
                 if (children != null) {
@@ -152,7 +152,7 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                 Reference root = igcRestClient.getAssetWithSubsetOfProperties(
                         rootIdentity.getRid(),
                         rootIdentity.getAssetType(),
-                        IGCRestConstants.getModificationProperties().toArray(new String[0]));
+                        IGCRestConstants.getModificationProperties());
                 if (root != null) {
                     if (log.isDebugEnabled()) { log.debug("Mapping ultimate parent category from: {}", fromIgcObject); }
                     try {
