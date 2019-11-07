@@ -541,6 +541,7 @@ public class IGCRepositoryHelper {
      * @param assetType the IGC asset type
      * @param prefix the prefix to use to uniquely identify this generated entity's GUID
      * @param rid the Repository ID (RID) of the IGC asset
+     * @return IGCEntityGuid
      */
     public IGCEntityGuid getEntityGuid(String assetType, String prefix, String rid) {
         return new IGCEntityGuid(metadataCollectionId, assetType, prefix, rid);
@@ -557,6 +558,7 @@ public class IGCRepositoryHelper {
      * @param rid1 the Repository ID (RID) of the IGC asset at the first endpoint of the relationship
      * @param rid2 the Repository ID (RID) of the IGC asset at the second endpoint of the relationship
      * @param relationshipType the OMRS type name of the relationship
+     * @return IGCRelationshipGuid
      */
     public IGCRelationshipGuid getRelationshipGuid(String assetType1,
                                                    String assetType2,
@@ -798,9 +800,10 @@ public class IGCRepositoryHelper {
      * @param classificationTypeDef the TypeDef of the classification to add
      * @param classificationProperties the properties to set on the classification that is to be added
      * @return Reference - the IGC asset that was classified
-     * @throws RepositoryErrorException
-     * @throws EntityNotKnownException
-     * @throws ClassificationErrorException
+     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where the
+     *                                  metadata collection is stored
+     * @throws EntityNotKnownException the entity identified by the guid is not found in the metadata collection
+     * @throws ClassificationErrorException the requested classification is either not known or not valid for the entity
      */
     public Reference classifyEntity(String userId,
                                     String entityGUID,
@@ -881,9 +884,10 @@ public class IGCRepositoryHelper {
      * @param entityGUID the GUID of the IGC entity from which classification should be removed
      * @param classificationTypeDef the TypeDef of the classification that should be removed
      * @return Reference - the IGC asset that was declassified
-     * @throws RepositoryErrorException
-     * @throws EntityNotKnownException
-     * @throws ClassificationErrorException
+     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
+     *                                  the metadata collection is stored
+     * @throws EntityNotKnownException the entity identified by the guid is not found in the metadata collection
+     * @throws ClassificationErrorException the requested classification is not set on the entity
      */
     public Reference declassifyEntity(String userId,
                                       String entityGUID,
@@ -1113,6 +1117,7 @@ public class IGCRepositoryHelper {
      * Adds the provided value to search criteria for IGC (once we know the IGC property).
      *
      * @param repositoryHelper helper for the OMRS repository
+     * @param repositoryName the name of the metadata repository
      * @param igcSearchConditionSet the search conditions to which to add the criteria
      * @param igcPropertyName the IGC property name to search
      * @param value the value for which to search

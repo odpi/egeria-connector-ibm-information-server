@@ -152,6 +152,7 @@ public class IGCRelationshipGuid extends IGCGuidHeader {
      * Attempt to create a new IGC GUID from the provided GUID.
      *
      * @param guid the IGC GUID representation of the provided GUID, or null if it does not appear to be a valid IGC GUID
+     * @return IGCRelationshipGuid
      */
     public static IGCRelationshipGuid fromGuid(String guid) {
 

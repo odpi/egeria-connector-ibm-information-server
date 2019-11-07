@@ -43,10 +43,10 @@ public class Spine_Mapper extends ClassificationMapping {
      * referencing category will be considered to be a Spine Object / Attribute (and therefore be given a
      * SpineObject/Attribute classification).
      *
-     * @param igcomrsRepositoryConnector
-     * @param classifications
-     * @param fromIgcObject
-     * @param userId
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param classifications the list of classifications to which to add
+     * @param fromIgcObject the IGC object for which the classification should exist
+     * @param userId the user requesting the mapped classifications
      */
     @Override
     public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,

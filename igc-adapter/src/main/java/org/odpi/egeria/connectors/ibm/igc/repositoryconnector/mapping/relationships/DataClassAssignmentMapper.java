@@ -130,10 +130,10 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * This is one of the few relationships in IGC that has relationship-specific properties handled by a separate
      * 'classification' object, so it must be handled using custom logic.
      *
-     * @param igcomrsRepositoryConnector
-     * @param relationships
-     * @param fromIgcObject
-     * @param userId
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param relationships the list of relationships to which to add
+     * @param fromIgcObject the IGC entity from which the relationship exists
+     * @param userId the user ID requesting the mapped relationships
      */
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,

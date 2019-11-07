@@ -132,7 +132,7 @@ public class EndpointMapper extends ReferenceableMapper {
     /**
      * Handle the search for 'networkAddress' by searching against 'name' of the endpoint in IGC.
      *
-     * @param repositoryHelper
+     * @param repositoryHelper the repository helper
      * @param repositoryName name of the repository
      * @param igcRestClient connectivity to an IGC environment
      * @param igcSearchConditionSet the set of search criteria to which to add

@@ -69,10 +69,10 @@ public class AssetZoneMembershipMapper extends ClassificationMapping {
      * connector configuration. This could be overridden to implement whatever other logic may be necessary to come
      * up with more granular zones, including on a per-IGC-asset-type basis (by overriding within the class subtypes).
      *
-     * @param igcomrsRepositoryConnector
-     * @param classifications
-     * @param fromIgcObject
-     * @param userId
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param classifications the list of classifications to which to add
+     * @param fromIgcObject the IGC object against which the classification should exist
+     * @param userId the user requesting the mapped classifications
      */
     @Override
     public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,

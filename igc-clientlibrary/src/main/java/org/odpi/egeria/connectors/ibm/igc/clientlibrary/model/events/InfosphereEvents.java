@@ -1,14 +1,18 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 /* Copyright Contributors to the ODPi Egeria project. */
-package org.odpi.egeria.connectors.ibm.igc.eventmapper.model;
+package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.events;
 
 import com.fasterxml.jackson.annotation.*;
+
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 
 /**
  * The base class of all InfosphereEvents topic messages from IBM Information Server, including
  * Information Governance Catalog, Metadata Asset Manager and Information Analyzer.
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="eventType", visible=true, defaultImpl=InfosphereEventsAssetEvent.class)
+@JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = InfosphereEventsIMAMEvent.class, name = "IMAM_SHARE_EVENT"),
         @JsonSubTypes.Type(value = InfosphereEventsDCEvent.class, name = "DC_CREATE_EVENT"),
@@ -43,16 +47,24 @@ import com.fasterxml.jackson.annotation.*;
         @JsonSubTypes.Type(value = InfosphereEventsRuleEvent.class, name = "IA_DATARULESET_MODIFIED_EVENT"),
         @JsonSubTypes.Type(value = InfosphereEventsDiscoverEvent.class, name = "DISCOVER_IMPORT_COMPLETE")
 })
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class InfosphereEvents {
 
-    /**
-     * The 'eventType' property of an event defines the type of event.
-     * For example, 'IGC_BUSINESSTERM_EVENT' or 'IGC_BUSINESSCATEGORY_EVENT'.
-     */
     protected String eventType;
 
-    /** @see #eventType */ @JsonProperty("eventType") public String getEventType() { return this.eventType; }
-    /** @see #eventType */ @JsonProperty("eventType") public void setEventType(String eventType) { this.eventType = eventType; }
+    /**
+     * Retrieve the type of this event, for example 'IGC_BUSINESSTERM_EVENT', 'IGC_BUSINESSCATEGORY_EVENT', etc.
+     * @return String
+     */
+    @JsonProperty("eventType")
+    public String getEventType() { return this.eventType; }
+
+    /**
+     * Set the type of this event.
+     * @param eventType of this event
+     */
+    @JsonProperty("eventType")
+    public void setEventType(String eventType) { this.eventType = eventType; }
 
 }

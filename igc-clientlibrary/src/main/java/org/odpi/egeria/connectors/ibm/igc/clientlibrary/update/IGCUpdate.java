@@ -74,7 +74,7 @@ public class IGCUpdate {
     /**
      * Sets the update mode that should be used for the non-exclusive relationship properties.
      *
-     * @param updateMode
+     * @param updateMode the mode of the update
      * @see UpdateMode
      * @see #addRelationship(String, String)
      */

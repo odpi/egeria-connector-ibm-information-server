@@ -109,16 +109,16 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      * The relationship itself in IGC is complicated, from the host end it requires multiple hops (as the
      * 'data_connections' property on the host actually points to 'connector' assets, not 'data_connection' assets).
      *
-     * @param igcomrsRepositoryConnector
-     * @param relationships
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param relationships the list of relationships to which to add
      * @param fromIgcObject the host asset for which to create the relationship
-     * @param userId
+     * @param userId the user ID requesting the mapped relationships
      */
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                 List<Relationship> relationships,
-                                                 Reference fromIgcObject,
-                                                 String userId) {
+                                           List<Relationship> relationships,
+                                           Reference fromIgcObject,
+                                           String userId) {
 
         String assetType = IGCRestConstants.getAssetTypeForSearch(fromIgcObject.getType());
 

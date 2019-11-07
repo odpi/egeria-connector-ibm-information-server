@@ -141,6 +141,7 @@ public class IGCRestConstants {
         map.put("main_object", "reference");
         map.put("host_(engine)", "host");
         map.put("host", "information_asset");
+        map.put("Rule_Execution_Result", "information_asset");
         map.put("information_asset", "main_object");
         map.put("database_alias", "datagroup");
         map.put("database_table", "datagroup");
@@ -215,7 +216,7 @@ public class IGCRestConstants {
     /**
      * Retrieve the mapping of IGC object sub-types to granular super-types.
      *
-     * @return {@Map<String, String>}
+     * @return {@code Map<String, String>}
      */
     public static Map<String, String> getSubTypeToSuperType() { return SUB_TYPE_TO_SUPER_TYPE; }
 

@@ -50,10 +50,10 @@ public class SubjectAreaMapper extends ClassificationMapping {
      * under any higher-level 'Subject Areas' category, such a category should be treated as subject area
      * and therefore will be mapped to a "SubjectArea" classification in OMRS.
      *
-     * @param igcomrsRepositoryConnector
-     * @param classifications
-     * @param fromIgcObject
-     * @param userId
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param classifications the list of classifications to which to add
+     * @param fromIgcObject the IGC object for which the classification should exist
+     * @param userId the user requesing the mapped classifications
      */
     @Override
     public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,

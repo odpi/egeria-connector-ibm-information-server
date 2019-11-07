@@ -114,6 +114,7 @@ public class IGCEntityGuid extends IGCGuidHeader {
      * Attempt to create a new IGC GUID from the provided GUID.
      *
      * @param guid the IGC GUID representation of the provided GUID, or null if it does not appear to be a valid IGC GUID
+     * @return IGCEntityGuid
      */
     public static IGCEntityGuid fromGuid(String guid) {
 

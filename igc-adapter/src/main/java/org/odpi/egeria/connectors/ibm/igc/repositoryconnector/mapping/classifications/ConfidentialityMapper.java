@@ -66,10 +66,10 @@ public class ConfidentialityMapper extends ClassificationMapping {
      * Therefore, any 'assigned_to_term' relationship on a term, where the assigned term is within a "Confidentiality"
      * parent category in IGC, will be mapped to a "Confidentiality" classification in OMRS.
      *
-     * @param igcomrsRepositoryConnector
-     * @param classifications
-     * @param fromIgcObject
-     * @param userId
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param classifications the list of classifications to which to add
+     * @param fromIgcObject the IGC object for which the classification should exist
+     * @param userId the user requesting the mapped classifications
      */
     @Override
     public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,

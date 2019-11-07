@@ -49,10 +49,10 @@ public class PrimaryKeyMapper extends ClassificationMapping {
     /**
      * Implements the "PrimaryKey" OMRS classification for IGC database_column assets.
      *
-     * @param igcomrsRepositoryConnector
-     * @param classifications
-     * @param fromIgcObject
-     * @param userId
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param classifications the list of classifications to which to add
+     * @param fromIgcObject the IGC object for which the classification should exist
+     * @param userId the user requesting the mapped classifications
      */
     @Override
     public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,

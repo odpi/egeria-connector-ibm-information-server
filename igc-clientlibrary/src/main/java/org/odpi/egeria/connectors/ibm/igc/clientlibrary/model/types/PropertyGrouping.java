@@ -26,7 +26,7 @@ public class PropertyGrouping extends ObjectPrinter {
     /**
      * Retrieve the list of properties contained within this grouping.
      *
-     * @return {@List <TypeProperty>}
+     * @return {@code List<TypeProperty>}
      */
     public List<TypeProperty> getProperties() { return properties; }
 

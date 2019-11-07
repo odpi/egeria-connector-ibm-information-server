@@ -206,8 +206,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcRestClient REST API connectivity
      * @return Reference - the asset to be used for endpoint one of the relationship
      */
-    public <T extends Reference> List<T> getProxyOneAssetFromAsset(T relationshipAsset, IGCRestClient igcRestClient) {
-        List<T> referenceAsList = new ArrayList<>();
+    public List<Reference> getProxyOneAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient) {
+        List<Reference> referenceAsList = new ArrayList<>();
         referenceAsList.add(relationshipAsset);
         return referenceAsList;
     }
@@ -1323,7 +1323,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcPropertyName the name of the IGC relationship property
      * @param userId the user retrieving the mapped relationship
      * @return Relationship
-     * @throws RepositoryErrorException
+     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
+     *                                  the metadata collection is stored
      */
     protected static Relationship getMappedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                         RelationshipMapping relationshipMapping,
@@ -1356,7 +1357,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param userId the user retrieving the mapped relationship
      * @param relationshipLevelRid the IGC RID for the relationship itself (in rare instances where it exists)
      * @return Relationship
-     * @throws RepositoryErrorException
+     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
+     *                                  the metadata collection is stored
      */
     public static Relationship getMappedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                      RelationshipMapping relationshipMapping,
@@ -1392,7 +1394,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param relationshipLevelRid the IGC RID for the relationship itself (in rare instances where it exists)
      * @param proxyOrderKnown should be true iff the provided candidate proxies are known to be in the correct order
      * @return Relationship
-     * @throws RepositoryErrorException
+     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
+     *                                  the metadata collection is stored
      */
     public static Relationship getMappedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                      RelationshipMapping relationshipMapping,
@@ -1600,7 +1603,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param proxyTwo IGC object representing the second proxy of the relationship
      * @param userId userId through which to create the relationship
      * @return Relationship the created OMRS relationship
-     * @throws RepositoryErrorException
+     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
+     *                                  the metadata collection is stored
      */
     public static Relationship addIgcRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                   RelationshipMapping relationshipMapping,

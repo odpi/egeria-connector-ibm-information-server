@@ -101,7 +101,7 @@ public class SchemaAttribute_Mapper extends ReferenceableMapper {
     /**
      * Handle the search for 'minCardinality' by searching against 'allows_null_values' of the object in IGC.
      *
-     * @param repositoryHelper
+     * @param repositoryHelper the repository helper
      * @param repositoryName name of the repository
      * @param igcRestClient connectivity to an IGC environment
      * @param igcSearchConditionSet the set of search criteria to which to add

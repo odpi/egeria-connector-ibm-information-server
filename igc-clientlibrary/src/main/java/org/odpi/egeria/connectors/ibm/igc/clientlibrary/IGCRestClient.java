@@ -335,7 +335,8 @@ public class IGCRestClient {
      * Attempt to convert the JSON string into an ItemList.
      *
      * @param json the JSON string to convert
-     * @return {@ItemList<T>}
+     * @param <T> the type of items that should be in the ItemList
+     * @return {@code ItemList<T>}
      */
     public <T extends Reference> ItemList<T> readJSONIntoItemList(String json) {
         ItemList<T> itemList = null;
@@ -661,6 +662,7 @@ public class IGCRestClient {
      * @param rid the repository ID (RID) of the asset to retrieve
      * @param assetType the IGC asset type of the asset to retrieve
      * @param properties a list of the properties to retrieve
+     * @param <T> the type of Reference to return
      * @return Reference - the object including only the subset of properties specified
      */
     public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
@@ -677,6 +679,7 @@ public class IGCRestClient {
      * @param assetType the IGC asset type of the asset to retrieve
      * @param properties a list of the properties to retrieve
      * @param pageSize the maximum number of each of the asset's relationships to return on this request
+     * @param <T> the type of Reference to return
      * @return Reference - the object including only the subset of properties specified
      */
     public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
@@ -695,6 +698,7 @@ public class IGCRestClient {
      * @param properties a list of the properties to retrieve
      * @param pageSize the maximum number of each of the asset's relationships to return on this request
      * @param sorting the sorting criteria to use for the results
+     * @param <T> the type of Reference to return
      * @return Reference - the object including only the subset of properties specified
      */
     public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
@@ -734,6 +738,7 @@ public class IGCRestClient {
      * Retrieve all assets that match the provided search criteria from IGC.
      *
      * @param igcSearch search conditions and criteria to use
+     * @param <T> the type of items that should be in the ItemList
      * @return {@code ItemList<T>} - the first page of results from the search
      */
     public <T extends Reference> ItemList<T> search(IGCSearch igcSearch) {
@@ -955,11 +960,12 @@ public class IGCRestClient {
     }
 
     /**
-     * Retrieve the next page of results from a set of paging details<br>
-     * ... or if there is no next page, return an empty ItemList.
+     * Retrieve the next page of results from a set of paging details, or if there is no next page return an empty
+     * ItemList.
      *
      * @param paging the "paging" portion of the JSON response from which to retrieve the next page
-     * @return {@ItemList<T>} - the next page of results
+     * @param <T> the type of items to expect in the ItemList
+     * @return {@code ItemList<T>} - the next page of results
      */
     public <T extends Reference> ItemList<T> getNextPage(Paging paging) {
         ItemList<T> nextPage = null;
@@ -992,11 +998,12 @@ public class IGCRestClient {
     }
 
     /**
-     * Retrieve all pages of results from a set of Paging details and items<br>
-     * ... or if there is no next page, return the items provided.
+     * Retrieve all pages of results from a set of Paging details and items, or if there is no next page return the
+     * items provided.
      *
      * @param items the List of items for which to retrieve all pages
      * @param paging the Paging object for which to retrieve all pages
+     * @param <T> the type of items to expect in the ItemList
      * @return {@code List<Reference>} - a List containing all items from all pages of results
      */
     public <T extends Reference> List<T> getAllPages(List<T> items, Paging paging) {

@@ -346,7 +346,7 @@ public class ChangeSet {
                     // a list, as the JSON Patch is only giving us a singular Reference (the paging we need for
                     // the list is split off on other change operations)
                     if (referenceListProperties.contains(getIgcPropertyName()) && !path.contains("/items/")) {
-                        value = igcRestClient.readJSONIntoReferenceList(node.toString());
+                        value = igcRestClient.readJSONIntoItemList(node.toString());
                     } else {
                         value = igcRestClient.readJSONIntoPOJO(node.toString());
                     }
