@@ -53,6 +53,7 @@ import java.util.Date;
         @JsonSubTypes.Type(value = DataFileDefinitionField.class, name = "data_file_definition_field"),
         @JsonSubTypes.Type(value = DataFileDefinitionRecord.class, name = "data_file_definition_record"),
         @JsonSubTypes.Type(value = DataFileFolder.class, name = "data_file_folder"),
+        @JsonSubTypes.Type(value = DataFileFolderNobucket.class, name = "data_file_folder_nobucket"),
         @JsonSubTypes.Type(value = DataItem.class, name = "data_item"),
         @JsonSubTypes.Type(value = DataRule.class, name = "data_rule"),
         @JsonSubTypes.Type(value = DataRuleDefinition.class, name = "data_rule_definition"),
