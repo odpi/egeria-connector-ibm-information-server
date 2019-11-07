@@ -41,7 +41,7 @@ public class Classdescriptor extends Reference {
     protected ItemList<Actiondescriptor> hasActionDescriptor;
 
     @JsonProperty("has_custom_attribute_def")
-    protected ItemList<Customattributedef> hasCustomAttributeDef;
+    protected ItemList<InformationAsset> hasCustomAttributeDef;
 
     @JsonProperty("has_navigation_descriptor")
     protected ItemList<Navigationdescriptor> hasNavigationDescriptor;
@@ -131,17 +131,17 @@ public class Classdescriptor extends Reference {
 
     /**
      * Retrieve the {@code has_custom_attribute_def} property (displayed as '{@literal Has Custom Attribute Def}') of the object.
-     * @return {@code ItemList<Customattributedef>}
+     * @return {@code ItemList<InformationAsset>}
      */
     @JsonProperty("has_custom_attribute_def")
-    public ItemList<Customattributedef> getHasCustomAttributeDef() { return this.hasCustomAttributeDef; }
+    public ItemList<InformationAsset> getHasCustomAttributeDef() { return this.hasCustomAttributeDef; }
 
     /**
      * Set the {@code has_custom_attribute_def} property (displayed as {@code Has Custom Attribute Def}) of the object.
      * @param hasCustomAttributeDef the value to set
      */
     @JsonProperty("has_custom_attribute_def")
-    public void setHasCustomAttributeDef(ItemList<Customattributedef> hasCustomAttributeDef) { this.hasCustomAttributeDef = hasCustomAttributeDef; }
+    public void setHasCustomAttributeDef(ItemList<InformationAsset> hasCustomAttributeDef) { this.hasCustomAttributeDef = hasCustomAttributeDef; }
 
     /**
      * Retrieve the {@code has_navigation_descriptor} property (displayed as '{@literal Has Navigation Descriptor}') of the object.

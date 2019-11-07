@@ -47,6 +47,7 @@ public class SystemRole extends MainObject {
      *   <li>GLOSSARY (displayed in the UI as 'GLOSSARY')</li>
      *   <li>OMD (displayed in the UI as 'OMD')</li>
      *   <li>WISD (displayed in the UI as 'WISD')</li>
+     *   <li>PERSONA (displayed in the UI as 'PERSONA')</li>
      * </ul>
      */
     @JsonProperty("product")
@@ -61,6 +62,7 @@ public class SystemRole extends MainObject {
      *   <li>SUITE (displayed in the UI as 'SUITE')</li>
      *   <li>PRODUCT (displayed in the UI as 'PRODUCT')</li>
      *   <li>PROJECT (displayed in the UI as 'PROJECT')</li>
+     *   <li>PERSONA (displayed in the UI as 'PERSONA')</li>
      * </ul>
      */
     @JsonProperty("role_type")

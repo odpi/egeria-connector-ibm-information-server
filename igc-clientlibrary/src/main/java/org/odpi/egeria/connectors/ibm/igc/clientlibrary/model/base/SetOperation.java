@@ -15,24 +15,21 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import java.util.Date;
 
 /**
- * POJO for the {@code data_policy} asset type in IGC, displayed as '{@literal Data Policy}' in the IGC UI.
+ * POJO for the {@code set_operation} asset type in IGC, displayed as '{@literal Set Operation}' in the IGC UI.
  * <br><br>
  * (this code has been created based on out-of-the-box IGC metadata types.
  *  If modifications are needed, eg. to handle custom attributes,
  *  extending from this class in your own custom class is the best approach.)
  */
-@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=DataPolicy.class)
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=SetOperation.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
-@JsonTypeName("data_policy")
-public class DataPolicy extends MainObject {
+@JsonTypeName("set_operation")
+public class SetOperation extends Reference {
 
-    @JsonProperty("applied_to_assets")
-    protected ItemList<MainObject> appliedToAssets;
-
-    @JsonProperty("contacts")
-    protected ItemList<Steward> contacts;
+    @JsonProperty("additional_inputs")
+    protected ItemList<Infoset> additionalInputs;
 
     @JsonProperty("created_by")
     protected String createdBy;
@@ -40,8 +37,8 @@ public class DataPolicy extends MainObject {
     @JsonProperty("created_on")
     protected Date createdOn;
 
-    @JsonProperty("effective_date")
-    protected Date effectiveDate;
+    @JsonProperty("infoset")
+    protected Infoset infoset;
 
     @JsonProperty("modified_by")
     protected String modifiedBy;
@@ -49,39 +46,37 @@ public class DataPolicy extends MainObject {
     @JsonProperty("modified_on")
     protected Date modifiedOn;
 
-    @JsonProperty("policy_number")
-    protected String policyNumber;
+    @JsonProperty("primary_input")
+    protected Infoset primaryInput;
 
-    @JsonProperty("termination_date")
-    protected Date terminationDate;
-
-    /**
-     * Retrieve the {@code applied_to_assets} property (displayed as '{@literal Applied to Assets}') of the object.
-     * @return {@code ItemList<MainObject>}
-     */
-    @JsonProperty("applied_to_assets")
-    public ItemList<MainObject> getAppliedToAssets() { return this.appliedToAssets; }
+    @JsonProperty("secondary_input")
+    protected Infoset secondaryInput;
 
     /**
-     * Set the {@code applied_to_assets} property (displayed as {@code Applied to Assets}) of the object.
-     * @param appliedToAssets the value to set
+     * Valid values are:
+     * <ul>
+     *   <li>Union (displayed in the UI as 'Union')</li>
+     *   <li>Intersection (displayed in the UI as 'Intersection')</li>
+     *   <li>Difference (displayed in the UI as 'Difference')</li>
+     *   <li>Subtraction (displayed in the UI as 'Subtraction')</li>
+     * </ul>
      */
-    @JsonProperty("applied_to_assets")
-    public void setAppliedToAssets(ItemList<MainObject> appliedToAssets) { this.appliedToAssets = appliedToAssets; }
+    @JsonProperty("type")
+    protected String type;
 
     /**
-     * Retrieve the {@code contacts} property (displayed as '{@literal Contacts}') of the object.
-     * @return {@code ItemList<Steward>}
+     * Retrieve the {@code additional_inputs} property (displayed as '{@literal Additional Inputs}') of the object.
+     * @return {@code ItemList<Infoset>}
      */
-    @JsonProperty("contacts")
-    public ItemList<Steward> getContacts() { return this.contacts; }
+    @JsonProperty("additional_inputs")
+    public ItemList<Infoset> getAdditionalInputs() { return this.additionalInputs; }
 
     /**
-     * Set the {@code contacts} property (displayed as {@code Contacts}) of the object.
-     * @param contacts the value to set
+     * Set the {@code additional_inputs} property (displayed as {@code Additional Inputs}) of the object.
+     * @param additionalInputs the value to set
      */
-    @JsonProperty("contacts")
-    public void setContacts(ItemList<Steward> contacts) { this.contacts = contacts; }
+    @JsonProperty("additional_inputs")
+    public void setAdditionalInputs(ItemList<Infoset> additionalInputs) { this.additionalInputs = additionalInputs; }
 
     /**
      * Retrieve the {@code created_by} property (displayed as '{@literal Created By}') of the object.
@@ -112,18 +107,18 @@ public class DataPolicy extends MainObject {
     public void setCreatedOn(Date createdOn) { this.createdOn = createdOn; }
 
     /**
-     * Retrieve the {@code effective_date} property (displayed as '{@literal Effective Date}') of the object.
-     * @return {@code Date}
+     * Retrieve the {@code infoset} property (displayed as '{@literal InfoSet}') of the object.
+     * @return {@code Infoset}
      */
-    @JsonProperty("effective_date")
-    public Date getEffectiveDate() { return this.effectiveDate; }
+    @JsonProperty("infoset")
+    public Infoset getInfoset() { return this.infoset; }
 
     /**
-     * Set the {@code effective_date} property (displayed as {@code Effective Date}) of the object.
-     * @param effectiveDate the value to set
+     * Set the {@code infoset} property (displayed as {@code InfoSet}) of the object.
+     * @param infoset the value to set
      */
-    @JsonProperty("effective_date")
-    public void setEffectiveDate(Date effectiveDate) { this.effectiveDate = effectiveDate; }
+    @JsonProperty("infoset")
+    public void setInfoset(Infoset infoset) { this.infoset = infoset; }
 
     /**
      * Retrieve the {@code modified_by} property (displayed as '{@literal Modified By}') of the object.
@@ -154,31 +149,45 @@ public class DataPolicy extends MainObject {
     public void setModifiedOn(Date modifiedOn) { this.modifiedOn = modifiedOn; }
 
     /**
-     * Retrieve the {@code policy_number} property (displayed as '{@literal Policy Number}') of the object.
+     * Retrieve the {@code primary_input} property (displayed as '{@literal Primary Input}') of the object.
+     * @return {@code Infoset}
+     */
+    @JsonProperty("primary_input")
+    public Infoset getPrimaryInput() { return this.primaryInput; }
+
+    /**
+     * Set the {@code primary_input} property (displayed as {@code Primary Input}) of the object.
+     * @param primaryInput the value to set
+     */
+    @JsonProperty("primary_input")
+    public void setPrimaryInput(Infoset primaryInput) { this.primaryInput = primaryInput; }
+
+    /**
+     * Retrieve the {@code secondary_input} property (displayed as '{@literal Secondary Input}') of the object.
+     * @return {@code Infoset}
+     */
+    @JsonProperty("secondary_input")
+    public Infoset getSecondaryInput() { return this.secondaryInput; }
+
+    /**
+     * Set the {@code secondary_input} property (displayed as {@code Secondary Input}) of the object.
+     * @param secondaryInput the value to set
+     */
+    @JsonProperty("secondary_input")
+    public void setSecondaryInput(Infoset secondaryInput) { this.secondaryInput = secondaryInput; }
+
+    /**
+     * Retrieve the {@code type} property (displayed as '{@literal Set Operation}') of the object.
      * @return {@code String}
      */
-    @JsonProperty("policy_number")
-    public String getPolicyNumber() { return this.policyNumber; }
+    @JsonProperty("type")
+    public String getTheType() { return this.type; }
 
     /**
-     * Set the {@code policy_number} property (displayed as {@code Policy Number}) of the object.
-     * @param policyNumber the value to set
+     * Set the {@code type} property (displayed as {@code Set Operation}) of the object.
+     * @param type the value to set
      */
-    @JsonProperty("policy_number")
-    public void setPolicyNumber(String policyNumber) { this.policyNumber = policyNumber; }
-
-    /**
-     * Retrieve the {@code termination_date} property (displayed as '{@literal Termination Date}') of the object.
-     * @return {@code Date}
-     */
-    @JsonProperty("termination_date")
-    public Date getTerminationDate() { return this.terminationDate; }
-
-    /**
-     * Set the {@code termination_date} property (displayed as {@code Termination Date}) of the object.
-     * @param terminationDate the value to set
-     */
-    @JsonProperty("termination_date")
-    public void setTerminationDate(Date terminationDate) { this.terminationDate = terminationDate; }
+    @JsonProperty("type")
+    public void setTheType(String type) { this.type = type; }
 
 }

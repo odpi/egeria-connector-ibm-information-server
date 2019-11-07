@@ -32,7 +32,7 @@ public class Metric extends InformationAsset {
     protected List<String> benchmark;
 
     @JsonProperty("data_policies")
-    protected ItemList<DataPolicy> dataPolicies;
+    protected ItemList<MainObject> dataPolicies;
 
     @JsonProperty("execution_history")
     protected ItemList<DataRuleResults> executionHistory;
@@ -81,17 +81,17 @@ public class Metric extends InformationAsset {
 
     /**
      * Retrieve the {@code data_policies} property (displayed as '{@literal Data Policies}') of the object.
-     * @return {@code ItemList<DataPolicy>}
+     * @return {@code ItemList<MainObject>}
      */
     @JsonProperty("data_policies")
-    public ItemList<DataPolicy> getDataPolicies() { return this.dataPolicies; }
+    public ItemList<MainObject> getDataPolicies() { return this.dataPolicies; }
 
     /**
      * Set the {@code data_policies} property (displayed as {@code Data Policies}) of the object.
      * @param dataPolicies the value to set
      */
     @JsonProperty("data_policies")
-    public void setDataPolicies(ItemList<DataPolicy> dataPolicies) { this.dataPolicies = dataPolicies; }
+    public void setDataPolicies(ItemList<MainObject> dataPolicies) { this.dataPolicies = dataPolicies; }
 
     /**
      * Retrieve the {@code execution_history} property (displayed as '{@literal Execution History}') of the object.

@@ -52,11 +52,15 @@ public class DatabaseTable extends Datagroup {
     @JsonProperty("bi_report_queries")
     protected ItemList<BiReportQuery> biReportQueries;
 
+    /**
+     * No longer applicable from 11.7.0.0 onwards.
+     */
+    @Deprecated
     @JsonProperty("blueprint_elements")
     protected ItemList<BlueprintElementLink> blueprintElements;
 
     @JsonProperty("data_policies")
-    protected ItemList<DataPolicy> dataPolicies;
+    protected ItemList<MainObject> dataPolicies;
 
     @JsonProperty("database_aliases")
     protected ItemList<Datagroup> databaseAliases;
@@ -70,6 +74,10 @@ public class DatabaseTable extends Datagroup {
     @JsonProperty("defined_foreign_key")
     protected ItemList<Reference> definedForeignKey;
 
+    /**
+     * No longer applicable from 11.7.0.0 onwards.
+     */
+    @Deprecated
     @JsonProperty("defined_non_primary_key")
     protected ItemList<CandidateKey> definedNonPrimaryKey;
 
@@ -261,31 +269,37 @@ public class DatabaseTable extends Datagroup {
 
     /**
      * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
+     * No longer applicable from 11.7.0.0 onwards.
+     *
      * @return {@code ItemList<BlueprintElementLink>}
      */
+    @Deprecated
     @JsonProperty("blueprint_elements")
     public ItemList<BlueprintElementLink> getBlueprintElements() { return this.blueprintElements; }
 
     /**
      * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
+     * No longer applicable from 11.7.0.0 onwards.
+     *
      * @param blueprintElements the value to set
      */
+    @Deprecated
     @JsonProperty("blueprint_elements")
     public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
 
     /**
      * Retrieve the {@code data_policies} property (displayed as '{@literal Data Policies}') of the object.
-     * @return {@code ItemList<DataPolicy>}
+     * @return {@code ItemList<MainObject>}
      */
     @JsonProperty("data_policies")
-    public ItemList<DataPolicy> getDataPolicies() { return this.dataPolicies; }
+    public ItemList<MainObject> getDataPolicies() { return this.dataPolicies; }
 
     /**
      * Set the {@code data_policies} property (displayed as {@code Data Policies}) of the object.
      * @param dataPolicies the value to set
      */
     @JsonProperty("data_policies")
-    public void setDataPolicies(ItemList<DataPolicy> dataPolicies) { this.dataPolicies = dataPolicies; }
+    public void setDataPolicies(ItemList<MainObject> dataPolicies) { this.dataPolicies = dataPolicies; }
 
     /**
      * Retrieve the {@code database_aliases} property (displayed as '{@literal Database Aliases}') of the object.
@@ -331,8 +345,8 @@ public class DatabaseTable extends Datagroup {
 
     /**
      * Retrieve the {@code defined_foreign_key} property (displayed as '{@literal Defined Foreign Key}') of the object.
-     * Prior to 11.5.0.2sp5 this will return an {@code ItemList<DatabaseColumn>} while from 11.5.0.2sp5 onwards this
-     * will return an {@code ItemList<ForeignKey>}.
+     * For earlier releases this will return an {@code ItemList<DatabaseColumn>} while for newer releases (11.5.0.2sp5
+     * onwards and 11.7.x.x onwards) this will return an {@code ItemList<ForeignKey>}.
      *
      * @return {@code ItemList<Reference>}
      */
@@ -341,8 +355,8 @@ public class DatabaseTable extends Datagroup {
 
     /**
      * Set the {@code defined_foreign_key} property (displayed as {@code Defined Foreign Key}) of the object.
-     * Prior to 11.5.0.2sp5 this required an {@code ItemList<DatabaseColumn>} while from 11.5.0.2sp5 onwards this
-     * requires an {@code ItemList<ForeignKey>}.
+     * For earlier releases this required an {@code ItemList<DatabaseColumn>} while for newer releases (11.5.0.2sp5
+     * onwards and 11.7.x.x onwards) requires an {@code ItemList<ForeignKey>}.
      *
      * @param definedForeignKey the value to set
      */
@@ -351,15 +365,21 @@ public class DatabaseTable extends Datagroup {
 
     /**
      * Retrieve the {@code defined_non_primary_key} property (displayed as '{@literal Defined Non Primary Key}') of the object.
+     * No longer applicable from 11.7.0.0 onwards.
+     *
      * @return {@code ItemList<CandidateKey>}
      */
+    @Deprecated
     @JsonProperty("defined_non_primary_key")
     public ItemList<CandidateKey> getDefinedNonPrimaryKey() { return this.definedNonPrimaryKey; }
 
     /**
      * Set the {@code defined_non_primary_key} property (displayed as {@code Defined Non Primary Key}) of the object.
+     * No longer applicable from 11.7.0.0 onwards.
+     *
      * @param definedNonPrimaryKey the value to set
      */
+    @Deprecated
     @JsonProperty("defined_non_primary_key")
     public void setDefinedNonPrimaryKey(ItemList<CandidateKey> definedNonPrimaryKey) { this.definedNonPrimaryKey = definedNonPrimaryKey; }
 

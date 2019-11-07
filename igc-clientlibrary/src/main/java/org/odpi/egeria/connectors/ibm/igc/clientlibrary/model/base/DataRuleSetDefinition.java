@@ -31,7 +31,7 @@ public class DataRuleSetDefinition extends InformationAsset {
     protected ItemList<Steward> contact;
 
     @JsonProperty("data_policies")
-    protected ItemList<DataPolicy> dataPolicies;
+    protected ItemList<MainObject> dataPolicies;
 
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
@@ -83,17 +83,17 @@ public class DataRuleSetDefinition extends InformationAsset {
 
     /**
      * Retrieve the {@code data_policies} property (displayed as '{@literal Data Policies}') of the object.
-     * @return {@code ItemList<DataPolicy>}
+     * @return {@code ItemList<MainObject>}
      */
     @JsonProperty("data_policies")
-    public ItemList<DataPolicy> getDataPolicies() { return this.dataPolicies; }
+    public ItemList<MainObject> getDataPolicies() { return this.dataPolicies; }
 
     /**
      * Set the {@code data_policies} property (displayed as {@code Data Policies}) of the object.
      * @param dataPolicies the value to set
      */
     @JsonProperty("data_policies")
-    public void setDataPolicies(ItemList<DataPolicy> dataPolicies) { this.dataPolicies = dataPolicies; }
+    public void setDataPolicies(ItemList<MainObject> dataPolicies) { this.dataPolicies = dataPolicies; }
 
     /**
      * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.

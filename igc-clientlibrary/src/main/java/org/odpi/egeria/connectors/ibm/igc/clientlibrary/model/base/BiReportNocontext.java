@@ -12,69 +12,57 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import java.util.Date;
+import java.util.List;
 
 /**
- * POJO for the {@code bi_model} asset type in IGC, displayed as '{@literal BI Model}' in the IGC UI.
+ * POJO for the {@code bi_report_nocontext} asset type in IGC, displayed as '{@literal BI Report}' in the IGC UI.
  * <br><br>
  * (this code has been created based on out-of-the-box IGC metadata types.
  *  If modifications are needed, eg. to handle custom attributes,
  *  extending from this class in your own custom class is the best approach.)
  */
-@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=BiModel.class)
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=BiReportNocontext.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
-@JsonTypeName("bi_model")
-public class BiModel extends InformationAsset {
+@JsonTypeName("bi_report_nocontext")
+public class BiReportNocontext extends InformationAsset {
 
     @JsonProperty("alias_(business_name)")
     protected String aliasBusinessName;
 
-    @JsonProperty("bi_collections")
-    protected ItemList<BiCollection> biCollections;
+    @JsonProperty("author")
+    protected String author;
 
-    @JsonProperty("bi_cubes")
-    protected ItemList<BiCube> biCubes;
-
-    @JsonProperty("bi_filters")
-    protected ItemList<BiFilter> biFilters;
+    @JsonProperty("bi_cube")
+    protected BiCube biCube;
 
     @JsonProperty("bi_folder")
     protected BiFolder biFolder;
 
-    @JsonProperty("bi_folder_or_bi_model")
-    protected ItemList<MainObject> biFolderOrBiModel;
-
-    @JsonProperty("bi_hierarchies")
-    protected ItemList<BiHierarchy> biHierarchies;
-
-    @JsonProperty("bi_joins")
-    protected ItemList<OlapJoin> biJoins;
+    @JsonProperty("bi_folder_or_bi_model_or_cube")
+    protected ItemList<MainObject> biFolderOrBiModelOrCube;
 
     @JsonProperty("bi_model")
     protected BiModel biModel;
 
-    @JsonProperty("bi_model_creation_date")
-    protected Date biModelCreationDate;
+    @JsonProperty("bi_report_creation_date")
+    protected Date biReportCreationDate;
 
-    @JsonProperty("bi_model_modification_date")
-    protected Date biModelModificationDate;
+    @JsonProperty("bi_report_modification_date")
+    protected Date biReportModificationDate;
 
     @JsonProperty("bi_report_queries")
     protected ItemList<BiReportQuery> biReportQueries;
 
-    @JsonProperty("bi_reports")
-    protected ItemList<BiReport> biReports;
+    @JsonProperty("bi_report_run_date")
+    protected Date biReportRunDate;
 
-    /**
-     * No longer applicable from 11.7.0.0 onwards.
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    protected ItemList<BlueprintElementLink> blueprintElements;
+    @JsonProperty("expression")
+    protected List<String> expression;
 
-    @JsonProperty("child_bi_models")
-    protected ItemList<BiModel> childBiModels;
+    @JsonProperty("format")
+    protected String format;
 
     @JsonProperty("impacted_by")
     protected ItemList<InformationAsset> impactedBy;
@@ -91,8 +79,17 @@ public class BiModel extends InformationAsset {
     @JsonProperty("include_for_business_lineage")
     protected Boolean includeForBusinessLineage;
 
+    @JsonProperty("language")
+    protected String language;
+
     @JsonProperty("namespace")
     protected String namespace;
+
+    @JsonProperty("number_of_runs")
+    protected Number numberOfRuns;
+
+    @JsonProperty("number_of_versions")
+    protected Number numberOfVersions;
 
     @JsonProperty("read_by_(design)")
     protected ItemList<InformationAsset> readByDesign;
@@ -106,11 +103,11 @@ public class BiModel extends InformationAsset {
     @JsonProperty("read_by_(user_defined)")
     protected ItemList<InformationAsset> readByUserDefined;
 
-    @JsonProperty("used_by_bi_reports")
-    protected ItemList<BiReport> usedByBiReports;
+    @JsonProperty("referenced_by_bi_reports")
+    protected ItemList<BiReport> referencedByBiReports;
 
-    @JsonProperty("uses_databases")
-    protected ItemList<Database> usesDatabases;
+    @JsonProperty("references_bi_reports")
+    protected ItemList<BiReport> referencesBiReports;
 
     @JsonProperty("written_by_(design)")
     protected ItemList<InformationAsset> writtenByDesign;
@@ -139,46 +136,32 @@ public class BiModel extends InformationAsset {
     public void setAliasBusinessName(String aliasBusinessName) { this.aliasBusinessName = aliasBusinessName; }
 
     /**
-     * Retrieve the {@code bi_collections} property (displayed as '{@literal BI Collections}') of the object.
-     * @return {@code ItemList<BiCollection>}
+     * Retrieve the {@code author} property (displayed as '{@literal Author}') of the object.
+     * @return {@code String}
      */
-    @JsonProperty("bi_collections")
-    public ItemList<BiCollection> getBiCollections() { return this.biCollections; }
+    @JsonProperty("author")
+    public String getAuthor() { return this.author; }
 
     /**
-     * Set the {@code bi_collections} property (displayed as {@code BI Collections}) of the object.
-     * @param biCollections the value to set
+     * Set the {@code author} property (displayed as {@code Author}) of the object.
+     * @param author the value to set
      */
-    @JsonProperty("bi_collections")
-    public void setBiCollections(ItemList<BiCollection> biCollections) { this.biCollections = biCollections; }
+    @JsonProperty("author")
+    public void setAuthor(String author) { this.author = author; }
 
     /**
-     * Retrieve the {@code bi_cubes} property (displayed as '{@literal BI Cubes}') of the object.
-     * @return {@code ItemList<BiCube>}
+     * Retrieve the {@code bi_cube} property (displayed as '{@literal BI Cube}') of the object.
+     * @return {@code BiCube}
      */
-    @JsonProperty("bi_cubes")
-    public ItemList<BiCube> getBiCubes() { return this.biCubes; }
+    @JsonProperty("bi_cube")
+    public BiCube getBiCube() { return this.biCube; }
 
     /**
-     * Set the {@code bi_cubes} property (displayed as {@code BI Cubes}) of the object.
-     * @param biCubes the value to set
+     * Set the {@code bi_cube} property (displayed as {@code BI Cube}) of the object.
+     * @param biCube the value to set
      */
-    @JsonProperty("bi_cubes")
-    public void setBiCubes(ItemList<BiCube> biCubes) { this.biCubes = biCubes; }
-
-    /**
-     * Retrieve the {@code bi_filters} property (displayed as '{@literal BI Filters}') of the object.
-     * @return {@code ItemList<BiFilter>}
-     */
-    @JsonProperty("bi_filters")
-    public ItemList<BiFilter> getBiFilters() { return this.biFilters; }
-
-    /**
-     * Set the {@code bi_filters} property (displayed as {@code BI Filters}) of the object.
-     * @param biFilters the value to set
-     */
-    @JsonProperty("bi_filters")
-    public void setBiFilters(ItemList<BiFilter> biFilters) { this.biFilters = biFilters; }
+    @JsonProperty("bi_cube")
+    public void setBiCube(BiCube biCube) { this.biCube = biCube; }
 
     /**
      * Retrieve the {@code bi_folder} property (displayed as '{@literal BI Folder}') of the object.
@@ -195,46 +178,18 @@ public class BiModel extends InformationAsset {
     public void setBiFolder(BiFolder biFolder) { this.biFolder = biFolder; }
 
     /**
-     * Retrieve the {@code bi_folder_or_bi_model} property (displayed as '{@literal BI Folder or BI Model}') of the object.
+     * Retrieve the {@code bi_folder_or_bi_model_or_cube} property (displayed as '{@literal BI Folder or BI Model or Cube}') of the object.
      * @return {@code ItemList<MainObject>}
      */
-    @JsonProperty("bi_folder_or_bi_model")
-    public ItemList<MainObject> getBiFolderOrBiModel() { return this.biFolderOrBiModel; }
+    @JsonProperty("bi_folder_or_bi_model_or_cube")
+    public ItemList<MainObject> getBiFolderOrBiModelOrCube() { return this.biFolderOrBiModelOrCube; }
 
     /**
-     * Set the {@code bi_folder_or_bi_model} property (displayed as {@code BI Folder or BI Model}) of the object.
-     * @param biFolderOrBiModel the value to set
+     * Set the {@code bi_folder_or_bi_model_or_cube} property (displayed as {@code BI Folder or BI Model or Cube}) of the object.
+     * @param biFolderOrBiModelOrCube the value to set
      */
-    @JsonProperty("bi_folder_or_bi_model")
-    public void setBiFolderOrBiModel(ItemList<MainObject> biFolderOrBiModel) { this.biFolderOrBiModel = biFolderOrBiModel; }
-
-    /**
-     * Retrieve the {@code bi_hierarchies} property (displayed as '{@literal BI Hierarchies}') of the object.
-     * @return {@code ItemList<BiHierarchy>}
-     */
-    @JsonProperty("bi_hierarchies")
-    public ItemList<BiHierarchy> getBiHierarchies() { return this.biHierarchies; }
-
-    /**
-     * Set the {@code bi_hierarchies} property (displayed as {@code BI Hierarchies}) of the object.
-     * @param biHierarchies the value to set
-     */
-    @JsonProperty("bi_hierarchies")
-    public void setBiHierarchies(ItemList<BiHierarchy> biHierarchies) { this.biHierarchies = biHierarchies; }
-
-    /**
-     * Retrieve the {@code bi_joins} property (displayed as '{@literal BI Joins}') of the object.
-     * @return {@code ItemList<OlapJoin>}
-     */
-    @JsonProperty("bi_joins")
-    public ItemList<OlapJoin> getBiJoins() { return this.biJoins; }
-
-    /**
-     * Set the {@code bi_joins} property (displayed as {@code BI Joins}) of the object.
-     * @param biJoins the value to set
-     */
-    @JsonProperty("bi_joins")
-    public void setBiJoins(ItemList<OlapJoin> biJoins) { this.biJoins = biJoins; }
+    @JsonProperty("bi_folder_or_bi_model_or_cube")
+    public void setBiFolderOrBiModelOrCube(ItemList<MainObject> biFolderOrBiModelOrCube) { this.biFolderOrBiModelOrCube = biFolderOrBiModelOrCube; }
 
     /**
      * Retrieve the {@code bi_model} property (displayed as '{@literal BI Model}') of the object.
@@ -251,32 +206,32 @@ public class BiModel extends InformationAsset {
     public void setBiModel(BiModel biModel) { this.biModel = biModel; }
 
     /**
-     * Retrieve the {@code bi_model_creation_date} property (displayed as '{@literal BI Model Creation Date}') of the object.
+     * Retrieve the {@code bi_report_creation_date} property (displayed as '{@literal BI Report Creation Date}') of the object.
      * @return {@code Date}
      */
-    @JsonProperty("bi_model_creation_date")
-    public Date getBiModelCreationDate() { return this.biModelCreationDate; }
+    @JsonProperty("bi_report_creation_date")
+    public Date getBiReportCreationDate() { return this.biReportCreationDate; }
 
     /**
-     * Set the {@code bi_model_creation_date} property (displayed as {@code BI Model Creation Date}) of the object.
-     * @param biModelCreationDate the value to set
+     * Set the {@code bi_report_creation_date} property (displayed as {@code BI Report Creation Date}) of the object.
+     * @param biReportCreationDate the value to set
      */
-    @JsonProperty("bi_model_creation_date")
-    public void setBiModelCreationDate(Date biModelCreationDate) { this.biModelCreationDate = biModelCreationDate; }
+    @JsonProperty("bi_report_creation_date")
+    public void setBiReportCreationDate(Date biReportCreationDate) { this.biReportCreationDate = biReportCreationDate; }
 
     /**
-     * Retrieve the {@code bi_model_modification_date} property (displayed as '{@literal BI Model Modification Date}') of the object.
+     * Retrieve the {@code bi_report_modification_date} property (displayed as '{@literal BI Report Modification Date}') of the object.
      * @return {@code Date}
      */
-    @JsonProperty("bi_model_modification_date")
-    public Date getBiModelModificationDate() { return this.biModelModificationDate; }
+    @JsonProperty("bi_report_modification_date")
+    public Date getBiReportModificationDate() { return this.biReportModificationDate; }
 
     /**
-     * Set the {@code bi_model_modification_date} property (displayed as {@code BI Model Modification Date}) of the object.
-     * @param biModelModificationDate the value to set
+     * Set the {@code bi_report_modification_date} property (displayed as {@code BI Report Modification Date}) of the object.
+     * @param biReportModificationDate the value to set
      */
-    @JsonProperty("bi_model_modification_date")
-    public void setBiModelModificationDate(Date biModelModificationDate) { this.biModelModificationDate = biModelModificationDate; }
+    @JsonProperty("bi_report_modification_date")
+    public void setBiReportModificationDate(Date biReportModificationDate) { this.biReportModificationDate = biReportModificationDate; }
 
     /**
      * Retrieve the {@code bi_report_queries} property (displayed as '{@literal BI Report Queries}') of the object.
@@ -293,52 +248,46 @@ public class BiModel extends InformationAsset {
     public void setBiReportQueries(ItemList<BiReportQuery> biReportQueries) { this.biReportQueries = biReportQueries; }
 
     /**
-     * Retrieve the {@code bi_reports} property (displayed as '{@literal BI Reports}') of the object.
-     * @return {@code ItemList<BiReport>}
+     * Retrieve the {@code bi_report_run_date} property (displayed as '{@literal BI Report Run Date}') of the object.
+     * @return {@code Date}
      */
-    @JsonProperty("bi_reports")
-    public ItemList<BiReport> getBiReports() { return this.biReports; }
+    @JsonProperty("bi_report_run_date")
+    public Date getBiReportRunDate() { return this.biReportRunDate; }
 
     /**
-     * Set the {@code bi_reports} property (displayed as {@code BI Reports}) of the object.
-     * @param biReports the value to set
+     * Set the {@code bi_report_run_date} property (displayed as {@code BI Report Run Date}) of the object.
+     * @param biReportRunDate the value to set
      */
-    @JsonProperty("bi_reports")
-    public void setBiReports(ItemList<BiReport> biReports) { this.biReports = biReports; }
+    @JsonProperty("bi_report_run_date")
+    public void setBiReportRunDate(Date biReportRunDate) { this.biReportRunDate = biReportRunDate; }
 
     /**
-     * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
-     * @return {@code ItemList<BlueprintElementLink>}
+     * Retrieve the {@code expression} property (displayed as '{@literal Expression}') of the object.
+     * @return {@code List<String>}
      */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public ItemList<BlueprintElementLink> getBlueprintElements() { return this.blueprintElements; }
+    @JsonProperty("expression")
+    public List<String> getExpression() { return this.expression; }
 
     /**
-     * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
-     * @param blueprintElements the value to set
+     * Set the {@code expression} property (displayed as {@code Expression}) of the object.
+     * @param expression the value to set
      */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
+    @JsonProperty("expression")
+    public void setExpression(List<String> expression) { this.expression = expression; }
 
     /**
-     * Retrieve the {@code child_bi_models} property (displayed as '{@literal Child BI Models}') of the object.
-     * @return {@code ItemList<BiModel>}
+     * Retrieve the {@code format} property (displayed as '{@literal Format}') of the object.
+     * @return {@code String}
      */
-    @JsonProperty("child_bi_models")
-    public ItemList<BiModel> getChildBiModels() { return this.childBiModels; }
+    @JsonProperty("format")
+    public String getFormat() { return this.format; }
 
     /**
-     * Set the {@code child_bi_models} property (displayed as {@code Child BI Models}) of the object.
-     * @param childBiModels the value to set
+     * Set the {@code format} property (displayed as {@code Format}) of the object.
+     * @param format the value to set
      */
-    @JsonProperty("child_bi_models")
-    public void setChildBiModels(ItemList<BiModel> childBiModels) { this.childBiModels = childBiModels; }
+    @JsonProperty("format")
+    public void setFormat(String format) { this.format = format; }
 
     /**
      * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
@@ -411,6 +360,20 @@ public class BiModel extends InformationAsset {
     public void setIncludeForBusinessLineage(Boolean includeForBusinessLineage) { this.includeForBusinessLineage = includeForBusinessLineage; }
 
     /**
+     * Retrieve the {@code language} property (displayed as '{@literal Language}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("language")
+    public String getLanguage() { return this.language; }
+
+    /**
+     * Set the {@code language} property (displayed as {@code Language}) of the object.
+     * @param language the value to set
+     */
+    @JsonProperty("language")
+    public void setLanguage(String language) { this.language = language; }
+
+    /**
      * Retrieve the {@code namespace} property (displayed as '{@literal Namespace}') of the object.
      * @return {@code String}
      */
@@ -423,6 +386,34 @@ public class BiModel extends InformationAsset {
      */
     @JsonProperty("namespace")
     public void setNamespace(String namespace) { this.namespace = namespace; }
+
+    /**
+     * Retrieve the {@code number_of_runs} property (displayed as '{@literal Number of Runs}') of the object.
+     * @return {@code Number}
+     */
+    @JsonProperty("number_of_runs")
+    public Number getNumberOfRuns() { return this.numberOfRuns; }
+
+    /**
+     * Set the {@code number_of_runs} property (displayed as {@code Number of Runs}) of the object.
+     * @param numberOfRuns the value to set
+     */
+    @JsonProperty("number_of_runs")
+    public void setNumberOfRuns(Number numberOfRuns) { this.numberOfRuns = numberOfRuns; }
+
+    /**
+     * Retrieve the {@code number_of_versions} property (displayed as '{@literal Number of Versions}') of the object.
+     * @return {@code Number}
+     */
+    @JsonProperty("number_of_versions")
+    public Number getNumberOfVersions() { return this.numberOfVersions; }
+
+    /**
+     * Set the {@code number_of_versions} property (displayed as {@code Number of Versions}) of the object.
+     * @param numberOfVersions the value to set
+     */
+    @JsonProperty("number_of_versions")
+    public void setNumberOfVersions(Number numberOfVersions) { this.numberOfVersions = numberOfVersions; }
 
     /**
      * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.
@@ -481,32 +472,32 @@ public class BiModel extends InformationAsset {
     public void setReadByUserDefined(ItemList<InformationAsset> readByUserDefined) { this.readByUserDefined = readByUserDefined; }
 
     /**
-     * Retrieve the {@code used_by_bi_reports} property (displayed as '{@literal Used by BI Reports}') of the object.
+     * Retrieve the {@code referenced_by_bi_reports} property (displayed as '{@literal Referenced by BI Reports}') of the object.
      * @return {@code ItemList<BiReport>}
      */
-    @JsonProperty("used_by_bi_reports")
-    public ItemList<BiReport> getUsedByBiReports() { return this.usedByBiReports; }
+    @JsonProperty("referenced_by_bi_reports")
+    public ItemList<BiReport> getReferencedByBiReports() { return this.referencedByBiReports; }
 
     /**
-     * Set the {@code used_by_bi_reports} property (displayed as {@code Used by BI Reports}) of the object.
-     * @param usedByBiReports the value to set
+     * Set the {@code referenced_by_bi_reports} property (displayed as {@code Referenced by BI Reports}) of the object.
+     * @param referencedByBiReports the value to set
      */
-    @JsonProperty("used_by_bi_reports")
-    public void setUsedByBiReports(ItemList<BiReport> usedByBiReports) { this.usedByBiReports = usedByBiReports; }
+    @JsonProperty("referenced_by_bi_reports")
+    public void setReferencedByBiReports(ItemList<BiReport> referencedByBiReports) { this.referencedByBiReports = referencedByBiReports; }
 
     /**
-     * Retrieve the {@code uses_databases} property (displayed as '{@literal Uses Databases}') of the object.
-     * @return {@code ItemList<Database>}
+     * Retrieve the {@code references_bi_reports} property (displayed as '{@literal References BI Reports}') of the object.
+     * @return {@code ItemList<BiReport>}
      */
-    @JsonProperty("uses_databases")
-    public ItemList<Database> getUsesDatabases() { return this.usesDatabases; }
+    @JsonProperty("references_bi_reports")
+    public ItemList<BiReport> getReferencesBiReports() { return this.referencesBiReports; }
 
     /**
-     * Set the {@code uses_databases} property (displayed as {@code Uses Databases}) of the object.
-     * @param usesDatabases the value to set
+     * Set the {@code references_bi_reports} property (displayed as {@code References BI Reports}) of the object.
+     * @param referencesBiReports the value to set
      */
-    @JsonProperty("uses_databases")
-    public void setUsesDatabases(ItemList<Database> usesDatabases) { this.usesDatabases = usesDatabases; }
+    @JsonProperty("references_bi_reports")
+    public void setReferencesBiReports(ItemList<BiReport> referencesBiReports) { this.referencesBiReports = referencesBiReports; }
 
     /**
      * Retrieve the {@code written_by_(design)} property (displayed as '{@literal Written by (Design)}') of the object.

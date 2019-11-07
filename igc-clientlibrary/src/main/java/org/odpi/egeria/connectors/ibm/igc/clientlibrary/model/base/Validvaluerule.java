@@ -35,7 +35,7 @@ public class Validvaluerule extends Reference {
     protected Date createdOn;
 
     @JsonProperty("custom_attribute_def_of_has_valid_values_inverse")
-    protected ItemList<Customattributedef> customAttributeDefOfHasValidValuesInverse;
+    protected ItemList<InformationAsset> customAttributeDefOfHasValidValuesInverse;
 
     @JsonProperty("is_case_sensitive")
     protected Boolean isCaseSensitive;
@@ -91,17 +91,17 @@ public class Validvaluerule extends Reference {
 
     /**
      * Retrieve the {@code custom_attribute_def_of_has_valid_values_inverse} property (displayed as '{@literal Custom Attribute Def Of Has Valid Values Inverse}') of the object.
-     * @return {@code ItemList<Customattributedef>}
+     * @return {@code ItemList<InformationAsset>}
      */
     @JsonProperty("custom_attribute_def_of_has_valid_values_inverse")
-    public ItemList<Customattributedef> getCustomAttributeDefOfHasValidValuesInverse() { return this.customAttributeDefOfHasValidValuesInverse; }
+    public ItemList<InformationAsset> getCustomAttributeDefOfHasValidValuesInverse() { return this.customAttributeDefOfHasValidValuesInverse; }
 
     /**
      * Set the {@code custom_attribute_def_of_has_valid_values_inverse} property (displayed as {@code Custom Attribute Def Of Has Valid Values Inverse}) of the object.
      * @param customAttributeDefOfHasValidValuesInverse the value to set
      */
     @JsonProperty("custom_attribute_def_of_has_valid_values_inverse")
-    public void setCustomAttributeDefOfHasValidValuesInverse(ItemList<Customattributedef> customAttributeDefOfHasValidValuesInverse) { this.customAttributeDefOfHasValidValuesInverse = customAttributeDefOfHasValidValuesInverse; }
+    public void setCustomAttributeDefOfHasValidValuesInverse(ItemList<InformationAsset> customAttributeDefOfHasValidValuesInverse) { this.customAttributeDefOfHasValidValuesInverse = customAttributeDefOfHasValidValuesInverse; }
 
     /**
      * Retrieve the {@code is_case_sensitive} property (displayed as '{@literal Is Case Sensitive}') of the object.

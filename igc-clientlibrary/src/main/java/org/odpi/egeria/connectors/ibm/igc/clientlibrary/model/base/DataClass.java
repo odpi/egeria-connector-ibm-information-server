@@ -28,6 +28,37 @@ import java.util.List;
 @JsonTypeName("data_class")
 public class DataClass extends InformationAsset {
 
+    @JsonProperty("active")
+    protected Boolean active;
+
+    @JsonProperty("additional_regular_expression")
+    protected String additionalRegularExpression;
+
+    /**
+     * Valid values are:
+     * <ul>
+     *   <li>structured_data_only (displayed in the UI as 'Structured Data Only')</li>
+     *   <li>unstructured_data_only (displayed in the UI as 'Unstructured Data Only')</li>
+     *   <li>all_data (displayed in the UI as 'All Data')</li>
+     * </ul>
+     */
+    @JsonProperty("additionial_applicable_for")
+    protected String additionialApplicableFor;
+
+    @JsonProperty("allowSubstringMatch")
+    protected Boolean allowsubstringmatch;
+
+    /**
+     * Valid values are:
+     * <ul>
+     *   <li>structured_data_only (displayed in the UI as 'Structured Data Only')</li>
+     *   <li>unstructured_data_only (displayed in the UI as 'Unstructured Data Only')</li>
+     *   <li>all_data (displayed in the UI as 'All Data')</li>
+     * </ul>
+     */
+    @JsonProperty("applicable_for_single")
+    protected String applicableForSingle;
+
     @JsonProperty("class_code")
     protected String classCode;
 
@@ -50,6 +81,9 @@ public class DataClass extends InformationAsset {
      *   <li>Regex (displayed in the UI as 'Regex')</li>
      *   <li>Java (displayed in the UI as 'Java')</li>
      *   <li>ValidValues (displayed in the UI as 'Valid Values')</li>
+     *   <li>Script (displayed in the UI as 'Script')</li>
+     *   <li>ColumnSimilarity (displayed in the UI as 'Column Similarity')</li>
+     *   <li>UnstructuredFilter (displayed in the UI as 'Unstructured Filter')</li>
      * </ul>
      */
     @JsonProperty("data_class_type_single")
@@ -77,11 +111,27 @@ public class DataClass extends InformationAsset {
     @JsonProperty("example")
     protected String example;
 
+    @JsonProperty("expression")
+    protected String expression;
+
+    @JsonProperty("filters")
+    protected ItemList<Filter> filters;
+
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
 
     @JsonProperty("java_class_name_single")
     protected String javaClassNameSingle;
+
+    /**
+     * Valid values are:
+     * <ul>
+     *   <li>JavaScript (displayed in the UI as 'JavaScript')</li>
+     *   <li>DataRule (displayed in the UI as 'Data Rule')</li>
+     * </ul>
+     */
+    @JsonProperty("language")
+    protected String language;
 
     @JsonProperty("length_filter_max")
     protected Number lengthFilterMax;
@@ -92,8 +142,32 @@ public class DataClass extends InformationAsset {
     @JsonProperty("parent_data_class")
     protected DataClass parentDataClass;
 
+    @JsonProperty("properties")
+    protected String properties;
+
+    @JsonProperty("provider")
+    protected String provider;
+
+    @JsonProperty("reference_columns_metadata")
+    protected String referenceColumnsMetadata;
+
     @JsonProperty("regular_expression_single")
     protected String regularExpressionSingle;
+
+    /**
+     * Valid values are:
+     * <ul>
+     *   <li>value (displayed in the UI as 'Value')</li>
+     *   <li>column (displayed in the UI as 'Column')</li>
+     *   <li>dataset_columns (displayed in the UI as 'Dataset Columns')</li>
+     *   <li>dataset (displayed in the UI as 'Dataset')</li>
+     * </ul>
+     */
+    @JsonProperty("scope")
+    protected String scope;
+
+    @JsonProperty("script")
+    protected String script;
 
     @JsonProperty("squeezeConsecutiveWhiteSpaces")
     protected Boolean squeezeconsecutivewhitespaces;
@@ -106,6 +180,76 @@ public class DataClass extends InformationAsset {
 
     @JsonProperty("valid_values_case_sensitive")
     protected Boolean validValuesCaseSensitive;
+
+    /**
+     * Retrieve the {@code active} property (displayed as '{@literal Active}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("active")
+    public Boolean getActive() { return this.active; }
+
+    /**
+     * Set the {@code active} property (displayed as {@code Active}) of the object.
+     * @param active the value to set
+     */
+    @JsonProperty("active")
+    public void setActive(Boolean active) { this.active = active; }
+
+    /**
+     * Retrieve the {@code additional_regular_expression} property (displayed as '{@literal Additional Regular Expression}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("additional_regular_expression")
+    public String getAdditionalRegularExpression() { return this.additionalRegularExpression; }
+
+    /**
+     * Set the {@code additional_regular_expression} property (displayed as {@code Additional Regular Expression}) of the object.
+     * @param additionalRegularExpression the value to set
+     */
+    @JsonProperty("additional_regular_expression")
+    public void setAdditionalRegularExpression(String additionalRegularExpression) { this.additionalRegularExpression = additionalRegularExpression; }
+
+    /**
+     * Retrieve the {@code additionial_applicable_for} property (displayed as '{@literal Additional Applicable For}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("additionial_applicable_for")
+    public String getAdditionialApplicableFor() { return this.additionialApplicableFor; }
+
+    /**
+     * Set the {@code additionial_applicable_for} property (displayed as {@code Additional Applicable For}) of the object.
+     * @param additionialApplicableFor the value to set
+     */
+    @JsonProperty("additionial_applicable_for")
+    public void setAdditionialApplicableFor(String additionialApplicableFor) { this.additionialApplicableFor = additionialApplicableFor; }
+
+    /**
+     * Retrieve the {@code allowSubstringMatch} property (displayed as '{@literal Allow Substring Match}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("allowSubstringMatch")
+    public Boolean getAllowsubstringmatch() { return this.allowsubstringmatch; }
+
+    /**
+     * Set the {@code allowSubstringMatch} property (displayed as {@code Allow Substring Match}) of the object.
+     * @param allowsubstringmatch the value to set
+     */
+    @JsonProperty("allowSubstringMatch")
+    public void setAllowsubstringmatch(Boolean allowsubstringmatch) { this.allowsubstringmatch = allowsubstringmatch; }
+
+    /**
+     * Retrieve the {@code applicable_for_single} property (displayed as '{@literal Applicable For}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("applicable_for_single")
+    public String getApplicableForSingle() { return this.applicableForSingle; }
+
+    /**
+     * Set the {@code applicable_for_single} property (displayed as {@code Applicable For}) of the object.
+     * @param applicableForSingle the value to set
+     */
+    @JsonProperty("applicable_for_single")
+    public void setApplicableForSingle(String applicableForSingle) { this.applicableForSingle = applicableForSingle; }
 
     /**
      * Retrieve the {@code class_code} property (displayed as '{@literal Class Code}') of the object.
@@ -248,6 +392,34 @@ public class DataClass extends InformationAsset {
     public void setExample(String example) { this.example = example; }
 
     /**
+     * Retrieve the {@code expression} property (displayed as '{@literal Expression}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("expression")
+    public String getExpression() { return this.expression; }
+
+    /**
+     * Set the {@code expression} property (displayed as {@code Expression}) of the object.
+     * @param expression the value to set
+     */
+    @JsonProperty("expression")
+    public void setExpression(String expression) { this.expression = expression; }
+
+    /**
+     * Retrieve the {@code filters} property (displayed as '{@literal Filters}') of the object.
+     * @return {@code ItemList<Filter>}
+     */
+    @JsonProperty("filters")
+    public ItemList<Filter> getFilters() { return this.filters; }
+
+    /**
+     * Set the {@code filters} property (displayed as {@code Filters}) of the object.
+     * @param filters the value to set
+     */
+    @JsonProperty("filters")
+    public void setFilters(ItemList<Filter> filters) { this.filters = filters; }
+
+    /**
      * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
      * @return {@code ItemList<Collection>}
      */
@@ -274,6 +446,20 @@ public class DataClass extends InformationAsset {
      */
     @JsonProperty("java_class_name_single")
     public void setJavaClassNameSingle(String javaClassNameSingle) { this.javaClassNameSingle = javaClassNameSingle; }
+
+    /**
+     * Retrieve the {@code language} property (displayed as '{@literal Language}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("language")
+    public String getLanguage() { return this.language; }
+
+    /**
+     * Set the {@code language} property (displayed as {@code Language}) of the object.
+     * @param language the value to set
+     */
+    @JsonProperty("language")
+    public void setLanguage(String language) { this.language = language; }
 
     /**
      * Retrieve the {@code length_filter_max} property (displayed as '{@literal Maximum Data Length}') of the object.
@@ -318,6 +504,48 @@ public class DataClass extends InformationAsset {
     public void setParentDataClass(DataClass parentDataClass) { this.parentDataClass = parentDataClass; }
 
     /**
+     * Retrieve the {@code properties} property (displayed as '{@literal Properties}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("properties")
+    public String getProperties() { return this.properties; }
+
+    /**
+     * Set the {@code properties} property (displayed as {@code Properties}) of the object.
+     * @param properties the value to set
+     */
+    @JsonProperty("properties")
+    public void setProperties(String properties) { this.properties = properties; }
+
+    /**
+     * Retrieve the {@code provider} property (displayed as '{@literal Provider}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("provider")
+    public String getProvider() { return this.provider; }
+
+    /**
+     * Set the {@code provider} property (displayed as {@code Provider}) of the object.
+     * @param provider the value to set
+     */
+    @JsonProperty("provider")
+    public void setProvider(String provider) { this.provider = provider; }
+
+    /**
+     * Retrieve the {@code reference_columns_metadata} property (displayed as '{@literal Reference Columns Metadata}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("reference_columns_metadata")
+    public String getReferenceColumnsMetadata() { return this.referenceColumnsMetadata; }
+
+    /**
+     * Set the {@code reference_columns_metadata} property (displayed as {@code Reference Columns Metadata}) of the object.
+     * @param referenceColumnsMetadata the value to set
+     */
+    @JsonProperty("reference_columns_metadata")
+    public void setReferenceColumnsMetadata(String referenceColumnsMetadata) { this.referenceColumnsMetadata = referenceColumnsMetadata; }
+
+    /**
      * Retrieve the {@code regular_expression_single} property (displayed as '{@literal Regular Expression}') of the object.
      * @return {@code String}
      */
@@ -330,6 +558,34 @@ public class DataClass extends InformationAsset {
      */
     @JsonProperty("regular_expression_single")
     public void setRegularExpressionSingle(String regularExpressionSingle) { this.regularExpressionSingle = regularExpressionSingle; }
+
+    /**
+     * Retrieve the {@code scope} property (displayed as '{@literal Scope}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("scope")
+    public String getScope() { return this.scope; }
+
+    /**
+     * Set the {@code scope} property (displayed as {@code Scope}) of the object.
+     * @param scope the value to set
+     */
+    @JsonProperty("scope")
+    public void setScope(String scope) { this.scope = scope; }
+
+    /**
+     * Retrieve the {@code script} property (displayed as '{@literal Script}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("script")
+    public String getScript() { return this.script; }
+
+    /**
+     * Set the {@code script} property (displayed as {@code Script}) of the object.
+     * @param script the value to set
+     */
+    @JsonProperty("script")
+    public void setScript(String script) { this.script = script; }
 
     /**
      * Retrieve the {@code squeezeConsecutiveWhiteSpaces} property (displayed as '{@literal Collapse Consecutive White Spaces}') of the object.

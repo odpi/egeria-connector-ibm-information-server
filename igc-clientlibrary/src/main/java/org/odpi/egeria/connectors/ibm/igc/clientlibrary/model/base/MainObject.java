@@ -32,6 +32,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
         @JsonSubTypes.Type(value = BiHierarchy.class, name = "bi_hierarchy"),
         @JsonSubTypes.Type(value = BiLevel.class, name = "bi_level"),
         @JsonSubTypes.Type(value = DataClassOld.class, name = "data_class_old"),
+        @JsonSubTypes.Type(value = DataPolicy.class, name = "data_policy"),
         @JsonSubTypes.Type(value = Directory.class, name = "directory"),
         @JsonSubTypes.Type(value = DsdesignView.class, name = "dsdesign_view"),
         @JsonSubTypes.Type(value = Dsjcltemplate.class, name = "dsjcltemplate"),

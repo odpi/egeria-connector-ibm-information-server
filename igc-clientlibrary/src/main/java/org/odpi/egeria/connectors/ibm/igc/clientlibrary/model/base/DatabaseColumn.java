@@ -44,6 +44,10 @@ public class DatabaseColumn extends Classificationenabledgroup {
     @JsonProperty("bi_report_query_items")
     protected ItemList<Reportobject> biReportQueryItems;
 
+    /**
+     * No longer applicable from 11.7.0.0 onwards.
+     */
+    @Deprecated
     @JsonProperty("blueprint_elements")
     protected ItemList<BlueprintElementLink> blueprintElements;
 
@@ -54,7 +58,7 @@ public class DatabaseColumn extends Classificationenabledgroup {
     protected Boolean constantflag;
 
     @JsonProperty("data_policies")
-    protected ItemList<DataPolicy> dataPolicies;
+    protected ItemList<MainObject> dataPolicies;
 
     @JsonProperty("data_rule_definitions")
     protected ItemList<NonPublishedDataRuleDefinition> dataRuleDefinitions;
@@ -92,6 +96,10 @@ public class DatabaseColumn extends Classificationenabledgroup {
     @JsonProperty("defined_foreign_key_references")
     protected ItemList<DatabaseColumn> definedForeignKeyReferences;
 
+    /**
+     * No longer applicable from 11.7.0.0 onwards.
+     */
+    @Deprecated
     @JsonProperty("defined_non_primary_key")
     protected ItemList<CandidateKey> definedNonPrimaryKey;
 
@@ -113,6 +121,10 @@ public class DatabaseColumn extends Classificationenabledgroup {
     @JsonProperty("impacts_on")
     protected ItemList<InformationAsset> impactsOn;
 
+    /**
+     * No longer applicable from 11.7.0.0 onwards.
+     */
+    @Deprecated
     @JsonProperty("implemented_key")
     protected ItemList<CandidateKey> implementedKey;
 
@@ -350,15 +362,21 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     /**
      * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
+     * No longer applicable from 11.7.0.0 onwards.
+     *
      * @return {@code ItemList<BlueprintElementLink>}
      */
+    @Deprecated
     @JsonProperty("blueprint_elements")
     public ItemList<BlueprintElementLink> getBlueprintElements() { return this.blueprintElements; }
 
     /**
      * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
+     * No longer applicable from 11.7.0.0 onwards.
+     *
      * @param blueprintElements the value to set
      */
+    @Deprecated
     @JsonProperty("blueprint_elements")
     public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
 
@@ -392,17 +410,17 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     /**
      * Retrieve the {@code data_policies} property (displayed as '{@literal Data Policies}') of the object.
-     * @return {@code ItemList<DataPolicy>}
+     * @return {@code ItemList<MainObject>}
      */
     @JsonProperty("data_policies")
-    public ItemList<DataPolicy> getDataPolicies() { return this.dataPolicies; }
+    public ItemList<MainObject> getDataPolicies() { return this.dataPolicies; }
 
     /**
      * Set the {@code data_policies} property (displayed as {@code Data Policies}) of the object.
      * @param dataPolicies the value to set
      */
     @JsonProperty("data_policies")
-    public void setDataPolicies(ItemList<DataPolicy> dataPolicies) { this.dataPolicies = dataPolicies; }
+    public void setDataPolicies(ItemList<MainObject> dataPolicies) { this.dataPolicies = dataPolicies; }
 
     /**
      * Retrieve the {@code data_rule_definitions} property (displayed as '{@literal Data Rule Definitions}') of the object.
@@ -574,15 +592,21 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     /**
      * Retrieve the {@code defined_non_primary_key} property (displayed as '{@literal Defined Non Primary Key}') of the object.
+     * No longer applicable from 11.7.0.0 onwards.
+     *
      * @return {@code ItemList<CandidateKey>}
      */
+    @Deprecated
     @JsonProperty("defined_non_primary_key")
     public ItemList<CandidateKey> getDefinedNonPrimaryKey() { return this.definedNonPrimaryKey; }
 
     /**
      * Set the {@code defined_non_primary_key} property (displayed as {@code Defined Non Primary Key}) of the object.
+     * No longer applicable from 11.7.0.0 onwards.
+     *
      * @param definedNonPrimaryKey the value to set
      */
+    @Deprecated
     @JsonProperty("defined_non_primary_key")
     public void setDefinedNonPrimaryKey(ItemList<CandidateKey> definedNonPrimaryKey) { this.definedNonPrimaryKey = definedNonPrimaryKey; }
 
@@ -672,15 +696,21 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     /**
      * Retrieve the {@code implemented_key} property (displayed as '{@literal Implemented Key}') of the object.
+     * No longer applicable from 11.7.0.0 onwards.
+     *
      * @return {@code ItemList<CandidateKey>}
      */
+    @Deprecated
     @JsonProperty("implemented_key")
     public ItemList<CandidateKey> getImplementedKey() { return this.implementedKey; }
 
     /**
      * Set the {@code implemented_key} property (displayed as {@code Implemented Key}) of the object.
+     * No longer applicable from 11.7.0.0 onwards.
+     *
      * @param implementedKey the value to set
      */
+    @Deprecated
     @JsonProperty("implemented_key")
     public void setImplementedKey(ItemList<CandidateKey> implementedKey) { this.implementedKey = implementedKey; }
 

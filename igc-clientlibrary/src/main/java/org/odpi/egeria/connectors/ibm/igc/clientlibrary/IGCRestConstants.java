@@ -139,9 +139,11 @@ public class IGCRestConstants {
     private static Map<String, String> createSubTypeToSuperType() {
         Map<String, String> map = new HashMap<>();
         map.put("main_object", "reference");
+        map.put("data_policy", "main_object");
         map.put("host_(engine)", "host");
         map.put("host", "information_asset");
         map.put("Rule_Execution_Result", "information_asset");
+        map.put("customattributedef", "information_asset");
         map.put("information_asset", "main_object");
         map.put("database_alias", "datagroup");
         map.put("database_table", "datagroup");
