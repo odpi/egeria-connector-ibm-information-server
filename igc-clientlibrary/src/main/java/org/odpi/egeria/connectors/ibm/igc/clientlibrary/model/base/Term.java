@@ -28,6 +28,9 @@ import java.util.List;
 @JsonTypeName("term")
 public class Term extends InformationAsset {
 
+    @JsonProperty("Automation_Rules")
+    protected ItemList<MainObject> automationRules;
+
     @JsonProperty("abbreviation")
     protected String abbreviation;
 
@@ -137,6 +140,20 @@ public class Term extends InformationAsset {
      */
     @JsonProperty("workflow_current_state")
     protected List<String> workflowCurrentState;
+
+    /**
+     * Retrieve the {@code Automation_Rules} property (displayed as '{@literal Automation Rules}') of the object.
+     * @return {@code ItemList<MainObject>}
+     */
+    @JsonProperty("Automation_Rules")
+    public ItemList<MainObject> getAutomationRules() { return this.automationRules; }
+
+    /**
+     * Set the {@code Automation_Rules} property (displayed as {@code Automation Rules}) of the object.
+     * @param automationRules the value to set
+     */
+    @JsonProperty("Automation_Rules")
+    public void setAutomationRules(ItemList<MainObject> automationRules) { this.automationRules = automationRules; }
 
     /**
      * Retrieve the {@code abbreviation} property (displayed as '{@literal Abbreviation}') of the object.

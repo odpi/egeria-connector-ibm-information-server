@@ -130,6 +130,7 @@ public class IGCRestConstants {
         list.add("datagroup");
         list.add("data_item");
         list.add("data_item_definition");
+        list.add("data_field");
         list.add("classificationenabledgroup");
         list.add("reportobject");
         return list;

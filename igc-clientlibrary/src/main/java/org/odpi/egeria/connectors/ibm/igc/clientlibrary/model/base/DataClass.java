@@ -142,6 +142,9 @@ public class DataClass extends InformationAsset {
     @JsonProperty("parent_data_class")
     protected DataClass parentDataClass;
 
+    @JsonProperty("priority")
+    protected Number priority;
+
     @JsonProperty("properties")
     protected String properties;
 
@@ -502,6 +505,20 @@ public class DataClass extends InformationAsset {
      */
     @JsonProperty("parent_data_class")
     public void setParentDataClass(DataClass parentDataClass) { this.parentDataClass = parentDataClass; }
+
+    /**
+     * Retrieve the {@code priority} property (displayed as '{@literal Priority}') of the object.
+     * @return {@code Number}
+     */
+    @JsonProperty("priority")
+    public Number getPriority() { return this.priority; }
+
+    /**
+     * Set the {@code priority} property (displayed as {@code Priority}) of the object.
+     * @param priority the value to set
+     */
+    @JsonProperty("priority")
+    public void setPriority(Number priority) { this.priority = priority; }
 
     /**
      * Retrieve the {@code properties} property (displayed as '{@literal Properties}') of the object.

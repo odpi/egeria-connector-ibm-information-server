@@ -149,6 +149,12 @@ public class DataFileField extends Classificationenabledgroup {
     @JsonProperty("qualityScore")
     protected String qualityscore;
 
+    @JsonProperty("qualityScore_bubble")
+    protected String qualityscoreBubble;
+
+    @JsonProperty("quality_dimension")
+    protected ItemList<QualityProblem> qualityDimension;
+
     @JsonProperty("read_by_(design)")
     protected ItemList<InformationAsset> readByDesign;
 
@@ -610,6 +616,34 @@ public class DataFileField extends Classificationenabledgroup {
      */
     @JsonProperty("qualityScore")
     public void setQualityscore(String qualityscore) { this.qualityscore = qualityscore; }
+
+    /**
+     * Retrieve the {@code qualityScore_bubble} property (displayed as '{@literal Quality Score}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("qualityScore_bubble")
+    public String getQualityscoreBubble() { return this.qualityscoreBubble; }
+
+    /**
+     * Set the {@code qualityScore_bubble} property (displayed as {@code Quality Score}) of the object.
+     * @param qualityscoreBubble the value to set
+     */
+    @JsonProperty("qualityScore_bubble")
+    public void setQualityscoreBubble(String qualityscoreBubble) { this.qualityscoreBubble = qualityscoreBubble; }
+
+    /**
+     * Retrieve the {@code quality_dimension} property (displayed as '{@literal Quality Dimensions}') of the object.
+     * @return {@code ItemList<QualityProblem>}
+     */
+    @JsonProperty("quality_dimension")
+    public ItemList<QualityProblem> getQualityDimension() { return this.qualityDimension; }
+
+    /**
+     * Set the {@code quality_dimension} property (displayed as {@code Quality Dimensions}) of the object.
+     * @param qualityDimension the value to set
+     */
+    @JsonProperty("quality_dimension")
+    public void setQualityDimension(ItemList<QualityProblem> qualityDimension) { this.qualityDimension = qualityDimension; }
 
     /**
      * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.

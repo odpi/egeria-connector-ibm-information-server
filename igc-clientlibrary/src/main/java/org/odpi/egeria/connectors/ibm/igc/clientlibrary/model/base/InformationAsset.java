@@ -35,6 +35,7 @@ import java.util.Date;
         @JsonSubTypes.Type(value = Attribute.class, name = "attribute"),
         @JsonSubTypes.Type(value = AttributeType.class, name = "attribute_type"),
         @JsonSubTypes.Type(value = AttributeTypeField.class, name = "attribute_type_field"),
+        @JsonSubTypes.Type(value = AutomationRule.class, name = "automation_rule"),
         @JsonSubTypes.Type(value = BiCollection.class, name = "bi_collection"),
         @JsonSubTypes.Type(value = BiCollectionMember.class, name = "bi_collection_member"),
         @JsonSubTypes.Type(value = BiCube.class, name = "bi_cube"),

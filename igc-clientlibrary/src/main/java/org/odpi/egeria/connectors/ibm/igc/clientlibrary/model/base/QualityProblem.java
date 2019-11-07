@@ -27,6 +27,15 @@ import java.util.Date;
 @JsonTypeName("quality_problem")
 public class QualityProblem extends Reference {
 
+    @JsonProperty("Column")
+    protected String column;
+
+    @JsonProperty("QualityProblemTypeDescription")
+    protected String qualityproblemtypedescription;
+
+    @JsonProperty("QualityProblemTypeName")
+    protected String qualityproblemtypename;
+
     @JsonProperty("confidence")
     protected Number confidence;
 
@@ -36,6 +45,10 @@ public class QualityProblem extends Reference {
     @JsonProperty("created_on")
     protected Date createdOn;
 
+    /**
+     * No longer applicable from 11.7.0.1sp1 onwards.
+     */
+    @Deprecated
     @JsonProperty("data_quality_score")
     protected InformationAsset dataQualityScore;
 
@@ -54,8 +67,57 @@ public class QualityProblem extends Reference {
     @JsonProperty("percent_occurrences")
     protected Number percentOccurrences;
 
+    /**
+     * No longer applicable from 11.7.0.1sp1 onwards.
+     */
+    @Deprecated
     @JsonProperty("problem_type")
     protected InformationAsset problemType;
+
+    @JsonProperty("qualityScore")
+    protected Number qualityscore;
+
+    /**
+     * Retrieve the {@code Column} property (displayed as '{@literal Column}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("Column")
+    public String getColumn() { return this.column; }
+
+    /**
+     * Set the {@code Column} property (displayed as {@code Column}) of the object.
+     * @param column the value to set
+     */
+    @JsonProperty("Column")
+    public void setColumn(String column) { this.column = column; }
+
+    /**
+     * Retrieve the {@code QualityProblemTypeDescription} property (displayed as '{@literal Quality Problem Type Description}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("QualityProblemTypeDescription")
+    public String getQualityproblemtypedescription() { return this.qualityproblemtypedescription; }
+
+    /**
+     * Set the {@code QualityProblemTypeDescription} property (displayed as {@code Quality Problem Type Description}) of the object.
+     * @param qualityproblemtypedescription the value to set
+     */
+    @JsonProperty("QualityProblemTypeDescription")
+    public void setQualityproblemtypedescription(String qualityproblemtypedescription) { this.qualityproblemtypedescription = qualityproblemtypedescription; }
+
+    /**
+     * Retrieve the {@code QualityProblemTypeName} property (displayed as '{@literal Quality Problem Type Name}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("QualityProblemTypeName")
+    public String getQualityproblemtypename() { return this.qualityproblemtypename; }
+
+    /**
+     * Set the {@code QualityProblemTypeName} property (displayed as {@code Quality Problem Type Name}) of the object.
+     * @param qualityproblemtypename the value to set
+     */
+    @JsonProperty("QualityProblemTypeName")
+    public void setQualityproblemtypename(String qualityproblemtypename) { this.qualityproblemtypename = qualityproblemtypename; }
 
     /**
      * Retrieve the {@code confidence} property (displayed as '{@literal Confidence}') of the object.
@@ -101,15 +163,21 @@ public class QualityProblem extends Reference {
 
     /**
      * Retrieve the {@code data_quality_score} property (displayed as '{@literal Data Quality Score}') of the object.
+     * No longer applicable from 11.7.0.1sp1 onwards.
+     *
      * @return {@code InformationAsset}
      */
+    @Deprecated
     @JsonProperty("data_quality_score")
     public InformationAsset getDataQualityScore() { return this.dataQualityScore; }
 
     /**
      * Set the {@code data_quality_score} property (displayed as {@code Data Quality Score}) of the object.
+     * No longer applicable from 11.7.0.1sp1 onwards.
+     *
      * @param dataQualityScore the value to set
      */
+    @Deprecated
     @JsonProperty("data_quality_score")
     public void setDataQualityScore(InformationAsset dataQualityScore) { this.dataQualityScore = dataQualityScore; }
 
@@ -185,16 +253,36 @@ public class QualityProblem extends Reference {
 
     /**
      * Retrieve the {@code problem_type} property (displayed as '{@literal Problem Type}') of the object.
+     * No longer applicable from 11.7.0.1sp1 onwards.
+     *
      * @return {@code InformationAsset}
      */
+    @Deprecated
     @JsonProperty("problem_type")
     public InformationAsset getProblemType() { return this.problemType; }
 
     /**
      * Set the {@code problem_type} property (displayed as {@code Problem Type}) of the object.
+     * No longer applicable from 11.7.0.1sp1 onwards.
+     *
      * @param problemType the value to set
      */
+    @Deprecated
     @JsonProperty("problem_type")
     public void setProblemType(InformationAsset problemType) { this.problemType = problemType; }
+
+    /**
+     * Retrieve the {@code qualityScore} property (displayed as '{@literal Quality Score}') of the object.
+     * @return {@code Number}
+     */
+    @JsonProperty("qualityScore")
+    public Number getQualityscore() { return this.qualityscore; }
+
+    /**
+     * Set the {@code qualityScore} property (displayed as {@code Quality Score}) of the object.
+     * @param qualityscore the value to set
+     */
+    @JsonProperty("qualityScore")
+    public void setQualityscore(Number qualityscore) { this.qualityscore = qualityscore; }
 
 }

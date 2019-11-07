@@ -80,10 +80,6 @@ public class View extends Datagroup {
     @JsonProperty("defined_foreign_key")
     protected ItemList<Reference> definedForeignKey;
 
-    /**
-     * No longer applicable from 11.7.0.0 onwards.
-     */
-    @Deprecated
     @JsonProperty("defined_non_primary_key")
     protected ItemList<CandidateKey> definedNonPrimaryKey;
 
@@ -141,6 +137,12 @@ public class View extends Datagroup {
 
     @JsonProperty("qualityScore")
     protected String qualityscore;
+
+    @JsonProperty("qualityScore_bubble")
+    protected String qualityscoreBubble;
+
+    @JsonProperty("quality_dimension")
+    protected ItemList<QualityProblem> qualityDimension;
 
     @JsonProperty("read_by_(design)")
     protected ItemList<InformationAsset> readByDesign;
@@ -412,21 +414,15 @@ public class View extends Datagroup {
 
     /**
      * Retrieve the {@code defined_non_primary_key} property (displayed as '{@literal Defined Non Primary Key}') of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
      * @return {@code ItemList<CandidateKey>}
      */
-    @Deprecated
     @JsonProperty("defined_non_primary_key")
     public ItemList<CandidateKey> getDefinedNonPrimaryKey() { return this.definedNonPrimaryKey; }
 
     /**
      * Set the {@code defined_non_primary_key} property (displayed as {@code Defined Non Primary Key}) of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
      * @param definedNonPrimaryKey the value to set
      */
-    @Deprecated
     @JsonProperty("defined_non_primary_key")
     public void setDefinedNonPrimaryKey(ItemList<CandidateKey> definedNonPrimaryKey) { this.definedNonPrimaryKey = definedNonPrimaryKey; }
 
@@ -673,6 +669,34 @@ public class View extends Datagroup {
      */
     @JsonProperty("qualityScore")
     public void setQualityscore(String qualityscore) { this.qualityscore = qualityscore; }
+
+    /**
+     * Retrieve the {@code qualityScore_bubble} property (displayed as '{@literal Quality Score}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("qualityScore_bubble")
+    public String getQualityscoreBubble() { return this.qualityscoreBubble; }
+
+    /**
+     * Set the {@code qualityScore_bubble} property (displayed as {@code Quality Score}) of the object.
+     * @param qualityscoreBubble the value to set
+     */
+    @JsonProperty("qualityScore_bubble")
+    public void setQualityscoreBubble(String qualityscoreBubble) { this.qualityscoreBubble = qualityscoreBubble; }
+
+    /**
+     * Retrieve the {@code quality_dimension} property (displayed as '{@literal Quality Dimensions}') of the object.
+     * @return {@code ItemList<QualityProblem>}
+     */
+    @JsonProperty("quality_dimension")
+    public ItemList<QualityProblem> getQualityDimension() { return this.qualityDimension; }
+
+    /**
+     * Set the {@code quality_dimension} property (displayed as {@code Quality Dimensions}) of the object.
+     * @param qualityDimension the value to set
+     */
+    @JsonProperty("quality_dimension")
+    public void setQualityDimension(ItemList<QualityProblem> qualityDimension) { this.qualityDimension = qualityDimension; }
 
     /**
      * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.
