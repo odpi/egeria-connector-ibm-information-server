@@ -1403,11 +1403,10 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 IGCSearch igcSearch = new IGCSearch();
                 String igcAssetType = igcRepositoryHelper.addTypeToSearch(mapping, igcSearch);
 
-                // Get POJO from the asset type, and use this to retrieve a listing of all string properties
-                // for that asset type -- these are the list of properties we should use for the search
-                Class pojo = igcRestClient.getPOJOForType(igcAssetType);
-
-                if (pojo != null) {
+                // Get list of string properties from the asset type -- these are the list of properties we should use
+                // for the search
+                List<String> properties = igcRestClient.getAllStringPropertiesForType(igcAssetType);
+                if (properties != null) {
 
                     IGCSearchConditionSet classificationLimiters = igcRepositoryHelper.getSearchCriteriaForClassifications(
                             igcAssetType,
@@ -1428,7 +1427,6 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         // If the searchCriteria is empty, retrieve all entities of the type (no conditions)
                         if (searchCriteria != null && !searchCriteria.equals("")) {
 
-                            List<String> properties = igcRestClient.getAllStringPropertiesForType(igcAssetType);
                             // POST'd search to IGC doesn't work on v11.7.0.2 using long_description
                             // Using "searchText" requires using "searchProperties" (no "where" conditions) -- but does not
                             // work with 'main_object', must be used with a specific asset type

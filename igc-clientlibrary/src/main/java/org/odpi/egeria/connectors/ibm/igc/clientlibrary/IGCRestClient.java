@@ -75,7 +75,6 @@ public class IGCRestClient {
     private RestTemplate restTemplate;
 
     private IGCVersionEnum igcVersion;
-    private HashMap<String, Class> registeredPojosByType;
     private HashMap<String, DynamicPropertyReader> typeAndPropertyToAccessor;
     private HashMap<String, DynamicPropertyWriter> typeAndPropertyToWriter;
 
@@ -147,7 +146,6 @@ public class IGCRestClient {
         // 'published_data_rule_definition')
         this.mapper = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
         this.typeMapper = new ObjectMapper();
-        this.registeredPojosByType = new HashMap<>();
         this.typeAndPropertyToAccessor = new HashMap<>();
         this.typeAndPropertyToWriter = new HashMap<>();
         this.restTemplate = new RestTemplate();
@@ -187,8 +185,6 @@ public class IGCRestClient {
                 } catch (IOException e) {
                     if (log.isErrorEnabled()) { log.error("Unable to determine if workflow is enabled.", e); }
                 }
-                // Register the non-generated types
-                //this.registerPOJO(Paging.class);
 
                 // Start with lowest version supported
                 this.igcVersion = IGCVersionEnum.values()[0];
@@ -325,10 +321,10 @@ public class IGCRestClient {
      * @param json the JSON string to convert
      * @return Reference - an IGC object
      */
-    public Reference readJSONIntoPOJO(String json) {
-        Reference reference = null;
+    public <T extends Reference> T readJSONIntoPOJO(String json) {
+        T reference = null;
         try {
-            reference = this.mapper.readValue(json, Reference.class);
+            reference = this.mapper.readValue(json, new TypeReference<T>(){});
         } catch (IOException e) {
             if (log.isErrorEnabled()) { log.error("Unable to translate JSON into POJO: {}", json, e); }
         }
@@ -461,7 +457,7 @@ public class IGCRestClient {
      */
     public boolean uploadFile(String endpoint, HttpMethod method, AbstractResource file) {
         ResponseEntity<String> response = uploadFile(endpoint, method, file, false);
-        return (response == null ? false : response.getStatusCode() == HttpStatus.OK);
+        return (response != null && response.getStatusCode() == HttpStatus.OK);
     }
 
     /**
@@ -788,7 +784,7 @@ public class IGCRestClient {
      * @param igcSearch the IGCSearch object defining criteria by which to search
      * @return JsonNode - the first JSON page of results from the search
      */
-    public String searchJson(IGCSearch igcSearch) {
+    private String searchJson(IGCSearch igcSearch) {
         return makeRequest(EP_SEARCH, HttpMethod.POST, MediaType.APPLICATION_JSON, igcSearch.getQuery().toString());
     }
 
@@ -1150,6 +1146,17 @@ public class IGCRestClient {
     }
 
     /**
+     * Retrieve the display name of this IGC object type.
+     *
+     * @param typeName the name of the IGC object type
+     * @return String
+     */
+    public String getDisplayNameForType(String typeName) {
+        cacheTypeDetails(typeName);
+        return typeToDisplayName.getOrDefault(typeName, null);
+    }
+
+    /**
      * Indicates whether the IGC object type can be created (true) or not (false).
      *
      * @param typeName the name of the IGC object type
@@ -1167,6 +1174,7 @@ public class IGCRestClient {
      * @return boolean
      */
     public boolean hasModificationDetails(String typeName) {
+        cacheTypeDetails(typeName);
         return typesThatIncludeModificationDetails.contains(typeName);
     }
 
@@ -1218,26 +1226,24 @@ public class IGCRestClient {
 
     /**
      * Register a POJO as an object to handle serde of JSON objects.<br>
-     * Note that this MUST be done BEFORE any object mappingRemoved (translation) is done!
+     * Note that this MUST be done BEFORE any object mapping (translation) is done!
      * <br><br>
-     * In general, you'll want your POJO to extend at least the model.Reference
-     * object in this package; more likely the model.MainObject (for your own OpenIGC object),
+     * In general, you'll want your POJO to extend at least the Reference
+     * object, and more likely the InformationAsset (for your own OpenIGC object),
      * or if you are adding custom attributes to one of the native asset types, consider
-     * directly extending that asset from model.generated.*
+     * directly changing that bean.
      * <br><br>
      * To allow this dynamic registration to work, also ensure you have a @JsonTypeName("...") annotation
      * in your class set to the type that the IGC REST API uses to refer to the asset (eg. for Term.class
-     * it would be "term"). See the generated POJOs for examples.
+     * it would be "term"). See the base POJOs for examples.
      *
      * @param clazz the Java Class (POJO) object to register
-     * @see #getPOJOForType(String)
      */
     public void registerPOJO(Class clazz) {
         JsonTypeName typeName = (JsonTypeName) clazz.getAnnotation(JsonTypeName.class);
         if (typeName != null) {
             String typeId = typeName.value();
             this.mapper.registerSubtypes(clazz);
-            this.registeredPojosByType.put(typeId, clazz);
             if (log.isInfoEnabled()) { log.info("Registered IGC type {} to be handled by POJO: {}", typeId, clazz.getCanonicalName()); }
         } else {
             if (log.isErrorEnabled()) { log.error("Unable to find JsonTypeName annotation to identify type in POJO: {}", clazz.getCanonicalName()); }
@@ -1245,26 +1251,12 @@ public class IGCRestClient {
     }
 
     /**
-     * Returns the POJO that is registered to serde the provided IGC asset type.
-     * <br><br>
-     * Note that the POJO must first be registered via registerPOJO!
+     * Returns the out-of-the-box POJO that is registered to serde the provided IGC asset type.
      *
-     * @param typeName name of the IGC asset
-     * @return Class
-     * @see #registerPOJO(Class)
-     */
-    public Class getPOJOForType(String typeName) {
-        return findPOJOForType(typeName);
-        //return this.registeredPojosByType.get(typeName);
-    }
-
-    /**
-     * Retrieve the POJO for the provided IGC REST API's JSON representation into a Java object.
-     *
-     * @param assetType the IGC REST API's JSON representation
+     * @param assetType name of the IGC asset
      * @return Class
      */
-    public final Class findPOJOForType(String assetType) {
+    private Class getPOJOForType(String assetType) {
         Class igcPOJO = null;
         StringBuilder sbPojoName = new StringBuilder();
         sbPojoName.append(IGCRestConstants.IGC_REST_BASE_MODEL_PKG);
@@ -1375,7 +1367,7 @@ public class IGCRestClient {
      * @param property the name of the property to set / update
      * @param value the value to set on the property
      */
-    public void setPropertyByName(Reference object, String property, Object value) {
+    private void setPropertyByName(Reference object, String property, Object value) {
         if (object != null) {
             DynamicPropertyWriter writer = getWriter(object.getType(), property);
             writer.setProperty(object, value);

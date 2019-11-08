@@ -129,40 +129,6 @@ public abstract class EntityMapping extends InstanceMapping {
     public final String getIgcAssetTypeDisplayName() { return this.igcAssetTypeDisplayName; }
 
     /**
-     * Retrieve the POJO used to translate the IGC REST API's JSON representation into a Java object.
-     *
-     * @param igcomrsRepositoryConnector connection to an IGC repository
-     * @return Class
-     */
-    public final Class getIgcPOJO(IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
-        return getIgcPOJO(igcomrsRepositoryConnector, igcAssetType);
-    }
-
-    /**
-     * Retrieve the POJO for the provided IGC REST API's JSON representation into a Java object.
-     *
-     * @param igcomrsRepositoryConnector connection to an IGC repository
-     * @param assetType the IGC REST API's JSON representation
-     * @return Class
-     */
-    private Class getIgcPOJO(IGCOMRSRepositoryConnector igcomrsRepositoryConnector, String assetType) {
-        Class igcPOJO = null;
-        if (assetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
-            StringBuilder sbPojoName = new StringBuilder();
-            sbPojoName.append(IGCRestConstants.IGC_REST_COMMON_MODEL_PKG);
-            sbPojoName.append(".MainObject");
-            try {
-                igcPOJO = Class.forName(sbPojoName.toString());
-            } catch (ClassNotFoundException e) {
-                if (log.isErrorEnabled()) { log.error("Unable to find POJO class: {}", sbPojoName.toString(), e); }
-            }
-        } else {
-            igcPOJO = igcomrsRepositoryConnector.getIGCRestClient().findPOJOForType(assetType);
-        }
-        return igcPOJO;
-    }
-
-    /**
      * Indicates whether the IGC Repository ID (RID) requires a prefix (true) or not (false). A prefix is typically
      * required when the entity represented by the RID does not actually exist as a distinct entity in IGC, but is
      * rather a subset of properties, relationships and classifications from another IGC asset type. (The prefix allows
@@ -219,23 +185,6 @@ public abstract class EntityMapping extends InstanceMapping {
      * @return {@code List<String>}
      */
     public final List<String> getOtherIGCAssetTypes() { return this.otherIgcTypes; }
-
-    /**
-     * Retrieve listing of any additional IGC POJOs needed by this mapping.
-     *
-     * @param igcomrsRepositoryConnector connection to an IGC repository
-     * @return {@code List<Class>}
-     */
-    public final List<Class> getOtherIGCPOJOs(IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
-        ArrayList<Class> others = new ArrayList<>();
-        for (String assetType : otherIgcTypes) {
-            Class other = getIgcPOJO(igcomrsRepositoryConnector, assetType);
-            if (other != null) {
-                others.add(other);
-            }
-        }
-        return others;
-    }
 
     /**
      * Add a simple one-to-one property mapping between an IGC property and an OMRS property.

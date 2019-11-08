@@ -1482,13 +1482,11 @@ public class IGCRepositoryHelper {
 
             if (!assetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
                 // Introspect the full list of properties from the POJO of the asset
-                Class pojoClass = igcRestClient.getPOJOForType(assetType);
-                if (pojoClass != null) {
-                    List<String> allProps = igcRestClient.getAllPropertiesForType(assetType);
+                List<String> allProps = igcRestClient.getAllPropertiesForType(assetType);
+                if (allProps != null) {
 
                     // Retrieve all asset properties, via search, as this will allow larger page
                     // retrievals (and therefore be overall more efficient) than going by the GET of the asset
-
                     fullAsset = igcRestClient.getAssetWithSubsetOfProperties(
                             rid,
                             assetType,
