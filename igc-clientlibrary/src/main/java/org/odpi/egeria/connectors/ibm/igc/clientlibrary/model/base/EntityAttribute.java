@@ -75,8 +75,14 @@ public class EntityAttribute extends InformationAsset {
     @JsonProperty("sequence")
     protected Number sequence;
 
+    /**
+     * Up to 11.7.1.0sp2 this appears to be a singular LogicalValidationList, but from 11.7.1.0sp2 onwards it is an
+     * ItemList of those objects. If used as-is in versions prior to 11.7.1.0sp2 this could cause deserialization
+     * errors. If so, simply remove the 'ItemList' wrapping and correct the corresponding getters and setters for
+     * your release.
+     */
     @JsonProperty("validation_list")
-    protected LogicalValidationList validationList;
+    protected ItemList<LogicalValidationList> validationList;
 
     @JsonProperty("validation_range")
     protected LogicalValidationRange validationRange;
@@ -310,17 +316,17 @@ public class EntityAttribute extends InformationAsset {
 
     /**
      * Retrieve the {@code validation_list} property (displayed as '{@literal Validation List}') of the object.
-     * @return {@code LogicalValidationList}
+     * @return {@code ItemList<LogicalValidationList>}
      */
     @JsonProperty("validation_list")
-    public LogicalValidationList getValidationList() { return this.validationList; }
+    public ItemList<LogicalValidationList> getValidationList() { return this.validationList; }
 
     /**
      * Set the {@code validation_list} property (displayed as {@code Validation List}) of the object.
      * @param validationList the value to set
      */
     @JsonProperty("validation_list")
-    public void setValidationList(LogicalValidationList validationList) { this.validationList = validationList; }
+    public void setValidationList(ItemList<LogicalValidationList> validationList) { this.validationList = validationList; }
 
     /**
      * Retrieve the {@code validation_range} property (displayed as '{@literal Validation Range}') of the object.

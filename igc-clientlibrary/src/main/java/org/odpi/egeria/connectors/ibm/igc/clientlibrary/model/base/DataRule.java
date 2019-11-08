@@ -58,6 +58,9 @@ public class DataRule extends InformationAsset {
     @JsonProperty("native_id")
     protected String nativeId;
 
+    @JsonProperty("output_content_column")
+    protected ItemList<InformationAsset> outputContentColumn;
+
     @JsonProperty("project")
     protected List<String> project;
 
@@ -217,6 +220,20 @@ public class DataRule extends InformationAsset {
      */
     @JsonProperty("native_id")
     public void setNativeId(String nativeId) { this.nativeId = nativeId; }
+
+    /**
+     * Retrieve the {@code output_content_column} property (displayed as '{@literal Output Content Column}') of the object.
+     * @return {@code ItemList<InformationAsset>}
+     */
+    @JsonProperty("output_content_column")
+    public ItemList<InformationAsset> getOutputContentColumn() { return this.outputContentColumn; }
+
+    /**
+     * Set the {@code output_content_column} property (displayed as {@code Output Content Column}) of the object.
+     * @param outputContentColumn the value to set
+     */
+    @JsonProperty("output_content_column")
+    public void setOutputContentColumn(ItemList<InformationAsset> outputContentColumn) { this.outputContentColumn = outputContentColumn; }
 
     /**
      * Retrieve the {@code project} property (displayed as '{@literal Project}') of the object.
