@@ -4,13 +4,13 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 
 /**
@@ -22,22 +22,19 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=StageType.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = DsstageType.class, name = "dsstage_type"),
+})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("stage_type")
-public class StageType extends Reference {
+public class StageType extends InformationAsset {
 
     @JsonProperty("author")
     protected String author;
 
     @JsonProperty("copyright")
     protected String copyright;
-
-    @JsonProperty("long_description")
-    protected String longDescription;
-
-    @JsonProperty("name")
-    protected String name;
 
     @JsonProperty("native_id")
     protected String nativeId;
@@ -78,34 +75,6 @@ public class StageType extends Reference {
      */
     @JsonProperty("copyright")
     public void setCopyright(String copyright) { this.copyright = copyright; }
-
-    /**
-     * Retrieve the {@code long_description} property (displayed as '{@literal Description}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("long_description")
-    public String getLongDescription() { return this.longDescription; }
-
-    /**
-     * Set the {@code long_description} property (displayed as {@code Description}) of the object.
-     * @param longDescription the value to set
-     */
-    @JsonProperty("long_description")
-    public void setLongDescription(String longDescription) { this.longDescription = longDescription; }
-
-    /**
-     * Retrieve the {@code name} property (displayed as '{@literal Name}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("name")
-    public String getTheName() { return this.name; }
-
-    /**
-     * Set the {@code name} property (displayed as {@code Name}) of the object.
-     * @param name the value to set
-     */
-    @JsonProperty("name")
-    public void setTheName(String name) { this.name = name; }
 
     /**
      * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.

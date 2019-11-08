@@ -25,22 +25,13 @@ import java.util.Date;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("dsstage_type")
-public class DsstageType extends InformationAsset {
-
-    @JsonProperty("author")
-    protected String author;
-
-    @JsonProperty("copyright")
-    protected String copyright;
+public class DsstageType extends StageType {
 
     @JsonProperty("dll_name")
     protected String dllName;
 
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("ole_type")
     protected String oleType;
@@ -53,40 +44,6 @@ public class DsstageType extends InformationAsset {
 
     @JsonProperty("transformation_project")
     protected TransformationProject transformationProject;
-
-    @JsonProperty("vendor")
-    protected String vendor;
-
-    @JsonProperty("version")
-    protected String version;
-
-    /**
-     * Retrieve the {@code author} property (displayed as '{@literal Author}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("author")
-    public String getAuthor() { return this.author; }
-
-    /**
-     * Set the {@code author} property (displayed as {@code Author}) of the object.
-     * @param author the value to set
-     */
-    @JsonProperty("author")
-    public void setAuthor(String author) { this.author = author; }
-
-    /**
-     * Retrieve the {@code copyright} property (displayed as '{@literal Copyright}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("copyright")
-    public String getCopyright() { return this.copyright; }
-
-    /**
-     * Set the {@code copyright} property (displayed as {@code Copyright}) of the object.
-     * @param copyright the value to set
-     */
-    @JsonProperty("copyright")
-    public void setCopyright(String copyright) { this.copyright = copyright; }
 
     /**
      * Retrieve the {@code dll_name} property (displayed as '{@literal DLL Name}') of the object.
@@ -115,20 +72,6 @@ public class DsstageType extends InformationAsset {
      */
     @JsonProperty("in_collections")
     public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code ole_type} property (displayed as '{@literal OLE Type}') of the object.
@@ -185,33 +128,5 @@ public class DsstageType extends InformationAsset {
      */
     @JsonProperty("transformation_project")
     public void setTransformationProject(TransformationProject transformationProject) { this.transformationProject = transformationProject; }
-
-    /**
-     * Retrieve the {@code vendor} property (displayed as '{@literal Vendor}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("vendor")
-    public String getVendor() { return this.vendor; }
-
-    /**
-     * Set the {@code vendor} property (displayed as {@code Vendor}) of the object.
-     * @param vendor the value to set
-     */
-    @JsonProperty("vendor")
-    public void setVendor(String vendor) { this.vendor = vendor; }
-
-    /**
-     * Retrieve the {@code version} property (displayed as '{@literal Version}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("version")
-    public String getVersion() { return this.version; }
-
-    /**
-     * Set the {@code version} property (displayed as {@code Version}) of the object.
-     * @param version the value to set
-     */
-    @JsonProperty("version")
-    public void setVersion(String version) { this.version = version; }
 
 }

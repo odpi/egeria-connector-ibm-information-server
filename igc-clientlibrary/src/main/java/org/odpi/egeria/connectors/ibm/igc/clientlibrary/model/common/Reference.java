@@ -184,7 +184,6 @@ import java.util.List;
         @JsonSubTypes.Type(value = SessionConfiguration.class, name = "session_configuration"),
         @JsonSubTypes.Type(value = SetOperation.class, name = "set_operation"),
         @JsonSubTypes.Type(value = StageDataRuleDefinition.class, name = "stage_data_rule_definition"),
-        @JsonSubTypes.Type(value = StageType.class, name = "stage_type"),
         @JsonSubTypes.Type(value = StandardizationObject.class, name = "standardization_object"),
         @JsonSubTypes.Type(value = StandardizationRule.class, name = "standardization_rule"),
         @JsonSubTypes.Type(value = Steward.class, name = "steward"),

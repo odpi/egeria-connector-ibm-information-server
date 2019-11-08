@@ -127,6 +127,7 @@ public class IGCRestConstants {
         list.add("main_object");
         list.add("information_asset");
         list.add("host");
+        list.add("stage_type");
         list.add("datagroup");
         list.add("data_item");
         list.add("data_item_definition");
@@ -145,6 +146,8 @@ public class IGCRestConstants {
         map.put("host", "information_asset");
         map.put("Rule_Execution_Result", "information_asset");
         map.put("customattributedef", "information_asset");
+        map.put("stage_type", "information_asset");
+        map.put("dsstage_type", "stage_type");
         map.put("information_asset", "main_object");
         map.put("database_alias", "datagroup");
         map.put("database_table", "datagroup");
