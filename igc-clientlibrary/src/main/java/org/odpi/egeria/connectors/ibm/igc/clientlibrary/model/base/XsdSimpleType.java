@@ -67,6 +67,9 @@ public class XsdSimpleType extends InformationAsset {
     @JsonProperty("min_length")
     protected Number minLength;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("restricted_by_xsd_simple_type")
     protected ItemList<XsdSimpleType> restrictedByXsdSimpleType;
 
@@ -303,6 +306,20 @@ public class XsdSimpleType extends InformationAsset {
      */
     @JsonProperty("min_length")
     public void setMinLength(Number minLength) { this.minLength = minLength; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code restricted_by_xsd_simple_type} property (displayed as '{@literal Restricted by XSD Simple Types}') of the object.

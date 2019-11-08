@@ -57,6 +57,9 @@ public class AmazonS3DataFileFolder extends InformationAsset {
     @JsonProperty("location")
     protected String location;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("parent_folder")
     protected MainObject parentFolder;
 
@@ -80,6 +83,9 @@ public class AmazonS3DataFileFolder extends InformationAsset {
 
     @JsonProperty("source_modification_date")
     protected Date sourceModificationDate;
+
+    @JsonProperty("synchronized_from")
+    protected String synchronizedFrom;
 
     @JsonProperty("uses_data_file_definitions")
     protected ItemList<DataFileDefinition> usesDataFileDefinitions;
@@ -237,6 +243,20 @@ public class AmazonS3DataFileFolder extends InformationAsset {
     public void setLocation(String location) { this.location = location; }
 
     /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
+
+    /**
      * Retrieve the {@code parent_folder} property (displayed as '{@literal Data File Folder}') of the object.
      * @return {@code MainObject}
      */
@@ -347,6 +367,20 @@ public class AmazonS3DataFileFolder extends InformationAsset {
      */
     @JsonProperty("source_modification_date")
     public void setSourceModificationDate(Date sourceModificationDate) { this.sourceModificationDate = sourceModificationDate; }
+
+    /**
+     * Retrieve the {@code synchronized_from} property (displayed as '{@literal Synchronized From}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("synchronized_from")
+    public String getSynchronizedFrom() { return this.synchronizedFrom; }
+
+    /**
+     * Set the {@code synchronized_from} property (displayed as {@code Synchronized From}) of the object.
+     * @param synchronizedFrom the value to set
+     */
+    @JsonProperty("synchronized_from")
+    public void setSynchronizedFrom(String synchronizedFrom) { this.synchronizedFrom = synchronizedFrom; }
 
     /**
      * Retrieve the {@code uses_data_file_definitions} property (displayed as '{@literal Uses Data File Definitions}') of the object.

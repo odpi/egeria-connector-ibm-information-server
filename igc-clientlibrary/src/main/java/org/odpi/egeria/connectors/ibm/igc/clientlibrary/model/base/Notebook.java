@@ -48,6 +48,9 @@ public class Notebook extends InformationAsset {
     @JsonProperty("model_input_training_column")
     protected ItemList<DataField> modelInputTrainingColumn;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("package_name")
     protected String packageName;
 
@@ -157,6 +160,20 @@ public class Notebook extends InformationAsset {
      */
     @JsonProperty("model_input_training_column")
     public void setModelInputTrainingColumn(ItemList<DataField> modelInputTrainingColumn) { this.modelInputTrainingColumn = modelInputTrainingColumn; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code package_name} property (displayed as '{@literal Package Name}') of the object.

@@ -39,6 +39,10 @@ public class View extends Datagroup {
     @JsonProperty("Row Count")
     protected List<Number> rowCount;
 
+    /**
+     * No longer applicable from 11.7.1.0 onwards.
+     */
+    @Deprecated
     @JsonProperty("alias_(business_name)")
     protected String aliasBusinessName;
 
@@ -141,6 +145,9 @@ public class View extends Datagroup {
     @JsonProperty("qualityScore_bubble")
     protected String qualityscoreBubble;
 
+    @JsonProperty("quality_benchmark")
+    protected List<Number> qualityBenchmark;
+
     @JsonProperty("quality_dimension")
     protected ItemList<QualityProblem> qualityDimension;
 
@@ -179,6 +186,9 @@ public class View extends Datagroup {
 
     @JsonProperty("suggested_term_assignments")
     protected ItemList<TermAssignment> suggestedTermAssignments;
+
+    @JsonProperty("synchronized_from")
+    protected String synchronizedFrom;
 
     @JsonProperty("table_definitions")
     protected ItemList<TableDefinition> tableDefinitions;
@@ -242,15 +252,21 @@ public class View extends Datagroup {
 
     /**
      * Retrieve the {@code alias_(business_name)} property (displayed as '{@literal Alias (Business Name)}') of the object.
+     * No longer applicable from 11.7.1.0 onwards.
+     *
      * @return {@code String}
      */
+    @Deprecated
     @JsonProperty("alias_(business_name)")
     public String getAliasBusinessName() { return this.aliasBusinessName; }
 
     /**
      * Set the {@code alias_(business_name)} property (displayed as {@code Alias (Business Name)}) of the object.
+     * No longer applicable from 11.7.1.0 onwards.
+     *
      * @param aliasBusinessName the value to set
      */
+    @Deprecated
     @JsonProperty("alias_(business_name)")
     public void setAliasBusinessName(String aliasBusinessName) { this.aliasBusinessName = aliasBusinessName; }
 
@@ -351,14 +367,14 @@ public class View extends Datagroup {
     public void setDataPolicies(ItemList<MainObject> dataPolicies) { this.dataPolicies = dataPolicies; }
 
     /**
-     * Retrieve the {@code database_aliases} property (displayed as '{@literal Database Aliases}') of the object.
+     * Retrieve the {@code database_aliases} property (displayed as '{@literal Alias}') of the object.
      * @return {@code ItemList<Datagroup>}
      */
     @JsonProperty("database_aliases")
     public ItemList<Datagroup> getDatabaseAliases() { return this.databaseAliases; }
 
     /**
-     * Set the {@code database_aliases} property (displayed as {@code Database Aliases}) of the object.
+     * Set the {@code database_aliases} property (displayed as {@code Alias}) of the object.
      * @param databaseAliases the value to set
      */
     @JsonProperty("database_aliases")
@@ -393,9 +409,9 @@ public class View extends Datagroup {
     public void setDatabaseIndexes(ItemList<DatabaseIndex> databaseIndexes) { this.databaseIndexes = databaseIndexes; }
 
     /**
-     * Retrieve the {@code defined_foreign_key} property (displayed as '{@literal Defined Foreign Key}') of the object.
+     * Retrieve the {@code defined_foreign_key} property (displayed as '{@literal Defined Foreign Key}' or '{@literal Has Foreign Key Implemented}') of the object.
      * For earlier releases this will return an {@code ItemList<DatabaseColumn>} while for newer releases (11.5.0.2sp5
-     * onwards and 11.7.x.x onwards) this will return an {@code ItemList<ForeignKey>}.
+     * onwards and 11.7.1.0 onwards) this will return an {@code ItemList<ForeignKey>}.
      *
      * @return {@code ItemList<Reference>}
      */
@@ -403,9 +419,9 @@ public class View extends Datagroup {
     public ItemList<Reference> getDefinedForeignKey() { return this.definedForeignKey; }
 
     /**
-     * Set the {@code defined_foreign_key} property (displayed as {@code Defined Foreign Key}) of the object.
+     * Set the {@code defined_foreign_key} property (displayed as {@code Defined Foreign Key} or {@code Has Foreign Key Implemented}) of the object.
      * For earlier releases this required an {@code ItemList<DatabaseColumn>} while for newer releases (11.5.0.2sp5
-     * onwards and 11.7.x.x onwards) requires an {@code ItemList<ForeignKey>}.
+     * onwards and 11.7.1.0 onwards) requires an {@code ItemList<ForeignKey>}.
      *
      * @param definedForeignKey the value to set
      */
@@ -685,6 +701,20 @@ public class View extends Datagroup {
     public void setQualityscoreBubble(String qualityscoreBubble) { this.qualityscoreBubble = qualityscoreBubble; }
 
     /**
+     * Retrieve the {@code quality_benchmark} property (displayed as '{@literal Quality Benchmark}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("quality_benchmark")
+    public List<Number> getQualityBenchmark() { return this.qualityBenchmark; }
+
+    /**
+     * Set the {@code quality_benchmark} property (displayed as {@code Quality Benchmark}) of the object.
+     * @param qualityBenchmark the value to set
+     */
+    @JsonProperty("quality_benchmark")
+    public void setQualityBenchmark(List<Number> qualityBenchmark) { this.qualityBenchmark = qualityBenchmark; }
+
+    /**
      * Retrieve the {@code quality_dimension} property (displayed as '{@literal Quality Dimensions}') of the object.
      * @return {@code ItemList<QualityProblem>}
      */
@@ -865,6 +895,20 @@ public class View extends Datagroup {
      */
     @JsonProperty("suggested_term_assignments")
     public void setSuggestedTermAssignments(ItemList<TermAssignment> suggestedTermAssignments) { this.suggestedTermAssignments = suggestedTermAssignments; }
+
+    /**
+     * Retrieve the {@code synchronized_from} property (displayed as '{@literal Synchronized From}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("synchronized_from")
+    public String getSynchronizedFrom() { return this.synchronizedFrom; }
+
+    /**
+     * Set the {@code synchronized_from} property (displayed as {@code Synchronized From}) of the object.
+     * @param synchronizedFrom the value to set
+     */
+    @JsonProperty("synchronized_from")
+    public void setSynchronizedFrom(String synchronizedFrom) { this.synchronizedFrom = synchronizedFrom; }
 
     /**
      * Retrieve the {@code table_definitions} property (displayed as '{@literal Table Definitions}') of the object.

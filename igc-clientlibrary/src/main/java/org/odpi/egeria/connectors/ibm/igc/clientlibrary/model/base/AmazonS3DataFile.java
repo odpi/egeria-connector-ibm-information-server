@@ -64,6 +64,9 @@ public class AmazonS3DataFile extends InformationAsset {
     @JsonProperty("include_for_business_lineage")
     protected Boolean includeForBusinessLineage;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("parent_folder")
     protected AmazonS3DataFileFolder parentFolder;
 
@@ -90,6 +93,9 @@ public class AmazonS3DataFile extends InformationAsset {
 
     @JsonProperty("source_modification_date")
     protected Date sourceModificationDate;
+
+    @JsonProperty("synchronized_from")
+    protected String synchronizedFrom;
 
     @JsonProperty("url")
     protected String url;
@@ -270,6 +276,20 @@ public class AmazonS3DataFile extends InformationAsset {
     public void setIncludeForBusinessLineage(Boolean includeForBusinessLineage) { this.includeForBusinessLineage = includeForBusinessLineage; }
 
     /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
+
+    /**
      * Retrieve the {@code parent_folder} property (displayed as '{@literal Parent Folder}') of the object.
      * @return {@code AmazonS3DataFileFolder}
      */
@@ -394,6 +414,20 @@ public class AmazonS3DataFile extends InformationAsset {
      */
     @JsonProperty("source_modification_date")
     public void setSourceModificationDate(Date sourceModificationDate) { this.sourceModificationDate = sourceModificationDate; }
+
+    /**
+     * Retrieve the {@code synchronized_from} property (displayed as '{@literal Synchronized From}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("synchronized_from")
+    public String getSynchronizedFrom() { return this.synchronizedFrom; }
+
+    /**
+     * Set the {@code synchronized_from} property (displayed as {@code Synchronized From}) of the object.
+     * @param synchronizedFrom the value to set
+     */
+    @JsonProperty("synchronized_from")
+    public void setSynchronizedFrom(String synchronizedFrom) { this.synchronizedFrom = synchronizedFrom; }
 
     /**
      * Retrieve the {@code url} property (displayed as '{@literal URL}') of the object.

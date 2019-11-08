@@ -29,6 +29,9 @@ public class OlapMemberSource extends Reference {
     @JsonProperty("data_field")
     protected DataItem dataField;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("olap_member")
     protected BiCollectionMember olapMember;
 
@@ -45,6 +48,20 @@ public class OlapMemberSource extends Reference {
      */
     @JsonProperty("data_field")
     public void setDataField(DataItem dataField) { this.dataField = dataField; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code olap_member} property (displayed as '{@literal OLAP Member}') of the object.

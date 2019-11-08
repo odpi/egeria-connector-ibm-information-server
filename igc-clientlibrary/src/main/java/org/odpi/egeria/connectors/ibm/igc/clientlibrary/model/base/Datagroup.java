@@ -49,6 +49,9 @@ public class Datagroup extends InformationAsset {
     @JsonProperty("name_quoting_char")
     protected String nameQuotingChar;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     /**
      * Retrieve the {@code database_schema} property (displayed as '{@literal Database Schema}') of the object.
      * @return {@code DatabaseSchema}
@@ -104,5 +107,19 @@ public class Datagroup extends InformationAsset {
      */
     @JsonProperty("name_quoting_char")
     public void setNameQuotingChar(String nameQuotingChar) { this.nameQuotingChar = nameQuotingChar; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
 }

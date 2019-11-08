@@ -39,6 +39,9 @@ public class StageType extends Reference {
     @JsonProperty("name")
     protected String name;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("steward")
     protected ItemList<Steward> steward;
 
@@ -103,6 +106,20 @@ public class StageType extends Reference {
      */
     @JsonProperty("name")
     public void setTheName(String name) { this.name = name; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code steward} property (displayed as '{@literal Steward}') of the object.

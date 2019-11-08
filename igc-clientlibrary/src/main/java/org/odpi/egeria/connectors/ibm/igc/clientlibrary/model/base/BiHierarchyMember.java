@@ -33,6 +33,9 @@ public class BiHierarchyMember extends Reference {
     @JsonProperty("child_level")
     protected ItemList<BiLevel> childLevel;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("sequence")
     protected Number sequence;
 
@@ -74,6 +77,20 @@ public class BiHierarchyMember extends Reference {
      */
     @JsonProperty("child_level")
     public void setChildLevel(ItemList<BiLevel> childLevel) { this.childLevel = childLevel; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code sequence} property (displayed as '{@literal Sequence}') of the object.

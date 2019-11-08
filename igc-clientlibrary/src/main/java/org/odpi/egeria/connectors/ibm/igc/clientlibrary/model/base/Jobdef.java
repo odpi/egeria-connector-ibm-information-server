@@ -29,6 +29,9 @@ public class Jobdef extends MainObject {
     @JsonProperty("alias")
     protected ItemList<MainObject> alias;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     /**
      * Retrieve the {@code alias} property (displayed as '{@literal Alias}') of the object.
      * @return {@code ItemList<MainObject>}
@@ -42,5 +45,19 @@ public class Jobdef extends MainObject {
      */
     @JsonProperty("alias")
     public void setAlias(ItemList<MainObject> alias) { this.alias = alias; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
 }

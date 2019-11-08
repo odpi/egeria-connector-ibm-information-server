@@ -27,6 +27,9 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 @JsonTypeName("xsd_attribute_reference")
 public class XsdAttributeReference extends Reference {
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("references_xsd_attribute")
     protected XsdAttribute referencesXsdAttribute;
 
@@ -41,6 +44,20 @@ public class XsdAttributeReference extends Reference {
 
     @JsonProperty("xsd_element")
     protected ItemList<MainObject> xsdElement;
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code references_xsd_attribute} property (displayed as '{@literal XSD Attribute}') of the object.

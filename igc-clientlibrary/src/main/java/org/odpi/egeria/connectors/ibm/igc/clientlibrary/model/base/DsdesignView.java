@@ -44,6 +44,9 @@ public class DsdesignView extends MainObject {
     @JsonProperty("is_top_level")
     protected Boolean isTopLevel;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("next_id")
     protected Number nextId;
 
@@ -163,6 +166,20 @@ public class DsdesignView extends MainObject {
      */
     @JsonProperty("is_top_level")
     public void setIsTopLevel(Boolean isTopLevel) { this.isTopLevel = isTopLevel; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code next_id} property (displayed as '{@literal Next ID}') of the object.

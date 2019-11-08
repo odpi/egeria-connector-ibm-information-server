@@ -29,6 +29,9 @@ public class SystemRole extends MainObject {
     @JsonProperty("defines_role_assignment")
     protected ItemList<RoleAssignment> definesRoleAssignment;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("of_acl_entry")
     protected ItemList<Aclentry> ofAclEntry;
 
@@ -81,6 +84,20 @@ public class SystemRole extends MainObject {
      */
     @JsonProperty("defines_role_assignment")
     public void setDefinesRoleAssignment(ItemList<RoleAssignment> definesRoleAssignment) { this.definesRoleAssignment = definesRoleAssignment; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code of_acl_entry} property (displayed as '{@literal Of Acl Entry}') of the object.

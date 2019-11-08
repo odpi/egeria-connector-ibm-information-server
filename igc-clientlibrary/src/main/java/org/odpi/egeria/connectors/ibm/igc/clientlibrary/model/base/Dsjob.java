@@ -91,6 +91,9 @@ public class Dsjob extends InformationAsset {
     @JsonProperty("mapping_specifications")
     protected ItemList<MainObject> mappingSpecifications;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("optimized_by_jobs")
     protected ItemList<Dsjob> optimizedByJobs;
 
@@ -391,6 +394,20 @@ public class Dsjob extends InformationAsset {
      */
     @JsonProperty("mapping_specifications")
     public void setMappingSpecifications(ItemList<MainObject> mappingSpecifications) { this.mappingSpecifications = mappingSpecifications; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code optimized_by_jobs} property (displayed as '{@literal Optimized by Jobs}') of the object.

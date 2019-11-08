@@ -95,6 +95,9 @@ public class Database extends InformationAsset {
     @JsonProperty("mapped_to_mdm_models")
     protected ItemList<MdmModel> mappedToMdmModels;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("read_by_(design)")
     protected ItemList<InformationAsset> readByDesign;
 
@@ -109,6 +112,9 @@ public class Database extends InformationAsset {
 
     @JsonProperty("suggested_term_assignments")
     protected ItemList<TermAssignment> suggestedTermAssignments;
+
+    @JsonProperty("synchronized_from")
+    protected String synchronizedFrom;
 
     @JsonProperty("written_by_(design)")
     protected ItemList<InformationAsset> writtenByDesign;
@@ -415,6 +421,20 @@ public class Database extends InformationAsset {
     public void setMappedToMdmModels(ItemList<MdmModel> mappedToMdmModels) { this.mappedToMdmModels = mappedToMdmModels; }
 
     /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
+
+    /**
      * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.
      * @return {@code ItemList<InformationAsset>}
      */
@@ -483,6 +503,20 @@ public class Database extends InformationAsset {
      */
     @JsonProperty("suggested_term_assignments")
     public void setSuggestedTermAssignments(ItemList<TermAssignment> suggestedTermAssignments) { this.suggestedTermAssignments = suggestedTermAssignments; }
+
+    /**
+     * Retrieve the {@code synchronized_from} property (displayed as '{@literal Synchronized From}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("synchronized_from")
+    public String getSynchronizedFrom() { return this.synchronizedFrom; }
+
+    /**
+     * Set the {@code synchronized_from} property (displayed as {@code Synchronized From}) of the object.
+     * @param synchronizedFrom the value to set
+     */
+    @JsonProperty("synchronized_from")
+    public void setSynchronizedFrom(String synchronizedFrom) { this.synchronizedFrom = synchronizedFrom; }
 
     /**
      * Retrieve the {@code written_by_(design)} property (displayed as '{@literal Written by (Design)}') of the object.

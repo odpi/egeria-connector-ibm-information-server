@@ -44,6 +44,9 @@ public class DataClassOld extends MainObject {
     @JsonProperty("is_user_defined")
     protected Boolean isUserDefined;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     /**
      * Retrieve the {@code class_code} property (displayed as '{@literal Class Code}') of the object.
      * @return {@code String}
@@ -127,5 +130,19 @@ public class DataClassOld extends MainObject {
      */
     @JsonProperty("is_user_defined")
     public void setIsUserDefined(Boolean isUserDefined) { this.isUserDefined = isUserDefined; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
 }

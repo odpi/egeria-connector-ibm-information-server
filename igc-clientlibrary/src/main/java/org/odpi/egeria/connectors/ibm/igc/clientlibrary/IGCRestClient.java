@@ -14,6 +14,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -141,7 +142,10 @@ public class IGCRestClient {
 
         this.baseURL = baseURL;
         this.authorization = authorization;
-        this.mapper = new ObjectMapper();
+        // We need to allow a single value as an array for a couple cases where one version of IGC uses
+        // an array of values (Strings) and another only has a single String (eg. 'rule_logic' in
+        // 'published_data_rule_definition')
+        this.mapper = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
         this.typeMapper = new ObjectMapper();
         this.registeredPojosByType = new HashMap<>();
         this.typeAndPropertyToAccessor = new HashMap<>();

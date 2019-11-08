@@ -43,11 +43,20 @@ public class PublishedDataRuleDefinition extends InformationAsset {
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
 
+    @JsonProperty("is_valid")
+    protected Boolean isValid;
+
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("publication_date")
     protected Date publicationDate;
 
     @JsonProperty("published")
     protected Boolean published;
+
+    @JsonProperty("root_folder")
+    protected String rootFolder;
 
     @JsonProperty("rule_logic")
     protected List<String> ruleLogic;
@@ -62,6 +71,7 @@ public class PublishedDataRuleDefinition extends InformationAsset {
      *   <li>DRAFT (displayed in the UI as 'DRAFT')</li>
      *   <li>IN_PROCESS (displayed in the UI as 'IN_PROCESS')</li>
      *   <li>REJECTED (displayed in the UI as 'REJECTED')</li>
+     *   <li>SUGGESTED (displayed in the UI as 'SUGGESTED')</li>
      *   <li>ERROR (displayed in the UI as 'ERROR')</li>
      * </ul>
      */
@@ -139,6 +149,34 @@ public class PublishedDataRuleDefinition extends InformationAsset {
     public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
+     * Retrieve the {@code is_valid} property (displayed as '{@literal Is Valid}') of the object.
+     * @return {@code Boolean}
+     */
+    @JsonProperty("is_valid")
+    public Boolean getIsValid() { return this.isValid; }
+
+    /**
+     * Set the {@code is_valid} property (displayed as {@code Is Valid}) of the object.
+     * @param isValid the value to set
+     */
+    @JsonProperty("is_valid")
+    public void setIsValid(Boolean isValid) { this.isValid = isValid; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
+
+    /**
      * Retrieve the {@code publication_date} property (displayed as '{@literal Publication Date}') of the object.
      * @return {@code Date}
      */
@@ -167,14 +205,28 @@ public class PublishedDataRuleDefinition extends InformationAsset {
     public void setPublished(Boolean published) { this.published = published; }
 
     /**
-     * Retrieve the {@code rule_logic} property (displayed as '{@literal Expression}') of the object.
+     * Retrieve the {@code root_folder} property (displayed as '{@literal Root Folder}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("root_folder")
+    public String getRootFolder() { return this.rootFolder; }
+
+    /**
+     * Set the {@code root_folder} property (displayed as {@code Root Folder}) of the object.
+     * @param rootFolder the value to set
+     */
+    @JsonProperty("root_folder")
+    public void setRootFolder(String rootFolder) { this.rootFolder = rootFolder; }
+
+    /**
+     * Retrieve the {@code rule_logic} property (displayed as '{@literal Rule Logic}' or '{@literal Expression}') of the object.
      * @return {@code List<String>}
      */
     @JsonProperty("rule_logic")
     public List<String> getRuleLogic() { return this.ruleLogic; }
 
     /**
-     * Set the {@code rule_logic} property (displayed as {@code Expression}) of the object.
+     * Set the {@code rule_logic} property (displayed as {@code Rule Logic} or {@code Expression}) of the object.
      * @param ruleLogic the value to set
      */
     @JsonProperty("rule_logic")

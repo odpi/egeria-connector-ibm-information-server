@@ -161,6 +161,9 @@ public class AmazonS3DataFileField extends InformationAsset {
     @JsonProperty("minimum_length")
     protected Number minimumLength;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("nbRecordsTested")
     protected List<Number> nbrecordstested;
 
@@ -240,6 +243,9 @@ public class AmazonS3DataFileField extends InformationAsset {
 
     @JsonProperty("selected_classification")
     protected DataClass selectedClassification;
+
+    @JsonProperty("synchronized_from")
+    protected String synchronizedFrom;
 
     @JsonProperty("type")
     protected String type;
@@ -622,6 +628,20 @@ public class AmazonS3DataFileField extends InformationAsset {
     public void setMinimumLength(Number minimumLength) { this.minimumLength = minimumLength; }
 
     /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
+
+    /**
      * Retrieve the {@code nbRecordsTested} property (displayed as '{@literal Number of Records Tested}') of the object.
      * @return {@code List<Number>}
      */
@@ -858,6 +878,20 @@ public class AmazonS3DataFileField extends InformationAsset {
      */
     @JsonProperty("selected_classification")
     public void setSelectedClassification(DataClass selectedClassification) { this.selectedClassification = selectedClassification; }
+
+    /**
+     * Retrieve the {@code synchronized_from} property (displayed as '{@literal Synchronized From}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("synchronized_from")
+    public String getSynchronizedFrom() { return this.synchronizedFrom; }
+
+    /**
+     * Set the {@code synchronized_from} property (displayed as {@code Synchronized From}) of the object.
+     * @param synchronizedFrom the value to set
+     */
+    @JsonProperty("synchronized_from")
+    public void setSynchronizedFrom(String synchronizedFrom) { this.synchronizedFrom = synchronizedFrom; }
 
     /**
      * Retrieve the {@code type} property (displayed as '{@literal Native Type}') of the object.

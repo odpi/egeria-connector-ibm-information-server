@@ -46,6 +46,9 @@ public class XsdUniqueKey extends Reference {
     @JsonProperty("namespace")
     protected String namespace;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("referenced_by_xsd_keys")
     protected ItemList<XsdForeignKey> referencedByXsdKeys;
 
@@ -141,6 +144,20 @@ public class XsdUniqueKey extends Reference {
      */
     @JsonProperty("namespace")
     public void setNamespace(String namespace) { this.namespace = namespace; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code referenced_by_xsd_keys} property (displayed as '{@literal Referenced by XSD Keys}') of the object.

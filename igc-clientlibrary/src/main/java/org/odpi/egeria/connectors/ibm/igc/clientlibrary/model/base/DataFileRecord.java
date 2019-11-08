@@ -90,6 +90,9 @@ public class DataFileRecord extends Datagroup {
     @JsonProperty("qualityScore_bubble")
     protected String qualityscoreBubble;
 
+    @JsonProperty("quality_benchmark")
+    protected List<Number> qualityBenchmark;
+
     @JsonProperty("quality_dimension")
     protected ItemList<QualityProblem> qualityDimension;
 
@@ -116,6 +119,9 @@ public class DataFileRecord extends Datagroup {
 
     @JsonProperty("suggested_term_assignments")
     protected ItemList<TermAssignment> suggestedTermAssignments;
+
+    @JsonProperty("synchronized_from")
+    protected String synchronizedFrom;
 
     @JsonProperty("written_by_(design)")
     protected ItemList<InformationAsset> writtenByDesign;
@@ -394,6 +400,20 @@ public class DataFileRecord extends Datagroup {
     public void setQualityscoreBubble(String qualityscoreBubble) { this.qualityscoreBubble = qualityscoreBubble; }
 
     /**
+     * Retrieve the {@code quality_benchmark} property (displayed as '{@literal Quality Benchmark}') of the object.
+     * @return {@code List<Number>}
+     */
+    @JsonProperty("quality_benchmark")
+    public List<Number> getQualityBenchmark() { return this.qualityBenchmark; }
+
+    /**
+     * Set the {@code quality_benchmark} property (displayed as {@code Quality Benchmark}) of the object.
+     * @param qualityBenchmark the value to set
+     */
+    @JsonProperty("quality_benchmark")
+    public void setQualityBenchmark(List<Number> qualityBenchmark) { this.qualityBenchmark = qualityBenchmark; }
+
+    /**
      * Retrieve the {@code quality_dimension} property (displayed as '{@literal Quality Dimensions}') of the object.
      * @return {@code ItemList<QualityProblem>}
      */
@@ -518,6 +538,20 @@ public class DataFileRecord extends Datagroup {
      */
     @JsonProperty("suggested_term_assignments")
     public void setSuggestedTermAssignments(ItemList<TermAssignment> suggestedTermAssignments) { this.suggestedTermAssignments = suggestedTermAssignments; }
+
+    /**
+     * Retrieve the {@code synchronized_from} property (displayed as '{@literal Synchronized From}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("synchronized_from")
+    public String getSynchronizedFrom() { return this.synchronizedFrom; }
+
+    /**
+     * Set the {@code synchronized_from} property (displayed as {@code Synchronized From}) of the object.
+     * @param synchronizedFrom the value to set
+     */
+    @JsonProperty("synchronized_from")
+    public void setSynchronizedFrom(String synchronizedFrom) { this.synchronizedFrom = synchronizedFrom; }
 
     /**
      * Retrieve the {@code written_by_(design)} property (displayed as '{@literal Written by (Design)}') of the object.

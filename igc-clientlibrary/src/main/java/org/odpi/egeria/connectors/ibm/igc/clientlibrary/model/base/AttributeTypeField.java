@@ -49,6 +49,9 @@ public class AttributeTypeField extends InformationAsset {
     @JsonProperty("length")
     protected Number length;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("required")
     protected Boolean required;
 
@@ -155,6 +158,20 @@ public class AttributeTypeField extends InformationAsset {
      */
     @JsonProperty("length")
     public void setLength(Number length) { this.length = length; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code required} property (displayed as '{@literal Required}') of the object.

@@ -42,6 +42,9 @@ public class RShinyApp extends InformationAsset {
     @JsonProperty("logical_name")
     protected String logicalName;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("package_name")
     protected String packageName;
 
@@ -120,6 +123,20 @@ public class RShinyApp extends InformationAsset {
      */
     @JsonProperty("logical_name")
     public void setLogicalName(String logicalName) { this.logicalName = logicalName; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code package_name} property (displayed as '{@literal Package Name}') of the object.

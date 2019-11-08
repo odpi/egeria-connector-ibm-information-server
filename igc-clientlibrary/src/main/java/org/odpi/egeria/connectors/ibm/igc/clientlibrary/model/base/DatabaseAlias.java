@@ -12,6 +12,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * POJO for the {@code database_alias} asset type in IGC, displayed as '{@literal Database Alias}' in the IGC UI.
@@ -28,7 +29,7 @@ import java.util.Date;
 public class DatabaseAlias extends Datagroup {
 
     @JsonProperty("alias_of_database_tables_or_views")
-    protected Datagroup aliasOfDatabaseTablesOrViews;
+    protected ItemList<Datagroup> aliasOfDatabaseTablesOrViews;
 
     @JsonProperty("database_columns")
     protected ItemList<DataItem> databaseColumns;
@@ -37,7 +38,7 @@ public class DatabaseAlias extends Datagroup {
     protected ItemList<DatabaseColumn> definedForeignKey;
 
     /**
-     * No longer applicable from 11.5.0.2sp5 onwards and 11.7.x.x onwards.
+     * No longer applicable from 11.5.0.2sp5 onwards and 11.7.1.0 onwards.
      * @see #implementedKey
      */
     @Deprecated
@@ -61,6 +62,15 @@ public class DatabaseAlias extends Datagroup {
 
     @JsonProperty("indexes")
     protected ItemList<DatabaseIndex> indexes;
+
+    @JsonProperty("lineage_service_information")
+    protected List<String> lineageServiceInformation;
+
+    @JsonProperty("lineage_service_last_run_date")
+    protected List<Date> lineageServiceLastRunDate;
+
+    @JsonProperty("lineage_service_status")
+    protected List<String> lineageServiceStatus;
 
     @JsonProperty("read_by_(design)")
     protected ItemList<InformationAsset> readByDesign;
@@ -88,17 +98,17 @@ public class DatabaseAlias extends Datagroup {
 
     /**
      * Retrieve the {@code alias_of_database_tables_or_views} property (displayed as '{@literal Alias of Database Tables or Views}') of the object.
-     * @return {@code Datagroup}
+     * @return {@code ItemList<Datagroup>}
      */
     @JsonProperty("alias_of_database_tables_or_views")
-    public Datagroup getAliasOfDatabaseTablesOrViews() { return this.aliasOfDatabaseTablesOrViews; }
+    public ItemList<Datagroup> getAliasOfDatabaseTablesOrViews() { return this.aliasOfDatabaseTablesOrViews; }
 
     /**
      * Set the {@code alias_of_database_tables_or_views} property (displayed as {@code Alias of Database Tables or Views}) of the object.
      * @param aliasOfDatabaseTablesOrViews the value to set
      */
     @JsonProperty("alias_of_database_tables_or_views")
-    public void setAliasOfDatabaseTablesOrViews(Datagroup aliasOfDatabaseTablesOrViews) { this.aliasOfDatabaseTablesOrViews = aliasOfDatabaseTablesOrViews; }
+    public void setAliasOfDatabaseTablesOrViews(ItemList<Datagroup> aliasOfDatabaseTablesOrViews) { this.aliasOfDatabaseTablesOrViews = aliasOfDatabaseTablesOrViews; }
 
     /**
      * Retrieve the {@code database_columns} property (displayed as '{@literal Database Columns}') of the object.
@@ -130,7 +140,7 @@ public class DatabaseAlias extends Datagroup {
 
     /**
      * Retrieve the {@code defined_primary_key} property (displayed as '{@literal Defined Primary Key}') of the object.
-     * No longer applicable from 11.5.0.2sp5 and 11.7.x.x onwards.
+     * No longer applicable from 11.5.0.2sp5 and 11.7.1.0 onwards.
      *
      * @return {@code ItemList<CandidateKey>}
      * @see #getImplementedKey()
@@ -141,7 +151,7 @@ public class DatabaseAlias extends Datagroup {
 
     /**
      * Set the {@code defined_primary_key} property (displayed as {@code Defined Primary Key}) of the object.
-     * No longer applicable from 11.5.0.2sp5 and 11.7.x.x onwards.
+     * No longer applicable from 11.5.0.2sp5 and 11.7.1.0 onwards.
      *
      * @param definedPrimaryKey the value to set
      * @see #setImplementedKey(ItemList)
@@ -233,6 +243,48 @@ public class DatabaseAlias extends Datagroup {
      */
     @JsonProperty("indexes")
     public void setIndexes(ItemList<DatabaseIndex> indexes) { this.indexes = indexes; }
+
+    /**
+     * Retrieve the {@code lineage_service_information} property (displayed as '{@literal Lineage Service Information}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("lineage_service_information")
+    public List<String> getLineageServiceInformation() { return this.lineageServiceInformation; }
+
+    /**
+     * Set the {@code lineage_service_information} property (displayed as {@code Lineage Service Information}) of the object.
+     * @param lineageServiceInformation the value to set
+     */
+    @JsonProperty("lineage_service_information")
+    public void setLineageServiceInformation(List<String> lineageServiceInformation) { this.lineageServiceInformation = lineageServiceInformation; }
+
+    /**
+     * Retrieve the {@code lineage_service_last_run_date} property (displayed as '{@literal Lineage Service Last Run Date}') of the object.
+     * @return {@code List<Date>}
+     */
+    @JsonProperty("lineage_service_last_run_date")
+    public List<Date> getLineageServiceLastRunDate() { return this.lineageServiceLastRunDate; }
+
+    /**
+     * Set the {@code lineage_service_last_run_date} property (displayed as {@code Lineage Service Last Run Date}) of the object.
+     * @param lineageServiceLastRunDate the value to set
+     */
+    @JsonProperty("lineage_service_last_run_date")
+    public void setLineageServiceLastRunDate(List<Date> lineageServiceLastRunDate) { this.lineageServiceLastRunDate = lineageServiceLastRunDate; }
+
+    /**
+     * Retrieve the {@code lineage_service_status} property (displayed as '{@literal Lineage Service Status}') of the object.
+     * @return {@code List<String>}
+     */
+    @JsonProperty("lineage_service_status")
+    public List<String> getLineageServiceStatus() { return this.lineageServiceStatus; }
+
+    /**
+     * Set the {@code lineage_service_status} property (displayed as {@code Lineage Service Status}) of the object.
+     * @param lineageServiceStatus the value to set
+     */
+    @JsonProperty("lineage_service_status")
+    public void setLineageServiceStatus(List<String> lineageServiceStatus) { this.lineageServiceStatus = lineageServiceStatus; }
 
     /**
      * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.

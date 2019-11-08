@@ -49,6 +49,9 @@ public class AttributeType extends InformationAsset {
     @JsonProperty("mdm_model_for_query")
     protected MdmModel mdmModelForQuery;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("referenced_by_attributes")
     protected ItemList<Attribute> referencedByAttributes;
 
@@ -141,6 +144,20 @@ public class AttributeType extends InformationAsset {
      */
     @JsonProperty("mdm_model_for_query")
     public void setMdmModelForQuery(MdmModel mdmModelForQuery) { this.mdmModelForQuery = mdmModelForQuery; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code referenced_by_attributes} property (displayed as '{@literal Referenced by Attributes}') of the object.

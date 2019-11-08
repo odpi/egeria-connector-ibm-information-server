@@ -81,6 +81,9 @@ public class DataFileFolderNobucket extends InformationAsset {
     @JsonProperty("store_type")
     protected String storeType;
 
+    @JsonProperty("synchronized_from")
+    protected String synchronizedFrom;
+
     @JsonProperty("type")
     protected String type;
 
@@ -350,6 +353,20 @@ public class DataFileFolderNobucket extends InformationAsset {
      */
     @JsonProperty("store_type")
     public void setStoreType(String storeType) { this.storeType = storeType; }
+
+    /**
+     * Retrieve the {@code synchronized_from} property (displayed as '{@literal Synchronized From}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("synchronized_from")
+    public String getSynchronizedFrom() { return this.synchronizedFrom; }
+
+    /**
+     * Set the {@code synchronized_from} property (displayed as {@code Synchronized From}) of the object.
+     * @param synchronizedFrom the value to set
+     */
+    @JsonProperty("synchronized_from")
+    public void setSynchronizedFrom(String synchronizedFrom) { this.synchronizedFrom = synchronizedFrom; }
 
     /**
      * Retrieve the {@code type} property (displayed as '{@literal Type}') of the object.

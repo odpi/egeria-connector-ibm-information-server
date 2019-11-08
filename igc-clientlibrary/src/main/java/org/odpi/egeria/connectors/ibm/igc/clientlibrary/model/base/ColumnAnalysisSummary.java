@@ -109,6 +109,9 @@ public class ColumnAnalysisSummary extends Reference {
     @JsonProperty("modified_on")
     protected Date modifiedOn;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("number_of_complete_values")
     protected Number numberOfCompleteValues;
 
@@ -411,6 +414,20 @@ public class ColumnAnalysisSummary extends Reference {
      */
     @JsonProperty("modified_on")
     public void setModifiedOn(Date modifiedOn) { this.modifiedOn = modifiedOn; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code number_of_complete_values} property (displayed as '{@literal Number of Complete Values}') of the object.

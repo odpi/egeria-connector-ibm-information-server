@@ -29,6 +29,9 @@ public class ParameterSet2 extends MainObject {
     @JsonProperty("has_parameter_def")
     protected ItemList<Parameter> hasParameterDef;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("used_as_parameter_def")
     protected ItemList<Parameter> usedAsParameterDef;
 
@@ -45,6 +48,20 @@ public class ParameterSet2 extends MainObject {
      */
     @JsonProperty("has_parameter_def")
     public void setHasParameterDef(ItemList<Parameter> hasParameterDef) { this.hasParameterDef = hasParameterDef; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code used_as_parameter_def} property (displayed as '{@literal Used As Parameter Def}') of the object.

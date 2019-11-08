@@ -50,11 +50,17 @@ public class InformationGovernanceRule extends InformationAsset {
     @JsonProperty("language")
     protected String language;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("referencing_policies")
     protected ItemList<InformationGovernancePolicy> referencingPolicies;
 
     @JsonProperty("related_rules")
     protected ItemList<InformationGovernanceRule> relatedRules;
+
+    @JsonProperty("translations")
+    protected ItemList<InformationGovernanceRule> translations;
 
     /**
      * Valid values are:
@@ -149,6 +155,20 @@ public class InformationGovernanceRule extends InformationAsset {
     public void setLanguage(String language) { this.language = language; }
 
     /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
+
+    /**
      * Retrieve the {@code referencing_policies} property (displayed as '{@literal Referencing Policies}') of the object.
      * @return {@code ItemList<InformationGovernancePolicy>}
      */
@@ -175,6 +195,20 @@ public class InformationGovernanceRule extends InformationAsset {
      */
     @JsonProperty("related_rules")
     public void setRelatedRules(ItemList<InformationGovernanceRule> relatedRules) { this.relatedRules = relatedRules; }
+
+    /**
+     * Retrieve the {@code translations} property (displayed as '{@literal Translations}') of the object.
+     * @return {@code ItemList<InformationGovernanceRule>}
+     */
+    @JsonProperty("translations")
+    public ItemList<InformationGovernanceRule> getTranslations() { return this.translations; }
+
+    /**
+     * Set the {@code translations} property (displayed as {@code Translations}) of the object.
+     * @param translations the value to set
+     */
+    @JsonProperty("translations")
+    public void setTranslations(ItemList<InformationGovernanceRule> translations) { this.translations = translations; }
 
     /**
      * Retrieve the {@code workflow_current_state} property (displayed as '{@literal Workflow Current State}') of the object.

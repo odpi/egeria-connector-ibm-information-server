@@ -27,6 +27,40 @@ import java.util.Date;
 @JsonTypeName("tuple_attribute")
 public class TupleAttribute extends InformationAsset {
 
+    /**
+     * Valid values are:
+     * <ul>
+     *   <li>boolean (displayed in the UI as 'boolean')</li>
+     *   <li>enum (displayed in the UI as 'enum')</li>
+     *   <li>int8 (displayed in the UI as 'int8')</li>
+     *   <li>int16 (displayed in the UI as 'int16')</li>
+     *   <li>int32 (displayed in the UI as 'int32')</li>
+     *   <li>int64 (displayed in the UI as 'int64')</li>
+     *   <li>uint8 (displayed in the UI as 'uint8')</li>
+     *   <li>uint16 (displayed in the UI as 'uint16')</li>
+     *   <li>uint32 (displayed in the UI as 'uint32')</li>
+     *   <li>uint64 (displayed in the UI as 'uint64')</li>
+     *   <li>float32 (displayed in the UI as 'float32')</li>
+     *   <li>float64 (displayed in the UI as 'float64')</li>
+     *   <li>decimal32 (displayed in the UI as 'decimal32')</li>
+     *   <li>decimal64 (displayed in the UI as 'decimal64')</li>
+     *   <li>decimal128 (displayed in the UI as 'decimal128')</li>
+     *   <li>complex32 (displayed in the UI as 'complex32')</li>
+     *   <li>complex64 (displayed in the UI as 'complex64')</li>
+     *   <li>timestamp (displayed in the UI as 'timestamp')</li>
+     *   <li>rstring (displayed in the UI as 'rstring')</li>
+     *   <li>ustring (displayed in the UI as 'ustring')</li>
+     *   <li>blob (displayed in the UI as 'blob')</li>
+     *   <li>xml (displayed in the UI as 'xml')</li>
+     *   <li>tuple (displayed in the UI as 'tuple')</li>
+     *   <li>list (displayed in the UI as 'list')</li>
+     *   <li>set (displayed in the UI as 'set')</li>
+     *   <li>map (displayed in the UI as 'map')</li>
+     * </ul>
+     */
+    @JsonProperty("collection_type")
+    protected String collectionType;
+
     @JsonProperty("impacted_by")
     protected ItemList<InformationAsset> impactedBy;
 
@@ -35,6 +69,12 @@ public class TupleAttribute extends InformationAsset {
 
     @JsonProperty("in_collections")
     protected ItemList<Collection> inCollections;
+
+    @JsonProperty("length")
+    protected Number length;
+
+    @JsonProperty("native_id")
+    protected String nativeId;
 
     @JsonProperty("read_by_(design)")
     protected ItemList<InformationAsset> readByDesign;
@@ -57,6 +97,40 @@ public class TupleAttribute extends InformationAsset {
     @JsonProperty("tuple_or_tuple_attribute")
     protected ItemList<MainObject> tupleOrTupleAttribute;
 
+    /**
+     * Valid values are:
+     * <ul>
+     *   <li>boolean (displayed in the UI as 'boolean')</li>
+     *   <li>enum (displayed in the UI as 'enum')</li>
+     *   <li>int8 (displayed in the UI as 'int8')</li>
+     *   <li>int16 (displayed in the UI as 'int16')</li>
+     *   <li>int32 (displayed in the UI as 'int32')</li>
+     *   <li>int64 (displayed in the UI as 'int64')</li>
+     *   <li>uint8 (displayed in the UI as 'uint8')</li>
+     *   <li>uint16 (displayed in the UI as 'uint16')</li>
+     *   <li>uint32 (displayed in the UI as 'uint32')</li>
+     *   <li>uint64 (displayed in the UI as 'uint64')</li>
+     *   <li>float32 (displayed in the UI as 'float32')</li>
+     *   <li>float64 (displayed in the UI as 'float64')</li>
+     *   <li>decimal32 (displayed in the UI as 'decimal32')</li>
+     *   <li>decimal64 (displayed in the UI as 'decimal64')</li>
+     *   <li>decimal128 (displayed in the UI as 'decimal128')</li>
+     *   <li>complex32 (displayed in the UI as 'complex32')</li>
+     *   <li>complex64 (displayed in the UI as 'complex64')</li>
+     *   <li>timestamp (displayed in the UI as 'timestamp')</li>
+     *   <li>rstring (displayed in the UI as 'rstring')</li>
+     *   <li>ustring (displayed in the UI as 'ustring')</li>
+     *   <li>blob (displayed in the UI as 'blob')</li>
+     *   <li>xml (displayed in the UI as 'xml')</li>
+     *   <li>tuple (displayed in the UI as 'tuple')</li>
+     *   <li>list (displayed in the UI as 'list')</li>
+     *   <li>set (displayed in the UI as 'set')</li>
+     *   <li>map (displayed in the UI as 'map')</li>
+     * </ul>
+     */
+    @JsonProperty("type")
+    protected String type;
+
     @JsonProperty("written_by_(design)")
     protected ItemList<InformationAsset> writtenByDesign;
 
@@ -68,6 +142,20 @@ public class TupleAttribute extends InformationAsset {
 
     @JsonProperty("written_by_(user_defined)")
     protected ItemList<InformationAsset> writtenByUserDefined;
+
+    /**
+     * Retrieve the {@code collection_type} property (displayed as '{@literal Collection Type}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("collection_type")
+    public String getCollectionType() { return this.collectionType; }
+
+    /**
+     * Set the {@code collection_type} property (displayed as {@code Collection Type}) of the object.
+     * @param collectionType the value to set
+     */
+    @JsonProperty("collection_type")
+    public void setCollectionType(String collectionType) { this.collectionType = collectionType; }
 
     /**
      * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
@@ -110,6 +198,34 @@ public class TupleAttribute extends InformationAsset {
      */
     @JsonProperty("in_collections")
     public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
+
+    /**
+     * Retrieve the {@code length} property (displayed as '{@literal Length}') of the object.
+     * @return {@code Number}
+     */
+    @JsonProperty("length")
+    public Number getLength() { return this.length; }
+
+    /**
+     * Set the {@code length} property (displayed as {@code Length}) of the object.
+     * @param length the value to set
+     */
+    @JsonProperty("length")
+    public void setLength(Number length) { this.length = length; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.
@@ -208,6 +324,20 @@ public class TupleAttribute extends InformationAsset {
      */
     @JsonProperty("tuple_or_tuple_attribute")
     public void setTupleOrTupleAttribute(ItemList<MainObject> tupleOrTupleAttribute) { this.tupleOrTupleAttribute = tupleOrTupleAttribute; }
+
+    /**
+     * Retrieve the {@code type} property (displayed as '{@literal Type}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("type")
+    public String getTheType() { return this.type; }
+
+    /**
+     * Set the {@code type} property (displayed as {@code Type}) of the object.
+     * @param type the value to set
+     */
+    @JsonProperty("type")
+    public void setTheType(String type) { this.type = type; }
 
     /**
      * Retrieve the {@code written_by_(design)} property (displayed as '{@literal Written by (Design)}') of the object.

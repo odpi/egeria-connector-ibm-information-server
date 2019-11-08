@@ -79,6 +79,9 @@ public class IdocSegmentType extends InformationAsset {
     @JsonProperty("min_/_max")
     protected List<String> minMax;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("of_idoc_segment_type")
     protected DataItemDefinition ofIdocSegmentType;
 
@@ -226,6 +229,20 @@ public class IdocSegmentType extends InformationAsset {
      */
     @JsonProperty("min_/_max")
     public void setMinMax(List<String> minMax) { this.minMax = minMax; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code of_idoc_segment_type} property (displayed as '{@literal IDoc Segment Type}') of the object.

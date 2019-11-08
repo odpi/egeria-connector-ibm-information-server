@@ -45,6 +45,9 @@ public class Filter extends InformationAsset {
     @JsonProperty("instance")
     protected Instance instance;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("sync_state")
     protected String syncState;
 
@@ -137,6 +140,20 @@ public class Filter extends InformationAsset {
      */
     @JsonProperty("instance")
     public void setInstance(Instance instance) { this.instance = instance; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code sync_state} property (displayed as '{@literal State}') of the object.

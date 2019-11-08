@@ -29,6 +29,9 @@ public class Derivation extends Reference {
     @JsonProperty("expression")
     protected String expression;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     /**
      * Retrieve the {@code expression} property (displayed as '{@literal Expression}') of the object.
      * @return {@code String}
@@ -42,5 +45,19 @@ public class Derivation extends Reference {
      */
     @JsonProperty("expression")
     public void setExpression(String expression) { this.expression = expression; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
 }

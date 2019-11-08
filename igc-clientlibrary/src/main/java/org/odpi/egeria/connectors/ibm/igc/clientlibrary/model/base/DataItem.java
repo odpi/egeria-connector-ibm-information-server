@@ -114,6 +114,9 @@ public class DataItem extends InformationAsset {
     @JsonProperty("minimum_length")
     protected Number minimumLength;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     /**
      * Valid values are:
      * <ul>
@@ -201,14 +204,14 @@ public class DataItem extends InformationAsset {
     public void setAllowsNullValues(Boolean allowsNullValues) { this.allowsNullValues = allowsNullValues; }
 
     /**
-     * Retrieve the {@code based_on} property (displayed as '{@literal Based On }') of the object.
+     * Retrieve the {@code based_on} property (displayed as '{@literal Based On}') of the object.
      * @return {@code String}
      */
     @JsonProperty("based_on")
     public String getBasedOn() { return this.basedOn; }
 
     /**
-     * Set the {@code based_on} property (displayed as {@code Based On }) of the object.
+     * Set the {@code based_on} property (displayed as {@code Based On}) of the object.
      * @param basedOn the value to set
      */
     @JsonProperty("based_on")
@@ -395,6 +398,20 @@ public class DataItem extends InformationAsset {
      */
     @JsonProperty("minimum_length")
     public void setMinimumLength(Number minimumLength) { this.minimumLength = minimumLength; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code odbc_type} property (displayed as '{@literal ODBC Type}') of the object.

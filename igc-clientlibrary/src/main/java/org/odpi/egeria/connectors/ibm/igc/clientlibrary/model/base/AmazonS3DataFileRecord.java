@@ -81,6 +81,9 @@ public class AmazonS3DataFileRecord extends InformationAsset {
     @JsonProperty("include_for_business_lineage")
     protected Boolean includeForBusinessLineage;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("nbRecordTested")
     protected List<Number> nbrecordtested;
 
@@ -104,6 +107,9 @@ public class AmazonS3DataFileRecord extends InformationAsset {
 
     @JsonProperty("rowCount")
     protected List<Number> rowcount;
+
+    @JsonProperty("synchronized_from")
+    protected String synchronizedFrom;
 
     @JsonProperty("written_by_(design)")
     protected ItemList<InformationAsset> writtenByDesign;
@@ -340,6 +346,20 @@ public class AmazonS3DataFileRecord extends InformationAsset {
     public void setIncludeForBusinessLineage(Boolean includeForBusinessLineage) { this.includeForBusinessLineage = includeForBusinessLineage; }
 
     /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
+
+    /**
      * Retrieve the {@code nbRecordTested} property (displayed as '{@literal Number of Records Tested}') of the object.
      * @return {@code List<Number>}
      */
@@ -450,6 +470,20 @@ public class AmazonS3DataFileRecord extends InformationAsset {
      */
     @JsonProperty("rowCount")
     public void setRowcount(List<Number> rowcount) { this.rowcount = rowcount; }
+
+    /**
+     * Retrieve the {@code synchronized_from} property (displayed as '{@literal Synchronized From}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("synchronized_from")
+    public String getSynchronizedFrom() { return this.synchronizedFrom; }
+
+    /**
+     * Set the {@code synchronized_from} property (displayed as {@code Synchronized From}) of the object.
+     * @param synchronizedFrom the value to set
+     */
+    @JsonProperty("synchronized_from")
+    public void setSynchronizedFrom(String synchronizedFrom) { this.synchronizedFrom = synchronizedFrom; }
 
     /**
      * Retrieve the {@code written_by_(design)} property (displayed as '{@literal Written by (Design)}') of the object.

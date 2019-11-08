@@ -62,6 +62,9 @@ public class InvDataRuleDefinition extends Reference {
     @JsonProperty("name")
     protected String name;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("project")
     protected String project;
 
@@ -84,6 +87,7 @@ public class InvDataRuleDefinition extends Reference {
      *   <li>DRAFT (displayed in the UI as 'DRAFT')</li>
      *   <li>IN_PROCESS (displayed in the UI as 'IN_PROCESS')</li>
      *   <li>REJECTED (displayed in the UI as 'REJECTED')</li>
+     *   <li>SUGGESTED (displayed in the UI as 'SUGGESTED')</li>
      *   <li>ERROR (displayed in the UI as 'ERROR')</li>
      * </ul>
      */
@@ -243,6 +247,20 @@ public class InvDataRuleDefinition extends Reference {
      */
     @JsonProperty("name")
     public void setTheName(String name) { this.name = name; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code project} property (displayed as '{@literal Project}') of the object.

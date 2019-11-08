@@ -47,6 +47,9 @@ public class Category extends InformationAsset {
     @JsonProperty("language")
     protected String language;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("parent_category")
     protected Category parentCategory;
 
@@ -55,6 +58,9 @@ public class Category extends InformationAsset {
 
     @JsonProperty("terms")
     protected ItemList<Term> terms;
+
+    @JsonProperty("translations")
+    protected ItemList<Category> translations;
 
     /**
      * Valid values are:
@@ -135,6 +141,20 @@ public class Category extends InformationAsset {
     public void setLanguage(String language) { this.language = language; }
 
     /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
+
+    /**
      * Retrieve the {@code parent_category} property (displayed as '{@literal Parent Category}') of the object.
      * @return {@code Category}
      */
@@ -175,6 +195,20 @@ public class Category extends InformationAsset {
      */
     @JsonProperty("terms")
     public void setTerms(ItemList<Term> terms) { this.terms = terms; }
+
+    /**
+     * Retrieve the {@code translations} property (displayed as '{@literal Translations}') of the object.
+     * @return {@code ItemList<Category>}
+     */
+    @JsonProperty("translations")
+    public ItemList<Category> getTranslations() { return this.translations; }
+
+    /**
+     * Set the {@code translations} property (displayed as {@code Translations}) of the object.
+     * @param translations the value to set
+     */
+    @JsonProperty("translations")
+    public void setTranslations(ItemList<Category> translations) { this.translations = translations; }
 
     /**
      * Retrieve the {@code workflow_current_state} property (displayed as '{@literal Workflow Current State}') of the object.

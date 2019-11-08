@@ -46,6 +46,9 @@ public class CompositeView extends InformationAsset {
     @JsonProperty("member_type")
     protected MemberType memberType;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     /**
      * Valid values are:
      * <ul>
@@ -131,6 +134,20 @@ public class CompositeView extends InformationAsset {
      */
     @JsonProperty("member_type")
     public void setMemberType(MemberType memberType) { this.memberType = memberType; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code type} property (displayed as '{@literal Type}') of the object.

@@ -65,6 +65,9 @@ public class Host extends InformationAsset {
     @JsonProperty("location")
     protected String location;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("network_node")
     protected String networkNode;
 
@@ -216,6 +219,20 @@ public class Host extends InformationAsset {
      */
     @JsonProperty("location")
     public void setLocation(String location) { this.location = location; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code network_node} property (displayed as '{@literal Network Node}') of the object.

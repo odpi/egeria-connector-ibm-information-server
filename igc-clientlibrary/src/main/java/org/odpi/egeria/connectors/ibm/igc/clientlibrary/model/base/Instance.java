@@ -39,6 +39,9 @@ public class Instance extends InformationAsset {
     @JsonProperty("infosets")
     protected ItemList<Infoset> infosets;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("primary_contact")
     protected String primaryContact;
 
@@ -112,6 +115,20 @@ public class Instance extends InformationAsset {
      */
     @JsonProperty("infosets")
     public void setInfosets(ItemList<Infoset> infosets) { this.infosets = infosets; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code primary_contact} property (displayed as '{@literal Primary Contact}') of the object.

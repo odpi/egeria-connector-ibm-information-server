@@ -53,6 +53,9 @@ public class Function extends MainObject {
     @JsonProperty("module_path")
     protected String modulePath;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     @JsonProperty("platform_type")
     protected String platformType;
 
@@ -193,6 +196,20 @@ public class Function extends MainObject {
      */
     @JsonProperty("module_path")
     public void setModulePath(String modulePath) { this.modulePath = modulePath; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code platform_type} property (displayed as '{@literal Platform Type}') of the object.

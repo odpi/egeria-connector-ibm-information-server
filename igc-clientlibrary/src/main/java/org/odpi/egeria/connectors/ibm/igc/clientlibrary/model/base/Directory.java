@@ -32,6 +32,9 @@ public class Directory extends MainObject {
     @JsonProperty("has_principal")
     protected ItemList<Steward> hasPrincipal;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     /**
      * Retrieve the {@code has_directory_provider_configuration} property (displayed as '{@literal Has Directory Provider Configuration}') of the object.
      * @return {@code Directoryproviderconfiguration}
@@ -59,5 +62,19 @@ public class Directory extends MainObject {
      */
     @JsonProperty("has_principal")
     public void setHasPrincipal(ItemList<Steward> hasPrincipal) { this.hasPrincipal = hasPrincipal; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
 }

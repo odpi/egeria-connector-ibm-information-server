@@ -82,6 +82,9 @@ public class PhysicalDomain extends Reference {
     @JsonProperty("name")
     protected String name;
 
+    @JsonProperty("native_id")
+    protected String nativeId;
+
     /**
      * Valid values are:
      * <ul>
@@ -251,6 +254,20 @@ public class PhysicalDomain extends Reference {
      */
     @JsonProperty("name")
     public void setTheName(String name) { this.name = name; }
+
+    /**
+     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("native_id")
+    public String getNativeId() { return this.nativeId; }
+
+    /**
+     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
+     * @param nativeId the value to set
+     */
+    @JsonProperty("native_id")
+    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code odbc_type} property (displayed as '{@literal ODBC Type}') of the object.
