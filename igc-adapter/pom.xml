@@ -85,12 +85,12 @@
                     <execution>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <zip basedir="src/main/resources/bundleOMRS/"
                                      destfile="src/main/resources/OMRS.zip"
                                      includes="**/*">
                                 </zip>
-                            </tasks>
+                            </target>
                         </configuration>
                         <goals>
                             <goal>run</goal>

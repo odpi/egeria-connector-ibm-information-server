@@ -316,10 +316,11 @@ public class IGCRestClient {
     }
 
     /**
-     * Attempt to convert the JSON string into a Java object, based on the registered POJOs.
+     * Attempt to convert the JSON string into a Java object.
      *
      * @param json the JSON string to convert
-     * @return Reference - an IGC object
+     * @param <T> the type of POJO into which to read
+     * @return T - an IGC object that is at least a Reference, but can be more specific
      */
     public <T extends Reference> T readJSONIntoPOJO(String json) {
         T reference = null;
