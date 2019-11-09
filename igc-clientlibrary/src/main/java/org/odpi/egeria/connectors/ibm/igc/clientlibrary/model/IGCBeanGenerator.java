@@ -7,6 +7,8 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.*;
 import org.odpi.openmetadata.http.HttpHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.util.HtmlUtils;
 
 import java.io.BufferedWriter;
@@ -24,6 +26,8 @@ import java.util.*;
  * JSON payloads.
  */
 public class IGCBeanGenerator {
+
+    private static final Logger log = LoggerFactory.getLogger(IGCBeanGenerator.class);
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -80,9 +84,9 @@ public class IGCBeanGenerator {
         // First ensure the target directory has been created / exists
         File dir = new File(BASE_DIRECTORY);
         if (!dir.exists()){
-            System.out.println("Creating directory: " + BASE_DIRECTORY);
+            log.info("Creating directory: " + BASE_DIRECTORY);
             if (!dir.mkdirs()) {
-                System.err.println("Unable to create target directory: " + BASE_DIRECTORY);
+                log.error("Unable to create target directory: {}", BASE_DIRECTORY);
             }
         }
 
@@ -113,7 +117,7 @@ public class IGCBeanGenerator {
         for (String superTypeName : IGCRestConstants.getSuperTypes()) {
             String superTypeClassName = IGCRestConstants.getClassNameForAssetType(superTypeName);
             if (!superTypeClassName.equals("Reference")) {
-                System.out.println("Injecting subtype information into " + superTypeClassName + "...");
+                log.info("Injecting subtype information into {}...", superTypeClassName);
                 injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + superTypeClassName + ".java"), superTypeToSubTypeToClassName.get(superTypeName));
             }
         }
@@ -122,7 +126,7 @@ public class IGCBeanGenerator {
         // actually generated)
         Path refPath = Paths.get(COMMON_DIRECTORY + File.separator + "Reference.java");
         removeInjectedSubtypes(refPath);
-        System.out.println("Injecting subtype information into Reference...");
+        log.info("Injecting subtype information into Reference...");
         injectSubTypes(refPath, superTypeToSubTypeToClassName.get("reference"));
 
         igcRestClient.disconnect();
@@ -136,7 +140,7 @@ public class IGCBeanGenerator {
         String id   = typeDetails.getId();
         String name = typeDetails.getName();
 
-        System.out.println("Processing type: " + id);
+        log.info("Processing type: {}", id);
 
         String className = IGCRestConstants.getClassNameForAssetType(id);
 
@@ -228,8 +232,7 @@ public class IGCBeanGenerator {
                     fs.append(System.lineSeparator());
                 }
             } catch (IOException e) {
-                System.err.println("Unable to append property details.");
-                e.printStackTrace();
+                log.error("Unable to append property details.", e);
             }
 
             if (!superTypeToSubTypeToClassName.containsKey(superType)) {
@@ -241,8 +244,7 @@ public class IGCBeanGenerator {
             fs.append(System.lineSeparator());
 
         } catch (IOException e) {
-            System.err.println("Unable to open file output: " + filename);
-            e.printStackTrace();
+            log.error("Unable to open file output: {}", filename, e);
         }
 
     }
@@ -277,10 +279,10 @@ public class IGCBeanGenerator {
         if (name != null
                 && !IGCRestConstants.getPropertiesToIgnore().contains(name)
                 && !CORE_TO_IGNORE.contains(name)) {
-            //System.out.println(" ... adding property: " + property.getName());
+            log.debug(" ... adding property: {}", property.getName());
             String javaType = IGCRestConstants.getJavaTypeForProperty(property);
             if (javaType == null) {
-                System.err.println("Unable to determine Java type for: " + property);
+                log.error("Unable to determine Java type for: {}", property);
             } else {
                 detail = new PropertyDetail();
                 String propNameActual = property.getName();
@@ -563,8 +565,7 @@ public class IGCBeanGenerator {
             lines.add(position, "})");
             Files.write(path, lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            System.err.println("Unable to inject subtypes into file: " + path);
-            e.printStackTrace();
+            log.error("Unable to inject subtypes into file: {}", path, e);
         }
 
     }
@@ -612,8 +613,7 @@ public class IGCBeanGenerator {
             }
             Files.write(path, lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            System.err.println("Unable to remove injected subtypes from file: " + path);
-            e.printStackTrace();
+            log.error("Unable to remove injected subtypes from file: {}", path, e);
         }
 
     }
