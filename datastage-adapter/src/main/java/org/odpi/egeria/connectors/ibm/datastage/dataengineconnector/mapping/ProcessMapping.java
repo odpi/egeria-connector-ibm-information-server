@@ -3,8 +3,8 @@
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DSJob;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.openmetadata.accessservices.dataengine.model.*;
 import org.odpi.openmetadata.accessservices.dataengine.model.Process;
 import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.model.DataEngineLineageMappings;
@@ -158,7 +158,7 @@ public class ProcessMapping extends BaseMapping {
                                           Set<LineageMapping> lineageMappings) {
         String stageNameSuffix = "_" + stage.getName();
         // Setup an x_PORT for each x_link into / out of the stage
-        ReferenceList links = (ReferenceList) igcRestClient.getPropertyByName(stage, linkProperty);
+        ItemList<Reference> links = (ItemList<Reference>) igcRestClient.getPropertyByName(stage, linkProperty);
         for (Reference linkRef : links.getItems()) {
             Reference linkObjFull = job.getLinkByRid(linkRef.getId());
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, linkObjFull, portType, stageNameSuffix);
@@ -190,7 +190,7 @@ public class ProcessMapping extends BaseMapping {
         String stageNameSuffix = "_" + stage.getName();
         // Setup an x_PORT for any data stores that are used by design as sources / targets
         String fullyQualifiedStageName = getFullyQualifiedName(stage);
-        ReferenceList stores = (ReferenceList) igcRestClient.getPropertyByName(stage, stageProperty);
+        ItemList<Reference> stores = (ItemList<Reference>) igcRestClient.getPropertyByName(stage, stageProperty);
         for (Reference storeRef : stores.getItems()) {
             List<Reference> fieldsForStore = job.getFieldsForStore(storeRef.getId());
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, stage, portType, fieldsForStore, fullyQualifiedStageName);

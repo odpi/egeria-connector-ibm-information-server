@@ -9,8 +9,8 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.Sche
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -144,10 +144,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 this.igcRestClient.setDefaultPageSize(100);
             }
             // Register the types we'll use as part of job processing
-            for (String lineageAssetType : getLineageAssetTypes()) {
+            /*for (String lineageAssetType : getLineageAssetTypes()) {
                 Class pojo = igcRestClient.findPOJOForType(lineageAssetType);
                 igcRestClient.registerPOJO(pojo);
-            }
+            }*/
         } else {
             DataStageErrorCode errorCode = DataStageErrorCode.CONNECTION_FAILURE;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
@@ -343,9 +343,9 @@ public class DataStageConnector extends DataEngineConnectorBase {
      *
      * @param from the date and time from which to look for changed jobs
      * @param to the date and time up to which to look for changed jobs
-     * @return ReferenceList
+     * @return {@ItemList<Reference>}
      */
-    private ReferenceList getChangedJobs(Date from, Date to) {
+    private ItemList<Reference> getChangedJobs(Date from, Date to) {
         long fromTime = 0;
         long toTime = to.getTime();
         // TODO: may need to modify search criteria for job retrieval to pick up jobs used in changed sequences
@@ -369,7 +369,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      *
      * @param jobs the changed job details to cache
      */
-    private void cacheChangedJobs(ReferenceList jobs) {
+    private void cacheChangedJobs(ItemList<Reference> jobs) {
 
         // TODO: need to keep an eye on how fast this may consume memory, and may need to determine some other way
         //  to batch up
@@ -395,11 +395,11 @@ public class DataStageConnector extends DataEngineConnectorBase {
         if (log.isDebugEnabled()) { log.debug("Retrieving job details for: {}", job.getId()); }
 
         String jobRid = job.getId();
-        ReferenceList stages = getStageDetailsForJob(jobRid);
-        ReferenceList links = getLinkDetailsForJob(jobRid);
-        ReferenceList stageCols = getStageColumnDetailsForLinks(jobRid);
+        ItemList<Reference> stages = getStageDetailsForJob(jobRid);
+        ItemList<Reference> links = getLinkDetailsForJob(jobRid);
+        ItemList<Reference> stageCols = getStageColumnDetailsForLinks(jobRid);
 
-        Map<String, ReferenceList> dataStoreDetailsMap = new HashMap<>();
+        Map<String, ItemList<Reference>> dataStoreDetailsMap = new HashMap<>();
         if (!job.getType().equals("sequence_job")) {
             mapDataStoreDetailsForJob(job, "reads_from_(design)", dataStoreDetailsMap);
             mapDataStoreDetailsForJob(job, "writes_to_(design)", dataStoreDetailsMap);
@@ -407,7 +407,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
         // Flatten the list of data store details
         List<Reference> dataStoreDetails = new ArrayList<>();
-        for (ReferenceList referenceList : dataStoreDetailsMap.values()) {
+        for (ItemList<Reference> referenceList : dataStoreDetailsMap.values()) {
             dataStoreDetails.addAll(referenceList.getItems());
         }
 
@@ -528,16 +528,16 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * Retrieve a listing of the stages within a particular DataStage job.
      *
      * @param jobRid the RID of the job for which to retrieve stage details
-     * @return ReferenceList
+     * @return {@ItemList<Reference>}
      */
-    private ReferenceList getStageDetailsForJob(String jobRid) {
+    private ItemList<Reference> getStageDetailsForJob(String jobRid) {
         if (log.isDebugEnabled()) { log.debug("Retrieving stage details for job: {}", jobRid); }
         IGCSearch igcSearch = new IGCSearch("stage");
         igcSearch.addProperties(DSStage.getSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("job_or_container", "=", jobRid);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
-        ReferenceList stages = igcRestClient.search(igcSearch);
+        ItemList<Reference> stages = igcRestClient.search(igcSearch);
         stages.getAllPages(igcRestClient);
         return stages;
     }
@@ -546,16 +546,16 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * Retrieve a listing of the links within a particular DataStage job.
      *
      * @param jobRid the RID of the job for which to retrieve link details
-     * @return ReferenceList
+     * @return {@code ItemList<Reference>}
      */
-    private ReferenceList getLinkDetailsForJob(String jobRid) {
+    private ItemList<Reference> getLinkDetailsForJob(String jobRid) {
         if (log.isDebugEnabled()) { log.debug("Retrieving link details for job: {}", jobRid); }
         IGCSearch igcSearch = new IGCSearch("link");
         igcSearch.addProperties(DSLink.getSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("job_or_container", "=", jobRid);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
-        ReferenceList links = igcRestClient.search(igcSearch);
+        ItemList<Reference> links = igcRestClient.search(igcSearch);
         links.getAllPages(igcRestClient);
         return links;
     }
@@ -564,16 +564,16 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * Retrieve a listing of the stage columns within a particular DataStage job.
      *
      * @param jobRid the RID of the job for which to retrieve stage column details
-     * @return ReferenceList
+     * @return {@code ItemList<Reference>}
      */
-    private ReferenceList getStageColumnDetailsForLinks(String jobRid) {
+    private ItemList<Reference> getStageColumnDetailsForLinks(String jobRid) {
         if (log.isDebugEnabled()) { log.debug("Retrieving stage column details for job: {}", jobRid); }
         IGCSearch igcSearch = new IGCSearch("ds_stage_column");
         igcSearch.addProperties(DSStageColumn.getSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("link.job_or_container", "=", jobRid);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
-        ReferenceList stageCols = igcRestClient.search(igcSearch);
+        ItemList<Reference> stageCols = igcRestClient.search(igcSearch);
         stageCols.getAllPages(igcRestClient);
         return stageCols;
     }
@@ -582,16 +582,16 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * Retrieve a listing of database columns within a particular database table.
      *
      * @param tableRid the RID of the database table for which to retrieve column details
-     * @return ReferenceList
+     * @return {@code ItemList<Reference>}
      */
-    private ReferenceList getColumnsForTable(String tableRid) {
+    private ItemList<Reference> getColumnsForTable(String tableRid) {
         if (log.isDebugEnabled()) { log.debug("Retrieving column details for table: {}", tableRid); }
         IGCSearch igcSearch = new IGCSearch("database_column");
         igcSearch.addProperties(DatabaseColumn.getSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("database_table_or_view", "=", tableRid);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
-        ReferenceList columns = igcRestClient.search(igcSearch);
+        ItemList<Reference> columns = igcRestClient.search(igcSearch);
         columns.getAllPages(igcRestClient);
         return columns;
     }
@@ -600,16 +600,16 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * Retrieve a listing of file fields within a particular file record.
      *
      * @param recordRid the RID of the data file record for which to retrieve field details
-     * @return ReferenceList
+     * @return {@code ItemList<Reference>}
      */
-    private ReferenceList getFieldsForRecord(String recordRid) {
+    private ItemList<Reference> getFieldsForRecord(String recordRid) {
         if (log.isDebugEnabled()) { log.debug("Retrieving field details for data file record: {}", recordRid); }
         IGCSearch igcSearch = new IGCSearch("data_file_field");
         igcSearch.addProperties(DataFileField.getSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("data_file_record", "=", recordRid);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
-        ReferenceList fields = igcRestClient.search(igcSearch);
+        ItemList<Reference> fields = igcRestClient.search(igcSearch);
         fields.getAllPages(igcRestClient);
         return fields;
     }
@@ -621,8 +621,8 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param relationshipProperty the relationship property from which to retrieve data store information
      * @param dataStoreDetailsMap the map into which to place the results
      */
-    private void mapDataStoreDetailsForJob(Reference job, String relationshipProperty, Map<String, ReferenceList> dataStoreDetailsMap) {
-        ReferenceList candidates = (ReferenceList) igcRestClient.getPropertyByName(job, relationshipProperty);
+    private void mapDataStoreDetailsForJob(Reference job, String relationshipProperty, Map<String, ItemList<Reference>> dataStoreDetailsMap) {
+        ItemList<Reference> candidates = (ItemList<Reference>) igcRestClient.getPropertyByName(job, relationshipProperty);
         if (candidates != null) {
             for (Reference candidate : candidates.getItems()) {
                 String candidateId = candidate.getId();
@@ -637,11 +637,11 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * Retrieve a listing of details of the fields contained within the provided data store.
      *
      * @param datastore the data store for which to retrieve detailed field-level information
-     * @return ReferenceList
+     * @return {@code ItemList<Reference>}
      */
-    private ReferenceList getDataFieldDetails(Reference datastore) {
+    private ItemList<Reference> getDataFieldDetails(Reference datastore) {
 
-        ReferenceList results = null;
+        ItemList<Reference> results = null;
         switch(datastore.getType()) {
             case "database_table":
             case "view":
@@ -669,7 +669,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
         IGCSearchCondition condition = new IGCSearchCondition("name", "=", SYNC_RULE_NAME);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
-        ReferenceList results = igcRestClient.search(igcSearch);
+        ItemList<Reference> results = igcRestClient.search(igcSearch);
         return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
     }
 

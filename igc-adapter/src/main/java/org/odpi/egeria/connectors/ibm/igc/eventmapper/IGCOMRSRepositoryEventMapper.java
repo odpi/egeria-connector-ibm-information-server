@@ -8,12 +8,13 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.events.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
-import org.odpi.egeria.connectors.ibm.igc.eventmapper.model.*;
+import org.odpi.egeria.connectors.ibm.igc.eventmapper.model.ChangeSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
@@ -382,7 +383,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 IGCSearchCondition igcSearchCondition = new IGCSearchCondition(searchProperty, "=", containerAsset.getId());
                 IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(igcSearchCondition);
                 IGCSearch igcSearch = new IGCSearch(searchAssetType, new String[]{ searchProperty }, igcSearchConditionSet);
-                ReferenceList subAssets = igcRestClient.search(igcSearch);
+                ItemList<Reference> subAssets = igcRestClient.search(igcSearch);
                 if (subAssets != null) {
                     subAssets.getAllPages(igcRestClient);
                     if (log.isDebugEnabled()) { log.debug("Processing {} child assets from IA publication: {}", subAssets.getPaging().getNumTotal(), containerRid); }
@@ -671,17 +672,16 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         for (ChangeSet.Change change : changesForProperty) {
 
             String assetType = latestVersion.getType();
-            Class pojo = igcRestClient.getPOJOForType(assetType);
-            if (pojo != null) {
-                List<String> referenceListProperties = igcRestClient.getPagedRelationalPropertiesFromPOJO(assetType);
+            List<String> referenceListProperties = igcRestClient.getPagedRelationshipPropertiesForType(assetType);
+            if (referenceListProperties != null) {
 
                 Object relatedValue = change.getNewValue(referenceListProperties);
                 if (log.isDebugEnabled()) { log.debug(" ... found value: {}", relatedValue); }
                 if (relatedValue != null) {
-                    if (Reference.isReferenceList(relatedValue)) {
+                    if (Reference.isItemList(relatedValue)) {
 
-                        if (log.isDebugEnabled()) { log.debug(" ... found ReferenceList, processing each item"); }
-                        ReferenceList related = (ReferenceList) relatedValue;
+                        if (log.isDebugEnabled()) { log.debug(" ... found ItemList, processing each item"); }
+                        ItemList<Reference> related = (ItemList<Reference>) relatedValue;
                         for (Reference relatedAsset : related.getItems()) {
                             processOneOrMoreRelationships(
                                     relationshipMapping,
@@ -712,7 +712,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         if (log.isErrorEnabled()) { log.error(" ... change consolidation in ChangeSet did not work: {}", change); }
                     } else if (!change.getIgcPropertyPath().endsWith("_name") && !change.getIgcPropertyPath().endsWith("_url")) {
                         // if the path ends with '_name' or '_url' then we should already be handling it by the '_id' clause above
-                        if (log.isWarnEnabled()) { log.warn("Expected relationship for path '{}' for guid {} but found neither Reference nor ReferenceList: {}", change.getIgcPropertyPath(), latestVersion.getId(), relatedValue); }
+                        if (log.isWarnEnabled()) { log.warn("Expected relationship for path '{}' for guid {} but found neither Reference nor ItemList: {}", change.getIgcPropertyPath(), latestVersion.getId(), relatedValue); }
                     }
                 } else {
                     if (log.isWarnEnabled()) { log.warn("Expected relationship for path '{}' for guid {} but found nothing.", change.getIgcPropertyPath(), latestVersion.getId()); }

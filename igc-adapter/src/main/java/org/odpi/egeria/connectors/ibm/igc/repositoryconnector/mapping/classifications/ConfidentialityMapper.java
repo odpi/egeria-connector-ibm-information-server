@@ -4,20 +4,19 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classific
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.GovernanceClassificationStatusMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
-import org.odpi.openmetadata.repositoryservices.ffdc.exception.EntityNotKnownException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,10 +66,10 @@ public class ConfidentialityMapper extends ClassificationMapping {
      * Therefore, any 'assigned_to_term' relationship on a term, where the assigned term is within a "Confidentiality"
      * parent category in IGC, will be mapped to a "Confidentiality" classification in OMRS.
      *
-     * @param igcomrsRepositoryConnector
-     * @param classifications
-     * @param fromIgcObject
-     * @param userId
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param classifications the list of classifications to which to add
+     * @param fromIgcObject the IGC object for which the classification should exist
+     * @param userId the user requesting the mapped classifications
      */
     @Override
     public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
@@ -83,7 +82,7 @@ public class ConfidentialityMapper extends ClassificationMapping {
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
         // Retrieve all assigned_to_terms relationships from this IGC object
-        ReferenceList assignedToTerms = (ReferenceList) igcRestClient.getPropertyByName(fromIgcObject, "assigned_to_terms");
+        ItemList<Reference> assignedToTerms = (ItemList<Reference>) igcRestClient.getPropertyByName(fromIgcObject, "assigned_to_terms");
         assignedToTerms.getAllPages(igcRestClient);
 
         // For each such relationship:
@@ -242,7 +241,7 @@ public class ConfidentialityMapper extends ClassificationMapping {
             igcSearchConditionSet.setMatchAnyCondition(false);
 
             IGCSearch igcSearch = new IGCSearch("term", igcSearchConditionSet);
-            ReferenceList results = igcRestClient.search(igcSearch);
+            ItemList<Term> results = igcRestClient.search(igcSearch);
             if (results == null || results.getPaging().getNumTotal() < 1) {
                 if (log.isErrorEnabled()) { log.error("No Confidentiality found with level: {}", levelAsString); }
                 IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_NOT_FOUND;
@@ -322,7 +321,7 @@ public class ConfidentialityMapper extends ClassificationMapping {
         IGCSearch igcSearch = new IGCSearch("term", igcSearchConditionSet);
         igcSearch.addProperty("assigned_to_terms");
 
-        ReferenceList thisTermResults = igcRestClient.search(igcSearch);
+        ItemList<Term> thisTermResults = igcRestClient.search(igcSearch);
 
         // Only continue if the term has some Confidentiality assigned
         if (thisTermResults != null && thisTermResults.getPaging().getNumTotal() > 0) {
@@ -335,19 +334,19 @@ public class ConfidentialityMapper extends ClassificationMapping {
             );
             igcSearchConditionSet = new IGCSearchConditionSet(inConfidentiality);
             igcSearch = new IGCSearch("term", igcSearchConditionSet);
-            ReferenceList confidentialityTerms = igcRestClient.search(igcSearch);
+            ItemList<Term> confidentialityTerms = igcRestClient.search(igcSearch);
 
             Set<String> confidentialityRids = new HashSet<>();
             if (confidentialityTerms != null) {
                 confidentialityTerms.getAllPages(igcRestClient);
-                for (Reference confidentialityTerm : confidentialityTerms.getItems()) {
+                for (Term confidentialityTerm : confidentialityTerms.getItems()) {
                     confidentialityRids.add(confidentialityTerm.getId());
                 }
             }
 
             // cull the list of referencing categories to remove any under Confidentiality
             IGCUpdate igcUpdate = new IGCUpdate(igcAsset.getId());
-            ReferenceList assignedToTerms = (ReferenceList) igcRestClient.getPropertyByName(thisTermResults.getItems().get(0), "assigned_to_terms");
+            ItemList<Reference> assignedToTerms = (ItemList<Reference>) igcRestClient.getPropertyByName(thisTermResults.getItems().get(0), "assigned_to_terms");
             assignedToTerms.getAllPages(igcRestClient);
             boolean bRemovedOne = false;
             for (Reference assignedToTerm : assignedToTerms.getItems()) {

@@ -4,9 +4,8 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
@@ -14,14 +13,12 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataClassHierarchyMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.PrimitivePropertyValue;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Defines the mapping to the OMRS "DataClass" entity.
@@ -202,7 +199,7 @@ public class DataClassMapper extends ReferenceableMapper {
                 dataClassDetails = (String) igcRestClient.getPropertyByName(igcEntity, "expression");
                 break;
             case "UnstructuredFilter":
-                ReferenceList filters = (ReferenceList) igcRestClient.getPropertyByName(igcEntity, "filters");
+                ItemList<Reference> filters = (ItemList<Reference>) igcRestClient.getPropertyByName(igcEntity, "filters");
                 if (!filters.getItems().isEmpty()) {
                     filters.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
                     ArrayList<String> filterNames = new ArrayList<>();
@@ -247,7 +244,7 @@ public class DataClassMapper extends ReferenceableMapper {
     /**
      * Handle the search for 'networkAddress' by searching against 'name' of the endpoint in IGC.
      *
-     * @param repositoryHelper
+     * @param repositoryHelper the repository helper
      * @param repositoryName name of the repository
      * @param igcRestClient connectivity to an IGC environment
      * @param igcSearchConditionSet the set of search criteria to which to add

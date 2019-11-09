@@ -4,8 +4,8 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relations
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -207,7 +207,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @return Reference - the asset to be used for endpoint one of the relationship
      */
     public List<Reference> getProxyOneAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient) {
-        ArrayList<Reference> referenceAsList = new ArrayList<>();
+        List<Reference> referenceAsList = new ArrayList<>();
         referenceAsList.add(relationshipAsset);
         return referenceAsList;
     }
@@ -222,7 +222,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @return Reference - the asset to be used for endpoint two of the relationship
      */
     public List<Reference> getProxyTwoAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient) {
-        ArrayList<Reference> referenceAsList = new ArrayList<>();
+        List<Reference> referenceAsList = new ArrayList<>();
         referenceAsList.add(relationshipAsset);
         return referenceAsList;
     }
@@ -893,7 +893,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     entityProxy.setGUID(igcEntityGuid.asGuid());
 
                     if (igcRestClient.hasModificationDetails(igcObj.getType())) {
-                        igcObj.populateModificationDetails(igcRestClient);
+                        igcRestClient.populateModificationDetails(igcObj);
                         entityProxy.setCreatedBy((String) igcRestClient.getPropertyByName(igcObj, IGCRestConstants.MOD_CREATED_BY));
                         entityProxy.setCreateTime((Date) igcRestClient.getPropertyByName(igcObj, IGCRestConstants.MOD_CREATED_ON));
                         entityProxy.setUpdatedBy((String) igcRestClient.getPropertyByName(igcObj, IGCRestConstants.MOD_MODIFIED_BY));
@@ -1054,14 +1054,14 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     );
                 }
 
-            } else if (directRelationships != null && Reference.isReferenceList(directRelationships)) { // and list of relationships another
+            } else if (directRelationships != null && Reference.isItemList(directRelationships)) { // and list of relationships another
 
                 addListOfMappedRelationships(
                         igcomrsRepositoryConnector,
                         mapping,
                         relationships,
                         fromIgcObject,
-                        (ReferenceList) directRelationships,
+                        (ItemList<Reference>) directRelationships,
                         igcRelationshipName,
                         userId
                 );
@@ -1177,7 +1177,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 igcSearch.addProperties(IGCRestConstants.getModificationProperties());
             }
         }
-        ReferenceList foundRelationships = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
+        ItemList<Reference> foundRelationships = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
         addListOfMappedRelationships(
                 igcomrsRepositoryConnector,
                 mapping,
@@ -1205,7 +1205,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                      RelationshipMapping mapping,
                                                      List<Relationship> relationships,
                                                      Reference fromIgcObject,
-                                                     ReferenceList igcRelationships,
+                                                     ItemList<Reference> igcRelationships,
                                                      String igcPropertyName,
                                                      String userId) {
 
@@ -1323,7 +1323,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcPropertyName the name of the IGC relationship property
      * @param userId the user retrieving the mapped relationship
      * @return Relationship
-     * @throws RepositoryErrorException
+     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
+     *                                  the metadata collection is stored
      */
     protected static Relationship getMappedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                         RelationshipMapping relationshipMapping,
@@ -1356,7 +1357,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param userId the user retrieving the mapped relationship
      * @param relationshipLevelRid the IGC RID for the relationship itself (in rare instances where it exists)
      * @return Relationship
-     * @throws RepositoryErrorException
+     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
+     *                                  the metadata collection is stored
      */
     public static Relationship getMappedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                      RelationshipMapping relationshipMapping,
@@ -1392,7 +1394,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param relationshipLevelRid the IGC RID for the relationship itself (in rare instances where it exists)
      * @param proxyOrderKnown should be true iff the provided candidate proxies are known to be in the correct order
      * @return Relationship
-     * @throws RepositoryErrorException
+     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
+     *                                  the metadata collection is stored
      */
     public static Relationship getMappedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                      RelationshipMapping relationshipMapping,
@@ -1463,6 +1466,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         errorCode.getUserAction());
             }
 
+            if (log.isDebugEnabled()) { log.debug("Mapping relationship with GUID: {}", igcRelationshipGuid); }
+
             relationship.setGUID(igcRelationshipGuid.asGuid());
             relationship.setMetadataCollectionId(igcomrsRepositoryConnector.getMetadataCollectionId());
             relationship.setStatus(InstanceStatus.ACTIVE);
@@ -1471,8 +1476,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
             String ridForEP1 = igcRelationshipGuid.getRid1();
             String ridForEP2 = igcRelationshipGuid.getRid2();
 
-            EntityProxy ep1 = null;
-            EntityProxy ep2 = null;
+            EntityProxy ep1;
+            EntityProxy ep2;
 
             if (relationshipLevelRid != null
                     || (ridForEP1.equals(proxyOne.getId()) && ridForEP2.equals(proxyTwo.getId()))) {
@@ -1598,7 +1603,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param proxyTwo IGC object representing the second proxy of the relationship
      * @param userId userId through which to create the relationship
      * @return Relationship the created OMRS relationship
-     * @throws RepositoryErrorException
+     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
+     *                                  the metadata collection is stored
      */
     public static Relationship addIgcRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                   RelationshipMapping relationshipMapping,
@@ -1624,7 +1630,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             // If there is a relationship-level asset, these cannot be created, so we need to simply fail
             if (relationshipMapping.hasRelationshipLevelAsset()) {
                 String relationshipLevelAssetType = relationshipMapping.getRelationshipLevelIgcAsset();
-                if (igcRestClient.isCreatableFromPOJO(relationshipLevelAssetType)) {
+                if (igcRestClient.isCreatable(relationshipLevelAssetType)) {
                     // TODO: for creatable relationship-level assets, create a new one to represent this relationship
                     //  (this should never be reached as there currently are no such assets in IGC)
                     if (log.isInfoEnabled()) { log.info("Creating a relationship-level asset for IGC type {} is not yet implemented.", relationshipLevelAssetType); }

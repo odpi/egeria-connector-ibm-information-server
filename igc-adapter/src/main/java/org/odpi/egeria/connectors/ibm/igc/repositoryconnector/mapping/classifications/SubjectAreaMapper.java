@@ -4,8 +4,9 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classific
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -49,10 +50,10 @@ public class SubjectAreaMapper extends ClassificationMapping {
      * under any higher-level 'Subject Areas' category, such a category should be treated as subject area
      * and therefore will be mapped to a "SubjectArea" classification in OMRS.
      *
-     * @param igcomrsRepositoryConnector
-     * @param classifications
-     * @param fromIgcObject
-     * @param userId
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param classifications the list of classifications to which to add
+     * @param fromIgcObject the IGC object for which the classification should exist
+     * @param userId the user requesing the mapped classifications
      */
     @Override
     public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
@@ -65,7 +66,7 @@ public class SubjectAreaMapper extends ClassificationMapping {
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
         // Retrieve all terms this category is assigned to
-        ReferenceList assignedToTerms = (ReferenceList) igcRestClient.getPropertyByName(fromIgcObject, "assigned_to_terms");
+        ItemList<Reference> assignedToTerms = (ItemList<Reference>) igcRestClient.getPropertyByName(fromIgcObject, "assigned_to_terms");
 
         // Only need to continue if there are any terms
         if (assignedToTerms != null) {
@@ -226,7 +227,7 @@ public class SubjectAreaMapper extends ClassificationMapping {
             igcSearchConditionSet.setMatchAnyCondition(false);
 
             IGCSearch igcSearch = new IGCSearch("category", igcSearchConditionSet);
-            ReferenceList results = igcRestClient.search(igcSearch);
+            ItemList<Category> results = igcRestClient.search(igcSearch);
             if (results == null || results.getPaging().getNumTotal() < 1) {
                 if (log.isErrorEnabled()) { log.error("No SubjectArea found with name: {}", subjectAreaName); }
                 IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_NOT_FOUND;

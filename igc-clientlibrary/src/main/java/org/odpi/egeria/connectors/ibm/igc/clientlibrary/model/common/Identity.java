@@ -327,8 +327,8 @@ public class Identity {
 
         Identity ident = null;
         try {
-            Class pojo = igcRestClient.getPOJOForType(assetType);
-            if (pojo != null) {
+            String displayName = igcRestClient.getDisplayNameForType(assetType);
+            if (displayName != null) {
                 ident = new Identity(context, assetType, assetName, assetId);
             }
         } catch (Exception e) {

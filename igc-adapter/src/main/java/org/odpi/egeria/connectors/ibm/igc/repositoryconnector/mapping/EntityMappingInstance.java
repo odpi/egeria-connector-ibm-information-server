@@ -33,7 +33,7 @@ public class EntityMappingInstance {
 
     private String igcEntityType;
     private String igcEntityRid;
-    private String[] igcPropertiesToRetrieve;
+    private List<String> igcPropertiesToRetrieve;
 
     private boolean alreadyRetrieved;
     private Reference igcEntity;
@@ -187,9 +187,7 @@ public class EntityMappingInstance {
      * @param properties the list of properties to include in entity retrieval
      */
     public final void setPropertiesToRetrieveForIgcEntity(List<String> properties) {
-        if (properties != null && !properties.isEmpty()) {
-            igcPropertiesToRetrieve = properties.toArray(new String[0]);
-        }
+        igcPropertiesToRetrieve = properties;
     }
 
     /**
@@ -305,7 +303,7 @@ public class EntityMappingInstance {
             igcEntity = igcomrsRepositoryConnector.getIGCRestClient().getAssetWithSubsetOfProperties(
                     igcEntityRid,
                     igcEntityType,
-                    allProperties.toArray(new String[0]),
+                    allProperties,
                     pageSize,
                     sort
             );

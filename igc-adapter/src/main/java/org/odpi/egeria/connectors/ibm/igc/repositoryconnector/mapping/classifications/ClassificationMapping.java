@@ -314,7 +314,8 @@ public abstract class ClassificationMapping extends InstanceMapping {
      * @param fromIgcObject the IGC object against which the classification applies
      * @param userId the user through which the classification should be done
      * @return Classification
-     * @throws RepositoryErrorException
+     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
+     *                                  the metadata collection is stored
      */
     protected Classification getMappedClassification(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                      InstanceProperties classificationProperties,

@@ -3,8 +3,8 @@
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DSJob;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.openmetadata.accessservices.dataengine.model.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ class AttributeMapping extends BaseMapping {
         if (log.isDebugEnabled()) { log.debug("Creating new AttributeMapping from job and link..."); }
         attributes = new ArrayList<>();
         if (link != null) {
-            ReferenceList stageColumns = (ReferenceList) igcRestClient.getPropertyByName(link, "stage_columns");
+            ItemList<Reference> stageColumns = (ItemList<Reference>) igcRestClient.getPropertyByName(link, "stage_columns");
             int index = 0;
             for (Reference stageColumn : stageColumns.getItems()) {
                 String colId = stageColumn.getId();

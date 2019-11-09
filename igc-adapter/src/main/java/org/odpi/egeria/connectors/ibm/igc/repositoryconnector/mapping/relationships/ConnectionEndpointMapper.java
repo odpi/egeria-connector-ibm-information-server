@@ -5,8 +5,10 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relations
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Connector;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataConnection;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -87,16 +89,16 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
     public List<Reference> getProxyTwoAssetFromAsset(Reference connectorAsset, IGCRestClient igcRestClient) {
         String otherAssetType = connectorAsset.getType();
         if (otherAssetType.equals("connector")) {
-            Reference withDataConnections = igcRestClient.getAssetWithSubsetOfProperties(
+            Connector withDataConnections = igcRestClient.getAssetWithSubsetOfProperties(
                     connectorAsset.getId(),
                     connectorAsset.getType(),
                     new String[]{ "host", "data_connections" });
-            ReferenceList dataConnections = (ReferenceList) igcRestClient.getPropertyByName(withDataConnections, "data_connections");
+            ItemList<Reference> dataConnections = (ItemList<Reference>) igcRestClient.getPropertyByName(withDataConnections, "data_connections");
             dataConnections.getAllPages(igcRestClient);
             return dataConnections.getItems();
         } else {
             if (log.isDebugEnabled()) { log.debug("Not a connector asset, just returning as-is: {}", connectorAsset); }
-            ArrayList<Reference> referenceAsList = new ArrayList<>();
+            List<Reference> referenceAsList = new ArrayList<>();
             referenceAsList.add(connectorAsset);
             return referenceAsList;
         }
@@ -107,16 +109,16 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      * The relationship itself in IGC is complicated, from the host end it requires multiple hops (as the
      * 'data_connections' property on the host actually points to 'connector' assets, not 'data_connection' assets).
      *
-     * @param igcomrsRepositoryConnector
-     * @param relationships
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param relationships the list of relationships to which to add
      * @param fromIgcObject the host asset for which to create the relationship
-     * @param userId
+     * @param userId the user ID requesting the mapped relationships
      */
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                 List<Relationship> relationships,
-                                                 Reference fromIgcObject,
-                                                 String userId) {
+                                           List<Relationship> relationships,
+                                           Reference fromIgcObject,
+                                           String userId) {
 
         String assetType = IGCRestConstants.getAssetTypeForSearch(fromIgcObject.getType());
 
@@ -170,7 +172,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
         String[] properties = new String[]{ "name" };
         IGCSearch igcSearch = new IGCSearch("data_connection", properties, igcSearchConditionSet);
 
-        ReferenceList dataConnections = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
+        ItemList<DataConnection> dataConnections = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
         dataConnections.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
 
         for (Reference dataConnection : dataConnections.getItems()) {
@@ -228,7 +230,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
         String[] properties = new String[]{ "host" };
         IGCSearch igcSearch = new IGCSearch("connector", properties, igcSearchConditionSet);
 
-        ReferenceList dataConnectors = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
+        ItemList<Connector> dataConnectors = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
         dataConnectors.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
 
         for (Reference dataConnector : dataConnectors.getItems()) {

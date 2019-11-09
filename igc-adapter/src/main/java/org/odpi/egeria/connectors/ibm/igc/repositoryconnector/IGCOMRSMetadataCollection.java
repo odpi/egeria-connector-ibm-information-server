@@ -5,8 +5,8 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -1403,11 +1403,10 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 IGCSearch igcSearch = new IGCSearch();
                 String igcAssetType = igcRepositoryHelper.addTypeToSearch(mapping, igcSearch);
 
-                // Get POJO from the asset type, and use this to retrieve a listing of all string properties
-                // for that asset type -- these are the list of properties we should use for the search
-                Class pojo = igcRestClient.getPOJOForType(igcAssetType);
-
-                if (pojo != null) {
+                // Get list of string properties from the asset type -- these are the list of properties we should use
+                // for the search
+                List<String> properties = igcRestClient.getAllStringPropertiesForType(igcAssetType);
+                if (properties != null) {
 
                     IGCSearchConditionSet classificationLimiters = igcRepositoryHelper.getSearchCriteriaForClassifications(
                             igcAssetType,
@@ -1428,7 +1427,6 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         // If the searchCriteria is empty, retrieve all entities of the type (no conditions)
                         if (searchCriteria != null && !searchCriteria.equals("")) {
 
-                            List<String> properties = igcRestClient.getStringPropertiesFromPOJO(igcAssetType);
                             // POST'd search to IGC doesn't work on v11.7.0.2 using long_description
                             // Using "searchText" requires using "searchProperties" (no "where" conditions) -- but does not
                             // work with 'main_object', must be used with a specific asset type
@@ -1794,7 +1792,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         } else {
             igcTypeName = mapping.getIgcAssetType();
             // Next ensure that we actually support creation of this entity type
-            if (!igcRestClient.isCreatableFromPOJO(igcTypeName)) {
+            if (!igcRestClient.isCreatable(igcTypeName)) {
                 IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CREATION_NOT_SUPPORTED;
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                         entityTypeGUID,
@@ -2489,7 +2487,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
                 IGCSearch igcSearch = new IGCSearch(proxyOneMapping.getIgcAssetType(), igcSearchConditionSet);
                 igcSearch.addProperties(proxyOneRelationships);
-                ReferenceList results = igcRestClient.search(igcSearch);
+                ItemList<Reference> results = igcRestClient.search(igcSearch);
 
                 // only proceed if there is actually anything to remove
                 if (results != null && results.getPaging().getNumTotal() > 0) {
@@ -2499,13 +2497,13 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     Reference proxyOne = results.getItems().get(0);
 
                     String proxyOneType = proxyOne.getType();
-                    List<String> pagedRelationships = igcRestClient.getPagedRelationalPropertiesFromPOJO(proxyOneType);
+                    List<String> pagedRelationships = igcRestClient.getPagedRelationshipPropertiesForType(proxyOneType);
 
                     // null every property that holds the relationship, but retain the rest of the relationships that
                     // do not refer to the specific one we have been asked to purge
                     for (String relationshipAttr : proxyOneRelationships) {
                         if (pagedRelationships.contains(relationshipAttr)) {
-                            ReferenceList relations = (ReferenceList) igcRestClient.getPropertyByName(proxyOne, relationshipAttr);
+                            ItemList<Reference> relations = (ItemList<Reference>) igcRestClient.getPropertyByName(proxyOne, relationshipAttr);
                             relations.getAllPages(igcRestClient);
                             for (Reference relation : relations.getItems()) {
                                 String relationId = relation.getId();

@@ -84,13 +84,20 @@ public class EntityMappingStore {
                 igcAssetTypeAndPrefixToOmrsGuid.put(prefix + otherType, guid);
             }
             IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
-            igcRestClient.registerPOJO(mapping.getIgcPOJO(igcomrsRepositoryConnector));
-            List<Class> otherPOJOs = mapping.getOtherIGCPOJOs(igcomrsRepositoryConnector);
+            igcRestClient.cacheTypeDetails(mapping.getIgcAssetType());
+            List<String> otherTypes = mapping.getOtherIGCAssetTypes();
+            if (otherTypes != null && !otherTypes.isEmpty()) {
+                for (String type : otherTypes) {
+                    igcRestClient.cacheTypeDetails(type);
+                }
+            }
+            /*igcRestClient.registerPOJO(mapping.getIgcPOJO(igcomrsRepositoryConnector));
+            List<Class> otherPOJOs = mapping.getOtherIGCPOJOs(igcomrsRepositoryConnector);/*
             if (otherPOJOs != null && !otherPOJOs.isEmpty()) {
                 for (Class pojo : otherPOJOs) {
                     igcRestClient.registerPOJO(pojo);
                 }
-            }
+            }*/
         }
 
         return (mapping != null);

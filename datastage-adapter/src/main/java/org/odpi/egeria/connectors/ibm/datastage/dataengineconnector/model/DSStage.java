@@ -3,8 +3,8 @@
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -57,7 +57,7 @@ public class DSStage {
      * @return boolean
      */
     static boolean isInputStage(IGCRestClient igcRestClient, Reference stage) {
-        ReferenceList inputLinks = getLinkDetails(igcRestClient, stage, "input_links");
+        ItemList<Reference> inputLinks = getLinkDetails(igcRestClient, stage, "input_links");
         return inputLinks != null && inputLinks.getPaging().getNumTotal() == 0;
     }
 
@@ -69,7 +69,7 @@ public class DSStage {
      * @return boolean
      */
     static boolean isOutputStage(IGCRestClient igcRestClient, Reference stage) {
-        ReferenceList outputLinks = getLinkDetails(igcRestClient, stage, "output_links");
+        ItemList<Reference> outputLinks = getLinkDetails(igcRestClient, stage, "output_links");
         return outputLinks != null && outputLinks.getPaging().getNumTotal() == 0;
     }
 
@@ -80,19 +80,19 @@ public class DSStage {
      * @param igcRestClient connectivity to an IGC environment
      * @param stage the stage for which to retrieve link details
      * @param propertyName the property name of the link relationships to retrieve
-     * @return ReferenceList
+     * @return {@code ItemList<Reference>}
      */
-    private static ReferenceList getLinkDetails(IGCRestClient igcRestClient, Reference stage, String propertyName) {
-        ReferenceList links = (ReferenceList) igcRestClient.getPropertyByName(stage, propertyName);
+    private static ItemList<Reference> getLinkDetails(IGCRestClient igcRestClient, Reference stage, String propertyName) {
+        ItemList<Reference> links = (ItemList<Reference>) igcRestClient.getPropertyByName(stage, propertyName);
         if (links == null) {
             IGCSearch igcSearch = new IGCSearch("stage");
             igcSearch.addProperties(DSStage.getSearchProperties());
             IGCSearchCondition condition = new IGCSearchCondition("_id", "=", stage.getId());
             IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
             igcSearch.addConditions(conditionSet);
-            ReferenceList stages = igcRestClient.search(igcSearch);
+            ItemList<Reference> stages = igcRestClient.search(igcSearch);
             stage = stages.getItems().get(0);
-            links = (ReferenceList) igcRestClient.getPropertyByName(stage, propertyName);
+            links = (ItemList<Reference>) igcRestClient.getPropertyByName(stage, propertyName);
         }
         return links;
     }

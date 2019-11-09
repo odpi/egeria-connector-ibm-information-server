@@ -5,8 +5,10 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relations
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classification;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ReferenceList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -128,10 +130,10 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * This is one of the few relationships in IGC that has relationship-specific properties handled by a separate
      * 'classification' object, so it must be handled using custom logic.
      *
-     * @param igcomrsRepositoryConnector
-     * @param relationships
-     * @param fromIgcObject
-     * @param userId
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param relationships the list of relationships to which to add
+     * @param fromIgcObject the IGC entity from which the relationship exists
+     * @param userId the user ID requesting the mapped relationships
      */
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
@@ -203,7 +205,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
             igcSearch.addProperty("value_frequency");
         }
-        ReferenceList detectedClassifications = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
+        ItemList<Classification> detectedClassifications = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
 
         detectedClassifications.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
 
@@ -320,7 +322,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         igcSearch.addType("database_column");
         igcSearch.addProperty("selected_classification");
         igcSearch.addProperties(IGCRestConstants.getModificationProperties());
-        ReferenceList assetsWithSelected = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
+        ItemList<InformationAsset> assetsWithSelected = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
 
         assetsWithSelected.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
 
@@ -396,7 +398,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
             igcSearch.addProperty("value_frequency");
         }
-        ReferenceList detectedClassifications = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
+        ItemList<Classification> detectedClassifications = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
 
         detectedClassifications.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
 

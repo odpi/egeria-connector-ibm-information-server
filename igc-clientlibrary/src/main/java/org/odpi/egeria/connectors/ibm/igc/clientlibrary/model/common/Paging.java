@@ -2,13 +2,16 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
+
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 
 /**
  * Represents the metadata related to a page of results or relationships.
  */
+@JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("paging")
 public class Paging extends ObjectPrinter {
@@ -49,6 +52,9 @@ public class Paging extends ObjectPrinter {
      */
     protected Integer begin;
 
+    /**
+     * Default constructor sets up defaults for an empty paging object.
+     */
     public Paging() {
         this.numTotal = 0;
         this.next = null;
@@ -70,23 +76,89 @@ public class Paging extends ObjectPrinter {
         this.end = numTotal;
     }
 
-    /** @see #numTotal */ @JsonProperty("numTotal") public Integer getNumTotal() { return this.numTotal; }
-    /** @see #numTotal */ @JsonProperty("numTotal") public void setNumTotal(Integer numTotal) { this.numTotal = numTotal; }
+    /**
+     * Retrieve the total number of items across all pages.
+     * @return Integer
+     */
+    @JsonProperty("numTotal")
+    public Integer getNumTotal() { return this.numTotal; }
 
-    /** @see #next */ @JsonProperty("next") public String getNextPageURL() { return this.next; }
-    /** @see #next */ @JsonProperty("next") public void setNextPageURL(String next) { this.next = next; }
+    /**
+     * Set the total number of items across all pages.
+     * @param numTotal of items across all pages
+     */
+    @JsonProperty("numTotal")
+    public void setNumTotal(Integer numTotal) { this.numTotal = numTotal; }
 
-    /** @see #previous */ @JsonProperty("previous") public String getPreviousPageURL() { return this.previous; }
-    /** @see #previous */ @JsonProperty("previous") public void setPreviousPageURL(String previous) { this.previous = previous; }
+    /**
+     * Retrieve the URL for the next page of results, or null if there are no more pages.
+     * @return String
+     */
+    @JsonProperty("next")
+    public String getNextPageURL() { return this.next; }
 
-    /** @see #pageSize */ @JsonProperty("pageSize") public Integer getPageSize() { return this.pageSize; }
-    /** @see #pageSize */ @JsonProperty("pageSize") public void setPageSize(Integer pageSize) { this.pageSize = pageSize; }
+    /**
+     * Set the URL for the next page of results, or null if there are no more pages.
+     * @param next URL for the next page of results
+     */
+    @JsonProperty("next")
+    public void setNextPageURL(String next) { this.next = next; }
 
-    /** @see #end */ @JsonProperty("end") public Integer getEndIndex() { return this.end; }
-    /** @see #end */ @JsonProperty("end") public void setEndIndex(Integer end) { this.end = end; }
+    /**
+     * Retrieve the URL for the previous page of results, or null if there is no previous page.
+     * @return String
+     */
+    @JsonProperty("previous")
+    public String getPreviousPageURL() { return this.previous; }
 
-    /** @see #begin */ @JsonProperty("begin") public Integer getBeginIndex() { return this.begin; }
-    /** @see #begin */ @JsonProperty("begin") public void setBeginIndex(Integer begin) { this.begin = begin; }
+    /**
+     * Set the URL for the previous page of results, or null if there is no previous page.
+     * @param previous URL for the previous page of results
+     */
+    @JsonProperty("previous")
+    public void setPreviousPageURL(String previous) { this.previous = previous; }
+
+    /**
+     * Retrieve the number of items included in each page.
+     * @return Integer
+     */
+    @JsonProperty("pageSize")
+    public Integer getPageSize() { return this.pageSize; }
+
+    /**
+     * Set the number of items included in each page.
+     * @param pageSize number of items included in each page
+     */
+    @JsonProperty("pageSize")
+    public void setPageSize(Integer pageSize) { this.pageSize = pageSize; }
+
+    /**
+     * Retrieve the numeric index representing the last item in this page.
+     * @return Integer
+     */
+    @JsonProperty("end")
+    public Integer getEndIndex() { return this.end; }
+
+    /**
+     * Set the numeric index representing the last item in this page.
+     * @param end numeric index of last item in this page
+     */
+    @JsonProperty("end")
+    public void setEndIndex(Integer end) { this.end = end; }
+
+    /**
+     * Retrieve the numeric index representing the first item in this page.
+     * @return Integer
+     */
+    @JsonProperty("begin")
+    public Integer getBeginIndex() { return this.begin; }
+
+    /**
+     * Set the numeric index representing the first item in this page.
+     * @param begin numeric index of first item in this page
+     */
+    @JsonProperty("begin")
+    public void setBeginIndex(Integer begin) { this.begin = begin; }
 
     /**
      * Returns true iff there are more (unretrieved) pages for the paging that this object represents.
