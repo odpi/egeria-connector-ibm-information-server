@@ -38,7 +38,7 @@ public class DatabaseAlias extends Datagroup {
     protected ItemList<DatabaseColumn> definedForeignKey;
 
     /**
-     * No longer applicable from 11.5.0.2sp5 onwards and 11.7.1.0 onwards.
+     * @deprecated No longer applicable from 11.5.0.2sp5 onwards and 11.7.1.0 onwards.
      * @see #implementedKey
      */
     @Deprecated
@@ -140,8 +140,7 @@ public class DatabaseAlias extends Datagroup {
 
     /**
      * Retrieve the {@code defined_primary_key} property (displayed as '{@literal Defined Primary Key}') of the object.
-     * No longer applicable from 11.5.0.2sp5 and 11.7.1.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.2sp5 and 11.7.1.0 onwards.
      * @return {@code ItemList<CandidateKey>}
      * @see #getImplementedKey()
      */
@@ -151,8 +150,7 @@ public class DatabaseAlias extends Datagroup {
 
     /**
      * Set the {@code defined_primary_key} property (displayed as {@code Defined Primary Key}) of the object.
-     * No longer applicable from 11.5.0.2sp5 and 11.7.1.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.2sp5 and 11.7.1.0 onwards.
      * @param definedPrimaryKey the value to set
      * @see #setImplementedKey(ItemList)
      */

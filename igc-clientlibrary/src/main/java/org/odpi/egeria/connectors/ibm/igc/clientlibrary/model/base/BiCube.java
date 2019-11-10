@@ -49,7 +49,7 @@ public class BiCube extends InformationAsset {
     protected BiModel biModel;
 
     /**
-     * No longer applicable from 11.7.0.0 onwards.
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      */
     @Deprecated
     @JsonProperty("blueprint_elements")
@@ -200,8 +200,7 @@ public class BiCube extends InformationAsset {
 
     /**
      * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      * @return {@code ItemList<BlueprintElementLink>}
      */
     @Deprecated
@@ -210,8 +209,7 @@ public class BiCube extends InformationAsset {
 
     /**
      * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      * @param blueprintElements the value to set
      */
     @Deprecated

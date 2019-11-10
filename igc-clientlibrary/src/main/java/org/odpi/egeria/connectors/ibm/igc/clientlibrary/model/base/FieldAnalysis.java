@@ -141,7 +141,7 @@ public class FieldAnalysis extends Reference {
     protected String project;
 
     /**
-     * No longer applicable from 11.5.0.1ru5 onwards.
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @see #qualityScorePercent
      */
     @Deprecated
@@ -575,8 +575,7 @@ public class FieldAnalysis extends Reference {
 
     /**
      * Retrieve the {@code quality_score} property (displayed as '{@literal Quality Score}') of the object.
-     * No longer applicable from 11.5.0.1ru5 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @return {@code Number}
      * @see #getQualityScorePercent()
      */
@@ -586,8 +585,7 @@ public class FieldAnalysis extends Reference {
 
     /**
      * Set the {@code quality_score} property (displayed as {@code Quality Score}) of the object.
-     * No longer applicable from 11.5.0.1ru5 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @param qualityScore the value to set
      * @see #setQualityScorePercent(String)
      */

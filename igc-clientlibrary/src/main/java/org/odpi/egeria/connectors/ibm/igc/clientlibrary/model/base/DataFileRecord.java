@@ -38,14 +38,14 @@ public class DataFileRecord extends Datagroup {
     protected String aliasBusinessName;
 
     /**
-     * No longer applicable from 11.5.0.2sp3 onwards.
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      */
     @Deprecated
     @JsonProperty("analysis")
     protected ItemList<FileRecordAnalysis> analysis;
 
     /**
-     * No longer applicable from 11.7.0.0 onwards.
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      */
     @Deprecated
     @JsonProperty("blueprint_elements")
@@ -179,8 +179,7 @@ public class DataFileRecord extends Datagroup {
 
     /**
      * Retrieve the {@code analysis} property (displayed as '{@literal Analysis}') of the object.
-     * No longer applicable from 11.5.0.2sp3 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      * @return {@code ItemList<FileRecordAnalysis>}
      */
     @Deprecated
@@ -189,8 +188,7 @@ public class DataFileRecord extends Datagroup {
 
     /**
      * Set the {@code analysis} property (displayed as {@code Analysis}) of the object.
-     * No longer applicable from 11.5.0.2sp3 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      * @param analysis the value to set
      */
     @Deprecated
@@ -199,8 +197,7 @@ public class DataFileRecord extends Datagroup {
 
     /**
      * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      * @return {@code ItemList<BlueprintElementLink>}
      */
     @Deprecated
@@ -209,8 +206,7 @@ public class DataFileRecord extends Datagroup {
 
     /**
      * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      * @param blueprintElements the value to set
      */
     @Deprecated

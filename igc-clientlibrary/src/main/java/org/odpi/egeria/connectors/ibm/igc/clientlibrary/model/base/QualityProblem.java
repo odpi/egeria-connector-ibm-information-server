@@ -46,7 +46,7 @@ public class QualityProblem extends Reference {
     protected Date createdOn;
 
     /**
-     * No longer applicable from 11.7.0.1sp1 onwards.
+     * @deprecated No longer applicable from 11.7.0.1sp1 onwards.
      */
     @Deprecated
     @JsonProperty("data_quality_score")
@@ -68,7 +68,7 @@ public class QualityProblem extends Reference {
     protected Number percentOccurrences;
 
     /**
-     * No longer applicable from 11.7.0.1sp1 onwards.
+     * @deprecated No longer applicable from 11.7.0.1sp1 onwards.
      */
     @Deprecated
     @JsonProperty("problem_type")
@@ -163,8 +163,7 @@ public class QualityProblem extends Reference {
 
     /**
      * Retrieve the {@code data_quality_score} property (displayed as '{@literal Data Quality Score}') of the object.
-     * No longer applicable from 11.7.0.1sp1 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.1sp1 onwards.
      * @return {@code InformationAsset}
      */
     @Deprecated
@@ -173,8 +172,7 @@ public class QualityProblem extends Reference {
 
     /**
      * Set the {@code data_quality_score} property (displayed as {@code Data Quality Score}) of the object.
-     * No longer applicable from 11.7.0.1sp1 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.1sp1 onwards.
      * @param dataQualityScore the value to set
      */
     @Deprecated
@@ -253,8 +251,7 @@ public class QualityProblem extends Reference {
 
     /**
      * Retrieve the {@code problem_type} property (displayed as '{@literal Problem Type}') of the object.
-     * No longer applicable from 11.7.0.1sp1 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.1sp1 onwards.
      * @return {@code InformationAsset}
      */
     @Deprecated
@@ -263,8 +260,7 @@ public class QualityProblem extends Reference {
 
     /**
      * Set the {@code problem_type} property (displayed as {@code Problem Type}) of the object.
-     * No longer applicable from 11.7.0.1sp1 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.1sp1 onwards.
      * @param problemType the value to set
      */
     @Deprecated

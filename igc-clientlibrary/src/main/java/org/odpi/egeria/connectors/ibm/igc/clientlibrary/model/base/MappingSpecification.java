@@ -51,7 +51,7 @@ public class MappingSpecification extends InformationAsset {
     protected String includeForLineage;
 
     /**
-     * No longer applicable from 11.7.0.1 onwards.
+     * @deprecated No longer applicable from 11.7.0.1 onwards.
      */
     @Deprecated
     @JsonProperty("information_server_reports")
@@ -161,8 +161,7 @@ public class MappingSpecification extends InformationAsset {
 
     /**
      * Retrieve the {@code information_server_reports} property (displayed as '{@literal Information Server Reports}') of the object.
-     * No longer applicable from 11.7.0.1 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.1 onwards.
      * @return {@code ItemList<InformationServerReportMappingSpecification>}
      */
     @Deprecated
@@ -171,8 +170,7 @@ public class MappingSpecification extends InformationAsset {
 
     /**
      * Set the {@code information_server_reports} property (displayed as {@code Information Server Reports}) of the object.
-     * No longer applicable from 11.7.0.1 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.1 onwards.
      * @param informationServerReports the value to set
      */
     @Deprecated

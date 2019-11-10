@@ -80,7 +80,7 @@ public class XsdSimpleType extends InformationAsset {
     protected Boolean restrictionMaximumInclusive;
 
     /**
-     * No longer applicable from 11.5.0.1ru5 onwards.
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @see #restrictionMaximumInclusive
      */
     @Deprecated
@@ -94,7 +94,7 @@ public class XsdSimpleType extends InformationAsset {
     protected Boolean restrictionMinimumInclusive;
 
     /**
-     * No longer applicable from 11.5.0.1ru5 onwards.
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @see #restrictionMinimumInclusive
      */
     @Deprecated
@@ -365,8 +365,7 @@ public class XsdSimpleType extends InformationAsset {
 
     /**
      * Retrieve the {@code restriction_maximum_inclusive_string} property (displayed as '{@literal Maximum Range Inclusive}') of the object.
-     * No longer applicable from 11.5.0.1ru5 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @return {@code List<String>}
      * @see #getRestrictionMaximumInclusive()
      */
@@ -376,8 +375,7 @@ public class XsdSimpleType extends InformationAsset {
 
     /**
      * Set the {@code restriction_maximum_inclusive_string} property (displayed as {@code Maximum Range Inclusive}) of the object.
-     * No longer applicable from 11.5.0.1ru5 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @param restrictionMaximumInclusiveString the value to set
      * @see #setRestrictionMaximumInclusive(Boolean)
      */
@@ -416,8 +414,7 @@ public class XsdSimpleType extends InformationAsset {
 
     /**
      * Retrieve the {@code restriction_minimum_inclusive_string} property (displayed as '{@literal Minimum Range Inclusive}') of the object.
-     * No longer applicable from 11.5.0.1ru5 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @return {@code List<String>}
      * @see #getRestrictionMinimumInclusive()
      */
@@ -427,8 +424,7 @@ public class XsdSimpleType extends InformationAsset {
 
     /**
      * Set the {@code restriction_minimum_inclusive_string} property (displayed as {@code Minimum Range Inclusive}) of the object.
-     * No longer applicable from 11.5.0.1ru5 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @param restrictionMinimumInclusiveString the value to set
      * @see #setRestrictionMinimumInclusive(Boolean)
      */

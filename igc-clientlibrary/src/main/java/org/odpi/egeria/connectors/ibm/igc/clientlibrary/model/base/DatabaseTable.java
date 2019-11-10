@@ -37,14 +37,14 @@ public class DatabaseTable extends Datagroup {
     protected List<Number> pkduplicatecount;
 
     /**
-     * No longer applicable from 11.7.1.0 onwards.
+     * @deprecated No longer applicable from 11.7.1.0 onwards.
      */
     @Deprecated
     @JsonProperty("alias_(business_name)")
     protected String aliasBusinessName;
 
     /**
-     * No longer applicable from 11.5.0.2sp3 onwards.
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      */
     @Deprecated
     @JsonProperty("analysis")
@@ -57,7 +57,7 @@ public class DatabaseTable extends Datagroup {
     protected ItemList<BiReportQuery> biReportQueries;
 
     /**
-     * No longer applicable from 11.7.0.0 onwards.
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      */
     @Deprecated
     @JsonProperty("blueprint_elements")
@@ -219,8 +219,7 @@ public class DatabaseTable extends Datagroup {
 
     /**
      * Retrieve the {@code alias_(business_name)} property (displayed as '{@literal Alias (Business Name)}') of the object.
-     * No longer applicable from 11.7.1.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.1.0 onwards.
      * @return {@code String}
      */
     @Deprecated
@@ -229,8 +228,7 @@ public class DatabaseTable extends Datagroup {
 
     /**
      * Set the {@code alias_(business_name)} property (displayed as {@code Alias (Business Name)}) of the object.
-     * No longer applicable from 11.7.1.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.1.0 onwards.
      * @param aliasBusinessName the value to set
      */
     @Deprecated
@@ -239,8 +237,7 @@ public class DatabaseTable extends Datagroup {
 
     /**
      * Retrieve the {@code analysis} property (displayed as '{@literal Analysis}') of the object.
-     * No longer applicable from 11.5.0.2sp3 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      * @return {@code ItemList<TableAnalysis>}
      */
     @Deprecated
@@ -249,8 +246,7 @@ public class DatabaseTable extends Datagroup {
 
     /**
      * Set the {@code analysis} property (displayed as {@code Analysis}) of the object.
-     * No longer applicable from 11.5.0.2sp3 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      * @param analysis the value to set
      */
     @Deprecated
@@ -287,8 +283,7 @@ public class DatabaseTable extends Datagroup {
 
     /**
      * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      * @return {@code ItemList<BlueprintElementLink>}
      */
     @Deprecated
@@ -297,8 +292,7 @@ public class DatabaseTable extends Datagroup {
 
     /**
      * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      * @param blueprintElements the value to set
      */
     @Deprecated

@@ -32,7 +32,7 @@ public class AmazonS3DataFileField extends InformationAsset {
     protected Boolean allowsNullValues;
 
     /**
-     * No longer applicable from 11.5.0.2sp3 onwards.
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      */
     @Deprecated
     @JsonProperty("analysis")
@@ -287,8 +287,7 @@ public class AmazonS3DataFileField extends InformationAsset {
 
     /**
      * Retrieve the {@code analysis} property (displayed as '{@literal Analysis}') of the object.
-     * No longer applicable from 11.5.0.2sp3 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      * @return {@code ItemList<FieldAnalysis>}
      */
     @Deprecated
@@ -297,8 +296,7 @@ public class AmazonS3DataFileField extends InformationAsset {
 
     /**
      * Set the {@code analysis} property (displayed as {@code Analysis}) of the object.
-     * No longer applicable from 11.5.0.2sp3 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      * @param analysis the value to set
      */
     @Deprecated

@@ -37,7 +37,7 @@ public class Database extends InformationAsset {
     protected ItemList<BiReport> biReports;
 
     /**
-     * No longer applicable from 11.7.0.0 onwards.
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      */
     @Deprecated
     @JsonProperty("blueprint_elements")
@@ -50,7 +50,7 @@ public class Database extends InformationAsset {
     protected ItemList<DataConnection> dataConnections;
 
     /**
-     * No longer applicable from 11.7.0.1 onwards.
+     * @deprecated No longer applicable from 11.7.0.1 onwards.
      */
     @Deprecated
     @JsonProperty("data_policies")
@@ -172,8 +172,7 @@ public class Database extends InformationAsset {
 
     /**
      * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      * @return {@code ItemList<BlueprintElementLink>}
      */
     @Deprecated
@@ -182,8 +181,7 @@ public class Database extends InformationAsset {
 
     /**
      * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      * @param blueprintElements the value to set
      */
     @Deprecated
@@ -220,8 +218,7 @@ public class Database extends InformationAsset {
 
     /**
      * Retrieve the {@code data_policies} property (displayed as '{@literal Data Policies}') of the object.
-     * No longer applicable from 11.7.0.1 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.1 onwards.
      * @return {@code ItemList<DataPolicy>}
      */
     @Deprecated
@@ -230,8 +227,7 @@ public class Database extends InformationAsset {
 
     /**
      * Set the {@code data_policies} property (displayed as {@code Data Policies}) of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      * @param dataPolicies the value to set
      */
     @Deprecated

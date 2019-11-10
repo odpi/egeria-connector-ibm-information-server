@@ -28,7 +28,7 @@ import java.util.Date;
 public class AutomationRule extends InformationAsset {
 
     /**
-     * No longer applicable from 11.7.0.2 onwards.
+     * @deprecated No longer applicable from 11.7.0.2 onwards.
      */
     @Deprecated
     @JsonProperty("associated_terms")
@@ -62,8 +62,7 @@ public class AutomationRule extends InformationAsset {
 
     /**
      * Retrieve the {@code associated_terms} property (displayed as '{@literal Associated Terms}') of the object.
-     * No longer applicable from 11.7.0.2 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.2 onwards.
      * @return {@code ItemList<Term>}
      */
     @Deprecated
@@ -72,8 +71,7 @@ public class AutomationRule extends InformationAsset {
 
     /**
      * Set the {@code associated_terms} property (displayed as {@code Associated Terms}) of the object.
-     * No longer applicable from 11.7.0.2 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.2 onwards.
      * @param associatedTerms the value to set
      */
     @Deprecated
