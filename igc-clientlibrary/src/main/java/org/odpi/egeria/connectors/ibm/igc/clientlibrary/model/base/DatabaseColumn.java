@@ -29,7 +29,7 @@ import java.util.List;
 public class DatabaseColumn extends Classificationenabledgroup {
 
     /**
-     * No longer applicable from 11.5.0.2sp3 onwards.
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      */
     @Deprecated
     @JsonProperty("analysis")
@@ -45,7 +45,7 @@ public class DatabaseColumn extends Classificationenabledgroup {
     protected ItemList<Reportobject> biReportQueryItems;
 
     /**
-     * No longer applicable from 11.7.0.0 onwards.
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      */
     @Deprecated
     @JsonProperty("blueprint_elements")
@@ -241,7 +241,7 @@ public class DatabaseColumn extends Classificationenabledgroup {
     protected ItemList<DatabaseColumn> referencesDatabaseColumns;
 
     /**
-     * No longer applicable from 11.5.0.1ru5 onwards.
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @see #sameAsDataSources
      */
     @Deprecated
@@ -301,8 +301,7 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     /**
      * Retrieve the {@code analysis} property (displayed as '{@literal Analysis}') of the object.
-     * No longer applicable from 11.5.0.2sp3 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      * @return {@code ItemList<ColumnAnalysis>}
      */
     @Deprecated
@@ -311,8 +310,7 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     /**
      * Set the {@code analysis} property (displayed as {@code Analysis}) of the object.
-     * No longer applicable from 11.5.0.2sp3 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      * @param analysis the value to set
      */
     @Deprecated
@@ -363,8 +361,7 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     /**
      * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      * @return {@code ItemList<BlueprintElementLink>}
      */
     @Deprecated
@@ -373,8 +370,7 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     /**
      * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      * @param blueprintElements the value to set
      */
     @Deprecated
@@ -1139,8 +1135,7 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     /**
      * Retrieve the {@code same_as_database_columns} property (displayed as '{@literal Same as Database Columns}') of the object.
-     * No longer applicable from 11.5.0.1ru5 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @return {@code ItemList<DatabaseColumn>}
      * @see #getSameAsDataSources()
      */
@@ -1150,8 +1145,7 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     /**
      * Set the {@code same_as_database_columns} property (displayed as {@code Same as Database Columns}) of the object.
-     * No longer applicable from 11.5.0.1ru5 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @param sameAsDatabaseColumns the value to set
      * @see #setSameAsDataSources(ItemList)
      */

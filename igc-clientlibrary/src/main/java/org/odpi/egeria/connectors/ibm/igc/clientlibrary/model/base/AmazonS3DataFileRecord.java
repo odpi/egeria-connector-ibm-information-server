@@ -44,14 +44,14 @@ public class AmazonS3DataFileRecord extends InformationAsset {
     protected ItemList<AmazonS3DataFileField> amazonS3DataFileFields;
 
     /**
-     * No longer applicable from 11.5.0.2sp3 onwards.
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      */
     @Deprecated
     @JsonProperty("analysis")
     protected ItemList<FileRecordAnalysis> analysis;
 
     /**
-     * No longer applicable from 11.7.0.0 onwards.
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      */
     @Deprecated
     @JsonProperty("blueprint_elements")
@@ -195,8 +195,7 @@ public class AmazonS3DataFileRecord extends InformationAsset {
 
     /**
      * Retrieve the {@code analysis} property (displayed as '{@literal Analysis}') of the object.
-     * No longer applicable from 11.5.0.2sp3 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      * @return {@code ItemList<FileRecordAnalysis>}
      */
     @Deprecated
@@ -205,8 +204,7 @@ public class AmazonS3DataFileRecord extends InformationAsset {
 
     /**
      * Set the {@code analysis} property (displayed as {@code Analysis}) of the object.
-     * No longer applicable from 11.5.0.2sp3 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      * @param analysis the value to set
      */
     @Deprecated
@@ -215,8 +213,7 @@ public class AmazonS3DataFileRecord extends InformationAsset {
 
     /**
      * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      * @return {@code ItemList<BlueprintElementLink>}
      */
     @Deprecated
@@ -225,8 +222,7 @@ public class AmazonS3DataFileRecord extends InformationAsset {
 
     /**
      * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      * @param blueprintElements the value to set
      */
     @Deprecated

@@ -56,7 +56,7 @@ public class TransformationProject extends InformationAsset {
     protected ItemList<Dsjob> jobs;
 
     /**
-     * No longer applicable from 11.7.0.0 onwards.
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      */
     @Deprecated
     @JsonProperty("machine_profiles")
@@ -183,8 +183,7 @@ public class TransformationProject extends InformationAsset {
 
     /**
      * Retrieve the {@code machine_profiles} property (displayed as '{@literal Machine Profiles}') of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      * @return {@code ItemList<MachineProfile>}
      */
     @Deprecated
@@ -193,8 +192,7 @@ public class TransformationProject extends InformationAsset {
 
     /**
      * Set the {@code machine_profiles} property (displayed as {@code Machine Profiles}) of the object.
-     * No longer applicable from 11.7.0.0 onwards.
-     *
+     * @deprecated No longer applicable from 11.7.0.0 onwards.
      * @param machineProfiles the value to set
      */
     @Deprecated

@@ -29,7 +29,7 @@ import java.util.List;
 public class DataFileField extends Classificationenabledgroup {
 
     /**
-     * No longer applicable from 11.5.0.2sp3 onwards.
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      */
     @Deprecated
     @JsonProperty("analysis")
@@ -199,8 +199,7 @@ public class DataFileField extends Classificationenabledgroup {
 
     /**
      * Retrieve the {@code analysis} property (displayed as '{@literal Analysis}') of the object.
-     * No longer applicable from 11.5.0.2sp3 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      * @return {@code ItemList<FieldAnalysis>}
      */
     @Deprecated
@@ -209,8 +208,7 @@ public class DataFileField extends Classificationenabledgroup {
 
     /**
      * Set the {@code analysis} property (displayed as {@code Analysis}) of the object.
-     * No longer applicable from 11.5.0.2sp3 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
      * @param analysis the value to set
      */
     @Deprecated

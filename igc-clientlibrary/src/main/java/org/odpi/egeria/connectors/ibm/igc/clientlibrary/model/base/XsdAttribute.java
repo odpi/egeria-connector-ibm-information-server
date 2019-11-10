@@ -56,7 +56,7 @@ public class XsdAttribute extends InformationAsset {
     protected Boolean isMaximumRangeInclusive;
 
     /**
-     * No longer applicable from 11.5.0.1ru5 onwards.
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @see #isMaximumRangeInclusive
      */
     @Deprecated
@@ -67,7 +67,7 @@ public class XsdAttribute extends InformationAsset {
     protected Boolean isMinimumRangeInclusive;
 
     /**
-     * No longer applicable from 11.5.0.1ru5 onwards.
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @see #isMinimumRangeInclusive
      */
     @Deprecated
@@ -253,8 +253,7 @@ public class XsdAttribute extends InformationAsset {
 
     /**
      * Retrieve the {@code is_maximum_range_inclusive_string} property (displayed as '{@literal Maximum Range Inclusive}') of the object.
-     * No longer applicable from 11.5.0.1ru5 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @return {@code List<String>}
      * @see #isMaximumRangeInclusive
      */
@@ -264,8 +263,7 @@ public class XsdAttribute extends InformationAsset {
 
     /**
      * Set the {@code is_maximum_range_inclusive_string} property (displayed as {@code Maximum Range Inclusive}) of the object.
-     * No longer applicable from 11.5.0.1ru5 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @param isMaximumRangeInclusiveString the value to set
      * @see #setIsMaximumRangeInclusive(Boolean)
      */
@@ -289,8 +287,7 @@ public class XsdAttribute extends InformationAsset {
 
     /**
      * Retrieve the {@code is_minimum_range_inclusive_string} property (displayed as '{@literal Minimum Range Inclusive}') of the object.
-     * No longer applicable from 11.5.0.1ru5 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @return {@code List<String>}
      * @see #isMinimumRangeInclusive
      */
@@ -300,8 +297,7 @@ public class XsdAttribute extends InformationAsset {
 
     /**
      * Set the {@code is_minimum_range_inclusive_string} property (displayed as {@code Minimum Range Inclusive}) of the object.
-     * No longer applicable from 11.5.0.1ru5 onwards.
-     *
+     * @deprecated No longer applicable from 11.5.0.1ru5 onwards.
      * @param isMinimumRangeInclusiveString the value to set
      * @see #setIsMinimumRangeInclusive(Boolean)
      */
