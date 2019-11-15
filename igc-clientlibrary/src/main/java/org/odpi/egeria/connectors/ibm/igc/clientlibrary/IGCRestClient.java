@@ -530,7 +530,6 @@ public class IGCRestClient {
         String body = null;
         if (response == null) {
             log.error("Unable to complete request -- check IGC environment connectivity and authentication details.");
-            throw new NullPointerException("Unable to complete request -- check IGC environment connectivity and authentication details.");
         } else if (response.hasBody()) {
             body = response.getBody();
         }
@@ -557,10 +556,8 @@ public class IGCRestClient {
         String rid = null;
         if (response == null) {
             log.error("Unable to create instance -- check IGC environment connectivity and authentication details.");
-            throw new NullPointerException("Unable to create instance -- check IGC environment connectivity and authentication details.");
         } else if (!response.getStatusCode().equals(HttpStatus.CREATED)) {
             log.error("Unable to create instance -- check IGC environment connectivity and authentication details.");
-            throw new NullPointerException("Unable to create instance -- check IGC environment connectivity and authentication details.");
         } else {
             HttpHeaders headers = response.getHeaders();
             List<String> instanceURLs = headers.get("Location");
