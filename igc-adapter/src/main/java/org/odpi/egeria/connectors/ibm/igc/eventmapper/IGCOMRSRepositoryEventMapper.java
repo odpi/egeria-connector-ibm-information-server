@@ -15,6 +15,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.eventmapper.model.ChangeSet;
+import org.odpi.egeria.connectors.ibm.igc.eventmapper.model.PurgeMarker;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
@@ -402,17 +403,6 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     }
 
     /**
-     * Attempt to retrieve the EntityDetail object for the provided asset, and handle any errors if unable to do so.
-     *
-     * @param asset the IGC asset for which to retrieve an EntityDetail object
-     * @return EntityDetail
-     */
-    private EntityDetail getEntityDetailForAsset(Reference asset) {
-        IGCEntityGuid igcEntityGuid = igcRepositoryHelper.getEntityGuid(asset.getType(), null, asset.getId());
-        return getEntityDetailForAssetWithGUID(asset, igcEntityGuid);
-    }
-
-    /**
      * Attempt to retrieve the EntityDetail object for the provided asset, using the provided Repository ID (RID).
      * Useful for when the RID indicates there is some generated entity that does not actually exist on its own in
      * IGC. Will handle any errors if unable to retrieve the asset, and the EntityDetail will simply be null.
@@ -471,10 +461,41 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             } catch (EntityNotKnownException e) {
                 if (log.isErrorEnabled()) { log.error("Unable to find EntityDetail for stub with GUID: {}", guid, e); }
             } catch (RepositoryErrorException e) {
-                if (log.isErrorEnabled()) { log.error("Unexpected error in retrieving EntityDetail for stub: {}", stub.getId()); }
+                if (log.isErrorEnabled()) { log.error("Unexpected error in retrieving EntityDetail for stub: {}", stub.getId(), e); }
             }
         }
         return detail;
+
+    }
+
+    /**
+     * Attempt to retrieve the Relationships for the provided OMRS stub, using the provided Repository ID (RID).
+     * Will handle any errors if unable to retrieve the asset, and the list of relationships will simply be null.
+     *
+     * @param stub the OMRS stub for which to retrieve the Relationships
+     * @param guid the IGC GUID to use for the asset
+     * @return {@code List<Relationship>}
+     */
+    private List<Relationship> getRelationshipsForStubWithGUID(OMRSStub stub, IGCEntityGuid guid) {
+
+        List<Relationship> relationships = null;
+        if (log.isDebugEnabled()) { log.debug("Retrieving Relationships for stub: {}", stub); }
+        Reference asset = getIgcAssetFromStubPayload(stub);
+        if (asset != null) {
+            // If no RID was provided, take it from the asset we retrieved
+            if (guid == null) {
+                guid = igcRepositoryHelper.getEntityGuid(asset.getType(), null, asset.getId());
+            }
+            if (log.isDebugEnabled()) { log.debug(" ... retrieved asset from stub: {}", asset); }
+            try {
+                relationships = igcRepositoryHelper.getRelationshipsFromFullAsset(localServerUserId, guid, asset);
+            } catch (EntityNotKnownException e) {
+                if (log.isErrorEnabled()) { log.error("Unable to find Relationships for stub with GUID: {}", guid, e); }
+            } catch (RepositoryErrorException e) {
+                if (log.isErrorEnabled()) { log.error("Unexpected error in retrieving Relationships for stub: {}", stub.getId(), e); }
+            }
+        }
+        return relationships;
 
     }
 
@@ -559,22 +580,8 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             // If we can't retrieve the asset by RID, it no longer exists -- so send a delete event
             // TODO: currently only possible if we also know the assetType
             if (assetType != null) {
+                // this should also ensure that any generated entities are purged
                 sendPurgedEntity(assetType, rid);
-                // Find any mapper(s) for this type that use a prefix and send a purge for the prefixed entity as well
-                List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(assetType, localServerUserId);
-                for (EntityMapping referenceableMapper : referenceableMappers) {
-                    List<RelationshipMapping> relationshipMappings = referenceableMapper.getRelationshipMappers();
-                    for (RelationshipMapping relationshipMapping : relationshipMappings) {
-                        String prefixOne = relationshipMapping.getProxyOneMapping().getIgcRidPrefix();
-                        String prefixTwo = relationshipMapping.getProxyTwoMapping().getIgcRidPrefix();
-                        if (prefixTwo != null) {
-                            sendPurgedEntity(assetType, prefixTwo + rid);
-                        }
-                        if (prefixOne != null) {
-                            sendPurgedEntity(assetType, prefixOne + rid);
-                        }
-                    }
-                }
             } else {
                 if (log.isWarnEnabled()) { log.warn("No asset type was provided for purged RID {} -- cannot generate purgeEntity event.", rid); }
             }
@@ -763,7 +770,20 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             String relatedAssetType = relatedAsset.getType();
             List<Reference> proxyOnes = new ArrayList<>();
             List<Reference> proxyTwos = new ArrayList<>();
-            if (pmOne.matchesAssetType(latestVersionType) && pmTwo.matchesAssetType(relatedAssetType)) {
+            if (relationshipMapping.sameTypeOnBothEnds() && !relationshipMapping.samePropertiesOnBothEnds()) {
+                String igcPropertyName = change.getIgcPropertyName();
+                if (log.isDebugEnabled()) { log.debug(" ... relationship is the same on both ends, but property differs: {}", igcPropertyName); }
+                if (pmOne.getIgcRelationshipProperties().contains(igcPropertyName)) {
+                    if (log.isDebugEnabled()) { log.debug(" ... proxy mapping 1 contains the property, setting 1 from '{}' and 2 from '{}'", latestVersion.getName(), relatedAsset.getName()); }
+                    proxyOnes = relationshipMapping.getProxyOneAssetFromAsset(latestVersion, igcRestClient);
+                    proxyTwos = relationshipMapping.getProxyTwoAssetFromAsset(relatedAsset, igcRestClient);
+                } else if (pmTwo.getIgcRelationshipProperties().contains(igcPropertyName)) {
+                    if (log.isDebugEnabled()) { log.debug(" ... proxy mapping 2 contains the property, setting 1 from '{}' and 2 from '{}'", relatedAsset.getName(), latestVersion.getName()); }
+                    proxyOnes = relationshipMapping.getProxyOneAssetFromAsset(relatedAsset, igcRestClient);
+                    proxyTwos = relationshipMapping.getProxyTwoAssetFromAsset(latestVersion, igcRestClient);
+                }
+            } else if (relationshipMapping.sameTypeOnBothEnds()
+                    || (pmOne.matchesAssetType(latestVersionType) && pmTwo.matchesAssetType(relatedAssetType))) {
                 proxyOnes = relationshipMapping.getProxyOneAssetFromAsset(latestVersion, igcRestClient);
                 proxyTwos = relationshipMapping.getProxyTwoAssetFromAsset(relatedAsset, igcRestClient);
             } else if (pmTwo.matchesAssetType(latestVersionType) && pmOne.matchesAssetType(relatedAssetType)) {
@@ -832,8 +852,11 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         String relatedRID = proxyTwo.getId();
 
-        // Only proceed if there is actually some related RID (ie. it wasn't just an empty list of relationships)
-        if (relatedRID != null && !relatedRID.equals("null")) {
+        // Only proceed if there is actually some related RID (ie. it wasn't just an empty list of relationships),
+        // and only if the relationship mapping considers this an actual relationship to include
+        if (relatedRID != null
+                && !relatedRID.equals("null")
+                && relationshipMapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, proxyOne, proxyTwo)) {
 
             if (log.isDebugEnabled()) { log.debug("processSingleRelationship processing between {} and {} for type: {}", latestVersionRID, relatedRID, omrsRelationshipType); }
 
@@ -846,7 +869,8 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     proxyOne,
                     proxyTwo,
                     change.getIgcPropertyName(),
-                    null
+                    null,
+                    true
             );
 
             if (log.isDebugEnabled()) { log.debug(" ... calculated relationship GUID: {}", igcRelationshipGuid); }
@@ -932,7 +956,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         }
 
                     } catch (RelationshipNotKnownException e) {
-                        if (log.isErrorEnabled()) { log.error("Unable to find relationship with GUID: {}", igcRelationshipGuid); }
+                        if (log.isErrorEnabled()) { log.error("Unable to find relationship with GUID: {}", igcRelationshipGuid, e); }
                     } catch (InvalidParameterException | RepositoryErrorException e) {
                         if (log.isErrorEnabled()) { log.error("Unknown error occurred trying to retrieve relationship: {}", igcRelationshipGuid, e); }
                     }
@@ -942,7 +966,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             }
 
         } else {
-            if (log.isWarnEnabled()) { log.warn("Related RID for relationship type {} and guid {} was null.", omrsRelationshipType, latestVersionRID); }
+            if (log.isWarnEnabled()) { log.warn("Related RID for relationship type {} and guid {} was null, or explicitly excluded.", omrsRelationshipType, latestVersionRID); }
         }
 
     }
@@ -990,7 +1014,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 // Note: no need to call back to processAsset with prefixed GUID as it will have been handled already
                 // by the base asset being processed
             } catch (RelationshipNotKnownException e) {
-                if (log.isErrorEnabled()) { log.error("Unable to find relationship with GUID: {}", igcRelationshipGuid); }
+                if (log.isErrorEnabled()) { log.error("Unable to find relationship with GUID: {}", igcRelationshipGuid, e); }
             } catch (InvalidParameterException | RepositoryErrorException e) {
                 if (log.isErrorEnabled()) { log.error("Unknown error occurred trying to retrieve relationship: {}", igcRelationshipGuid, e); }
             }
@@ -1110,7 +1134,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     }
                 } catch (InvalidParameterException | RepositoryErrorException | TypeDefNotKnownException e) {
                     if (log.isErrorEnabled()) {
-                        log.error("Unable to find relationship type definition '{}' / not supported for guid: {}", relationshipMapping.getOmrsRelationshipType(), newRelationshipGUID);
+                        log.error("Unable to find relationship type definition '{}' / not supported for guid: {}", relationshipMapping.getOmrsRelationshipType(), newRelationshipGUID, e);
                     }
                 }
             } else {
@@ -1176,7 +1200,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         relationship
                 );
             } catch (RepositoryErrorException e) {
-                if (log.isErrorEnabled()) { log.error("Unable to retrieve relationship details for: {}", relationshipGUID); }
+                if (log.isErrorEnabled()) { log.error("Unable to retrieve relationship details for: {}", relationshipGUID, e); }
             }
         } else {
             if (log.isWarnEnabled()) { log.warn("Unable to produce DeletePurgedRelationshipEvent for relationship: {}", relationshipGUID); }
@@ -1191,69 +1215,43 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      */
     private void sendNewEntity(Reference asset) {
 
-        EntityDetail detail = getEntityDetailForAsset(asset);
+        boolean atLeastOneEvent = false;
 
-        if (detail != null) {
-
-            // Send an event for the entity itself
-            repositoryEventProcessor.processNewEntityEvent(
-                    sourceName,
-                    metadataCollectionId,
-                    originatorServerName,
-                    originatorServerType,
-                    null,
-                    detail
-            );
-
-            // TODO: for now this sends the same set of classifications every time, known design issue with how
-            //  classifications are currently handled (to be changed once classifications are reworked)
-            List<Classification> classifications = detail.getClassifications();
-            if (classifications != null) {
-                for (Classification classification : classifications) {
-                    sendNewClassification(detail);
-                }
-            }
-
-            // See if there are any generated entities to send an event for (ie. *Type)
-            List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(asset.getType(), localServerUserId);
-            for (EntityMapping referenceableMapper : referenceableMappers) {
-                // Generated entities MUST have a prefix, so if there is no prefix ignore that mapper
-                String ridPrefix = referenceableMapper.getIgcRidPrefix();
-                if (ridPrefix != null) {
-                    IGCEntityGuid igcEntityGuid = igcRepositoryHelper.getEntityGuid(asset.getType(), ridPrefix, asset.getId());
-                    EntityDetail genDetail = getEntityDetailForAssetWithGUID(asset, igcEntityGuid);
-                    if (genDetail != null) {
-                        repositoryEventProcessor.processNewEntityEvent(
-                                sourceName,
-                                metadataCollectionId,
-                                originatorServerName,
-                                originatorServerType,
-                                null,
-                                genDetail
-                        );
-                        // TODO: for now this sends the same set of classifications every time, known design issue with how
-                        //  classifications are currently handled (to be changed once classifications are reworked)
-                        classifications = genDetail.getClassifications();
-                        if (classifications != null) {
-                            for (Classification classification : classifications) {
-                                sendNewClassification(genDetail);
-                            }
-                        }
-                    } else {
-                        if (log.isWarnEnabled()) { log.warn("Unable to generate new entity for asset type {} with prefix {} and RID: {}", asset.getType(), ridPrefix, asset.getId()); }
+        // Output an entity for all entities that map to this asset type -- generated and non-generated
+        List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(asset.getType(), localServerUserId);
+        for (EntityMapping referenceableMapper : referenceableMappers) {
+            String ridPrefix = referenceableMapper.getIgcRidPrefix();
+            IGCEntityGuid igcEntityGuid = igcRepositoryHelper.getEntityGuid(asset.getType(), ridPrefix, asset.getId());
+            EntityDetail detail = getEntityDetailForAssetWithGUID(asset, igcEntityGuid);
+            if (detail != null) {
+                atLeastOneEvent = true;
+                repositoryEventProcessor.processNewEntityEvent(
+                        sourceName,
+                        metadataCollectionId,
+                        originatorServerName,
+                        originatorServerType,
+                        null,
+                        detail
+                );
+                // TODO: for now this sends the same set of classifications every time, known design issue with how
+                //  classifications are currently handled (to be changed once classifications are reworked)
+                List<Classification> classifications = detail.getClassifications();
+                if (classifications != null) {
+                    for (Classification classification : classifications) {
+                        sendNewClassification(detail);
                     }
-                } else {
-                    if (log.isDebugEnabled()) { log.debug("No prefix found in mapper {}, skipping for generated new entity.", referenceableMapper.getClass().getCanonicalName()); }
                 }
+            } else {
+                if (log.isWarnEnabled()) { log.warn("Unable to retrieve new entity for asset type {} with prefix {} and RID: {}", asset.getType(), ridPrefix, asset.getId()); }
             }
-
-            // Finally, update the stub with the latest version of the asset
-            // (if any of the above fail, this will also be missed, so we will simply have more updates on the next event)
-            igcRepositoryHelper.upsertOMRSStubForAsset(asset);
-
-        } else {
-            if (log.isErrorEnabled()) { log.error("EntityDetail could not be retrieved for RID: {}", asset.getId()); }
         }
+
+        // Finally, update the stub with the latest version of the asset
+        // (if any of the above fail, this will also be missed, so we will simply have more updates on the next event)
+        if (atLeastOneEvent) {
+            igcRepositoryHelper.upsertOMRSStubForAsset(asset);
+        }
+
     }
 
     /**
@@ -1264,58 +1262,37 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      */
     private void sendUpdatedEntity(Reference latestVersion, OMRSStub stub) {
 
-        EntityDetail latest = getEntityDetailForAsset(latestVersion);
+        boolean atLeastOneEvent = false;
 
-        if (latest != null) {
-
-            // Send an event for the entity itself
-            EntityDetail last = getEntityDetailForStub(stub);
-            repositoryEventProcessor.processUpdatedEntityEvent(
-                    sourceName,
-                    metadataCollectionId,
-                    originatorServerName,
-                    originatorServerType,
-                    null,
-                    last,
-                    latest
-            );
-
-            processClassifications(latest, latest.getClassifications(), last == null ? new ArrayList<>() : last.getClassifications());
-
-            // See if there are any generated entities to send an event for (ie. *Type)
-            List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(latestVersion.getType(), localServerUserId);
-            for (EntityMapping referenceableMapper : referenceableMappers) {
-                // Generated entities MUST have a prefix, so if there is no prefix ignore that mapper
-                String ridPrefix = referenceableMapper.getIgcRidPrefix();
-                if (ridPrefix != null) {
-                    IGCEntityGuid igcEntityGuid = igcRepositoryHelper.getEntityGuid(latestVersion.getType(), ridPrefix, latestVersion.getId());
-                    EntityDetail genDetail = getEntityDetailForAssetWithGUID(latestVersion, igcEntityGuid);
-                    if (genDetail != null) {
-                        EntityDetail genLast = getEntityDetailForStubWithGUID(stub, igcEntityGuid);
-                        repositoryEventProcessor.processUpdatedEntityEvent(
-                                sourceName,
-                                metadataCollectionId,
-                                originatorServerName,
-                                originatorServerType,
-                                null,
-                                genLast,
-                                genDetail
-                        );
-                        processClassifications(genDetail, genDetail.getClassifications(), genLast == null ? new ArrayList<>() : genLast.getClassifications());
-                    } else {
-                        if (log.isWarnEnabled()) { log.warn("Unable to generate updated entity for asset type {} with prefix {} and RID: {}", latestVersion.getType(), ridPrefix, latestVersion.getId()); }
-                    }
-                } else {
-                    if (log.isDebugEnabled()) { log.debug("No prefix found in mapper {}, skipping for generated update entity.", referenceableMapper.getClass().getCanonicalName()); }
-                }
+        // See if there are any generated entities to send an event for (ie. *Type)
+        List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(latestVersion.getType(), localServerUserId);
+        for (EntityMapping referenceableMapper : referenceableMappers) {
+            // Generated entities MUST have a prefix, so if there is no prefix ignore that mapper
+            String ridPrefix = referenceableMapper.getIgcRidPrefix();
+            IGCEntityGuid igcEntityGuid = igcRepositoryHelper.getEntityGuid(latestVersion.getType(), ridPrefix, latestVersion.getId());
+            EntityDetail detail = getEntityDetailForAssetWithGUID(latestVersion, igcEntityGuid);
+            if (detail != null) {
+                atLeastOneEvent = true;
+                EntityDetail last = getEntityDetailForStubWithGUID(stub, igcEntityGuid);
+                repositoryEventProcessor.processUpdatedEntityEvent(
+                        sourceName,
+                        metadataCollectionId,
+                        originatorServerName,
+                        originatorServerType,
+                        null,
+                        last,
+                        detail
+                );
+                processClassifications(detail, detail.getClassifications(), last == null ? new ArrayList<>() : last.getClassifications());
+            } else {
+                if (log.isWarnEnabled()) { log.warn("Unable to generate updated entity for asset type {} with prefix {} and RID: {}", latestVersion.getType(), ridPrefix, latestVersion.getId()); }
             }
+        }
 
-            // Finally, update the stub with the latest version of the asset
-            // (if any of the above fail, this will also be missed, so we will simply have more updates on the next event)
+        // Finally, update the stub with the latest version of the asset
+        // (if any of the above fail, this will also be missed, so we will simply have more updates on the next event)
+        if (atLeastOneEvent) {
             igcRepositoryHelper.upsertOMRSStubForAsset(latestVersion);
-
-        } else {
-            if (log.isErrorEnabled()) { log.error("Latest EntityDetail could not be retrieved for RID: {}", latestVersion.getId()); }
         }
 
     }
@@ -1430,40 +1407,286 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         );
     }
 
+    private void sendPurgedEntity(String igcAssetType, String rid) {
+        sendPurgedEntity(igcAssetType, rid, new HashSet<>());
+    }
+
     /**
      * Send an event out on OMRS topic for a purged entity.
      *
      * @param igcAssetType the IGC asset type (ie. translated from the ASSET_TYPE from the event)
      * @param rid the IGC Repository ID (RID) of the asset
      */
-    private void sendPurgedEntity(String igcAssetType, String rid) {
+    private void sendPurgedEntity(String igcAssetType, String rid, Set<String> alreadyPurgedRids) {
 
-        OMRSStub stub = igcRepositoryHelper.getOMRSStubForAsset(rid, igcAssetType);
+        if (alreadyPurgedRids.contains(rid)) {
+            if (log.isDebugEnabled()) { log.debug("Received RID has already been purged -- skipping: {}", rid); }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Purging entity of type '{}' with RID: {}", igcAssetType, rid);
+            }
+            OMRSStub stub = igcRepositoryHelper.getOMRSStubForAsset(rid, igcAssetType);
+            Reference fromObject = getIgcAssetFromStubPayload(stub);
 
-        // Purge entities by getting all mappers used for that entity (ie. *Type generated entities
-        // as well as non-generated entities)
-        List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(igcAssetType, localServerUserId);
-        for (EntityMapping referenceableMapper : referenceableMappers) {
-            String ridPrefix = referenceableMapper.getIgcRidPrefix();
-            IGCEntityGuid igcEntityGuid = igcRepositoryHelper.getEntityGuid(igcAssetType, ridPrefix, rid);
-            EntityDetail detail = getEntityDetailForStubWithGUID(stub, igcEntityGuid);
-            if (detail != null) {
-                repositoryEventProcessor.processDeletePurgedEntityEvent(
-                        sourceName,
-                        metadataCollectionId,
-                        originatorServerName,
-                        originatorServerType,
-                        null,
-                        detail
-                );
-            } else {
-                if (log.isWarnEnabled()) { log.warn("No stub information exists for purged RID {} -- cannot generated purgeEntity event.", rid); }
+            // Purge entities by getting all mappers used for that entity (ie. *Type generated entities
+            // as well as non-generated entities)
+            List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(igcAssetType, localServerUserId);
+            for (EntityMapping referenceableMapper : referenceableMappers) {
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Checking via: {}", referenceableMapper.getClass().getName());
+                }
+                if (referenceableMapper.isOmrsType(igcRestClient, fromObject)) {
+
+                    List<PurgeMarker> purgeMarkers = new ArrayList<>();
+                    String ridPrefix = referenceableMapper.getIgcRidPrefix();
+                    IGCEntityGuid igcEntityGuid = igcRepositoryHelper.getEntityGuid(igcAssetType, ridPrefix, rid);
+                    // First purge any relationships that exist against this entity
+                    List<RelationshipMapping> relationshipMappers = referenceableMapper.getRelationshipMappers();
+                    for (RelationshipMapping relationshipMapping : relationshipMappers) {
+
+                        if (log.isDebugEnabled()) {
+                            log.debug("Checking for relationships via: {}", relationshipMapping.getClass().getName());
+                        }
+                        RelationshipMapping.ProxyMapping pmOne = relationshipMapping.getProxyOneMapping();
+                        RelationshipMapping.ProxyMapping pmTwo = relationshipMapping.getProxyTwoMapping();
+                        try {
+                            RelationshipDef relationshipDef = (RelationshipDef) igcomrsMetadataCollection.getTypeDefByName(
+                                    localServerUserId,
+                                    relationshipMapping.getOmrsRelationshipType()
+                            );
+                            RelationshipMapping.ContainedType childEnd = relationshipMapping.getContainedType();
+                            // TODO: not quite as simple as this just checking types, as the IGC type could match both ends...
+                            if ((childEnd.equals(RelationshipMapping.ContainedType.ONE) && pmTwo.matchesAssetType(igcAssetType))
+                                    || (childEnd.equals(RelationshipMapping.ContainedType.TWO) && pmOne.matchesAssetType(igcAssetType))) {
+                                // If the child entities are at one end of the relationship, and we are starting from the
+                                // other, then recursively purge
+                                if (log.isDebugEnabled()) {
+                                    log.debug(" ... containment detected for type '{}' and relationship {}", igcAssetType, relationshipMapping.getClass().getName());
+                                }
+                                // Need to ensure all relationships are purged BEFORE recursing on entities, otherwise
+                                // for recursed entities we will inevitably need to try to delete a parent-child relationship
+                                // where one end (eg. the child) has already been purged and therefore a stub for it cannot be
+                                // retrieved
+                                purgeMarkers.add(new PurgeMarker(fromObject, relationshipDef, relationshipMapping));
+                            }
+
+                            // Irrespective of containment and the potential need to recurse, remove the relationship
+                            List<String> propertyNames = null;
+                            List<Reference> endOne = new ArrayList<>();
+                            List<Reference> endTwo = new ArrayList<>();
+                            boolean iterateOnOne = false;
+                            if (pmOne.matchesAssetType(igcAssetType)) {
+                                if (log.isDebugEnabled()) {
+                                    log.debug(" ... setting 'from' to end1: {}", igcAssetType);
+                                }
+                                propertyNames = pmOne.getIgcRelationshipProperties();
+                                endOne.addAll(relationshipMapping.getProxyOneAssetFromAsset(fromObject, igcRestClient));
+                                iterateOnOne = true;
+                            } else if (pmTwo.matchesAssetType(igcAssetType)) {
+                                if (log.isDebugEnabled()) {
+                                    log.debug(" ... setting 'from' to end2: {}", igcAssetType);
+                                }
+                                propertyNames = pmTwo.getIgcRelationshipProperties();
+                                endTwo.addAll(relationshipMapping.getProxyTwoAssetFromAsset(fromObject, igcRestClient));
+                                iterateOnOne = false;
+                            } else {
+                                log.warn("Unable to match the purged entity '{}' to either end of relationship: {}", igcAssetType, relationshipDef.getName());
+                            }
+                            if (propertyNames != null) {
+                                for (String property : propertyNames) {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug(" ... checking for relationship on property: {}", property);
+                                    }
+                                    Object relatedResult = igcRestClient.getPropertyByName(fromObject, property);
+                                    if (relatedResult != null) {
+                                        // TODO: we should also cache up all of the relationship ends that are NOT purged,
+                                        //  as these entities should have their stubs updated (to no longer refer to a
+                                        //  non-existent relationship) -- in fact, that might take care of sending the
+                                        //  correct relationship purges for us?
+                                        if (Reference.isReference(relatedResult)) {
+                                            Reference relationship = (Reference) relatedResult;
+                                            cascadeRelationshipPurge(
+                                                    relationshipMapping,
+                                                    relationshipDef,
+                                                    endOne,
+                                                    endTwo,
+                                                    relationship,
+                                                    property,
+                                                    iterateOnOne
+                                            );
+                                        } else if (Reference.isItemList(relatedResult)) {
+                                            ItemList<Reference> relationships = (ItemList<Reference>) relatedResult;
+                                            for (Reference relationship : relationships.getItems()) {
+                                                cascadeRelationshipPurge(
+                                                        relationshipMapping,
+                                                        relationshipDef,
+                                                        endOne,
+                                                        endTwo,
+                                                        relationship,
+                                                        property,
+                                                        iterateOnOne
+                                                );
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (RepositoryErrorException | TypeDefNotKnownException | InvalidParameterException e) {
+                            log.error("Unable to retrieve the relationship type definition for '{}' -- cannot purge relationship.", relationshipMapping.getOmrsRelationshipType(), e);
+                        }
+
+                    }
+
+                    // Recurse on any purges we've marked
+                    for (PurgeMarker purgeMarker : purgeMarkers) {
+                        recurseOnContainedEntities(purgeMarker, alreadyPurgedRids);
+                    }
+
+                    // Then remove the entity itself
+                    EntityDetail detail = getEntityDetailForStubWithGUID(stub, igcEntityGuid);
+                    if (detail != null) {
+                        if (log.isDebugEnabled()) {
+                            log.debug(" ... purging entity: {}", igcEntityGuid.asGuid());
+                        }
+                        repositoryEventProcessor.processDeletePurgedEntityEvent(
+                                sourceName,
+                                metadataCollectionId,
+                                originatorServerName,
+                                originatorServerType,
+                                null,
+                                detail
+                        );
+                        // and mark it as purged, so that we don't attempt to purge again during the recursion
+                        alreadyPurgedRids.add(igcEntityGuid.getRid());
+                    } else {
+                        if (log.isWarnEnabled()) {
+                            log.warn("No stub information exists for purged GUID {} -- cannot generated purgeEntity event.", igcEntityGuid.asGuid());
+                        }
+                    }
+
+                } else {
+                    log.info("Type ({}) did not match mapper, skipped: {}", igcAssetType, referenceableMapper.getClass().getName());
+                }
+            }
+
+            // Finally, remove the stub (so that if such an asset is created in the future it is recognised as new
+            // rather than an update)
+            if (log.isDebugEnabled()) {
+                log.debug("Deleting stub: {}", rid);
+            }
+            igcRepositoryHelper.deleteOMRSStubForAsset(rid, igcAssetType);
+        }
+
+    }
+
+    /**
+     * Recursively purge any entities that are contained within the marker pointing to what was purged.
+     *
+     * @param marker the marker indicating what was purged
+     * @param alreadyPurgedRids a set of RIDs for entities that have already been purged
+     */
+    private void recurseOnContainedEntities(PurgeMarker marker, Set<String> alreadyPurgedRids) {
+
+        RelationshipMapping relationshipMapping = marker.getMapping();
+        Reference parentObject = marker.getTriggerObject();
+        RelationshipMapping.ContainedType childEnd = relationshipMapping.getContainedType();
+        RelationshipMapping.ProxyMapping parent;
+
+        if (log.isDebugEnabled()) { log.debug("Recursing on mapping: {}", relationshipMapping.getClass().getName()); }
+
+        String parentRid = parentObject.getId();
+
+        if (childEnd.equals(RelationshipMapping.ContainedType.TWO)) {
+            if (log.isDebugEnabled()) { log.debug(" ... setting parent as 1, child as 2"); }
+            parent = relationshipMapping.getProxyOneMapping();
+        } else {
+            if (log.isDebugEnabled()) { log.debug(" ... setting child as 1, parent as 2"); }
+            parent = relationshipMapping.getProxyTwoMapping();
+        }
+        List<String> relationshipProperties = parent.getIgcRelationshipProperties();
+        if (log.isDebugEnabled()) { log.debug(" ... iterating through parent's properties: {}", relationshipProperties); }
+        for (String property : relationshipProperties) {
+            if (log.isDebugEnabled()) { log.debug(" ... getting child entities from property: {}", property); }
+            Object relatedResult = igcRestClient.getPropertyByName(parentObject, property);
+            if (relatedResult != null) {
+                if (Reference.isReference(relatedResult)) {
+                    Reference relationship = (Reference) relatedResult;
+                    if (!relationship.getId().equals(parentRid)) {
+                        if (log.isDebugEnabled()) { log.debug(" ... purging child entity: {}", relationship.getId()); }
+                        sendPurgedEntity(relationship.getType(), relationship.getId(), alreadyPurgedRids);
+                    }
+                } else if (Reference.isItemList(relatedResult)) {
+                    ItemList<Reference> relationships = (ItemList<Reference>) relatedResult;
+                    for (Reference relationship : relationships.getItems()) {
+                        if (!relationship.getId().equals(parentRid)) {
+                            if (log.isDebugEnabled()) { log.debug(" ... purging child entity: {}", relationship.getId()); }
+                            sendPurgedEntity(relationship.getType(), relationship.getId(), alreadyPurgedRids);
+                        }
+                    }
+                }
             }
         }
 
-        // Finally, remove the stub (so that if such an asset is created in the future it is recognised as new
-        // rather than an update)
-        igcRepositoryHelper.deleteOMRSStubForAsset(rid, igcAssetType);
+    }
+
+    private void cascadeRelationshipPurge(RelationshipMapping relationshipMapping,
+                                          RelationshipDef relationshipDef,
+                                          List<Reference> endOne,
+                                          List<Reference> endTwo,
+                                          Reference relatedObject,
+                                          String propertyName,
+                                          boolean iterateOnOne) {
+
+        if (iterateOnOne) {
+            for (Reference one : endOne) {
+                IGCRelationshipGuid relGuid = RelationshipMapping.getRelationshipGUID(
+                        igcRepositoryHelper,
+                        relationshipMapping,
+                        one,
+                        relatedObject,
+                        propertyName,
+                        null,
+                        true
+                );
+                // Purge the relationship
+                if (log.isDebugEnabled()) {
+                    log.debug(" ... purging relationship for purged entity: {}", relGuid.asGuid());
+                }
+                sendPurgedRelationship(
+                        relationshipMapping,
+                        relationshipDef,
+                        relGuid,
+                        propertyName,
+                        one,
+                        relatedObject
+                );
+            }
+        } else {
+            for (Reference two : endTwo) {
+                IGCRelationshipGuid relGuid = RelationshipMapping.getRelationshipGUID(
+                        igcRepositoryHelper,
+                        relationshipMapping,
+                        relatedObject,
+                        two,
+                        propertyName,
+                        null,
+                        true
+                );
+                // Purge the relationship
+                if (log.isDebugEnabled()) {
+                    log.debug(" ... purging relationship for purged entity: {}", relGuid.asGuid());
+                }
+                sendPurgedRelationship(
+                        relationshipMapping,
+                        relationshipDef,
+                        relGuid,
+                        propertyName,
+                        relatedObject,
+                        two
+                );
+            }
+        }
 
     }
 
