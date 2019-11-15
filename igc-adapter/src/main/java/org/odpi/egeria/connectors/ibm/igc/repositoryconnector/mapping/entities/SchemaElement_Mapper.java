@@ -4,64 +4,57 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataClassAssignmentMapper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.PrimitivePropertyValue;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 
-import java.util.List;
-
 /**
- * Defines the common mappings to the OMRS "SchemaAttribute" entity.
+ * Defines the mapping to the OMRS "SchemaElement" entity.
  */
-public class SchemaAttribute_Mapper extends SchemaElement_Mapper {
+public class SchemaElement_Mapper extends ReferenceableMapper {
 
     private static class Singleton {
-        private static final SchemaAttribute_Mapper INSTANCE = new SchemaAttribute_Mapper();
+        private static final SchemaElement_Mapper INSTANCE = new SchemaElement_Mapper();
     }
-    public static SchemaAttribute_Mapper getInstance(IGCVersionEnum version) {
+    public static SchemaElement_Mapper getInstance(IGCVersionEnum version) {
         return Singleton.INSTANCE;
     }
 
-    private SchemaAttribute_Mapper() {
+    private SchemaElement_Mapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(
                 "",
                 "",
-                "SchemaAttribute",
-                null
+                "SchemaElement"
         );
 
     }
 
-    protected SchemaAttribute_Mapper(String igcAssetTypeName,
-                                     String igcAssetTypeDisplayName,
-                                     String omrsEntityTypeName) {
+    protected SchemaElement_Mapper(String igcAssetTypeName,
+                                   String igcAssetTypeDisplayName,
+                                   String omrsEntityTypeName,
+                                   String prefix) {
         super(
                 igcAssetTypeName,
                 igcAssetTypeDisplayName,
                 omrsEntityTypeName,
-                null
+                prefix
         );
 
         // The list of properties that should be mapped
-        addLiteralPropertyMapping("maxCardinality", 1);
-        addComplexIgcProperty("allows_null_values");
-        addComplexOmrsProperty("minCardinality");
-
-        // Deprecated / moved properties will be null'd
-        addLiteralPropertyMapping("name", null);
-
-        // The list of relationships that should be mapped
-        addRelationshipMapper(DataClassAssignmentMapper.getInstance(null));
+        addSimplePropertyMapping("name", "displayName");
+        addSimplePropertyMapping("short_description", "description");
+        addComplexOmrsProperty("anchorGUID");
 
     }
 
@@ -81,16 +74,19 @@ public class SchemaAttribute_Mapper extends SchemaElement_Mapper {
         Reference igcEntity = entityMap.getIgcEntity();
 
         OMRSRepositoryHelper repositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
+        IGCRepositoryHelper igcRepositoryHelper = ((IGCOMRSMetadataCollection)igcomrsRepositoryConnector.getMetadataCollection()).getIgcRepositoryHelper();
         String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
 
-        // setup the OMRS 'minCardinality' property
-        Boolean allowsNulls = (Boolean) igcRestClient.getPropertyByName(igcEntity, "allows_null_values");
-        if (allowsNulls != null) {
-            instanceProperties = repositoryHelper.addIntPropertyToInstance(
+        // setup the OMRS 'anchorGUID' property
+        Identity identity = igcEntity.getIdentity(igcRestClient);
+        Identity parent = identity.getParentIdentity();
+        if (parent != null) {
+            IGCEntityGuid parentGuid = igcRepositoryHelper.getEntityGuid(parent.getAssetType(), null, parent.getRid());
+            instanceProperties = repositoryHelper.addStringPropertyToInstance(
                     repositoryName,
                     instanceProperties,
-                    "minCardinality",
-                    allowsNulls ? 0 : 1,
+                    "anchorGUID",
+                    parentGuid.asGuid(),
                     methodName
             );
         }
@@ -100,7 +96,7 @@ public class SchemaAttribute_Mapper extends SchemaElement_Mapper {
     }
 
     /**
-     * Handle the search for 'minCardinality' by searching against 'allows_null_values' of the object in IGC.
+     * Handle the search for 'domain' by searching against 'parent_policy' of the object in IGC.
      *
      * @param repositoryHelper the repository helper
      * @param repositoryName name of the repository
@@ -122,19 +118,7 @@ public class SchemaAttribute_Mapper extends SchemaElement_Mapper {
 
         super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, value);
 
-        if (omrsPropertyName.equals("minCardinality")) {
-
-            Object minCardinality = ((PrimitivePropertyValue) value).getPrimitiveValue();
-            boolean optional = (minCardinality == null || ((Integer) minCardinality) <= 0);
-
-            IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
-                    "allows_null_values",
-                    "=",
-                    optional ? "true" : "false"
-            );
-            igcSearchConditionSet.addCondition(igcSearchCondition);
-
-        }
+        // TODO: handle searching for anchorGUID, assuming there is a general way we could do it across all types?
 
     }
 

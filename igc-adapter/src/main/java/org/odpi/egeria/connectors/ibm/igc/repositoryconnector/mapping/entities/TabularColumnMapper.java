@@ -28,9 +28,11 @@ public class TabularColumnMapper extends SchemaAttribute_Mapper {
         );
 
         // The list of properties that should be mapped
-        addSimplePropertyMapping("name", "displayName");
         addSimplePropertyMapping("position", "position");
         addSimplePropertyMapping("default_value", "defaultValueOverride");
+        addSimplePropertyMapping("type", "nativeClass");
+        addLiteralPropertyMapping("allowsDuplicateValues", null);
+        addLiteralPropertyMapping("orderedValues", null);
 
         // The list of relationships that should be mapped
         addRelationshipMapper(AttributeForSchemaMapper_RecordField.getInstance(null));

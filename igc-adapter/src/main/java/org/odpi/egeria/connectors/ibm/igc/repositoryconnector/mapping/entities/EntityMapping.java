@@ -171,6 +171,21 @@ public abstract class EntityMapping extends InstanceMapping {
     }
 
     /**
+     * Indicates whether the provided asset represents the OMRS type defined in the entity mapping (true)
+     * or not (false). This is primarily useful for any singular object types in IGC that map to multiple types in
+     * OMRS depending on certain characteristics, in which case this method should be overridden by the entity mapping
+     * implementation to define those criteria. In the majority of cases this does not need to be overridden and
+     * simply returns true directly.
+     *
+     * @param igcRestClient connectivity to the IGC environment
+     * @param igcObject the IGC object to check matches the OMRS type or not
+     * @return boolean
+     */
+    public boolean isOmrsType(IGCRestClient igcRestClient, Reference igcObject) {
+        return true;
+    }
+
+    /**
      * Add any other IGC asset type needed for this mapping.
      *
      * @param igcAssetTypeName name of additional IGC asset
@@ -536,7 +551,10 @@ public abstract class EntityMapping extends InstanceMapping {
         }
         entityMap.initializeEntitySummary();
 
-        setupEntityObj(entityMap, entityMap.getOmrsSummary());
+        EntitySummary preliminary = entityMap.getOmrsSummary();
+        if (preliminary != null) {
+            setupEntityObj(entityMap, preliminary);
+        }
         return entityMap.getOmrsSummary();
 
     }
@@ -583,12 +601,15 @@ public abstract class EntityMapping extends InstanceMapping {
         // Handle any super-generic mappings first
         entityMap.initializeEntityDetail();
 
-        // Then handle any generic mappings and classifications
-        setupEntityObj(entityMap, entityMap.getOmrsDetail());
+        EntityDetail preliminary = entityMap.getOmrsDetail();
+        if (preliminary != null) {
+            // Then handle any generic mappings and classifications
+            setupEntityObj(entityMap, preliminary);
 
-        // Use reflection to apply POJO-specific mappings
-        InstanceProperties instanceProperties = getMappedInstanceProperties(entityMap);
-        entityMap.updateOmrsDetailWithProperties(instanceProperties);
+            // Use reflection to apply POJO-specific mappings
+            InstanceProperties instanceProperties = getMappedInstanceProperties(entityMap);
+            entityMap.updateOmrsDetailWithProperties(instanceProperties);
+        }
 
         return entityMap.getOmrsDetail();
 

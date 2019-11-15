@@ -26,6 +26,7 @@ public class NestedFileMapper extends RelationshipMapping {
                 "homeFolder",
                 "nestedFiles"
         );
+        setContainedType(ContainedType.TWO);
     }
 
 }

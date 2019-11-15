@@ -36,6 +36,7 @@ public class CategoryHierarchyLinkMapper extends RelationshipMapping {
                 "superCategory",
                 "subcategories"
         );
+        setContainedType(ContainedType.TWO);
     }
 
     /**

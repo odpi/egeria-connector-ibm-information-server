@@ -2,7 +2,11 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.CategoryAnchorMapper;
@@ -43,6 +47,19 @@ public class GlossaryCategoryMapper extends ReferenceableMapper {
         // The classes to use for mapping any classifications
         addClassificationMapper(SubjectAreaMapper.getInstance(null));
 
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isOmrsType(IGCRestClient igcRestClient, Reference igcObject) {
+        String assetType = IGCRestConstants.getAssetTypeForSearch(igcObject.getType());
+        if (assetType.equals("category")) {
+            Identity catIdentity = igcObject.getIdentity(igcRestClient);
+            Identity parentIdentity = catIdentity.getParentIdentity();
+            return parentIdentity != null;
+        }
+        return false;
     }
 
     /**

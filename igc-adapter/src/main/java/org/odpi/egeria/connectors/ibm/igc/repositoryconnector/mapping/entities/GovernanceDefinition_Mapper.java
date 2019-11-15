@@ -7,61 +7,58 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataClassAssignmentMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.PrimitivePropertyValue;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 
-import java.util.List;
-
 /**
- * Defines the common mappings to the OMRS "SchemaAttribute" entity.
+ * Defines the common mappings to the OMRS "GovernanceDefinition" entity.
  */
-public class SchemaAttribute_Mapper extends SchemaElement_Mapper {
+public class GovernanceDefinition_Mapper extends ReferenceableMapper {
 
     private static class Singleton {
-        private static final SchemaAttribute_Mapper INSTANCE = new SchemaAttribute_Mapper();
+        private static final GovernanceDefinition_Mapper INSTANCE = new GovernanceDefinition_Mapper();
     }
-    public static SchemaAttribute_Mapper getInstance(IGCVersionEnum version) {
+    public static GovernanceDefinition_Mapper getInstance(IGCVersionEnum version) {
         return Singleton.INSTANCE;
     }
 
-    private SchemaAttribute_Mapper() {
+    private GovernanceDefinition_Mapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(
                 "",
                 "",
-                "SchemaAttribute",
-                null
+                "GovernanceDefinition"
         );
 
     }
 
-    protected SchemaAttribute_Mapper(String igcAssetTypeName,
-                                     String igcAssetTypeDisplayName,
-                                     String omrsEntityTypeName) {
+    protected GovernanceDefinition_Mapper(String igcAssetTypeName,
+                                          String igcAssetTypeDisplayName,
+                                          String omrsEntityTypeName) {
         super(
                 igcAssetTypeName,
                 igcAssetTypeDisplayName,
-                omrsEntityTypeName,
-                null
+                omrsEntityTypeName
         );
 
         // The list of properties that should be mapped
-        addLiteralPropertyMapping("maxCardinality", 1);
-        addComplexIgcProperty("allows_null_values");
-        addComplexOmrsProperty("minCardinality");
-
-        // Deprecated / moved properties will be null'd
-        addLiteralPropertyMapping("name", null);
-
-        // The list of relationships that should be mapped
-        addRelationshipMapper(DataClassAssignmentMapper.getInstance(null));
+        addSimplePropertyMapping("name", "title");
+        addSimplePropertyMapping("short_description", "summary");
+        addSimplePropertyMapping("long_description", "description");
+        addComplexIgcProperty("parent_policy");
+        addComplexOmrsProperty("domain");
+        addLiteralPropertyMapping("scope", null);
+        addLiteralPropertyMapping("priority", null);
+        addLiteralPropertyMapping("implications", null);
+        addLiteralPropertyMapping("outcomes", null);
+        addLiteralPropertyMapping("results", null);
 
     }
 
@@ -83,14 +80,14 @@ public class SchemaAttribute_Mapper extends SchemaElement_Mapper {
         OMRSRepositoryHelper repositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
         String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
 
-        // setup the OMRS 'minCardinality' property
-        Boolean allowsNulls = (Boolean) igcRestClient.getPropertyByName(igcEntity, "allows_null_values");
-        if (allowsNulls != null) {
-            instanceProperties = repositoryHelper.addIntPropertyToInstance(
+        // setup the OMRS 'domain' property
+        Reference parentPolicy = (Reference) igcRestClient.getPropertyByName(igcEntity, "parent_policy");
+        if (parentPolicy != null) {
+            instanceProperties = repositoryHelper.addStringPropertyToInstance(
                     repositoryName,
                     instanceProperties,
-                    "minCardinality",
-                    allowsNulls ? 0 : 1,
+                    "domain",
+                    parentPolicy.getName(),
                     methodName
             );
         }
@@ -100,7 +97,7 @@ public class SchemaAttribute_Mapper extends SchemaElement_Mapper {
     }
 
     /**
-     * Handle the search for 'minCardinality' by searching against 'allows_null_values' of the object in IGC.
+     * Handle the search for 'domain' by searching against 'parent_policy' of the object in IGC.
      *
      * @param repositoryHelper the repository helper
      * @param repositoryName name of the repository
@@ -122,18 +119,36 @@ public class SchemaAttribute_Mapper extends SchemaElement_Mapper {
 
         super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, value);
 
-        if (omrsPropertyName.equals("minCardinality")) {
+        final String methodName = "addComplexPropertySearchCriteria";
 
-            Object minCardinality = ((PrimitivePropertyValue) value).getPrimitiveValue();
-            boolean optional = (minCardinality == null || ((Integer) minCardinality) <= 0);
-
-            IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
-                    "allows_null_values",
-                    "=",
-                    optional ? "true" : "false"
-            );
-            igcSearchConditionSet.addCondition(igcSearchCondition);
-
+        // Only need to add a condition of we are after the 'fileType' and have been provided a String
+        if (omrsPropertyName.equals("domain") && value.getInstancePropertyCategory().equals(InstancePropertyCategory.PRIMITIVE)) {
+            String domain = value.valueAsString();
+            String searchableDomain = repositoryHelper.getUnqualifiedLiteralString(domain);
+            if (repositoryHelper.isExactMatchRegex(domain)) {
+                IGCSearchCondition exact = new IGCSearchCondition("parent_policy.name", "=", searchableDomain);
+                igcSearchConditionSet.addCondition(exact);
+            } else if (repositoryHelper.isEndsWithRegex(domain)) {
+                IGCSearchCondition endsWith = new IGCSearchCondition("parent_policy.name", "like %{0}", searchableDomain);
+                igcSearchConditionSet.addCondition(endsWith);
+            } else if (repositoryHelper.isStartsWithRegex(domain)) {
+                IGCSearchCondition startsWith = new IGCSearchCondition("parent_policy.name", "like {0}%", searchableDomain);
+                igcSearchConditionSet.addCondition(startsWith);
+            } else if (repositoryHelper.isContainsRegex(domain)) {
+                IGCSearchCondition contains = new IGCSearchCondition("parent_policy.name", "like %{0}%", searchableDomain);
+                igcSearchConditionSet.addCondition(contains);
+            } else {
+                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
+                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                        repositoryName,
+                        domain);
+                throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
+                        this.getClass().getName(),
+                        methodName,
+                        errorMessage,
+                        errorCode.getSystemAction(),
+                        errorCode.getUserAction());
+            }
         }
 
     }

@@ -44,6 +44,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     private ProxyMapping two;
     private String omrsRelationshipType;
     private OptimalStart optimalStart;
+    private ContainedType containedType;
 
     private List<RelationshipMapping> subtypes;
     private String relationshipLevelIgcAsset;
@@ -60,6 +61,14 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *  - CUSTOM = must be custom implemented via a complexRelationshipMappings method
      */
     public enum OptimalStart { ONE, TWO, OPPOSITE, CUSTOM }
+
+    /**
+     * The endpoint which is contained within the other (if any):
+     * - ONE = object represented by ProxyOne is the child of the object represented by ProxyTwo
+     * - TWO = object represented by ProxyTwo is the child of the object represented by ProxyOne
+     * - NONE = there is no containment in the relationship (endpoints are peers rather than parent / child)
+     */
+    public enum ContainedType { ONE, TWO, NONE }
 
     @Override
     public String toString() {
@@ -116,6 +125,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
         );
         this.omrsRelationshipType = omrsRelationshipType;
         this.optimalStart = OptimalStart.OPPOSITE;
+        this.containedType = ContainedType.NONE;
         this.subtypes = new ArrayList<>();
         this.omrsSupportedStatuses = new ArrayList<>();
         this.mappedOmrsPropertyNames = new HashSet<>();
@@ -347,6 +357,20 @@ public abstract class RelationshipMapping extends InstanceMapping {
     private OptimalStart getOptimalStart() { return this.optimalStart; }
 
     /**
+     * Set the child of a parent-child relationship.
+     *
+     * @param containedType the endpoint to treat as the child of the relationship
+     */
+    void setContainedType(ContainedType containedType) { this.containedType = containedType; }
+
+    /**
+     * Get the child of the parent-child relationship.
+     *
+     * @return ContainedType
+     */
+    public ContainedType getContainedType() { return this.containedType; }
+
+    /**
      * Add an alternative IGC property that can be used to traverse the relationship from proxy one to proxy two.
      *
      * @param property the name of the additional IGC relationship property
@@ -388,7 +412,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @return boolean
      */
-    private boolean sameTypeOnBothEnds() {
+    public boolean sameTypeOnBothEnds() {
         return one.getIgcAssetType().equals(two.getIgcAssetType());
     }
 
@@ -397,7 +421,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @return boolean
      */
-    private boolean samePropertiesOnBothEnds() {
+    public boolean samePropertiesOnBothEnds() {
         List<String> pOneProperties = one.getIgcRelationshipProperties();
         List<String> pTwoProperties = two.getIgcRelationshipProperties();
         return new HashSet<>(pOneProperties).equals(new HashSet<>(pTwoProperties));

@@ -51,6 +51,7 @@ public class TermAnchorMapper extends RelationshipMapping {
                 null
         );
         setOptimalStart(OptimalStart.CUSTOM);
+        setContainedType(ContainedType.TWO);
     }
 
     /**
@@ -68,12 +69,8 @@ public class TermAnchorMapper extends RelationshipMapping {
             Identity termIdentity = term.getIdentity(igcRestClient);
             if (termIdentity != null) {
                 Identity rootIdentity = termIdentity.getUltimateParentIdentity();
-                Reference root = igcRestClient.getAssetRefById(rootIdentity.getRid());
-                if (root != null) {
-                    asList.add(root);
-                } else {
-                    if (log.isErrorEnabled()) { log.error("Unable to find root-level category with identity: {}", rootIdentity); }
-                }
+                Reference root = new Reference(rootIdentity.getName(), rootIdentity.getAssetType(), rootIdentity.getRid());
+                asList.add(root);
             } else {
                 if (log.isErrorEnabled()) { log.error("Term has no identity: {}", term); }
             }

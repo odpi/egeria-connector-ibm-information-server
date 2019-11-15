@@ -51,6 +51,7 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                 null
         );
         setOptimalStart(OptimalStart.CUSTOM);
+        setContainedType(ContainedType.TWO);
     }
 
     /**
@@ -68,12 +69,8 @@ public class CategoryAnchorMapper extends RelationshipMapping {
             Identity catIdentity = category.getIdentity(igcRestClient);
             if (catIdentity != null) {
                 Identity rootIdentity = catIdentity.getUltimateParentIdentity();
-                Reference root = igcRestClient.getAssetRefById(rootIdentity.getRid());
-                if (root != null) {
-                    asList.add(root);
-                } else {
-                    if (log.isErrorEnabled()) { log.error("Unable to find root-level category with identity: {}", rootIdentity); }
-                }
+                Reference root = new Reference(rootIdentity.getName(), rootIdentity.getAssetType(), rootIdentity.getRid());
+                asList.add(root);
             } else {
                 if (log.isDebugEnabled()) { log.debug("Already at a root-level category, returning as-is: {}", category); }
                 asList.add(category);
@@ -179,6 +176,22 @@ public class CategoryAnchorMapper extends RelationshipMapping {
             if (log.isWarnEnabled()) { log.warn("Found unexpected asset type during relationship mapping: {}", fromIgcObject); }
         }
 
+    }
+
+    /**
+     * Avoid creating an anchor relationship between the glossary and itself (as a category).
+     *
+     * @param igcomrsRepositoryConnector connection to the IGC environment
+     * @param oneObject the IGC object to consider for inclusion on one end of the relationship
+     * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
+     * @return boolean
+     */
+    @Override
+    public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                    Reference oneObject,
+                                                    Reference otherObject) {
+        if (log.isDebugEnabled()) { log.debug("Considering inclusion of objects:\n... {}\n... {}", oneObject, otherObject); }
+        return !oneObject.getId().equals(otherObject.getId());
     }
 
 }

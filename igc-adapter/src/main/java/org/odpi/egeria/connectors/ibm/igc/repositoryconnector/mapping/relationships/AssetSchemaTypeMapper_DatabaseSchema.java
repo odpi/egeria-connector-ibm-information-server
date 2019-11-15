@@ -29,6 +29,7 @@ public class AssetSchemaTypeMapper_DatabaseSchema extends RelationshipMapping {
                 null,
                 RelationalDBSchemaTypeMapper.IGC_RID_PREFIX
         );
+        setContainedType(ContainedType.TWO);
     }
 
 }

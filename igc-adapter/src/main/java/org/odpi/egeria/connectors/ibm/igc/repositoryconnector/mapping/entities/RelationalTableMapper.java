@@ -10,7 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Defines the mapping to the OMRS "RelationalTable" entity.
  */
-public class RelationalTableMapper extends ReferenceableMapper {
+public class RelationalTableMapper extends SchemaElement_Mapper {
 
     private static class Singleton {
         private static final RelationalTableMapper INSTANCE = new RelationalTableMapper();
@@ -25,11 +25,21 @@ public class RelationalTableMapper extends ReferenceableMapper {
         super(
                 "database_table",
                 "Database Table",
-                "RelationalTable"
+                "RelationalTable",
+                null
         );
 
         // The list of properties that should be mapped
-        addSimplePropertyMapping("name", "displayName");
+        addLiteralPropertyMapping("position", null);
+        addLiteralPropertyMapping("minCardinality", 1);
+        addLiteralPropertyMapping("maxCardinality", 1);
+        addLiteralPropertyMapping("allowsDuplicateValues", null);
+        addLiteralPropertyMapping("orderedValues", null);
+        addLiteralPropertyMapping("defaultValueOverride", null);
+        addLiteralPropertyMapping("nativeClass", null);
+
+        // Deprecated properties will be null'd
+        addLiteralPropertyMapping("name", null);
 
         // The list of relationships that should be mapped
         addRelationshipMapper(AttributeForSchemaMapper_TableSchema.getInstance(null));

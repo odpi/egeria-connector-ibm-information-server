@@ -70,6 +70,13 @@ public class GlossaryMapper extends ReferenceableMapper {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public boolean isOmrsType(IGCRestClient igcRestClient, Reference igcObject) {
+        return isGlossary(igcRestClient, igcObject);
+    }
+
+    /**
      * Search for Glossaries by looking for a category with no parent category.
      *
      * @return IGCSearchConditionSet - the IGC search criteria to find Glossary entities

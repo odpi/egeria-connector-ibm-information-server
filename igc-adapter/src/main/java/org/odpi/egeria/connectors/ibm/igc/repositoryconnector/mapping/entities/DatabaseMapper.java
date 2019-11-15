@@ -10,7 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Define sthe mapping to the OMRS "Database" entity.
  */
-public class DatabaseMapper extends ReferenceableMapper {
+public class DatabaseMapper extends DataStore_Mapper {
 
     private static class Singleton {
         private static final DatabaseMapper INSTANCE = new DatabaseMapper();
@@ -29,14 +29,10 @@ public class DatabaseMapper extends ReferenceableMapper {
         );
 
         // The list of properties that should be mapped
-        addSimplePropertyMapping("name", "name");
-        addSimplePropertyMapping("short_description", "description");
         addSimplePropertyMapping("dbms", "type");
         addSimplePropertyMapping("dbms_version", "version");
         addSimplePropertyMapping("dbms_server_instance", "instance");
         addSimplePropertyMapping("imported_from", "importedFrom");
-        addSimplePropertyMapping("created_on", "createTime");
-        addSimplePropertyMapping("modified_on", "modifiedTime");
 
         // The list of relationships that should be mapped
         addRelationshipMapper(DataContentForDataSetMapper.getInstance(null));

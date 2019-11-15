@@ -204,14 +204,26 @@ public class EntityMappingInstance {
      *
      * @return EntitySummary
      */
-    public final EntitySummary getOmrsSummary() { return omrsSummary; }
+    public final EntitySummary getOmrsSummary() {
+        if (mapping.isOmrsType(igcomrsRepositoryConnector.getIGCRestClient(), igcEntity)) {
+            return omrsSummary;
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Retrieve the OMRS EntityDetail for which this mapping exists.
      *
      * @return EntityDetail
      */
-    public final EntityDetail getOmrsDetail() { return omrsDetail; }
+    public final EntityDetail getOmrsDetail() {
+        if (mapping.isOmrsType(igcomrsRepositoryConnector.getIGCRestClient(), igcEntity)) {
+            return omrsDetail;
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Retrieve the OMRS Classifications mapped to this entity.

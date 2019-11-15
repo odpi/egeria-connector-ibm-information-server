@@ -10,7 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Defines the mapping to the OMRS "DeployedDatabaseSchema" entity.
  */
-public class DeployedDatabaseSchemaMapper extends ReferenceableMapper {
+public class DeployedDatabaseSchemaMapper extends DataSet_Mapper {
 
     private static class Singleton {
         private static final DeployedDatabaseSchemaMapper INSTANCE = new DeployedDatabaseSchemaMapper();
@@ -27,10 +27,6 @@ public class DeployedDatabaseSchemaMapper extends ReferenceableMapper {
                 "Database Schema",
                 "DeployedDatabaseSchema"
         );
-
-        // The list of properties that should be mapped
-        addSimplePropertyMapping("name", "name");
-        addSimplePropertyMapping("short_description", "description");
 
         // The list of relationships that should be mapped
         addRelationshipMapper(AssetSchemaTypeMapper_DatabaseSchema.getInstance(null));

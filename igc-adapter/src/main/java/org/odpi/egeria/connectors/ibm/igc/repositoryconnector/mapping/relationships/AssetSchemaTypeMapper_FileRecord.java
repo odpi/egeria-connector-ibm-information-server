@@ -26,6 +26,7 @@ public class AssetSchemaTypeMapper_FileRecord extends RelationshipMapping {
                 "describesAssets",
                 "schema"
         );
+        setContainedType(ContainedType.TWO);
     }
 
 }
