@@ -42,7 +42,7 @@ class AttributeMapping extends BaseMapping {
                 attribute.setQualifiedName(stageColumnObj.getIdentity(igcRestClient).toString() + stageNameSuffix);
                 attribute.setDisplayName(stageColumnObj.getName());
                 attribute.setDataType((String)igcRestClient.getPropertyByName(stageColumnObj, "odbc_type"));
-                attribute.setElementPosition(index);
+                attribute.setPosition(index);
                 attributes.add(attribute);
                 index++;
             }
@@ -73,7 +73,7 @@ class AttributeMapping extends BaseMapping {
                 }
                 Double position = (Double)igcRestClient.getPropertyByName(field, "position");
                 if (position != null) {
-                    attribute.setElementPosition(position.intValue());
+                    attribute.setPosition(position.intValue());
                 }
                 attribute.setDefaultValue((String)igcRestClient.getPropertyByName(field, "default_value"));
                 attributes.add(attribute);
