@@ -76,7 +76,6 @@ public class IGCRestClient {
 
     private IGCVersionEnum igcVersion;
     private HashMap<String, DynamicPropertyReader> typeAndPropertyToAccessor;
-    private HashMap<String, DynamicPropertyWriter> typeAndPropertyToWriter;
 
     private Set<String> typesThatCanBeCreated;
     private Set<String> typesThatIncludeModificationDetails;
@@ -147,7 +146,6 @@ public class IGCRestClient {
         this.mapper = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
         this.typeMapper = new ObjectMapper();
         this.typeAndPropertyToAccessor = new HashMap<>();
-        this.typeAndPropertyToWriter = new HashMap<>();
         this.restTemplate = new RestTemplate();
 
         // Ensure that the REST template always uses UTF-8
@@ -1108,8 +1106,6 @@ public class IGCRestClient {
                     if (!IGCRestConstants.getPropertiesToIgnore().contains(propertyName)) {
                         if (propertyName.equals("created_on")) {
                             typesThatIncludeModificationDetails.add(typeName);
-                            // Instantiate and cache generic property update mechanisms
-                            cacheWriter(typeName, propertyName);
                         }
                         org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeReference type = property.getType();
                         String propertyType = type.getName();
@@ -1316,33 +1312,6 @@ public class IGCRestClient {
     }
 
     /**
-     * Cache a dynamic property writer to update the specified property for the specified IGC object type.
-     *
-     * @param type the name of the IGC object type
-     * @param property the name of the property within the IGC object type
-     */
-    private void cacheWriter(String type, String property) {
-        String key = getDynamicPropertyKey(type, property);
-        if (!typeAndPropertyToWriter.containsKey(key)) {
-            DynamicPropertyWriter writer = new DynamicPropertyWriter(getPOJOForType(type), property);
-            typeAndPropertyToWriter.put(key, writer);
-        }
-    }
-
-    /**
-     * Retrieve a dynamic property writer to update properties of the provided asset type, and create one if it does
-     * not already exist.
-     *
-     * @param type the IGC asset type for which to update a property
-     * @param property the name of the property to update
-     * @return DynamicPropertyWriter
-     */
-    private DynamicPropertyWriter getWriter(String type, String property) {
-        cacheWriter(type, property);
-        return typeAndPropertyToWriter.getOrDefault(getDynamicPropertyKey(type, property), null);
-    }
-
-    /**
      * Retrieve a property of an IGC object based on the property's name.
      *
      * @param object the IGC object from which to retrieve the property's value
@@ -1352,23 +1321,14 @@ public class IGCRestClient {
     public Object getPropertyByName(Reference object, String property) {
         if (object != null) {
             DynamicPropertyReader accessor = getAccessor(object.getType(), property);
-            return accessor.getProperty(object);
+            if (accessor != null) {
+                return accessor.getProperty(object);
+            } else {
+                log.warn("Unable to find accessor for object type '{}' and property '{}'.", object.getType(), property);
+                return null;
+            }
         } else {
             return null;
-        }
-    }
-
-    /**
-     * Set a property of an IGC object based on the property's name.
-     *
-     * @param object the IGC object for which to set the property's value
-     * @param property the name of the property to set / update
-     * @param value the value to set on the property
-     */
-    private void setPropertyByName(Reference object, String property, Object value) {
-        if (object != null) {
-            DynamicPropertyWriter writer = getWriter(object.getType(), property);
-            writer.setProperty(object, value);
         }
     }
 
@@ -1377,69 +1337,36 @@ public class IGCRestClient {
      * the asset does not support them).
      *
      * @param object the IGC object for which to populate modification details
-     * @return boolean indicating whether details were successfully / already populated (true) or not (false)
+     * @param <T> the type of IGC object (minimally a Reference)
+     * @return T - the IGC object with its _context and modification details populated
      */
-    public boolean populateModificationDetails(Reference object) {
-
-        boolean success = true;
-
-        if (object != null) {
-
-            // Only bother retrieving the details if the object supports them and they aren't already present
-            boolean bHasModificationDetails = hasModificationDetails(object.getType());
-            String createdBy = (String) getPropertyByName(object, IGCRestConstants.MOD_CREATED_BY);
-
-            if (bHasModificationDetails && createdBy == null) {
-
-                if (log.isDebugEnabled()) {
-                    log.debug("Populating modification details that were missing...");
-                }
-
-                IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", object.getId());
-                IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
-                IGCSearch igcSearch = new IGCSearch(object.getType(), idOnlySet);
-                igcSearch.addProperties(IGCRestConstants.getModificationProperties());
-                igcSearch.setPageSize(2);
-                ItemList<Reference> assetsWithModDetails = search(igcSearch);
-                success = (!assetsWithModDetails.getItems().isEmpty());
-                if (success) {
-
-                    Reference assetWithModDetails = assetsWithModDetails.getItems().get(0);
-                    setPropertyByName(object, IGCRestConstants.MOD_CREATED_ON, getPropertyByName(assetWithModDetails, IGCRestConstants.MOD_CREATED_ON));
-                    setPropertyByName(object, IGCRestConstants.MOD_CREATED_BY, getPropertyByName(assetWithModDetails, IGCRestConstants.MOD_CREATED_BY));
-                    setPropertyByName(object, IGCRestConstants.MOD_MODIFIED_ON, getPropertyByName(assetWithModDetails, IGCRestConstants.MOD_MODIFIED_ON));
-                    setPropertyByName(object, IGCRestConstants.MOD_MODIFIED_BY, getPropertyByName(assetWithModDetails, IGCRestConstants.MOD_MODIFIED_BY));
-
-                }
-            }
-        }
-
-        return success;
-
+    public <T extends Reference> T getModificationDetails(T object) {
+        return getAssetContext(object, true);
     }
 
     /**
      * Ensures that the _context of the asset is populated (takes no action if already populated).
      * In addition, if the asset type supports them, will also retrieve and set modification details.
+     * Will force retrieval of modification details even if _context is populated if 'bPopulateModDetails' is true
+     * and no modification details appear to be populated. (Takes no action otherwise, just returns object as-is.)
      *
-     * @param object the IGC object for which to populate the context
-     * @return boolean indicating whether _context was successfully / already populated (true) or not (false)
+     * @param object the IGC object for which to populate the context (and modification details)
+     * @param bPopulateModDetails true to force modification detail retrieval, false otherwise
+     * @param <T> the type of IGC object (minimally a Reference)
+     * @return T - the IGC object with its _context and modification details populated
      */
-    public boolean populateContext(Reference object) {
+    private <T extends Reference> T getAssetContext(T object, boolean bPopulateModDetails) {
 
-        boolean success = true;
-
+        T populated = object;
         if (object != null) {
 
-            // Only bother retrieving the context if it isn't already present
-            List<Reference> ctx = object.getContext();
-            if (ctx == null || ctx.isEmpty()) {
+            boolean bHasModificationDetails = hasModificationDetails(object.getType());
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Context is empty, populating...");
-                }
+            // Only bother retrieving the context if the identity isn't already present
+            if ( (!object.isIdentityPopulated() && (object.getContext() == null || object.getContext().isEmpty()))
+                    || (bHasModificationDetails && !object.areModificationDetailsPopulated() && bPopulateModDetails)) {
 
-                boolean bHasModificationDetails = hasModificationDetails(object.getType());
+                if (log.isDebugEnabled()) { log.debug("Context and / or modification details are empty, populating..."); }
 
                 IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", object.getId());
                 IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
@@ -1448,26 +1375,15 @@ public class IGCRestClient {
                     igcSearch.addProperties(IGCRestConstants.getModificationProperties());
                 }
                 igcSearch.setPageSize(2);
-                ItemList<Reference> assetsWithCtx = search(igcSearch);
-                success = (!assetsWithCtx.getItems().isEmpty());
-                if (success) {
-
-                    Reference assetWithCtx = assetsWithCtx.getItems().get(0);
-                    object.setContext(assetWithCtx.getContext());
-
-                    if (bHasModificationDetails) {
-                        setPropertyByName(object, IGCRestConstants.MOD_CREATED_ON, getPropertyByName(assetWithCtx, IGCRestConstants.MOD_CREATED_ON));
-                        setPropertyByName(object, IGCRestConstants.MOD_CREATED_BY, getPropertyByName(assetWithCtx, IGCRestConstants.MOD_CREATED_BY));
-                        setPropertyByName(object, IGCRestConstants.MOD_MODIFIED_ON, getPropertyByName(assetWithCtx, IGCRestConstants.MOD_MODIFIED_ON));
-                        setPropertyByName(object, IGCRestConstants.MOD_MODIFIED_BY, getPropertyByName(assetWithCtx, IGCRestConstants.MOD_MODIFIED_BY));
-                    }
-
+                ItemList<T> assetsWithCtx = search(igcSearch);
+                if (!assetsWithCtx.getItems().isEmpty()) {
+                    populated = assetsWithCtx.getItems().get(0);
                 }
 
             }
         }
 
-        return success;
+        return populated;
 
     }
 

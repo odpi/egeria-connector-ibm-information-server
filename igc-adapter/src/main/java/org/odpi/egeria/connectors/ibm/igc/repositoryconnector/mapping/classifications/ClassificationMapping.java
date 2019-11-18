@@ -7,6 +7,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
@@ -409,6 +410,68 @@ public abstract class ClassificationMapping extends InstanceMapping {
         }
 
         return classification;
+
+    }
+
+    /**
+     * Validate that the provided classification properties are empty and can therefore be handled by IGC. If they are
+     * not empty, throw a RepositoryErrorException explaining that properties cannot be included in the classification.
+     *
+     * @param methodName the name of the method attempting to process a classification with properties
+     * @param initialProperties the set of classification-specific properties that were sent
+     * @throws RepositoryErrorException on any mismatch between the requested classification and what IGC supports
+     */
+    protected void validateUnsupportedProperties(String methodName,
+                                                 InstanceProperties initialProperties) throws RepositoryErrorException {
+
+        Map<String, InstancePropertyValue> classificationProperties = null;
+        if (initialProperties != null) {
+            classificationProperties = initialProperties.getInstanceProperties();
+        }
+
+        if (classificationProperties != null && !classificationProperties.isEmpty()) {
+
+            log.error("Classification properties are immutable in IGC.");
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_EXCEEDS_REPOSITORY;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    getOmrsClassificationType(),
+                    getIgcAssetType()
+            );
+            throw new RepositoryErrorException(
+                    errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction()
+            );
+
+        }
+    }
+
+    /**
+     * Throw an exception if an immutable classification is requested to be modified.
+     *
+     * @param methodName the name of the method attempting to modify the classification
+     * @param entityGUID the GUID of the entity instance against which the classification is set
+     * @throws RepositoryErrorException indicating the classification is immutable
+     */
+    protected void reportImmutableClassification(String methodName,
+                                                 String entityGUID) throws RepositoryErrorException {
+
+        IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_NOT_EDITABLE;
+        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                getOmrsClassificationType(),
+                entityGUID
+        );
+        throw new RepositoryErrorException(
+                errorCode.getHTTPErrorCode(),
+                this.getClass().getName(),
+                methodName,
+                errorMessage,
+                errorCode.getSystemAction(),
+                errorCode.getUserAction()
+        );
 
     }
 

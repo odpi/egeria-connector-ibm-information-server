@@ -12,7 +12,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import java.util.Date;
 
 /**
  * POJO for the {@code validvaluerange} asset type in IGC, displayed as '{@literal ValidValueRange}' in the IGC UI.
@@ -27,12 +26,6 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("validvaluerange")
 public class ValidValueRange2 extends Reference {
-
-    @JsonProperty("created_by")
-    protected String createdBy;
-
-    @JsonProperty("created_on")
-    protected Date createdOn;
 
     @JsonProperty("custom_attribute_def_of_has_valid_values_inverse")
     protected ItemList<InformationAsset> customAttributeDefOfHasValidValuesInverse;
@@ -55,45 +48,11 @@ public class ValidValueRange2 extends Reference {
     @JsonProperty("minimum_value")
     protected String minimumValue;
 
-    @JsonProperty("modified_by")
-    protected String modifiedBy;
-
-    @JsonProperty("modified_on")
-    protected Date modifiedOn;
-
     @JsonProperty("sequence")
     protected Number sequence;
 
     @JsonProperty("valid_value_list_of_contains_valid_values_inverse")
     protected ItemList<ValidValueList2> validValueListOfContainsValidValuesInverse;
-
-    /**
-     * Retrieve the {@code created_by} property (displayed as '{@literal Created By}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("created_by")
-    public String getCreatedBy() { return this.createdBy; }
-
-    /**
-     * Set the {@code created_by} property (displayed as {@code Created By}) of the object.
-     * @param createdBy the value to set
-     */
-    @JsonProperty("created_by")
-    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
-
-    /**
-     * Retrieve the {@code created_on} property (displayed as '{@literal Created On}') of the object.
-     * @return {@code Date}
-     */
-    @JsonProperty("created_on")
-    public Date getCreatedOn() { return this.createdOn; }
-
-    /**
-     * Set the {@code created_on} property (displayed as {@code Created On}) of the object.
-     * @param createdOn the value to set
-     */
-    @JsonProperty("created_on")
-    public void setCreatedOn(Date createdOn) { this.createdOn = createdOn; }
 
     /**
      * Retrieve the {@code custom_attribute_def_of_has_valid_values_inverse} property (displayed as '{@literal Custom Attribute Def Of Has Valid Values Inverse}') of the object.
@@ -192,34 +151,6 @@ public class ValidValueRange2 extends Reference {
      */
     @JsonProperty("minimum_value")
     public void setMinimumValue(String minimumValue) { this.minimumValue = minimumValue; }
-
-    /**
-     * Retrieve the {@code modified_by} property (displayed as '{@literal Modified By}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("modified_by")
-    public String getModifiedBy() { return this.modifiedBy; }
-
-    /**
-     * Set the {@code modified_by} property (displayed as {@code Modified By}) of the object.
-     * @param modifiedBy the value to set
-     */
-    @JsonProperty("modified_by")
-    public void setModifiedBy(String modifiedBy) { this.modifiedBy = modifiedBy; }
-
-    /**
-     * Retrieve the {@code modified_on} property (displayed as '{@literal Modified On}') of the object.
-     * @return {@code Date}
-     */
-    @JsonProperty("modified_on")
-    public Date getModifiedOn() { return this.modifiedOn; }
-
-    /**
-     * Set the {@code modified_on} property (displayed as {@code Modified On}) of the object.
-     * @param modifiedOn the value to set
-     */
-    @JsonProperty("modified_on")
-    public void setModifiedOn(Date modifiedOn) { this.modifiedOn = modifiedOn; }
 
     /**
      * Retrieve the {@code sequence} property (displayed as '{@literal Sequence}') of the object.

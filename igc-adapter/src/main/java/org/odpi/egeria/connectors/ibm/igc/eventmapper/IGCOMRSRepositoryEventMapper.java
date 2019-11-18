@@ -770,7 +770,19 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             String relatedAssetType = relatedAsset.getType();
             List<Reference> proxyOnes = new ArrayList<>();
             List<Reference> proxyTwos = new ArrayList<>();
-            if (relationshipMapping.sameTypeOnBothEnds() && !relationshipMapping.samePropertiesOnBothEnds()) {
+            String relationshipLevelRid = null;
+            if (relationshipMapping.hasRelationshipLevelAsset()) {
+                String relationshipLevelType = relationshipMapping.getRelationshipLevelIgcAsset();
+                if (latestVersionType.equals(relationshipLevelType)) {
+                    relationshipLevelRid = latestVersionRID;
+                    proxyOnes = relationshipMapping.getProxyOneAssetFromAsset(latestVersion, igcRestClient);
+                    proxyTwos = relationshipMapping.getProxyTwoAssetFromAsset(latestVersion, igcRestClient);
+                } else if (relatedAssetType.equals(relationshipLevelType)) {
+                    relationshipLevelRid = relatedRID;
+                    proxyOnes = relationshipMapping.getProxyOneAssetFromAsset(relatedAsset, igcRestClient);
+                    proxyTwos = relationshipMapping.getProxyTwoAssetFromAsset(relatedAsset, igcRestClient);
+                }
+            } else if (relationshipMapping.sameTypeOnBothEnds() && !relationshipMapping.samePropertiesOnBothEnds()) {
                 String igcPropertyName = change.getIgcPropertyName();
                 if (log.isDebugEnabled()) { log.debug(" ... relationship is the same on both ends, but property differs: {}", igcPropertyName); }
                 if (pmOne.getIgcRelationshipProperties().contains(igcPropertyName)) {
@@ -816,6 +828,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                             proxyTwo,
                             referenceListProperties,
                             change,
+                            relationshipLevelRid,
                             relationshipTriggerGUID
                     );
                 }
@@ -837,6 +850,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      * @param proxyTwo the latest version (non-stub) for the other end of the relationship
      * @param referenceListProperties the list of IGC property names that contain reference lists
      * @param change the JSON Patch entry indicating a specific change
+     * @param relationshipLevelRid the RID of the relationship-level asset (if any, or null if none)
      * @param relationshipTriggerGUID passthrough of GUID for relationship that triggered this process (if not triggered
      *                                directly from an event), null if not triggered by another relationship
      */
@@ -845,6 +859,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                            Reference proxyTwo,
                                            List<String> referenceListProperties,
                                            ChangeSet.Change change,
+                                           String relationshipLevelRid,
                                            IGCRelationshipGuid relationshipTriggerGUID) {
 
         String omrsRelationshipType = relationshipMapping.getOmrsRelationshipType();
@@ -869,7 +884,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     proxyOne,
                     proxyTwo,
                     change.getIgcPropertyName(),
-                    null,
+                    relationshipLevelRid,
                     true
             );
 
@@ -894,22 +909,34 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                 proxyOne,
                                 proxyTwo
                         );
+
                         // After purging the relationship, process any other updates
                         // on the assets at each end of the relationship
-                        IGCEntityGuid igcEntityGuid1 = RelationshipMapping.getProxyOneGuidFromRelationship(
-                                igcRepositoryHelper,
-                                igcRelationshipGuid);
-                        IGCEntityGuid igcEntityGuid2 = RelationshipMapping.getProxyTwoGuidFromRelationship(
-                                igcRepositoryHelper,
-                                igcRelationshipGuid);
-                        processAsset(igcEntityGuid1.getRid(),
-                                pmOne.getIgcAssetType(),
-                                igcRelationshipGuid,
-                                igcEntityGuid1.getGeneratedPrefix());
-                        processAsset(igcEntityGuid2.getRid(),
-                                pmTwo.getIgcAssetType(),
-                                igcRelationshipGuid,
-                                igcEntityGuid2.getGeneratedPrefix());
+                        String proxyOneType = proxyOne.getType();
+                        String proxyTwoType = proxyTwo.getType();
+
+                        if (!IGCRestConstants.getRelationshipLevelTypes().contains(proxyTwoType)) {
+                            IGCEntityGuid igcEntityGuid2 = RelationshipMapping.getProxyTwoGuidFromRelationship(
+                                    igcRepositoryHelper,
+                                    igcRelationshipGuid);
+                            processAsset(igcEntityGuid2.getRid(),
+                                    pmTwo.getIgcAssetType(),
+                                    igcRelationshipGuid,
+                                    igcEntityGuid2.getGeneratedPrefix());
+                        } else {
+                            if (log.isDebugEnabled()) { log.debug(" ... proxy two was a relationship-level type, not processing it as an asset: {}", proxyTwoType); }
+                        }
+                        if (!IGCRestConstants.getRelationshipLevelTypes().contains(proxyOneType)) {
+                            IGCEntityGuid igcEntityGuid1 = RelationshipMapping.getProxyOneGuidFromRelationship(
+                                    igcRepositoryHelper,
+                                    igcRelationshipGuid);
+                            processAsset(igcEntityGuid1.getRid(),
+                                    pmOne.getIgcAssetType(),
+                                    igcRelationshipGuid,
+                                    igcEntityGuid1.getGeneratedPrefix());
+                        } else {
+                            if (log.isDebugEnabled()) { log.debug(" ... proxy one was a relationship-level type, not processing it as an asset: {}", proxyOneType); }
+                        }
                     } catch (InvalidParameterException | RepositoryErrorException | TypeDefNotKnownException e) {
                         if (log.isErrorEnabled()) { log.error("Unable to retrieve relationship type definition: {}", omrsRelationshipType, e); }
                     }

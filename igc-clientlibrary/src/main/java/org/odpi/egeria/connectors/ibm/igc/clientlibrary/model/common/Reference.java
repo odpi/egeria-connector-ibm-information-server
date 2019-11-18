@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,7 +30,7 @@ import java.util.List;
  * </ul><br>
  *  POJOs to represent user-defined objects (OpenIGC) should not extend this class directly, but the MainObject class.
  */
-@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="_type", visible=true, defaultImpl=Reference.class)
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=Reference.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Acl.class, name = "acl"),
@@ -265,6 +266,18 @@ public class Reference extends ObjectPrinter {
      */
     protected String _url;
 
+    @JsonProperty("created_by")
+    protected String createdBy;
+
+    @JsonProperty("created_on")
+    protected Date createdOn;
+
+    @JsonProperty("modified_by")
+    protected String modifiedBy;
+
+    @JsonProperty("modified_on")
+    protected Date modifiedOn;
+
     /**
      * Default constructor
      */
@@ -384,6 +397,78 @@ public class Reference extends ObjectPrinter {
     public void setUrl(String _url) { this._url = _url; }
 
     /**
+     * Retrieve the {@code created_by} property (displayed as '{@literal Created By}') of the object.
+     * Note: not all objects in IGC have this information, but for re-usability purposes these are held at top-level.
+     *
+     * @return {@code String}
+     */
+    @JsonProperty("created_by")
+    public String getCreatedBy() { return this.createdBy; }
+
+    /**
+     * Set the {@code created_by} property (displayed as {@code Created By}) of the object.
+     * Note: not all objects in IGC have this information, but for re-usability purposes these are held at top-level.
+     *
+     * @param createdBy the value to set
+     */
+    @JsonProperty("created_by")
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    /**
+     * Retrieve the {@code created_on} property (displayed as '{@literal Created On}') of the object.
+     * Note: not all objects in IGC have this information, but for re-usability purposes these are held at top-level.
+     *
+     * @return {@code Date}
+     */
+    @JsonProperty("created_on")
+    public Date getCreatedOn() { return this.createdOn; }
+
+    /**
+     * Set the {@code created_on} property (displayed as {@code Created On}) of the object.
+     * Note: not all objects in IGC have this information, but for re-usability purposes these are held at top-level.
+     *
+     * @param createdOn the value to set
+     */
+    @JsonProperty("created_on")
+    public void setCreatedOn(Date createdOn) { this.createdOn = createdOn; }
+
+    /**
+     * Retrieve the {@code modified_by} property (displayed as '{@literal Modified By}') of the object.
+     * Note: not all objects in IGC have this information, but for re-usability purposes these are held at top-level.
+     *
+     * @return {@code String}
+     */
+    @JsonProperty("modified_by")
+    public String getModifiedBy() { return this.modifiedBy; }
+
+    /**
+     * Set the {@code modified_by} property (displayed as {@code Modified By}) of the object.
+     * Note: not all objects in IGC have this information, but for re-usability purposes these are held at top-level.
+     *
+     * @param modifiedBy the value to set
+     */
+    @JsonProperty("modified_by")
+    public void setModifiedBy(String modifiedBy) { this.modifiedBy = modifiedBy; }
+
+    /**
+     * Retrieve the {@code modified_on} property (displayed as '{@literal Modified On}') of the object.
+     * Note: not all objects in IGC have this information, but for re-usability purposes these are held at top-level.
+     *
+     * @return {@code Date}
+     */
+    @JsonProperty("modified_on")
+    public Date getModifiedOn() { return this.modifiedOn; }
+
+    /**
+     * Set the {@code modified_on} property (displayed as {@code Modified On}) of the object.
+     * Note: not all objects in IGC have this information, but for re-usability purposes these are held at top-level.
+     *
+     * @param modifiedOn the value to set
+     */
+    @JsonProperty("modified_on")
+    public void setModifiedOn(Date modifiedOn) { this.modifiedOn = modifiedOn; }
+
+    /**
      * Determine whether this object instance is fully retrieved (true) or only partially (false).
      *
      * @return boolean
@@ -403,6 +488,7 @@ public class Reference extends ObjectPrinter {
      * @param obj the object to check
      * @return Boolean
      */
+    @JsonIgnore
     public static boolean isReference(Object obj) {
         Class clazz = obj.getClass();
         while (clazz != null && clazz != Reference.class) {
@@ -417,6 +503,7 @@ public class Reference extends ObjectPrinter {
      * @param obj the object to check
      * @return Boolean
      */
+    @JsonIgnore
     public static boolean isItemList(Object obj) {
         return (obj.getClass() == ItemList.class);
     }
@@ -427,8 +514,29 @@ public class Reference extends ObjectPrinter {
      * @param obj the object to check
      * @return Boolean
      */
+    @JsonIgnore
     public static boolean isSimpleType(Object obj) {
         return (!Reference.isReference(obj) && !Reference.isItemList(obj));
+    }
+
+    /**
+     * Indicates whether the item's modification details (if any) have already been populated (true) or not (false).
+     *
+     * @return boolean
+     */
+    @JsonIgnore
+    public boolean areModificationDetailsPopulated() {
+        return createdBy != null;
+    }
+
+    /**
+     * Indicates whether this item's identity has already been populated (true) or not (false).
+     *
+     * @return boolean
+     */
+    @JsonIgnore
+    public boolean isIdentityPopulated() {
+        return identity != null;
     }
 
     /**
@@ -437,10 +545,16 @@ public class Reference extends ObjectPrinter {
      * @param igcrest a REST API connection to use in confirming the identity of the asset
      * @return Identity
      */
+    @JsonIgnore
     public Identity getIdentity(IGCRestClient igcrest) {
-        if (identity == null) {
-            igcrest.populateContext(this);
-            identity = new Identity(_context, getType(), getName(), getId());
+        if (!isIdentityPopulated()) {
+            Reference assetWithCtx = igcrest.getModificationDetails(this);
+            setContext(assetWithCtx.getContext());
+            setCreatedOn(assetWithCtx.getCreatedOn());
+            setCreatedBy(assetWithCtx.getCreatedBy());
+            setModifiedOn(assetWithCtx.getModifiedOn());
+            setModifiedBy(assetWithCtx.getModifiedBy());
+            identity = new Identity(getContext(), getType(), getName(), getId());
         }
         return identity;
     }

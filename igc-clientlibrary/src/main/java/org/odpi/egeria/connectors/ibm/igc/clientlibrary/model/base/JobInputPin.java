@@ -12,7 +12,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import java.util.Date;
 
 /**
  * POJO for the {@code job_input_pin} asset type in IGC, displayed as '{@literal Job Input Pin}' in the IGC UI.
@@ -34,12 +33,6 @@ public class JobInputPin extends Reference {
     @JsonProperty("condition_not_met")
     protected String conditionNotMet;
 
-    @JsonProperty("created_by")
-    protected String createdBy;
-
-    @JsonProperty("created_on")
-    protected Date createdOn;
-
     @JsonProperty("enable_tx_group")
     protected Number enableTxGroup;
 
@@ -60,12 +53,6 @@ public class JobInputPin extends Reference {
 
     @JsonProperty("lookup_fail")
     protected String lookupFail;
-
-    @JsonProperty("modified_by")
-    protected String modifiedBy;
-
-    @JsonProperty("modified_on")
-    protected Date modifiedOn;
 
     @JsonProperty("of_job_component")
     protected MainObject ofJobComponent;
@@ -112,34 +99,6 @@ public class JobInputPin extends Reference {
      */
     @JsonProperty("condition_not_met")
     public void setConditionNotMet(String conditionNotMet) { this.conditionNotMet = conditionNotMet; }
-
-    /**
-     * Retrieve the {@code created_by} property (displayed as '{@literal Created By}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("created_by")
-    public String getCreatedBy() { return this.createdBy; }
-
-    /**
-     * Set the {@code created_by} property (displayed as {@code Created By}) of the object.
-     * @param createdBy the value to set
-     */
-    @JsonProperty("created_by")
-    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
-
-    /**
-     * Retrieve the {@code created_on} property (displayed as '{@literal Created On}') of the object.
-     * @return {@code Date}
-     */
-    @JsonProperty("created_on")
-    public Date getCreatedOn() { return this.createdOn; }
-
-    /**
-     * Set the {@code created_on} property (displayed as {@code Created On}) of the object.
-     * @param createdOn the value to set
-     */
-    @JsonProperty("created_on")
-    public void setCreatedOn(Date createdOn) { this.createdOn = createdOn; }
 
     /**
      * Retrieve the {@code enable_tx_group} property (displayed as '{@literal Enable Tx Group}') of the object.
@@ -238,34 +197,6 @@ public class JobInputPin extends Reference {
      */
     @JsonProperty("lookup_fail")
     public void setLookupFail(String lookupFail) { this.lookupFail = lookupFail; }
-
-    /**
-     * Retrieve the {@code modified_by} property (displayed as '{@literal Modified By}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("modified_by")
-    public String getModifiedBy() { return this.modifiedBy; }
-
-    /**
-     * Set the {@code modified_by} property (displayed as {@code Modified By}) of the object.
-     * @param modifiedBy the value to set
-     */
-    @JsonProperty("modified_by")
-    public void setModifiedBy(String modifiedBy) { this.modifiedBy = modifiedBy; }
-
-    /**
-     * Retrieve the {@code modified_on} property (displayed as '{@literal Modified On}') of the object.
-     * @return {@code Date}
-     */
-    @JsonProperty("modified_on")
-    public Date getModifiedOn() { return this.modifiedOn; }
-
-    /**
-     * Set the {@code modified_on} property (displayed as {@code Modified On}) of the object.
-     * @param modifiedOn the value to set
-     */
-    @JsonProperty("modified_on")
-    public void setModifiedOn(Date modifiedOn) { this.modifiedOn = modifiedOn; }
 
     /**
      * Retrieve the {@code of_job_component} property (displayed as '{@literal Of Job Component}') of the object.

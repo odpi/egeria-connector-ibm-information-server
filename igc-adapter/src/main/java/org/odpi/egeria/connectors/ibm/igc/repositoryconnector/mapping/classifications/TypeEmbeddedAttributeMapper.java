@@ -5,12 +5,9 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classific
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.EntityDetail;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
-import org.odpi.openmetadata.repositoryservices.ffdc.exception.EntityNotKnownException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,33 +65,8 @@ public class TypeEmbeddedAttributeMapper extends ClassificationMapping {
                                             String entityGUID,
                                             InstanceProperties initialProperties,
                                             String userId) throws RepositoryErrorException {
-
         final String methodName = "addClassificationToIGCAsset";
-
-        Map<String, InstancePropertyValue> classificationProperties = null;
-        if (initialProperties != null) {
-            classificationProperties = initialProperties.getInstanceProperties();
-        }
-
-        if (classificationProperties != null && !classificationProperties.isEmpty()) {
-
-            log.error("Classification properties are immutable in IGC.");
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_EXCEEDS_REPOSITORY;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    getOmrsClassificationType(),
-                    getIgcAssetType()
-            );
-            throw new RepositoryErrorException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
-
-        }
-
+        validateUnsupportedProperties(methodName, initialProperties);
     }
 
     /**
@@ -107,19 +79,7 @@ public class TypeEmbeddedAttributeMapper extends ClassificationMapping {
                                                  String userId)
             throws RepositoryErrorException {
         final String methodName = "removeClassificationFromIGCAsset";
-        IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_NOT_EDITABLE;
-        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                getOmrsClassificationType(),
-                entityGUID
-        );
-        throw new RepositoryErrorException(
-                errorCode.getHTTPErrorCode(),
-                this.getClass().getName(),
-                methodName,
-                errorMessage,
-                errorCode.getSystemAction(),
-                errorCode.getUserAction()
-        );
+        reportImmutableClassification(methodName, entityGUID);
     }
 
 }

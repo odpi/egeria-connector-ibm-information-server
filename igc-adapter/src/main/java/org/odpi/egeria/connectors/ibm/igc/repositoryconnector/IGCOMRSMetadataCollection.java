@@ -1569,6 +1569,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         String proxyTwoType = igcRelationshipGuid.getAssetType2();
         String omrsRelationshipName = igcRelationshipGuid.getRelationshipType();
 
+        List<RelationshipMapping> mappings = new ArrayList<>();
+        List<Relationship> relationships = new ArrayList<>();
+
         // Should not need to translate from proxyone / proxytwo to alternative assets, as the RIDs provided
         // in the relationship GUID should already be pointing to the correct assets
         String relationshipLevelRid = igcRelationshipGuid.isRelationshipLevelObject() ? proxyOneRid : null;
@@ -1576,6 +1579,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         Reference proxyTwo;
         RelationshipMapping relationshipMapping;
         if (relationshipLevelRid != null) {
+
+            // TODO: replace with singular retrieval?
             Reference relationshipAsset = igcRestClient.getAssetRefById(relationshipLevelRid);
             String relationshipAssetType = relationshipAsset.getType();
             relationshipMapping = igcRepositoryHelper.getRelationshipMappingByTypes(
@@ -1583,61 +1588,94 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     relationshipAssetType,
                     relationshipAssetType
             );
-            // Only need to translate if the RIDs are relationship-level RIDs
-            // TODO: replace with singular retrieval?
             proxyOne = relationshipMapping.getProxyOneAssetFromAsset(relationshipAsset, igcRestClient).get(0);
             proxyTwo = relationshipMapping.getProxyTwoAssetFromAsset(relationshipAsset, igcRestClient).get(0);
+            mappings.add(relationshipMapping);
+
         } else {
+
             // TODO: replace with singular retrieval?
-            proxyOne = igcRestClient.getAssetRefById(proxyOneRid);
+            Reference oneEnd = igcRestClient.getAssetRefById(proxyOneRid);
             proxyTwo = igcRestClient.getAssetRefById(proxyTwoRid);
             relationshipMapping = igcRepositoryHelper.getRelationshipMappingByTypes(
                     omrsRelationshipName,
                     proxyOneType,
                     proxyTwoType
             );
+            proxyOne = relationshipMapping.getProxyOneAssetFromAsset(oneEnd, igcRestClient).get(0);
+            mappings.add(relationshipMapping);
+
         }
 
-        Relationship found;
-
-        if (relationshipMapping != null) {
-            try {
-
-                RelationshipDef omrsRelationshipDef = (RelationshipDef) getTypeDefByName(userId, omrsRelationshipName);
-                // Since the ordering should be set by the GUID we're lookup up anyway, we'll simply set the property
-                // to one of the proxyOne properties
-                String igcPropertyName = relationshipMapping.getProxyOneMapping().getIgcRelationshipProperties().get(0);
-                if (log.isDebugEnabled()) { log.debug(" ... using property: {}", igcPropertyName); }
-                found = RelationshipMapping.getMappedRelationship(
-                        igcomrsRepositoryConnector,
-                        relationshipMapping,
-                        omrsRelationshipDef,
-                        proxyOne,
-                        proxyTwo,
-                        igcPropertyName,
-                        userId,
-                        relationshipLevelRid,
-                        true
-                );
-
-            } catch (TypeDefNotKnownException e) {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        omrsRelationshipName,
-                        repositoryName);
-                throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
-            }
-        } else {
+        // If no mapping was found, throw exception indicating the relationship type is not mapped
+        if (mappings.isEmpty()) {
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     omrsRelationshipName,
                     repositoryName);
             throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        }
+
+        Relationship found = null;
+
+        // Otherwise proceed by obtaining all relationships that are mapped
+        try {
+            TypeDef relationshipTypeDef = getTypeDefByName(userId, omrsRelationshipName);
+            RelationshipMapping.getMappedRelationships(
+                    igcomrsRepositoryConnector,
+                    relationships,
+                    mappings,
+                    relationshipTypeDef.getGUID(),
+                    proxyOne,
+                    proxyTwo,
+                    userId
+            );
+        } catch (TypeDefNotKnownException e) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    omrsRelationshipName,
+                    repositoryName);
+            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        }
+        if (relationships.isEmpty()) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    guid,
+                    repositoryName);
+            throw new RelationshipNotKnownException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        } else if (relationships.size() > 1) {
+            // Iterate through the found relationships if there is more than one, and return the first one whose
+            // GUID matches the one requested
+            for (Relationship relationship : relationships) {
+                if (relationship.getGUID().equals(guid)) {
+                    found = relationship;
+                }
+            }
+        } else {
+            found = relationships.get(0);
+        }
+
+        if (found == null) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    guid,
+                    repositoryName);
+            throw new RelationshipNotKnownException(errorCode.getHTTPErrorCode(),
                     this.getClass().getName(),
                     methodName,
                     errorMessage,

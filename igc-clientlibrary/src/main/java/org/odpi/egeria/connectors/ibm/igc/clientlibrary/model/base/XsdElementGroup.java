@@ -11,7 +11,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import java.util.Date;
 
 /**
  * POJO for the {@code xsd_element_group} asset type in IGC, displayed as '{@literal XSD Element Group}' in the IGC UI.

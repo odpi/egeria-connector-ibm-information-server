@@ -92,12 +92,15 @@ public class TermAnchorMapper extends RelationshipMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the relationships to which to add
      * @param fromIgcObject the term from which to traverse upwards / category from which to traverse downwards
+     * @param toIgcObject the category from which to traverse downwards / term from which to traverse upwards
+     *                    (or null if not known)
      * @param userId the user requesting the relationships
      */
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                            List<Relationship> relationships,
                                            Reference fromIgcObject,
+                                           Reference toIgcObject,
                                            String userId) {
 
         String assetType = IGCRestConstants.getAssetTypeForSearch(fromIgcObject.getType());
@@ -109,14 +112,32 @@ public class TermAnchorMapper extends RelationshipMapping {
 
         if (GlossaryMapper.isGlossary(igcRestClient, fromIgcObject)) {
 
-            // If we have a glossary-level category, create term anchors for all of its child terms
-            if (log.isDebugEnabled()) { log.debug("Looking for all offspring terms from: {}", fromIgcObject); }
-            // We are already at the glossary-level category, so we need to get all the children terms
-            IGCSearchCondition byCatPath = new IGCSearchCondition("parent_category.category_path", "=", fromIgcObject.getId());
-            IGCSearchCondition byParent = new IGCSearchCondition("parent_category", "=", fromIgcObject.getId());
-            IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(byCatPath);
-            conditionSet.addCondition(byParent);
-            conditionSet.setMatchAnyCondition(true);
+            IGCSearchConditionSet conditionSet = new IGCSearchConditionSet();
+            if (toIgcObject == null) {
+                // If we have a glossary-level category, create term anchors for all of its child terms
+                if (log.isDebugEnabled()) { log.debug("Looking for all offspring terms from: {}", fromIgcObject); }
+                // We are already at the glossary-level category, so we need to get all the children terms
+                IGCSearchCondition byCatPath = new IGCSearchCondition("parent_category.category_path", "=", fromIgcObject.getId());
+                IGCSearchCondition byParent = new IGCSearchCondition("parent_category", "=", fromIgcObject.getId());
+                conditionSet.addCondition(byCatPath);
+                conditionSet.addCondition(byParent);
+                conditionSet.setMatchAnyCondition(true);
+            } else {
+                // If we have a glossary-level category and a single other term object, create term anchors for just
+                // that single term
+                if (log.isDebugEnabled()) { log.debug("Looking for single terms for: {}", toIgcObject); }
+                IGCSearchCondition byCatPath = new IGCSearchCondition("parent_category.category_path", "=", fromIgcObject.getId());
+                IGCSearchCondition byParent = new IGCSearchCondition("parent_category", "=", fromIgcObject.getId());
+                IGCSearchCondition byTerm = new IGCSearchCondition("_id", "=", toIgcObject.getId());
+                IGCSearchConditionSet inGlossary = new IGCSearchConditionSet(byCatPath);
+                inGlossary.addCondition(byParent);
+                inGlossary.setMatchAnyCondition(true);
+                IGCSearchConditionSet byTermCS = new IGCSearchConditionSet(byTerm);
+                conditionSet.addNestedConditionSet(byTermCS);
+                conditionSet.addNestedConditionSet(inGlossary);
+                conditionSet.setMatchAnyCondition(false);
+            }
+
             IGCSearch igcSearch = new IGCSearch("term",
                     IGCRestConstants.getModificationProperties(),
                     conditionSet);
@@ -128,7 +149,7 @@ public class TermAnchorMapper extends RelationshipMapping {
                     try {
                         Relationship relationship = getMappedRelationship(
                                 igcomrsRepositoryConnector,
-                                CategoryAnchorMapper.getInstance(null),
+                                TermAnchorMapper.getInstance(null),
                                 relationshipDef,
                                 fromIgcObject,
                                 term,
@@ -143,7 +164,10 @@ public class TermAnchorMapper extends RelationshipMapping {
                     }
                 }
             }
+
+
         } else if (assetType.equals("term")) {
+
             // We are at a child term, so we need to get the ultimate root-level category
             Identity catIdentity = fromIgcObject.getIdentity(igcRestClient);
             Identity rootIdentity = catIdentity.getUltimateParentIdentity();
@@ -156,7 +180,7 @@ public class TermAnchorMapper extends RelationshipMapping {
                 try {
                     Relationship relationship = getMappedRelationship(
                             igcomrsRepositoryConnector,
-                            CategoryAnchorMapper.getInstance(null),
+                            TermAnchorMapper.getInstance(null),
                             relationshipDef,
                             root,
                             fromIgcObject,
@@ -172,10 +196,29 @@ public class TermAnchorMapper extends RelationshipMapping {
             } else {
                 log.error("Unable to find root-level category with identity: {}", rootIdentity);
             }
+
         } else {
             if (log.isWarnEnabled()) { log.warn("Found unexpected asset type during relationship mapping: {}", fromIgcObject); }
         }
 
+    }
+
+    /**
+     * Avoid creating an anchor relationship between the glossary and itself (as a category).
+     *
+     * @param igcomrsRepositoryConnector connection to the IGC environment
+     * @param oneObject the IGC object to consider for inclusion on one end of the relationship
+     * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
+     * @return boolean
+     */
+    @Override
+    public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                    Reference oneObject,
+                                                    Reference otherObject) {
+        if (log.isDebugEnabled()) { log.debug("Considering inclusion of objects:\n... {}\n... {}", oneObject, otherObject); }
+        IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
+        return (GlossaryMapper.isGlossary(igcRestClient, oneObject) && otherObject.getType().equals("term"))
+                || (oneObject.getType().equals("term") && GlossaryMapper.isGlossary(igcRestClient, otherObject));
     }
 
 }

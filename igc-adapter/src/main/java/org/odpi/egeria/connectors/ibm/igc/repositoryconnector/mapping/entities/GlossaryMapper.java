@@ -64,7 +64,7 @@ public class GlossaryMapper extends ReferenceableMapper {
         if (assetType.equals("category")) {
             Identity catIdentity = igcObject.getIdentity(igcRestClient);
             Identity parentIdentity = catIdentity.getParentIdentity();
-            return parentIdentity == null;
+            return parentIdentity == null && !catIdentity.getName().equals("Classifications");
         }
         return false;
     }

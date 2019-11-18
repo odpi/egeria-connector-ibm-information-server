@@ -112,33 +112,8 @@ public class AssetZoneMembershipMapper extends ClassificationMapping {
                                             String entityGUID,
                                             InstanceProperties initialProperties,
                                             String userId) throws RepositoryErrorException {
-
         final String methodName = "addClassificationToIGCAsset";
-
-        Map<String, InstancePropertyValue> classificationProperties = null;
-        if (initialProperties != null) {
-            classificationProperties = initialProperties.getInstanceProperties();
-        }
-
-        if (classificationProperties != null && !classificationProperties.isEmpty()) {
-
-            log.error("Classification properties are immutable in IGC.");
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_EXCEEDS_REPOSITORY;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    getOmrsClassificationType(),
-                    getIgcAssetType()
-            );
-            throw new RepositoryErrorException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
-
-        }
-
+        validateUnsupportedProperties(methodName, initialProperties);
     }
 
     /**
@@ -151,19 +126,7 @@ public class AssetZoneMembershipMapper extends ClassificationMapping {
                                                  String userId)
             throws RepositoryErrorException {
         final String methodName = "removeClassificationFromIGCAsset";
-        IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_NOT_EDITABLE;
-        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                getOmrsClassificationType(),
-                entityGUID
-        );
-        throw new RepositoryErrorException(
-                errorCode.getHTTPErrorCode(),
-                this.getClass().getName(),
-                methodName,
-                errorMessage,
-                errorCode.getSystemAction(),
-                errorCode.getUserAction()
-        );
+        reportImmutableClassification(methodName, entityGUID);
     }
 
 }

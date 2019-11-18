@@ -91,13 +91,6 @@ public class EntityMappingStore {
                     igcRestClient.cacheTypeDetails(type);
                 }
             }
-            /*igcRestClient.registerPOJO(mapping.getIgcPOJO(igcomrsRepositoryConnector));
-            List<Class> otherPOJOs = mapping.getOtherIGCPOJOs(igcomrsRepositoryConnector);/*
-            if (otherPOJOs != null && !otherPOJOs.isEmpty()) {
-                for (Class pojo : otherPOJOs) {
-                    igcRestClient.registerPOJO(pojo);
-                }
-            }*/
         }
 
         return (mapping != null);

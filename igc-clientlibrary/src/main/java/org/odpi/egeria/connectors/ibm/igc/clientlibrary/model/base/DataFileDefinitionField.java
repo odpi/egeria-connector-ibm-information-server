@@ -11,7 +11,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import java.util.Date;
 
 /**
  * POJO for the {@code data_file_definition_field} asset type in IGC, displayed as '{@literal Data File Definition Field}' in the IGC UI.

@@ -112,12 +112,14 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
      * @param fromIgcObject the host asset for which to create the relationship
+     * @param toIgcObject the other entity endpoint for the relationship (or null if unknown)
      * @param userId the user ID requesting the mapped relationships
      */
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                            List<Relationship> relationships,
                                            Reference fromIgcObject,
+                                           Reference toIgcObject,
                                            String userId) {
 
         String assetType = IGCRestConstants.getAssetTypeForSearch(fromIgcObject.getType());
@@ -157,15 +159,15 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      * The relationship itself in IGC is complicated, from the host end it requires multiple hops (as the
      * 'data_connections' property on the host actually points to 'connector' assets, not 'data_connection' assets).
      *
-     * @param igcomrsRepositoryConnector
-     * @param relationships
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param relationships the list of relationships to which to add
      * @param fromIgcObject the host asset for which to create the relationship
-     * @param userId
+     * @param userId the user requesting mapped relationships
      */
     private void addMappedOMRSRelationships_host(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                           List<Relationship> relationships,
-                                           Reference fromIgcObject,
-                                           String userId) {
+                                                 List<Relationship> relationships,
+                                                 Reference fromIgcObject,
+                                                 String userId) {
 
         IGCSearchCondition igcSearchCondition = new IGCSearchCondition("data_connectors.host", "=", fromIgcObject.getId());
         IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(igcSearchCondition);
@@ -214,15 +216,15 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      * the 'connector' object related through the 'data_connectors' property, as the 'host' property on'data_connection'
      * itself is inevitably blank.
      *
-     * @param igcomrsRepositoryConnector
-     * @param relationships
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param relationships the list of relationships to which to add
      * @param fromIgcObject the data_connection object for which to create the relationship
-     * @param userId
+     * @param userId the user requesting the mapped relationships
      */
     private void addMappedOMRSRelationships_connection(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                           List<Relationship> relationships,
-                                           Reference fromIgcObject,
-                                           String userId) {
+                                                       List<Relationship> relationships,
+                                                       Reference fromIgcObject,
+                                                       String userId) {
 
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         IGCSearchCondition igcSearchCondition = new IGCSearchCondition("data_connections", "=", fromIgcObject.getId());

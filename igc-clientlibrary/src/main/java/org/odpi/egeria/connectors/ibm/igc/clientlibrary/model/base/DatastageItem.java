@@ -11,7 +11,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import java.util.Date;
 
 /**
  * POJO for the {@code datastage_item} asset type in IGC, displayed as '{@literal DataStage Item}' in the IGC UI.
@@ -29,18 +28,6 @@ public class DatastageItem extends Reference {
 
     @JsonProperty("class_name")
     protected String className;
-
-    @JsonProperty("created_by")
-    protected String createdBy;
-
-    @JsonProperty("created_on")
-    protected Date createdOn;
-
-    @JsonProperty("modified_by")
-    protected String modifiedBy;
-
-    @JsonProperty("modified_on")
-    protected Date modifiedOn;
 
     @JsonProperty("name")
     protected String name;
@@ -64,62 +51,6 @@ public class DatastageItem extends Reference {
      */
     @JsonProperty("class_name")
     public void setClassName(String className) { this.className = className; }
-
-    /**
-     * Retrieve the {@code created_by} property (displayed as '{@literal Created By}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("created_by")
-    public String getCreatedBy() { return this.createdBy; }
-
-    /**
-     * Set the {@code created_by} property (displayed as {@code Created By}) of the object.
-     * @param createdBy the value to set
-     */
-    @JsonProperty("created_by")
-    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
-
-    /**
-     * Retrieve the {@code created_on} property (displayed as '{@literal Created on}') of the object.
-     * @return {@code Date}
-     */
-    @JsonProperty("created_on")
-    public Date getCreatedOn() { return this.createdOn; }
-
-    /**
-     * Set the {@code created_on} property (displayed as {@code Created on}) of the object.
-     * @param createdOn the value to set
-     */
-    @JsonProperty("created_on")
-    public void setCreatedOn(Date createdOn) { this.createdOn = createdOn; }
-
-    /**
-     * Retrieve the {@code modified_by} property (displayed as '{@literal Modified By}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("modified_by")
-    public String getModifiedBy() { return this.modifiedBy; }
-
-    /**
-     * Set the {@code modified_by} property (displayed as {@code Modified By}) of the object.
-     * @param modifiedBy the value to set
-     */
-    @JsonProperty("modified_by")
-    public void setModifiedBy(String modifiedBy) { this.modifiedBy = modifiedBy; }
-
-    /**
-     * Retrieve the {@code modified_on} property (displayed as '{@literal Last Modified on}') of the object.
-     * @return {@code Date}
-     */
-    @JsonProperty("modified_on")
-    public Date getModifiedOn() { return this.modifiedOn; }
-
-    /**
-     * Set the {@code modified_on} property (displayed as {@code Last Modified on}) of the object.
-     * @param modifiedOn the value to set
-     */
-    @JsonProperty("modified_on")
-    public void setModifiedOn(Date modifiedOn) { this.modifiedOn = modifiedOn; }
 
     /**
      * Retrieve the {@code name} property (displayed as '{@literal Name}') of the object.

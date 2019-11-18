@@ -284,19 +284,7 @@ public class SubjectAreaMapper extends ClassificationMapping {
                                                  String userId)
             throws RepositoryErrorException {
         final String methodName = "removeClassificationFromIGCAsset";
-        IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_NOT_EDITABLE;
-        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                getOmrsClassificationType(),
-                entityGUID
-        );
-        throw new RepositoryErrorException(
-                errorCode.getHTTPErrorCode(),
-                this.getClass().getName(),
-                methodName,
-                errorMessage,
-                errorCode.getSystemAction(),
-                errorCode.getUserAction()
-        );
+        reportImmutableClassification(methodName, entityGUID);
     }
 
 }

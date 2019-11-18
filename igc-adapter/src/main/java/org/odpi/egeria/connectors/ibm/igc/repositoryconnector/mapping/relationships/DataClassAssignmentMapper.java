@@ -133,12 +133,14 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
      * @param fromIgcObject the IGC entity from which the relationship exists
+     * @param toIgcObject the other entity endpoint for the relationship (or null if unknown)
      * @param userId the user ID requesting the mapped relationships
      */
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                            List<Relationship> relationships,
                                            Reference fromIgcObject,
+                                           Reference toIgcObject,
                                            String userId) {
 
         String assetType = IGCRestConstants.getAssetTypeForSearch(fromIgcObject.getType());
@@ -176,15 +178,15 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
     /**
      * Map the detected classifications for objects classified by the provided data_class object.
      *
-     * @param igcomrsRepositoryConnector
-     * @param relationships
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param relationships the list of relationships to which to add
      * @param fromIgcObject the data_class object
-     * @param userId
+     * @param userId the user requesting the mapped relationships
      */
     private void mapDetectedClassifications_fromDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                   List<Relationship> relationships,
-                                                   Reference fromIgcObject,
-                                                   String userId) {
+                                                          List<Relationship> relationships,
+                                                          Reference fromIgcObject,
+                                                          String userId) {
 
         final String methodName = "mapDetectedClassifications_fromDataClass";
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
@@ -302,15 +304,15 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
     /**
      * Map the selected classifications for objects classified by the provided data_class object.
      *
-     * @param igcomrsRepositoryConnector
-     * @param relationships
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param relationships the list of relationships to which to add
      * @param fromIgcObject the data_class object
-     * @param userId
+     * @param userId the user requesting the mapped relationships
      */
     private void mapSelectedClassifications_fromDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                   List<Relationship> relationships,
-                                                   Reference fromIgcObject,
-                                                   String userId) {
+                                                          List<Relationship> relationships,
+                                                          Reference fromIgcObject,
+                                                          String userId) {
 
         // (Note that in IGC these can only be retrieved by looking up all assets for which this data_class is selected,
         // they cannot be looked up as a relationship from the data_class object...  Therefore, start by searching
@@ -369,15 +371,15 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
     /**
      * Map the provided main_object object to its detected data classes.
      *
-     * @param igcomrsRepositoryConnector
-     * @param relationships
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param relationships the list of relationships to which to add
      * @param fromIgcObject the main_object object
-     * @param userId
+     * @param userId the user requesting the mapped relationships
      */
     private void mapDetectedClassifications_toDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                          List<Relationship> relationships,
-                                                          Reference fromIgcObject,
-                                                          String userId) {
+                                                        List<Relationship> relationships,
+                                                        Reference fromIgcObject,
+                                                        String userId) {
 
         final String methodName = "mapDetectedClassifications_toDataClass";
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
@@ -495,15 +497,15 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
     /**
      * Map the provided main_object object to its selected classification.
      *
-     * @param igcomrsRepositoryConnector
-     * @param relationships
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @param relationships the list of relationships to which to add
      * @param fromIgcObject the main_object object
-     * @param userId
+     * @param userId the user requesting the mapped relationships
      */
     private void mapSelectedClassifications_toDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                          List<Relationship> relationships,
-                                                          Reference fromIgcObject,
-                                                          String userId) {
+                                                        List<Relationship> relationships,
+                                                        Reference fromIgcObject,
+                                                        String userId) {
 
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         Reference withSelectedClassification = igcRestClient.getAssetWithSubsetOfProperties(

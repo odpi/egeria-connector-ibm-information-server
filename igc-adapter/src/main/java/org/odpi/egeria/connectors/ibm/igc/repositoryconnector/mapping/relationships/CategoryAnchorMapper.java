@@ -93,12 +93,14 @@ public class CategoryAnchorMapper extends RelationshipMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the relationships to which to add
      * @param fromIgcObject the category from which to traverse upwards / downwards
+     * @param toIgcObject the category from which to traverse downwards / upwards (or null if not known)
      * @param userId the user requesting the relationships
      */
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                            List<Relationship> relationships,
                                            Reference fromIgcObject,
+                                           Reference toIgcObject,
                                            String userId) {
 
         String assetType = IGCRestConstants.getAssetTypeForSearch(fromIgcObject.getType());
@@ -112,10 +114,23 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                     "CategoryAnchor");
 
             if (GlossaryMapper.isGlossary(igcRestClient, fromIgcObject)) {
-                if (log.isDebugEnabled()) { log.debug("Looking for all offspring categories from: {}", fromIgcObject); }
-                // We are already at the glossary-level category, so we need to get all the children categories
-                IGCSearchCondition byCatPath = new IGCSearchCondition("category_path", "=", fromIgcObject.getId());
-                IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(byCatPath);
+
+                IGCSearchConditionSet conditionSet = new IGCSearchConditionSet();
+                if (toIgcObject == null) {
+                    if (log.isDebugEnabled()) { log.debug("Looking for all offspring categories from: {}", fromIgcObject); }
+                    // We are already at the glossary-level category, so we need to get all the children categories
+                    IGCSearchCondition byCatPath = new IGCSearchCondition("category_path", "=", fromIgcObject.getId());
+                    conditionSet.addCondition(byCatPath);
+                } else {
+                    // We are already at the glossary-level category, and have a single other category object, create
+                    // category anchor for just that single category
+                    if (log.isDebugEnabled()) { log.debug("Looking for single category for: {}", toIgcObject); }
+                    IGCSearchCondition byCatPath = new IGCSearchCondition("category_path", "=", fromIgcObject.getId());
+                    IGCSearchCondition byCategory = new IGCSearchCondition("_id", "=", toIgcObject.getId());
+                    conditionSet.addCondition(byCatPath);
+                    conditionSet.addCondition(byCategory);
+                    conditionSet.setMatchAnyCondition(false);
+                }
                 IGCSearch igcSearch = new IGCSearch("category",
                         IGCRestConstants.getModificationProperties(),
                         conditionSet);
@@ -191,7 +206,9 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                                                     Reference oneObject,
                                                     Reference otherObject) {
         if (log.isDebugEnabled()) { log.debug("Considering inclusion of objects:\n... {}\n... {}", oneObject, otherObject); }
-        return !oneObject.getId().equals(otherObject.getId());
+        IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
+        return (GlossaryMapper.isGlossary(igcRestClient, oneObject) && otherObject.getType().equals("category") && !GlossaryMapper.isGlossary(igcRestClient, otherObject))
+                || (!GlossaryMapper.isGlossary(igcRestClient, oneObject) && oneObject.getType().equals("category") && GlossaryMapper.isGlossary(igcRestClient, otherObject));
     }
 
 }
