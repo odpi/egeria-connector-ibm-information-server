@@ -110,16 +110,17 @@ public class EntityMappingInstance {
         this.omrsClassifications = new ArrayList<>();
         this.alreadyRetrieved = true;
 
-        /*
         // Translate the provided asset to a base asset type for the mapper, if needed
         // (if not needed the 'getBaseIgcAssetFromAlternative' is effectively a NOOP and gives back same object)
         // We need to make use of mapping.getBaseIgcAssetFromAlternative() here before we attempt to retrieve the
         // entity itself, as we may (very rarely) need to retrieve a different entity type than what we've been given
         Reference simple = mapping.getBaseIgcAssetFromAlternative(igcEntityType, igcEntityRid, igcomrsRepositoryConnector);
-        if (simple != null) {
+        if (simple != null && !simple.getId().equals(igcEntityRid)) {
+            // If the base asset has changed, record the new details and reset the status as not yet retrieved
             this.igcEntityType = simple.getType();
             this.igcEntityRid = simple.getId();
-        } */
+            this.alreadyRetrieved = false;
+        }
     }
 
     /**
@@ -204,14 +205,26 @@ public class EntityMappingInstance {
      *
      * @return EntitySummary
      */
-    public final EntitySummary getOmrsSummary() { return omrsSummary; }
+    public final EntitySummary getOmrsSummary() {
+        if (mapping.isOmrsType(igcomrsRepositoryConnector.getIGCRestClient(), igcEntity)) {
+            return omrsSummary;
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Retrieve the OMRS EntityDetail for which this mapping exists.
      *
      * @return EntityDetail
      */
-    public final EntityDetail getOmrsDetail() { return omrsDetail; }
+    public final EntityDetail getOmrsDetail() {
+        if (mapping.isOmrsType(igcomrsRepositoryConnector.getIGCRestClient(), igcEntity)) {
+            return omrsDetail;
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Retrieve the OMRS Classifications mapped to this entity.

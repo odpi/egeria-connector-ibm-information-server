@@ -30,12 +30,6 @@ public class AnalyticsScript extends MainObject {
     @JsonProperty("analytics_project")
     protected AnalyticsProject analyticsProject;
 
-    @JsonProperty("created_by")
-    protected String createdBy;
-
-    @JsonProperty("created_on")
-    protected Date createdOn;
-
     @JsonProperty("data_file")
     protected MainObject dataFile;
 
@@ -44,12 +38,6 @@ public class AnalyticsScript extends MainObject {
 
     @JsonProperty("logical_name")
     protected String logicalName;
-
-    @JsonProperty("modified_by")
-    protected String modifiedBy;
-
-    @JsonProperty("modified_on")
-    protected Date modifiedOn;
 
     @JsonProperty("native_id")
     protected String nativeId;
@@ -79,34 +67,6 @@ public class AnalyticsScript extends MainObject {
      */
     @JsonProperty("analytics_project")
     public void setAnalyticsProject(AnalyticsProject analyticsProject) { this.analyticsProject = analyticsProject; }
-
-    /**
-     * Retrieve the {@code created_by} property (displayed as '{@literal Created By}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("created_by")
-    public String getCreatedBy() { return this.createdBy; }
-
-    /**
-     * Set the {@code created_by} property (displayed as {@code Created By}) of the object.
-     * @param createdBy the value to set
-     */
-    @JsonProperty("created_by")
-    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
-
-    /**
-     * Retrieve the {@code created_on} property (displayed as '{@literal Created On}') of the object.
-     * @return {@code Date}
-     */
-    @JsonProperty("created_on")
-    public Date getCreatedOn() { return this.createdOn; }
-
-    /**
-     * Set the {@code created_on} property (displayed as {@code Created On}) of the object.
-     * @param createdOn the value to set
-     */
-    @JsonProperty("created_on")
-    public void setCreatedOn(Date createdOn) { this.createdOn = createdOn; }
 
     /**
      * Retrieve the {@code data_file} property (displayed as '{@literal Data File}') of the object.
@@ -149,34 +109,6 @@ public class AnalyticsScript extends MainObject {
      */
     @JsonProperty("logical_name")
     public void setLogicalName(String logicalName) { this.logicalName = logicalName; }
-
-    /**
-     * Retrieve the {@code modified_by} property (displayed as '{@literal Modified By}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("modified_by")
-    public String getModifiedBy() { return this.modifiedBy; }
-
-    /**
-     * Set the {@code modified_by} property (displayed as {@code Modified By}) of the object.
-     * @param modifiedBy the value to set
-     */
-    @JsonProperty("modified_by")
-    public void setModifiedBy(String modifiedBy) { this.modifiedBy = modifiedBy; }
-
-    /**
-     * Retrieve the {@code modified_on} property (displayed as '{@literal Modified On}') of the object.
-     * @return {@code Date}
-     */
-    @JsonProperty("modified_on")
-    public Date getModifiedOn() { return this.modifiedOn; }
-
-    /**
-     * Set the {@code modified_on} property (displayed as {@code Modified On}) of the object.
-     * @param modifiedOn the value to set
-     */
-    @JsonProperty("modified_on")
-    public void setModifiedOn(Date modifiedOn) { this.modifiedOn = modifiedOn; }
 
     /**
      * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.

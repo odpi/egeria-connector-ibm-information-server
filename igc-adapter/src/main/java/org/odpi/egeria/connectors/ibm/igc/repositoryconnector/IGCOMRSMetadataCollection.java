@@ -376,43 +376,6 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         return found;
     }
 
-    /*
-     * {@inheritDoc}
-    @Override
-    public void addTypeDefGallery(String userId, TypeDefGallery newTypes) throws
-            InvalidParameterException,
-            RepositoryErrorException,
-            TypeDefNotSupportedException,
-            TypeDefKnownException,
-            TypeDefConflictException,
-            InvalidTypeDefException,
-            FunctionNotSupportedException,
-            UserNotAuthorizedException {
-
-        final String  methodName = "addTypeDefGallery";
-        final String  galleryParameterName = "newTypes";
-
-        this.validateRepositoryConnector(methodName);
-        parentConnector.validateRepositoryIsActive(methodName);
-        repositoryValidator.validateUserId(repositoryName, userId, methodName);
-        repositoryValidator.validateTypeDefGallery(repositoryName, galleryParameterName, newTypes, methodName);
-
-        List<AttributeTypeDef> attributeTypeDefs = newTypes.getAttributeTypeDefs();
-        if (attributeTypeDefs != null) {
-            for (AttributeTypeDef attributeTypeDef : attributeTypeDefs) {
-                addAttributeTypeDef(userId, attributeTypeDef);
-            }
-        }
-
-        List<TypeDef> typeDefs = newTypes.getTypeDefs();
-        if (typeDefs != null) {
-            for (TypeDef typeDef : typeDefs) {
-                addTypeDef(userId, typeDef);
-            }
-        }
-
-    } */
-
     /**
      * {@inheritDoc}
      */
@@ -550,6 +513,37 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     }
 
     /**
+     * Verify that the mapped properties provided support all of the properties defined on the provided type definition
+     * (and its supertypes).
+     *
+     * @param typeDef the type definition to verify
+     * @param mappedProperties the list of properties that are mapped for the type
+     * @param gaps the list of names of any properties that are not mapped
+     */
+    private void verifyPropertiesForTypeDef(TypeDef typeDef, Set<String> mappedProperties, List<String> gaps) {
+        List<TypeDefAttribute> properties = typeDef.getPropertiesDefinition();
+        if (properties != null) {
+            for (TypeDefAttribute typeDefAttribute : properties) {
+                String omrsPropertyName = typeDefAttribute.getAttributeName();
+                if (!mappedProperties.contains(omrsPropertyName)) {
+                    gaps.add(omrsPropertyName);
+                }
+            }
+        }
+        TypeDefLink superTypeLink = typeDef.getSuperType();
+        if (superTypeLink != null) {
+            String superTypeGUID = superTypeLink.getGUID();
+            TypeDef superType = typeDefStore.getTypeDefByGUID(superTypeGUID);
+            if (superType == null) {
+                superType = typeDefStore.getUnimplementedTypeDefByGUID(superTypeGUID, true);
+            }
+            if (superType != null) {
+                verifyPropertiesForTypeDef(superType, mappedProperties, gaps);
+            }
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -579,8 +573,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     errorCode.getUserAction());
         } else if (typeDefStore.getTypeDefByGUID(guid) != null) {
 
-            boolean bVerified = true;
-            List<String> issues = new ArrayList<>();
+            List<String> gaps = new ArrayList<>();
 
             Set<String> mappedProperties = new HashSet<>();
             switch (typeDef.getCategory()) {
@@ -606,20 +599,11 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
             // Validate that we support all of the possible properties before deciding whether we
             // fully-support the TypeDef or not
-            List<TypeDefAttribute> properties = typeDef.getPropertiesDefinition();
-            if (properties != null) {
-                for (TypeDefAttribute typeDefAttribute : properties) {
-                    String omrsPropertyName = typeDefAttribute.getAttributeName();
-                    if (!mappedProperties.contains(omrsPropertyName)) {
-                        bVerified = false;
-                        issues.add("property '" + omrsPropertyName + "' is not mapped");
-                    }
-                }
-            }
+            verifyPropertiesForTypeDef(typeDef, mappedProperties, gaps);
 
             // If we were unable to verify everything, throw exception indicating it is not a supported TypeDef
-            if (!bVerified) {
-                if (log.isWarnEnabled()) { log.warn("Unable to verify type definition {}: {}", typeDef.getName(), String.join(", ", issues)); }
+            if (!gaps.isEmpty()) {
+                if (log.isWarnEnabled()) { log.warn("Unable to verify type definition {} due to missing property mappings for: {}", typeDef.getName(), String.join(", ", gaps)); }
                 IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                         typeDef.getName(),
@@ -1585,6 +1569,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         String proxyTwoType = igcRelationshipGuid.getAssetType2();
         String omrsRelationshipName = igcRelationshipGuid.getRelationshipType();
 
+        List<RelationshipMapping> mappings = new ArrayList<>();
+        List<Relationship> relationships = new ArrayList<>();
+
         // Should not need to translate from proxyone / proxytwo to alternative assets, as the RIDs provided
         // in the relationship GUID should already be pointing to the correct assets
         String relationshipLevelRid = igcRelationshipGuid.isRelationshipLevelObject() ? proxyOneRid : null;
@@ -1592,6 +1579,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         Reference proxyTwo;
         RelationshipMapping relationshipMapping;
         if (relationshipLevelRid != null) {
+
+            // TODO: replace with singular retrieval?
             Reference relationshipAsset = igcRestClient.getAssetRefById(relationshipLevelRid);
             String relationshipAssetType = relationshipAsset.getType();
             relationshipMapping = igcRepositoryHelper.getRelationshipMappingByTypes(
@@ -1599,60 +1588,94 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     relationshipAssetType,
                     relationshipAssetType
             );
-            // Only need to translate if the RIDs are relationship-level RIDs
-            // TODO: replace with singular retrieval?
             proxyOne = relationshipMapping.getProxyOneAssetFromAsset(relationshipAsset, igcRestClient).get(0);
             proxyTwo = relationshipMapping.getProxyTwoAssetFromAsset(relationshipAsset, igcRestClient).get(0);
+            mappings.add(relationshipMapping);
+
         } else {
+
             // TODO: replace with singular retrieval?
-            proxyOne = igcRestClient.getAssetRefById(proxyOneRid);
+            Reference oneEnd = igcRestClient.getAssetRefById(proxyOneRid);
             proxyTwo = igcRestClient.getAssetRefById(proxyTwoRid);
             relationshipMapping = igcRepositoryHelper.getRelationshipMappingByTypes(
                     omrsRelationshipName,
                     proxyOneType,
                     proxyTwoType
             );
+            proxyOne = relationshipMapping.getProxyOneAssetFromAsset(oneEnd, igcRestClient).get(0);
+            mappings.add(relationshipMapping);
+
         }
 
-        Relationship found;
-
-        if (relationshipMapping != null) {
-            try {
-
-                RelationshipDef omrsRelationshipDef = (RelationshipDef) getTypeDefByName(userId, omrsRelationshipName);
-                // Since the ordering should be set by the GUID we're lookup up anyway, we'll simply set the property
-                // to one of the proxyOne properties
-                String igcPropertyName = relationshipMapping.getProxyOneMapping().getIgcRelationshipProperties().get(0);
-                if (log.isDebugEnabled()) { log.debug(" ... using property: {}", igcPropertyName); }
-                found = RelationshipMapping.getMappedRelationship(
-                        igcomrsRepositoryConnector,
-                        relationshipMapping,
-                        omrsRelationshipDef,
-                        proxyOne,
-                        proxyTwo,
-                        igcPropertyName,
-                        userId,
-                        relationshipLevelRid
-                );
-
-            } catch (TypeDefNotKnownException e) {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        omrsRelationshipName,
-                        repositoryName);
-                throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
-            }
-        } else {
+        // If no mapping was found, throw exception indicating the relationship type is not mapped
+        if (mappings.isEmpty()) {
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     omrsRelationshipName,
                     repositoryName);
             throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        }
+
+        Relationship found = null;
+
+        // Otherwise proceed by obtaining all relationships that are mapped
+        try {
+            TypeDef relationshipTypeDef = getTypeDefByName(userId, omrsRelationshipName);
+            RelationshipMapping.getMappedRelationships(
+                    igcomrsRepositoryConnector,
+                    relationships,
+                    mappings,
+                    relationshipTypeDef.getGUID(),
+                    proxyOne,
+                    proxyTwo,
+                    userId
+            );
+        } catch (TypeDefNotKnownException e) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    omrsRelationshipName,
+                    repositoryName);
+            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        }
+        if (relationships.isEmpty()) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    guid,
+                    repositoryName);
+            throw new RelationshipNotKnownException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        } else if (relationships.size() > 1) {
+            // Iterate through the found relationships if there is more than one, and return the first one whose
+            // GUID matches the one requested
+            for (Relationship relationship : relationships) {
+                if (relationship.getGUID().equals(guid)) {
+                    found = relationship;
+                }
+            }
+        } else {
+            found = relationships.get(0);
+        }
+
+        if (found == null) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    guid,
+                    repositoryName);
+            throw new RelationshipNotKnownException(errorCode.getHTTPErrorCode(),
                     this.getClass().getName(),
                     methodName,
                     errorMessage,
@@ -1667,6 +1690,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<Relationship> findRelationshipsByProperty(String userId,
                                                           String relationshipTypeGUID,
                                                           InstanceProperties matchProperties,
@@ -1691,6 +1715,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<Relationship> findRelationshipsByPropertyValue(String userId,
                                                                String relationshipTypeGUID,
                                                                String searchCriteria,
@@ -1712,8 +1737,11 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     }
 
     /**
-     * {@inheritDoc}
-     */
+     * Will not be implemented, as no way to handle the uniqueness of qualifiedName across both these interfaces,
+     * the normal IGC REST API, and the IGC UI (eg. even if there were a custom property to capture an interface-
+     * provided qualifiedName, there is no way to guarantee it is unique across those 3 potential placse it could
+     * be input). Therefore, not possible to create new entities in IGC that conform to the standard.
+    @Override
     public EntityDetail addEntity(String userId,
                                   String entityTypeGUID,
                                   InstanceProperties initialProperties,
@@ -1820,7 +1848,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                     entityTypeGUID,
                                     igcTypeName,
                                     repositoryName);
-                            throw new PropertyErrorException(errorCode.getHTTPErrorCode(),
+                            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
                                     this.getClass().getName(),
                                     methodName,
                                     errorMessage,
@@ -1828,7 +1856,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                     errorCode.getUserAction());
                         } else {
                             String igcPropertyName = mapping.getIgcPropertyName(omrsPropertyName);
-                            creationObj.addProperty(igcPropertyName, AttributeMapping.getIgcValueFromPropertyValue(value));
+                            if (!igcPropertyName.equals(EntityMapping.COMPLEX_MAPPING_SENTINEL)) {
+                                creationObj.addProperty(igcPropertyName, AttributeMapping.getIgcValueFromPropertyValue(value));
+                            }
                         }
                     }
                     // TODO: probably also need to cycle through all 'additionalProperties' and attempt to set these
@@ -1860,6 +1890,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     }
                 }
 
+                String omrsTypeName = mapping.getOmrsTypeDefName();
+
                 // If the object being created is a term, we need to set certain mandatory fields (which we can do
                 // using default values provided in the connector configuration)
                 if (igcTypeName.equals("term")) {
@@ -1868,6 +1900,12 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         creationObj.addProperty("status", igcomrsRepositoryConnector.getDefaultTermStatus());
                     }
                     // having a parent_category is mandatory - default to the "default glossary" as a starting point
+                    if (!creationObj.hasProperty("parent_category")) {
+                        creationObj.addProperty("parent_category", igcomrsRepositoryConnector.getDefaultGlossaryRID());
+                    }
+                } else if (omrsTypeName.equals("GlossaryCategory")) {
+                    // place any new categories into the default glossary, to avoid creating a top-level IGC category
+                    // that would then be interpreted as a Glossary instead of a GlossaryCategory
                     if (!creationObj.hasProperty("parent_category")) {
                         creationObj.addProperty("parent_category", igcomrsRepositoryConnector.getDefaultGlossaryRID());
                     }
@@ -1913,7 +1951,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     entityTypeGUID,
                     igcTypeName,
                     repositoryName);
-            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
                     this.getClass().getName(),
                     methodName,
                     errorMessage,
@@ -1928,7 +1966,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         entityTypeGUID,
                         igcTypeName,
                         repositoryName);
-                throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+                throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
                         this.getClass().getName(),
                         methodName,
                         errorMessage,
@@ -1940,10 +1978,12 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         return detail;
 
     }
+     */
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public EntityDetail updateEntityProperties(String userId,
                                                String entityGUID,
                                                InstanceProperties properties) throws
@@ -1951,6 +1991,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             RepositoryErrorException,
             EntityNotKnownException,
             PropertyErrorException,
+            FunctionNotSupportedException,
             UserNotAuthorizedException {
 
         final String methodName = "updateEntityProperties";
@@ -1984,7 +2025,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     entityGUID,
                     repositoryName);
-            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
                     this.getClass().getName(),
                     methodName,
                     errorMessage,
@@ -2004,7 +2045,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                             omrsPropertyName,
                             repositoryName);
-                    throw new PropertyErrorException(errorCode.getHTTPErrorCode(),
+                    throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
                             this.getClass().getName(),
                             methodName,
                             errorMessage,
@@ -2021,7 +2062,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                         updateObj.toString(),
                         entityGUID);
-                throw new PropertyErrorException(errorCode.getHTTPErrorCode(),
+                throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
                         this.getClass().getName(),
                         methodName,
                         errorMessage,
@@ -2040,6 +2081,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void purgeEntity(String userId,
                             String typeDefGUID,
                             String typeDefName,
@@ -2047,6 +2089,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             InvalidParameterException,
             RepositoryErrorException,
             EntityNotKnownException,
+            FunctionNotSupportedException,
             UserNotAuthorizedException {
 
         final String methodName = "purgeEntity";
@@ -2095,7 +2138,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     deletedEntityGUID,
                     rid);
-            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
                     this.getClass().getName(),
                     methodName,
                     errorMessage,
@@ -2171,19 +2214,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     }
 
     /**
-     * Remove a specific classification from an entity.
-     *
-     * @param userId unique identifier for requesting user.
-     * @param entityGUID String unique identifier (guid) for the entity.
-     * @param classificationName String name for the classification.
-     * @return EntityDetail showing the resulting entity header, properties and classifications.
-     * @throws InvalidParameterException one of the parameters is invalid or null.
-     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
-     *                                  the metadata collection is stored.
-     * @throws EntityNotKnownException the entity identified by the guid is not found in the metadata collection
-     * @throws ClassificationErrorException the requested classification is not set on the entity.
-     * @throws UserNotAuthorizedException the userId is not permitted to perform this operation.
+     * {@inheritDoc}
      */
+    @Override
     public EntityDetail declassifyEntity(String userId,
                                          String entityGUID,
                                          String classificationName) throws
@@ -2421,6 +2454,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void purgeRelationship(String userId,
                                   String typeDefGUID,
                                   String typeDefName,
@@ -2428,6 +2462,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             InvalidParameterException,
             RepositoryErrorException,
             RelationshipNotKnownException,
+            FunctionNotSupportedException,
             UserNotAuthorizedException {
 
         final String methodName = "purgeRelationship";
@@ -2535,7 +2570,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                                     deletedRelationshipGUID,
                                     proxyOneRid);
-                            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+                            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
                                     this.getClass().getName(),
                                     methodName,
                                     errorMessage,

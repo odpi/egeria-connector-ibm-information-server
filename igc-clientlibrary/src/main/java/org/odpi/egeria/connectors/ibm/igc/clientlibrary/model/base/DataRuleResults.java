@@ -31,20 +31,8 @@ public class DataRuleResults extends Reference {
     @JsonProperty("benchmark")
     protected String benchmark;
 
-    @JsonProperty("created_by")
-    protected String createdBy;
-
-    @JsonProperty("created_on")
-    protected Date createdOn;
-
     @JsonProperty("end_time")
     protected Date endTime;
-
-    @JsonProperty("modified_by")
-    protected String modifiedBy;
-
-    @JsonProperty("modified_on")
-    protected Date modifiedOn;
 
     @JsonProperty("name")
     protected String name;
@@ -82,34 +70,6 @@ public class DataRuleResults extends Reference {
     public void setBenchmark(String benchmark) { this.benchmark = benchmark; }
 
     /**
-     * Retrieve the {@code created_by} property (displayed as '{@literal Created By}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("created_by")
-    public String getCreatedBy() { return this.createdBy; }
-
-    /**
-     * Set the {@code created_by} property (displayed as {@code Created By}) of the object.
-     * @param createdBy the value to set
-     */
-    @JsonProperty("created_by")
-    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
-
-    /**
-     * Retrieve the {@code created_on} property (displayed as '{@literal Created On}') of the object.
-     * @return {@code Date}
-     */
-    @JsonProperty("created_on")
-    public Date getCreatedOn() { return this.createdOn; }
-
-    /**
-     * Set the {@code created_on} property (displayed as {@code Created On}) of the object.
-     * @param createdOn the value to set
-     */
-    @JsonProperty("created_on")
-    public void setCreatedOn(Date createdOn) { this.createdOn = createdOn; }
-
-    /**
      * Retrieve the {@code end_time} property (displayed as '{@literal End Time}') of the object.
      * @return {@code Date}
      */
@@ -122,34 +82,6 @@ public class DataRuleResults extends Reference {
      */
     @JsonProperty("end_time")
     public void setEndTime(Date endTime) { this.endTime = endTime; }
-
-    /**
-     * Retrieve the {@code modified_by} property (displayed as '{@literal Modified By}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("modified_by")
-    public String getModifiedBy() { return this.modifiedBy; }
-
-    /**
-     * Set the {@code modified_by} property (displayed as {@code Modified By}) of the object.
-     * @param modifiedBy the value to set
-     */
-    @JsonProperty("modified_by")
-    public void setModifiedBy(String modifiedBy) { this.modifiedBy = modifiedBy; }
-
-    /**
-     * Retrieve the {@code modified_on} property (displayed as '{@literal Modified On}') of the object.
-     * @return {@code Date}
-     */
-    @JsonProperty("modified_on")
-    public Date getModifiedOn() { return this.modifiedOn; }
-
-    /**
-     * Set the {@code modified_on} property (displayed as {@code Modified On}) of the object.
-     * @param modifiedOn the value to set
-     */
-    @JsonProperty("modified_on")
-    public void setModifiedOn(Date modifiedOn) { this.modifiedOn = modifiedOn; }
 
     /**
      * Retrieve the {@code name} property (displayed as '{@literal Name}') of the object.

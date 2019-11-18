@@ -29,7 +29,6 @@ public class RelationalColumnMapper extends SchemaAttribute_Mapper {
         );
 
         // The list of properties that should be mapped
-        addSimplePropertyMapping("name", "displayName");
         addSimplePropertyMapping("position", "position");
         addSimplePropertyMapping("minimum_length", "minimumLength");
         addSimplePropertyMapping("length", "length");
@@ -37,6 +36,9 @@ public class RelationalColumnMapper extends SchemaAttribute_Mapper {
         addSimplePropertyMapping("allows_null_values", "isNullable");
         addSimplePropertyMapping("unique", "isUnique");
         addSimplePropertyMapping("default_value", "defaultValueOverride");
+        addSimplePropertyMapping("type", "nativeClass");
+        addLiteralPropertyMapping("allowsDuplicateValues", null);
+        addLiteralPropertyMapping("orderedValues", null);
 
         // The list of relationships that should be mapped
         addRelationshipMapper(NestedSchemaAttributeMapper.getInstance(null));

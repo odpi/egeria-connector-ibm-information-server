@@ -26,6 +26,7 @@ public class DataClassHierarchyMapper extends RelationshipMapping {
                 "superDataClass",
                 "subDataClasses"
         );
+        setContainedType(ContainedType.TWO);
     }
 
 }

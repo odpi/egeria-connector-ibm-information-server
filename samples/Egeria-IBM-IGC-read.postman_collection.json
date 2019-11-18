@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "a1bc6690-f8f4-47ec-b34e-fe11a5a7f850",
+		"_postman_id": "b9769977-2a36-4491-be82-76eafa2b6864",
 		"name": "Egeria-IBM-IGC-read",
 		"description": "Collection to run tests against Egeria's IBM Information Server (IGC) integration",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -2119,6 +2119,10 @@
 							"    pm.expect(jsonData.relationships[5].entityTwoProxy.version).to.be.above(1);",
 							"});",
 							"",
+							"const relationshipGuid = jsonData.relationships[3].guid;",
+							"pm.environment.set(\"classification_rid\", relationshipGuid);",
+							"const selectedGuid = jsonData.relationships[4].guid;",
+							"pm.environment.set(\"proposed_assignment_rid\", selectedGuid);",
 							"const dataclassGuid = jsonData.relationships[4].entityTwoProxy.guid;",
 							"pm.environment.set('rid_data_class', dataclassGuid);",
 							""
@@ -2214,6 +2218,124 @@
 						{
 							"key": "guid",
 							"value": "{{rid_database_column}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10.4 - Get Relationship: DataClassAssignment (Proposed)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Proper DataClassAssignment proposed relationship\", function() {",
+							"    pm.expect(jsonData.relationship.type.typeDefName).to.equal(\"DataClassAssignment\");",
+							"    pm.expect(jsonData.relationship.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationship.entityOneProxy.type.typeDefName).to.be.oneOf([\"RelationalColumn\",\"TabularColumn\"]);",
+							"    pm.expect(jsonData.relationship.entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationship.entityTwoProxy.type.typeDefName).to.equal(\"DataClass\");",
+							"    pm.expect(jsonData.relationship.entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationship.entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.equal(\"(data_class)=Email Address\");",
+							"    pm.expect(jsonData.relationship.properties.instanceProperties.status.ordinal).to.equal(1);",
+							"    pm.expect(jsonData.relationship.properties.instanceProperties.status.symbolicName).to.equal(\"Proposed\");",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/relationship/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"relationship",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{proposed_assignment_rid}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10.5 - Get Relationship: DataClassAssignment (Discovered)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ec0d8ff-68aa-4207-a7ca-3634c4663b42",
+						"exec": [
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Proper DataClassAssignment proposed relationship\", function() {",
+							"    pm.expect(jsonData.relationship.type.typeDefName).to.equal(\"DataClassAssignment\");",
+							"    pm.expect(jsonData.relationship.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationship.entityOneProxy.type.typeDefName).to.be.oneOf([\"RelationalColumn\",\"TabularColumn\"]);",
+							"    pm.expect(jsonData.relationship.entityOneProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationship.entityTwoProxy.type.typeDefName).to.equal(\"DataClass\");",
+							"    pm.expect(jsonData.relationship.entityTwoProxy.version).to.be.above(1);",
+							"    pm.expect(jsonData.relationship.entityTwoProxy.uniqueProperties.instanceProperties.qualifiedName.primitiveValue).to.be.oneOf([\"(data_class)=Email Address\",\"(data_class)=Text\"]);",
+							"    pm.expect(jsonData.relationship.properties.instanceProperties.status.ordinal).to.equal(0);",
+							"    pm.expect(jsonData.relationship.properties.instanceProperties.status.symbolicName).to.equal(\"Discovered\");",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/relationship/:guid",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"servers",
+						"{{server}}",
+						"open-metadata",
+						"repository-services",
+						"users",
+						"{{user}}",
+						"instances",
+						"relationship",
+						":guid"
+					],
+					"variable": [
+						{
+							"key": "guid",
+							"value": "{{classification_rid}}"
 						}
 					]
 				}

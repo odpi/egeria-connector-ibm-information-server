@@ -10,6 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
@@ -24,6 +25,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefAttribute;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.OMRSErrorCode;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RelationshipNotKnownException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.TypeErrorException;
 import org.slf4j.Logger;
@@ -44,6 +46,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     private ProxyMapping two;
     private String omrsRelationshipType;
     private OptimalStart optimalStart;
+    private ContainedType containedType;
 
     private List<RelationshipMapping> subtypes;
     private String relationshipLevelIgcAsset;
@@ -60,6 +63,14 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *  - CUSTOM = must be custom implemented via a complexRelationshipMappings method
      */
     public enum OptimalStart { ONE, TWO, OPPOSITE, CUSTOM }
+
+    /**
+     * The endpoint which is contained within the other (if any):
+     * - ONE = object represented by ProxyOne is the child of the object represented by ProxyTwo
+     * - TWO = object represented by ProxyTwo is the child of the object represented by ProxyOne
+     * - NONE = there is no containment in the relationship (endpoints are peers rather than parent / child)
+     */
+    public enum ContainedType { ONE, TWO, NONE }
 
     @Override
     public String toString() {
@@ -116,6 +127,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
         );
         this.omrsRelationshipType = omrsRelationshipType;
         this.optimalStart = OptimalStart.OPPOSITE;
+        this.containedType = ContainedType.NONE;
         this.subtypes = new ArrayList<>();
         this.omrsSupportedStatuses = new ArrayList<>();
         this.mappedOmrsPropertyNames = new HashSet<>();
@@ -301,11 +313,13 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcomrsRepositoryConnector connection to the IGC environment
      * @param relationships list of relationships to which to append
      * @param fromIgcObject the entity starting point for the relationship
+     * @param toIgcObject the other entity endpoint for the relationship (or null if unknown)
      * @param userId the userId doing the mapping
      */
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                            List<Relationship> relationships,
                                            Reference fromIgcObject,
+                                           Reference toIgcObject,
                                            String userId) {
         // By default there are no complex / custom mappings
     }
@@ -345,6 +359,20 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @return OptimalStart
      */
     private OptimalStart getOptimalStart() { return this.optimalStart; }
+
+    /**
+     * Set the child of a parent-child relationship.
+     *
+     * @param containedType the endpoint to treat as the child of the relationship
+     */
+    void setContainedType(ContainedType containedType) { this.containedType = containedType; }
+
+    /**
+     * Get the child of the parent-child relationship.
+     *
+     * @return ContainedType
+     */
+    public ContainedType getContainedType() { return this.containedType; }
 
     /**
      * Add an alternative IGC property that can be used to traverse the relationship from proxy one to proxy two.
@@ -388,7 +416,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @return boolean
      */
-    private boolean sameTypeOnBothEnds() {
+    public boolean sameTypeOnBothEnds() {
         return one.getIgcAssetType().equals(two.getIgcAssetType());
     }
 
@@ -397,7 +425,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @return boolean
      */
-    private boolean samePropertiesOnBothEnds() {
+    public boolean samePropertiesOnBothEnds() {
         List<String> pOneProperties = one.getIgcRelationshipProperties();
         List<String> pTwoProperties = two.getIgcRelationshipProperties();
         return new HashSet<>(pOneProperties).equals(new HashSet<>(pTwoProperties));
@@ -671,7 +699,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcPropertyName the name of the IGC property for which the relationship is being generated
      * @param relationshipLevelRid the relationship-level RID (if any) within IGC (these are very rare)
      * @param proxyOrderKnown should be true iff the provided candidate proxies are known to be in the correct order
-     * @return IGCRelationshipGuid - the unique GUID for the relationship
+     * @return IGCRelationshipGuid - the unique GUID for the relationship (or null if it could not be determined)
      */
     public static IGCRelationshipGuid getRelationshipGUID(IGCRepositoryHelper igcRepositoryHelper,
                                                           RelationshipMapping relationshipMapping,
@@ -683,125 +711,13 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
         String omrsRelationshipName = relationshipMapping.getOmrsRelationshipType();
         // Lookup types via this helper function, to translate any alias types (eg. host_(engine) and host)
-        String endOneType = IGCRestConstants.getAssetTypeForSearch(endOne.getType());
-        String endTwoType = IGCRestConstants.getAssetTypeForSearch(endTwo.getType());
 
-        if (log.isDebugEnabled()) { log.debug("Calculating relationship GUID from {} to {} via {} for {} (with mapper: {})", endOneType, endTwoType, igcPropertyName, omrsRelationshipName, relationshipMapping.getClass().getCanonicalName()); }
+        IGCRelationshipGuid igcRelationshipGuid = null;
 
-        // If the relationship mapping includes a relationship-level asset, check if either provided endpoint is one
-        // (and if so, setup the relationshipLevelRid based on its ID)
-        String relationshipLevelType = null;
-        if (relationshipMapping.hasRelationshipLevelAsset()) {
-            relationshipLevelType = relationshipMapping.getRelationshipLevelIgcAsset();
-            if (endOneType.equals(relationshipLevelType)) {
-                relationshipLevelRid = endOne.getId();
-            } else if (endTwoType.equals(relationshipLevelType)) {
-                relationshipLevelRid = endTwo.getId();
-            }
-        }
-
-        ProxyMapping pmOne = relationshipMapping.getProxyOneMapping();
-        ProxyMapping pmTwo = relationshipMapping.getProxyTwoMapping();
-        List<String> pmOneProperties = pmOne.getIgcRelationshipProperties();
-        List<String> pmTwoProperties = pmTwo.getIgcRelationshipProperties();
-
-        String proxyOneRid = null;
-        String proxyTwoRid = null;
-
-        if (proxyOrderKnown) {
-            proxyOneRid = endOne.getId();
-            proxyTwoRid = endTwo.getId();
-        } else if (igcPropertyName != null && igcPropertyName.equals(SELF_REFERENCE_SENTINEL)) {
-            // When self-referencing, it should be the same entity on both sides, but we need to
-            // prefix the correct RID based on where the relationship mapping tells us it belongs
-            // (ie. ordering IS important, unlike next conditional)
-            // (the actual prefixing is done further below, for non-self-referencing as well)
-            proxyOneRid = endOne.getId();
-            proxyTwoRid = endTwo.getId();
-            if (pmOne.getIgcRidPrefix() == null && pmTwo.getIgcRidPrefix() == null) {
-                if (log.isWarnEnabled()) { log.warn("Self-referencing relationship expected, but no prefix found for relationship {} from {} to {} via {}", omrsRelationshipName, proxyOneRid, proxyTwoRid, igcPropertyName); }
-            }
-            if (!proxyOneRid.equals(proxyTwoRid)) {
-                if (log.isWarnEnabled()) { log.warn("Self-referencing relationship expected for {}, but RIDs of ends do not match: {} and {}", omrsRelationshipName, proxyOneRid, proxyTwoRid); }
-            }
-        } else if (relationshipMapping.sameTypeOnBothEnds()
-                && pmOne.matchesAssetType(endOneType)) {
-            if (relationshipMapping.samePropertiesOnBothEnds()) {
-                // If both the types and property names of both ends of the mapping are the same (eg. synonyms and
-                // translations on terms), then only option is to sort the RIDs themselves to give consistency
-                String endOneRid = endOne.getId();
-                String endTwoRid = endTwo.getId();
-                if (log.isDebugEnabled()) { log.debug(" ... same types, same properties: alphabetically sorting RIDs."); }
-                if (endOneRid.compareTo(endTwoRid) > 0) {
-                    proxyOneRid = endOneRid;
-                    proxyTwoRid = endTwoRid;
-                } else {
-                    proxyOneRid = endTwoRid;
-                    proxyTwoRid = endOneRid;
-                }
-            } else {
-                // Otherwise if only the types are the same on both ends, the property is key to determining which
-                // end is which, and also relies on the direction in which they were retrieved
-                if (relationshipMapping.getOptimalStart().equals(OptimalStart.OPPOSITE)) {
-                    if (pmOneProperties.contains(igcPropertyName)) {
-                        if (log.isDebugEnabled()) {
-                            log.debug(" ... same types, opposite lookup, property matches one: reversing RIDs.");
-                        }
-                        proxyOneRid = endTwo.getId();
-                        proxyTwoRid = endOne.getId();
-                    } else if (pmTwoProperties.contains(igcPropertyName)) {
-                        if (log.isDebugEnabled()) {
-                            log.debug(" ... same types, opposite lookup, property matches two: keeping RID direction.");
-                        }
-                        proxyOneRid = endOne.getId();
-                        proxyTwoRid = endTwo.getId();
-                    }
-                } else {
-                    if (pmOneProperties.contains(igcPropertyName)) {
-                        if (log.isDebugEnabled()) {
-                            log.debug(" ... same types, direct lookup, property matches one: keeping RID direction.");
-                        }
-                        proxyOneRid = endOne.getId();
-                        proxyTwoRid = endTwo.getId();
-                    } else if (pmTwoProperties.contains(igcPropertyName)) {
-                        if (log.isDebugEnabled()) {
-                            log.debug(" ... same types, direct lookup, property matches two: reversing RIDs.");
-                        }
-                        proxyOneRid = endTwo.getId();
-                        proxyTwoRid = endOne.getId();
-                    }
-                }
-            }
-        } else if (pmOne.matchesAssetType(endOneType)
-                && (pmOneProperties.contains(igcPropertyName) || pmTwoProperties.contains(igcPropertyName))
-                && pmTwo.matchesAssetType(endTwoType) ) {
-            // Otherwise if one aligns with one and two aligns with two, and property appears somewhere, go with those
-            // (this should also apply when the relationship is self-referencing)
-            if (log.isDebugEnabled()) { log.debug(" ... one matches one, two matches two: keeping RID direction."); }
-            proxyOneRid = endOne.getId();
-            proxyTwoRid = endTwo.getId();
-        } else if (pmTwo.matchesAssetType(endOneType)
-                && (pmOneProperties.contains(igcPropertyName) || pmTwoProperties.contains(igcPropertyName))
-                && pmOne.matchesAssetType(endTwoType) ) {
-            // Or if two aligns with one and one aligns with two, and property appears somewhere, reverse them
-            if (log.isDebugEnabled()) { log.debug(" ... two matches one, one matches two: reversing RIDs."); }
-            proxyOneRid = endTwo.getId();
-            proxyTwoRid = endOne.getId();
-            // We also need to reverse the types
-            String tempType = endOneType;
-            endOneType = endTwoType;
-            endTwoType = tempType;
-        } else if (relationshipLevelRid == null) {
-            // Otherwise indicate something appears to be wrong
-            if (log.isErrorEnabled()) { log.error("Unable to find matching ends for relationship {} from {} to {} via {}", omrsRelationshipName, endOne.getId(), endTwo.getId(), igcPropertyName); }
-        }
-
-        String proxyOnePrefix = pmOne.getIgcRidPrefix();
-        String proxyTwoPrefix = pmTwo.getIgcRidPrefix();
-
-        IGCRelationshipGuid igcRelationshipGuid;
-
+        // If we are provided a relationship-level RID, short-circuit the entire rest of this process
         if (relationshipLevelRid != null) {
+            if (log.isDebugEnabled()) { log.debug("Calculating relationship GUID for relationship-level RID {} (with mapper: {})", relationshipLevelRid, relationshipMapping.getClass().getName()); }
+            String relationshipLevelType = relationshipMapping.getRelationshipLevelIgcAsset();
             igcRelationshipGuid = igcRepositoryHelper.getRelationshipGuid(
                     relationshipLevelType,
                     relationshipLevelType,
@@ -811,16 +727,159 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     relationshipLevelRid,
                     omrsRelationshipName
             );
-        } else {
-            igcRelationshipGuid = igcRepositoryHelper.getRelationshipGuid(
-                    endOneType,
-                    endTwoType,
-                    proxyOnePrefix,
-                    proxyTwoPrefix,
-                    proxyOneRid,
-                    proxyTwoRid,
-                    omrsRelationshipName
-            );
+        } else if (endOne != null && endTwo != null) {
+
+            String endOneType = IGCRestConstants.getAssetTypeForSearch(endOne.getType());
+            String endTwoType = IGCRestConstants.getAssetTypeForSearch(endTwo.getType());
+
+            if (log.isDebugEnabled()) {
+                log.debug("Calculating relationship GUID from {} to {} via {} for {} (with mapper: {})", endOneType, endTwoType, igcPropertyName, omrsRelationshipName, relationshipMapping.getClass().getName());
+            }
+
+            // If the relationship mapping includes a relationship-level asset, check if either provided endpoint is one
+            // (and if so, setup the relationshipLevelRid based on its ID)
+            String relationshipLevelType = null;
+            if (relationshipMapping.hasRelationshipLevelAsset()) {
+                relationshipLevelType = relationshipMapping.getRelationshipLevelIgcAsset();
+                if (endOneType.equals(relationshipLevelType)) {
+                    relationshipLevelRid = endOne.getId();
+                } else if (endTwoType.equals(relationshipLevelType)) {
+                    relationshipLevelRid = endTwo.getId();
+                }
+            }
+
+            ProxyMapping pmOne = relationshipMapping.getProxyOneMapping();
+            ProxyMapping pmTwo = relationshipMapping.getProxyTwoMapping();
+            List<String> pmOneProperties = pmOne.getIgcRelationshipProperties();
+            List<String> pmTwoProperties = pmTwo.getIgcRelationshipProperties();
+
+            String proxyOneRid = null;
+            String proxyTwoRid = null;
+
+            if (proxyOrderKnown) {
+                proxyOneRid = endOne.getId();
+                proxyTwoRid = endTwo.getId();
+            } else if (igcPropertyName != null && igcPropertyName.equals(SELF_REFERENCE_SENTINEL)) {
+                // When self-referencing, it should be the same entity on both sides, but we need to
+                // prefix the correct RID based on where the relationship mapping tells us it belongs
+                // (ie. ordering IS important, unlike next conditional)
+                // (the actual prefixing is done further below, for non-self-referencing as well)
+                proxyOneRid = endOne.getId();
+                proxyTwoRid = endTwo.getId();
+                if (pmOne.getIgcRidPrefix() == null && pmTwo.getIgcRidPrefix() == null) {
+                    if (log.isWarnEnabled()) {
+                        log.warn("Self-referencing relationship expected, but no prefix found for relationship {} from {} to {} via {}", omrsRelationshipName, proxyOneRid, proxyTwoRid, igcPropertyName);
+                    }
+                }
+                if (!proxyOneRid.equals(proxyTwoRid)) {
+                    if (log.isWarnEnabled()) {
+                        log.warn("Self-referencing relationship expected for {}, but RIDs of ends do not match: {} and {}", omrsRelationshipName, proxyOneRid, proxyTwoRid);
+                    }
+                }
+            } else if (relationshipMapping.sameTypeOnBothEnds()
+                    && pmOne.matchesAssetType(endOneType)) {
+                if (relationshipMapping.samePropertiesOnBothEnds()) {
+                    // If both the types and property names of both ends of the mapping are the same (eg. synonyms and
+                    // translations on terms), then only option is to sort the RIDs themselves to give consistency
+                    String endOneRid = endOne.getId();
+                    String endTwoRid = endTwo.getId();
+                    if (log.isDebugEnabled()) {
+                        log.debug(" ... same types, same properties: alphabetically sorting RIDs.");
+                    }
+                    if (endOneRid.compareTo(endTwoRid) > 0) {
+                        proxyOneRid = endOneRid;
+                        proxyTwoRid = endTwoRid;
+                    } else {
+                        proxyOneRid = endTwoRid;
+                        proxyTwoRid = endOneRid;
+                    }
+                } else {
+                    // Otherwise if only the types are the same on both ends, the property is key to determining which
+                    // end is which, and also relies on the direction in which they were retrieved
+                    if (relationshipMapping.getOptimalStart().equals(OptimalStart.OPPOSITE)) {
+                        if (pmOneProperties.contains(igcPropertyName)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug(" ... same types, opposite lookup, property matches one: reversing RIDs.");
+                            }
+                            proxyOneRid = endTwo.getId();
+                            proxyTwoRid = endOne.getId();
+                        } else if (pmTwoProperties.contains(igcPropertyName)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug(" ... same types, opposite lookup, property matches two: keeping RID direction.");
+                            }
+                            proxyOneRid = endOne.getId();
+                            proxyTwoRid = endTwo.getId();
+                        }
+                    } else {
+                        if (pmOneProperties.contains(igcPropertyName)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug(" ... same types, direct lookup, property matches one: keeping RID direction.");
+                            }
+                            proxyOneRid = endOne.getId();
+                            proxyTwoRid = endTwo.getId();
+                        } else if (pmTwoProperties.contains(igcPropertyName)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug(" ... same types, direct lookup, property matches two: reversing RIDs.");
+                            }
+                            proxyOneRid = endTwo.getId();
+                            proxyTwoRid = endOne.getId();
+                        }
+                    }
+                }
+            } else if (pmOne.matchesAssetType(endOneType)
+                    && (pmOneProperties.contains(igcPropertyName) || pmTwoProperties.contains(igcPropertyName))
+                    && pmTwo.matchesAssetType(endTwoType)) {
+                // Otherwise if one aligns with one and two aligns with two, and property appears somewhere, go with those
+                // (this should also apply when the relationship is self-referencing)
+                if (log.isDebugEnabled()) {
+                    log.debug(" ... one matches one, two matches two: keeping RID direction.");
+                }
+                proxyOneRid = endOne.getId();
+                proxyTwoRid = endTwo.getId();
+            } else if (pmTwo.matchesAssetType(endOneType)
+                    && (pmOneProperties.contains(igcPropertyName) || pmTwoProperties.contains(igcPropertyName))
+                    && pmOne.matchesAssetType(endTwoType)) {
+                // Or if two aligns with one and one aligns with two, and property appears somewhere, reverse them
+                if (log.isDebugEnabled()) {
+                    log.debug(" ... two matches one, one matches two: reversing RIDs.");
+                }
+                proxyOneRid = endTwo.getId();
+                proxyTwoRid = endOne.getId();
+                // We also need to reverse the types
+                String tempType = endOneType;
+                endOneType = endTwoType;
+                endTwoType = tempType;
+            } else if (relationshipLevelRid == null) {
+                // Otherwise indicate something appears to be wrong
+                if (log.isErrorEnabled()) {
+                    log.error("Unable to find matching ends for relationship {} from {} to {} via {}", omrsRelationshipName, endOne.getId(), endTwo.getId(), igcPropertyName);
+                }
+            }
+
+            String proxyOnePrefix = pmOne.getIgcRidPrefix();
+            String proxyTwoPrefix = pmTwo.getIgcRidPrefix();
+
+            if (relationshipLevelRid != null) {
+                igcRelationshipGuid = igcRepositoryHelper.getRelationshipGuid(
+                        relationshipLevelType,
+                        relationshipLevelType,
+                        null,
+                        null,
+                        relationshipLevelRid,
+                        relationshipLevelRid,
+                        omrsRelationshipName
+                );
+            } else {
+                igcRelationshipGuid = igcRepositoryHelper.getRelationshipGuid(
+                        endOneType,
+                        endTwoType,
+                        proxyOnePrefix,
+                        proxyTwoPrefix,
+                        proxyOneRid,
+                        proxyTwoRid,
+                        omrsRelationshipName
+                );
+            }
         }
 
         return igcRelationshipGuid;
@@ -893,11 +952,11 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     entityProxy.setGUID(igcEntityGuid.asGuid());
 
                     if (igcRestClient.hasModificationDetails(igcObj.getType())) {
-                        igcRestClient.populateModificationDetails(igcObj);
-                        entityProxy.setCreatedBy((String) igcRestClient.getPropertyByName(igcObj, IGCRestConstants.MOD_CREATED_BY));
-                        entityProxy.setCreateTime((Date) igcRestClient.getPropertyByName(igcObj, IGCRestConstants.MOD_CREATED_ON));
-                        entityProxy.setUpdatedBy((String) igcRestClient.getPropertyByName(igcObj, IGCRestConstants.MOD_MODIFIED_BY));
-                        entityProxy.setUpdateTime((Date) igcRestClient.getPropertyByName(igcObj, IGCRestConstants.MOD_MODIFIED_ON));
+                        Reference withModDetails = igcRestClient.getModificationDetails(igcObj);
+                        entityProxy.setCreatedBy(withModDetails.getCreatedBy());
+                        entityProxy.setCreateTime(withModDetails.getCreatedOn());
+                        entityProxy.setUpdatedBy(withModDetails.getModifiedBy());
+                        entityProxy.setUpdateTime(withModDetails.getModifiedOn());
                         if (entityProxy.getUpdateTime() != null) {
                             entityProxy.setVersion(entityProxy.getUpdateTime().getTime());
                         }
@@ -935,6 +994,35 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                               String relationshipTypeGUID,
                                               Reference fromIgcObject,
                                               String userId) {
+        getMappedRelationships(
+                igcomrsRepositoryConnector,
+                relationships,
+                mappings,
+                relationshipTypeGUID,
+                fromIgcObject,
+                null,
+                userId
+        );
+    }
+
+    /**
+     * Utility function that actually does the Relationship object setup and addition to 'relationships' member.
+     *
+     * @param igcomrsRepositoryConnector connectivity to an IGC environment
+     * @param relationships the list of relationships to append to
+     * @param mappings the mappings to use for retrieving the relationships
+     * @param relationshipTypeGUID String GUID of the the type of relationship required (null for all).
+     * @param fromIgcObject the IGC object that is the source of the relationships
+     * @param toIgcObject the IGC object that is the target of the relationship (or null if not known).
+     * @param userId the user retrieving the mapped relationships
+     */
+    public static void getMappedRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                              List<Relationship> relationships,
+                                              List<RelationshipMapping> mappings,
+                                              String relationshipTypeGUID,
+                                              Reference fromIgcObject,
+                                              Reference toIgcObject,
+                                              String userId) {
 
         // Iterate through the provided mappings to create a number of OMRS relationships
         for (RelationshipMapping mapping : mappings) {
@@ -961,11 +1049,11 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     if (fromIgcObject.isFullyRetrieved()
                             || (optimalStart.equals(OptimalStart.ONE) && pmOne.matchesAssetType(fromAssetType) )
                             || (optimalStart.equals(OptimalStart.TWO) && pmTwo.matchesAssetType(fromAssetType)) ) {
-                        addDirectRelationship(igcomrsRepositoryConnector, mapping, relationships, fromIgcObject, userId);
+                        addDirectRelationship(igcomrsRepositoryConnector, mapping, relationships, fromIgcObject, toIgcObject, userId);
                     } else if (optimalStart.equals(OptimalStart.OPPOSITE)
                             || (optimalStart.equals(OptimalStart.TWO) && pmOne.matchesAssetType(fromAssetType))
                             || (optimalStart.equals(OptimalStart.ONE) && pmTwo.matchesAssetType(fromAssetType)) ) {
-                        addInvertedRelationship(igcomrsRepositoryConnector, mapping, relationships, fromIgcObject, userId);
+                        addInvertedRelationship(igcomrsRepositoryConnector, mapping, relationships, fromIgcObject, toIgcObject, userId);
                     } else {
                         if (log.isWarnEnabled()) { log.warn("Ran out of options for finding the relationship: {}", omrsRelationshipDef.getName()); }
                     }
@@ -976,6 +1064,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         igcomrsRepositoryConnector,
                         relationships,
                         fromIgcObject,
+                        toIgcObject,
                         userId
                 );
 
@@ -1021,55 +1110,68 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param mapping the mapping for the direct relationship
      * @param relationships the list of relationships to append to
      * @param fromIgcObject the IGC object that is the source of the direct relationship
+     * @param toIgcObject the IGC object that is the target of the direct relationship (if known, otherwise null)
      * @param userId the user retrieving the mapped relationship
      */
     private static void addDirectRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                               RelationshipMapping mapping,
                                               List<Relationship> relationships,
                                               Reference fromIgcObject,
+                                              Reference toIgcObject,
                                               String userId) {
 
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
-        // If we already have all info about the entity, optimal path to retrieve relationships is to use
-        // the ones that are already in-memory -- though if it is also not optimal (or possible) to retrieve
-        // from a search (see below) we must also resort to this property-based retrieval
-        for (String igcRelationshipName : mapping.getIgcRelationshipPropertiesForType(fromIgcObject.getType())) {
+        if (toIgcObject != null) {
+            addSingleMappedRelationshipWithKnownOrder(
+                    igcomrsRepositoryConnector,
+                    mapping,
+                    relationships,
+                    fromIgcObject,
+                    toIgcObject,
+                    userId
+            );
+        } else {
+            // If we already have all info about the entity, optimal path to retrieve relationships is to use
+            // the ones that are already in-memory -- though if it is also not optimal (or possible) to retrieve
+            // from a search (see below) we must also resort to this property-based retrieval
+            for (String igcRelationshipName : mapping.getIgcRelationshipPropertiesForType(fromIgcObject.getType())) {
 
-            Object directRelationships = igcRestClient.getPropertyByName(fromIgcObject, igcRelationshipName);
+                Object directRelationships = igcRestClient.getPropertyByName(fromIgcObject, igcRelationshipName);
 
-            // Handle single instance relationship one way
-            if (directRelationships != null && Reference.isReference(directRelationships)) {
+                // Handle single instance relationship one way
+                if (directRelationships != null && Reference.isReference(directRelationships)) {
 
-                Reference singleRelationship = (Reference) directRelationships;
-                if (mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, fromIgcObject, singleRelationship)) {
-                    addSingleMappedRelationship(
+                    Reference singleRelationship = (Reference) directRelationships;
+                    if (mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, fromIgcObject, singleRelationship)) {
+                        addSingleMappedRelationship(
+                                igcomrsRepositoryConnector,
+                                mapping,
+                                relationships,
+                                fromIgcObject,
+                                singleRelationship,
+                                igcRelationshipName,
+                                userId
+                        );
+                    }
+
+                } else if (directRelationships != null && Reference.isItemList(directRelationships)) { // and list of relationships another
+
+                    addListOfMappedRelationships(
                             igcomrsRepositoryConnector,
                             mapping,
                             relationships,
                             fromIgcObject,
-                            singleRelationship,
+                            (ItemList<Reference>) directRelationships,
                             igcRelationshipName,
                             userId
                     );
+
+                } else {
+                    if (log.isDebugEnabled()) { log.debug(" ... skipping relationship {}, either empty or neither reference or list {}", igcRelationshipName, directRelationships); }
                 }
 
-            } else if (directRelationships != null && Reference.isItemList(directRelationships)) { // and list of relationships another
-
-                addListOfMappedRelationships(
-                        igcomrsRepositoryConnector,
-                        mapping,
-                        relationships,
-                        fromIgcObject,
-                        (ItemList<Reference>) directRelationships,
-                        igcRelationshipName,
-                        userId
-                );
-
-            } else {
-                if (log.isDebugEnabled()) { log.debug(" ... skipping relationship {}, either empty or neither reference or list {}", igcRelationshipName, directRelationships); }
             }
-
         }
 
     }
@@ -1081,70 +1183,84 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param mapping the mapping for the inverted relationship
      * @param relationships the list of relationships to append to
      * @param fromIgcObject the IGC object that is the source of the inverted relationship (or really the target)
+     * @param toIgcObject the IGC object that is the target of the inverted relationship (if known, otherwise null)
      * @param userId the user retrieving the mapped relationship
      */
     private static void addInvertedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                 RelationshipMapping mapping,
                                                 List<Relationship> relationships,
                                                 Reference fromIgcObject,
+                                                Reference toIgcObject,
                                                 String userId) {
 
         String assetType = fromIgcObject.getType();
 
         if (log.isDebugEnabled()) { log.debug("Adding inverted relationship for mapping: {}", mapping); }
 
-        if (mapping.sameTypeOnBothEnds()) {
-
-            // If we have a hierarchical relationship, we need to run searches across both
-            // properties and add both sets of relationships
-            List<String> igcProperties = mapping.getIgcRelationshipPropertiesForType(assetType);
-            for (String igcRelationshipName : igcProperties) {
-                IGCSearchCondition condition = new IGCSearchCondition(igcRelationshipName, "=", fromIgcObject.getId());
-                IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(condition);
-                addSearchResultsToRelationships(
-                        igcomrsRepositoryConnector,
-                        mapping,
-                        relationships,
-                        fromIgcObject,
-                        igcSearchConditionSet,
-                        assetType,
-                        igcRelationshipName,
-                        userId
-                );
-            }
-
+        if (toIgcObject != null) {
+            addSingleMappedRelationshipWithKnownOrder(
+                    igcomrsRepositoryConnector,
+                    mapping,
+                    relationships,
+                    fromIgcObject,
+                    toIgcObject,
+                    userId
+            );
         } else {
 
-            // Otherwise, use the optimal retrieval for the relationship (a search that will batch-retrieve _context)
-            RelationshipMapping.ProxyMapping otherSide = mapping.getOtherProxyFromType(assetType);
-            if (log.isDebugEnabled()) { log.debug(" ... found other proxy: {}", otherSide); }
-            RelationshipMapping.ProxyMapping thisSide = mapping.getProxyFromType(assetType);
-            if (log.isDebugEnabled()) { log.debug(" ... found this proxy: {}", thisSide); }
+            if (mapping.sameTypeOnBothEnds()) {
 
-            String anIgcRelationshipProperty = null;
-            IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
-            igcSearchConditionSet.setMatchAnyCondition(true);
-            if (otherSide != null) {
-                for (String igcRelationshipName : otherSide.getIgcRelationshipProperties()) {
+                // If we have a hierarchical relationship, we need to run searches across both
+                // properties and add both sets of relationships
+                List<String> igcProperties = mapping.getIgcRelationshipPropertiesForType(assetType);
+                for (String igcRelationshipName : igcProperties) {
                     IGCSearchCondition condition = new IGCSearchCondition(igcRelationshipName, "=", fromIgcObject.getId());
-                    igcSearchConditionSet.addCondition(condition);
-                    anIgcRelationshipProperty = igcRelationshipName;
+                    IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(condition);
+                    addSearchResultsToRelationships(
+                            igcomrsRepositoryConnector,
+                            mapping,
+                            relationships,
+                            fromIgcObject,
+                            igcSearchConditionSet,
+                            assetType,
+                            igcRelationshipName,
+                            userId
+                    );
                 }
-                String sourceAssetType = otherSide.getIgcAssetType();
-                addSearchResultsToRelationships(
-                        igcomrsRepositoryConnector,
-                        mapping,
-                        relationships,
-                        fromIgcObject,
-                        igcSearchConditionSet,
-                        sourceAssetType,
-                        anIgcRelationshipProperty,
-                        userId
-                );
-            } else {
-                log.error("Unable to determine other side of relationship -- cannot process inverted relationship.");
-            }
 
+            } else {
+
+                // Otherwise, use the optimal retrieval for the relationship (a search that will batch-retrieve _context)
+                RelationshipMapping.ProxyMapping otherSide = mapping.getOtherProxyFromType(assetType);
+                if (log.isDebugEnabled()) { log.debug(" ... found other proxy: {}", otherSide); }
+                RelationshipMapping.ProxyMapping thisSide = mapping.getProxyFromType(assetType);
+                if (log.isDebugEnabled()) { log.debug(" ... found this proxy: {}", thisSide); }
+
+                String anIgcRelationshipProperty = null;
+                IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
+                igcSearchConditionSet.setMatchAnyCondition(true);
+                if (otherSide != null) {
+                    for (String igcRelationshipName : otherSide.getIgcRelationshipProperties()) {
+                        IGCSearchCondition condition = new IGCSearchCondition(igcRelationshipName, "=", fromIgcObject.getId());
+                        igcSearchConditionSet.addCondition(condition);
+                        anIgcRelationshipProperty = igcRelationshipName;
+                    }
+                    String sourceAssetType = otherSide.getIgcAssetType();
+                    addSearchResultsToRelationships(
+                            igcomrsRepositoryConnector,
+                            mapping,
+                            relationships,
+                            fromIgcObject,
+                            igcSearchConditionSet,
+                            sourceAssetType,
+                            anIgcRelationshipProperty,
+                            userId
+                    );
+                } else {
+                    log.error("Unable to determine other side of relationship -- cannot process inverted relationship.");
+                }
+
+            }
         }
 
     }
@@ -1268,11 +1384,57 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 if (log.isDebugEnabled()) { log.debug("addSingleMappedRelationship - adding relationship: {}", omrsRelationship); }
                 relationships.add(omrsRelationship);
             } catch (RepositoryErrorException e) {
-                if (log.isErrorEnabled()) { log.error("Unable to add relationship {} for object {}", mapping.getOmrsRelationshipType(), igcRelationship); }
+                if (log.isErrorEnabled()) { log.error("Unable to add relationship {} for object {}", mapping.getOmrsRelationshipType(), igcRelationship, e); }
             }
 
         }
 
+    }
+
+    /**
+     * Add the provided relationship as an OMRS relationship, when the order of the proxy endpoints is known.
+     *
+     * @param igcomrsRepositoryConnector connectivity to the IGC repository
+     * @param mapping the mapping to use in translating each relationship
+     * @param relationships the list of relationships to append to
+     * @param proxyOne the asset that acts as proxy one in the relationship
+     * @param proxyTwo the asset that acts as proxy two in the relationship
+     * @param userId the user retrieving the mapped relationship
+     */
+    private static void addSingleMappedRelationshipWithKnownOrder(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                                  RelationshipMapping mapping,
+                                                                  List<Relationship> relationships,
+                                                                  Reference proxyOne,
+                                                                  Reference proxyTwo,
+                                                                  String userId) {
+        if (log.isDebugEnabled()) { log.debug(" ... single reference: {}", proxyTwo); }
+        if (proxyTwo != null
+                && proxyTwo.getType() != null
+                && !proxyTwo.getType().equals("null")) {
+
+            try {
+                RelationshipDef omrsRelationshipDef = (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
+                        igcomrsRepositoryConnector.getRepositoryName(),
+                        mapping.getOmrsRelationshipType()
+                );
+                Relationship omrsRelationship = getMappedRelationship(
+                        igcomrsRepositoryConnector,
+                        mapping,
+                        omrsRelationshipDef,
+                        proxyOne,
+                        proxyTwo,
+                        null,
+                        userId,
+                        null,
+                        true
+                );
+                if (log.isDebugEnabled()) { log.debug("addSingleMappedRelationshipWithKnownOrder - adding relationship: {}", omrsRelationship); }
+                relationships.add(omrsRelationship);
+            } catch (RepositoryErrorException e) {
+                if (log.isErrorEnabled()) { log.error("Unable to add relationship {} for object {}", mapping.getOmrsRelationshipType(), proxyTwo, e); }
+            }
+
+        }
     }
 
     /**
@@ -1286,7 +1448,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcPropertyName the name of the IGC relationship property
      * @param userId the user retrieving the mapped relationship
      * @return Relationship
-     * @throws RepositoryErrorException
+     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
+     *                                  the metadata collection is stored
      */
     private static Relationship getMappedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                       RelationshipMapping mapping,
@@ -1436,35 +1599,17 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     errorCode.getUserAction());
         }
 
-        if (proxyOne != null && proxyTwo != null) {
+        IGCRelationshipGuid igcRelationshipGuid = RelationshipMapping.getRelationshipGUID(
+                igcRepositoryHelper,
+                relationshipMapping,
+                proxyOne,
+                proxyTwo,
+                igcPropertyName,
+                relationshipLevelRid,
+                proxyOrderKnown
+        );
 
-            IGCRelationshipGuid igcRelationshipGuid = RelationshipMapping.getRelationshipGUID(
-                    igcRepositoryHelper,
-                    relationshipMapping,
-                    proxyOne,
-                    proxyTwo,
-                    igcPropertyName,
-                    relationshipLevelRid,
-                    proxyOrderKnown
-            );
-
-            if (igcRelationshipGuid == null) {
-                if (log.isErrorEnabled()) { log.error("Unable to construct relationship GUID -- skipping relationship: {}", omrsRelationshipName); }
-                String omrsEndOneProperty = omrsRelationshipDef.getEndDef1().getAttributeName();
-                String omrsEndTwoProperty = omrsRelationshipDef.getEndDef2().getAttributeName();
-                OMRSErrorCode errorCode = OMRSErrorCode.INVALID_RELATIONSHIP_ENDS;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(methodName,
-                        repositoryName,
-                        omrsRelationshipName,
-                        omrsEndOneProperty,
-                        omrsEndTwoProperty);
-                throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                        RelationshipMapping.class.getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
-            }
+        if (igcRelationshipGuid != null) {
 
             if (log.isDebugEnabled()) { log.debug("Mapping relationship with GUID: {}", igcRelationshipGuid); }
 
@@ -1541,8 +1686,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
             }
 
             if (ep1 != null && ep2 != null) {
-                 relationship.setEntityOneProxy(ep1);
-                 relationship.setEntityTwoProxy(ep2);
+                relationship.setEntityOneProxy(ep1);
+                relationship.setEntityTwoProxy(ep2);
             }
 
             // Set any fixed (literal) relationship property values
@@ -1564,7 +1709,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                     methodName
                             );
                         } else {
-                            relationshipProperties.setProperty(omrsPropertyName, (InstancePropertyValue)value);
+                            relationshipProperties.setProperty(omrsPropertyName, (InstancePropertyValue) value);
                         }
                     }
                 }
@@ -1572,6 +1717,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             relationship.setProperties(relationshipProperties);
 
         } else {
+            if (log.isErrorEnabled()) { log.error("Unable to construct relationship GUID -- skipping relationship: {}", omrsRelationshipName); }
             String omrsEndOneProperty = omrsRelationshipDef.getEndDef1().getAttributeName();
             String omrsEndTwoProperty = omrsRelationshipDef.getEndDef2().getAttributeName();
             OMRSErrorCode errorCode = OMRSErrorCode.INVALID_RELATIONSHIP_ENDS;
@@ -1666,7 +1812,6 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 );
             }
 
-            OptimalStart direction = relationshipMapping.getOptimalStart();
             List<String> igcRelationshipProperties = null;
             String entityToUpdateRid = null;
             String relatedEntityRid = null;

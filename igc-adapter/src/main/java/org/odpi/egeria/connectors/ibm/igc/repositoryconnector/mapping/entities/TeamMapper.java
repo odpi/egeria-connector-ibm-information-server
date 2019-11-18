@@ -8,7 +8,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Defines the mapping to the OMRS "Team" entity.
  */
-public class TeamMapper extends ReferenceableMapper {
+public class TeamMapper extends ActorProfile_Mapper {
 
     private static class Singleton {
         private static final TeamMapper INSTANCE = new TeamMapper();
@@ -23,9 +23,7 @@ public class TeamMapper extends ReferenceableMapper {
         super(
                 "group",
                 "Group",
-                "Team",
-                null,
-                false
+                "Team"
         );
 
         // The list of properties that should be mapped

@@ -404,6 +404,10 @@ public class IGCBeanGenerator {
         set.add("_url");
         set.add("_id");
         set.add("_context");
+        set.add("created_by");
+        set.add("created_on");
+        set.add("modified_by");
+        set.add("modified_on");
         return set;
     }
 

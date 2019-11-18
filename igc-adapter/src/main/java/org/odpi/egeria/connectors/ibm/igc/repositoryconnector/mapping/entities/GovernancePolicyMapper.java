@@ -8,7 +8,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Defines the mapping to the OMRS "GlossaryPolicy" entity.
  */
-public class GovernancePolicyMapper extends ReferenceableMapper {
+public class GovernancePolicyMapper extends GovernanceDefinition_Mapper {
 
     private static class Singleton {
         private static final GovernancePolicyMapper INSTANCE = new GovernancePolicyMapper();
@@ -25,11 +25,6 @@ public class GovernancePolicyMapper extends ReferenceableMapper {
                 "Information Governance Policy",
                 "GovernancePolicy"
         );
-
-        // The list of properties that should be mapped
-        addSimplePropertyMapping("name", "title");
-        addSimplePropertyMapping("short_description", "summary");
-        addSimplePropertyMapping("long_description", "description");
 
         // The list of relationships that should be mapped
         addRelationshipMapper(GovernancePolicyLinkMapper.getInstance(null));

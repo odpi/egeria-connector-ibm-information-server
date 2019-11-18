@@ -8,6 +8,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.GlossaryMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ public class CategoryHierarchyLinkMapper extends RelationshipMapping {
                 "superCategory",
                 "subcategories"
         );
+        setContainedType(ContainedType.TWO);
     }
 
     /**
@@ -57,7 +59,11 @@ public class CategoryHierarchyLinkMapper extends RelationshipMapping {
         if (isGlossary) {
             if (log.isDebugEnabled()) { log.debug(" ... skipping, Glossary-level category."); }
         }
-        return !isGlossary;
+        boolean isClassification = ClassificationMapping.isClassification(igcRestClient, oneObject) || ClassificationMapping.isClassification(igcRestClient, otherObject);
+        if (isClassification) {
+            if (log.isDebugEnabled()) { log.debug(" ... skipping, classification object."); }
+        }
+        return !isGlossary && !isClassification;
     }
 
 }

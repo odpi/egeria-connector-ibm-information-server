@@ -11,7 +11,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Defines the mapping to the OMRS "FileFolder" entity.
  */
-public class FileFolderMapper extends ReferenceableMapper {
+public class FileFolderMapper extends DataStore_Mapper {
 
     private static class Singleton {
         private static final FileFolderMapper INSTANCE = new FileFolderMapper();
@@ -28,10 +28,6 @@ public class FileFolderMapper extends ReferenceableMapper {
                 "Data File Folder",
                 "FileFolder"
         );
-
-        // The list of properties that should be mapped
-        addSimplePropertyMapping("name", "name");
-        addSimplePropertyMapping("short_description", "description");
 
         // The classes to use for mapping any relationships
         addRelationshipMapper(FolderHierarchyMapper.getInstance(null));

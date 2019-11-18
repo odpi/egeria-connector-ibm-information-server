@@ -29,6 +29,7 @@ public class AttributeForSchemaMapper_TableSchema extends RelationshipMapping {
                 RelationalDBSchemaTypeMapper.IGC_RID_PREFIX,
                 null
         );
+        setContainedType(ContainedType.TWO);
     }
 
 }

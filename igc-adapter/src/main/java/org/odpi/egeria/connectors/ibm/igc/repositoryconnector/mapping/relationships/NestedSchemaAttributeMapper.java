@@ -27,6 +27,7 @@ public class NestedSchemaAttributeMapper extends RelationshipMapping {
                 "parentAttribute",
                 "nestedAttributes"
         );
+        setContainedType(ContainedType.TWO);
     }
 
 }

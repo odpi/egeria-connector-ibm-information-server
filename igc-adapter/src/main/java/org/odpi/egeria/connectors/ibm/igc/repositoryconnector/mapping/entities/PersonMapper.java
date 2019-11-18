@@ -8,7 +8,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Defines the mapping to the OMRS "Person" entity.
  */
-public class PersonMapper extends ReferenceableMapper {
+public class PersonMapper extends ActorProfile_Mapper {
 
     private static class Singleton {
         private static final PersonMapper INSTANCE = new PersonMapper();
@@ -23,18 +23,14 @@ public class PersonMapper extends ReferenceableMapper {
         super(
                 "user",
                 "User",
-                "Person",
-                null,
-                false
+                "Person"
         );
         addOtherIGCAssetType("steward_user");
         addOtherIGCAssetType("non_steward_user");
 
         // The list of properties that should be mapped
-        addSimplePropertyMapping("principal_id", "name");
         addSimplePropertyMapping("full_name", "fullName");
         addSimplePropertyMapping("job_title", "jobTitle");
-
         addLiteralPropertyMapping("isPublic", true);
 
         // The classes to use for mapping any relationships

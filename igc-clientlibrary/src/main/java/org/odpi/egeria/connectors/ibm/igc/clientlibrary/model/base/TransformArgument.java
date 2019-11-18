@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Date;
 
 /**
  * POJO for the {@code transform_argument} asset type in IGC, displayed as '{@literal Transform Argument}' in the IGC UI.

@@ -26,6 +26,7 @@ public class FolderHierarchyMapper extends RelationshipMapping {
                 "parentFolder",
                 "nestedFolder"
         );
+        setContainedType(ContainedType.TWO);
     }
 
 }

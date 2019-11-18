@@ -630,6 +630,80 @@ public class IGCRepositoryHelper {
     }
 
     /**
+     * Return the full set of relationships known about the specific entity, using the provided IGC asset.
+     *
+     * Note: this method assumes that the provided IGC object is already fully-populated, so will avoid any further
+     * retrieval of information.
+     *
+     * @param userId unique identifier for requesting user.
+     * @param guid unique IGC identifier for the entity.
+     * @param asset the IGC asset for which the list of Relationships should be constructed.
+     * @return {@code List<Relationship>}
+     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
+     *                                  the metadata collection is stored.
+     * @throws EntityNotKnownException the entity cannot be found in IGC
+     */
+    public List<Relationship> getRelationshipsFromFullAsset(String userId, IGCEntityGuid guid, Reference asset)
+            throws RepositoryErrorException, EntityNotKnownException {
+
+        final String methodName = "getRelationshipsFromFullAsset";
+
+        if (log.isDebugEnabled()) { log.debug("getRelationshipsFromFullAsset with guid = {}", guid); }
+
+        List<Relationship> alRelationships = new ArrayList<>();
+        if (guid == null) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("null",
+                    "null",
+                    repositoryName);
+            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        }
+
+        String rid = guid.getRid();
+        String prefix = guid.getGeneratedPrefix();
+        String igcType = guid.getAssetType();
+
+        // Ensure the entity mapping actually exists (if not, throw error to that effect)
+        EntityMappingInstance entityMap = getMappingInstanceForParameters(
+                igcType,
+                rid,
+                prefix,
+                userId);
+
+        if (entityMap != null) {
+            // 2. Apply the mapping to the object, and retrieve the resulting relationships
+            alRelationships.addAll(
+                    EntityMapping.getMappedRelationships(
+                            guid,
+                            entityMap,
+                            null,
+                            0,
+                            null,
+                            100)
+            );
+        } else {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    prefix + igcType,
+                    repositoryName);
+            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        }
+
+        return alRelationships;
+
+    }
+
+    /**
      * Return the header, classifications and properties of a specific entity, using the provided IGC asset.
      *
      * Note: this method assumes that the provided IGC object is already fully-populated for an EntityDetail,

@@ -12,7 +12,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import java.util.Date;
 
 /**
  * POJO for the {@code logical_foreign_key} asset type in IGC, displayed as '{@literal Logical Foreign Key}' in the IGC UI.
@@ -31,23 +30,11 @@ public class LogicalForeignKey extends Reference {
     @JsonProperty("child_entity_attributes")
     protected ItemList<EntityAttribute> childEntityAttributes;
 
-    @JsonProperty("created_by")
-    protected String createdBy;
-
-    @JsonProperty("created_on")
-    protected Date createdOn;
-
     @JsonProperty("logical_entity")
     protected LogicalEntity logicalEntity;
 
     @JsonProperty("long_description")
     protected String longDescription;
-
-    @JsonProperty("modified_by")
-    protected String modifiedBy;
-
-    @JsonProperty("modified_on")
-    protected Date modifiedOn;
 
     @JsonProperty("name")
     protected String name;
@@ -79,34 +66,6 @@ public class LogicalForeignKey extends Reference {
     public void setChildEntityAttributes(ItemList<EntityAttribute> childEntityAttributes) { this.childEntityAttributes = childEntityAttributes; }
 
     /**
-     * Retrieve the {@code created_by} property (displayed as '{@literal Created By}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("created_by")
-    public String getCreatedBy() { return this.createdBy; }
-
-    /**
-     * Set the {@code created_by} property (displayed as {@code Created By}) of the object.
-     * @param createdBy the value to set
-     */
-    @JsonProperty("created_by")
-    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
-
-    /**
-     * Retrieve the {@code created_on} property (displayed as '{@literal Created On}') of the object.
-     * @return {@code Date}
-     */
-    @JsonProperty("created_on")
-    public Date getCreatedOn() { return this.createdOn; }
-
-    /**
-     * Set the {@code created_on} property (displayed as {@code Created On}) of the object.
-     * @param createdOn the value to set
-     */
-    @JsonProperty("created_on")
-    public void setCreatedOn(Date createdOn) { this.createdOn = createdOn; }
-
-    /**
      * Retrieve the {@code logical_entity} property (displayed as '{@literal Logical Entity}') of the object.
      * @return {@code LogicalEntity}
      */
@@ -133,34 +92,6 @@ public class LogicalForeignKey extends Reference {
      */
     @JsonProperty("long_description")
     public void setLongDescription(String longDescription) { this.longDescription = longDescription; }
-
-    /**
-     * Retrieve the {@code modified_by} property (displayed as '{@literal Modified By}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("modified_by")
-    public String getModifiedBy() { return this.modifiedBy; }
-
-    /**
-     * Set the {@code modified_by} property (displayed as {@code Modified By}) of the object.
-     * @param modifiedBy the value to set
-     */
-    @JsonProperty("modified_by")
-    public void setModifiedBy(String modifiedBy) { this.modifiedBy = modifiedBy; }
-
-    /**
-     * Retrieve the {@code modified_on} property (displayed as '{@literal Modified On}') of the object.
-     * @return {@code Date}
-     */
-    @JsonProperty("modified_on")
-    public Date getModifiedOn() { return this.modifiedOn; }
-
-    /**
-     * Set the {@code modified_on} property (displayed as {@code Modified On}) of the object.
-     * @param modifiedOn the value to set
-     */
-    @JsonProperty("modified_on")
-    public void setModifiedOn(Date modifiedOn) { this.modifiedOn = modifiedOn; }
 
     /**
      * Retrieve the {@code name} property (displayed as '{@literal Name}') of the object.

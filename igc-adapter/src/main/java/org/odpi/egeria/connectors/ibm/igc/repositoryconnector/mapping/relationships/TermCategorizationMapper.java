@@ -11,6 +11,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCol
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.TermRelationshipStatusMapper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.GlossaryMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Relationship;
@@ -67,7 +68,11 @@ public class TermCategorizationMapper extends RelationshipMapping {
         if (isGlossary) {
             if (log.isDebugEnabled()) { log.debug(" ... skipping, Glossary-level category."); }
         }
-        return !isGlossary;
+        boolean isClassification = ClassificationMapping.isClassification(igcRestClient, oneObject) || ClassificationMapping.isClassification(igcRestClient, otherObject);
+        if (isClassification) {
+            if (log.isDebugEnabled()) { log.debug(" ... skipping, classification object."); }
+        }
+        return !isGlossary && !isClassification;
     }
 
 }

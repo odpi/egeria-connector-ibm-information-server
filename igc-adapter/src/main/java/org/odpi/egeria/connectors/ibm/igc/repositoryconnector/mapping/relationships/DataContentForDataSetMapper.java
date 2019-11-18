@@ -26,6 +26,7 @@ public class DataContentForDataSetMapper extends RelationshipMapping {
                 "dataContent",
                 "supportedDataSets"
         );
+        setContainedType(ContainedType.TWO);
     }
 
 }

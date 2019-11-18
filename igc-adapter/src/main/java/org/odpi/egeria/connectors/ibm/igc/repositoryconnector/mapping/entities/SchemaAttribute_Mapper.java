@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * Defines the common mappings to the OMRS "SchemaAttribute" entity.
  */
-public class SchemaAttribute_Mapper extends ReferenceableMapper {
+public class SchemaAttribute_Mapper extends SchemaElement_Mapper {
 
     private static class Singleton {
         private static final SchemaAttribute_Mapper INSTANCE = new SchemaAttribute_Mapper();
@@ -36,7 +36,8 @@ public class SchemaAttribute_Mapper extends ReferenceableMapper {
         super(
                 "",
                 "",
-                "SchemaAttribute"
+                "SchemaAttribute",
+                null
         );
 
     }
@@ -47,7 +48,8 @@ public class SchemaAttribute_Mapper extends ReferenceableMapper {
         super(
                 igcAssetTypeName,
                 igcAssetTypeDisplayName,
-                omrsEntityTypeName
+                omrsEntityTypeName,
+                null
         );
 
         // The list of properties that should be mapped
@@ -55,17 +57,16 @@ public class SchemaAttribute_Mapper extends ReferenceableMapper {
         addComplexIgcProperty("allows_null_values");
         addComplexOmrsProperty("minCardinality");
 
+        // Deprecated / moved properties will be null'd
+        addLiteralPropertyMapping("name", null);
+
         // The list of relationships that should be mapped
         addRelationshipMapper(DataClassAssignmentMapper.getInstance(null));
 
     }
 
     /**
-     * Implement any complex property mappings that cannot be simply mapped one-to-one.
-     *
-     * @param entityMap the instantiation of a mapping to carry out
-     * @param instanceProperties the instance properties to which to add the complex-mapped properties
-     * @return InstanceProperties
+     * {@inheritDoc}
      */
     @Override
     protected InstanceProperties complexPropertyMappings(EntityMappingInstance entityMap,

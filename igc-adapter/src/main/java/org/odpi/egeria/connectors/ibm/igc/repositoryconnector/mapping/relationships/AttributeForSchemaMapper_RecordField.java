@@ -26,6 +26,7 @@ public class AttributeForSchemaMapper_RecordField extends RelationshipMapping {
                 "parentSchemas",
                 "attributes"
         );
+        setContainedType(ContainedType.TWO);
     }
 
 }
