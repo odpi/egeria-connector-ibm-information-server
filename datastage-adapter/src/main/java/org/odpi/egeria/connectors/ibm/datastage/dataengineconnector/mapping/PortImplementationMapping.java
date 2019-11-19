@@ -2,8 +2,10 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DSJob;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
 import org.odpi.openmetadata.accessservices.dataengine.model.PortImplementation;
 import org.odpi.openmetadata.accessservices.dataengine.model.PortType;
 
@@ -24,7 +26,7 @@ class PortImplementationMapping extends BaseMapping {
      * @param portType the port type to use
      * @param stageNameSuffix the unique suffix (based on the stage name) to ensure each schema is unique
      */
-    PortImplementationMapping(DSJob job, Reference link, PortType portType, String stageNameSuffix) {
+    PortImplementationMapping(DataStageJob job, Link link, PortType portType, String stageNameSuffix) {
         super(job.getIgcRestClient());
         portImplementation = null;
         if (link != null) {
@@ -46,7 +48,7 @@ class PortImplementationMapping extends BaseMapping {
      * @param fields the data store fields from which to create the PortImplementation's schema
      * @param fullyQualifiedStageName the qualified name of the stage to ensure each schema is unique
      */
-    PortImplementationMapping(DSJob job, Reference stage, PortType portType, List<Reference> fields, String fullyQualifiedStageName) {
+    PortImplementationMapping(DataStageJob job, Stage stage, PortType portType, List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
         super(job.getIgcRestClient());
         portImplementation = null;
         if (stage != null && fields != null && !fields.isEmpty()) {

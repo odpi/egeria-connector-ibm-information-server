@@ -134,6 +134,7 @@ public class IGCRestConstants {
         list.add("data_field");
         list.add("classificationenabledgroup");
         list.add("reportobject");
+        list.add("dsjob");
         return list;
     }
 
@@ -174,6 +175,8 @@ public class IGCRestConstants {
         map.put("classificationenabledgroup", "data_field");
         map.put("bi_report_query_item", "reportobject");
         map.put("reportobject", "information_asset");
+        map.put("sequence_job", "dsjob");
+        map.put("dsjob", "information_asset");
         return map;
     }
 
