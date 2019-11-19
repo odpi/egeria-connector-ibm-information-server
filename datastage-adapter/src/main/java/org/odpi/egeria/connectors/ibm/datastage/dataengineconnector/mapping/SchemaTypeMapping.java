@@ -2,9 +2,11 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DSJob;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.openmetadata.accessservices.dataengine.model.SchemaType;
 
 import java.util.List;
@@ -23,7 +25,7 @@ public class SchemaTypeMapping extends BaseMapping {
      * @param storeIdentity the store identity for which to create the schema type
      * @param fields the fields that should be created for the store
      */
-    public SchemaTypeMapping(DSJob job, Identity storeIdentity, List<Reference> fields) {
+    public SchemaTypeMapping(DataStageJob job, Identity storeIdentity, List<Classificationenabledgroup> fields) {
         super(job.getIgcRestClient());
         schemaType = null;
         if (storeIdentity != null) {
@@ -42,14 +44,14 @@ public class SchemaTypeMapping extends BaseMapping {
      * @param link the link from which to retrieve stage columns for the SchemaType's attributes
      * @param stageNameSuffix the unique suffix (based on the stage name) to ensure each attribute is unique
      */
-    SchemaTypeMapping(DSJob job, Reference link, String stageNameSuffix) {
+    SchemaTypeMapping(DataStageJob job, Link link, String stageNameSuffix) {
         super(job.getIgcRestClient());
         schemaType = null;
         if (link != null) {
             schemaType = new SchemaType();
             schemaType.setQualifiedName(link.getIdentity(igcRestClient).toString() + stageNameSuffix);
             schemaType.setDisplayName(link.getId());
-            schemaType.setAuthor((String)igcRestClient.getPropertyByName(link, "modified_by"));
+            schemaType.setAuthor(link.getModifiedBy());
             AttributeMapping attributeMapping = new AttributeMapping(job, link, stageNameSuffix);
             schemaType.setAttributeList(attributeMapping.getAttributes());
         }
@@ -65,7 +67,7 @@ public class SchemaTypeMapping extends BaseMapping {
      * @param fields the fields from the data store to use in creating the SchemaType
      * @param fullyQualifiedStageName the fully-qualified name of the stage
      */
-    SchemaTypeMapping(DSJob job, Reference stage, String storeName, String storeQualifiedName, List<Reference> fields, String fullyQualifiedStageName) {
+    SchemaTypeMapping(DataStageJob job, Stage stage, String storeName, String storeQualifiedName, List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
         super(job.getIgcRestClient());
         schemaType = null;
         if (stage != null) {

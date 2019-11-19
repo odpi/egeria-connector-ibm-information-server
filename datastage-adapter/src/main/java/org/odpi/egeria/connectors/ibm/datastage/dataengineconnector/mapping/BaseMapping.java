@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 
@@ -21,14 +22,10 @@ class BaseMapping {
      * @param igcObj the IGC object for which to retrieve the description
      * @return String
      */
-    String getDescription(Reference igcObj) {
-        Object desc = igcRestClient.getPropertyByName(igcObj, "long_description");
-        String description = null;
-        if (desc == null) {
-            desc = igcRestClient.getPropertyByName(igcObj, "short_description");
-        }
-        if (desc != null) {
-            description = (String) desc;
+    String getDescription(InformationAsset igcObj) {
+        String description = igcObj.getLongDescription();
+        if (description == null) {
+            description = igcObj.getShortDescription();
         }
         return description;
     }

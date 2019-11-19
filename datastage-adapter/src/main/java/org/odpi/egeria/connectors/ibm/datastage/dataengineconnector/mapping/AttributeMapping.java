@@ -2,9 +2,11 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DSJob;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataItem;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.openmetadata.accessservices.dataengine.model.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,20 +30,21 @@ class AttributeMapping extends BaseMapping {
      * @param link the link containing stage column detail for the Attributes
      * @param stageNameSuffix the unique suffix (based on the stage name) to ensure each attribute is unique
      */
-    AttributeMapping(DSJob job, Reference link, String stageNameSuffix) {
+    AttributeMapping(DataStageJob job, Link link, String stageNameSuffix) {
         super(job.getIgcRestClient());
         if (log.isDebugEnabled()) { log.debug("Creating new AttributeMapping from job and link..."); }
         attributes = new ArrayList<>();
         if (link != null) {
-            ItemList<Reference> stageColumns = (ItemList<Reference>) igcRestClient.getPropertyByName(link, "stage_columns");
+            ItemList<DataItem> stageColumns = link.getStageColumns();
+            stageColumns.getAllPages(igcRestClient);
             int index = 0;
-            for (Reference stageColumn : stageColumns.getItems()) {
+            for (DataItem stageColumn : stageColumns.getItems()) {
                 String colId = stageColumn.getId();
-                Reference stageColumnObj = job.getStageColumnByRid(colId);
+                DataItem stageColumnObj = job.getStageColumnByRid(colId);
                 Attribute attribute = new Attribute();
                 attribute.setQualifiedName(stageColumnObj.getIdentity(igcRestClient).toString() + stageNameSuffix);
                 attribute.setDisplayName(stageColumnObj.getName());
-                attribute.setDataType((String)igcRestClient.getPropertyByName(stageColumnObj, "odbc_type"));
+                attribute.setDataType(stageColumnObj.getOdbcType());
                 attribute.setPosition(index);
                 attributes.add(attribute);
                 index++;
@@ -56,26 +59,26 @@ class AttributeMapping extends BaseMapping {
      * @param fields the data store fields containing detail for the Attributes
      * @param fullyQualifiedStageName the qualified name of the stage to ensure each attribute is unique
      */
-    AttributeMapping(DSJob job, List<Reference> fields, String fullyQualifiedStageName) {
+    AttributeMapping(DataStageJob job, List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
         super(job.getIgcRestClient());
         if (log.isDebugEnabled()) { log.debug("Creating new AttributeMapping from job and fields..."); }
         attributes = new ArrayList<>();
         if (fields != null && !fields.isEmpty()) {
-            for (Reference field : fields) {
+            for (Classificationenabledgroup field : fields) {
                 Attribute attribute = new Attribute();
                 attribute.setQualifiedName(getFullyQualifiedName(field) + fullyQualifiedStageName);
                 attribute.setDisplayName(field.getName());
-                String dataType = (String) igcRestClient.getPropertyByName(field, "data_type");
+                String dataType = field.getDataType();
                 if (dataType != null) {
                     attribute.setDataType(dataType);
                 } else {
-                    attribute.setDataType((String)igcRestClient.getPropertyByName(field, "odbc_type"));
+                    attribute.setDataType(field.getOdbcType());
                 }
-                Double position = (Double)igcRestClient.getPropertyByName(field, "position");
+                Number position = field.getPosition();
                 if (position != null) {
                     attribute.setPosition(position.intValue());
                 }
-                attribute.setDefaultValue((String)igcRestClient.getPropertyByName(field, "default_value"));
+                attribute.setDefaultValue(field.getDefaultValue());
                 attributes.add(attribute);
             }
         }
@@ -87,7 +90,7 @@ class AttributeMapping extends BaseMapping {
      * @param job the job for which to create the Attributes
      * @param fields the data store fields containing detail for the Attributes
      */
-    AttributeMapping(DSJob job, List<Reference> fields) {
+    AttributeMapping(DataStageJob job, List<Classificationenabledgroup> fields) {
         this(job, fields, "");
     }
 

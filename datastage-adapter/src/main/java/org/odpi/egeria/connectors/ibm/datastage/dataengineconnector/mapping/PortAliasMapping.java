@@ -2,10 +2,11 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DSJob;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.openmetadata.accessservices.dataengine.model.PortAlias;
 import org.odpi.openmetadata.accessservices.dataengine.model.PortType;
 import org.slf4j.Logger;
@@ -35,13 +36,14 @@ class PortAliasMapping extends BaseMapping {
      * @param stages the stages from which to create PortAliases
      * @param relationshipProperty the relationship property on each stage from which to draw PortAlias details
      */
-    PortAliasMapping(DSJob job, List<Reference> stages, String relationshipProperty) {
+    PortAliasMapping(DataStageJob job, List<Stage> stages, String relationshipProperty) {
 
         this(job.getIgcRestClient());
 
-        for (Reference stage : stages) {
-            ItemList<Reference> relations = (ItemList<Reference>) igcRestClient.getPropertyByName(stage, relationshipProperty);
-            for (Reference relation : relations.getItems()) {
+        for (Stage stage : stages) {
+            ItemList<InformationAsset> relations = (ItemList<InformationAsset>) igcRestClient.getPropertyByName(stage, relationshipProperty);
+            relations.getAllPages(igcRestClient);
+            for (InformationAsset relation : relations.getItems()) {
                 String fullyQualifiedStoreName = job.getQualifiedNameFromStoreRid(relation.getId());
                 String fullyQualifiedStageName = getFullyQualifiedName(stage);
                 PortAlias portAlias = new PortAlias();

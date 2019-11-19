@@ -118,7 +118,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
         @JsonSubTypes.Type(value = Reportobject.class, name = "reportobject"),
         @JsonSubTypes.Type(value = ResultColumn.class, name = "result_column"),
         @JsonSubTypes.Type(value = Routine.class, name = "routine"),
-        @JsonSubTypes.Type(value = SequenceJob.class, name = "sequence_job"),
         @JsonSubTypes.Type(value = SharedContainer.class, name = "shared_container"),
         @JsonSubTypes.Type(value = Stage.class, name = "stage"),
         @JsonSubTypes.Type(value = StageColumn.class, name = "stage_column"),

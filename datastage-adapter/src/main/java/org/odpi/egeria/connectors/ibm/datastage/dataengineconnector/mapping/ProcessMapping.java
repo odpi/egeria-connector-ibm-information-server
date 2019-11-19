@@ -2,9 +2,9 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DSJob;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.openmetadata.accessservices.dataengine.model.*;
 import org.odpi.openmetadata.accessservices.dataengine.model.Process;
 import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.model.DataEngineLineageMappings;
@@ -26,22 +26,22 @@ public class ProcessMapping extends BaseMapping {
     private DataEngineProcess process;
 
     /**
-     * Create a new process from a DSJob.
+     * Create a new process from a DataStageJob.
      *
-     * @param job the DSJob from which to create a process
+     * @param job the DataStageJob from which to create a process
      */
-    public ProcessMapping(DSJob job) {
+    public ProcessMapping(DataStageJob job) {
         super(job.getIgcRestClient());
         process = null;
-        if (job.getType() == DSJob.JobType.JOB) {
-            Reference jobObj = job.getJobObject();
+        if (job.getType().equals(DataStageJob.JobType.JOB)) {
+            Dsjob jobObj = job.getJobObject();
             process = getSkeletonProcess(jobObj);
             if (process != null) {
                 PortAliasMapping inputAliasMapping = new PortAliasMapping(job, job.getInputStages(), "reads_from_(design)");
                 PortAliasMapping outputAliasMapping = new PortAliasMapping(job, job.getOutputStages(), "writes_to_(design)");
                 process.getProcess().setPortAliases(Stream.concat(inputAliasMapping.getPortAliases().stream(), outputAliasMapping.getPortAliases().stream()).collect(Collectors.toList()));
                 Set<LineageMapping> lineageMappings = new HashSet<>();
-                for (Reference link : job.getAllLinks()) {
+                for (Link link : job.getAllLinks()) {
                     LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, link);
                     DataEngineLineageMappings crossStageLineageMappings = lineageMappingMapping.getLineageMappings();
                     if (crossStageLineageMappings != null) {
@@ -61,26 +61,30 @@ public class ProcessMapping extends BaseMapping {
     }
 
     /**
-     * Create a new process from a DSJob that represents a sequence.
+     * Create a new process from a DataStageJob that represents a sequence.
      *
      * @param sequence the sequence from which to create a process
      * @param jobProcessByRid a map from job RID to the full Process for that job
      */
-    public ProcessMapping(DSJob sequence, Map<String, DataEngineProcess> jobProcessByRid) {
+    public ProcessMapping(DataStageJob sequence, Map<String, DataEngineProcess> jobProcessByRid) {
         super(sequence.getIgcRestClient());
         process = null;
-        if (sequence.getType() == DSJob.JobType.SEQUENCE) {
-            Reference jobObj = sequence.getJobObject();
+        if (sequence.getType().equals(DataStageJob.JobType.SEQUENCE)) {
+            Dsjob jobObj = sequence.getJobObject();
             process = getSkeletonProcess(jobObj);
             if (process != null) {
                 Set<PortAlias> portAliases = new HashSet<>();
-                for (Reference stage : sequence.getAllStages()) {
-                    Reference runsJob = (Reference) igcRestClient.getPropertyByName(stage, "runs_sequences_jobs");
+                for (Stage stage : sequence.getAllStages()) {
+                    Dsjob runsJob = stage.getRunsSequencesJobs();
                     if (runsJob != null) {
                         String jobId = runsJob.getId();
-                        DataEngineProcess jobProcess = jobProcessByRid.getOrDefault(jobId, null);
-                        if (jobProcess != null) {
-                            portAliases.addAll(jobProcess.getProcess().getPortAliases());
+                        if (jobId != null) {
+                            DataEngineProcess jobProcess = jobProcessByRid.getOrDefault(jobId, null);
+                            if (jobProcess != null) {
+                                portAliases.addAll(jobProcess.getProcess().getPortAliases());
+                            } else {
+                                log.warn("Unable to find existing process to use for alias: {}", jobId);
+                            }
                         }
                     }
                 }
@@ -97,16 +101,16 @@ public class ProcessMapping extends BaseMapping {
      * @param job the job within which the stage exists
      * @param stage the stage from which to create a process
      */
-    public ProcessMapping(DSJob job, Reference stage) {
+    public ProcessMapping(DataStageJob job, Stage stage) {
         super(job.getIgcRestClient());
         process = getSkeletonProcess(stage);
         if (process != null) {
             Set<PortImplementation> portImplementations = new HashSet<>();
             Set<LineageMapping> lineageMappings = new HashSet<>();
-            addImplementationDetails(job, stage, "input_links", PortType.INPUT_PORT, portImplementations, lineageMappings);
-            addDataStoreDetails(job, stage, "reads_from_(design)", "read_by_(design)", PortType.INPUT_PORT, portImplementations, lineageMappings);
-            addImplementationDetails(job, stage, "output_links", PortType.OUTPUT_PORT, portImplementations, lineageMappings);
-            addDataStoreDetails(job, stage, "writes_to_(design)", "written_by_(design)", PortType.OUTPUT_PORT, portImplementations, lineageMappings);
+            addImplementationDetails(job, stage, stage.getInputLinks(), PortType.INPUT_PORT, portImplementations, lineageMappings);
+            addDataStoreDetails(job, stage, stage.getReadsFromDesign(), "read_by_(design)", PortType.INPUT_PORT, portImplementations, lineageMappings);
+            addImplementationDetails(job, stage, stage.getOutputLinks(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
+            addDataStoreDetails(job, stage, stage.getWritesToDesign(), "written_by_(design)", PortType.OUTPUT_PORT, portImplementations, lineageMappings);
             process.getProcess().setPortImplementations(new ArrayList<>(portImplementations));
             process.getProcess().setLineageMappings(new ArrayList<>(lineageMappings));
         }
@@ -125,7 +129,7 @@ public class ProcessMapping extends BaseMapping {
      * @param igcObj the IGC object from which to construct the skeletal Process
      * @return DataEngineProcess
      */
-    private DataEngineProcess getSkeletonProcess(Reference igcObj) {
+    private DataEngineProcess getSkeletonProcess(InformationAsset igcObj) {
         DataEngineProcess deProcess = null;
         if (igcObj != null) {
             Process process = new Process();
@@ -133,8 +137,8 @@ public class ProcessMapping extends BaseMapping {
             process.setDisplayName(igcObj.getName());
             process.setQualifiedName(getFullyQualifiedName(igcObj));
             process.setDescription(getDescription(igcObj));
-            process.setOwner((String)igcRestClient.getPropertyByName(igcObj, "created_by"));
-            String modifiedBy = (String)igcRestClient.getPropertyByName(igcObj, "modified_by");
+            process.setOwner(igcObj.getCreatedBy());
+            String modifiedBy = igcObj.getModifiedBy();
             deProcess = new DataEngineProcess(process, modifiedBy);
         }
         return deProcess;
@@ -145,22 +149,22 @@ public class ProcessMapping extends BaseMapping {
      *
      * @param job the job within which the stage exists
      * @param stage the stage for which to add implementation details
-     * @param linkProperty the property of the stage for which to create the implementation details
+     * @param links the links of the stage from which to draw implementation details
      * @param portType the type of port
      * @param portImplementations the list of PortImplementations to append to with implementation details
      * @param lineageMappings the list of LineageMappings to append to with implementation details
      */
-    private void addImplementationDetails(DSJob job,
-                                          Reference stage,
-                                          String linkProperty,
+    private void addImplementationDetails(DataStageJob job,
+                                          Stage stage,
+                                          ItemList<Link> links,
                                           PortType portType,
                                           Set<PortImplementation> portImplementations,
                                           Set<LineageMapping> lineageMappings) {
         String stageNameSuffix = "_" + stage.getName();
         // Setup an x_PORT for each x_link into / out of the stage
-        ItemList<Reference> links = (ItemList<Reference>) igcRestClient.getPropertyByName(stage, linkProperty);
-        for (Reference linkRef : links.getItems()) {
-            Reference linkObjFull = job.getLinkByRid(linkRef.getId());
+        links.getAllPages(igcRestClient);
+        for (Link linkRef : links.getItems()) {
+            Link linkObjFull = job.getLinkByRid(linkRef.getId());
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, linkObjFull, portType, stageNameSuffix);
             portImplementations.add(portImplementationMapping.getPortImplementation());
             LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, linkObjFull, stageNameSuffix, portType == PortType.INPUT_PORT);
@@ -174,15 +178,15 @@ public class ProcessMapping extends BaseMapping {
      *
      * @param job the job within which the stage exists
      * @param stage the stage for which to add implementation details
-     * @param stageProperty the property of the stage for which to create the implementation details
+     * @param stores the stores for which to create the implementation details
      * @param dataStoreProperty the property of the stage for which to create the data store-relevant details
      * @param portType the type of port
      * @param portImplementations the list of PortImplementations to append to with implementation details
      * @param lineageMappings the list of LineageMappings to append to with implementation details
      */
-    private void addDataStoreDetails(DSJob job,
-                                     Reference stage,
-                                     String stageProperty,
+    private void addDataStoreDetails(DataStageJob job,
+                                     Stage stage,
+                                     ItemList<InformationAsset> stores,
                                      String dataStoreProperty,
                                      PortType portType,
                                      Set<PortImplementation> portImplementations,
@@ -190,9 +194,9 @@ public class ProcessMapping extends BaseMapping {
         String stageNameSuffix = "_" + stage.getName();
         // Setup an x_PORT for any data stores that are used by design as sources / targets
         String fullyQualifiedStageName = getFullyQualifiedName(stage);
-        ItemList<Reference> stores = (ItemList<Reference>) igcRestClient.getPropertyByName(stage, stageProperty);
-        for (Reference storeRef : stores.getItems()) {
-            List<Reference> fieldsForStore = job.getFieldsForStore(storeRef.getId());
+        stores.getAllPages(igcRestClient);
+        for (InformationAsset storeRef : stores.getItems()) {
+            List<Classificationenabledgroup> fieldsForStore = job.getFieldsForStore(storeRef.getId());
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, stage, portType, fieldsForStore, fullyQualifiedStageName);
             portImplementations.add(portImplementationMapping.getPortImplementation());
             LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, fieldsForStore, dataStoreProperty, portType == PortType.INPUT_PORT, fullyQualifiedStageName, stageNameSuffix);
