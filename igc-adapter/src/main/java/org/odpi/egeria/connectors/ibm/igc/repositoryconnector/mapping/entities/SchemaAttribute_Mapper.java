@@ -56,6 +56,8 @@ public class SchemaAttribute_Mapper extends SchemaElement_Mapper {
         addLiteralPropertyMapping("maxCardinality", 1);
         addComplexIgcProperty("allows_null_values");
         addComplexOmrsProperty("minCardinality");
+        addLiteralPropertyMapping("aliases", null);
+        addLiteralPropertyMapping("sortOrder", null);
 
         // Deprecated / moved properties will be null'd
         addLiteralPropertyMapping("name", null);

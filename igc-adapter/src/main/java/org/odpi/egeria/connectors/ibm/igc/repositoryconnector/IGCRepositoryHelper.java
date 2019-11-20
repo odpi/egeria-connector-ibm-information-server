@@ -105,6 +105,15 @@ public class IGCRepositoryHelper {
     }
 
     /**
+     * Retrieve a listing of all of the relationship mappings between OMRS and IGC.
+     *
+     * @return {@code List<RelationshipMapping>}
+     */
+    List<RelationshipMapping> getAllRelationshipMappings() {
+        return relationshipMappingStore.getAllMappings();
+    }
+
+    /**
      * Retrieve a listing of all of the entity mappings between OMRS and IGC.
      *
      * @return {@code List<EntityMapping>}
@@ -477,6 +486,98 @@ public class IGCRepositoryHelper {
         if (results.hasMorePages() && entityDetails.size() < pageSize) {
             results.getNextPage(this.igcRestClient);
             processResults(mapper, results, entityDetails, pageSize, userId);
+        }
+
+    }
+
+    /**
+     * Process the search results into the provided list of Relationship objects.
+     *
+     * @param mapper the EntityMapping that should be used to translate the results
+     * @param results the IGC search results
+     * @param relationships the list of Relationships to append
+     * @param pageSize the number of results per page (0 for all results)
+     * @param userId the user making the request
+     */
+    void processResults(RelationshipMapping mapper,
+                        ItemList<Reference> results,
+                        List<Relationship> relationships,
+                        int pageSize,
+                        String userId) throws RepositoryErrorException {
+
+        if (pageSize == 0) {
+            // If the provided pageSize was 0, we need to retrieve ALL pages of results...
+            results.getAllPages(this.igcRestClient);
+        }
+
+        IGCOMRSMetadataCollection igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
+
+        // Recall that our search should always be entities of proxy endpoint TWO
+        for (Reference endTwo : results.getItems()) {
+            /* Only proceed with retrieving the Relationship if the type from IGC is not explicitly
+             * a 'main_object' (as these are non-API-accessible asset types in IGC like column analysis master,
+             * etc and will simply result in 400-code Bad Request messages from the API) */
+            if (!endTwo.getType().equals(DEFAULT_IGC_TYPE)) {
+                Relationship relationship = null;
+
+                if (log.isDebugEnabled()) { log.debug("processResults with mapper: {}", mapper.getClass().getCanonicalName()); }
+                IGCRelationshipGuid idToLookup;
+                List<Reference> endOnes = new ArrayList<>();
+                RelationshipMapping.ProxyMapping pmTwo = mapper.getProxyTwoMapping();
+                List<String> relationshipProperties = pmTwo.getIgcRelationshipProperties();
+                for (String igcPropertyName : relationshipProperties) {
+                    if (igcPropertyName.equals(RelationshipMapping.SELF_REFERENCE_SENTINEL)) {
+                        endOnes.add(endTwo);
+                    } else {
+                        Object otherEnd = igcRestClient.getPropertyByName(endTwo, igcPropertyName);
+                        if (otherEnd != null) {
+                            if (Reference.isReference(otherEnd)) {
+                                Reference other = (Reference) otherEnd;
+                                if (other.getType() != null) {
+                                    endOnes.addAll(mapper.getProxyOneAssetFromAsset(other, igcRestClient));
+                                }
+                            } else if (Reference.isItemList(otherEnd)) {
+                                ItemList<Reference> otherEnds = (ItemList<Reference>) otherEnd;
+                                otherEnds.getAllPages(igcRestClient);
+                                for (Reference other : otherEnds.getItems()) {
+                                    endOnes.addAll(mapper.getProxyOneAssetFromAsset(other, igcRestClient));
+                                }
+                            } else {
+                                log.warn("Not a relationship, skipping: {}", otherEnd);
+                            }
+                        }
+                    }
+                }
+                for (Reference endOne : endOnes) {
+                    // We do not need a property name when the proxy order is known...
+                    // TODO: we still need to handle the very rare cases of relationship-level objects and RIDs
+                    if (mapper.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, endOne, endTwo)) {
+                        idToLookup = RelationshipMapping.getRelationshipGUID(
+                                this,
+                                mapper,
+                                endOne,
+                                endTwo,
+                                null,
+                                null,
+                                true
+                        );
+                        try {
+                            relationship = igcomrsMetadataCollection.getRelationship(userId, idToLookup.asGuid());
+                        } catch (InvalidParameterException | RelationshipNotKnownException e) {
+                            log.error("Unable to find relationship: {}", idToLookup);
+                        }
+                        if (relationship != null) {
+                            relationships.add(relationship);
+                        }
+                    }
+                }
+            }
+        }
+
+        // If we haven't filled a page of results (because we needed to skip some above), recurse...
+        if (results.hasMorePages() && relationships.size() < pageSize) {
+            results.getNextPage(this.igcRestClient);
+            processResults(mapper, results, relationships, pageSize, userId);
         }
 
     }

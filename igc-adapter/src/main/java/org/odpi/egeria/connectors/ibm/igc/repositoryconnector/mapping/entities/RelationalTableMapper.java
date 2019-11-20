@@ -37,6 +37,8 @@ public class RelationalTableMapper extends SchemaElement_Mapper {
         addLiteralPropertyMapping("orderedValues", null);
         addLiteralPropertyMapping("defaultValueOverride", null);
         addLiteralPropertyMapping("nativeClass", null);
+        addLiteralPropertyMapping("aliases", null);
+        addLiteralPropertyMapping("sortOrder", null);
 
         // Deprecated properties will be null'd
         addLiteralPropertyMapping("name", null);

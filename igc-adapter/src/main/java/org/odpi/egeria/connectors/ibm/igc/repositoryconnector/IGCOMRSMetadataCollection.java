@@ -1700,16 +1700,76 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                                           Date asOfTime,
                                                           String sequencingProperty,
                                                           SequencingOrder sequencingOrder,
-                                                          int pageSize) throws FunctionNotSupportedException {
-        final String methodName = "findRelationshipsByProperty";
-        IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.NO_RELATIONSHIP_PROPERTIES;
-        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(repositoryName);
-        throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                this.getClass().getName(),
-                methodName,
-                errorMessage,
-                errorCode.getSystemAction(),
-                errorCode.getUserAction());
+                                                          int pageSize) throws
+            InvalidParameterException,
+            TypeErrorException,
+            RepositoryErrorException,
+            PropertyErrorException,
+            PagingErrorException,
+            FunctionNotSupportedException,
+            UserNotAuthorizedException {
+
+        final String  methodName = "findRelationshipsByProperty";
+
+        this.findRelationshipsByPropertyParameterValidation(userId,
+                relationshipTypeGUID,
+                matchProperties,
+                matchCriteria,
+                fromRelationshipElement,
+                limitResultsByStatus,
+                asOfTime,
+                sequencingProperty,
+                sequencingOrder,
+                pageSize);
+
+        List<Relationship> relationships = new ArrayList<>();
+
+        // Immediately throw unimplemented exception if trying to retrieve historical view
+        if (asOfTime != null) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.NO_HISTORY;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(repositoryName);
+            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        } else if (limitResultsByStatus == null
+                || (limitResultsByStatus.size() == 1 && limitResultsByStatus.contains(InstanceStatus.ACTIVE))) {
+
+            // Otherwise, only bother searching if we are after ACTIVE (or "all") relationships -- non-ACTIVE means we
+            // will just return an empty list
+            // This method should give us only the leaf-level relationship mappings (those WITHOUT any subtypes)
+            List<RelationshipMapping> mappingsToSearch = getRelationshipMappingsToSearch(relationshipTypeGUID, userId);
+
+            // Now iterate through all of the mappings we need to search, construct and run an appropriate search
+            // for each one
+            for (RelationshipMapping mapping : mappingsToSearch) {
+
+                // This will default to giving us the simple search criteria, if no complex criteria are defined
+                // for the mapping.
+                IGCSearch igcSearch = mapping.getComplexIGCSearchCriteria(
+                        repositoryHelper,
+                        repositoryName,
+                        igcRestClient,
+                        matchProperties,
+                        matchCriteria
+                );
+
+                // TODO: handle sequencing and paging -- here or as part of method above?
+
+                igcRepositoryHelper.processResults(mapping,
+                        igcRestClient.search(igcSearch),
+                        relationships,
+                        pageSize,
+                        userId);
+
+            }
+
+        }
+
+        return relationships.isEmpty() ? null : relationships;
+
     }
 
     /**
@@ -2661,13 +2721,48 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             for (TypeDef typeDef : allEntityTypes) {
                 EntityMapping implementedMapping = igcRepositoryHelper.getEntityMappingByGUID(typeDef.getGUID());
                 if (implementedMapping != null) {
-                    if (repositoryHelper.isTypeOf(metadataCollectionId, typeDef.getName(), requestedTypeName)) {
+                    String typeDefName = typeDef.getName();
+                    if (!typeDefName.equals("Referenceable") && repositoryHelper.isTypeOf(metadataCollectionId, typeDefName, requestedTypeName)) {
                         // Add any subtypes of the requested type into the search
                         mappingsToSearch.add(implementedMapping);
                     }
                 }
             }
 
+        }
+
+        return mappingsToSearch;
+
+    }
+
+    /**
+     * Retrieve the listing of implemented mappings that should be used for a relationship search.
+     *
+     * @param relationshipTypeGUID the GUID of the OMRS relationship type for which to search
+     * @param userId the userId through which to search
+     * @return {@code List<RelationshipMapping>}
+     */
+    private List<RelationshipMapping> getRelationshipMappingsToSearch(String relationshipTypeGUID, String userId) {
+
+        List<RelationshipMapping> mappingsToSearch = new ArrayList<>();
+
+        // If no entityType was provided, add all implemented types
+        if (relationshipTypeGUID == null) {
+            for (RelationshipMapping candidate : igcRepositoryHelper.getAllRelationshipMappings()) {
+                if (!candidate.hasSubTypes()) {
+                    // Only list the actual mappings, not the super-type mappings
+                    mappingsToSearch.add(candidate);
+                }
+            }
+        } else {
+            RelationshipMapping mappingExact = igcRepositoryHelper.getRelationshipMappingByGUID(relationshipTypeGUID);
+            if (mappingExact != null) {
+                if (mappingExact.hasSubTypes()) {
+                    mappingsToSearch.addAll(mappingExact.getSubTypes());
+                } else {
+                    mappingsToSearch.add(mappingExact);
+                }
+            }
         }
 
         return mappingsToSearch;

@@ -208,9 +208,13 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param omrsPropertyName the OMRS property name to be mapped
      */
     public final void addSimplePropertyMapping(String igcPropertyName, String omrsPropertyName) {
-        PropertyMapping pm = new PropertyMapping(igcPropertyName, omrsPropertyName);
-        mappingByOmrsProperty.put(omrsPropertyName, pm);
-        mappingByIgcProperty.put(igcPropertyName, pm);
+        if (igcPropertyName != null && omrsPropertyName != null) {
+            PropertyMapping pm = new PropertyMapping(igcPropertyName, omrsPropertyName);
+            mappingByOmrsProperty.put(omrsPropertyName, pm);
+            mappingByIgcProperty.put(igcPropertyName, pm);
+        } else {
+            log.warn("Attempted to add null property to mapping -- IGC = {}, OMRS = {}", igcPropertyName, omrsPropertyName);
+        }
     }
 
     /**
@@ -219,7 +223,11 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param igcPropertyName the IGC property name
      */
     public final void addComplexIgcProperty(String igcPropertyName) {
-        complexIgcProperties.add(igcPropertyName);
+        if (igcPropertyName != null) {
+            complexIgcProperties.add(igcPropertyName);
+        } else {
+            log.warn("Attempted to add null property to mapping -- IGC.");
+        }
     }
 
     /**
@@ -228,7 +236,11 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param omrsPropertyName the OMRS property name
      */
     final void addComplexOmrsProperty(String omrsPropertyName) {
-        complexOmrsProperties.add(omrsPropertyName);
+        if (omrsPropertyName != null) {
+            complexOmrsProperties.add(omrsPropertyName);
+        } else {
+            log.warn("Attempted to add null property to mapping -- OMRS.");
+        }
     }
 
     /**
@@ -256,7 +268,9 @@ public abstract class EntityMapping extends InstanceMapping {
      */
     public final Set<String> getAllMappedIgcProperties() {
         HashSet<String> igcProperties = new HashSet<>(getSimpleMappedIgcProperties());
-        igcProperties.addAll(complexIgcProperties);
+        if (getComplexMappedIgcProperties() != null) {
+            igcProperties.addAll(getComplexMappedIgcProperties());
+        }
         return igcProperties;
     }
 
@@ -296,8 +310,12 @@ public abstract class EntityMapping extends InstanceMapping {
      */
     public final Set<String> getAllMappedOmrsProperties() {
         HashSet<String> omrsProperties = new HashSet<>(getSimpleMappedOmrsProperties());
-        omrsProperties.addAll(getComplexMappedOmrsProperties());
-        omrsProperties.addAll(getLiteralPropertyMappings());
+        if (getComplexMappedOmrsProperties() != null) {
+            omrsProperties.addAll(getComplexMappedOmrsProperties());
+        }
+        if (getLiteralPropertyMappings() != null) {
+            omrsProperties.addAll(getLiteralPropertyMappings());
+        }
         return omrsProperties;
     }
 
@@ -530,7 +548,10 @@ public abstract class EntityMapping extends InstanceMapping {
     public final List<String> getAllPropertiesForEntitySummary() {
         Set<String> allProperties = new HashSet<>();
         for (ClassificationMapping classificationMapping : getClassificationMappers()) {
-            allProperties.addAll(classificationMapping.getMappedIgcPropertyNames());
+            Set<String> classificationProperties = classificationMapping.getMappedIgcPropertyNames();
+            if (classificationProperties != null) {
+                allProperties.addAll(classificationProperties);
+            }
         }
         allProperties.addAll(getAllMappedIgcProperties());
         return new ArrayList<>(allProperties);
@@ -571,10 +592,15 @@ public abstract class EntityMapping extends InstanceMapping {
                                                               String igcAssetType) {
         Set<String> allProperties = new HashSet<>(getAllMappedIgcProperties());
         for (ClassificationMapping classificationMapping : getClassificationMappers()) {
-            allProperties.addAll(classificationMapping.getMappedIgcPropertyNames());
+            Set<String> classificationProperties = classificationMapping.getMappedIgcPropertyNames();
+            if (classificationProperties != null) {
+                allProperties.addAll(classificationProperties);
+            }
         }
         List<String> nonRelationshipProperties = igcRestClient.getNonRelationshipPropertiesForType(igcAssetType);
-        allProperties.addAll(nonRelationshipProperties);
+        if (nonRelationshipProperties != null) {
+            allProperties.addAll(nonRelationshipProperties);
+        }
         return new ArrayList<>(allProperties);
     }
 

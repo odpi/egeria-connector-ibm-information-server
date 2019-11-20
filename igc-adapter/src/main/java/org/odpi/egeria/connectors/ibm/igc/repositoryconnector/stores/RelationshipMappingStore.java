@@ -98,6 +98,15 @@ public class RelationshipMappingStore {
     }
 
     /**
+     * Retrieves all relationship mappings that are implemented for this repository.
+     *
+     * @return {@code List<RelationshipMapping>}
+     */
+    public List<RelationshipMapping> getAllMappings() {
+        return new ArrayList<>(omrsGuidToMapping.values());
+    }
+
+    /**
      * Retrieves a RelationshipMapping by OMRS relationship type from those that are listed as implemented.
      *
      * @param omrsRelationshipType the name of the OMRS relationship type for which to retrieve a mapping
