@@ -168,10 +168,21 @@ public class Identity {
         }
         if (assetType.equals("database_column") && (ctxAssetType.equals("database_table") || ctxAssetType.equals("view"))) {
             pathSoFar = pathSoFar + "database_table_or_view";
-        } else if (ctxAssetType.equals("category")) {
-            pathSoFar = pathSoFar + "parent_category";
         } else {
-            pathSoFar = pathSoFar + IGCRestConstants.getAssetTypeForSearch(ctxAssetType);
+            switch (ctxAssetType) {
+                case "category":
+                    pathSoFar = pathSoFar + "parent_category";
+                    break;
+                case "information_governance_policy":
+                    pathSoFar = pathSoFar + "parent_policy";
+                    break;
+                case "data_class":
+                    pathSoFar = pathSoFar + "parent_data_class";
+                    break;
+                default:
+                    pathSoFar = pathSoFar + IGCRestConstants.getAssetTypeForSearch(ctxAssetType);
+                    break;
+            }
         }
         return pathSoFar;
     }
@@ -200,10 +211,24 @@ public class Identity {
             );
             igcSearchConditionSet.addCondition(condition);
         } else {
-            if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", (propertyPath == null ? "name" : propertyPath + ".name"), "=", ctxName); }
+            String ctxTypeToSearch = IGCRestConstants.getAssetTypeForSearch(ctxType);
+            String nameProperty = "name";
+            String operator = "=";
+            if (ctxTypeToSearch.equals("group")) {
+                nameProperty = "group_name";
+            } else if (ctxTypeToSearch.equals("user")) {
+                nameProperty = "full_name";
+                operator = "like %{0}";
+                // For users, we cannot search on the unique '_name' and there is no corresponding 'name' property,
+                // so the best we can do is try to cut off the courtesy title portion and search for an ends-with on
+                // the full name...
+                ctxName = ctxName.substring(ctxName.indexOf(" ") + 1);
+            }
+            String searchFor = (propertyPath == null ? nameProperty : propertyPath + "." + nameProperty);
+            if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", searchFor, operator, ctxName); }
             IGCSearchCondition condition = new IGCSearchCondition(
-                    (propertyPath == null ? "name" : propertyPath + ".name"),
-                    "=",
+                    searchFor,
+                    operator,
                     ctxName
             );
             igcSearchConditionSet.addCondition(condition);
