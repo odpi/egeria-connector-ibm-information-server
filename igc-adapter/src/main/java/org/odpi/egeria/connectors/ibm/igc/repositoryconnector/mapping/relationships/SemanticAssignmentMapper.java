@@ -72,7 +72,7 @@ public class SemanticAssignmentMapper extends RelationshipMapping {
     public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                     Reference oneObject,
                                                     Reference otherObject) {
-        if (log.isDebugEnabled()) { log.debug("Considering inclusion of objects:\n... {}\n... {}", oneObject, otherObject); }
+        if (log.isDebugEnabled()) { log.debug("Considering inclusion of objects: {} ({}) and {} ({})", oneObject.getName(), oneObject.getType(), otherObject.getName(), otherObject.getType()); }
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         boolean isClassification = ClassificationMapping.isClassification(igcRestClient, oneObject)
                 || ClassificationMapping.isClassification(igcRestClient, otherObject);

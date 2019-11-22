@@ -15,17 +15,21 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.DataClassAssignmentStatusMapper;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.EnumPropertyValue;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Relationship;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Singleton to map the OMRS "DataClassAssignment" relationship for IGC "data_class" assets, including both
@@ -91,7 +95,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             }
             asList.add(classifiedObj);
         } else {
-            if (log.isDebugEnabled()) { log.debug("Not a classification asset, just returning as-is: {}", relationshipAsset); }
+            if (log.isDebugEnabled()) { log.debug("Not a classification asset, just returning as-is: {} of type {}", relationshipAsset.getName(), relationshipAsset.getType()); }
             asList.add(relationshipAsset);
         }
         return asList;
@@ -119,7 +123,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             }
             asList.add(dataClass);
         } else {
-            if (log.isDebugEnabled()) { log.debug("Not a classification asset, just returning as-is: {}", relationshipAsset); }
+            if (log.isDebugEnabled()) { log.debug("Not a classification asset, just returning as-is: {} of type {}", relationshipAsset.getName(), relationshipAsset.getType()); }
             asList.add(relationshipAsset);
         }
         return asList;
@@ -172,6 +176,143 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                     userId
             );
         }
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IGCSearch getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                                 String repositoryName,
+                                                 IGCRestClient igcRestClient,
+                                                 InstanceProperties matchProperties,
+                                                 MatchCriteria matchCriteria) throws FunctionNotSupportedException {
+
+        // If no search properties were provided, we can short-circuit and just return all such assignments via the
+        // simple search criteria
+        if (matchProperties == null) {
+            return getSimpleIGCSearchCriteria();
+        }
+
+        IGCSearch igcSearch = new IGCSearch();
+        IGCSearchConditionSet conditions = new IGCSearchConditionSet();
+        Map<String, InstancePropertyValue> mapOfValues = matchProperties.getInstanceProperties();
+        if (mapOfValues == null) {
+            return getSimpleIGCSearchCriteria();
+        }
+
+        // First see if we are searching by status, as this changes the other properties we can search
+        // - Proposed status in IGC will have no other properties
+        // - Discovered status in IGC will be the link to a 'classification' object with other properties
+        InstancePropertyValue status = mapOfValues.getOrDefault("status", null);
+        String statusName = null;
+        if (status != null && status.getInstancePropertyCategory().equals(InstancePropertyCategory.ENUM)) {
+            EnumPropertyValue statusEnum = (EnumPropertyValue) status;
+            statusName = statusEnum.getSymbolicName();
+            if (statusName != null) {
+                if (statusName.equals("Discovered")) {
+                    IGCSearchCondition discovered = new IGCSearchCondition("classified_assets_detected", "isNull", true);
+                    conditions.addCondition(discovered);
+                } else if (statusName.equals("Proposed")) {
+                    IGCSearchCondition proposed = new IGCSearchCondition("classifications_selected", "isNull", true);
+                    conditions.addCondition(proposed);
+                } else {
+                    // If the status is something else, there will be no results from IGC
+                    conditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                }
+            }
+        }
+
+        Set<String> searchProperties = mapOfValues.keySet();
+        Set<String> mappedOmrsProperties = getMappedOmrsPropertyNames();
+        if (!mappedOmrsProperties.containsAll(searchProperties)) {
+            // If any of the properties included in the search is one we do not map in IGC, return no results
+            conditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+        } else if (statusName == null || statusName.equals("Discovered")) {
+            // Otherwise only add further conditions if we are searching across all statuses, or the Discovered status
+            String rootOfProperties = "classified_assets_detected.";
+            for (Map.Entry<String, InstancePropertyValue> entry : mapOfValues.entrySet()) {
+                String omrsPropertyName = entry.getKey();
+                InstancePropertyValue value = entry.getValue();
+                switch (omrsPropertyName) {
+                    case "confidence":
+                        IGCSearchCondition byConfidence = new IGCSearchCondition(rootOfProperties + "confidencePercent", "=", value.valueAsString());
+                        conditions.addCondition(byConfidence);
+                        break;
+                    case P_THRESHOLD:
+                        IGCSearchCondition byThreshold = new IGCSearchCondition(rootOfProperties + "threshold", "=", value.valueAsString());
+                        conditions.addCondition(byThreshold);
+                        break;
+                    case "partialMatch":
+                        IGCSearchCondition byPartialMatch = new IGCSearchCondition(rootOfProperties + "confidencePercent", "<", "100");
+                        conditions.addCondition(byPartialMatch);
+                        break;
+                    case "valueFrequency":
+                        IGCSearchCondition byValueFrequency = new IGCSearchCondition(rootOfProperties + "value_frequency", "=", value.valueAsString());
+                        conditions.addCondition(byValueFrequency);
+                        break;
+                }
+            }
+        } else {
+            conditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+        }
+
+        IGCRepositoryHelper.setConditionsFromMatchCriteria(conditions, matchCriteria);
+
+        igcSearch.addConditions(conditions);
+
+        return igcSearch;
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IGCSearch getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                                 String repositoryName,
+                                                 IGCRestClient igcRestClient,
+                                                 String searchCriteria) throws FunctionNotSupportedException {
+
+        // If no search criteria was provided, we can short-circuit and just return all such assignments via the
+        // simple search criteria
+        if (searchCriteria == null || searchCriteria.equals("")) {
+            return getSimpleIGCSearchCriteria();
+        }
+
+        IGCSearch igcSearch = new IGCSearch();
+        igcSearch.addType("data_class");
+
+        IGCSearchConditionSet conditions = new IGCSearchConditionSet();
+        boolean matchesSomething = false;
+
+        // The only string property we can attempt to match against is the status, and the only ones that are mapped
+        // are Discovered and Proposed -- if anything else, we should ensure an empty list is returned
+        Pattern pattern = Pattern.compile(searchCriteria);
+        Matcher discovered = pattern.matcher("Discovered");
+        Matcher proposed = pattern.matcher("Proposed");
+        if (discovered.matches()) {
+            matchesSomething = true;
+            IGCSearchCondition nonNull = new IGCSearchCondition("classified_assets_detected", "isNull", true);
+            conditions.addCondition(nonNull);
+            igcSearch.addProperty("classified_assets_detected");
+        }
+        if (proposed.matches()) {
+            matchesSomething = true;
+            IGCSearchCondition nonNull = new IGCSearchCondition("classifications_selected", "isNull", true);
+            conditions.addCondition(nonNull);
+            igcSearch.addProperty("classifications_selected");
+        }
+
+        // If we are trying to match to something that will give no results, create a spurious search that should
+        // give no results
+        if (!matchesSomething) {
+            conditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+        }
+        igcSearch.addConditions(conditions);
+
+        return igcSearch;
 
     }
 
@@ -290,7 +431,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                     );
 
                     relationship.setProperties(relationshipProperties);
-                    if (log.isDebugEnabled()) { log.debug("mapDetectedClassifications_fromDataClass - adding relationship: {}", relationship); }
+                    if (log.isDebugEnabled()) { log.debug("mapDetectedClassifications_fromDataClass - adding relationship: {}", relationship.getGUID()); }
                     relationships.add(relationship);
 
                 } catch (RepositoryErrorException e) {
@@ -357,7 +498,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                 );
 
                 relationship.setProperties(relationshipProperties);
-                if (log.isDebugEnabled()) { log.debug("mapSelectedClassifications_fromDataClass - adding relationship: {}", relationship); }
+                if (log.isDebugEnabled()) { log.debug("mapSelectedClassifications_fromDataClass - adding relationship: {}", relationship.getGUID()); }
                 relationships.add(relationship);
 
             } catch (RepositoryErrorException e) {
@@ -483,7 +624,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                     );
 
                     relationship.setProperties(relationshipProperties);
-                    if (log.isDebugEnabled()) { log.debug("mapDetectedClassifications_toDataClass - adding relationship: {}", relationship); }
+                    if (log.isDebugEnabled()) { log.debug("mapDetectedClassifications_toDataClass - adding relationship: {}", relationship.getGUID()); }
                     relationships.add(relationship);
 
                 } catch (RepositoryErrorException e) {
@@ -544,7 +685,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
 
                 relationship.setProperties(relationshipProperties);
                 if (log.isDebugEnabled()) {
-                    log.debug("mapSelectedClassifications_toDataClass - adding relationship: {}", relationship);
+                    log.debug("mapSelectedClassifications_toDataClass - adding relationship: {}", relationship.getGUID());
                 }
                 relationships.add(relationship);
 

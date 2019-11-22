@@ -1110,10 +1110,9 @@ public class IGCRestClient {
                             }
                             org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeReference type = property.getType();
                             String propertyType = type.getName();
-                            if (propertyType.equals("string")) {
+                            if (propertyType.equals("string") || propertyType.equals("enum")) {
+                                // TODO: confirm whether enums should be treated the same as all other string properties?
                                 stringProperties.add(propertyName);
-                                nonRelationship.add(propertyName);
-                            } else if (propertyType.equals("enum")) {
                                 nonRelationship.add(propertyName);
                             } else if (type.getUrl() != null) {
                                 if (property.getMaxCardinality() < 0) {

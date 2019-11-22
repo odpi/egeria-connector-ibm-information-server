@@ -43,6 +43,7 @@ public abstract class EntityMapping extends InstanceMapping {
     private ArrayList<String> otherIgcTypes;
 
     public static final String COMPLEX_MAPPING_SENTINEL = "__COMPLEX_PROPERTY__";
+    public static final String LITERAL_MAPPING_SENTINEL = "__LITERAL_MAPPING__";
 
     private Map<String, PropertyMapping> mappingByIgcProperty;
     private Map<String, PropertyMapping> mappingByOmrsProperty;
@@ -163,7 +164,6 @@ public abstract class EntityMapping extends InstanceMapping {
      */
     public final boolean matchesAssetType(String igcAssetType) {
         String matchType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
-        if (log.isDebugEnabled()) { log.debug("checking for matching asset between {} and {}", this.igcAssetType, matchType); }
         return (
                 this.igcAssetType.equals(matchType)
                         || this.igcAssetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)
@@ -248,7 +248,7 @@ public abstract class EntityMapping extends InstanceMapping {
      *
      * @return {@code Set<String>}
      */
-    private Set<String> getSimpleMappedIgcProperties() {
+    public Set<String> getSimpleMappedIgcProperties() {
         return mappingByIgcProperty.keySet();
     }
 
@@ -288,7 +288,7 @@ public abstract class EntityMapping extends InstanceMapping {
      *
      * @return {@code Set<String>}
      */
-    private Set<String> getComplexMappedOmrsProperties() {
+    protected Set<String> getComplexMappedOmrsProperties() {
         return complexOmrsProperties;
     }
 
@@ -331,6 +331,8 @@ public abstract class EntityMapping extends InstanceMapping {
             igcPropertyName = mappingByOmrsProperty.get(omrsPropertyName).getIgcPropertyName();
         } else if (isOmrsPropertyComplexMapped(omrsPropertyName)) {
             igcPropertyName = COMPLEX_MAPPING_SENTINEL;
+        } else if (isOmrsPropertyLiteralMapped(omrsPropertyName)) {
+            igcPropertyName = LITERAL_MAPPING_SENTINEL;
         }
         return igcPropertyName;
     }
@@ -479,6 +481,25 @@ public abstract class EntityMapping extends InstanceMapping {
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
+        // Nothing to do -- no complex properties by default
+    }
+
+    /**
+     * This method needs to be overridden to define how to search for an entity using a string-based regex match
+     * against all of its potential String properties.
+     *
+     * @param repositoryHelper helper for the OMRS repository
+     * @param repositoryName name of the repository
+     * @param igcRestClient connectivity to an IGC environment
+     * @param igcSearchConditionSet the set of search criteria to which to add
+     * @param searchCriteria the regular expression to attempt to match against any string properties
+     * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
+     */
+    public void addComplexStringSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                               String repositoryName,
+                                               IGCRestClient igcRestClient,
+                                               IGCSearchConditionSet igcSearchConditionSet,
+                                               String searchCriteria) throws FunctionNotSupportedException {
         // Nothing to do -- no complex properties by default
     }
 

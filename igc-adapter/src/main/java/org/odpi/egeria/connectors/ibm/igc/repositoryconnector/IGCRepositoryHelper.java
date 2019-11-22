@@ -2,7 +2,9 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -31,6 +33,8 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 public class IGCRepositoryHelper {
@@ -313,29 +317,76 @@ public class IGCRepositoryHelper {
              * based on the values of the InstanceProperties provided */
             IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
-            IGCSearchConditionSet typeSpecificConditions = mapping.getIGCSearchCriteria();
-            if (typeSpecificConditions.size() > 0) {
-                igcSearchConditionSet.addNestedConditionSet(typeSpecificConditions);
-                igcSearchConditionSet.setMatchAnyCondition(false);
-            }
+            IGCRepositoryHelper.addTypeSpecificConditions(mapping,
+                    matchCriteria,
+                    matchProperties,
+                    igcSearchConditionSet);
 
             String qualifiedNameRegex = null;
+            boolean getAllOfType = false;
+            boolean getNothing = false;
             if (matchProperties != null) {
-                Iterator iPropertyNames = matchProperties.getPropertyNames();
-                Set<String> mappedProperties = mapping.getAllMappedIgcProperties();
-                while (!mappedProperties.isEmpty() && iPropertyNames.hasNext()) {
-                    String omrsPropertyName = (String) iPropertyNames.next();
-                    InstancePropertyValue value = matchProperties.getPropertyValue(omrsPropertyName);
-                    if (omrsPropertyName.equals("qualifiedName")) {
-                        qualifiedNameRegex = (String) ((PrimitivePropertyValue) value).getPrimitiveValue();
-                    }
-                    addSearchConditionFromValue(
-                            igcSearchConditionSet,
-                            omrsPropertyName,
-                            mapping,
-                            value
-                    );
+
+                Set<String> mappedOmrsProperties = mapping.getAllMappedOmrsProperties();
+                Map<String, InstancePropertyValue> propertiesToMatch = matchProperties.getInstanceProperties();
+                if (propertiesToMatch == null) {
+                    propertiesToMatch = new HashMap<>();
                 }
+
+                if (!mappedOmrsProperties.containsAll(propertiesToMatch.keySet()) && matchCriteria.equals(MatchCriteria.ALL)) {
+                    // If there is some property we are being asked to search but it has no mapping,
+                    // ensure we will get no results
+                    getNothing = true;
+                } else {
+
+                    if (matchCriteria.equals(MatchCriteria.ANY) || matchCriteria.equals(MatchCriteria.NONE)) {
+                        for (Map.Entry<String, InstancePropertyValue> entry : propertiesToMatch.entrySet()) {
+                            String omrsPropertyName = entry.getKey();
+                            if (mapping.isOmrsPropertyLiteralMapped(omrsPropertyName)) {
+                                Object literalValue = mapping.getOmrsPropertyLiteralValue(omrsPropertyName);
+                                boolean valuesAreEqual = equivalentValues(literalValue, entry.getValue());
+                                getAllOfType = (valuesAreEqual && matchCriteria.equals(MatchCriteria.ANY))
+                                        || (!valuesAreEqual && matchCriteria.equals(MatchCriteria.NONE));
+                                getNothing = valuesAreEqual && matchCriteria.equals(MatchCriteria.NONE);
+                            }
+                        }
+                    }
+
+                    if (getNothing) {
+                        igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                    } else if (!getAllOfType) {
+                        // Otherwise, cycle through the mappings and add them
+                        for (Map.Entry<String, InstancePropertyValue> entry : propertiesToMatch.entrySet()) {
+                            String omrsPropertyName = entry.getKey();
+                            InstancePropertyValue value = entry.getValue();
+                            // If one of the requested matching properties is literally mapped, and the values do not
+                            // match the literal mapping, AND this is a match-ALL request, then force no results
+                            if (mapping.isOmrsPropertyLiteralMapped(omrsPropertyName) && matchCriteria.equals(MatchCriteria.ALL)) {
+                                Object literalValue = mapping.getOmrsPropertyLiteralValue(omrsPropertyName);
+                                Object requestedValue = value.valueAsObject();
+                                if ( (literalValue == null && requestedValue != null)
+                                        || (literalValue != null && !literalValue.equals(requestedValue)) ) {
+                                    log.debug("Requested match property {} is literally-mapped, but values do not match ({} != {}) -- forcing no results.", omrsPropertyName, literalValue, requestedValue);
+                                    igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                    break;
+                                }
+                            }
+                            if (omrsPropertyName.equals("qualifiedName")) {
+                                qualifiedNameRegex = (String) ((PrimitivePropertyValue) value).getPrimitiveValue();
+                            }
+                            addSearchConditionFromValue(
+                                    igcSearchConditionSet,
+                                    omrsPropertyName,
+                                    mapping,
+                                    value
+                            );
+                        }
+                    } else {
+                        log.debug("Skipping detailed matchProperties iteration, as we should return all types based on criteria and literal mappings.");
+                    }
+
+                }
+
             }
 
             if (classificationLimiters != null) {
@@ -347,19 +398,8 @@ public class IGCRepositoryHelper {
                 igcSearchSorting = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
             }
 
-            if (matchCriteria != null) {
-                switch (matchCriteria) {
-                    case ALL:
-                        igcSearchConditionSet.setMatchAnyCondition(false);
-                        break;
-                    case ANY:
-                        igcSearchConditionSet.setMatchAnyCondition(true);
-                        break;
-                    case NONE:
-                        igcSearchConditionSet.setMatchAnyCondition(false);
-                        igcSearchConditionSet.setNegateAll(true);
-                        break;
-                }
+            if (!getNothing) {
+                IGCRepositoryHelper.setConditionsFromMatchCriteria(igcSearchConditionSet, matchCriteria);
             }
 
             igcSearch.addProperties(mapping.getAllPropertiesForEntityDetail(igcRestClient, igcAssetType));
@@ -478,6 +518,10 @@ public class IGCRepositoryHelper {
                 }
                 if (ed != null) {
                     entityDetails.add(ed);
+                    // Stop adding details if we have hit the page size
+                    if (pageSize > 0 && entityDetails.size() == pageSize) {
+                        break;
+                    }
                 }
             }
         }
@@ -550,7 +594,17 @@ public class IGCRepositoryHelper {
                 }
                 for (Reference endOne : endOnes) {
                     // We do not need a property name when the proxy order is known...
-                    // TODO: we still need to handle the very rare cases of relationship-level objects and RIDs
+                    String relationshipLevelRid = null;
+                    if (mapper.hasRelationshipLevelAsset()) {
+                        String relationshipLevelType = mapper.getRelationshipLevelIgcAsset();
+                        String endOneType = endOne.getType();
+                        String endTwoType = endTwo.getType();
+                        if (endOneType.equals(relationshipLevelType)) {
+                            relationshipLevelRid = endOne.getId();
+                        } else if (endTwoType.equals(relationshipLevelType)) {
+                            relationshipLevelRid = endTwo.getId();
+                        }
+                    }
                     if (mapper.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, endOne, endTwo)) {
                         idToLookup = RelationshipMapping.getRelationshipGUID(
                                 this,
@@ -558,7 +612,7 @@ public class IGCRepositoryHelper {
                                 endOne,
                                 endTwo,
                                 null,
-                                null,
+                                relationshipLevelRid,
                                 true
                         );
                         try {
@@ -568,9 +622,17 @@ public class IGCRepositoryHelper {
                         }
                         if (relationship != null) {
                             relationships.add(relationship);
+                            // Stop adding relationships if we have hit the page size
+                            if (pageSize > 0 && relationships.size() == pageSize) {
+                                break;
+                            }
                         }
                     }
                 }
+            }
+            // Stop adding relationships if we have hit the page size
+            if (pageSize > 0 && relationships.size() == pageSize) {
+                break;
             }
         }
 
@@ -580,6 +642,30 @@ public class IGCRepositoryHelper {
             processResults(mapper, results, relationships, pageSize, userId);
         }
 
+    }
+
+    /**
+     * Set the conditions on the search based on the provided match criteria.
+     *
+     * @param igcSearchConditionSet the conditions to set (or reset)
+     * @param matchCriteria the match criteria on which to base the conditions
+     */
+    public static void setConditionsFromMatchCriteria(IGCSearchConditionSet igcSearchConditionSet,
+                                                      MatchCriteria matchCriteria) {
+        if (matchCriteria != null) {
+            switch (matchCriteria) {
+                case ALL:
+                    igcSearchConditionSet.setMatchAnyCondition(false);
+                    break;
+                case ANY:
+                    igcSearchConditionSet.setMatchAnyCondition(true);
+                    break;
+                case NONE:
+                    igcSearchConditionSet.setMatchAnyCondition(false);
+                    igcSearchConditionSet.setNegateAll(true);
+                    break;
+            }
+        }
     }
 
     /**
@@ -724,7 +810,7 @@ public class IGCRepositoryHelper {
      */
     public static String getPrefixFromGeneratedQualifiedName(String qualifiedName) {
         if (isQualifiedNameOfGeneratedEntity(qualifiedName)) {
-            return qualifiedName.substring(qualifiedName.indexOf(GENERATED_ENTITY_QNAME_PREFIX) + GENERATED_ENTITY_QNAME_PREFIX.length() + 1, qualifiedName.indexOf(GENERATED_ENTITY_QNAME_POSTFIX));
+            return qualifiedName.substring(qualifiedName.indexOf(GENERATED_ENTITY_QNAME_PREFIX) + GENERATED_ENTITY_QNAME_PREFIX.length(), qualifiedName.indexOf(GENERATED_ENTITY_QNAME_POSTFIX));
         } else {
             return null;
         }
@@ -1148,7 +1234,7 @@ public class IGCRepositoryHelper {
         if (log.isDebugEnabled()) { log.debug("Looking for mapper for retrieved asset with guid {}", guid.asGuid()); }
 
         EntityMappingInstance entityMap = null;
-        EntityMapping found = entityMappingStore.getMappingByIgcAssetTypeAndPrefix(asset.getType(), guid.getGeneratedPrefix());
+        EntityMapping found = getEntityMappingByIgcType(guid.getAssetType(), guid.getGeneratedPrefix());
         if (found != null) {
             if (log.isDebugEnabled()) { log.debug("Found mapper class: {} ({})", found.getClass().getCanonicalName(), found); }
             entityMap = new EntityMappingInstance(
@@ -1179,7 +1265,7 @@ public class IGCRepositoryHelper {
         if (log.isDebugEnabled()) { log.debug("Looking for mapper for type {} with prefix {}", igcAssetType, prefix); }
 
         EntityMappingInstance entityMap = null;
-        EntityMapping found = entityMappingStore.getMappingByIgcAssetTypeAndPrefix(igcAssetType, prefix);
+        EntityMapping found = getEntityMappingByIgcType(igcAssetType, prefix);
         if (found != null) {
             if (log.isDebugEnabled()) { log.debug("Found mapper class: {} ({})", found.getClass().getCanonicalName(), found); }
             entityMap = new EntityMappingInstance(
@@ -1261,7 +1347,9 @@ public class IGCRepositoryHelper {
 
                 String igcPropertyName = mapping.getIgcPropertyName(omrsPropertyName);
 
-                if (igcPropertyName.equals(EntityMapping.COMPLEX_MAPPING_SENTINEL)) {
+                if (igcPropertyName == null) {
+                    log.warn("Unhandled search condition for unknown IGC property from OMRS property: {}", omrsPropertyName);
+                } else if (igcPropertyName.equals(EntityMapping.COMPLEX_MAPPING_SENTINEL)) {
 
                     mapping.addComplexPropertySearchCriteria(
                             repositoryHelper,
@@ -1272,7 +1360,7 @@ public class IGCRepositoryHelper {
                             omrsPropertyName,
                             value);
 
-                } else {
+                } else if (!igcPropertyName.equals(EntityMapping.LITERAL_MAPPING_SENTINEL)) {
 
                     addIGCSearchConditionFromValue(
                             repositoryHelper,
@@ -1329,11 +1417,13 @@ public class IGCRepositoryHelper {
                         ));
                         break;
                     case OM_PRIMITIVE_TYPE_DATE:
-                        Date date = (Date) actualValue.getPrimitiveValue();
+                        // For dates, we need to search within the 1 second interval, as that is all that IGC exposes
+                        // via the REST API (despite storing internally down to millisecond level)
+                        Long epoch = (Long) actualValue.getPrimitiveValue();
                         igcSearchConditionSet.addCondition(new IGCSearchCondition(
                                 igcPropertyName,
-                                "=",
-                                "" + date.getTime()
+                                epoch,
+                                epoch + 999
                         ));
                         break;
                     case OM_PRIMITIVE_TYPE_STRING:
@@ -1427,6 +1517,178 @@ public class IGCRepositoryHelper {
                 break;
         }
 
+    }
+
+    /**
+     * Indicates whether the provided values are equivalent (true) or not (false).
+     *
+     * @param igcValue the IGC value to compare
+     * @param omrsValue the OMRS value to compare (treated as a regular expression if the type is a string)
+     * @return boolean
+     */
+    public static boolean equivalentValues(Object igcValue,
+                                           InstancePropertyValue omrsValue) {
+
+        if (igcValue == null && omrsValue == null) {
+            return true;
+        }
+        if (igcValue == null || omrsValue == null) {
+            return false;
+        }
+
+        InstancePropertyCategory category = omrsValue.getInstancePropertyCategory();
+        switch (category) {
+            case PRIMITIVE:
+                PrimitivePropertyValue actualValue = (PrimitivePropertyValue) omrsValue;
+                PrimitiveDefCategory primitiveType = actualValue.getPrimitiveDefCategory();
+                String igcValueAsString = "";
+                String omrsValueAsString = "";
+                switch (primitiveType) {
+                    case OM_PRIMITIVE_TYPE_BOOLEAN:
+                        if (igcValue instanceof Boolean) {
+                            return ((Boolean) igcValue).booleanValue() == ((Boolean) actualValue.getPrimitiveValue()).booleanValue();
+                        }
+                    case OM_PRIMITIVE_TYPE_SHORT:
+                        if (igcValue instanceof Short) {
+                            return ((Short) igcValue).intValue() == ((Short) actualValue.getPrimitiveValue()).intValue();
+                        }
+                    case OM_PRIMITIVE_TYPE_INT:
+                        if (igcValue instanceof Integer) {
+                            return ((Integer) igcValue).intValue() == ((Integer) actualValue.getPrimitiveValue()).intValue();
+                        }
+                    case OM_PRIMITIVE_TYPE_LONG:
+                        if (igcValue instanceof Long) {
+                            return ((Long) igcValue).longValue() == ((Long) actualValue.getPrimitiveValue()).longValue();
+                        }
+                    case OM_PRIMITIVE_TYPE_FLOAT:
+                        if (igcValue instanceof Float) {
+                            return ((Float) igcValue).floatValue() == ((Float) actualValue.getPrimitiveValue()).floatValue();
+                        }
+                    case OM_PRIMITIVE_TYPE_DOUBLE:
+                        if (igcValue instanceof Double) {
+                            return ((Double) igcValue).doubleValue() == ((Double) actualValue.getPrimitiveValue()).doubleValue();
+                        }
+                    case OM_PRIMITIVE_TYPE_BIGINTEGER:
+                    case OM_PRIMITIVE_TYPE_BIGDECIMAL:
+                        if (igcValue instanceof BigInteger || igcValue instanceof BigDecimal) {
+                            return igcValue.equals(actualValue.getPrimitiveValue());
+                        }
+                    case OM_PRIMITIVE_TYPE_DATE:
+                        if (igcValue instanceof Long) {
+                            return ((Long) igcValue).longValue() == ((Long) actualValue.getPrimitiveValue()).longValue();
+                        } else if (igcValue instanceof Date) {
+                            return ((Date) igcValue).getTime() == ((Long) actualValue.getPrimitiveValue()).longValue();
+                        }
+                    case OM_PRIMITIVE_TYPE_BYTE:
+                    case OM_PRIMITIVE_TYPE_CHAR:
+                    case OM_PRIMITIVE_TYPE_STRING:
+                    default:
+                        omrsValueAsString = omrsValue.valueAsString();
+                        igcValueAsString = igcValue.toString();
+                        return igcValueAsString.equals(omrsValueAsString);
+                }
+            case ENUM:
+                String symbolicName = ((EnumPropertyValue) omrsValue).getSymbolicName();
+                return igcValue.toString().equals(symbolicName);
+            /*case STRUCT:
+                break;
+            case MAP:
+                break;
+            case ARRAY:
+                break;*/
+            default:
+                // Do nothing
+                if (log.isWarnEnabled()) { log.warn("Unable to handle value equivalency for value type: {}", category); }
+                break;
+        }
+
+        return false;
+
+    }
+
+    /**
+     * Adds search criteria based on the provided regular expression.
+     *
+     * @param repositoryHelper the repository helper
+     * @param repositoryName name of the respository
+     * @param methodName method adding the criteria
+     * @param igcPropertyToSearch the IGC property that should be searched
+     * @param valueWithRegex the value that should be used for the search, as a regular expression
+     * @return IGCSearchCondition
+     * @throws FunctionNotSupportedException when a regular expression is provided for the search that is not supported
+     */
+    public static IGCSearchCondition getRegexSearchCondition(OMRSRepositoryHelper repositoryHelper,
+                                                             String repositoryName,
+                                                             String methodName,
+                                                             String igcPropertyToSearch,
+                                                             String valueWithRegex) throws FunctionNotSupportedException {
+
+        IGCSearchCondition igcSearchCondition;
+        String igcValueToSearch = repositoryHelper.getUnqualifiedLiteralString(valueWithRegex);
+        if (repositoryHelper.isContainsRegex(valueWithRegex)) {
+            igcSearchCondition = new IGCSearchCondition(
+                    igcPropertyToSearch,
+                    "like %{0}%",
+                    igcValueToSearch
+            );
+        } else if (repositoryHelper.isStartsWithRegex(valueWithRegex)) {
+            igcSearchCondition = new IGCSearchCondition(
+                    igcPropertyToSearch,
+                    "like {0}%",
+                    igcValueToSearch
+            );
+        } else if (repositoryHelper.isEndsWithRegex(valueWithRegex)) {
+            igcSearchCondition = new IGCSearchCondition(
+                    igcPropertyToSearch,
+                    "like %{0}",
+                    igcValueToSearch
+            );
+        } else if (repositoryHelper.isExactMatchRegex(valueWithRegex)) {
+            igcSearchCondition = new IGCSearchCondition(
+                    igcPropertyToSearch,
+                    "=",
+                    igcValueToSearch
+            );
+        } else {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    repositoryName,
+                    valueWithRegex);
+            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
+                    IGCRepositoryHelper.class.getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        }
+
+        return igcSearchCondition;
+
+    }
+
+    /**
+     * Adds conditions to the search to ensure we narrow to only the appropriate types (where feasible).
+     *
+     * @param mapping the mapping information
+     * @param matchCriteria the criteria by which we should match during the search
+     * @param matchProperties the properties that should be matched during the search
+     * @param igcSearchConditionSet the set of IGC search conditions to which to append
+     */
+    public static void addTypeSpecificConditions(EntityMapping mapping,
+                                                 MatchCriteria matchCriteria,
+                                                 InstanceProperties matchProperties,
+                                                 IGCSearchConditionSet igcSearchConditionSet) {
+        // Only include type-specific criteria if the matchCriteria is 'ALL'
+        // - if it is 'ANY' and there are any properties this will include far too many results
+        // - if it is 'NONE' then it will exclude all of the types we are actually searching for
+        if (matchCriteria.equals(MatchCriteria.ALL) ||
+                (matchCriteria.equals(MatchCriteria.ANY) && (matchProperties == null || matchProperties.getPropertyCount() == 0))) {
+            IGCSearchConditionSet typeSpecificConditions = mapping.getIGCSearchCriteria();
+            if (typeSpecificConditions.size() > 0) {
+                igcSearchConditionSet.addNestedConditionSet(typeSpecificConditions);
+                igcSearchConditionSet.setMatchAnyCondition(false);
+            }
+        }
     }
 
     /**
@@ -1529,7 +1791,7 @@ public class IGCRepositoryHelper {
         }
 
         String stubXML = stringWriter.getBuffer().toString();
-        if (log.isDebugEnabled()) { log.debug("Constructed XML for stub: {}", stubXML); }
+        if (log.isDebugEnabled()) { log.debug("Constructed XML for stub: {}", stubName); }
 
         // Upsert using the constructed asset XML
         String results = igcRestClient.upsertOpenIgcAsset(stubXML);
@@ -1603,7 +1865,7 @@ public class IGCRepositoryHelper {
         }
 
         String stubXML = stringWriter.getBuffer().toString();
-        if (log.isDebugEnabled()) { log.debug("Constructed XML for stub deletion: {}", stubXML); }
+        if (log.isDebugEnabled()) { log.debug("Constructed XML for stub deletion: {}", stubName); }
 
         // Delete using the constructed asset XML
         return igcRestClient.deleteOpenIgcAsset(stubXML);

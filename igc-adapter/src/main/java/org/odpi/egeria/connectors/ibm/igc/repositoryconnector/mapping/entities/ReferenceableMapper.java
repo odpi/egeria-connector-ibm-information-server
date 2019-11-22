@@ -169,7 +169,8 @@ public class ReferenceableMapper extends EntityMapping {
                 } else if (propertyValue != null) {
                     value = propertyValue.toString();
                 }
-                if (value != null) {
+                // Leave out any properties that are null or empty strings, as these are unset in IGC
+                if (value != null && !value.equals("")) {
                     additionalProperties.put(propertyName, value);
                 }
             }
@@ -213,9 +214,9 @@ public class ReferenceableMapper extends EntityMapping {
 
         final String methodName = "addComplexPropertySearchCriteria";
 
-        if (log.isDebugEnabled()) { log.debug("Adding complex search criteria for: {}", omrsPropertyName); }
-
         if (omrsPropertyName.equals("qualifiedName")) {
+
+            if (log.isDebugEnabled()) { log.debug("Adding complex search criteria for: qualifiedName"); }
 
             String qualifiedName = ((PrimitivePropertyValue) value).getPrimitiveValue().toString();
             String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedName);
@@ -252,7 +253,7 @@ public class ReferenceableMapper extends EntityMapping {
                 // Identity must be translate-able and match the type being searched, if it is to be an exact match
                 if (identity != null) {
                     if (log.isDebugEnabled()) { log.debug(". . .found identity: {}", identity.toString()); }
-                    String igcType = identity.getAssetType();
+                    String igcType = IGCRestConstants.getAssetTypeForSearch(identity.getAssetType());
                     if (igcType.equals(getIgcAssetType()) || getOtherIGCAssetTypes().contains(igcType)) {
                         IGCSearchConditionSet nested = identity.getSearchCriteria();
                         igcSearchConditionSet.addNestedConditionSet(nested);
@@ -279,16 +280,13 @@ public class ReferenceableMapper extends EntityMapping {
 
             if (skip) {
                 if (log.isDebugEnabled()) { log.debug("Adding search condition to ensure no results."); }
-                IGCSearchCondition name = new IGCSearchCondition(
-                        "_id",
-                        "=",
-                        "NONEXISTENT"
-                );
-                IGCSearchConditionSet byName = new IGCSearchConditionSet(name);
+                IGCSearchConditionSet byName = new IGCSearchConditionSet(IGCRestConstants.getConditionToForceNoSearchResults());
                 igcSearchConditionSet.addNestedConditionSet(byName);
             }
 
         } else if (omrsPropertyName.equals("additionalProperties")) {
+
+            if (log.isDebugEnabled()) { log.debug("Adding complex search criteria for: additionalProperties"); }
 
             Map<String, InstancePropertyValue> mapValues = ((MapPropertyValue) value).getMapValues().getInstanceProperties();
             for (Map.Entry<String, InstancePropertyValue> nextEntry : mapValues.entrySet()) {
@@ -301,6 +299,38 @@ public class ReferenceableMapper extends EntityMapping {
                 );
             }
 
+        }
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addComplexStringSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                               String repositoryName,
+                                               IGCRestClient igcRestClient,
+                                               IGCSearchConditionSet igcSearchConditionSet,
+                                               String searchCriteria) throws FunctionNotSupportedException {
+
+        super.addComplexStringSearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, searchCriteria);
+
+        final String methodName = "addComplexStringSearchCriteria";
+
+        List<String> stringPropertiesForType = igcRestClient.getAllStringPropertiesForType(IGCRestConstants.getAssetTypeForSearch(getIgcAssetType()));
+
+        // By default, add a condition for every complex-mapped string property EXCEPT for the modification details
+        for (String propertyName : getComplexMappedIgcProperties()) {
+            if (stringPropertiesForType.contains(propertyName) && !propertyName.equals("modified_by") && !propertyName.equals("created_by")) {
+                IGCSearchCondition condition = IGCRepositoryHelper.getRegexSearchCondition(
+                        repositoryHelper,
+                        repositoryName,
+                        methodName,
+                        propertyName,
+                        searchCriteria
+                );
+                igcSearchConditionSet.addCondition(condition);
+            }
         }
 
     }

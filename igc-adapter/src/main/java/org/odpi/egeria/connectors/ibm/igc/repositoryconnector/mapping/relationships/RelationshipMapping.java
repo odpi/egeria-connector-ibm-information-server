@@ -380,15 +380,34 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcRestClient connectivity to an IGC environment
      * @param matchProperties the set of properties against which to match (or null if none)
      * @param matchCriteria the criteria against which to match (or null / ignored if matchProperties is null)
-     * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
      * @return IGCSearch - the search object by which to find these relationships
+     * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
      */
     public IGCSearch getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
                                                  String repositoryName,
                                                  IGCRestClient igcRestClient,
                                                  InstanceProperties matchProperties,
                                                  MatchCriteria matchCriteria) throws FunctionNotSupportedException {
-        // Nothing to do -- no complex properties by default -- so return the simple search
+        // Nothing to do -- no relationship-level properties by default -- so return the simple search
+        return getSimpleIGCSearchCriteria();
+    }
+
+    /**
+     * This method needs to be overridden to define how to search for a relationship using a string-based regex match
+     * against all of its potential String properties.
+     *
+     * @param repositoryHelper helper for the OMRS repository
+     * @param repositoryName name of the repository
+     * @param igcRestClient connectivity to an IGC environment
+     * @param searchCriteria the regular expression to attempt to match against any string properties
+     * @return IGCSearch - the search object by which to find these relationships
+     * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
+     */
+    public IGCSearch getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                                 String repositoryName,
+                                                 IGCRestClient igcRestClient,
+                                                 String searchCriteria) throws FunctionNotSupportedException {
+        // Nothing to do -- no relationship-level properties by default -- so return the simple search
         return getSimpleIGCSearchCriteria();
     }
 
@@ -704,7 +723,6 @@ public abstract class RelationshipMapping extends InstanceMapping {
          */
         public boolean matchesAssetType(String igcAssetType) {
             String simplifiedType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
-            if (log.isDebugEnabled()) { log.debug("checking for matching asset between {} and {}", this.igcAssetType, simplifiedType); }
             return (
                     this.igcAssetType.equals(simplifiedType)
                     || (this.igcAssetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !this.excludeIgcAssetType.contains(simplifiedType))
@@ -1176,10 +1194,10 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     RelationshipMapping.SELF_REFERENCE_SENTINEL,
                     userId
             );
-            if (log.isDebugEnabled()) { log.debug("addSelfReferencingRelationship - adding relationship: {}", relationship); }
+            if (log.isDebugEnabled()) { log.debug("addSelfReferencingRelationship - adding relationship: {}", relationship.getGUID()); }
             relationships.add(relationship);
         } catch (RepositoryErrorException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to add self-referencing relationship for: {}", fromIgcObject, e); }
+            if (log.isErrorEnabled()) { log.error("Unable to add self-referencing relationship for: {} of type {}", fromIgcObject.getName(), fromIgcObject.getType(), e); }
         }
     }
 
@@ -1275,7 +1293,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
         String assetType = fromIgcObject.getType();
 
-        if (log.isDebugEnabled()) { log.debug("Adding inverted relationship for mapping: {}", mapping); }
+        if (log.isDebugEnabled()) { log.debug("Adding inverted relationship for mapping: {}", mapping.getClass().getCanonicalName()); }
 
         if (toIgcObject != null) {
             addSingleMappedRelationshipWithKnownOrder(
@@ -1312,9 +1330,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
                 // Otherwise, use the optimal retrieval for the relationship (a search that will batch-retrieve _context)
                 RelationshipMapping.ProxyMapping otherSide = mapping.getOtherProxyFromType(assetType);
-                if (log.isDebugEnabled()) { log.debug(" ... found other proxy: {}", otherSide); }
+                if (log.isDebugEnabled()) { log.debug(" ... found other proxy: {} with prefix {}", otherSide.getIgcAssetType(), otherSide.getIgcRidPrefix()); }
                 RelationshipMapping.ProxyMapping thisSide = mapping.getProxyFromType(assetType);
-                if (log.isDebugEnabled()) { log.debug(" ... found this proxy: {}", thisSide); }
+                if (log.isDebugEnabled()) { log.debug(" ... found this proxy: {} with prefix {}", thisSide.getIgcAssetType(), thisSide.getIgcRidPrefix()); }
 
                 String anIgcRelationshipProperty = null;
                 IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
@@ -1447,7 +1465,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                     String igcPropertyName,
                                                     String userId) {
 
-        if (log.isDebugEnabled()) { log.debug(" ... single reference: {}", igcRelationship); }
+        if (log.isDebugEnabled()) { log.debug(" ... single reference: {} of type {}", igcRelationship.getName(), igcRelationship.getType()); }
         if (igcRelationship != null
                 && igcRelationship.getType() != null
                 && !igcRelationship.getType().equals("null")) {
@@ -1461,7 +1479,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         igcPropertyName,
                         userId
                 );
-                if (log.isDebugEnabled()) { log.debug("addSingleMappedRelationship - adding relationship: {}", omrsRelationship); }
+                if (log.isDebugEnabled()) { log.debug("addSingleMappedRelationship - adding relationship: {}", omrsRelationship.getGUID()); }
                 relationships.add(omrsRelationship);
             } catch (RepositoryErrorException e) {
                 if (log.isErrorEnabled()) { log.error("Unable to add relationship {} for object {}", mapping.getOmrsRelationshipType(), igcRelationship, e); }
@@ -1487,7 +1505,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                                   Reference proxyOne,
                                                                   Reference proxyTwo,
                                                                   String userId) {
-        if (log.isDebugEnabled()) { log.debug(" ... single reference: {}", proxyTwo); }
+        if (log.isDebugEnabled()) { log.debug(" ... single reference: {} of type {}", proxyTwo.getName(), proxyTwo.getType()); }
         if (proxyTwo != null
                 && proxyTwo.getType() != null
                 && !proxyTwo.getType().equals("null")) {
@@ -1508,7 +1526,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         null,
                         true
                 );
-                if (log.isDebugEnabled()) { log.debug("addSingleMappedRelationshipWithKnownOrder - adding relationship: {}", omrsRelationship); }
+                if (log.isDebugEnabled()) { log.debug("addSingleMappedRelationshipWithKnownOrder - adding relationship: {}", omrsRelationship.getGUID()); }
                 relationships.add(omrsRelationship);
             } catch (RepositoryErrorException e) {
                 if (log.isErrorEnabled()) { log.error("Unable to add relationship {} for object {}", mapping.getOmrsRelationshipType(), proxyTwo, e); }

@@ -3,22 +3,29 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataClassAssignmentMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataClassHierarchyMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.PrimitivePropertyValue;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Defines the mapping to the OMRS "DataClass" entity.
@@ -26,6 +33,8 @@ import java.util.ArrayList;
 public class DataClassMapper extends ReferenceableMapper {
 
     private static final Logger log = LoggerFactory.getLogger(DataClassMapper.class);
+
+    private static final String VALUE_DELIMITER = "__,__";
 
     private static class SingletonOld {
         private static final DataClassMapper INSTANCE = new DataClassMapper(IGCVersionEnum.V11501);
@@ -170,7 +179,7 @@ public class DataClassMapper extends ReferenceableMapper {
         instanceProperties = repositoryHelper.addStringPropertyToInstance(
                 repositoryName,
                 instanceProperties,
-                "specificationDetails",
+                "specification",
                 dataClassType,
                 methodName
         );
@@ -189,7 +198,7 @@ public class DataClassMapper extends ReferenceableMapper {
                 if (validValues == null || validValues.isEmpty()) {
                     dataClassDetails = (String) igcRestClient.getPropertyByName(igcEntity, "validValueReferenceFile");
                 } else {
-                    dataClassDetails = String.join(", ", validValues);
+                    dataClassDetails = String.join(VALUE_DELIMITER, validValues);
                 }
                 break;
             case "Script":
@@ -206,7 +215,7 @@ public class DataClassMapper extends ReferenceableMapper {
                     for (Reference filter : filters.getItems()) {
                         filterNames.add(filter.getName());
                     }
-                    dataClassDetails = String.join(", ", filterNames);
+                    dataClassDetails = String.join(VALUE_DELIMITER, filterNames);
                 }
                 break;
             default:
@@ -216,7 +225,7 @@ public class DataClassMapper extends ReferenceableMapper {
         instanceProperties = repositoryHelper.addStringPropertyToInstance(
                 repositoryName,
                 instanceProperties,
-                "specification",
+                "specificationDetails",
                 dataClassDetails,
                 methodName
         );
@@ -264,7 +273,156 @@ public class DataClassMapper extends ReferenceableMapper {
 
         super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, value);
 
-        // TODO: handle the various complex-mapped properties above from a search perspective
+        final String methodName = "addComplexPropertySearchCriteria";
+
+        if (getComplexMappedOmrsProperties().contains(omrsPropertyName)) {
+
+            if (log.isDebugEnabled()) { log.debug("Adding complex search criteria for: {}", omrsPropertyName); }
+
+            IGCVersionEnum igcVersion = igcRestClient.getIgcVersion();
+            String omrsValue = value.valueAsString();
+
+            // Will be used to handle any simple string properties further below -- the more complicated properties
+            // are handled directly in the switch statement
+            String igcPropertyToSearch = null;
+            switch (omrsPropertyName) {
+                case "dataType":
+                    igcPropertyToSearch = "data_type_filter_elements_enum";
+                    break;
+                case "specificationDetails":
+                    IGCSearchConditionSet complexCriteria = new IGCSearchConditionSet();
+
+                    IGCSearchConditionSet asRegex = new IGCSearchConditionSet();
+                    IGCSearchCondition byRegex = new IGCSearchCondition("data_class_type_single", "=", "Regex");
+                    IGCSearchCondition withRegex = IGCRepositoryHelper.getRegexSearchCondition(
+                            repositoryHelper,
+                            repositoryName,
+                            methodName,
+                            "regular_expression_single",
+                            omrsValue
+                    );
+                    asRegex.addCondition(byRegex);
+                    asRegex.addCondition(withRegex);
+                    asRegex.setMatchAnyCondition(false);
+
+                    IGCSearchConditionSet asValidValues = new IGCSearchConditionSet();
+                    IGCSearchCondition byValidValues = new IGCSearchCondition("data_class_type_single", "=", "ValidValues");
+                    IGCSearchCondition withValidValues;
+                    if (omrsValue.contains(VALUE_DELIMITER)) {
+                        // This may not be all that accurate since we strip the regular expression, do an 'in' search
+                        // and also assume that there are at least 2 valid values in any given data class for this
+                        // value delimiter to be present
+                        String unqualifiedValue = repositoryHelper.getUnqualifiedLiteralString(omrsValue);
+                        String[] valueList = unqualifiedValue.split(VALUE_DELIMITER);
+                        withValidValues = new IGCSearchCondition("valid_value_strings", Arrays.asList(valueList));
+                    } else {
+                        withValidValues = IGCRepositoryHelper.getRegexSearchCondition(
+                                repositoryHelper,
+                                repositoryName,
+                                methodName,
+                                "validValueReferenceFile",
+                                omrsValue
+                        );
+                    }
+                    asValidValues.addCondition(byValidValues);
+                    asValidValues.addCondition(withValidValues);
+                    asValidValues.setMatchAnyCondition(false);
+
+                    if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
+                        IGCSearchConditionSet asScript = new IGCSearchConditionSet();
+                        IGCSearchCondition byScript = new IGCSearchCondition("data_class_type_single", "=", "Script");
+                        IGCSearchCondition withScript = IGCRepositoryHelper.getRegexSearchCondition(
+                                repositoryHelper,
+                                repositoryName,
+                                methodName,
+                                "script",
+                                omrsValue
+                        );
+                        asScript.addCondition(byScript);
+                        asScript.addCondition(withScript);
+                        asScript.setMatchAnyCondition(false);
+
+                        IGCSearchConditionSet asColumnSimilarity = new IGCSearchConditionSet();
+                        IGCSearchCondition byColumnSimilarity = new IGCSearchCondition("data_class_type_single", "=", "ColumnSimilarity");
+                        IGCSearchCondition withColumnSimilarity = IGCRepositoryHelper.getRegexSearchCondition(
+                                repositoryHelper,
+                                repositoryName,
+                                methodName,
+                                "expression",
+                                omrsValue
+                        );
+                        asColumnSimilarity.addCondition(byColumnSimilarity);
+                        asColumnSimilarity.addCondition(withColumnSimilarity);
+                        asColumnSimilarity.setMatchAnyCondition(false);
+
+                        IGCSearchConditionSet asUnstructuredFilter = new IGCSearchConditionSet();
+                        IGCSearchCondition byUnstructuredFilter = new IGCSearchCondition("data_class_type_single", "=", "UnstructuredFilter");
+                        // This may not be all that accurate since we strip the regular expression, do an 'in' search
+                        // and also assume that there are at least 2 valid values in any given data class for this
+                        // value delimiter to be present
+                        String unqualifiedValue = repositoryHelper.getUnqualifiedLiteralString(omrsValue);
+                        String[] filterList = unqualifiedValue.split(VALUE_DELIMITER);
+                        IGCSearchCondition withUnstructuredFilter = new IGCSearchCondition("filters.name", Arrays.asList(filterList));
+                        asUnstructuredFilter.addCondition(byUnstructuredFilter);
+                        asUnstructuredFilter.addCondition(withUnstructuredFilter);
+                        asUnstructuredFilter.setMatchAnyCondition(false);
+
+                        complexCriteria.addNestedConditionSet(asScript);
+                        complexCriteria.addNestedConditionSet(asColumnSimilarity);
+                        complexCriteria.addNestedConditionSet(asUnstructuredFilter);
+                    }
+
+                    IGCSearchConditionSet asJavaClass = new IGCSearchConditionSet();
+                    IGCSearchCondition withJavaClass = IGCRepositoryHelper.getRegexSearchCondition(
+                            repositoryHelper,
+                            repositoryName,
+                            methodName,
+                            "java_class_name_single",
+                            omrsValue
+                    );
+                    asJavaClass.addCondition(withJavaClass);
+                    asJavaClass.setMatchAnyCondition(false);
+
+                    complexCriteria.addNestedConditionSet(asRegex);
+                    complexCriteria.addNestedConditionSet(asValidValues);
+                    complexCriteria.addNestedConditionSet(asJavaClass);
+                    complexCriteria.setMatchAnyCondition(true);
+
+                    igcSearchConditionSet.addNestedConditionSet(complexCriteria);
+                    break;
+                case "specification":
+                    igcPropertyToSearch = "data_class_type_single";
+                    break;
+                case "userDefined":
+                    if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
+                        boolean isUserDefined = Boolean.getBoolean(omrsValue);
+                        IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
+                                "provider",
+                                isUserDefined ? "<>" : "=",
+                                "IBM"
+                        );
+                        igcSearchConditionSet.addCondition(igcSearchCondition);
+                    }
+                    break;
+            }
+
+            // Handle any simple string properties
+            if (igcPropertyToSearch != null) {
+                igcSearchConditionSet.addCondition(
+                        IGCRepositoryHelper.getRegexSearchCondition(
+                                repositoryHelper,
+                                repositoryName,
+                                methodName,
+                                igcPropertyToSearch,
+                                omrsValue
+                        )
+                );
+            }
+
+        } else {
+            // Otherwise we've been asked to match a property that is not mapped, so force no results
+            igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+        }
 
     }
 

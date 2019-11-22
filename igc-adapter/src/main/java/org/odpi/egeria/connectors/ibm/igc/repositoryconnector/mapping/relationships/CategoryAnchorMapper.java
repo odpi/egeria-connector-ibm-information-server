@@ -72,11 +72,11 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                 Reference root = new Reference(rootIdentity.getName(), rootIdentity.getAssetType(), rootIdentity.getRid());
                 asList.add(root);
             } else {
-                if (log.isDebugEnabled()) { log.debug("Already at a root-level category, returning as-is: {}", category); }
+                if (log.isDebugEnabled()) { log.debug("Already at a root-level category, returning as-is: {} of type {}", category.getName(), category.getType()); }
                 asList.add(category);
             }
         } else {
-            if (log.isWarnEnabled()) { log.warn("Not a category asset, just returning as-is: {}", category); }
+            if (log.isWarnEnabled()) { log.warn("Not a category asset, just returning as-is: {} of type {}", category.getName(), category.getType()); }
             asList.add(category);
         }
         return asList;
@@ -117,14 +117,14 @@ public class CategoryAnchorMapper extends RelationshipMapping {
 
                 IGCSearchConditionSet conditionSet = new IGCSearchConditionSet();
                 if (toIgcObject == null) {
-                    if (log.isDebugEnabled()) { log.debug("Looking for all offspring categories from: {}", fromIgcObject); }
+                    if (log.isDebugEnabled()) { log.debug("Looking for all offspring categories from: {} of type {}", fromIgcObject.getName(), fromIgcObject.getType()); }
                     // We are already at the glossary-level category, so we need to get all the children categories
                     IGCSearchCondition byCatPath = new IGCSearchCondition("category_path", "=", fromIgcObject.getId());
                     conditionSet.addCondition(byCatPath);
                 } else {
                     // We are already at the glossary-level category, and have a single other category object, create
                     // category anchor for just that single category
-                    if (log.isDebugEnabled()) { log.debug("Looking for single category for: {}", toIgcObject); }
+                    if (log.isDebugEnabled()) { log.debug("Looking for single category for: {} of type {}", toIgcObject.getName(), toIgcObject.getType()); }
                     IGCSearchCondition byCatPath = new IGCSearchCondition("category_path", "=", fromIgcObject.getId());
                     IGCSearchCondition byCategory = new IGCSearchCondition("_id", "=", toIgcObject.getId());
                     conditionSet.addCondition(byCatPath);
@@ -166,7 +166,7 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                         rootIdentity.getAssetType(),
                         IGCRestConstants.getModificationProperties());
                 if (root != null) {
-                    if (log.isDebugEnabled()) { log.debug("Mapping ultimate parent category from: {}", fromIgcObject); }
+                    if (log.isDebugEnabled()) { log.debug("Mapping ultimate parent category from: {} of type {}", fromIgcObject.getName(), fromIgcObject.getType()); }
                     try {
                         Relationship relationship = getMappedRelationship(
                                 igcomrsRepositoryConnector,
@@ -205,7 +205,7 @@ public class CategoryAnchorMapper extends RelationshipMapping {
     public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                     Reference oneObject,
                                                     Reference otherObject) {
-        if (log.isDebugEnabled()) { log.debug("Considering inclusion of objects:\n... {}\n... {}", oneObject, otherObject); }
+        if (log.isDebugEnabled()) { log.debug("Considering inclusion of objects: {} ({}) and {} ({})", oneObject.getName(), oneObject.getType(), otherObject.getName(), otherObject.getType()); }
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         return (GlossaryMapper.isGlossary(igcRestClient, oneObject) && otherObject.getType().equals("category") && !GlossaryMapper.isGlossary(igcRestClient, otherObject))
                 || (!GlossaryMapper.isGlossary(igcRestClient, oneObject) && oneObject.getType().equals("category") && GlossaryMapper.isGlossary(igcRestClient, otherObject));
