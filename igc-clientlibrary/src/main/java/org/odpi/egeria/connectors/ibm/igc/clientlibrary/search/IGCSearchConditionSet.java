@@ -2,9 +2,8 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.search;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.*;
 
 /**
  * Manages the composition of multiple {@link IGCSearchCondition} objects into a coherent set of conditions,
@@ -83,11 +82,47 @@ public class IGCSearchConditionSet {
     public ObjectNode getConditionSetObject() {
         ObjectNode condSet = nf.objectNode();
         if (size() > 0) {
-            condSet.set("conditions", this.conditions);
-            condSet.set("operator", nf.textNode(this.conditionJoin));
-        }
-        if (negateAll) {
-            condSet.set("negated", nf.booleanNode(true));
+            if (negateAll) {
+                ArrayNode negatedConditions = nf.arrayNode(conditions.size());
+                for (JsonNode condition : this.conditions) {
+                    if (condition instanceof ObjectNode) {
+                        ObjectNode onCondition = (ObjectNode) condition;
+                        JsonNode existingNegated = onCondition.path("negated");
+                        BooleanNode negated = nf.booleanNode(true);
+                        if (!existingNegated.isMissingNode()) {
+                            negated = (BooleanNode) onCondition.get("negated");
+                            if (negated.asBoolean()) {
+                                negated = nf.booleanNode(false);
+                            } else {
+                                negated = nf.booleanNode(true);
+                            }
+                        }
+                        // Override any '=' with '<>' (and vice versa) if they should be negated, as these are the
+                        // only operators that work on numbers as well as strings (negated: true only works on strings)
+                        JsonNode existingOperation = onCondition.path("operator");
+                        if (!existingOperation.isMissingNode()) {
+                            TextNode operator = (TextNode) existingOperation;
+                            if (operator.textValue().equals("=") && negated.booleanValue()) {
+                                operator = nf.textNode("<>");
+                                negated = null;
+                            } else if (operator.textValue().equals("<>") && negated.booleanValue()) {
+                                operator = nf.textNode("=");
+                                negated = null;
+                            }
+                            onCondition.set("operator", operator);
+                        }
+                        if (negated != null) {
+                            onCondition.set("negated", negated);
+                        }
+                        negatedConditions.add(onCondition);
+                    }
+                }
+                condSet.set("conditions", negatedConditions);
+                condSet.set("operator", nf.textNode(this.conditionJoin));
+            } else {
+                condSet.set("conditions", this.conditions);
+                condSet.set("operator", nf.textNode(this.conditionJoin));
+            }
         }
         return condSet;
     }

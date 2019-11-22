@@ -21,6 +21,7 @@ import java.util.Objects;
 public class Identity {
 
     private static final Logger log = LoggerFactory.getLogger(Identity.class);
+    private static final String SEPARATOR_FOR_RID = "__RID__";
 
     private List<Reference> context;
 
@@ -149,7 +150,7 @@ public class Identity {
         sb.append(")=");
         sb.append(name);
         if (requiresRidToBeUnique(type)) {
-            sb.append("_");
+            sb.append(SEPARATOR_FOR_RID);
             sb.append(id);
         }
     }
@@ -324,6 +325,21 @@ public class Identity {
      * @see #toString()
      */
     public static Identity getFromString(String identity, IGCRestClient igcRestClient) {
+        return getFromString(identity, igcRestClient, true);
+    }
+
+    /**
+     * Builds an Identity based on an identity string (or null if unable to construct an Identity from the
+     * string).
+     *
+     * @param identity the string representing a qualified identity
+     * @param igcRestClient connectivity to an IGC environment
+     * @param warnOnNotFound indicates whether to log a warning (true) or not (false) in case the type inferred from
+     *                       the identity cannot be found
+     * @return Identity
+     * @see #toString()
+     */
+    public static Identity getFromString(String identity, IGCRestClient igcRestClient, boolean warnOnNotFound) {
 
         List<Reference> context = new ArrayList<>();
 
@@ -334,19 +350,26 @@ public class Identity {
         for (int i = 0; i < components.length; i++) {
             String component = components[i];
             String[] tokens = component.split("=");
-            String type = tokens[0].substring(1, tokens[0].length() - 1);
-            String name = tokens[1];
-            String id = null;
-            if (requiresRidToBeUnique(type)) {
-                id = name.split("_")[1];
-            }
-            if (i == components.length - 1) {
-                assetType = type;
-                assetName = name;
-                assetId = id;
+            if (tokens.length == 2) {
+                String type = tokens[0].substring(1, tokens[0].length() - 1);
+                String name = tokens[1];
+                String id = null;
+                if (requiresRidToBeUnique(type)) {
+                    id = name.split(SEPARATOR_FOR_RID)[1];
+                }
+                if (i == components.length - 1) {
+                    assetType = type;
+                    assetName = name;
+                    assetId = id;
+                } else {
+                    Reference item = new Reference(name, type, id);
+                    context.add(item);
+                }
             } else {
-                Reference item = new Reference(name, type, id);
-                context.add(item);
+                // If we could not form the tokens as we expect, short-circuit out as we cannot reconstruct
+                // the identity from this string
+                assetType = null;
+                break;
             }
         }
 
@@ -357,7 +380,7 @@ public class Identity {
                 ident = new Identity(context, assetType, assetName, assetId);
             }
         } catch (Exception e) {
-            if (log.isErrorEnabled()) { log.error("Unable to find registered IGC type '{}' -- cannot construct an IGC identity.", assetType); }
+            if (log.isWarnEnabled() && warnOnNotFound) { log.warn("Unable to find registered IGC type '{}' -- cannot construct an IGC identity.", assetType); }
         }
         return ident;
 

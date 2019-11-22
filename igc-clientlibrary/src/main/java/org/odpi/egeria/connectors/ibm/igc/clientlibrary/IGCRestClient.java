@@ -1082,59 +1082,61 @@ public class IGCRestClient {
      */
     public void cacheTypeDetails(String typeName) {
 
-        // Only continue if the information is not already cached
-        if (!typeToDisplayName.containsKey(typeName)) {
-            TypeDetails typeDetails = getTypeDetails(typeName);
+        if (typeName != null) {
+            // Only continue if the information is not already cached
+            if (!typeToDisplayName.containsKey(typeName)) {
+                TypeDetails typeDetails = getTypeDetails(typeName);
 
-            // Cache whether the type supports creation or not
-            if (typeDetails.getCreateInfo() != null) {
-                List<TypeProperty> create = typeDetails.getCreateInfo().getProperties();
-                if (create != null && !create.isEmpty()) {
-                    typesThatCanBeCreated.add(typeName);
-                }
-            }
-
-            // Cache property details
-            List<TypeProperty> view = typeDetails.getViewInfo().getProperties();
-            if (view != null) {
-                List<String> allProperties = new ArrayList<>();
-                List<String> nonRelationship = new ArrayList<>();
-                List<String> stringProperties = new ArrayList<>();
-                List<String> pagedRelationship = new ArrayList<>();
-                for (TypeProperty property : view) {
-                    String propertyName = property.getName();
-                    if (!IGCRestConstants.getPropertiesToIgnore().contains(propertyName)) {
-                        if (propertyName.equals("created_on")) {
-                            typesThatIncludeModificationDetails.add(typeName);
-                        }
-                        org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeReference type = property.getType();
-                        String propertyType = type.getName();
-                        if (propertyType.equals("string")) {
-                            stringProperties.add(propertyName);
-                            nonRelationship.add(propertyName);
-                        } else if (propertyType.equals("enum")) {
-                            nonRelationship.add(propertyName);
-                        } else if (type.getUrl() != null) {
-                            if (property.getMaxCardinality() < 0) {
-                                pagedRelationship.add(propertyName);
-                            }
-                        } else {
-                            nonRelationship.add(propertyName);
-                        }
-                        allProperties.add(propertyName);
-
-                        // Instantiate and cache generic property retrieval mechanisms
-                        cacheAccessor(typeName, propertyName);
+                // Cache whether the type supports creation or not
+                if (typeDetails.getCreateInfo() != null) {
+                    List<TypeProperty> create = typeDetails.getCreateInfo().getProperties();
+                    if (create != null && !create.isEmpty()) {
+                        typesThatCanBeCreated.add(typeName);
                     }
                 }
-                typeToAllProperties.put(typeName, allProperties);
-                typeToNonRelationshipProperties.put(typeName, nonRelationship);
-                typeToStringProperties.put(typeName, stringProperties);
-                typeToPagedRelationshipProperties.put(typeName, pagedRelationship);
+
+                // Cache property details
+                List<TypeProperty> view = typeDetails.getViewInfo().getProperties();
+                if (view != null) {
+                    List<String> allProperties = new ArrayList<>();
+                    List<String> nonRelationship = new ArrayList<>();
+                    List<String> stringProperties = new ArrayList<>();
+                    List<String> pagedRelationship = new ArrayList<>();
+                    for (TypeProperty property : view) {
+                        String propertyName = property.getName();
+                        if (!IGCRestConstants.getPropertiesToIgnore().contains(propertyName)) {
+                            if (propertyName.equals("created_on")) {
+                                typesThatIncludeModificationDetails.add(typeName);
+                            }
+                            org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeReference type = property.getType();
+                            String propertyType = type.getName();
+                            if (propertyType.equals("string")) {
+                                stringProperties.add(propertyName);
+                                nonRelationship.add(propertyName);
+                            } else if (propertyType.equals("enum")) {
+                                nonRelationship.add(propertyName);
+                            } else if (type.getUrl() != null) {
+                                if (property.getMaxCardinality() < 0) {
+                                    pagedRelationship.add(propertyName);
+                                }
+                            } else {
+                                nonRelationship.add(propertyName);
+                            }
+                            allProperties.add(propertyName);
+
+                            // Instantiate and cache generic property retrieval mechanisms
+                            cacheAccessor(typeName, propertyName);
+                        }
+                    }
+                    typeToAllProperties.put(typeName, allProperties);
+                    typeToNonRelationshipProperties.put(typeName, nonRelationship);
+                    typeToStringProperties.put(typeName, stringProperties);
+                    typeToPagedRelationshipProperties.put(typeName, pagedRelationship);
+
+                }
+                typeToDisplayName.put(typeName, typeDetails.getName());
 
             }
-            typeToDisplayName.put(typeName, typeDetails.getName());
-
         }
 
     }
@@ -1147,7 +1149,11 @@ public class IGCRestClient {
      */
     public String getDisplayNameForType(String typeName) {
         cacheTypeDetails(typeName);
-        return typeToDisplayName.getOrDefault(typeName, null);
+        if (typeName != null) {
+            return typeToDisplayName.getOrDefault(typeName, null);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -1158,7 +1164,11 @@ public class IGCRestClient {
      */
     public boolean isCreatable(String typeName) {
         cacheTypeDetails(typeName);
-        return typesThatCanBeCreated.contains(typeName);
+        if (typeName != null) {
+            return typesThatCanBeCreated.contains(typeName);
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -1169,7 +1179,11 @@ public class IGCRestClient {
      */
     public boolean hasModificationDetails(String typeName) {
         cacheTypeDetails(typeName);
-        return typesThatIncludeModificationDetails.contains(typeName);
+        if (typeName != null) {
+            return typesThatIncludeModificationDetails.contains(typeName);
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -1180,7 +1194,11 @@ public class IGCRestClient {
      */
     public List<String> getAllPropertiesForType(String typeName) {
         cacheTypeDetails(typeName);
-        return typeToAllProperties.getOrDefault(typeName, null);
+        if (typeName != null) {
+            return typeToAllProperties.getOrDefault(typeName, null);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -1192,7 +1210,11 @@ public class IGCRestClient {
      */
     public List<String> getNonRelationshipPropertiesForType(String typeName) {
         cacheTypeDetails(typeName);
-        return typeToNonRelationshipProperties.getOrDefault(typeName, null);
+        if (typeName != null) {
+            return typeToNonRelationshipProperties.getOrDefault(typeName, null);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -1203,7 +1225,11 @@ public class IGCRestClient {
      */
     public List<String> getAllStringPropertiesForType(String typeName) {
         cacheTypeDetails(typeName);
-        return typeToStringProperties.getOrDefault(typeName, null);
+        if (typeName != null) {
+            return typeToStringProperties.getOrDefault(typeName, null);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -1215,7 +1241,11 @@ public class IGCRestClient {
      */
     public List<String> getPagedRelationshipPropertiesForType(String typeName) {
         cacheTypeDetails(typeName);
-        return typeToPagedRelationshipProperties.getOrDefault(typeName, null);
+        if (typeName != null) {
+            return typeToPagedRelationshipProperties.getOrDefault(typeName, null);
+        } else {
+            return null;
+        }
     }
 
     /**

@@ -19,6 +19,8 @@ public class IGCSearchCondition {
     private String operator;
     private String value = null;
     private List<String> values = null;
+    private Long min = null;
+    private Long max = null;
 
     private Boolean negated = null;
 
@@ -36,9 +38,15 @@ public class IGCSearchCondition {
      * @param value the value to compare the property against
      */
     public IGCSearchCondition(String property, String operator, String value) {
-        this.property = property;
-        this.operator = operator;
-        this.value = value;
+        if (value == null) {
+            this.property = property;
+            this.operator = "isNull";
+            this.negated = false;
+        } else {
+            this.property = property;
+            this.operator = operator;
+            this.value = value;
+        }
     }
 
     /**
@@ -76,10 +84,22 @@ public class IGCSearchCondition {
      * @param negated whether to invert (negate) the comparison operator or not
      */
     public IGCSearchCondition(String property, String operator, String value, Boolean negated) {
-        this.property = property;
-        this.operator = operator;
-        this.value = value;
-        this.negated = negated;
+        if (value == null) {
+            this.property = property;
+            this.operator = "isNull";
+            this.negated = negated;
+        } else {
+            this.property = property;
+            if (operator.equals("=") && negated) {
+                // This is a more reliable 'does not equal' for both strings and numbers, the
+                // negated condition does not work for numbers
+                this.operator = "<>";
+            } else {
+                this.operator = operator;
+                this.negated = negated;
+            }
+            this.value = value;
+        }
     }
 
     /**
@@ -120,6 +140,20 @@ public class IGCSearchCondition {
         this.negated = negated;
     }
 
+    /**
+     * Creates a new search condition for a date field with a range of date / time between the two values provided.
+     *
+     * @param property the (date / time) property of an asset type to search against
+     * @param from the starting time (epoch) for the date / time
+     * @param to the ending time (epoch) for the date / time
+     */
+    public IGCSearchCondition(String property, long from, long to) {
+        this.property = property;
+        this.operator = "between";
+        this.min = from;
+        this.max = to;
+    }
+
     public String getProperty() { return this.property; }
     public void setProperty(String property) { this.property = property; }
 
@@ -152,6 +186,9 @@ public class IGCSearchCondition {
             condObj.set("value", arrayNode);
         } else if (this.value != null) {
             condObj.set("value", nf.textNode(getValue()));
+        } else if (this.min != null && this.max != null) {
+            condObj.set("min", nf.numberNode(min));
+            condObj.set("max", nf.numberNode(max));
         }
         if (this.negated != null) {
             condObj.set("negated", nf.booleanNode(getNegated()));
