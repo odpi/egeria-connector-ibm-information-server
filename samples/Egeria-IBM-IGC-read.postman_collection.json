@@ -230,11 +230,11 @@
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
-							"pm.test(\"2 total results\", function () {",
-							"    pm.expect(jsonData.entities).to.have.lengthOf(22);",
+							"pm.test(\"12 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(12);",
 							"});",
 							"pm.test(\"Proper GlossaryCategory entities\", function() {",
-							"    for (let i = 0; i < 22; i++) {",
+							"    for (let i = 0; i < 12; i++) {",
 							"        pm.expect(jsonData.entities[i].type.typeDefName).to.equal(\"GlossaryCategory\");",
 							"        pm.expect(jsonData.entities[i].version).to.be.above(1);",
 							"        pm.expect(jsonData.entities[i].properties.instanceProperties.qualifiedName.primitiveValue).to.contain(\"(category)=\");",
@@ -265,7 +265,7 @@
 					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"e507485b-9b5a-44c9-8a28-6967f7ff3672\",\n\t\"pageSize\": 100\n}"
 				},
 				"url": {
-					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property-value?searchCriteria=.%2A%5CQa%5CE.%2A",
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property-value?searchCriteria=.%2A%5CQe%5CE.%2A",
 					"host": [
 						"{{baseURL}}"
 					],
@@ -283,7 +283,7 @@
 					"query": [
 						{
 							"key": "searchCriteria",
-							"value": ".%2A%5CQa%5CE.%2A"
+							"value": ".%2A%5CQe%5CE.%2A"
 						}
 					]
 				}
