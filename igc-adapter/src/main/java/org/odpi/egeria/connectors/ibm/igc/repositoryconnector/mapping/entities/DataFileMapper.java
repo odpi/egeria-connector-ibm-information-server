@@ -92,7 +92,7 @@ public class DataFileMapper extends DataStore_Mapper {
     }
 
     /**
-     * Handle the search for 'networkAddress' by searching against 'name' of the endpoint in IGC.
+     * Handle the search for 'fileType' by searching against the extension of the file in IGC.
      *
      * @param repositoryHelper the repository helper
      * @param repositoryName name of the repository
@@ -138,6 +138,41 @@ public class DataFileMapper extends DataStore_Mapper {
                         errorCode.getSystemAction(),
                         errorCode.getUserAction());
             }
+        }
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addComplexStringSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                               String repositoryName,
+                                               IGCRestClient igcRestClient,
+                                               IGCSearchConditionSet igcSearchConditionSet,
+                                               String searchCriteria) throws FunctionNotSupportedException {
+
+        // Note that we will not call the superclass as we do not want the default behavior
+        final String methodName = "addComplexStringSearchCriteria";
+
+        String searchableExtension = repositoryHelper.getUnqualifiedLiteralString(searchCriteria);
+        if (repositoryHelper.isExactMatchRegex(searchCriteria) || repositoryHelper.isEndsWithRegex(searchCriteria)) {
+            IGCSearchCondition endsWith = new IGCSearchCondition("name", "like %{0}", searchableExtension);
+            igcSearchConditionSet.addCondition(endsWith);
+        } else if (repositoryHelper.isStartsWithRegex(searchCriteria) || repositoryHelper.isContainsRegex(searchCriteria)) {
+            IGCSearchCondition contains = new IGCSearchCondition("name", "like %{0}%", searchableExtension);
+            igcSearchConditionSet.addCondition(contains);
+        } else {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    repositoryName,
+                    searchCriteria);
+            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
         }
 
     }

@@ -6,10 +6,14 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
@@ -94,7 +98,7 @@ public class SchemaType_Mapper extends SchemaElement_Mapper {
     }
 
     /**
-     * Handle the search for 'domain' by searching against 'parent_policy' of the object in IGC.
+     * Handle the search for 'namespace' by searching against the name of the parent of the object in IGC.
      *
      * @param repositoryHelper the repository helper
      * @param repositoryName name of the repository
@@ -116,8 +120,59 @@ public class SchemaType_Mapper extends SchemaElement_Mapper {
 
         super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, value);
 
-        // TODO: handle searching for namespace, assuming there is a general way we could do it across all types?
+        final String methodName = "addComplexPropertySearchCriteria";
 
+        // Only need to add a condition of we are after the 'namespace' and have been provided a String
+        if (omrsPropertyName.equals("namespace") && value.getInstancePropertyCategory().equals(InstancePropertyCategory.PRIMITIVE)) {
+            String name = value.valueAsString();
+            addNamespaceCriteria(
+                    repositoryHelper,
+                    repositoryName,
+                    methodName,
+                    name,
+                    igcSearchConditionSet
+            );
+        }
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addComplexStringSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                               String repositoryName,
+                                               IGCRestClient igcRestClient,
+                                               IGCSearchConditionSet igcSearchConditionSet,
+                                               String searchCriteria) throws FunctionNotSupportedException {
+
+        super.addComplexStringSearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, searchCriteria);
+
+        final String methodName = "addComplexStringSearchCriteria";
+        addNamespaceCriteria(
+                repositoryHelper,
+                repositoryName,
+                methodName,
+                searchCriteria,
+                igcSearchConditionSet
+        );
+
+    }
+
+    private void addNamespaceCriteria(OMRSRepositoryHelper repositoryHelper,
+                                      String repositoryName,
+                                      String methodName,
+                                      String toSearch,
+                                      IGCSearchConditionSet igcSearchConditionSet) throws FunctionNotSupportedException {
+        String parentPropertyName = getParentPropertyName() + ".name";
+        IGCSearchCondition regex = IGCRepositoryHelper.getRegexSearchCondition(
+                repositoryHelper,
+                repositoryName,
+                methodName,
+                parentPropertyName,
+                toSearch
+        );
+        igcSearchConditionSet.addCondition(regex);
     }
 
 }

@@ -40,7 +40,6 @@ public class ActorProfile_Mapper extends ReferenceableMapper {
 
         // The list of properties that should be mapped
         addSimplePropertyMapping("principal_id", "name");
-        addLiteralPropertyMapping("description", null);
 
     }
 

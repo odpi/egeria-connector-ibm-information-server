@@ -32,6 +32,7 @@ public class PersonMapper extends ActorProfile_Mapper {
         addSimplePropertyMapping("full_name", "fullName");
         addSimplePropertyMapping("job_title", "jobTitle");
         addLiteralPropertyMapping("isPublic", true);
+        addLiteralPropertyMapping("description", null);
 
         // The classes to use for mapping any relationships
         addRelationshipMapper(ContactThroughMapper_Person.getInstance(null));

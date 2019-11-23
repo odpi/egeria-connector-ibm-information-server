@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -122,49 +123,30 @@ public class ContactDetailsMapper extends ReferenceableMapper {
         final String methodName = "addComplexPropertySearchCriteria";
 
         if (omrsPropertyName.equals("contactMethodValue")) {
-
-            IGCSearchCondition igcSearchCondition;
             String contactMethodValue = ((PrimitivePropertyValue) value).getPrimitiveValue().toString();
-            String unqualifiedValue = repositoryHelper.getUnqualifiedLiteralString(contactMethodValue);
-            if (repositoryHelper.isContainsRegex(contactMethodValue)) {
-                igcSearchCondition = new IGCSearchCondition(
-                        "email_address",
-                        "like %{0}%",
-                        unqualifiedValue
-                );
-                igcSearchConditionSet.addCondition(igcSearchCondition);
-            } else if (repositoryHelper.isStartsWithRegex(contactMethodValue)) {
-                igcSearchCondition = new IGCSearchCondition(
-                        "email_address",
-                        "like {0}%",
-                        unqualifiedValue
-                );
-                igcSearchConditionSet.addCondition(igcSearchCondition);
-            } else if (repositoryHelper.isEndsWithRegex(contactMethodValue)) {
-                igcSearchCondition = new IGCSearchCondition(
-                        "email_address",
-                        "like %{0}",
-                        unqualifiedValue
-                );
-                igcSearchConditionSet.addCondition(igcSearchCondition);
-            } else if (repositoryHelper.isExactMatchRegex(contactMethodValue)) {
-                igcSearchCondition = new IGCSearchCondition(
-                        "email_address",
-                        "=",
-                        unqualifiedValue
-                );
-                igcSearchConditionSet.addCondition(igcSearchCondition);
-            } else {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        repositoryName,
-                        contactMethodValue);
-                throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                        ContactDetailsMapper.class.getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
+            IGCSearchCondition condition = IGCRepositoryHelper.getRegexSearchCondition(
+                    repositoryHelper,
+                    repositoryName,
+                    methodName,
+                    "email_address",
+                    contactMethodValue
+            );
+            igcSearchConditionSet.addCondition(condition);
+        } else if (omrsPropertyName.equals("contactMethodType")) {
+
+            if (value instanceof EnumPropertyValue) {
+                EnumPropertyValue toMatch = (EnumPropertyValue) value;
+                EnumPropertyValue contactMethod = ContactMethodTypeMapper.getInstance(null).getEnumMappingByIgcValue("email");
+                if (!toMatch.getSymbolicName().equals(contactMethod.getSymbolicName())) {
+                    igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                } else {
+                    IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
+                            "email_address",
+                            "isNull",
+                            true
+                    );
+                    igcSearchConditionSet.addCondition(igcSearchCondition);
+                }
             }
 
         }

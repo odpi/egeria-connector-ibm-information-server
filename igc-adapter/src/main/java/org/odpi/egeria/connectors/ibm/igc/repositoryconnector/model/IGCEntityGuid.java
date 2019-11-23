@@ -2,6 +2,8 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
+
 import java.util.Objects;
 
 /**
@@ -52,7 +54,7 @@ public class IGCEntityGuid extends IGCGuidHeader {
      */
     public IGCEntityGuid(String metadataCollectionId, String assetType, String prefix, String rid) {
         super(metadataCollectionId);
-        this.assetType = assetType;
+        this.assetType = IGCRestConstants.getAssetTypeForSearch(assetType);
         this.generatedPrefix = prefix;
         this.rid = rid;
     }
@@ -126,7 +128,7 @@ public class IGCEntityGuid extends IGCGuidHeader {
         int indexOfMetadataColPostfix = guid.indexOf(METADATA_COL_POSTFIX);
 
         if (indexOfTypePostfix > 0 && indexOfMetadataColPostfix > indexOfTypePostfix) {
-            String assetType = guid.substring(0, indexOfTypePostfix);
+            String assetType = IGCRestConstants.getAssetTypeForSearch(guid.substring(0, indexOfTypePostfix));
             String metadataCollectionId = guid.substring(indexOfTypePostfix + 1, indexOfMetadataColPostfix);
             String rid;
             String generatedPrefix = null;

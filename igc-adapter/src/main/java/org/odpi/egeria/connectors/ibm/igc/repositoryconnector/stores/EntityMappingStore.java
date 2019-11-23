@@ -78,10 +78,14 @@ public class EntityMappingStore {
             if (mapping.getIgcRidPrefix() != null) {
                 prefix = mapping.getIgcRidPrefix();
             }
-            igcAssetTypeAndPrefixToOmrsGuid.put(prefix + igcAssetType, guid);
+            String coreKey = getPrefixedTypeKey(igcAssetType, prefix);
+            log.debug(" ... adding core mapping from {} to: {}", coreKey, guid);
+            igcAssetTypeAndPrefixToOmrsGuid.put(coreKey, guid);
             for (String otherType : mapping.getOtherIGCAssetTypes()) {
                 addIgcAssetTypeToGuid(otherType, guid);
-                igcAssetTypeAndPrefixToOmrsGuid.put(prefix + otherType, guid);
+                String otherKey = getPrefixedTypeKey(otherType, prefix);
+                log.debug(" ... adding additional mapping from {} to: {}", otherKey, guid);
+                igcAssetTypeAndPrefixToOmrsGuid.put(otherKey, guid);
             }
             IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
             igcRestClient.cacheTypeDetails(mapping.getIgcAssetType());
@@ -173,12 +177,12 @@ public class EntityMappingStore {
      */
     public EntityMapping getMappingByIgcAssetTypeAndPrefix(String assetType, String prefix) {
         String simpleType = IGCRestConstants.getAssetTypeForSearch(assetType);
-        String key = (prefix == null ? "" : prefix) + simpleType;
+        String key = getPrefixedTypeKey(simpleType, prefix);
         if (igcAssetTypeAndPrefixToOmrsGuid.containsKey(key)) {
             String guid = igcAssetTypeAndPrefixToOmrsGuid.get(key);
             return getMappingByOmrsTypeGUID(guid);
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unable to find mapping for IGC asset type with prefix: {}", key); }
+            if (log.isWarnEnabled()) { log.warn("Unable to find mapping for IGC asset type: {}", key); }
             return null;
         }
     }
@@ -238,6 +242,21 @@ public class EntityMappingStore {
             if (log.isErrorEnabled()) { log.error("Unable to find or instantiate EntityMapping class: {}", mappingClass, e); }
         }
         return entityMapper;
+    }
+
+    /**
+     * Retrieve a unique key for the combination of IGC asset type and prefix.
+     *
+     * @param type IGC asset type
+     * @param prefix prefix for the asset type
+     * @return String
+     */
+    private String getPrefixedTypeKey(String type, String prefix) {
+        if (prefix != null && !prefix.equals("")) {
+            return prefix + "$" + type;
+        } else {
+            return type;
+        }
     }
 
 }

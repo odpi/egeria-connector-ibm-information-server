@@ -11,6 +11,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSErrorCode;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.ConnectionEndpointMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
@@ -151,55 +152,18 @@ public class EndpointMapper extends ReferenceableMapper {
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
 
         super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, value);
-
         final String methodName = "addComplexPropertySearchCriteria";
-
         if (omrsPropertyName.equals("networkAddress")) {
-
-            IGCSearchCondition igcSearchCondition;
+            if (log.isDebugEnabled()) { log.debug("Adding complex search criteria for: networkAddress"); }
             String networkAddress = ((PrimitivePropertyValue) value).getPrimitiveValue().toString();
-            String unqualifiedValue = repositoryHelper.getUnqualifiedLiteralString(networkAddress);
-            if (repositoryHelper.isContainsRegex(networkAddress)) {
-                igcSearchCondition = new IGCSearchCondition(
-                        "name",
-                        "like %{0}%",
-                        unqualifiedValue
-                );
-                igcSearchConditionSet.addCondition(igcSearchCondition);
-            } else if (repositoryHelper.isStartsWithRegex(networkAddress)) {
-                igcSearchCondition = new IGCSearchCondition(
-                        "name",
-                        "like {0}%",
-                        unqualifiedValue
-                );
-                igcSearchConditionSet.addCondition(igcSearchCondition);
-            } else if (repositoryHelper.isEndsWithRegex(networkAddress)) {
-                igcSearchCondition = new IGCSearchCondition(
-                        "name",
-                        "like %{0}",
-                        unqualifiedValue
-                );
-                igcSearchConditionSet.addCondition(igcSearchCondition);
-            } else if (repositoryHelper.isExactMatchRegex(networkAddress)) {
-                igcSearchCondition = new IGCSearchCondition(
-                        "name",
-                        "=",
-                        unqualifiedValue
-                );
-                igcSearchConditionSet.addCondition(igcSearchCondition);
-            } else {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        repositoryName,
-                        networkAddress);
-                throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                        EndpointMapper.class.getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
-            }
-
+            IGCSearchCondition condition = IGCRepositoryHelper.getRegexSearchCondition(
+                    repositoryHelper,
+                    repositoryName,
+                    methodName,
+                    "name",
+                    networkAddress
+            );
+            igcSearchConditionSet.addCondition(condition);
         }
 
     }

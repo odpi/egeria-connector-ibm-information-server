@@ -18,7 +18,7 @@ Hoping for a mapping that isn't there?
 | IGC type(s) | OMRS type(s) |
 | :--- | :--- |
 | `main_object` (default) | [Referenceable](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/ReferenceableMapper.java) |
-| `category` | [GlossaryCategory](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/GlossaryCategoryMapper.java) |
+| `category` | [Glossary](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/GlossaryMapper.java)**, [GlossaryCategory](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/GlossaryCategoryMapper.java) |
 | `connector` | [ConnectorType](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/ConnectorTypeMapper.java) |
 | `data_class` | [DataClass](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/DataClassMapper.java) |
 | `data_connection` | [Connection](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/ConnectionMapper.java) |
@@ -37,6 +37,8 @@ Hoping for a mapping that isn't there?
 | `user`, `group` | [ContactDetails](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/ContactDetailsMapper.java), [Team](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/TeamMapper.java) |
 | `user`, `steward_user`, `non_steward_user` | [Person](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/PersonMapper.java) |
 
+** The Glossary mapping is for all top-level categories in IGC that are _not_ named `Classifications`.
+
 ## Relationships
 
 | IGC type(s) | OMRS type(s) |
@@ -47,6 +49,7 @@ Hoping for a mapping that isn't there?
 | `data_file_record`-`data_file_field` | [AttributeForSchema](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/AttributeForSchemaMapper_RecordField.java) |
 | `database_table`-`database_column` | [NestedSchemaAttribute](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/NestedSchemaAttributeMapper.java) |
 | `database_schema`-`database_table` | [AttributeForSchema](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/AttributeForSchemaMapper_TableSchema.java) |
+| `category`-`category` | [CategoryAnchor](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/CategoryAnchorMapper.java) |
 | `category`-`category` | [CategoryHierarchyLink](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/CategoryHierarchyLinkMapper.java) |
 | `data_connection`-`connector` | [ConnectionConnectorType](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ConnectionConnectorTypeMapper.java) |
 | `host`-`connector`-`data_connection` | [ConnectionEndpoint](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ConnectionEndpointMapper.java) |
@@ -65,7 +68,8 @@ Hoping for a mapping that isn't there?
 | `term`-`term` | [ReplacementTerm](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ReplacementTermMapper.java) |
 | `main_object`-`term` | [SemanticAssignment](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/SemanticAssignmentMapper.java) |
 | `term`-`term` | [Synonym](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/SynonymMapper.java) |
-| `category`-`term` | [TermCategorization](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TermCategorizationMapper.java) |
+| `category` - `term` | [TermAnchor](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TermAnchorMapper.java) |
+| `category`-`term` | [TermCategorization](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TermCategorizationMapper.java) | 
 | `term`-`term` | [TermHASARelationship](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TermHASARelationshipMapper.java) |
 | `term`-`term` | [TermISATypeOFRelationship](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TermISATypeOFRelationshipMapper.java) |
 | `term`-`term` | [Translation](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TranslationMapper.java) |
@@ -86,10 +90,10 @@ anytime these assets are retrieved.
 ### [Confidentiality](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/classifications/ConfidentialityMapper.java)
 
 The provided implementation assigns a `Confidentiality` classification to a `GlossaryTerm` (only) using the
-`assigned_to_term` relationship from one `term` to any `term` within a _Confidentiality_ parent `category`. The
-subcategories of this _Confidentiality_ parent `category` in essence represent the `ConfidentialityLevel` enumeration in
-OMRS. With this implementation, any `assigned_to_term` relationship on a `term`, where the assigned `term` is within a
-"Confidentiality" ancestral `category` in IGC, will be mapped to a `Confidentiality` classification in OMRS.
+`assigned_to_term` relationship from one `term` to any `term` within the `Classifications/Confidentiality` parent
+`category`. The terms contained within this _Confidentiality_ `category` in essence represent the `ConfidentialityLevel`
+enumeration in OMRS. With this implementation, any `assigned_to_term` relationship on a `term`, where the assigned
+`term` is within this _Confidentiality_ `category` in IGC, will be mapped to a `Confidentiality` classification in OMRS.
 
 ### [PrimaryKey](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/classifications/PrimaryKeyMapper.java)
 
@@ -98,16 +102,17 @@ properties on a `database_column`, and if present add a `PrimaryKey` classificat
 
 ### [SpineObject](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/classifications/SpineObjectMapper.java)
 
-The provided implementation assigns a `SpineObject` classification to a `GlossaryTerm` based on the `category_path` of
-the `term` in IGC. Specifically, when the `term` is within a `category` named _Spine Objects_, the `GlossaryTerm` to
-which that `term` maps will be assigned the `SpineObject` classification.
+The provided implementation assigns a `SpineObject` classification to a `GlossaryTerm` based on the
+`referencing_categories` of the `term` in IGC. Specifically, when the `term` has a `referencing_categories` named
+link to `Classifications/SpineObject`, the `GlossaryTerm` to which that `term` maps will be assigned the `SpineObject`
+classification.
 
 ### [SubjectArea](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/classifications/SubjectAreaMapper.java)
 
-The provided implementation assigns a `SubjectArea` classification to a `GlossaryCategory` based on the `category_path`
-of the `category` in IGC. Specifically, when the `category` is a direct subcategory of another `category` whose name
-starts with _Subject Area_, the subcategory will be assigned a `SubjectArea` classification whose `name` will match the
-name of the subcategory.
+The provided implementation assigns a `SubjectArea` classification to a `GlossaryCategory` based on the
+`assigned_to_term` relationship of the `category` in IGC. Specifically, when the `category` is has an `assigned_to_term`
+relationship to the IGC `term` `Classifications/SubjectArea`, the `GlossaryCategory` will be assigned a `SubjectArea`
+classification whose `name` will match the name of the IGC `category`.
 
 ### [TypeEmbeddedAttribute](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/classifications/TypeEmbeddedAttributeMapper.java)
 

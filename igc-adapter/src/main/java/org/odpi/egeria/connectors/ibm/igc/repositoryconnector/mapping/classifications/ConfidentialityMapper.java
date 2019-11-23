@@ -83,59 +83,61 @@ public class ConfidentialityMapper extends ClassificationMapping {
 
         // Retrieve all assigned_to_terms relationships from this IGC object
         ItemList<Reference> assignedToTerms = (ItemList<Reference>) igcRestClient.getPropertyByName(fromIgcObject, "assigned_to_terms");
-        assignedToTerms.getAllPages(igcRestClient);
+        if (assignedToTerms != null) {
+            assignedToTerms.getAllPages(igcRestClient);
 
-        // For each such relationship:
-        for (Reference assignedTerm : assignedToTerms.getItems()) {
+            // For each such relationship:
+            for (Reference assignedTerm : assignedToTerms.getItems()) {
 
-            // Retrieve the identity characteristics (ie. the parent category) of the related term
-            Identity termIdentity = assignedTerm.getIdentity(igcRestClient);
-            Identity catIdentity = termIdentity.getParentIdentity();
+                // Retrieve the identity characteristics (ie. the parent category) of the related term
+                Identity termIdentity = assignedTerm.getIdentity(igcRestClient);
+                Identity catIdentity = termIdentity.getParentIdentity();
 
-            // Only do something with the assigned term if its immediate parent category is named
-            // "Confidentiality"
-            if (catIdentity.toString().endsWith("Confidentiality")) {
+                // Only do something with the assigned term if its immediate parent category is named
+                // "Confidentiality"
+                if (catIdentity.toString().endsWith("Confidentiality")) {
 
-                InstanceProperties classificationProperties = new InstanceProperties();
+                    InstanceProperties classificationProperties = new InstanceProperties();
 
-                String confidentialityName = assignedTerm.getName();
-                int spaceIndex = confidentialityName.indexOf(" ");
-                if (spaceIndex > 0) {
+                    String confidentialityName = assignedTerm.getName();
+                    int spaceIndex = confidentialityName.indexOf(" ");
+                    if (spaceIndex > 0) {
 
-                    String level = confidentialityName.substring(0, spaceIndex);
+                        String level = confidentialityName.substring(0, spaceIndex);
 
-                    if (level != null) {
-                        try {
-                            int parsedLevel = Integer.parseInt(level);
-                            classificationProperties = igcomrsRepositoryConnector.getRepositoryHelper().addIntPropertyToInstance(
-                                    igcomrsRepositoryConnector.getRepositoryName(),
-                                    classificationProperties,
-                                    "level",
-                                    parsedLevel,
-                                    methodName
-                            );
-                        } catch (NumberFormatException e) {
-                            log.error("Unable to detect a level in the Confidentiality classification: {}", confidentialityName, e);
+                        if (level != null) {
+                            try {
+                                int parsedLevel = Integer.parseInt(level);
+                                classificationProperties = igcomrsRepositoryConnector.getRepositoryHelper().addIntPropertyToInstance(
+                                        igcomrsRepositoryConnector.getRepositoryName(),
+                                        classificationProperties,
+                                        "level",
+                                        parsedLevel,
+                                        methodName
+                                );
+                            } catch (NumberFormatException e) {
+                                log.error("Unable to detect a level in the Confidentiality classification: {}", confidentialityName, e);
+                            }
                         }
-                    }
-                    try {
-                        Classification classification = getMappedClassification(
-                                igcomrsRepositoryConnector,
-                                classificationProperties,
-                                fromIgcObject,
-                                userId
-                        );
-                        classifications.add(classification);
-                    } catch (RepositoryErrorException e) {
-                        log.error("Unable to map Confidentiality classification.", e);
+                        try {
+                            Classification classification = getMappedClassification(
+                                    igcomrsRepositoryConnector,
+                                    classificationProperties,
+                                    fromIgcObject,
+                                    userId
+                            );
+                            classifications.add(classification);
+                        } catch (RepositoryErrorException e) {
+                            log.error("Unable to map Confidentiality classification.", e);
+                        }
+
+                    } else {
+                        log.error("Unable to detect a level in the Confidentiality classification: {}", confidentialityName);
                     }
 
-                } else {
-                    log.error("Unable to detect a level in the Confidentiality classification: {}", confidentialityName);
                 }
 
             }
-
         }
 
     }

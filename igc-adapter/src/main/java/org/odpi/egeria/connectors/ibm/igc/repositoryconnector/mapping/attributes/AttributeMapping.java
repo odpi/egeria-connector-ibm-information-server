@@ -119,7 +119,6 @@ public abstract class AttributeMapping {
 
         if (propertyValue != null) {
             String propertyName = property.getAttributeName();
-            if (log.isDebugEnabled()) { log.debug("Adding property " + propertyName + " for " + methodName); }
 
             if (property.getAttributeType().getCategory() == AttributeTypeDefCategory.PRIMITIVE) {
                 try {
@@ -213,13 +212,17 @@ public abstract class AttributeMapping {
                             } else {
                                 stringValue = propertyValue.toString();
                             }
-                            resultingProperties = omrsRepositoryHelper.addStringPropertyToInstance(
-                                    sourceName,
-                                    properties,
-                                    propertyName,
-                                    stringValue,
-                                    methodName
-                            );
+                            // IGC will respond with empty strings when there is no value set, so only bother
+                            // adding a string value to the mapped property if it is non-empty
+                            if (stringValue != null && !stringValue.equals("")) {
+                                resultingProperties = omrsRepositoryHelper.addStringPropertyToInstance(
+                                        sourceName,
+                                        properties,
+                                        propertyName,
+                                        stringValue,
+                                        methodName
+                                );
+                            }
                             break;
                         case OM_PRIMITIVE_TYPE_DATE:
                             if (propertyValue instanceof Date) {
@@ -245,8 +248,6 @@ public abstract class AttributeMapping {
             } else {
                 if (log.isErrorEnabled()) { log.error("Cannot translate non-primitive property {} this way.", propertyName); }
             }
-        } else {
-            if (log.isDebugEnabled()) { log.debug("Null property"); }
         }
 
         return resultingProperties;
@@ -271,8 +272,8 @@ public abstract class AttributeMapping {
                 PrimitiveDefCategory primitiveType = actualValue.getPrimitiveDefCategory();
                 switch (primitiveType) {
                     case OM_PRIMITIVE_TYPE_DATE:
-                        Date date = (Date) actualValue.getPrimitiveValue();
-                        igcValue = "" + date.getTime();
+                        Long epoch = (Long) actualValue.getPrimitiveValue();
+                        igcValue = "" + epoch;
                         break;
                     case OM_PRIMITIVE_TYPE_BOOLEAN:
                     case OM_PRIMITIVE_TYPE_BYTE:

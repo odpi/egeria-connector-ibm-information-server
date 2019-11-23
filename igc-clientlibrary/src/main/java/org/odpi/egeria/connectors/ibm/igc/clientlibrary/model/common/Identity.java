@@ -21,6 +21,7 @@ import java.util.Objects;
 public class Identity {
 
     private static final Logger log = LoggerFactory.getLogger(Identity.class);
+    private static final String SEPARATOR_FOR_RID = "__RID__";
 
     private List<Reference> context;
 
@@ -149,7 +150,7 @@ public class Identity {
         sb.append(")=");
         sb.append(name);
         if (requiresRidToBeUnique(type)) {
-            sb.append("_");
+            sb.append(SEPARATOR_FOR_RID);
             sb.append(id);
         }
     }
@@ -168,10 +169,21 @@ public class Identity {
         }
         if (assetType.equals("database_column") && (ctxAssetType.equals("database_table") || ctxAssetType.equals("view"))) {
             pathSoFar = pathSoFar + "database_table_or_view";
-        } else if (ctxAssetType.equals("category")) {
-            pathSoFar = pathSoFar + "parent_category";
         } else {
-            pathSoFar = pathSoFar + IGCRestConstants.getAssetTypeForSearch(ctxAssetType);
+            switch (ctxAssetType) {
+                case "category":
+                    pathSoFar = pathSoFar + "parent_category";
+                    break;
+                case "information_governance_policy":
+                    pathSoFar = pathSoFar + "parent_policy";
+                    break;
+                case "data_class":
+                    pathSoFar = pathSoFar + "parent_data_class";
+                    break;
+                default:
+                    pathSoFar = pathSoFar + IGCRestConstants.getAssetTypeForSearch(ctxAssetType);
+                    break;
+            }
         }
         return pathSoFar;
     }
@@ -200,10 +212,24 @@ public class Identity {
             );
             igcSearchConditionSet.addCondition(condition);
         } else {
-            if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", (propertyPath == null ? "name" : propertyPath + ".name"), "=", ctxName); }
+            String ctxTypeToSearch = IGCRestConstants.getAssetTypeForSearch(ctxType);
+            String nameProperty = "name";
+            String operator = "=";
+            if (ctxTypeToSearch.equals("group")) {
+                nameProperty = "group_name";
+            } else if (ctxTypeToSearch.equals("user")) {
+                nameProperty = "full_name";
+                operator = "like %{0}";
+                // For users, we cannot search on the unique '_name' and there is no corresponding 'name' property,
+                // so the best we can do is try to cut off the courtesy title portion and search for an ends-with on
+                // the full name...
+                ctxName = ctxName.substring(ctxName.indexOf(" ") + 1);
+            }
+            String searchFor = (propertyPath == null ? nameProperty : propertyPath + "." + nameProperty);
+            if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", searchFor, operator, ctxName); }
             IGCSearchCondition condition = new IGCSearchCondition(
-                    (propertyPath == null ? "name" : propertyPath + ".name"),
-                    "=",
+                    searchFor,
+                    operator,
                     ctxName
             );
             igcSearchConditionSet.addCondition(condition);
@@ -299,6 +325,21 @@ public class Identity {
      * @see #toString()
      */
     public static Identity getFromString(String identity, IGCRestClient igcRestClient) {
+        return getFromString(identity, igcRestClient, true);
+    }
+
+    /**
+     * Builds an Identity based on an identity string (or null if unable to construct an Identity from the
+     * string).
+     *
+     * @param identity the string representing a qualified identity
+     * @param igcRestClient connectivity to an IGC environment
+     * @param warnOnNotFound indicates whether to log a warning (true) or not (false) in case the type inferred from
+     *                       the identity cannot be found
+     * @return Identity
+     * @see #toString()
+     */
+    public static Identity getFromString(String identity, IGCRestClient igcRestClient, boolean warnOnNotFound) {
 
         List<Reference> context = new ArrayList<>();
 
@@ -309,19 +350,26 @@ public class Identity {
         for (int i = 0; i < components.length; i++) {
             String component = components[i];
             String[] tokens = component.split("=");
-            String type = tokens[0].substring(1, tokens[0].length() - 1);
-            String name = tokens[1];
-            String id = null;
-            if (requiresRidToBeUnique(type)) {
-                id = name.split("_")[1];
-            }
-            if (i == components.length - 1) {
-                assetType = type;
-                assetName = name;
-                assetId = id;
+            if (tokens.length == 2) {
+                String type = tokens[0].substring(1, tokens[0].length() - 1);
+                String name = tokens[1];
+                String id = null;
+                if (requiresRidToBeUnique(type)) {
+                    id = name.split(SEPARATOR_FOR_RID)[1];
+                }
+                if (i == components.length - 1) {
+                    assetType = type;
+                    assetName = name;
+                    assetId = id;
+                } else {
+                    Reference item = new Reference(name, type, id);
+                    context.add(item);
+                }
             } else {
-                Reference item = new Reference(name, type, id);
-                context.add(item);
+                // If we could not form the tokens as we expect, short-circuit out as we cannot reconstruct
+                // the identity from this string
+                assetType = null;
+                break;
             }
         }
 
@@ -332,7 +380,7 @@ public class Identity {
                 ident = new Identity(context, assetType, assetName, assetId);
             }
         } catch (Exception e) {
-            if (log.isErrorEnabled()) { log.error("Unable to find registered IGC type '{}' -- cannot construct an IGC identity.", assetType); }
+            if (log.isWarnEnabled() && warnOnNotFound) { log.warn("Unable to find registered IGC type '{}' -- cannot construct an IGC identity.", assetType); }
         }
         return ident;
 

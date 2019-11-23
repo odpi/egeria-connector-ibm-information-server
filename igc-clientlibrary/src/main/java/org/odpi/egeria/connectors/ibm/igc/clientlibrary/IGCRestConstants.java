@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeReference;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -23,6 +24,8 @@ public class IGCRestConstants {
 
     public static final String IGC_REST_COMMON_MODEL_PKG = "org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common";
     public static final String IGC_REST_BASE_MODEL_PKG = "org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base";
+
+    private static final IGCSearchCondition NO_RESULTS_CONDITION = new IGCSearchCondition("_id", "=", "NONEXISTENT");
 
     private static final List<String> MODIFICATION_DETAILS = createModificationDetails();
     private static List<String> createModificationDetails() {
@@ -349,6 +352,15 @@ public class IGCRestConstants {
                 break;
         }
         return typeForSearch;
+    }
+
+    /**
+     * Retrieve a search condition that will ensure no results are returned from a search.
+     *
+     * @return IGCSearchCondition
+     */
+    public static IGCSearchCondition getConditionToForceNoSearchResults() {
+        return NO_RESULTS_CONDITION;
     }
 
     /**

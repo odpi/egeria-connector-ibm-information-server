@@ -52,7 +52,9 @@ public abstract class ClassificationMapping extends InstanceMapping {
                                  String omrsClassificationType) {
         this.igcAssetType = igcAssetType;
         this.igcRelationshipProperties = new ArrayList<>();
-        this.igcRelationshipProperties.add(igcRelationshipProperty);
+        if (igcRelationshipProperty != null) {
+            this.igcRelationshipProperties.add(igcRelationshipProperty);
+        }
         this.omrsEntityType = omrsEntityType;
         this.omrsClassificationType = omrsClassificationType;
         this.excludeIgcAssetType = new HashSet<>();
@@ -112,8 +114,13 @@ public abstract class ClassificationMapping extends InstanceMapping {
      * @return {@code Set<String>}
      */
     public Set<String> getMappedOmrsPropertyNames() {
-        HashSet<String> omrsProperties = new HashSet<>(mappedOmrsPropertyNames);
-        omrsProperties.addAll(getLiteralPropertyMappings());
+        HashSet<String> omrsProperties = new HashSet<>();
+        if (mappedOmrsPropertyNames != null) {
+            omrsProperties.addAll(mappedOmrsPropertyNames);
+        }
+        if (getLiteralPropertyMappings() != null) {
+            omrsProperties.addAll(getLiteralPropertyMappings());
+        }
         omrsProperties.addAll(mappingByOmrsProperty.keySet());
         return omrsProperties;
     }
@@ -131,8 +138,11 @@ public abstract class ClassificationMapping extends InstanceMapping {
      * @return {@code Set<String>}
      */
     public Set<String> getMappedIgcPropertyNames() {
-        HashSet<String> igcProperties = new HashSet<>(igcRelationshipProperties);
-        igcProperties.addAll(mappingByIgcProperty.keySet());
+        HashSet<String> igcProperties = new HashSet<>();
+        if (igcRelationshipProperties != null) {
+            igcProperties.addAll(igcRelationshipProperties);
+        }
+        igcProperties.addAll(getSimpleMappedIgcProperties());
         return igcProperties;
     }
 
@@ -182,9 +192,13 @@ public abstract class ClassificationMapping extends InstanceMapping {
      * @param omrsPropertyName the OMRS property name to be mapped
      */
     public final void addSimplePropertyMapping(String igcPropertyName, String omrsPropertyName) {
-        EntityMapping.PropertyMapping pm = new EntityMapping.PropertyMapping(igcPropertyName, omrsPropertyName);
-        mappingByOmrsProperty.put(omrsPropertyName, pm);
-        mappingByIgcProperty.put(igcPropertyName, pm);
+        if (omrsPropertyName != null && igcPropertyName != null) {
+            EntityMapping.PropertyMapping pm = new EntityMapping.PropertyMapping(igcPropertyName, omrsPropertyName);
+            mappingByOmrsProperty.put(omrsPropertyName, pm);
+            mappingByIgcProperty.put(igcPropertyName, pm);
+        } else {
+            log.warn("Attempted to add null property to mapping -- IGC = {}, OMRS = {}", igcPropertyName, omrsPropertyName);
+        }
     }
 
     /**
@@ -300,7 +314,6 @@ public abstract class ClassificationMapping extends InstanceMapping {
      */
     public boolean matchesAssetType(String igcAssetType) {
         String simplifiedType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
-        if (log.isDebugEnabled()) { log.debug("checking for matching asset between {} and {}", this.igcAssetType, simplifiedType); }
         return (
                 this.igcAssetType.equals(simplifiedType)
                         || (this.igcAssetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !this.excludeIgcAssetType.contains(simplifiedType))
