@@ -484,7 +484,7 @@
 					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"0db3e6ec-f5ef-4d75-ae38-b7ee6fd6ec0a\",\n\t\"pageSize\": 10\n}"
 				},
 				"url": {
-					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property-value?searchCriteria=.%2A%5CQaddress%5CE.%2A",
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property-value?searchCriteria=.%2A%5CQAddress%5CE.%2A",
 					"host": [
 						"{{baseURL}}"
 					],
@@ -502,7 +502,7 @@
 					"query": [
 						{
 							"key": "searchCriteria",
-							"value": ".%2A%5CQaddress%5CE.%2A"
+							"value": ".%2A%5CQAddress%5CE.%2A"
 						}
 					]
 				}
@@ -583,11 +583,11 @@
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
-							"pm.test(\"8 total results\", function () {",
-							"    pm.expect(jsonData.entities).to.have.lengthOf(8);",
+							"pm.test(\"7 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(7);",
 							"});",
 							"pm.test(\"Proper GlossaryTerm entities\", function() {",
-							"    for (let i = 0; i < 8; i++) {",
+							"    for (let i = 0; i < 7; i++) {",
 							"        pm.expect(jsonData.entities[i].type.typeDefName).to.equal(\"GlossaryTerm\");",
 							"        pm.expect(jsonData.entities[i].version).to.be.above(1);",
 							"    }",
@@ -609,7 +609,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"0db3e6ec-f5ef-4d75-ae38-b7ee6fd6ec0a\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ANY\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"displayName\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\Qaddress\\\\E.*\"\n\t\t\t},\n\t\t\t\"summary\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\Qnumber\\\\E.*\"\n\t\t\t}\n\t\t}\n\t}\n}"
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"0db3e6ec-f5ef-4d75-ae38-b7ee6fd6ec0a\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ANY\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"displayName\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\QAddress\\\\E.*\"\n\t\t\t},\n\t\t\t\"summary\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\QNumber\\\\E.*\"\n\t\t\t}\n\t\t}\n\t}\n}"
 				},
 				"url": {
 					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property",
@@ -669,7 +669,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"0db3e6ec-f5ef-4d75-ae38-b7ee6fd6ec0a\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ALL\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"displayName\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\Qaddress\\\\E.*\"\n\t\t\t},\n\t\t\t\"summary\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\Qnumber\\\\E.*\"\n\t\t\t}\n\t\t}\n\t}\n}"
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"0db3e6ec-f5ef-4d75-ae38-b7ee6fd6ec0a\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ALL\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"displayName\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\QAddress\\\\E.*\"\n\t\t\t},\n\t\t\t\"summary\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\Qnumber\\\\E.*\"\n\t\t\t}\n\t\t}\n\t}\n}"
 				},
 				"url": {
 					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property",
@@ -704,17 +704,15 @@
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
-							"pm.test(\"4 total results\", function () {",
-							"    pm.expect(jsonData.entities).to.have.lengthOf(4);",
+							"pm.test(\"1 total result\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(1);",
 							"});",
-							"pm.test(\"Proper Database or DataFile entities\", function() {",
-							"    for (let i = 0; i < 4; i++) {",
-							"        pm.expect(jsonData.entities[i].type.typeDefName).to.be.oneOf([\"Database\",\"DataFile\"]);",
-							"        pm.expect(jsonData.entities[i].version).to.be.above(1);",
-							"    }",
+							"pm.test(\"Proper Database entity\", function() {",
+							"    pm.expect(jsonData.entities[0].type.typeDefName).to.equal(\"Database\");",
+							"    pm.expect(jsonData.entities[0].version).to.be.above(1);",
 							"});",
 							"",
-							"const dbGuid = jsonData.entities[3].guid;",
+							"const dbGuid = jsonData.entities[0].guid;",
 							"pm.environment.set('rid_database', dbGuid);",
 							""
 						],
@@ -775,11 +773,11 @@
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
-							"pm.test(\"14 total results\", function () {",
-							"    pm.expect(jsonData.entities).to.have.lengthOf(14);",
+							"pm.test(\"13 total results\", function () {",
+							"    pm.expect(jsonData.entities).to.have.lengthOf(13);",
 							"});",
 							"pm.test(\"Proper GlossaryTerm or DataClass entity\", function() {",
-							"    for (let i = 0; i < 14; i++) {",
+							"    for (let i = 0; i < 13; i++) {",
 							"        pm.expect(jsonData.entities[i].type.typeDefName).to.be.oneOf([\"GlossaryTerm\",\"DataClass\"]);",
 							"        pm.expect(jsonData.entities[i].version).to.be.above(1);",
 							"    }",
@@ -804,7 +802,7 @@
 					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"pageSize\": 500\n}"
 				},
 				"url": {
-					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property-value?searchCriteria=.%2A%5CQaddress%5CE.%2A",
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property-value?searchCriteria=.%2A%5CQAddress%5CE.%2A",
 					"host": [
 						"{{baseURL}}"
 					],
@@ -822,7 +820,7 @@
 					"query": [
 						{
 							"key": "searchCriteria",
-							"value": ".%2A%5CQaddress%5CE.%2A"
+							"value": ".%2A%5CQAddress%5CE.%2A"
 						}
 					]
 				}
@@ -871,7 +869,7 @@
 					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"pageSize\": 500,\n\t\"limitResultsByClassification\": [\"Confidentiality\"]\n}"
 				},
 				"url": {
-					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property-value?searchCriteria=.%2A%5CQaddress%5CE.%2A",
+					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property-value?searchCriteria=.%2A%5CQAddress%5CE.%2A",
 					"host": [
 						"{{baseURL}}"
 					],
@@ -889,7 +887,7 @@
 					"query": [
 						{
 							"key": "searchCriteria",
-							"value": ".%2A%5CQaddress%5CE.%2A"
+							"value": ".%2A%5CQAddress%5CE.%2A"
 						}
 					]
 				}
@@ -3427,7 +3425,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"0db3e6ec-f5ef-4d75-ae38-b7ee6fd6ec0a\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ALL\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"displayName\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\Qemployee\\\\E.*\"\n\t\t\t}\n\t\t}\n\t}\n}"
+					"raw": "{\n\t\"class\": \"EntityPropertyFindRequest\",\n\t\"typeGUID\": \"0db3e6ec-f5ef-4d75-ae38-b7ee6fd6ec0a\",\n\t\"pageSize\": 10,\n\t\"matchCriteria\": \"ALL\",\n\t\"matchProperties\": {\n\t\t\"class\": \"InstanceProperties\",\n\t\t\"instanceProperties\": {\n\t\t\t\"displayName\": {\n\t\t\t\t\"class\": \"PrimitivePropertyValue\",\n\t\t\t\t\"instancePropertyCategory\": \"PRIMITIVE\",\n\t\t\t\t\"primitiveDefCategory\": \"OM_PRIMITIVE_TYPE_STRING\",\n\t\t\t\t\"primitiveValue\": \".*\\\\QEmployee\\\\E.*\"\n\t\t\t}\n\t\t}\n\t}\n}"
 				},
 				"url": {
 					"raw": "{{baseURL}}/servers/{{server}}/open-metadata/repository-services/users/{{user}}/instances/entities/by-property",
