@@ -1266,6 +1266,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                             mapping,
                             this.igcRestClient.search(igcSearch),
                             entityDetails,
+                            null,
+                            null,
+                            null,
                             pageSize,
                             userId
                     );
@@ -1503,6 +1506,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                     mapping,
                                     this.igcRestClient.search(igcSearch),
                                     entityDetails,
+                                    null,
+                                    null,
+                                    searchCriteria,
                                     pageSize,
                                     userId
                             );
