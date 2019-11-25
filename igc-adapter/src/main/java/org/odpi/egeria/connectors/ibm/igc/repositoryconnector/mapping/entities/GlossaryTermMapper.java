@@ -2,7 +2,13 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.SpineAttributeMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.*;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ConfidentialityMapper;
@@ -52,6 +58,32 @@ public class GlossaryTermMapper extends ReferenceableMapper {
         addClassificationMapper(SpineObjectMapper.getInstance(null));
         addClassificationMapper(SpineAttributeMapper.getInstance(null));
 
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isOmrsType(IGCRestClient igcRestClient, Reference igcObject) {
+        String assetType = IGCRestConstants.getAssetTypeForSearch(igcObject.getType());
+        if (assetType.equals("term")) {
+            Identity termIdentity = igcObject.getIdentity(igcRestClient);
+            Identity ultimateParentIdentity = termIdentity.getUltimateParentIdentity();
+            return ultimateParentIdentity != null && !ultimateParentIdentity.getName().equals("Classifications");
+        }
+        return false;
+    }
+
+    /**
+     * Search for GlossaryTerms by looking for a term not contained under the Classifications category.
+     *
+     * @return IGCSearchConditionSet - the IGC search criteria to find GlossaryTerm entities
+     */
+    @Override
+    public IGCSearchConditionSet getIGCSearchCriteria() {
+        IGCSearchCondition notClassification = new IGCSearchCondition("category_path.name", "=", "Classifications", true);
+        IGCSearchConditionSet conditions = new IGCSearchConditionSet(notClassification);
+        conditions.setMatchAnyCondition(false);
+        return conditions;
     }
 
 }
