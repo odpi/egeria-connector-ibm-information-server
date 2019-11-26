@@ -36,6 +36,8 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class IGCRepositoryHelper {
 
@@ -429,6 +431,9 @@ public class IGCRepositoryHelper {
                         mapping,
                         this.igcRestClient.search(igcSearch),
                         entityDetails,
+                        matchProperties,
+                        matchCriteria,
+                        null,
                         pageSize,
                         userId
                 );
@@ -481,12 +486,18 @@ public class IGCRepositoryHelper {
      * @param mapper the EntityMapping that should be used to translate the results
      * @param results the IGC search results
      * @param entityDetails the list of EntityDetails to append
+     * @param matchProperties the set of properties that should be matched (or null if none)
+     * @param matchCriteria the criteria by which the properties should be matched (or null if none)
+     * @param searchCriteria the string search criteria that should be matched (or null if none)
      * @param pageSize the number of results per page (0 for all results)
      * @param userId the user making the request
      */
     void processResults(EntityMapping mapper,
                         ItemList<Reference> results,
                         List<EntityDetail> entityDetails,
+                        InstanceProperties matchProperties,
+                        MatchCriteria matchCriteria,
+                        String searchCriteria,
                         int pageSize,
                         String userId) throws RepositoryErrorException {
 
@@ -516,7 +527,7 @@ public class IGCRepositoryHelper {
                 } catch (EntityNotKnownException e) {
                     if (log.isErrorEnabled()) { log.error("Unable to find entity: {}", idToLookup); }
                 }
-                if (ed != null) {
+                if (ed != null && includeResult(ed, matchProperties, matchCriteria, searchCriteria)) {
                     entityDetails.add(ed);
                     // Stop adding details if we have hit the page size
                     if (pageSize > 0 && entityDetails.size() == pageSize) {
@@ -529,7 +540,7 @@ public class IGCRepositoryHelper {
         // If we haven't filled a page of results (because we needed to skip some above), recurse...
         if (results.hasMorePages() && entityDetails.size() < pageSize) {
             results.getNextPage(this.igcRestClient);
-            processResults(mapper, results, entityDetails, pageSize, userId);
+            processResults(mapper, results, entityDetails, matchProperties, matchCriteria, searchCriteria, pageSize, userId);
         }
 
     }
@@ -640,6 +651,115 @@ public class IGCRepositoryHelper {
         if (results.hasMorePages() && relationships.size() < pageSize) {
             results.getNextPage(this.igcRestClient);
             processResults(mapper, results, relationships, pageSize, userId);
+        }
+
+    }
+
+    /**
+     * Indicates whether we should include the provided EntityDetail as a search result. This is necessary to enforce
+     * case-sensitivity, which IGC's REST-based searches are not able to enforce themselves.
+     *
+     * @param ed the EntityDetail to check
+     * @param matchProperties the set of match properties against which to check (or null if none)
+     * @param matchCriteria the criteria by which to check the properties (or null if none)
+     * @param searchCriteria the single string-based property to match against (or null if none)
+     * @return boolean
+     */
+    private boolean includeResult(EntityDetail ed,
+                                  InstanceProperties matchProperties,
+                                  MatchCriteria matchCriteria,
+                                  String searchCriteria) {
+
+        if (matchProperties != null) {
+            Map<String, InstancePropertyValue> propertiesToMatch = matchProperties.getInstanceProperties();
+            InstanceProperties edProperties = ed.getProperties();
+            if (edProperties == null) {
+                edProperties = new InstanceProperties();
+            }
+            if (propertiesToMatch != null) {
+
+                for (Map.Entry<String, InstancePropertyValue> toMatch : propertiesToMatch.entrySet()) {
+                    String propertyName = toMatch.getKey();
+                    InstancePropertyValue valueToMatch = toMatch.getValue();
+                    InstancePropertyValue edValue = edProperties.getPropertyValue(propertyName);
+                    boolean bValuesMatch = valuesMatch(valueToMatch, edValue);
+                    if (matchCriteria.equals(MatchCriteria.ANY) && bValuesMatch) {
+                        // If we just need to match one of the criteria and the values match, immediately return true
+                        return true;
+                    } else if (matchCriteria.equals(MatchCriteria.NONE) && bValuesMatch) {
+                        // If we need to match no criteria and one of them matches, immediately return false
+                        return false;
+                    } else if (matchCriteria.equals(MatchCriteria.ALL) && !bValuesMatch) {
+                        // If we need to match all criteria and one of them does not match, immediately return false
+                        return false;
+                    }
+                }
+                // If we manage to get through the loop above without returning, we must have matched successfully
+                // if we were either matching everything or nothing
+                return !matchCriteria.equals(MatchCriteria.ANY);
+
+            }
+            // If there were no properties defined to match (empty list), then return true
+            return true;
+        } else if (searchCriteria != null && !searchCriteria.equals("")) {
+            InstanceProperties edProperties = ed.getProperties();
+            if (edProperties == null) {
+                return false;
+            }
+            Pattern pattern = Pattern.compile(searchCriteria);
+            Map<String, InstancePropertyValue> allProperties = edProperties.getInstanceProperties();
+            for (InstancePropertyValue value : allProperties.values()) {
+                if (value.getInstancePropertyCategory().equals(InstancePropertyCategory.PRIMITIVE)
+                        && ((PrimitivePropertyValue)value).getPrimitiveDefCategory().equals(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_STRING)) {
+                    Matcher matcher = pattern.matcher(value.valueAsString());
+                    // Return true immediately on the first match we find
+                    if (matcher.matches()) {
+                        return true;
+                    }
+                }
+            }
+            // If we manage to get through all of the properties without finding a match, return false
+            return false;
+        }
+        // If either sets of criteria were empty, we should return true
+        return true;
+
+    }
+
+    /**
+     * Indicates whether the provided values match each other. This is necessary to check not only simple equality,
+     * but also cases where one of the values could contain a regular expression and the other needs to be matched
+     * against it.
+     *
+     * @param valueWithPossibleRegex the value that could include a regular expression
+     * @param valueToCheck the value to check against the first value
+     * @return boolean
+     */
+    private boolean valuesMatch(InstancePropertyValue valueWithPossibleRegex,
+                                InstancePropertyValue valueToCheck) {
+
+        if (valueWithPossibleRegex == null && valueToCheck == null) {
+            return true;
+        }
+        if (valueWithPossibleRegex != null && valueToCheck == null) {
+            return false;
+        }
+        if (valueWithPossibleRegex == null) {
+            return false;
+        }
+
+        // At this point, both values must be non-null
+
+        // If the value we are checking against is a primitive and a string, we should treat it as a regular expression
+        if (valueWithPossibleRegex.getInstancePropertyCategory().equals(InstancePropertyCategory.PRIMITIVE)
+            && ((PrimitivePropertyValue) valueWithPossibleRegex).getPrimitiveDefCategory().equals(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_STRING)) {
+            String searchCriteria = valueWithPossibleRegex.valueAsString();
+            Pattern pattern = Pattern.compile(searchCriteria);
+            Matcher matcher = pattern.matcher(valueToCheck.valueAsString());
+            return matcher.matches();
+        } else {
+            // Otherwise, we just check their values for equality directly
+            return valueWithPossibleRegex.equals(valueToCheck);
         }
 
     }
@@ -1429,43 +1549,14 @@ public class IGCRepositoryHelper {
                     case OM_PRIMITIVE_TYPE_STRING:
                     default:
                         String candidateValue = actualValue.getPrimitiveValue().toString();
-                        String unqualifiedValue = repositoryHelper.getUnqualifiedLiteralString(candidateValue);
-                        if (repositoryHelper.isContainsRegex(candidateValue)) {
-                            igcSearchConditionSet.addCondition(new IGCSearchCondition(
-                                    igcPropertyName,
-                                    "like %{0}%",
-                                    unqualifiedValue
-                            ));
-                        } else if (repositoryHelper.isStartsWithRegex(candidateValue)) {
-                            igcSearchConditionSet.addCondition(new IGCSearchCondition(
-                                    igcPropertyName,
-                                    "like {0}%",
-                                    unqualifiedValue
-                            ));
-                        } else if (repositoryHelper.isEndsWithRegex(candidateValue)) {
-                            igcSearchConditionSet.addCondition(new IGCSearchCondition(
-                                    igcPropertyName,
-                                    "like %{0}",
-                                    unqualifiedValue
-                            ));
-                        } else if (repositoryHelper.isExactMatchRegex(candidateValue)) {
-                            igcSearchConditionSet.addCondition(new IGCSearchCondition(
-                                    igcPropertyName,
-                                    "=",
-                                    unqualifiedValue
-                            ));
-                        } else {
-                            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
-                            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                                    repositoryName,
-                                    candidateValue);
-                            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                                    IGCOMRSMetadataCollection.class.getName(),
-                                    methodName,
-                                    errorMessage,
-                                    errorCode.getSystemAction(),
-                                    errorCode.getUserAction());
-                        }
+                        IGCSearchCondition regex = IGCRepositoryHelper.getRegexSearchCondition(
+                                repositoryHelper,
+                                repositoryName,
+                                methodName,
+                                igcPropertyName,
+                                candidateValue
+                        );
+                        igcSearchConditionSet.addCondition(regex);
                         break;
                 }
                 break;
