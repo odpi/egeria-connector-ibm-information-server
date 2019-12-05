@@ -8,6 +8,7 @@ More detailed documentation related to the connector is contained in this direct
 - [Implemented IGC -> OMRS type mappings](mappings)
 - [Extensions made to IGC to implement certain OMRS details](ibm-igc-extensions.md)
 - [Notes for developers](developers)
+- [Results from Conformance Test Suite](cts-results)
 
 
 ----
