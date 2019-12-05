@@ -422,9 +422,11 @@ public class IGCRestClient {
 
         HttpEntity<MultiValueMap<String, Object>> toSend = new HttpEntity<>(body, headers);
 
+        String url = baseURL + (endpoint.startsWith("/") ? endpoint : "/" + endpoint);
+
         try {
             response = restTemplate.exchange(
-                    baseURL + endpoint,
+                    url,
                     method,
                     toSend,
                     String.class
@@ -433,7 +435,7 @@ public class IGCRestClient {
             log.warn("Request failed -- session may have expired, retrying...", e);
             // If the response was forbidden (fails with exception), the session may have expired -- create a new one
             response = openNewSessionWithUpload(
-                    baseURL + endpoint,
+                    url,
                     method,
                     file,
                     forceLogin
@@ -519,7 +521,7 @@ public class IGCRestClient {
      */
     public String makeRequest(String endpoint, HttpMethod method, MediaType contentType, String payload) {
         ResponseEntity<String> response = makeRequest(
-                baseURL + endpoint,
+                baseURL + (endpoint.startsWith("/") ? endpoint : "/" + endpoint),
                 method,
                 contentType,
                 payload,
@@ -545,7 +547,7 @@ public class IGCRestClient {
      */
     public String makeCreateRequest(String endpoint, HttpMethod method, MediaType contentType, String payload) {
         ResponseEntity<String> response = makeRequest(
-                baseURL + endpoint,
+                baseURL + (endpoint.startsWith("/") ? endpoint : "/" + endpoint),
                 method,
                 contentType,
                 payload,
