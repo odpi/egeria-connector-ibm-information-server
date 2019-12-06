@@ -18,6 +18,8 @@ spec:
       port: 8080
     - name: web
       port: 9446
+    - name: zookeeper
+      port: 52181
     - name: kafka
       port: 59092
   selector:
@@ -124,7 +126,7 @@ spec:
               path: /ibm/iis/launchpad
               port: 9446
               scheme: "HTTPS"
-            initialDelaySeconds: 180
+            initialDelaySeconds: 240
             periodSeconds: 20
             failureThreshold: 12
           readinessProbe:
@@ -132,10 +134,10 @@ spec:
               path: /ibm/iis/launchpad
               port: 9446
               scheme: "HTTPS"
-            initialDelaySeconds: 180
+            initialDelaySeconds: 240
             periodSeconds: 20
-            timeoutSeconds: 3
-            failureThreshold: 3
+            timeoutSeconds: 5
+            failureThreshold: 5
           resources: {}
 
 status: {}
