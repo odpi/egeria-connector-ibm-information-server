@@ -126,18 +126,17 @@ spec:
               path: /ibm/iis/launchpad
               port: 9446
               scheme: "HTTPS"
-            initialDelaySeconds: 240
+            initialDelaySeconds: 720
             periodSeconds: 20
-            failureThreshold: 12
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /ibm/iis/launchpad
               port: 9446
               scheme: "HTTPS"
-            initialDelaySeconds: 240
+            initialDelaySeconds: 300
             periodSeconds: 20
-            timeoutSeconds: 5
-            failureThreshold: 5
+            failureThreshold: 12
           resources: {}
 
 status: {}
