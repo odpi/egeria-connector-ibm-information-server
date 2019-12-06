@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the Egeria project.
 ---
-name: egeria-connector-ibm-information-server-cts
+name: ec-cts-ibmis
 description: ODPi Egeria CTS automation for the IBM Information Server connectors
 apiVersion: v1
 version: 0.1
