@@ -13,6 +13,8 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 
+import java.util.List;
+
 /**
  * POJO for the {@code data_item} asset type in IGC, displayed as '{@literal Data Item}' in the IGC UI.
  * <br><br>
@@ -106,7 +108,7 @@ public class DataItem extends InformationAsset {
     protected String itemKind;
 
     @JsonProperty("length")
-    protected Number length;
+    protected List<Number> length;
 
     @JsonProperty("level")
     protected Number level;
@@ -359,17 +361,17 @@ public class DataItem extends InformationAsset {
 
     /**
      * Retrieve the {@code length} property (displayed as '{@literal Maximum Length}') of the object.
-     * @return {@code Number}
+     * @return {@code List<Number>}
      */
     @JsonProperty("length")
-    public Number getLength() { return this.length; }
+    public List<Number> getLength() { return this.length; }
 
     /**
      * Set the {@code length} property (displayed as {@code Maximum Length}) of the object.
      * @param length the value to set
      */
     @JsonProperty("length")
-    public void setLength(Number length) { this.length = length; }
+    public void setLength(List<Number> length) { this.length = length; }
 
     /**
      * Retrieve the {@code level} property (displayed as '{@literal Level Number}') of the object.
