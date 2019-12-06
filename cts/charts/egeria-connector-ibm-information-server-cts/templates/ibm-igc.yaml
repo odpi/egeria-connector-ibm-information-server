@@ -1,0 +1,151 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the Egeria project.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ include "myapp.name" . }}
+    helm.sh/chart: {{ include "myapp.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: ibm-igc-service
+  name: {{ include "myapp.fullname" . }}-ibm-igc-service
+
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: proxy
+      port: 8080
+      targetPort: 8080
+      nodePort: {{ .Values.service.nodeport.igcproxy }}
+    - name: web
+      port: 9446
+      targetPort: 9446
+      nodePort: {{ .Values.service.nodeport.ibmigc }}
+    - name: kafka
+      port: 59092
+      targetPort: 59092
+      nodePort: {{ .Values.service.nodeport.ibmigc_kafka }}
+  selector:
+    app.kubernetes.io/name: {{ include "myapp.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: ibm-igc-service
+...
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  name: {{ include "myapp.fullname" . }}-ibm-igc
+  labels:
+    app.kubernetes.io/name: {{ include "myapp.name" . }}
+    helm.sh/chart: {{ include "myapp.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: ibm-igc-service
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "myapp.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: ibm-igc-service
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/name: {{ include "myapp.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: ibm-igc-service
+    spec:
+# Fix the hostname to what the image requires of itself and define the secrets to use
+# for pulling the container image from a private repository
+      hostname: infosvr
+      imagePullSecrets:
+        - name: regcred
+      volumes:
+        - name: egeria-igc-connector-volume
+          emptyDir: {}
+      initContainers:
+        - name: init-connector
+          image: "{{ if (.Values.image.configure.registry | default .Values.imageDefaults.registry) }}{{ .Values.image.configure.registry | default .Values.imageDefaults.registry }}/{{ end }}\
+                  {{ if (.Values.image.configure.namespace | default .Values.imageDefaults.namespace) }}{{ .Values.image.configure.namespace | default .Values.imageDefaults.namespace }}/{{ end }}\
+                  {{ .Values.image.configure.name }}\
+                  :{{ .Values.image.configure.tag | default .Values.imageDefaults.tag }}"
+          imagePullPolicy: {{ .Values.image.configure.pullPolicy | default .Values.imageDefaults.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "myapp.fullname" . }}-configmap
+          command:
+            - "/bin/bash"
+            - "-c"
+            - >
+                cd /opt/egeria/connectors &&
+                wget ${CONNECTOR_URL}
+          volumeMounts:
+            - mountPath: /opt/egeria/connectors
+              name: egeria-igc-connector-volume
+      containers:
+        - name: proxy
+          image: "{{ if (.Values.image.egeria.registry | default .Values.imageDefaults.registry) }}{{ .Values.image.egeria.registry | default .Values.imageDefaults.registry }}/{{ end }}\
+                  {{ if (.Values.image.egeria.namespace | default .Values.imageDefaults.namespace) }}{{ .Values.image.egeria.namespace | default .Values.imageDefaults.namespace }}/{{ end }}\
+                  {{ .Values.image.egeria.name }}\
+                  :{{ .Values.image.egeria.tag | default .Values.imageDefaults.tag }}"
+          imagePullPolicy: {{ .Values.image.egeria.pullPolicy | default .Values.imageDefaults.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "myapp.fullname" . }}-configmap
+          env:
+            - name: "LOADER_PATH"
+              value: "/opt/egeria/connectors"
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 6
+          resources: {}
+          volumeMounts:
+            - mountPath: /opt/egeria/connectors
+              name: egeria-igc-connector-volume
+              readOnly: true
+        - name: ibm-igc
+          image: "{{ if (.Values.image.ibmigc.registry | default .Values.imageDefaults.registry) }}{{ .Values.image.ibmigc.registry | default .Values.imageDefaults.registry }}/{{ end }}\
+                  {{ if (.Values.image.ibmigc.namespace | default .Values.imageDefaults.namespace) }}{{ .Values.image.ibmigc.namespace | default .Values.imageDefaults.namespace }}/{{ end }}\
+                  {{ .Values.image.ibmigc.name }}\
+                  :{{ .Values.image.ibmigc.tag | default .Values.imageDefaults.tag }}"
+          imagePullPolicy: {{ .Values.image.ibmigc.pullPolicy | default .Values.imageDefaults.pullPolicy }}
+          securityContext:
+            privileged: true
+#            capabilities:
+#              add: ["IPC_OWNER"]
+          ports:
+            - containerPort: 9446
+            - containerPort: 52181
+            - containerPort: 59092
+          livenessProbe:
+            httpGet:
+              path: /ibm/iis/launchpad
+              port: 9446
+              scheme: "HTTPS"
+            initialDelaySeconds: 180
+            periodSeconds: 20
+            failureThreshold: 12
+          readinessProbe:
+            httpGet:
+              path: /ibm/iis/launchpad
+              port: 9446
+              scheme: "HTTPS"
+            initialDelaySeconds: 180
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources: {}
+
+status: {}
+...
