@@ -4,7 +4,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "myapp.name" . }}-job-01-init-igc-proxy
+  name: {{ .Release.Name }}-job-01-init-igc-proxy
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -31,7 +31,7 @@ spec:
           imagePullPolicy: {{ .Values.image.configure.pullPolicy | default .Values.imageDefaults.pullPolicy }}
           env:
             - name: SERVICE
-              value: {{ include "myapp.name" . }}-ibm-igc-service
+              value: {{ .Release.Name }}-ibm-igc-service
         - name: wait-for-kafka
           image: "{{ if (.Values.image.configure.registry | default .Values.imageDefaults.registry) }}{{ .Values.image.configure.registry | default .Values.imageDefaults.registry }}/{{ end }}\
                   {{ if (.Values.image.configure.namespace | default .Values.imageDefaults.namespace) }}{{ .Values.image.configure.namespace | default .Values.imageDefaults.namespace }}/{{ end }}\
@@ -49,14 +49,14 @@ spec:
           imagePullPolicy: {{ .Values.image.configure.pullPolicy | default .Values.imageDefaults.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ include "myapp.name" . }}-configmap
+                name: {{ .Release.Name }}-configmap
           command:
             - "/bin/bash"
             - "-c"
             - >
-                until $(curl -c /tmp/cookies.txt -s -f -k --connect-timeout 5 -X POST -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ include "myapp.name" . }}-ibm-igc-service:9446/ibm/iis/igc-rest/v1/search -H "Content-Type: application/json" -d '{"types":["category","term","information_governance_policy","information_governance_rule"],"pageSize":1,"workflowMode":"draft"}' | grep 'numTotal' >/dev/null); do
-                curl -b /tmp/cookies.txt -s -f -k --connect-timeout 5 -X GET -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ include "myapp.name" . }}-ibm-igc-service:9446/ibm/iis/igc-rest/v1/logout;
-                echo waiting for {{ include "myapp.name" . }}-ibm-igc-service to be accessible;
+                until $(curl -c /tmp/cookies.txt -s -f -k --connect-timeout 5 -X POST -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ .Release.Name }}-ibm-igc-service:9446/ibm/iis/igc-rest/v1/search -H "Content-Type: application/json" -d '{"types":["category","term","information_governance_policy","information_governance_rule"],"pageSize":1,"workflowMode":"draft"}' | grep 'numTotal' >/dev/null); do
+                curl -b /tmp/cookies.txt -s -f -k --connect-timeout 5 -X GET -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ .Release.Name }}-ibm-igc-service:9446/ibm/iis/igc-rest/v1/logout;
+                echo waiting for {{ .Release.Name }}-ibm-igc-service to be accessible;
                 sleep 2;
                 done;
       containers:
@@ -68,7 +68,7 @@ spec:
           imagePullPolicy: {{ .Values.image.configure.pullPolicy | default .Values.imageDefaults.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ include "myapp.name" . }}-configmap
+                name: {{ .Release.Name }}-configmap
           command:
             - "/bin/bash"
             - "-c"

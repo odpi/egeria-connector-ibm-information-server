@@ -10,23 +10,16 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/component: ibm-igc-service
-  name: {{ include "myapp.name" . }}-ibm-igc-service
+  name: {{ .Release.Name }}-ibm-igc-service
 
 spec:
-  type: {{ .Values.service.type }}
   ports:
     - name: proxy
       port: 8080
-      targetPort: 8080
-      nodePort: {{ .Values.service.nodeport.igcproxy }}
     - name: web
       port: 9446
-      targetPort: 9446
-      nodePort: {{ .Values.service.nodeport.ibmigc }}
     - name: kafka
       port: 59092
-      targetPort: 59092
-      nodePort: {{ .Values.service.nodeport.ibmigc_kafka }}
   selector:
     app.kubernetes.io/name: {{ include "myapp.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -37,7 +30,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   creationTimestamp: null
-  name: {{ include "myapp.name" . }}-ibm-igc
+  name: {{ .Release.Name }}-ibm-igc
   labels:
     app.kubernetes.io/name: {{ include "myapp.name" . }}
     helm.sh/chart: {{ include "myapp.chart" . }}
@@ -78,7 +71,7 @@ spec:
           imagePullPolicy: {{ .Values.image.configure.pullPolicy | default .Values.imageDefaults.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ include "myapp.name" . }}-configmap
+                name: {{ .Release.Name }}-configmap
           command:
             - "/bin/bash"
             - "-c"
@@ -97,7 +90,7 @@ spec:
           imagePullPolicy: {{ .Values.image.egeria.pullPolicy | default .Values.imageDefaults.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ include "myapp.name" . }}-configmap
+                name: {{ .Release.Name }}-configmap
           env:
             - name: "LOADER_PATH"
               value: "/opt/egeria/connectors"
@@ -122,8 +115,6 @@ spec:
           imagePullPolicy: {{ .Values.image.ibmigc.pullPolicy | default .Values.imageDefaults.pullPolicy }}
           securityContext:
             privileged: true
-#            capabilities:
-#              add: ["IPC_OWNER"]
           ports:
             - containerPort: 9446
             - containerPort: 52181

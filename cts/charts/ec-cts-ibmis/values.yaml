@@ -1,15 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the Egeria project.
 ---
-service:
-  type: NodePort
-
-  nodeport:
-    egeria: 30080
-    ibmigc: 32446
-    ibmigc_kafka: 32092
-    igcproxy: 30081
-
 logging:
   level: INFO
 
@@ -55,4 +46,3 @@ kafka:
       enabled: false
   persistence:
     enabled: false
-
