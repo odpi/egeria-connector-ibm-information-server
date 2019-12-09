@@ -21,6 +21,7 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/name: {{ include "myapp.name" . }}
     spec:
+      serviceAccountName: cts
       restartPolicy: OnFailure
       initContainers:
         - name: wait-for-igcproxy
