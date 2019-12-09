@@ -5,7 +5,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   creationTimestamp: null
-  name: {{ .Release.Name }}-init-and-report
+  name: {{ include "myapp.release" . }}-init-and-report
   labels:
     app.kubernetes.io/name: {{ include "myapp.name" . }}
     helm.sh/chart: {{ include "myapp.chart" . }}
@@ -40,7 +40,7 @@ spec:
           imagePullPolicy: {{ .Values.image.configure.pullPolicy | default .Values.imageDefaults.pullPolicy }}
           env:
             - name: SERVICE
-              value: {{ .Release.Name }}-ibm-igc-service
+              value: {{ include "myapp.release" . }}-ibm-igc-service
         - name: wait-for-kafka
           image: "{{ if (.Values.image.configure.registry | default .Values.imageDefaults.registry) }}{{ .Values.image.configure.registry | default .Values.imageDefaults.registry }}/{{ end }}\
                   {{ if (.Values.image.configure.namespace | default .Values.imageDefaults.namespace) }}{{ .Values.image.configure.namespace | default .Values.imageDefaults.namespace }}/{{ end }}\
@@ -49,7 +49,7 @@ spec:
           imagePullPolicy: {{ .Values.image.configure.pullPolicy | default .Values.imageDefaults.pullPolicy }}
           env:
             - name: SERVICE
-              value: {{ .Release.Name }}-kafka
+              value: {{ include "myapp.release" . }}-kafka
         - name: wait-for-ibm-igc
           image: "{{ if (.Values.image.configure.registry | default .Values.imageDefaults.registry) }}{{ .Values.image.configure.registry | default .Values.imageDefaults.registry }}/{{ end }}\
                   {{ if (.Values.image.configure.namespace | default .Values.imageDefaults.namespace) }}{{ .Values.image.configure.namespace | default .Values.imageDefaults.namespace }}/{{ end }}\
@@ -58,14 +58,14 @@ spec:
           imagePullPolicy: {{ .Values.image.configure.pullPolicy | default .Values.imageDefaults.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ .Release.Name }}-configmap
+                name: {{ include "myapp.release" . }}-configmap
           command:
             - "/bin/bash"
             - "-c"
             - >
-                until $(curl -c /tmp/cookies.txt -s -f -k --connect-timeout 5 -X POST -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ .Release.Name }}-ibm-igc-service:9446/ibm/iis/igc-rest/v1/search -H "Content-Type: application/json" -d '{"types":["category","term","information_governance_policy","information_governance_rule"],"pageSize":1,"workflowMode":"draft"}' | grep 'numTotal' >/dev/null); do
-                curl -b /tmp/cookies.txt -s -f -k --connect-timeout 5 -X GET -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ .Release.Name }}-ibm-igc-service:9446/ibm/iis/igc-rest/v1/logout;
-                echo waiting for {{ .Release.Name }}-ibm-igc-service to be accessible;
+                until $(curl -c /tmp/cookies.txt -s -f -k --connect-timeout 5 -X POST -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ include "myapp.release" . }}-ibm-igc-service:9446/ibm/iis/igc-rest/v1/search -H "Content-Type: application/json" -d '{"types":["category","term","information_governance_policy","information_governance_rule"],"pageSize":1,"workflowMode":"draft"}' | grep 'numTotal' >/dev/null); do
+                curl -b /tmp/cookies.txt -s -f -k --connect-timeout 5 -X GET -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ include "myapp.release" . }}-ibm-igc-service:9446/ibm/iis/igc-rest/v1/logout;
+                echo waiting for {{ include "myapp.release" . }}-ibm-igc-service to be accessible;
                 sleep 2;
                 done;
       # Then configure and startup the CTS, and eventually produce the reports
@@ -78,7 +78,7 @@ spec:
           imagePullPolicy: {{ .Values.image.configure.pullPolicy | default .Values.imageDefaults.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ .Release.Name }}-configmap
+                name: {{ include "myapp.release" . }}-configmap
           command:
             - "/bin/bash"
             - "-c"
