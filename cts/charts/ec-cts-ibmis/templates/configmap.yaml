@@ -34,3 +34,4 @@ data:
   {{ else }}
   CONNECTOR_URL: https://odpi.jfrog.io/odpi/egeria-release-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/{{ .Values.release.version }}/egeria-connector-ibm-information-server-package-{{ .Values.release.version }}.jar
   {{ end }}
+  CTS_REPORT_NAME: {{ .Release.Name }}

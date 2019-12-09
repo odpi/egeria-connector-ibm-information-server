@@ -162,9 +162,9 @@ spec:
                 testcount=$(cat /tmp/openmetadata.conformance.testlab.results | jq '.testLabResults.testCaseCount');
                 done;
                 &&
-                cd /tmp; tar cvf release.tar *.config coco.* openmetadata.conformance.testlab.results; gzip release.tar
+                cd /tmp; tar cvf ${CTS_REPORT_NAME}.tar *.config coco.* openmetadata.conformance.testlab.results; gzip ${CTS_REPORT_NAME}.tar
                 &&
-                echo "Complete -- CTS available to download from /tmp/release.tar.gz"
+                echo "Complete -- CTS results available to download from /tmp/${CTS_REPORT_NAME}.tar.gz"
                 &&
                 sleep 10000000
           resources:
