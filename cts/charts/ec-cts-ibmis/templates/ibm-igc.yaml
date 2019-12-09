@@ -96,6 +96,8 @@ spec:
           env:
             - name: "LOADER_PATH"
               value: "/opt/egeria/connectors"
+            - name: "LOGGING_LEVEL_ORG_ODPI_EGERIA_CONNECTORS_IBM_IGC"
+              value: "DEBUG"
           ports:
             - containerPort: 8080
           readinessProbe:
