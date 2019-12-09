@@ -3,9 +3,9 @@
 
 # Implemented mappings
 
-The following types are currently mapped from IGC to OMRS. Note that there are currently limited
-mappings from OMRS types to IGC types as this connector is primarily read-only (primarily capable of
-propagating or retrieving information _from_ IGC, and not _to_ IGC).
+The following types are currently mapped from IGC to OMRS. Note that there are currently no
+mappings from OMRS types to IGC types as this connector is entirely read-only (capable of
+propagating or retrieving metadata _from_ IGC, but not adding metadata _to_ IGC).
 
 Hoping for a mapping that isn't there?
 
@@ -15,10 +15,9 @@ Hoping for a mapping that isn't there?
 
 ## Entities
 
-| IGC type(s) | OMRS type(s) |
-| :--- | :--- |
-| `main_object` (default) | [Referenceable](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/ReferenceableMapper.java) |
-| `category` | [Glossary](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/GlossaryMapper.java)**, [GlossaryCategory](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/GlossaryCategoryMapper.java) |
+| IGC type(s) | OMRS type(s) | Notes |
+| :--- | :--- | :--- |
+| `category` | [Glossary](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/GlossaryMapper.java)**, [GlossaryCategory](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/GlossaryCategoryMapper.java) | All top-level categories in IGC that are _not_ named `Classifications` are considered a Glossary, all categories whose `parent_category` is not null and not `Classifications` are considered a GlossaryCategory |
 | `connector` | [ConnectorType](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/ConnectorTypeMapper.java) |
 | `data_class` | [DataClass](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/DataClassMapper.java) |
 | `data_connection` | [Connection](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/ConnectionMapper.java) |
@@ -37,49 +36,47 @@ Hoping for a mapping that isn't there?
 | `user`, `group` | [ContactDetails](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/ContactDetailsMapper.java), [Team](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/TeamMapper.java) |
 | `user`, `steward_user`, `non_steward_user` | [Person](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/PersonMapper.java) |
 
-** The Glossary mapping is for all top-level categories in IGC that are _not_ named `Classifications`.
-
 ## Relationships
 
-| IGC type(s) | OMRS type(s) |
-| :--- | :--- |
-| `database_schema`-`database_schema` | [AssetSchemaType](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/AssetSchemaTypeMapper_DatabaseSchema.java) |
-| `data_file`-`data_file_record` | [AssetSchemaType](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/AssetSchemaTypeMapper_FileRecord.java) |
-| `main_object`-`label` | [AttachedTag](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/AttachedTagMapper.java) |
-| `data_file_record`-`data_file_field` | [AttributeForSchema](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/AttributeForSchemaMapper_RecordField.java) |
-| `database_table`-`database_column` | [NestedSchemaAttribute](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/NestedSchemaAttributeMapper.java) |
-| `database_schema`-`database_table` | [AttributeForSchema](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/AttributeForSchemaMapper_TableSchema.java) |
-| `category`-`category` | [CategoryAnchor](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/CategoryAnchorMapper.java) |
-| `category`-`category` | [CategoryHierarchyLink](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/CategoryHierarchyLinkMapper.java) |
-| `data_connection`-`connector` | [ConnectionConnectorType](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ConnectionConnectorTypeMapper.java) |
-| `host`-`connector`-`data_connection` | [ConnectionEndpoint](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ConnectionEndpointMapper.java) |
-| `data_connection`-`database` | [ConnectionToAsset](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ConnectionToAssetMapper_Database.java) |
-| `data_connection`-`data_file_folder` | [ConnectionToAsset](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ConnectionToAssetMapper_FileFolder.java) |
-| `user`-`user` | [ContactThrough](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ContactThroughMapper_Person.java) |
-| `group`-`group` | [ContactThrough](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ContactThroughMapper_Team.java) |
-| `main_object`-`classification`-`data_class` | [DataClassAssignment](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/DataClassAssignmentMapper.java) |
-| `data_class`-`data_class` | [DataClassHierarchy](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/DataClassHierarchyMapper.java) |
-| `database`-`database_schema` | [DataContentForDataSet](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/DataContentForDataSetMapper.java) |
-| `data_file_folder`-`data_file_folder` | [FolderHierarchy](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/FolderHierarchyMapper.java) |
-| `database_column`-`database_column` | [ForeignKey](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ForeignKeyMapper.java) |
-| `information_governance_policy`-`information_governance_policy` | [GovernancePolicyLink](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/GovernancePolicyLinkMapper.java) |
-| `data_file_folder`-`data_file` | [NestedFile](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/NestedFileMapper.java) |
-| `term`-`term` | [RelatedTerm](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/RelatedTermMapper.java) |
-| `term`-`term` | [ReplacementTerm](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ReplacementTermMapper.java) |
-| `main_object`-`term` | [SemanticAssignment](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/SemanticAssignmentMapper.java) |
-| `term`-`term` | [Synonym](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/SynonymMapper.java) |
-| `category` - `term` | [TermAnchor](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TermAnchorMapper.java) |
-| `category`-`term` | [TermCategorization](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TermCategorizationMapper.java) | 
-| `term`-`term` | [TermHASARelationship](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TermHASARelationshipMapper.java) |
-| `term`-`term` | [TermISATypeOFRelationship](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TermISATypeOFRelationshipMapper.java) |
-| `term`-`term` | [Translation](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TranslationMapper.java) |
+| IGC types and properties | OMRS type | Notes |
+| :--- | :--- | :--- |
+| `database_schema` - `database_schema` | [AssetSchemaType](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/AssetSchemaTypeMapper_DatabaseSchema.java) | This is a generated relationship (all properties for both endpoints are on a single entity instance in IGC) |
+| `data_file.data_file_records` - `data_file_record.data_file` | [AssetSchemaType](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/AssetSchemaTypeMapper_FileRecord.java) |
+| `information_asset.labels` - `label.labeled_assets` | [AttachedTag](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/AttachedTagMapper.java) |
+| `data_file_record.data_file_fields` - `data_file_field.data_file_record` | [AttributeForSchema](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/AttributeForSchemaMapper_RecordField.java) |
+| `database_table.database_columns` - `database_column.database_table_or_view` | [NestedSchemaAttribute](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/NestedSchemaAttributeMapper.java) |
+| `database_schema.database_tables` - `database_table.database_schema` | [AttributeForSchema](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/AttributeForSchemaMapper_TableSchema.java) |
+| `category.subcategories` - `category.parent_category` | [CategoryAnchor](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/CategoryAnchorMapper.java) | Creates a relationship between the ultimate parent IGC category (Glossary) and any offspring |
+| `category.subcategories` - `category.parent_category` | [CategoryHierarchyLink](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/CategoryHierarchyLinkMapper.java) |
+| `data_connection.data_connectors` - `connector.data_connections` | [ConnectionConnectorType](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ConnectionConnectorTypeMapper.java) |
+| `host.data_connections` - `connector.data_connections` - `data_connection.data_connectors` | [ConnectionEndpoint](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ConnectionEndpointMapper.java) | Linked through IGC's `connector` object in the middle |
+| `data_connection.imports_database` - `database.data_connections` | [ConnectionToAsset](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ConnectionToAssetMapper_Database.java) |
+| `data_connection` - `data_file_folder.data_connection` | [ConnectionToAsset](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ConnectionToAssetMapper_FileFolder.java) |
+| `user` - `user` | [ContactThrough](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ContactThroughMapper_Person.java) | This is a generated relationship (all properties for both endpoints are on a single entity instance in IGC) |
+| `group` - `group` | [ContactThrough](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ContactThroughMapper_Team.java) | This is a generated relationship (all properties for both endpoints are on a single entity instance in IGC) |
+| `information_asset.detected_classifications` / `information_asset.selected_classification` - `classification` - `data_class.classified_assets_detected` / `data_class.classifications_selected` | [DataClassAssignment](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/DataClassAssignmentMapper.java) | Linked through IGC's `classification` object in the middle, which has some relationship-specific properties |
+| `data_class.contains_data_classes` - `data_class.parent_data_class` | [DataClassHierarchy](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/DataClassHierarchyMapper.java) |
+| `database.database_schemas` - `database_schema.database` | [DataContentForDataSet](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/DataContentForDataSetMapper.java) |
+| `data_file_folder.data_file_folders` - `data_file_folder.parent_folder` | [FolderHierarchy](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/FolderHierarchyMapper.java) |
+| `database_column.defined_foreign_key_referenced` / `database_column.selected_foreign_key_referenced` - `database_column.defined_foreign_key_references` / `database_column.selected_foreign_key_references` | [ForeignKey](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ForeignKeyMapper.java) |
+| `information_governance_policy.subpolicies` - `information_governance_policy.parent_policy` | [GovernancePolicyLink](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/GovernancePolicyLinkMapper.java) |
+| `data_file_folder.data_files` - `data_file.parent_folder` | [NestedFile](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/NestedFileMapper.java) |
+| `term.related_terms` - `term.related_terms` | [RelatedTerm](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/RelatedTermMapper.java) |
+| `term.replaced_by` - `term.replaces` | [ReplacementTerm](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/ReplacementTermMapper.java) |
+| `information_asset.assigned_to_terms` - `term.assigned_assets` | [SemanticAssignment](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/SemanticAssignmentMapper.java) |
+| `term.synonyms` - `term.synonyms` | [Synonym](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/SynonymMapper.java) |
+| `category.terms` - `term.parent_category` | [TermAnchor](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TermAnchorMapper.java) | Creates a relationship between the ultimate parent IGC category (Glossary) and an IGC term |
+| `category.terms` - `term.parent_category` | [TermCategorization](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TermCategorizationMapper.java) | 
+| `term.has_a_term` - `term.is_of` | [TermHASARelationship](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TermHASARelationshipMapper.java) |
+| `term.has_types` - `term.is_a_type_of` | [TermISATypeOFRelationship](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TermISATypeOFRelationshipMapper.java) |
+| `term.translations` - `term.translations` | [Translation](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/relationships/TranslationMapper.java) |
 
 ## Classifications
 
 Because IGC has no "Classification" concept, the following are suggested implementations of
 Classifications within IGC by overloading the use of other concepts. These can be changed to
 alternative implementations simply by updating the linked mapping code to match your desired
-implementation of the concept(s).
+implementation of the concept.
 
 ### [AssetZoneMembership](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/classifications/AssetZoneMembershipMapper.java)
 

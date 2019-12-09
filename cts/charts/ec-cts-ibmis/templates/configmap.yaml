@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the Egeria project.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+  labels:
+    app.kubernetes.io/name: {{ include "myapp.name" . }}
+    helm.sh/chart: {{ include "myapp.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  # General cluster configuration - for core egeria, kafka - these must be used
+  EGERIA_USER: {{ .Values.egeria.user }}
+  EGERIA_COHORT: {{ .Values.egeria.cohort }}
+  EGERIA_SERVER: {{ .Values.egeria.server }}
+  KAFKA_ENDPOINT: {{ .Release.Name }}-kafka:9092
+
+  # Used by IGC
+  STRICT_SSL: "false"
+  LOGGING_LEVEL_ROOT: {{ .Values.logging.level }}
+  IGCPROXY_ENDPOINT: http://{{ .Release.Name }}-ibm-igc-service:8080
+  IBMIGC_HOST: infosvr
+  IBMIGC_PORT: "9446"
+  IBMIGC_KAFKA_ENDPOINT: infosvr:59092
+  IBMIGC_USER: {{ .Values.ibmigc.user }}
+  IBMIGC_PASS: {{ .Values.ibmigc.password }}
+  IBMIGC_SERVER: {{ .Values.ibmigc.proxyserver }}
+
+  # Used for downloads
+  {{ if .Values.release.snapshot }}
+  CONNECTOR_URL: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/{{ .Values.release.version }}-SNAPSHOT/egeria-connector-ibm-information-server-package-{{ .Values.release.version }}-SNAPSHOT.jar
+  {{ else }}
+  CONNECTOR_URL: https://odpi.jfrog.io/odpi/egeria-release-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/{{ .Values.release.version }}/egeria-connector-ibm-information-server-package-{{ .Values.release.version }}.jar
+  {{ end }}
+  CTS_REPORT_NAME: {{ .Release.Name }}

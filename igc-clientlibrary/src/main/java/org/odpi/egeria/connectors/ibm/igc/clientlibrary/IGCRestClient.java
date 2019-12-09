@@ -142,8 +142,12 @@ public class IGCRestClient {
         this.authorization = authorization;
         // We need to allow a single value as an array for a couple cases where one version of IGC uses
         // an array of values (Strings) and another only has a single String (eg. 'rule_logic' in
-        // 'published_data_rule_definition')
-        this.mapper = new ObjectMapper().enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+        // 'published_data_rule_definition'), and also allow empty Strings to be equivalent to nulls, for
+        // areas where a Number is expected but the payload may contain "" (eg. 'length' of 'database_column' as
+        // derived from 'data_item')
+        this.mapper = new ObjectMapper()
+                            .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+                            .enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         this.typeMapper = new ObjectMapper();
         this.typeAndPropertyToAccessor = new HashMap<>();
         this.restTemplate = new RestTemplate();
@@ -422,9 +426,11 @@ public class IGCRestClient {
 
         HttpEntity<MultiValueMap<String, Object>> toSend = new HttpEntity<>(body, headers);
 
+        String url = baseURL + (endpoint.startsWith("/") ? endpoint : "/" + endpoint);
+
         try {
             response = restTemplate.exchange(
-                    baseURL + endpoint,
+                    url,
                     method,
                     toSend,
                     String.class
@@ -433,7 +439,7 @@ public class IGCRestClient {
             log.warn("Request failed -- session may have expired, retrying...", e);
             // If the response was forbidden (fails with exception), the session may have expired -- create a new one
             response = openNewSessionWithUpload(
-                    baseURL + endpoint,
+                    url,
                     method,
                     file,
                     forceLogin
@@ -519,7 +525,7 @@ public class IGCRestClient {
      */
     public String makeRequest(String endpoint, HttpMethod method, MediaType contentType, String payload) {
         ResponseEntity<String> response = makeRequest(
-                baseURL + endpoint,
+                baseURL + (endpoint.startsWith("/") ? endpoint : "/" + endpoint),
                 method,
                 contentType,
                 payload,
@@ -545,7 +551,7 @@ public class IGCRestClient {
      */
     public String makeCreateRequest(String endpoint, HttpMethod method, MediaType contentType, String payload) {
         ResponseEntity<String> response = makeRequest(
-                baseURL + endpoint,
+                baseURL + (endpoint.startsWith("/") ? endpoint : "/" + endpoint),
                 method,
                 contentType,
                 payload,

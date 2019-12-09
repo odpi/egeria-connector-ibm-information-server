@@ -564,9 +564,12 @@ public abstract class EntityMapping extends InstanceMapping {
      * Retrieve a listing of all of the properties we want to retrieve to have a complete EntitySummary for this
      * mapping.
      *
+     * @param igcRestClient REST connectivity to the IGC environment
+     * @param igcAssetType the asset type for which to retrieve properties
      * @return {@code List<String>}
      */
-    public final List<String> getAllPropertiesForEntitySummary() {
+    public final List<String> getAllPropertiesForEntitySummary(IGCRestClient igcRestClient,
+                                                               String igcAssetType) {
         Set<String> allProperties = new HashSet<>();
         for (ClassificationMapping classificationMapping : getClassificationMappers()) {
             Set<String> classificationProperties = classificationMapping.getMappedIgcPropertyNames();
@@ -575,6 +578,9 @@ public abstract class EntityMapping extends InstanceMapping {
             }
         }
         allProperties.addAll(getAllMappedIgcProperties());
+        // Restrict the set of properties to those that are known by this particular version of IGC
+        List<String> allKnownProperties = igcRestClient.getAllPropertiesForType(igcAssetType);
+        allProperties.retainAll(allKnownProperties);
         return new ArrayList<>(allProperties);
     }
 
@@ -587,9 +593,10 @@ public abstract class EntityMapping extends InstanceMapping {
     public static final EntitySummary getEntitySummary(EntityMappingInstance entityMap) {
 
         EntityMapping mapping = entityMap.getMapping();
+        IGCRestClient igcRestClient = entityMap.getRepositoryConnector().getIGCRestClient();
 
         if (!entityMap.isIgcEntityAlreadyRetrieved()) {
-            entityMap.setPropertiesToRetrieveForIgcEntity(mapping.getAllPropertiesForEntitySummary());
+            entityMap.setPropertiesToRetrieveForIgcEntity(mapping.getAllPropertiesForEntitySummary(igcRestClient, entityMap.getIgcEntityType()));
         }
         entityMap.initializeEntitySummary();
 
@@ -622,6 +629,9 @@ public abstract class EntityMapping extends InstanceMapping {
         if (nonRelationshipProperties != null) {
             allProperties.addAll(nonRelationshipProperties);
         }
+        // Restrict the set of properties to those that are known by this particular version of IGC
+        List<String> allKnownProperties = igcRestClient.getAllPropertiesForType(igcAssetType);
+        allProperties.retainAll(allKnownProperties);
         return new ArrayList<>(allProperties);
     }
 
