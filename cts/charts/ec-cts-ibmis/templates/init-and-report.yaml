@@ -1,28 +1,36 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the Egeria project.
 ---
-apiVersion: batch/v1
-kind: Job
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-job-01-init-igc-proxy
+  creationTimestamp: null
+  name: {{ .Release.Name }}-init-and-report
   labels:
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ include "myapp.chart" . }}
     app.kubernetes.io/name: {{ include "myapp.name" . }}
-  annotations:
-    "helm.sh/hook": post-install
-    "helm.sh/hook-weight": "0"
-    "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
+    helm.sh/chart: {{ include "myapp.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: init-and-report
+
 spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "myapp.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: init-and-report
+  strategy: {}
   template:
     metadata:
+      creationTimestamp: null
       labels:
-        app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/name: {{ include "myapp.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: init-and-report
     spec:
       serviceAccountName: cts
-      restartPolicy: OnFailure
+      # Wait for all of the services to be up before attempting initial configuration
       initContainers:
         - name: wait-for-igcproxy
           image: "{{ if (.Values.image.configure.registry | default .Values.imageDefaults.registry) }}{{ .Values.image.configure.registry | default .Values.imageDefaults.registry }}/{{ end }}\
@@ -60,8 +68,9 @@ spec:
                 echo waiting for {{ .Release.Name }}-ibm-igc-service to be accessible;
                 sleep 2;
                 done;
+      # Then configure and startup the CTS, and eventually produce the reports
       containers:
-        - name: initialize
+        - name: init-and-report
           image: "{{ if (.Values.image.configure.registry | default .Values.imageDefaults.registry) }}{{ .Values.image.configure.registry | default .Values.imageDefaults.registry }}/{{ end }}\
                   {{ if (.Values.image.configure.namespace | default .Values.imageDefaults.namespace) }}{{ .Values.image.configure.namespace | default .Values.imageDefaults.namespace }}/{{ end }}\
                   {{ .Values.image.configure.name }}\
@@ -120,4 +129,37 @@ spec:
                 &&
                 curl -f --verbose --basic admin:admin -X POST --max-time 900
                 ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/instance
+                &&
+                curl -f --verbose --basic admin:admin -X GET
+                ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/cts/configuration > /tmp/omag.server.cts.config
+                &&
+                curl -f --verbose --basic admin:admin -X GET
+                ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/configuration > /tmp/omag.server.ibmigc.config
+                &&
+                curl -f --verbose --basic admin:admin -X GET
+                ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/repository-services/users/${EGERIA_USER}/metadata-highway/local-registration > /tmp/coco.cohort.cts.local
+                &&
+                curl -f --verbose --basic admin:admin -X GET
+                ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/repository-services/users/${EGERIA_USER}/metadata-highway/cohorts/${EGERIA_COHORT}/remote-members > /tmp/coco.cohort.cts.remote
+                &&
+                curl -f --verbose --basic admin:admin -X GET
+                ${IGCPROXY_ENDPOINT}/servers/${IBMIGC_SERVER}/open-metadata/repository-services/users/${EGERIA_USER}/metadata-highway/local-registration > /tmp/coco.cohort.ibmigc.local
+                &&
+                curl -f --verbose --basic admin:admin -X GET
+                ${IGCPROXY_ENDPOINT}/servers/${IBMIGC_SERVER}/open-metadata/repository-services/users/${EGERIA_USER}/metadata-highway/cohorts/${EGERIA_COHORT}/remote-members > /tmp/coco.cohort.ibmigc.remote
+                &&
+                # TODO: what happens if this is produced "early"?  How to repeatedly produce it until it is "final"?
+                curl -f --verbose --basic admin:admin -X GET --max-time 900
+                ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/report > /tmp/openmetadata.conformance.testlab.results
+                &&
+                sleep 10000000
+          resources:
+            requests:
+              memory: "16Mi"
+              cpu: "100m"
+            limits:
+              memory: "64Mi"
+              cpu: "500m"
+
+status: {}
 ...
