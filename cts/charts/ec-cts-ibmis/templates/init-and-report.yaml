@@ -160,13 +160,13 @@ spec:
                 sleep 20;
                 curl -f --silent --basic admin:admin -X GET --max-time 900 ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/report > /tmp/openmetadata.conformance.testlab.results;
                 testcount=$(cat /tmp/openmetadata.conformance.testlab.results | jq '.testLabResults.testCaseCount');
-                done;
+                done
                 &&
                 cd /tmp; tar cvf ${CTS_REPORT_NAME}.tar *.config cohort.* openmetadata.conformance.testlab.results; gzip ${CTS_REPORT_NAME}.tar
                 &&
                 echo "Complete -- CTS results available to download from /tmp/${CTS_REPORT_NAME}.tar.gz"
                 &&
-                sleep 10000000
+                tail -f /dev/null
           resources:
             requests:
               memory: "16Mi"
