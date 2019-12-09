@@ -150,7 +150,7 @@ spec:
                 &&
                 echo "Waiting 2 minutes for CTS to start..."; sleep 120
                 &&
-                curl -f --verbose --basic admin:admin -X GET --max-time 900
+                curl -f --silent --basic admin:admin -X GET --max-time 900
                 ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/report > /tmp/openmetadata.conformance.testlab.results
                 &&
                 testcount=$(cat /tmp/openmetadata.conformance.testlab.results | jq '.testLabResults.testCaseCount')
@@ -158,7 +158,7 @@ spec:
                 until [ ${testcount} -ge 399 ]; do
                 echo "... waiting for CTS to complete (${testcount} / 399 tests completed)";
                 sleep 20;
-                curl -f --verbose --basic admin:admin -X GET --max-time 900 ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/report > /tmp/openmetadata.conformance.testlab.results;
+                curl -f --silent --basic admin:admin -X GET --max-time 900 ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/report > /tmp/openmetadata.conformance.testlab.results;
                 testcount=$(cat /tmp/openmetadata.conformance.testlab.results | jq '.testLabResults.testCaseCount');
                 done;
                 &&
