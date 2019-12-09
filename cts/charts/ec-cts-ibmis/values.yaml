@@ -26,12 +26,14 @@ image:
   configure:
     name: egeria-configure
 
-# NOTE: this image is "bring your own"...
+# NOTE: this image is "bring your own". Furthermore, the tag will be automatically built based on the
+# name used for the Helm chart release + "-samples". So for example, if you deploy the Helm chart with
+# a name of "v11.7.0.2" then the image tag used for deploying the IGC container will be "v11.7.0.2-samples"
+# (if you wish to override this, change the "ibm-igc.yaml" definition directly)
   ibmigc:
     registry: "localhost:5000"
     namespace: ibm
     name: infosvr
-    tag: v11.7.0.2
 
 ibmigc:
   user: isadmin

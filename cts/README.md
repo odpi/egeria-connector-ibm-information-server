@@ -21,10 +21,10 @@ connector. For each release, you will find the following details:
     - `omag.server.ibmigc.config` - the configuration of the IGC connector (proxy)
     - `omag.server.cts.config` - the configuration of the CTS workbench
 - The cohort registrations:
-    - `coco.cohort.ibmigc.local` - the local IGC connector (proxy) cohort registration information
-    - `coco.cohort.ibmigc.remote` - the cohort members considered remote from the IGC connector (proxy)'s perspective
-    - `coco.cohort.cts.local` - the local CTS Workbench cohort registration
-    - `coco.cohort.cts.remote` - the cohort members considered remote from the CTS Workbench's perspective
+    - `cohort.coco.ibmigc.local` - the local IGC connector (proxy) cohort registration information
+    - `cohort.coco.ibmigc.remote` - the cohort members considered remote from the IGC connector (proxy)'s perspective
+    - `cohort.coco.cts.local` - the local CTS Workbench cohort registration
+    - `cohort.coco.cts.remote` - the cohort members considered remote from the CTS Workbench's perspective
 
 ## Egeria 1.2
 

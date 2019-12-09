@@ -121,7 +121,7 @@ spec:
           image: "{{ if (.Values.image.ibmigc.registry | default .Values.imageDefaults.registry) }}{{ .Values.image.ibmigc.registry | default .Values.imageDefaults.registry }}/{{ end }}\
                   {{ if (.Values.image.ibmigc.namespace | default .Values.imageDefaults.namespace) }}{{ .Values.image.ibmigc.namespace | default .Values.imageDefaults.namespace }}/{{ end }}\
                   {{ .Values.image.ibmigc.name }}\
-                  :{{ .Values.image.ibmigc.tag | default .Values.imageDefaults.tag }}"
+                  :{{ .Release.Name }}-samples"
           imagePullPolicy: {{ .Values.image.ibmigc.pullPolicy | default .Values.imageDefaults.pullPolicy }}
           securityContext:
             privileged: true
