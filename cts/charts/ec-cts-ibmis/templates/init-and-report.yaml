@@ -29,7 +29,7 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: init-and-report
     spec:
-      serviceAccountName: cts
+      serviceAccountName: {{ .Release.Name }}-cts
       # Wait for all of the services to be up before attempting initial configuration
       initContainers:
         - name: wait-for-igcproxy
