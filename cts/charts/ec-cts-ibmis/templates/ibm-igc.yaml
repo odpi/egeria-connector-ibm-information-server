@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/component: ibm-igc-service
-  name: {{ include "myapp.release" . }}-ibm-igc-service
+  name: {{ .Release.Name }}-ibm-igc-service
 
 spec:
   ports:
@@ -32,7 +32,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   creationTimestamp: null
-  name: {{ include "myapp.release" . }}-ibm-igc
+  name: {{ .Release.Name }}-ibm-igc
   labels:
     app.kubernetes.io/name: {{ include "myapp.name" . }}
     helm.sh/chart: {{ include "myapp.chart" . }}
@@ -73,7 +73,7 @@ spec:
           imagePullPolicy: {{ .Values.image.configure.pullPolicy | default .Values.imageDefaults.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ include "myapp.release" . }}-configmap
+                name: {{ .Release.Name }}-configmap
           command:
             - "/bin/bash"
             - "-c"
@@ -92,7 +92,7 @@ spec:
           imagePullPolicy: {{ .Values.image.egeria.pullPolicy | default .Values.imageDefaults.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: {{ include "myapp.release" . }}-configmap
+                name: {{ .Release.Name }}-configmap
           env:
             - name: "LOADER_PATH"
               value: "/opt/egeria/connectors"
