@@ -17,6 +17,9 @@ The `results` sub-directory contains results of running the CTS against the IBM 
 connector. For each release, you will find the following details:
 
 - `openmetadata.conformance.testlab.results` - the detailed results, as produced by the CTS workbench itself
+- Description of the k8s environment
+    - `<version>.deployment` - details of the deployed components used for the test
+    - `<version>.configmap` - details of the variables used within the components of the test
 - The OMAG server configurations:
     - `omag.server.ibmigc.config` - the configuration of the IGC connector (proxy)
     - `omag.server.cts.config` - the configuration of the CTS workbench
@@ -30,16 +33,16 @@ connector. For each release, you will find the following details:
 
 | IGC version | Conformant profile(s) | Notes |
 | :--- | :--- | :--- |
-| [v11.5.0.2 SP3](1.2/11.5.0.2sp3) | Metadata sharing |
-| [v11.5.0.2 SP5](1.2/11.5.0.2sp5) | Metadata sharing |
-| [v11.5.0.2 SP6](1.2/11.5.0.2sp6) | None | There appears to be a bug in this release on pagination of complex search criteria, causing some of the `find...` methods to fail. |
-| [v11.7.0.0](1.2/11.7.0.0) | Metadata sharing |
-| [v11.7.0.1](1.2/11.7.0.1) | Metadata sharing |
-| [v11.7.0.1 SP1](1.2/11.7.0.1sp1) | Pending |
-| [v11.7.0.2](1.2/11.7.0.2) | Pending |
-| [v11.7.1.0](1.2/11.7.1.0) | Pending |
-| [v11.7.1.0 SP1](1.2/11.7.1.0sp1) | Pending |
-| [v11.7.1.0 SP2](1.2/11.7.1.0sp2) | Pending |
+| [v11.5.0.2 SP3](results/1.2/11.5.0.2sp3) | Metadata sharing |
+| [v11.5.0.2 SP5](results/1.2/11.5.0.2sp5) | Metadata sharing |
+| [v11.5.0.2 SP6](results/1.2/11.5.0.2sp6) | None | There appears to be a bug in this release on pagination of complex search criteria, causing some of the `find...` methods to fail. |
+| [v11.7.0.0](results/1.2/11.7.0.0) | Metadata sharing |
+| [v11.7.0.1](results/1.2/11.7.0.1) | Metadata sharing |
+| [v11.7.0.1 SP1](results/1.2/11.7.0.1sp1) | Metadata sharing |
+| [v11.7.0.2](results/1.2/11.7.0.2) | Metadata sharing |
+| [v11.7.1.0](results/1.2/11.7.1.0) | Metadata sharing |
+| [v11.7.1.0 SP1](results/1.2/11.7.1.0sp1) | Metadata sharing |
+| [v11.7.1.0 SP2](results/1.2/11.7.1.0sp2) | Metadata sharing |
 
 ## Known issues
 

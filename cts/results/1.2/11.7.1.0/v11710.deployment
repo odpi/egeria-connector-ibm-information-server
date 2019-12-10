@@ -1,0 +1,326 @@
+Name:                   v11710-ibm-igc
+Namespace:              default
+CreationTimestamp:      Tue, 10 Dec 2019 07:38:46 -0800
+Labels:                 app.kubernetes.io/component=ibm-igc-service
+                        app.kubernetes.io/instance=v11710
+                        app.kubernetes.io/managed-by=Helm
+                        app.kubernetes.io/name=ec-cts-ibmis
+                        helm.sh/chart=ec-cts-ibmis-0.1
+Annotations:            deployment.kubernetes.io/revision: 1
+Selector:               app.kubernetes.io/component=ibm-igc-service,app.kubernetes.io/instance=v11710,app.kubernetes.io/name=ec-cts-ibmis
+Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  app.kubernetes.io/component=ibm-igc-service
+           app.kubernetes.io/instance=v11710
+           app.kubernetes.io/name=ec-cts-ibmis
+  Init Containers:
+   init-connector:
+    Image:      docker.io/odpi/egeria-configure:1.2
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      /bin/bash
+      -c
+      cd /opt/egeria/connectors && wget ${CONNECTOR_URL}
+      
+    Environment Variables from:
+      v11710-configmap  ConfigMap  Optional: false
+    Environment:        <none>
+    Mounts:
+      /opt/egeria/connectors from egeria-igc-connector-volume (rw)
+  Containers:
+   proxy:
+    Image:      docker.io/odpi/egeria:1.2
+    Port:       8080/TCP
+    Host Port:  0/TCP
+    Limits:
+      cpu:     1
+      memory:  2Gi
+    Requests:
+      cpu:      250m
+      memory:   1Gi
+    Readiness:  tcp-socket :8080 delay=10s timeout=1s period=10s #success=1 #failure=6
+    Environment Variables from:
+      v11710-configmap  ConfigMap  Optional: false
+    Environment:
+      LOADER_PATH:                                       /opt/egeria/connectors
+      LOGGING_LEVEL_ORG_ODPI_EGERIA_CONNECTORS_IBM_IGC:  DEBUG
+    Mounts:
+      /opt/egeria/connectors from egeria-igc-connector-volume (ro)
+   ibm-igc:
+    Image:       hyc-daell-infosvr-docker-local.artifactory.swg-devops.com/ibm/infosvr:v11710-samples
+    Ports:       9446/TCP, 52181/TCP, 59092/TCP
+    Host Ports:  0/TCP, 0/TCP, 0/TCP
+    Limits:
+      cpu:     6
+      memory:  8Gi
+    Requests:
+      cpu:        2
+      memory:     4Gi
+    Liveness:     http-get https://:9446/ibm/iis/launchpad delay=720s timeout=1s period=20s #success=1 #failure=3
+    Readiness:    http-get https://:9446/ibm/iis/launchpad delay=300s timeout=1s period=20s #success=1 #failure=12
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:
+   egeria-igc-connector-volume:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   v11710-ibm-igc-795579f894 (1/1 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  53m   deployment-controller  Scaled up replica set v11710-ibm-igc-795579f894 to 1
+
+Name:                   v11710-init-and-report
+Namespace:              default
+CreationTimestamp:      Tue, 10 Dec 2019 07:38:46 -0800
+Labels:                 app.kubernetes.io/component=init-and-report
+                        app.kubernetes.io/instance=v11710
+                        app.kubernetes.io/managed-by=Helm
+                        app.kubernetes.io/name=ec-cts-ibmis
+                        helm.sh/chart=ec-cts-ibmis-0.1
+Annotations:            deployment.kubernetes.io/revision: 1
+Selector:               app.kubernetes.io/component=init-and-report,app.kubernetes.io/instance=v11710,app.kubernetes.io/name=ec-cts-ibmis
+Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:           app.kubernetes.io/component=init-and-report
+                    app.kubernetes.io/instance=v11710
+                    app.kubernetes.io/name=ec-cts-ibmis
+  Service Account:  v11710-cts
+  Init Containers:
+   wait-for-igcproxy:
+    Image:      docker.io/odpi/egeria-configure:1.2
+    Port:       <none>
+    Host Port:  <none>
+    Environment:
+      SERVICE:  v11710-ibm-igc-service
+    Mounts:     <none>
+   wait-for-kafka:
+    Image:      docker.io/odpi/egeria-configure:1.2
+    Port:       <none>
+    Host Port:  <none>
+    Environment:
+      SERVICE:  v11710-kafka
+    Mounts:     <none>
+   wait-for-ibm-igc:
+    Image:      docker.io/odpi/egeria-configure:1.2
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      /bin/bash
+      -c
+      until $(curl -c /tmp/cookies.txt -s -f -k --connect-timeout 5 -X POST -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://v11710-ibm-igc-service:9446/ibm/iis/igc-rest/v1/search -H "Content-Type: application/json" -d '{"types":["category","term","information_governance_policy","information_governance_rule"],"pageSize":1,"workflowMode":"draft"}' | grep 'numTotal' >/dev/null); do curl -b /tmp/cookies.txt -s -f -k --connect-timeout 5 -X GET -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://v11710-ibm-igc-service:9446/ibm/iis/igc-rest/v1/logout; echo waiting for v11710-ibm-igc-service to be accessible; sleep 2; done;
+      
+    Environment Variables from:
+      v11710-configmap  ConfigMap  Optional: false
+    Environment:        <none>
+    Mounts:             <none>
+  Containers:
+   init-and-report:
+    Image:      docker.io/odpi/egeria-configure:1.2
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      /bin/bash
+      -c
+      curl -f --verbose --basic admin:admin -X POST ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/server-url-root?url=${IGCPROXY_ENDPOINT} && curl -f --verbose --basic admin:admin -X POST ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/cts/server-type?typeName=Conformance && curl -f --verbose --basic admin:admin -X POST --header "Content-Type: application/json" ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/cts/event-bus?topicURLRoot=egeria --data '{"producer": {"bootstrap.servers": "'"${KAFKA_ENDPOINT}"'"}, "consumer": {"bootstrap.servers": "'"${KAFKA_ENDPOINT}"'"} }' && curl -f --verbose --basic admin:admin -X POST ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/cts/cohorts/${EGERIA_COHORT} && curl -f --verbose --basic admin:admin -X POST --header "Content-Type: application/json" ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/cts/conformance-suite-workbenches/repository-workbench/repositories --data '{"class":"RepositoryConformanceWorkbenchConfig","tutRepositoryServerName":"'"${IBMIGC_SERVER}"'","maxSearchResults":5}' && curl -f --verbose --basic admin:admin -X POST ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/cts/instance && curl -f --verbose --basic admin:admin -X POST ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/server-type?typeName=IBM%20Information%20Governance%20Catalog && curl -f --verbose --basic admin:admin -X POST ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/organization-name?name=ODPi && curl -f --verbose --basic admin:admin -X POST --header "Content-Type: application/json" ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/event-bus?topicURLRoot=egeria --data '{"producer": {"bootstrap.servers": "'"${KAFKA_ENDPOINT}"'"}, "consumer": {"bootstrap.servers": "'"${KAFKA_ENDPOINT}"'"} }' && curl -f --verbose --basic admin:admin -X POST --header "Content-Type: application/json" ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/local-repository/mode/repository-proxy/connection --data '{"class":"Connection","connectorType":{"class":"ConnectorType","connectorProviderClassName":"org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider"},"endpoint":{"class":"Endpoint","address":"'"${IBMIGC_HOST}:${IBMIGC_PORT}"'","protocol":"https"},"userId":"'"${IBMIGC_USER}"'","clearPassword":"'"${IBMIGC_USER}"'","configurationProperties":{"defaultZones":["default"]}}' && curl -f --verbose --basic admin:admin -X POST ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/cohorts/${EGERIA_COHORT} && curl -f --verbose --basic admin:admin -X POST "${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/local-repository/event-mapper-details?connectorProvider=org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapperProvider&eventSource=${IBMIGC_KAFKA_ENDPOINT}" && curl -f --verbose --basic admin:admin -X POST --max-time 900 ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/instance && curl -f --verbose --basic admin:admin -X GET ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/cts/configuration > /tmp/omag.server.cts.config && curl -f --verbose --basic admin:admin -X GET ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/configuration > /tmp/omag.server.${IBMIGC_SERVER}.config && curl -f --verbose --basic admin:admin -X GET ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/repository-services/users/${EGERIA_USER}/metadata-highway/local-registration > /tmp/cohort.${EGERIA_COHORT}.cts.local && curl -f --verbose --basic admin:admin -X GET ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/repository-services/users/${EGERIA_USER}/metadata-highway/cohorts/${EGERIA_COHORT}/remote-members > /tmp/cohort.${EGERIA_COHORT}.cts.remote && curl -f --verbose --basic admin:admin -X GET ${IGCPROXY_ENDPOINT}/servers/${IBMIGC_SERVER}/open-metadata/repository-services/users/${EGERIA_USER}/metadata-highway/local-registration > /tmp/cohort.${EGERIA_COHORT}.${IBMIGC_SERVER}.local && curl -f --verbose --basic admin:admin -X GET ${IGCPROXY_ENDPOINT}/servers/${IBMIGC_SERVER}/open-metadata/repository-services/users/${EGERIA_USER}/metadata-highway/cohorts/${EGERIA_COHORT}/remote-members > /tmp/cohort.${EGERIA_COHORT}.${IBMIGC_SERVER}.remote && echo "Waiting 2 minutes for CTS to start..."; sleep 120 && curl -f --silent --basic admin:admin -X GET --max-time 900 ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/report > /tmp/openmetadata.conformance.testlab.results && testcount=$(cat /tmp/openmetadata.conformance.testlab.results | jq '.testLabResults.testCaseCount') && until [ ${testcount} -ge 399 ]; do echo "... waiting for CTS to complete (${testcount} / 399 tests completed)"; sleep 20; curl -f --silent --basic admin:admin -X GET --max-time 900 ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/report > /tmp/openmetadata.conformance.testlab.results; testcount=$(cat /tmp/openmetadata.conformance.testlab.results | jq '.testLabResults.testCaseCount'); done && cd /tmp; tar cvf ${CTS_REPORT_NAME}.tar *.config cohort.* openmetadata.conformance.testlab.results; gzip ${CTS_REPORT_NAME}.tar && echo "Complete -- CTS results available to download from /tmp/${CTS_REPORT_NAME}.tar.gz" && tail -f /dev/null
+      
+    Limits:
+      cpu:     500m
+      memory:  64Mi
+    Requests:
+      cpu:     100m
+      memory:  16Mi
+    Environment Variables from:
+      v11710-configmap  ConfigMap  Optional: false
+    Environment:        <none>
+    Mounts:             <none>
+  Volumes:              <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   v11710-init-and-report-55496df585 (1/1 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  53m   deployment-controller  Scaled up replica set v11710-init-and-report-55496df585 to 1
+
+Name:                   v11710sp1-ibm-igc
+Namespace:              default
+CreationTimestamp:      Tue, 10 Dec 2019 08:12:51 -0800
+Labels:                 app.kubernetes.io/component=ibm-igc-service
+                        app.kubernetes.io/instance=v11710sp1
+                        app.kubernetes.io/managed-by=Helm
+                        app.kubernetes.io/name=ec-cts-ibmis
+                        helm.sh/chart=ec-cts-ibmis-0.1
+Annotations:            deployment.kubernetes.io/revision: 1
+Selector:               app.kubernetes.io/component=ibm-igc-service,app.kubernetes.io/instance=v11710sp1,app.kubernetes.io/name=ec-cts-ibmis
+Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  app.kubernetes.io/component=ibm-igc-service
+           app.kubernetes.io/instance=v11710sp1
+           app.kubernetes.io/name=ec-cts-ibmis
+  Init Containers:
+   init-connector:
+    Image:      docker.io/odpi/egeria-configure:1.2
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      /bin/bash
+      -c
+      cd /opt/egeria/connectors && wget ${CONNECTOR_URL}
+      
+    Environment Variables from:
+      v11710sp1-configmap  ConfigMap  Optional: false
+    Environment:           <none>
+    Mounts:
+      /opt/egeria/connectors from egeria-igc-connector-volume (rw)
+  Containers:
+   proxy:
+    Image:      docker.io/odpi/egeria:1.2
+    Port:       8080/TCP
+    Host Port:  0/TCP
+    Limits:
+      cpu:     1
+      memory:  2Gi
+    Requests:
+      cpu:      250m
+      memory:   1Gi
+    Readiness:  tcp-socket :8080 delay=10s timeout=1s period=10s #success=1 #failure=6
+    Environment Variables from:
+      v11710sp1-configmap  ConfigMap  Optional: false
+    Environment:
+      LOADER_PATH:                                       /opt/egeria/connectors
+      LOGGING_LEVEL_ORG_ODPI_EGERIA_CONNECTORS_IBM_IGC:  DEBUG
+    Mounts:
+      /opt/egeria/connectors from egeria-igc-connector-volume (ro)
+   ibm-igc:
+    Image:       hyc-daell-infosvr-docker-local.artifactory.swg-devops.com/ibm/infosvr:v11710sp1-samples
+    Ports:       9446/TCP, 52181/TCP, 59092/TCP
+    Host Ports:  0/TCP, 0/TCP, 0/TCP
+    Limits:
+      cpu:     6
+      memory:  8Gi
+    Requests:
+      cpu:        2
+      memory:     4Gi
+    Liveness:     http-get https://:9446/ibm/iis/launchpad delay=720s timeout=1s period=20s #success=1 #failure=3
+    Readiness:    http-get https://:9446/ibm/iis/launchpad delay=300s timeout=1s period=20s #success=1 #failure=12
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:
+   egeria-igc-connector-volume:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   v11710sp1-ibm-igc-bd495bf94 (1/1 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  19m   deployment-controller  Scaled up replica set v11710sp1-ibm-igc-bd495bf94 to 1
+
+Name:                   v11710sp1-init-and-report
+Namespace:              default
+CreationTimestamp:      Tue, 10 Dec 2019 08:12:51 -0800
+Labels:                 app.kubernetes.io/component=init-and-report
+                        app.kubernetes.io/instance=v11710sp1
+                        app.kubernetes.io/managed-by=Helm
+                        app.kubernetes.io/name=ec-cts-ibmis
+                        helm.sh/chart=ec-cts-ibmis-0.1
+Annotations:            deployment.kubernetes.io/revision: 1
+Selector:               app.kubernetes.io/component=init-and-report,app.kubernetes.io/instance=v11710sp1,app.kubernetes.io/name=ec-cts-ibmis
+Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:           app.kubernetes.io/component=init-and-report
+                    app.kubernetes.io/instance=v11710sp1
+                    app.kubernetes.io/name=ec-cts-ibmis
+  Service Account:  v11710sp1-cts
+  Init Containers:
+   wait-for-igcproxy:
+    Image:      docker.io/odpi/egeria-configure:1.2
+    Port:       <none>
+    Host Port:  <none>
+    Environment:
+      SERVICE:  v11710sp1-ibm-igc-service
+    Mounts:     <none>
+   wait-for-kafka:
+    Image:      docker.io/odpi/egeria-configure:1.2
+    Port:       <none>
+    Host Port:  <none>
+    Environment:
+      SERVICE:  v11710sp1-kafka
+    Mounts:     <none>
+   wait-for-ibm-igc:
+    Image:      docker.io/odpi/egeria-configure:1.2
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      /bin/bash
+      -c
+      until $(curl -c /tmp/cookies.txt -s -f -k --connect-timeout 5 -X POST -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://v11710sp1-ibm-igc-service:9446/ibm/iis/igc-rest/v1/search -H "Content-Type: application/json" -d '{"types":["category","term","information_governance_policy","information_governance_rule"],"pageSize":1,"workflowMode":"draft"}' | grep 'numTotal' >/dev/null); do curl -b /tmp/cookies.txt -s -f -k --connect-timeout 5 -X GET -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://v11710sp1-ibm-igc-service:9446/ibm/iis/igc-rest/v1/logout; echo waiting for v11710sp1-ibm-igc-service to be accessible; sleep 2; done;
+      
+    Environment Variables from:
+      v11710sp1-configmap  ConfigMap  Optional: false
+    Environment:           <none>
+    Mounts:                <none>
+  Containers:
+   init-and-report:
+    Image:      docker.io/odpi/egeria-configure:1.2
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      /bin/bash
+      -c
+      curl -f --verbose --basic admin:admin -X POST ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/server-url-root?url=${IGCPROXY_ENDPOINT} && curl -f --verbose --basic admin:admin -X POST ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/cts/server-type?typeName=Conformance && curl -f --verbose --basic admin:admin -X POST --header "Content-Type: application/json" ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/cts/event-bus?topicURLRoot=egeria --data '{"producer": {"bootstrap.servers": "'"${KAFKA_ENDPOINT}"'"}, "consumer": {"bootstrap.servers": "'"${KAFKA_ENDPOINT}"'"} }' && curl -f --verbose --basic admin:admin -X POST ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/cts/cohorts/${EGERIA_COHORT} && curl -f --verbose --basic admin:admin -X POST --header "Content-Type: application/json" ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/cts/conformance-suite-workbenches/repository-workbench/repositories --data '{"class":"RepositoryConformanceWorkbenchConfig","tutRepositoryServerName":"'"${IBMIGC_SERVER}"'","maxSearchResults":5}' && curl -f --verbose --basic admin:admin -X POST ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/cts/instance && curl -f --verbose --basic admin:admin -X POST ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/server-type?typeName=IBM%20Information%20Governance%20Catalog && curl -f --verbose --basic admin:admin -X POST ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/organization-name?name=ODPi && curl -f --verbose --basic admin:admin -X POST --header "Content-Type: application/json" ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/event-bus?topicURLRoot=egeria --data '{"producer": {"bootstrap.servers": "'"${KAFKA_ENDPOINT}"'"}, "consumer": {"bootstrap.servers": "'"${KAFKA_ENDPOINT}"'"} }' && curl -f --verbose --basic admin:admin -X POST --header "Content-Type: application/json" ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/local-repository/mode/repository-proxy/connection --data '{"class":"Connection","connectorType":{"class":"ConnectorType","connectorProviderClassName":"org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider"},"endpoint":{"class":"Endpoint","address":"'"${IBMIGC_HOST}:${IBMIGC_PORT}"'","protocol":"https"},"userId":"'"${IBMIGC_USER}"'","clearPassword":"'"${IBMIGC_USER}"'","configurationProperties":{"defaultZones":["default"]}}' && curl -f --verbose --basic admin:admin -X POST ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/cohorts/${EGERIA_COHORT} && curl -f --verbose --basic admin:admin -X POST "${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/local-repository/event-mapper-details?connectorProvider=org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapperProvider&eventSource=${IBMIGC_KAFKA_ENDPOINT}" && curl -f --verbose --basic admin:admin -X POST --max-time 900 ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/instance && curl -f --verbose --basic admin:admin -X GET ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/cts/configuration > /tmp/omag.server.cts.config && curl -f --verbose --basic admin:admin -X GET ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/configuration > /tmp/omag.server.${IBMIGC_SERVER}.config && curl -f --verbose --basic admin:admin -X GET ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/repository-services/users/${EGERIA_USER}/metadata-highway/local-registration > /tmp/cohort.${EGERIA_COHORT}.cts.local && curl -f --verbose --basic admin:admin -X GET ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/repository-services/users/${EGERIA_USER}/metadata-highway/cohorts/${EGERIA_COHORT}/remote-members > /tmp/cohort.${EGERIA_COHORT}.cts.remote && curl -f --verbose --basic admin:admin -X GET ${IGCPROXY_ENDPOINT}/servers/${IBMIGC_SERVER}/open-metadata/repository-services/users/${EGERIA_USER}/metadata-highway/local-registration > /tmp/cohort.${EGERIA_COHORT}.${IBMIGC_SERVER}.local && curl -f --verbose --basic admin:admin -X GET ${IGCPROXY_ENDPOINT}/servers/${IBMIGC_SERVER}/open-metadata/repository-services/users/${EGERIA_USER}/metadata-highway/cohorts/${EGERIA_COHORT}/remote-members > /tmp/cohort.${EGERIA_COHORT}.${IBMIGC_SERVER}.remote && echo "Waiting 2 minutes for CTS to start..."; sleep 120 && curl -f --silent --basic admin:admin -X GET --max-time 900 ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/report > /tmp/openmetadata.conformance.testlab.results && testcount=$(cat /tmp/openmetadata.conformance.testlab.results | jq '.testLabResults.testCaseCount') && until [ ${testcount} -ge 399 ]; do echo "... waiting for CTS to complete (${testcount} / 399 tests completed)"; sleep 20; curl -f --silent --basic admin:admin -X GET --max-time 900 ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/report > /tmp/openmetadata.conformance.testlab.results; testcount=$(cat /tmp/openmetadata.conformance.testlab.results | jq '.testLabResults.testCaseCount'); done && cd /tmp; tar cvf ${CTS_REPORT_NAME}.tar *.config cohort.* openmetadata.conformance.testlab.results; gzip ${CTS_REPORT_NAME}.tar && echo "Complete -- CTS results available to download from /tmp/${CTS_REPORT_NAME}.tar.gz" && tail -f /dev/null
+      
+    Limits:
+      cpu:     500m
+      memory:  64Mi
+    Requests:
+      cpu:     100m
+      memory:  16Mi
+    Environment Variables from:
+      v11710sp1-configmap  ConfigMap  Optional: false
+    Environment:           <none>
+    Mounts:                <none>
+  Volumes:                 <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   v11710sp1-init-and-report-76c86cb555 (1/1 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  19m   deployment-controller  Scaled up replica set v11710sp1-init-and-report-76c86cb555 to 1
+

@@ -362,9 +362,12 @@
                         <exclude>**/.project</exclude>
                         <exclude>**/.settings/**</exclude>
                         <exclude>config</exclude>
-                        <exclude>docs/cts-results/**/*.results</exclude>
-                        <exclude>docs/cts-results/**/*.config</exclude>
-                        <exclude>docs/cts-results/**/*.registrystore</exclude>
+                        <exclude>cts/results/**/*.results</exclude>
+                        <exclude>cts/results/**/*.config</exclude>
+                        <exclude>cts/results/**/*.local</exclude>
+                        <exclude>cts/results/**/*.remote</exclude>
+                        <exclude>cts/results/**/*.deployment</exclude>
+                        <exclude>cts/results/**/*.configmap</exclude>
                     </excludes>
                     <licenseFamilies>
                         <licenseFamily implementation="org.apache.rat.license.SimpleLicenseFamily">
