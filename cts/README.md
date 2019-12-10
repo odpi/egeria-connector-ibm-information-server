@@ -42,7 +42,7 @@ connector. For each release, you will find the following details:
 | [v11.7.0.2](results/1.2/11.7.0.2) | Metadata sharing |
 | [v11.7.1.0](results/1.2/11.7.1.0) | Metadata sharing |
 | [v11.7.1.0 SP1](results/1.2/11.7.1.0sp1) | Metadata sharing |
-| [v11.7.1.0 SP2](results/1.2/11.7.1.0sp2) |  |
+| [v11.7.1.0 SP2](results/1.2/11.7.1.0sp2) | Metadata sharing |
 
 ## Known issues
 
