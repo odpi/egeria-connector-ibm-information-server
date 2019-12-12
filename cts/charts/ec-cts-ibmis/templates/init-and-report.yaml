@@ -63,8 +63,8 @@ spec:
             - "/bin/bash"
             - "-c"
             - >
-                until $(curl -c /tmp/cookies.txt -s -f -k --connect-timeout 5 -X POST -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ .Release.Name }}-ibm-igc-service:9446/ibm/iis/igc-rest/v1/search -H "Content-Type: application/json" -d '{"types":["category","term","information_governance_policy","information_governance_rule"],"pageSize":1,"workflowMode":"draft"}' | grep 'numTotal' >/dev/null); do
-                curl -b /tmp/cookies.txt -s -f -k --connect-timeout 5 -X GET -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ .Release.Name }}-ibm-igc-service:9446/ibm/iis/igc-rest/v1/logout;
+                until $(curl -c /tmp/cookies.txt -s -f -k --connect-timeout 5 -X POST -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ .Release.Name }}-ibm-igc-service:${IBMIGC_PORT}/ibm/iis/igc-rest/v1/search -H "Content-Type: application/json" -d '{"types":["category","term","information_governance_policy","information_governance_rule"],"pageSize":1,"workflowMode":"draft"}' | grep 'numTotal' >/dev/null); do
+                curl -b /tmp/cookies.txt -s -f -k --connect-timeout 5 -X GET -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ .Release.Name }}-ibm-igc-service:${IBMIGC_PORT}/ibm/iis/igc-rest/v1/logout;
                 echo waiting for {{ .Release.Name }}-ibm-igc-service to be accessible;
                 sleep 2;
                 done;
@@ -119,7 +119,7 @@ spec:
                 curl -f --verbose --basic admin:admin -X POST
                 --header "Content-Type: application/json"
                 ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/local-repository/mode/repository-proxy/connection
-                --data '{"class":"Connection","connectorType":{"class":"ConnectorType","connectorProviderClassName":"org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider"},"endpoint":{"class":"Endpoint","address":"'"${IBMIGC_HOST}:${IBMIGC_PORT}"'","protocol":"https"},"userId":"'"${IBMIGC_USER}"'","clearPassword":"'"${IBMIGC_USER}"'","configurationProperties":{"defaultZones":["default"]}}'
+                --data '{"class":"Connection","connectorType":{"class":"ConnectorType","connectorProviderClassName":"org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider"},"endpoint":{"class":"Endpoint","address":"'"${IBMIGC_HOST}:${IBMIGC_PORT}"'","protocol":"https"},"userId":"'"${IBMIGC_USER}"'","clearPassword":"'"${IBMIGC_PASS}"'","configurationProperties":{"defaultZones":["default"]}}'
                 &&
                 curl -f --verbose --basic admin:admin -X POST
                 ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/cohorts/${EGERIA_COHORT}
