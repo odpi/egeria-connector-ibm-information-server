@@ -148,19 +148,14 @@ spec:
                 curl -f --verbose --basic admin:admin -X GET
                 ${IGCPROXY_ENDPOINT}/servers/${IBMIGC_SERVER}/open-metadata/repository-services/users/${EGERIA_USER}/metadata-highway/cohorts/${EGERIA_COHORT}/remote-members > /tmp/cohort.${EGERIA_COHORT}.${IBMIGC_SERVER}.remote
                 &&
-                echo "Waiting 2 minutes for CTS to start..."; sleep 120
+                echo "\nWaiting 2 minutes for CTS to start..."; sleep 120
                 &&
-                curl -f --silent --basic admin:admin -X GET --max-time 900
-                ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/report > /tmp/openmetadata.conformance.testlab.results
-                &&
-                testcount=$(cat /tmp/openmetadata.conformance.testlab.results | jq '.testLabResults.testCaseCount')
-                &&
-                until [ ${testcount} -ge 399 ]; do
-                echo "... waiting for CTS to complete (${testcount} / 399 tests completed)";
+                until [ $(curl -f --silent --basic admin:admin -X GET ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/status/workbenches/repository-workbench | jq '.workbenchStatus.workbenchComplete') == "true" ]; do
+                echo "... waiting for CTS to complete";
                 sleep 20;
-                curl -f --silent --basic admin:admin -X GET --max-time 900 ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/report > /tmp/openmetadata.conformance.testlab.results;
-                testcount=$(cat /tmp/openmetadata.conformance.testlab.results | jq '.testLabResults.testCaseCount');
                 done
+                &&
+                curl -f --silent --basic admin:admin -X GET --max-time 900 ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/report > /tmp/openmetadata.conformance.testlab.results
                 &&
                 cd /tmp; tar cvf ${CTS_REPORT_NAME}.tar *.config cohort.* openmetadata.conformance.testlab.results; gzip ${CTS_REPORT_NAME}.tar
                 &&
