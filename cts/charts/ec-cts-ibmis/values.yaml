@@ -22,9 +22,11 @@ release:
 image:
   egeria:
     name: egeria
+    pullPolicy: Always
 
   configure:
     name: egeria-configure
+    pullPolicy: Always
 
 # NOTE: this image is "bring your own". Furthermore, the tag will be automatically built based on the
 # name used for the Helm chart release + "-samples". So for example, if you deploy the Helm chart with
