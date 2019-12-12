@@ -16,17 +16,15 @@ egeria:
   server: myserver
 
 release:
-  version: 1.2
-  repo: staging
+  version: 1.3-SNAPSHOT
+  repo: snapshot
 
 image:
   egeria:
     name: egeria
-    tag: 1.2
 
   configure:
     name: egeria-configure
-    tag: 1.2
 
 # NOTE: this image is "bring your own". Furthermore, the tag will be automatically built based on the
 # name used for the Helm chart release + "-samples". So for example, if you deploy the Helm chart with
