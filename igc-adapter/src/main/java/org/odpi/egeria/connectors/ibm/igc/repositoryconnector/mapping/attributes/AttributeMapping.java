@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -122,6 +123,14 @@ public abstract class AttributeMapping {
 
             if (property.getAttributeType().getCategory() == AttributeTypeDefCategory.PRIMITIVE) {
                 try {
+                    // First check if our single primitive value is wrapped in a list (happens occasionally in IGC),
+                    // and if so take only its initial object value
+                    if (propertyValue instanceof List) {
+                        List<?> list = (List<?>)propertyValue;
+                        if (!list.isEmpty()) {
+                            propertyValue = list.get(0);
+                        }
+                    }
                     PrimitiveDef primitiveDef = (PrimitiveDef) property.getAttributeType();
                     switch (primitiveDef.getPrimitiveDefCategory()) {
                         case OM_PRIMITIVE_TYPE_BOOLEAN:
