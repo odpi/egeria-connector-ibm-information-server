@@ -63,8 +63,8 @@ spec:
             - "/bin/bash"
             - "-c"
             - >
-                until $(curl -c /tmp/cookies.txt -s -f -k --connect-timeout 5 -X POST -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ .Release.Name }}-ibm-igc-service:9446/ibm/iis/igc-rest/v1/search -H "Content-Type: application/json" -d '{"types":["category","term","information_governance_policy","information_governance_rule"],"pageSize":1,"workflowMode":"draft"}' | grep 'numTotal' >/dev/null); do
-                curl -b /tmp/cookies.txt -s -f -k --connect-timeout 5 -X GET -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ .Release.Name }}-ibm-igc-service:9446/ibm/iis/igc-rest/v1/logout;
+                until $(curl -c /tmp/cookies.txt -s -f -k --connect-timeout 5 -X POST -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ .Release.Name }}-ibm-igc-service:${IBMIGC_PORT}/ibm/iis/igc-rest/v1/search -H "Content-Type: application/json" -d '{"types":["category","term","information_governance_policy","information_governance_rule"],"pageSize":1,"workflowMode":"draft"}' | grep 'numTotal' >/dev/null); do
+                curl -b /tmp/cookies.txt -s -f -k --connect-timeout 5 -X GET -u ${IBMIGC_USER}:${IBMIGC_PASS} --url https://{{ .Release.Name }}-ibm-igc-service:${IBMIGC_PORT}/ibm/iis/igc-rest/v1/logout;
                 echo waiting for {{ .Release.Name }}-ibm-igc-service to be accessible;
                 sleep 2;
                 done;
@@ -119,7 +119,7 @@ spec:
                 curl -f --verbose --basic admin:admin -X POST
                 --header "Content-Type: application/json"
                 ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/local-repository/mode/repository-proxy/connection
-                --data '{"class":"Connection","connectorType":{"class":"ConnectorType","connectorProviderClassName":"org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider"},"endpoint":{"class":"Endpoint","address":"'"${IBMIGC_HOST}:${IBMIGC_PORT}"'","protocol":"https"},"userId":"'"${IBMIGC_USER}"'","clearPassword":"'"${IBMIGC_USER}"'","configurationProperties":{"defaultZones":["default"]}}'
+                --data '{"class":"Connection","connectorType":{"class":"ConnectorType","connectorProviderClassName":"org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider"},"endpoint":{"class":"Endpoint","address":"'"${IBMIGC_HOST}:${IBMIGC_PORT}"'","protocol":"https"},"userId":"'"${IBMIGC_USER}"'","clearPassword":"'"${IBMIGC_PASS}"'","configurationProperties":{"defaultZones":["default"]}}'
                 &&
                 curl -f --verbose --basic admin:admin -X POST
                 ${IGCPROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBMIGC_SERVER}/cohorts/${EGERIA_COHORT}
@@ -148,19 +148,14 @@ spec:
                 curl -f --verbose --basic admin:admin -X GET
                 ${IGCPROXY_ENDPOINT}/servers/${IBMIGC_SERVER}/open-metadata/repository-services/users/${EGERIA_USER}/metadata-highway/cohorts/${EGERIA_COHORT}/remote-members > /tmp/cohort.${EGERIA_COHORT}.${IBMIGC_SERVER}.remote
                 &&
-                echo "Waiting 2 minutes for CTS to start..."; sleep 120
+                echo ""; "Waiting 2 minutes for CTS to start..."; sleep 120
                 &&
-                curl -f --silent --basic admin:admin -X GET --max-time 900
-                ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/report > /tmp/openmetadata.conformance.testlab.results
-                &&
-                testcount=$(cat /tmp/openmetadata.conformance.testlab.results | jq '.testLabResults.testCaseCount')
-                &&
-                until [ ${testcount} -ge 399 ]; do
-                echo "... waiting for CTS to complete (${testcount} / 399 tests completed)";
+                until [ $(curl -f --silent --basic admin:admin -X GET ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/status/workbenches/repository-workbench | jq '.workbenchStatus.workbenchComplete') == "true" ]; do
+                echo "... waiting for CTS to complete";
                 sleep 20;
-                curl -f --silent --basic admin:admin -X GET --max-time 900 ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/report > /tmp/openmetadata.conformance.testlab.results;
-                testcount=$(cat /tmp/openmetadata.conformance.testlab.results | jq '.testLabResults.testCaseCount');
                 done
+                &&
+                curl -f --silent --basic admin:admin -X GET --max-time 900 ${IGCPROXY_ENDPOINT}/servers/cts/open-metadata/conformance-suite/users/${EGERIA_USER}/report > /tmp/openmetadata.conformance.testlab.results
                 &&
                 cd /tmp; tar cvf ${CTS_REPORT_NAME}.tar *.config cohort.* openmetadata.conformance.testlab.results; gzip ${CTS_REPORT_NAME}.tar
                 &&

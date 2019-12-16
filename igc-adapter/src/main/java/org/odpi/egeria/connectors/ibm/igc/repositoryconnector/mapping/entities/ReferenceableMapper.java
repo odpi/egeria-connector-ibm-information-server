@@ -227,28 +227,23 @@ public class ReferenceableMapper extends EntityMapping {
             Identity identity = Identity.getFromString(unqualifiedName, igcRestClient);
             boolean skip = false;
 
-            if (repositoryHelper.isContainsRegex(qualifiedName)
-                    || repositoryHelper.isStartsWithRegex(qualifiedName)
-                    || repositoryHelper.isEndsWithRegex(qualifiedName)) {
-                // TODO: identity must be translate-able (to some degree?) but type being searched does not need to match
+            if (repositoryHelper.isStartsWithRegex(qualifiedName)) {
+                // for a startsWith, we only know the upper portions of the context, so the best we can do is search
+                // for everything and trim the results after they've been returned
+                if (log.isDebugEnabled()) { log.debug(". . . running expensive startsWith query on: {}", qualifiedName); }
+            } else if (repositoryHelper.isEndsWithRegex(qualifiedName)) {
+                // for an endsWith, we only know the lower portions of the context, which we should be able to
+                // therefore search directly
+                identity = Identity.getPartialFromString(unqualifiedName);
                 if (identity != null) {
                     if (log.isDebugEnabled()) { log.debug(". . .found identity: {}", identity.toString()); }
                     IGCSearchConditionSet nested = identity.getSearchCriteria();
                     igcSearchConditionSet.addNestedConditionSet(nested);
-                } else {
-                    if (log.isInfoEnabled()) { log.info("Unable to find identity '{}' -- skipping.", qualifiedName); }
-                    skip = true;
                 }
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        repositoryName,
-                        qualifiedName);
-                throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                        IGCOMRSMetadataCollection.class.getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
+            } else if (repositoryHelper.isContainsRegex(qualifiedName)) {
+                // for a contains, we only know some middle portion of the context, so the best we can do is search
+                // for everything and trim the results after they've been returned
+                if (log.isDebugEnabled()) { log.debug(". . . running expensive contains query on: {}", qualifiedName); }
             } else if (repositoryHelper.isExactMatchRegex(qualifiedName)) {
                 // Identity must be translate-able and match the type being searched, if it is to be an exact match
                 if (identity != null) {

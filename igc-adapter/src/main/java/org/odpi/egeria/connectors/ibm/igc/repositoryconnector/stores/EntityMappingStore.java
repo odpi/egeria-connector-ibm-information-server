@@ -15,10 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Store of implemented entity mappings for the repository.
@@ -35,6 +32,7 @@ public class EntityMappingStore {
     private Map<String, List<String>> igcAssetTypeToOmrsGuids;
     private Map<String, String> igcAssetDisplayNameToOmrsGuid;
     private Map<String, String> igcAssetTypeAndPrefixToOmrsGuid;
+    private Map<String, Set<String>> igcPrefixToOmrsGuids;
     private Map<String, String> omrsNameToGuid;
 
     public EntityMappingStore(IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
@@ -44,6 +42,7 @@ public class EntityMappingStore {
         igcAssetTypeToOmrsGuids = new HashMap<>();
         igcAssetDisplayNameToOmrsGuid = new HashMap<>();
         igcAssetTypeAndPrefixToOmrsGuid = new HashMap<>();
+        igcPrefixToOmrsGuids = new HashMap<>();
         omrsNameToGuid = new HashMap<>();
     }
 
@@ -81,6 +80,12 @@ public class EntityMappingStore {
             String coreKey = getPrefixedTypeKey(igcAssetType, prefix);
             log.debug(" ... adding core mapping from {} to: {}", coreKey, guid);
             igcAssetTypeAndPrefixToOmrsGuid.put(coreKey, guid);
+            if (!prefix.equals("")) {
+                if (!igcPrefixToOmrsGuids.containsKey(prefix)) {
+                    igcPrefixToOmrsGuids.put(prefix, new HashSet<>());
+                }
+                igcPrefixToOmrsGuids.get(prefix).add(guid);
+            }
             for (String otherType : mapping.getOtherIGCAssetTypes()) {
                 addIgcAssetTypeToGuid(otherType, guid);
                 String otherKey = getPrefixedTypeKey(otherType, prefix);
@@ -183,6 +188,28 @@ public class EntityMappingStore {
             return getMappingByOmrsTypeGUID(guid);
         } else {
             if (log.isWarnEnabled()) { log.warn("Unable to find mapping for IGC asset type: {}", key); }
+            return null;
+        }
+    }
+
+    /**
+     * Retrieves the entity mappings that apply to the provided IGC prefix (non-null).
+     *
+     * @param prefix the prefix for the entity (non-null)
+     * @return {@code Set<EntityMapping>}
+     */
+    public Set<EntityMapping> getMappingsByIgcPrefix(String prefix) {
+        if (prefix == null) {
+            return null;
+        } else if (igcPrefixToOmrsGuids.containsKey(prefix)) {
+            Set<String> guids = igcPrefixToOmrsGuids.get(prefix);
+            Set<EntityMapping> mappings = new HashSet<>();
+            for (String guid : guids) {
+                mappings.add(getMappingByOmrsTypeGUID(guid));
+            }
+            return mappings;
+        } else {
+            if (log.isWarnEnabled()) { log.warn("Unable to find mapping for IGC prefix: {}", prefix); }
             return null;
         }
     }

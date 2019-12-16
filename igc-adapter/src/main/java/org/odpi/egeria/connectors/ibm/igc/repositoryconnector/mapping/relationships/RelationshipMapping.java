@@ -1330,9 +1330,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
                 // Otherwise, use the optimal retrieval for the relationship (a search that will batch-retrieve _context)
                 RelationshipMapping.ProxyMapping otherSide = mapping.getOtherProxyFromType(assetType);
-                if (log.isDebugEnabled()) { log.debug(" ... found other proxy: {} with prefix {}", otherSide.getIgcAssetType(), otherSide.getIgcRidPrefix()); }
+                if (log.isDebugEnabled()) { log.debug(" ... found other proxy: {} with prefix {}", otherSide == null ? "(null)" : otherSide.getIgcAssetType(), otherSide == null ? "(null)" : otherSide.getIgcRidPrefix()); }
                 RelationshipMapping.ProxyMapping thisSide = mapping.getProxyFromType(assetType);
-                if (log.isDebugEnabled()) { log.debug(" ... found this proxy: {} with prefix {}", thisSide.getIgcAssetType(), thisSide.getIgcRidPrefix()); }
+                if (log.isDebugEnabled()) { log.debug(" ... found this proxy: {} with prefix {}", thisSide == null ? "(null)" : thisSide.getIgcAssetType(), thisSide == null ? "(null)" : thisSide.getIgcRidPrefix()); }
 
                 String anIgcRelationshipProperty = null;
                 IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
