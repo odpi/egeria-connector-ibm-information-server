@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,21 +23,29 @@ public class Identity {
 
     private static final Logger log = LoggerFactory.getLogger(Identity.class);
     private static final String SEPARATOR_FOR_RID = "__RID__";
+    private static final String SEPARATOR_FOR_COMPONENTS = "::";
+    private static final String SEPARATOR_FOR_TYPE_AND_NAME = "=";
+    public static final String TYPE_PREFIX = "(";
+    private static final String TYPE_POSTFIX = ")";
 
     private List<Reference> context;
 
     private String assetType;
     private String assetName;
     private String rid;
+    private boolean partial;
 
     /**
      * Creates a new empty identity.
+     *
+     * @param partial true if this is only a partial identity, false otherwise
      */
-    public Identity() {
+    public Identity(boolean partial) {
         context = new ArrayList<>();
         assetType = "";
         assetName = "";
         rid = null;
+        this.partial = partial;
     }
 
     /**
@@ -60,7 +69,20 @@ public class Identity {
      * @param rid the Repository ID (RID) of the asset
      */
     public Identity(List<Reference> context, String assetType, String assetName, String rid) {
-        this();
+        this(context, assetType, assetName, rid, false);
+    }
+
+    /**
+     * Creates a new identity based on the identity characteristics provided.
+     *
+     * @param context the populated '_context' array from an asset
+     * @param assetType the type of the asset
+     * @param assetName the name of the asset
+     * @param rid the Repository ID (RID) of the asset
+     * @param partial true if this is only a partial identity, false otherwise
+     */
+    public Identity(List<Reference> context, String assetType, String assetName, String rid, boolean partial) {
+        this(partial);
         this.context = context;
         this.assetType = assetType;
         this.assetName = assetName;
@@ -126,15 +148,11 @@ public class Identity {
     public String getName() { return this.assetName; }
 
     /**
-     * Indicates whether the asset type requires its Repository ID (RID) in order to be unique. In other words, the name
-     * and context of the asset type are insufficient to make the identity unique.
+     * Returns true if this is a partial identity, or false if it is a full identity.
      *
-     * @param assetType the IGC asset type to check
      * @return boolean
      */
-    private static boolean requiresRidToBeUnique(String assetType) {
-        return (assetType.equals("data_connection"));
-    }
+    public boolean isPartial() { return this.partial; }
 
     /**
      * Composes a unique identity string from the provided parameters.
@@ -145,14 +163,11 @@ public class Identity {
      * @param id the Repository ID (RID) of the IGC asset
      */
     private static void composeString(StringBuilder sb, String type, String name, String id) {
-        sb.append("(");
+        sb.append(TYPE_PREFIX);
         sb.append(type);
-        sb.append(")=");
+        sb.append(TYPE_POSTFIX);
+        sb.append(SEPARATOR_FOR_TYPE_AND_NAME);
         sb.append(name);
-        if (requiresRidToBeUnique(type)) {
-            sb.append(SEPARATOR_FOR_RID);
-            sb.append(id);
-        }
     }
 
     /**
@@ -195,45 +210,32 @@ public class Identity {
      * @param propertyPath the property path for the search condition
      * @param ctxType the type of the context asset for which to add the search condition
      * @param ctxName the name of the context asset for which to add the search condition
-     * @param ctxId the RID of the context asset for which to add the search condition (only needed if required to
-     *              uniquely identify that type of asset)
      */
     private void addSearchCondition(IGCSearchConditionSet igcSearchConditionSet,
                                     String propertyPath,
                                     String ctxType,
-                                    String ctxName,
-                                    String ctxId) {
-        if (requiresRidToBeUnique(ctxType)) {
-            if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", (propertyPath == null ? "_id" : propertyPath), "=", ctxId); }
-            IGCSearchCondition condition = new IGCSearchCondition(
-                    (propertyPath == null ? "_id" : propertyPath),
-                    "=",
-                    ctxId
-            );
-            igcSearchConditionSet.addCondition(condition);
-        } else {
-            String ctxTypeToSearch = IGCRestConstants.getAssetTypeForSearch(ctxType);
-            String nameProperty = "name";
-            String operator = "=";
-            if (ctxTypeToSearch.equals("group")) {
-                nameProperty = "group_name";
-            } else if (ctxTypeToSearch.equals("user")) {
-                nameProperty = "full_name";
-                operator = "like %{0}";
-                // For users, we cannot search on the unique '_name' and there is no corresponding 'name' property,
-                // so the best we can do is try to cut off the courtesy title portion and search for an ends-with on
-                // the full name...
-                ctxName = ctxName.substring(ctxName.indexOf(" ") + 1);
-            }
-            String searchFor = (propertyPath == null ? nameProperty : propertyPath + "." + nameProperty);
-            if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", searchFor, operator, ctxName); }
-            IGCSearchCondition condition = new IGCSearchCondition(
-                    searchFor,
-                    operator,
-                    ctxName
-            );
-            igcSearchConditionSet.addCondition(condition);
+                                    String ctxName) {
+        String ctxTypeToSearch = IGCRestConstants.getAssetTypeForSearch(ctxType);
+        String nameProperty = "name";
+        String operator = "=";
+        if (ctxTypeToSearch.equals("group")) {
+            nameProperty = "group_name";
+        } else if (ctxTypeToSearch.equals("user")) {
+            nameProperty = "full_name";
+            operator = "like %{0}";
+            // For users, we cannot search on the unique '_name' and there is no corresponding 'name' property,
+            // so the best we can do is try to cut off the courtesy title portion and search for an ends-with on
+            // the full name...
+            ctxName = ctxName.substring(ctxName.indexOf(" ") + 1);
         }
+        String searchFor = (propertyPath == null ? nameProperty : propertyPath + "." + nameProperty);
+        if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", searchFor, operator, ctxName); }
+        IGCSearchCondition condition = new IGCSearchCondition(
+                searchFor,
+                operator,
+                ctxName
+        );
+        igcSearchConditionSet.addCondition(condition);
     }
 
     /**
@@ -269,7 +271,7 @@ public class Identity {
                 } else {
                     // Add context up as conditions until we hit 'data_file_folder' elements
                     propertyPath = getPropertyPath(assetType, type, propertyPath);
-                    addSearchCondition(igcSearchConditionSet, propertyPath, type, item.getName(), item.getId());
+                    addSearchCondition(igcSearchConditionSet, propertyPath, type, item.getName());
                 }
             }
             // If the propertyPath is empty, we must be searching for just a file folder on its own
@@ -304,15 +306,31 @@ public class Identity {
                 Reference item = context.get(i);
                 String type = item.getType();
                 propertyPath = getPropertyPath(assetType, type, propertyPath);
-                addSearchCondition(igcSearchConditionSet, propertyPath, type, item.getName(), item.getId());
+                addSearchCondition(igcSearchConditionSet, propertyPath, type, item.getName());
             }
         }
 
         // Then add the final condition for this asset itself
-        addSearchCondition(igcSearchConditionSet, null, assetType, assetName, rid);
+        addSearchCondition(igcSearchConditionSet, null, assetType, assetName);
 
         return igcSearchConditionSet;
 
+    }
+
+    /**
+     * Return true if the provided string appears to be an identity string (partial or complete), or false otherwise.
+     *
+     * @param candidate the string to test as an identity string
+     * @return int the count of identifying characteristics of an identity string (max 7)
+     */
+    public static int isIdentityString(String candidate) {
+        int charCount = 0;
+        charCount += (candidate.contains(SEPARATOR_FOR_RID) ? 1 : 0);
+        charCount += (candidate.contains(SEPARATOR_FOR_COMPONENTS) ? 2 : 0);
+        charCount += (candidate.contains(SEPARATOR_FOR_TYPE_AND_NAME) ? 2 : 0);
+        charCount += (candidate.contains(TYPE_PREFIX) ? 1 : 0);
+        charCount += (candidate.contains(TYPE_POSTFIX) ? 1 : 0);
+        return charCount;
     }
 
     /**
@@ -345,31 +363,27 @@ public class Identity {
 
         String assetType = null;
         String assetName = null;
-        String assetId = null;
-        String[] components = identity.split("::");
-        for (int i = 0; i < components.length; i++) {
-            String component = components[i];
-            String[] tokens = component.split("=");
-            if (tokens.length == 2) {
-                String type = tokens[0].substring(1, tokens[0].length() - 1);
-                String name = tokens[1];
-                String id = null;
-                if (requiresRidToBeUnique(type)) {
-                    id = name.split(SEPARATOR_FOR_RID)[1];
-                }
-                if (i == components.length - 1) {
-                    assetType = type;
-                    assetName = name;
-                    assetId = id;
+        List<String> components = getComponentsOfIdentityString(identity);
+        if (components != null) {
+            for (int i = 0; i < components.size(); i++) {
+                String component = components.get(i);
+                List<String> tokens = getTokensOfComponent(component);
+                if (tokens.size() == 2) {
+                    String type = tokens.get(0);
+                    String name = tokens.get(1);
+                    if (i == components.size() - 1) {
+                        assetType = type;
+                        assetName = name;
+                    } else {
+                        Reference item = new Reference(name, type);
+                        context.add(item);
+                    }
                 } else {
-                    Reference item = new Reference(name, type, id);
-                    context.add(item);
+                    // If we could not form the tokens as we expect, short-circuit out as we cannot reconstruct
+                    // the identity from this string
+                    assetType = null;
+                    break;
                 }
-            } else {
-                // If we could not form the tokens as we expect, short-circuit out as we cannot reconstruct
-                // the identity from this string
-                assetType = null;
-                break;
             }
         }
 
@@ -377,13 +391,132 @@ public class Identity {
         try {
             String displayName = igcRestClient.getDisplayNameForType(assetType);
             if (displayName != null) {
-                ident = new Identity(context, assetType, assetName, assetId);
+                ident = new Identity(context, assetType, assetName);
             }
         } catch (Exception e) {
             if (log.isWarnEnabled() && warnOnNotFound) { log.warn("Unable to find registered IGC type '{}' -- cannot construct an IGC identity.", assetType); }
         }
         return ident;
 
+    }
+
+    /**
+     * Attempt to build a partial Identity based on the received partial identity string (or null if completely unable
+     * to parse into even a partial Identity).
+     *
+     * @param identity the string representing a qualified identity
+     * @return String
+     */
+    public static Identity getPartialFromString(String identity) {
+
+        List<Reference> context = new ArrayList<>();
+
+        String assetType = null;
+        String assetName = null;
+        String assetId = null;
+
+        // At a minimum, try to find one component of an identity
+        List<String> components = getComponentsOfIdentityString(identity);
+        if (components == null) {
+            // If there are not multiple items in the identity string, try to parse just a single one out
+            List<String> tokens = getTokensOfComponent(identity);
+            boolean nothingDone = parseTokensIntoContext(tokens, context);
+            if (!context.isEmpty() && !nothingDone) {
+                Reference item = popLastRefFromContext(context);
+                assetType = item.getType();
+                assetName = item.getName();
+                assetId = item.getId();
+            }
+        } else {
+            for (int i = 0; i < components.size(); i++) {
+                String component = components.get(i);
+                List<String> tokens = getTokensOfComponent(component);
+                boolean nothingDone = parseTokensIntoContext(tokens, context);
+                if (i == components.size() - 1 && !context.isEmpty() && !nothingDone) {
+                    Reference item = popLastRefFromContext(context);
+                    assetType = item.getType();
+                    assetName = item.getName();
+                    assetId = item.getId();
+                }
+            }
+        }
+
+        Identity ident = null;
+        // We need at least some contextual items or an assetType to construct even a partial identity
+        if (!context.isEmpty() || assetType != null) {
+            ident = new Identity(context, assetType, assetName, assetId, true);
+        }
+        return ident;
+
+    }
+
+    private static List<String> getComponentsOfIdentityString(String identity) {
+        if (identity.contains(SEPARATOR_FOR_COMPONENTS)) {
+            return Arrays.asList(identity.split(SEPARATOR_FOR_COMPONENTS));
+        } else if (identity.contains(SEPARATOR_FOR_TYPE_AND_NAME)
+                || (identity.contains(TYPE_PREFIX) && identity.contains(TYPE_POSTFIX))) {
+            List<String> list = new ArrayList<>();
+            list.add(identity);
+            return list;
+        } else {
+            return null;
+        }
+    }
+
+    private static List<String> getTokensOfComponent(String component) {
+        List<String> pair = new ArrayList<>();
+        if (component.contains(SEPARATOR_FOR_TYPE_AND_NAME)) {
+            String[] tokens = component.split(SEPARATOR_FOR_TYPE_AND_NAME);
+            String type = getTypeFromComponentToken(tokens[0]);
+            if (type != null) {
+                pair.add(type);
+                if (tokens.length == 2) {
+                    String name = tokens[1];
+                    if (name != null) {
+                        pair.add(name);
+                    }
+                }
+            }
+        } else {
+            String type = getTypeFromComponentToken(component);
+            if (type != null) {
+                pair.add(type);
+            }
+        }
+        return pair;
+    }
+
+    private static String getTypeFromComponentToken(String token) {
+        if (token.contains(TYPE_PREFIX) && token.contains(TYPE_POSTFIX)) {
+            return token.substring(token.indexOf(TYPE_PREFIX) + 1, token.lastIndexOf(TYPE_POSTFIX));
+        } else {
+            return null;
+        }
+    }
+
+    private static boolean parseTokensIntoContext(List<String> tokens, List<Reference> context) {
+        boolean nothingDone = false;
+        if (tokens.size() == 2) {
+            String type = tokens.get(0);
+            String name = tokens.get(1);
+            Reference item = new Reference(name, type);
+            context.add(item);
+        } else if (tokens.size() == 1) {
+            // All we have is a type
+            String type = tokens.get(0);
+            Reference item = new Reference(null, type, null);
+            context.add(item);
+        } else {
+            // We have nothing -- no type, no name
+            nothingDone = true;
+        }
+        return nothingDone;
+    }
+
+    private static Reference popLastRefFromContext(List<Reference> context) {
+        Reference item = context.get(context.size() - 1);
+        context.remove(context.size() - 1);
+        return item;
     }
 
     /**
@@ -415,7 +548,7 @@ public class Identity {
         StringBuilder sb = new StringBuilder();
         for (Reference ref : context) {
             composeString(sb, ref.getType(), ref.getName(), ref.getId());
-            sb.append("::");
+            sb.append(SEPARATOR_FOR_COMPONENTS);
         }
         composeString(sb, assetType, assetName, rid);
         return sb.toString();

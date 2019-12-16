@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
@@ -1030,50 +1031,104 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     && matchProperties.getPropertyNames().next().equals("qualifiedName")) {
                 String qualifiedNameToFind = (String) ((PrimitivePropertyValue)matchProperties.getInstanceProperties().get("qualifiedName")).getPrimitiveValue();
                 log.debug("Short-circuiting find to qualifiedName search: {}", qualifiedNameToFind);
-                if (repositoryHelper.isExactMatchRegex(qualifiedNameToFind)) {
-                    String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedNameToFind);
-                    String qualifiedName = unqualifiedName;
-                    String prefix = null;
-                    if (IGCRepositoryHelper.isQualifiedNameOfGeneratedEntity(unqualifiedName)) {
-                        prefix = IGCRepositoryHelper.getPrefixFromGeneratedQualifiedName(unqualifiedName);
-                        qualifiedName = IGCRepositoryHelper.getSearchableQualifiedName(unqualifiedName);
-                        log.debug(" ... generated name with prefix {} and name: {}", prefix, qualifiedName);
-                    }
-                    Identity identity = Identity.getFromString(qualifiedName, igcRestClient);
-                    if (identity != null) {
-                        String igcType = identity.getAssetType();
-                        EntityMapping mapper = igcRepositoryHelper.getEntityMappingByIgcType(igcType, prefix);
-                        if (mapper != null) {
-                            // validate mapped OMRS type against the provided entityTypeGUID (if non-null), and
-                            // only proceed with the search if IGC identity is a (sub)type of the one requested
-                            boolean runSearch = true;
-                            if (entityTypeGUID != null) {
-                                String mappedOmrsTypeName = mapper.getOmrsTypeDefName();
-                                TypeDef entityTypeDef = repositoryHelper.getTypeDef(repositoryName,
-                                        "entityTypeGUID",
-                                        entityTypeGUID,
-                                        methodName);
-                                runSearch = repositoryHelper.isTypeOf(metadataCollectionId, mappedOmrsTypeName, entityTypeDef.getName());
+                if (repositoryHelper.isExactMatchRegex(qualifiedNameToFind) || repositoryHelper.isEndsWithRegex(qualifiedNameToFind)) {
+
+                    List<EntityMapping> mappers = new ArrayList<>();
+                    // If we are doing a NONE-based search, we still need to consider all mappings and cannot short-
+                    // circuit based on the type implicit in the qualifiedName
+                    if (matchCriteria != null && matchCriteria.equals(MatchCriteria.NONE)) {
+                        mappers = findMappingsForInputs(entityTypeGUID, null, userId);
+                    } else {
+                        // Otherwise we should be able to optimise by trying to pull out the type implicit in the
+                        // qualifiedName itself
+                        String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedNameToFind);
+                        String qualifiedName = unqualifiedName;
+                        String prefix = null;
+                        if (IGCRepositoryHelper.isQualifiedNameOfGeneratedEntity(unqualifiedName)) {
+                            prefix = IGCRepositoryHelper.getPrefixFromGeneratedQualifiedName(unqualifiedName);
+                            qualifiedName = IGCRepositoryHelper.getSearchableQualifiedName(unqualifiedName);
+                            if (log.isDebugEnabled()) {
+                                log.debug(" ... generated name with prefix {} and name: {}", prefix, qualifiedName);
                             }
-                            if (runSearch) {
-                                igcRepositoryHelper.processResultsForMapping(
-                                        mapper,
-                                        entityDetails,
-                                        userId,
-                                        matchProperties,
-                                        matchCriteria,
-                                        fromEntityElement,
-                                        limitResultsByClassification,
-                                        sequencingProperty,
-                                        sequencingOrder,
-                                        pageSize
-                                );
-                            } else {
-                                log.warn("Unable to confirm that the qualifiedName-embedded type ({}) is a subtype of the requested type ({}) -- skipping qualifiedName search.", mapper.getOmrsTypeDefName(), entityTypeGUID);
-                            }
-                        } else {
-                            log.warn("Unable to find a mapping for type {} with prefix {} -- skipping qualifiedName search.", igcType, prefix);
                         }
+                        Identity identity = Identity.getFromString(qualifiedName, igcRestClient);
+                        if (identity == null && repositoryHelper.isEndsWithRegex(qualifiedNameToFind)) {
+                            // If we cannot retrieve a fully qualifiedName (exact match), attempt to retrieve a partial (endsWith)
+                            identity = Identity.getPartialFromString(qualifiedName);
+                        }
+                        if (identity != null) {
+                            // Resolve the asset type directly from the identity, if we can
+                            if (log.isDebugEnabled()) { log.debug(" ... proceeding on basis of identity: {}", identity); }
+                            String igcType = identity.getAssetType();
+                            mappers.add(igcRepositoryHelper.getEntityMappingByIgcType(igcType, prefix));
+                        } else {
+                            // Otherwise fall-back to taking the mappings from the entity information received on the
+                            // method itself
+                            mappers = findMappingsForInputs(entityTypeGUID, prefix, userId);
+                        }
+                    }
+                    for (EntityMapping mapper : mappers) {
+                        // validate mapped OMRS type against the provided entityTypeGUID (if non-null), and
+                        // only proceed with the search if IGC identity is a (sub)type of the one requested
+                        boolean runSearch = true;
+                        if (entityTypeGUID != null) {
+                            String mappedOmrsTypeName = mapper.getOmrsTypeDefName();
+                            TypeDef entityTypeDef = repositoryHelper.getTypeDef(repositoryName,
+                                    "entityTypeGUID",
+                                    entityTypeGUID,
+                                    methodName);
+                            runSearch = repositoryHelper.isTypeOf(metadataCollectionId, mappedOmrsTypeName, entityTypeDef.getName());
+                        }
+                        if (runSearch) {
+                            igcRepositoryHelper.processResultsForMapping(
+                                    mapper,
+                                    entityDetails,
+                                    userId,
+                                    entityTypeGUID,
+                                    matchProperties,
+                                    matchCriteria,
+                                    fromEntityElement,
+                                    limitResultsByClassification,
+                                    sequencingProperty,
+                                    sequencingOrder,
+                                    pageSize
+                            );
+                        } else {
+                            log.warn("Unable to confirm that the qualifiedName-embedded type ({}) is a subtype of the requested type ({}) -- skipping qualifiedName search.", mapper.getOmrsTypeDefName(), entityTypeGUID);
+                        }
+                    }
+
+                } else if (repositoryHelper.isStartsWithRegex(qualifiedNameToFind) || repositoryHelper.isContainsRegex(qualifiedNameToFind)) {
+
+                    List<EntityMapping> mappers;
+                    // If we are doing a NONE-based search, we still need to consider all mappings and cannot short-
+                    // circuit based on the type implicit in the qualifiedName
+                    if (matchCriteria != null && matchCriteria.equals(MatchCriteria.NONE)) {
+                        mappers = findMappingsForInputs(entityTypeGUID, null, userId);
+                    } else {
+                        // Otherwise try to optimise based on whatever information we can find implicitly in the
+                        // qualifiedName itself
+                        String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedNameToFind);
+                        String prefix = null;
+                        if (IGCRepositoryHelper.isQualifiedNameOfGeneratedEntity(unqualifiedName)) {
+                            prefix = IGCRepositoryHelper.getPrefixFromGeneratedQualifiedName(unqualifiedName);
+                        }
+                        mappers = findMappingsForInputs(entityTypeGUID, prefix, userId);
+                    }
+                    for (EntityMapping mapper : mappers) {
+                        igcRepositoryHelper.processResultsForMapping(
+                                mapper,
+                                entityDetails,
+                                userId,
+                                entityTypeGUID,
+                                matchProperties,
+                                matchCriteria,
+                                fromEntityElement,
+                                limitResultsByClassification,
+                                sequencingProperty,
+                                sequencingOrder,
+                                pageSize
+                        );
                     }
                 }
 
@@ -1092,6 +1147,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                 mapping,
                                 entityDetails,
                                 userId,
+                                entityTypeGUID,
                                 matchProperties,
                                 matchCriteria,
                                 fromEntityElement,
@@ -1364,34 +1420,35 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         } else if (limitResultsByStatus == null
                 || (limitResultsByStatus.size() == 1 && limitResultsByStatus.contains(InstanceStatus.ACTIVE))) {
 
-            // Short-circuit if the string we're looking for is an exact match and resolve-able as a qualifiedName
-            if (repositoryHelper.isExactMatchRegex(searchCriteria)) {
+            // If the string we're looking for can in any way be interpreted as an identity string, treat it as such
+            // and search based on qualifiedName
+            if (igcRepositoryHelper.isIdentityString(searchCriteria)) {
 
-                String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(searchCriteria);
-                String qualifiedName = IGCRepositoryHelper.getSearchableQualifiedName(unqualifiedName);
-                Identity identity = Identity.getFromString(qualifiedName, igcRestClient, false);
-                if (identity != null) {
-                    InstanceProperties matchProperties = repositoryHelper.addStringPropertyToInstance(
-                            repositoryName,
-                            null,
-                            "qualifiedName",
-                            searchCriteria,
-                            methodName
-                    );
-                    return findEntitiesByProperty(
-                            userId,
-                            entityTypeGUID,
-                            matchProperties,
-                            MatchCriteria.ALL,
-                            fromEntityElement,
-                            limitResultsByStatus,
-                            limitResultsByClassification,
-                            null,
-                            sequencingProperty,
-                            sequencingOrder,
-                            pageSize
-                    );
-                }
+                if (log.isDebugEnabled()) { log.debug("Treating {} as an identity-string (qualifiedName) search.", searchCriteria); }
+                // Only proceed down this path if there is any kind of qualifiedName that was received
+                InstanceProperties matchProperties = repositoryHelper.addStringPropertyToInstance(
+                        repositoryName,
+                        null,
+                        "qualifiedName",
+                        searchCriteria,
+                        methodName
+                );
+                return findEntitiesByProperty(
+                        userId,
+                        entityTypeGUID,
+                        matchProperties,
+                        MatchCriteria.ALL,
+                        fromEntityElement,
+                        limitResultsByStatus,
+                        limitResultsByClassification,
+                        null,
+                        sequencingProperty,
+                        sequencingOrder,
+                        pageSize
+                );
+
+            } else {
+                if (log.isDebugEnabled()) { log.debug("Treating {} as a normal (non-identity-string / non-qualifiedName) search.", searchCriteria); }
             }
 
             // Otherwise, only bother searching if we are after ACTIVE (or "all") entities -- non-ACTIVE means we
@@ -2837,6 +2894,41 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         return mappingsToSearch;
 
+    }
+
+    /**
+     * Find the minimal set of mappings that we should use for searching based on the provided parameters.
+     *
+     * @param entityTypeGUID the GUID of the entity type to be searched (if any, null otherwise)
+     * @param prefix the prefix of the entity type to be searched (if any, null otherwise)
+     * @param userId of the user making the request
+     * @return {@code List<EntityMapping>}
+     */
+    private List<EntityMapping> findMappingsForInputs(String entityTypeGUID,
+                                                     String prefix,
+                                                     String userId) {
+        if (log.isDebugEnabled()) { log.debug("Looking for mappers for GUID {} and prefix: {}", entityTypeGUID, prefix); }
+        List<EntityMapping> mappers = new ArrayList<>();
+        if (entityTypeGUID != null) {
+            // Prefer the specific mapping(s) requested as the first choice (if any were requested)
+            try {
+                mappers = getMappingsToSearch(entityTypeGUID, userId);
+            } catch (InvalidParameterException | RepositoryErrorException e) {
+                log.error("Unable to retrieve mappers for: {}", entityTypeGUID, e);
+            }
+        } else if (prefix != null) {
+            // Next preference is to optimise to only those needed for any provided prefix
+            mappers = new ArrayList<>(igcRepositoryHelper.getEntityMappingsByPrefix(prefix));
+        } else {
+            // And finally fall-back to a full set of mappings (same call as earlier but this will resolve to all
+            // mappers that are implemented)
+            try {
+                mappers = getMappingsToSearch(entityTypeGUID, userId);
+            } catch (InvalidParameterException | RepositoryErrorException e) {
+                log.error("Unable to retrieve all mappers (no entityTypeGUID requested).", e);
+            }
+        }
+        return mappers;
     }
 
 }

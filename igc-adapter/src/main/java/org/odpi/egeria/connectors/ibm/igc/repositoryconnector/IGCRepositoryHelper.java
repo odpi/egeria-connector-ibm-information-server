@@ -2,9 +2,9 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
-import com.fasterxml.jackson.databind.node.BooleanNode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -175,6 +175,14 @@ public class IGCRepositoryHelper {
     EntityMapping getEntityMappingByIgcType(String assetType, String prefix) { return entityMappingStore.getMappingByIgcAssetTypeAndPrefix(assetType, prefix); }
 
     /**
+     * Retrieves the entity mapping by the IGC asset prefix alone.
+     *
+     * @param prefix the prefix (non-null)
+     * @return {@code Set<EntityMapping>}
+     */
+    Set<EntityMapping> getEntityMappingsByPrefix(String prefix) { return entityMappingStore.getMappingsByIgcPrefix(prefix); }
+
+    /**
      * Retrieves the classification mapping by GUID of the OMRS TypeDef.
      *
      * @param guid of the OMRS TypeDef
@@ -275,6 +283,7 @@ public class IGCRepositoryHelper {
      * @param mapping the mapping to use for running the search
      * @param entityDetails the list of results to append into
      * @param userId unique identifier for requesting user
+     * @param entityTypeGUID the GUID of the entity type that was requested as part of the search (or null for all)
      * @param matchProperties Optional list of entity properties to match (where any String property's value should
      *                        be defined as a Java regular expression, even if it should be an exact match).
      * @param matchCriteria Enum defining how the properties should be matched to the entities in the repository.
@@ -293,6 +302,7 @@ public class IGCRepositoryHelper {
     void processResultsForMapping(EntityMapping mapping,
                                   List<EntityDetail> entityDetails,
                                   String userId,
+                                  String entityTypeGUID,
                                   InstanceProperties matchProperties,
                                   MatchCriteria matchCriteria,
                                   int fromEntityElement,
@@ -301,6 +311,8 @@ public class IGCRepositoryHelper {
                                   SequencingOrder sequencingOrder,
                                   int pageSize)
             throws FunctionNotSupportedException, RepositoryErrorException {
+
+        final String methodName = "processResultsForMapping";
 
         String igcAssetType = mapping.getIgcAssetType();
         IGCSearchConditionSet classificationLimiters = getSearchCriteriaForClassifications(
@@ -423,7 +435,24 @@ public class IGCRepositoryHelper {
                 String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedNameRegex);
                 String prefix = mapping.getIgcRidPrefix();
                 boolean generatedQN = isQualifiedNameOfGeneratedEntity(unqualifiedName);
-                includeResult = (generatedQN && prefix != null) || (!generatedQN && prefix == null);
+                // If all entities were requested, include regardless, otherwise only if the combo of QN and prefix match
+                includeResult = entityTypeGUID == null || (generatedQN && prefix != null) || (!generatedQN && prefix == null);
+                if (!includeResult) {
+                    // Finally, check if this is a subtype of the type requested for the search if we thus far are not
+                    // meant to include it (eg. if the search is for Referenceable we should actually include it even
+                    // if there is no prefix and it is generated, as long as it is a subtype of Referenceable)
+                    String omrsTypeName = mapping.getOmrsTypeDefName();
+                    try {
+                        TypeDef entityTypeDef = repositoryHelper.getTypeDef(repositoryName,
+                                "entityTypeGUID",
+                                entityTypeGUID,
+                                methodName);
+                        includeResult = repositoryHelper.isTypeOf(metadataCollectionId, omrsTypeName, entityTypeDef.getName());
+                    } catch (TypeErrorException e) {
+                        log.error("Unable to lookup type for inclusion comparison: {}", entityTypeGUID, e);
+                    }
+                }
+                if (log.isDebugEnabled()) { log.debug("Include result for name '{}' and prefix '{}'? {}", unqualifiedName, prefix, includeResult); }
             }
 
             if (includeResult) {
@@ -762,6 +791,35 @@ public class IGCRepositoryHelper {
             return valueWithPossibleRegex.equals(valueToCheck);
         }
 
+    }
+
+    /**
+     * Returns true if the provided string appears to be an identity string of some kind (partial or complete), and
+     * false otherwise.
+     *
+     * @param candidate the string to check for identity characteristics
+     * @return boolean
+     */
+    public boolean isIdentityString(String candidate) {
+        int count = Identity.isIdentityString(candidate);
+        if (repositoryHelper.isStartsWithRegex(candidate)) {
+            String unqualified = repositoryHelper.getUnqualifiedLiteralString(candidate);
+            // For a startsWith search to be an identity String, it MUST start with either a generated name prefix or
+            // a type prefix character
+            return (unqualified.startsWith(IGCRepositoryHelper.GENERATED_ENTITY_QNAME_PREFIX) || unqualified.startsWith(Identity.TYPE_PREFIX));
+        } else if (count > 0 && (repositoryHelper.isContainsRegex(candidate)
+                || repositoryHelper.isEndsWithRegex(candidate)) ) {
+            // We must find at least a score of 1 (any single identity string characteristic) to treat the string as
+            // an identity string, otherwise we should just treat it as a normal string
+            return true;
+        } else if (repositoryHelper.isExactMatchRegex(candidate) && count >= 4) {
+            // RID is optional in some identities, and there could be cases where only a single component is present,
+            // but if it is an exact match we should expect to find at least the type prefix and postfix (2) and the
+            // type and name separator (2) for a minimum score of 4
+            return true;
+        }
+        // If we have found a score of 0, or the search is not for a regular expression, return false
+        return false;
     }
 
     /**
@@ -1471,6 +1529,7 @@ public class IGCRepositoryHelper {
                     log.warn("Unhandled search condition for unknown IGC property from OMRS property: {}", omrsPropertyName);
                 } else if (igcPropertyName.equals(EntityMapping.COMPLEX_MAPPING_SENTINEL)) {
 
+                    if (log.isDebugEnabled()) { log.debug("Adding complex property search criteria for: {}", omrsPropertyName); }
                     mapping.addComplexPropertySearchCriteria(
                             repositoryHelper,
                             repositoryName,
@@ -1482,6 +1541,7 @@ public class IGCRepositoryHelper {
 
                 } else if (!igcPropertyName.equals(EntityMapping.LITERAL_MAPPING_SENTINEL)) {
 
+                    if (log.isDebugEnabled()) { log.debug("Adding non-literal property search criteria for: {}", omrsPropertyName); }
                     addIGCSearchConditionFromValue(
                             repositoryHelper,
                             repositoryName,
