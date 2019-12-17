@@ -29,7 +29,9 @@ import org.odpi.openmetadata.repositoryservices.connectors.openmetadatatopic.Ope
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Classification;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.EntityDetail;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Relationship;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryConnector;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryeventmapper.OMRSRepositoryEventMapperBase;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.*;
@@ -127,6 +129,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         this.igcKafkaConsumer = new IGCKafkaConsumerThread();
         this.igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
         this.igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
+        igcomrsMetadataCollection.setEventMapper(this);
         this.metadataCollectionId = igcomrsRepositoryConnector.getMetadataCollectionId();
         this.originatorServerName = igcomrsRepositoryConnector.getServerName();
         this.originatorServerType = igcomrsRepositoryConnector.getServerType();
@@ -1737,6 +1740,85 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     public void disconnect() throws ConnectorCheckedException {
         super.disconnect();
         igcKafkaConsumer.stop();
+    }
+
+    /**
+     * Sends a new TypeDef event.
+     *
+     * @param newTypeDef the new TypeDef for which to send an event
+     */
+    public void sendNewTypeDefEvent(TypeDef newTypeDef) {
+        repositoryEventProcessor.processNewTypeDefEvent(
+                sourceName,
+                metadataCollectionId,
+                localServerName,
+                localServerType,
+                localOrganizationName,
+                newTypeDef
+        );
+    }
+
+    /**
+     * Sends a new AttributeTypeDef event.
+     *
+     * @param newAttributeTypeDef the new AttributeTypeDef for which to send an event
+     */
+    public void sendNewAttributeTypeDefEvent(AttributeTypeDef newAttributeTypeDef) {
+        repositoryEventProcessor.processNewAttributeTypeDefEvent(
+                sourceName,
+                metadataCollectionId,
+                localServerName,
+                localServerType,
+                localOrganizationName,
+                newAttributeTypeDef);
+    }
+
+    /**
+     * Sends a refresh entity request event.
+     *
+     * @param typeDefGUID unique identifier of requested entity's TypeDef
+     * @param typeDefName unique name of requested entity's TypeDef
+     * @param entityGUID unique identifier of requested entity
+     * @param homeMetadataCollectionId identifier of the metadata collection that is the home to this entity
+     */
+    public void sendRefreshEntityRequest(String typeDefGUID,
+                                         String typeDefName,
+                                         String entityGUID,
+                                         String homeMetadataCollectionId) {
+        repositoryEventProcessor.processRefreshEntityRequested(
+                sourceName,
+                metadataCollectionId,
+                localServerName,
+                localServerType,
+                localOrganizationName,
+                typeDefGUID,
+                typeDefName,
+                entityGUID,
+                homeMetadataCollectionId);
+    }
+
+    /**
+     * Sends a refresh relationship request event.
+     *
+     * @param typeDefGUID the guid of the TypeDef for the relationship used to verify the relationship identity
+     * @param typeDefName the name of the TypeDef for the relationship used to verify the relationship identity
+     * @param relationshipGUID unique identifier of the relationship
+     * @param homeMetadataCollectionId unique identifier for the home repository for this relationship
+     */
+    public void sendRefreshRelationshipRequest(String typeDefGUID,
+                                               String typeDefName,
+                                               String relationshipGUID,
+                                               String homeMetadataCollectionId) {
+        repositoryEventProcessor.processRefreshRelationshipRequest(
+                sourceName,
+                metadataCollectionId,
+                localServerName,
+                localServerType,
+                localOrganizationName,
+                typeDefGUID,
+                typeDefName,
+                relationshipGUID,
+                homeMetadataCollectionId);
     }
 
 }

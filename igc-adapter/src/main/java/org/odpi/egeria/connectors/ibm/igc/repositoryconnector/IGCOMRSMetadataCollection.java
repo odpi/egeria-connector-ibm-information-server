@@ -10,6 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
+import org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
@@ -24,6 +25,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryValidator;
+import org.odpi.openmetadata.repositoryservices.ffdc.OMRSErrorCode;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +42,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     private IGCRestClient igcRestClient;
     private IGCOMRSRepositoryConnector igcomrsRepositoryConnector;
     private IGCRepositoryHelper igcRepositoryHelper;
+    private IGCOMRSRepositoryEventMapper eventMapper;
 
     private TypeDefStore typeDefStore;
     private AttributeMappingStore attributeMappingStore;
@@ -458,6 +461,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     errorCode.getUserAction());
         }
 
+        checkEventMapperIsConfigured(methodName);
+        eventMapper.sendNewTypeDefEvent(newTypeDef);
+
     }
 
     /**
@@ -505,6 +511,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     errorCode.getSystemAction(),
                     errorCode.getUserAction());
         }
+
+        checkEventMapperIsConfigured(methodName);
+        eventMapper.sendNewAttributeTypeDefEvent(newAttributeTypeDef);
 
     }
 
@@ -1924,877 +1933,137 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     }
 
     /**
-     * Will not be implemented, as no way to handle the uniqueness of qualifiedName across both these interfaces,
-     * the normal IGC REST API, and the IGC UI (eg. even if there were a custom property to capture an interface-
-     * provided qualifiedName, there is no way to guarantee it is unique across those 3 potential placse it could
-     * be input). Therefore, not possible to create new entities in IGC that conform to the standard.
-    @Override
-    public EntityDetail addEntity(String userId,
-                                  String entityTypeGUID,
-                                  InstanceProperties initialProperties,
-                                  List<Classification> initialClassifications,
-                                  InstanceStatus initialStatus) throws
-            InvalidParameterException,
-            RepositoryErrorException,
-            TypeErrorException,
-            PropertyErrorException,
-            ClassificationErrorException,
-            StatusNotSupportedException,
-            FunctionNotSupportedException,
-            UserNotAuthorizedException {
-
-        final String methodName = "addEntity";
-        super.addEntityParameterValidation(userId,
-                entityTypeGUID,
-                initialProperties,
-                initialClassifications,
-                initialStatus,
-                methodName);
-
-        EntityDetail detail;
-        String assetRid;
-        String igcTypeName;
-        String guid = null;
-
-        // Default the status to ACTIVE if none was provided
-        if (initialStatus == null) {
-            initialStatus = InstanceStatus.ACTIVE;
-        }
-
-        // First ensure the TypeDef is mapped and that we support the requested status
-        try {
-            TypeDef typeDef = getTypeDefByGUID(userId, entityTypeGUID);
-            HashSet<InstanceStatus> validStatuses = new HashSet<>(typeDef.getValidInstanceStatusList());
-            if (!validStatuses.contains(initialStatus)) {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.UNSUPPORTED_STATUS;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        initialStatus.getName(),
-                        entityTypeGUID,
-                        repositoryName);
-                throw new StatusNotSupportedException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
-            }
-        } catch (TypeDefNotKnownException e) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    entityTypeGUID,
-                    repositoryName);
-            throw new TypeErrorException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        }
-
-        EntityMapping mapping = igcRepositoryHelper.getEntityMappingByGUID(entityTypeGUID);
-
-        if (mapping == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    entityTypeGUID,
-                    repositoryName);
-            throw new TypeErrorException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        } else {
-            igcTypeName = mapping.getIgcAssetType();
-            // Next ensure that we actually support creation of this entity type
-            if (!igcRestClient.isCreatable(igcTypeName)) {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CREATION_NOT_SUPPORTED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        entityTypeGUID,
-                        igcTypeName,
-                        repositoryName);
-                throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
-            } else {
-
-                IGCCreate creationObj = new IGCCreate(igcTypeName);
-
-                // Then ensure that we support all of the properties that we will attempt to set
-                if (initialProperties != null) {
-                    Set<String> mappedOmrsProperties = mapping.getWriteableMappedOmrsProperties();
-                    for (Map.Entry<String, InstancePropertyValue> entry : initialProperties.getInstanceProperties().entrySet()) {
-                        String omrsPropertyName = entry.getKey();
-                        InstancePropertyValue value = entry.getValue();
-                        if (!mappedOmrsProperties.contains(omrsPropertyName)) {
-                            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CREATION_NOT_SUPPORTED;
-                            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                                    entityTypeGUID,
-                                    igcTypeName,
-                                    repositoryName);
-                            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                                    this.getClass().getName(),
-                                    methodName,
-                                    errorMessage,
-                                    errorCode.getSystemAction(),
-                                    errorCode.getUserAction());
-                        } else {
-                            String igcPropertyName = mapping.getIgcPropertyName(omrsPropertyName);
-                            if (!igcPropertyName.equals(EntityMapping.COMPLEX_MAPPING_SENTINEL)) {
-                                creationObj.addProperty(igcPropertyName, AttributeMapping.getIgcValueFromPropertyValue(value));
-                            }
-                        }
-                    }
-                    // TODO: probably also need to cycle through all 'additionalProperties' and attempt to set these
-                    //  against IGC object itself?
-                }
-
-                // Then ensure that we support all of the classifications (and their properties) that we will attempt to set
-                if (initialClassifications != null) {
-                    List<ClassificationMapping> classificationMappings = mapping.getClassificationMappers();
-                    HashMap<String, ClassificationMapping> omrsNameToMapping = new HashMap<>();
-                    for (ClassificationMapping classificationMapping : classificationMappings) {
-                        String omrsClassification = classificationMapping.getOmrsClassificationType();
-                        omrsNameToMapping.put(omrsClassification, classificationMapping);
-                    }
-                    for (Classification classification : initialClassifications) {
-                        String omrsClassification = classification.getName();
-                        if (!omrsNameToMapping.containsKey(omrsClassification)) {
-                            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_NOT_APPLICABLE;
-                            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                                    omrsClassification,
-                                    igcTypeName);
-                            throw new ClassificationErrorException(errorCode.getHTTPErrorCode(),
-                                    this.getClass().getName(),
-                                    methodName,
-                                    errorMessage,
-                                    errorCode.getSystemAction(),
-                                    errorCode.getUserAction());
-                        }
-                    }
-                }
-
-                String omrsTypeName = mapping.getOmrsTypeDefName();
-
-                // If the object being created is a term, we need to set certain mandatory fields (which we can do
-                // using default values provided in the connector configuration)
-                if (igcTypeName.equals("term")) {
-                    // the IGC-specific status is a mandatory field
-                    if (!creationObj.hasProperty("status")) {
-                        creationObj.addProperty("status", igcomrsRepositoryConnector.getDefaultTermStatus());
-                    }
-                    // having a parent_category is mandatory - default to the "default glossary" as a starting point
-                    if (!creationObj.hasProperty("parent_category")) {
-                        creationObj.addProperty("parent_category", igcomrsRepositoryConnector.getDefaultGlossaryRID());
-                    }
-                } else if (omrsTypeName.equals("GlossaryCategory")) {
-                    // place any new categories into the default glossary, to avoid creating a top-level IGC category
-                    // that would then be interpreted as a Glossary instead of a GlossaryCategory
-                    if (!creationObj.hasProperty("parent_category")) {
-                        creationObj.addProperty("parent_category", igcomrsRepositoryConnector.getDefaultGlossaryRID());
-                    }
-                }
-
-                // And FINALLY, if we support everything, go ahead with the creation
-                assetRid = igcRestClient.create(creationObj);
-
-                if (assetRid != null) {
-                    IGCEntityGuid igcGuid = new IGCEntityGuid(metadataCollectionId, igcTypeName, assetRid);
-                    guid = igcGuid.asGuid();
-                    // Then update the entity with the classifications (which cannot be set during creation)
-                    if (initialClassifications != null) {
-                        List<String> classificationNames = new ArrayList<>();
-                        try {
-                            for (Classification classification : initialClassifications) {
-                                classificationNames.add(classification.getName());
-                                TypeDef classificationTypeDef = getTypeDefByGUID(userId, classification.getType().getTypeDefGUID());
-                                igcRepositoryHelper.classifyEntity(userId, guid, classificationTypeDef, classification.getProperties());
-                            }
-                        } catch (TypeDefNotKnownException | EntityNotKnownException | RepositoryErrorException e) {
-                            // If there is any failure, cleanup after ourselves by deleting the IGC asset that was created
-                            igcRestClient.delete(assetRid);
-                            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_ERROR_UNKNOWN;
-                            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                                    classificationNames.toString(),
-                                    assetRid);
-                            throw new ClassificationErrorException(errorCode.getHTTPErrorCode(),
-                                    this.getClass().getName(),
-                                    methodName,
-                                    errorMessage,
-                                    errorCode.getSystemAction(),
-                                    errorCode.getUserAction());
-                        }
-                    }
-                }
-            }
-        }
-
-        if (assetRid == null || guid == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CREATION_NOT_SUPPORTED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    entityTypeGUID,
-                    igcTypeName,
-                    repositoryName);
-            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        } else {
-            try {
-                detail = getEntityDetail(userId, guid);
-            } catch (EntityNotKnownException e) {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CREATION_NOT_SUPPORTED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        entityTypeGUID,
-                        igcTypeName,
-                        repositoryName);
-                throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
-            }
-        }
-
-        return detail;
-
-    }
-     */
-
-    /**
      * {@inheritDoc}
-    @Override
-    public EntityDetail updateEntityProperties(String userId,
-                                               String entityGUID,
-                                               InstanceProperties properties) throws
-            InvalidParameterException,
-            RepositoryErrorException,
-            EntityNotKnownException,
-            PropertyErrorException,
-            FunctionNotSupportedException,
-            UserNotAuthorizedException {
-
-        final String methodName = "updateEntityProperties";
-        super.updateInstancePropertiesPropertyValidation(userId, entityGUID, properties, methodName);
-
-        EntityDetail detail;
-
-        IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(entityGUID);
-        if (igcGuid == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    entityGUID,
-                    "null",
-                    repositoryName);
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        }
-
-        String rid = igcGuid.getRid();
-        String prefix = igcGuid.getGeneratedPrefix();
-        String igcType = igcGuid.getAssetType();
-
-        EntityMapping mapping = igcRepositoryHelper.getEntityMappingByIgcType(igcType, prefix);
-
-        if (mapping == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    entityGUID,
-                    repositoryName);
-            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        } else {
-
-            IGCUpdate updateObj = new IGCUpdate(rid);
-
-            // Then ensure that we support all of the properties that we will attempt to set
-            Set<String> mappedOmrsProperties = mapping.getWriteableMappedOmrsProperties();
-            for (Map.Entry<String, InstancePropertyValue> entry : properties.getInstanceProperties().entrySet()) {
-                String omrsPropertyName = entry.getKey();
-                InstancePropertyValue value = entry.getValue();
-                if (!mappedOmrsProperties.contains(omrsPropertyName)) {
-                    IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ATTRIBUTE_TYPEDEF_NOT_MAPPED;
-                    String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                            omrsPropertyName,
-                            repositoryName);
-                    throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                            this.getClass().getName(),
-                            methodName,
-                            errorMessage,
-                            errorCode.getSystemAction(),
-                            errorCode.getUserAction());
-                } else {
-                    String igcPropertyName = mapping.getIgcPropertyName(omrsPropertyName);
-                    updateObj.addProperty(igcPropertyName, AttributeMapping.getIgcValueFromPropertyValue(value));
-                }
-            }
-
-            if (!igcRestClient.update(updateObj)) {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.UPDATE_ERROR_UNKNOWN;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        updateObj.toString(),
-                        entityGUID);
-                throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
-            } else {
-                detail = igcRepositoryHelper.getEntityDetail(userId, igcGuid);
-            }
-
-        }
-
-        return detail;
-
-    }
      */
-
-    /**
-     * {@inheritDoc}
     @Override
-    public void purgeEntity(String userId,
-                            String typeDefGUID,
-                            String typeDefName,
-                            String deletedEntityGUID) throws
+    public void refreshEntityReferenceCopy(String userId,
+                                           String entityGUID,
+                                           String typeDefGUID,
+                                           String typeDefName,
+                                           String homeMetadataCollectionId) throws
             InvalidParameterException,
             RepositoryErrorException,
-            EntityNotKnownException,
-            FunctionNotSupportedException,
+            HomeEntityException,
             UserNotAuthorizedException {
 
-        final String methodName = "purgeEntity";
-        final String guidParameterName = "deletedEntityGUID";
-        super.manageInstanceParameterValidation(userId,
-                typeDefGUID,
-                typeDefName,
-                deletedEntityGUID,
-                guidParameterName,
-                methodName);
+        final String methodName = "refreshEntityReferenceCopy";
+        final String entityParameterName = "entityGUID";
+        final String homeParameterName = "homeMetadataCollectionId";
 
-        IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(deletedEntityGUID);
-        if (igcGuid == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    deletedEntityGUID,
-                    "null",
-                    repositoryName);
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        }
-
-        String rid = igcGuid.getRid();
-        Reference igcObj = igcRestClient.getAssetRefById(rid);
-
-        if (igcObj == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    deletedEntityGUID,
-                    rid,
-                    repositoryName);
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        }
-
-        if (!igcRestClient.delete(rid)) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.DELETE_ERROR_UNKNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    deletedEntityGUID,
-                    rid);
-            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        }
-
-    }
-     */
-
-    /**
-     * {@inheritDoc}
-    @Override
-    public EntityDetail classifyEntity(String userId,
-                                       String entityGUID,
-                                       String classificationName,
-                                       InstanceProperties classificationProperties) throws
-            InvalidParameterException,
-            RepositoryErrorException,
-            EntityNotKnownException,
-            ClassificationErrorException,
-            PropertyErrorException,
-            UserNotAuthorizedException {
-
-        final String methodName = "classifyEntity";
-        this.classifyEntityParameterValidation(
-                userId,
+        /*
+         * Validate parameters
+         */
+        super.manageReferenceInstanceParameterValidation(userId,
                 entityGUID,
-                classificationName,
-                classificationProperties,
-                methodName
-        );
-
-        EntityDetail entityDetail;
-
-        try {
-            TypeDef classificationTypeDef = getTypeDefByName(userId, classificationName);
-            if (classificationTypeDef != null) {
-                Reference igcEntity = igcRepositoryHelper.classifyEntity(userId, entityGUID, classificationTypeDef, classificationProperties);
-                IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(entityGUID);
-                entityDetail = igcRepositoryHelper.getEntityDetail(userId, igcGuid);
-            } else {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        classificationName,
-                        repositoryName);
-                throw new ClassificationErrorException(
-                        errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction()
-                );
-            }
-        } catch (TypeDefNotKnownException e) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    classificationName,
-                    repositoryName);
-            throw new ClassificationErrorException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
-        }
-
-        return entityDetail;
-
-    }
-     */
-
-    /**
-     * {@inheritDoc}
-    @Override
-    public EntityDetail declassifyEntity(String userId,
-                                         String entityGUID,
-                                         String classificationName) throws
-            InvalidParameterException,
-            RepositoryErrorException,
-            EntityNotKnownException,
-            ClassificationErrorException,
-            UserNotAuthorizedException {
-
-        final String methodName = "declassifyEntity";
-        super.declassifyEntityParameterValidation(userId, entityGUID, classificationName);
-
-        EntityDetail entityDetail;
-
-        try {
-            TypeDef classificationTypeDef = getTypeDefByName(userId, classificationName);
-            if (classificationTypeDef != null) {
-                Reference igcEntity = igcRepositoryHelper.declassifyEntity(userId, entityGUID, classificationTypeDef);
-                IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(entityGUID);
-                entityDetail = igcRepositoryHelper.getEntityDetail(userId, igcGuid);
-            } else {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        classificationName,
-                        repositoryName);
-                throw new ClassificationErrorException(
-                        errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction()
-                );
-            }
-        } catch (TypeDefNotKnownException e) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    classificationName,
-                    repositoryName);
-            throw new ClassificationErrorException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
-        }
-
-        return entityDetail;
-
-    }
-     */
-
-    /**
-     * {@inheritDoc}
-    @Override
-    public Relationship addRelationship(String userId,
-                                        String relationshipTypeGUID,
-                                        InstanceProperties initialProperties,
-                                        String entityOneGUID,
-                                        String entityTwoGUID,
-                                        InstanceStatus initialStatus) throws
-            InvalidParameterException,
-            RepositoryErrorException,
-            TypeErrorException,
-            PropertyErrorException,
-            EntityNotKnownException,
-            StatusNotSupportedException,
-            UserNotAuthorizedException {
-
-        final String methodName = "addRelationship";
-        this.addRelationshipParameterValidation(
-                userId,
-                relationshipTypeGUID,
-                initialProperties,
-                entityOneGUID,
-                entityTwoGUID,
-                initialStatus,
-                methodName
-        );
-
-        Relationship relationship;
-
-        if (initialStatus != null && initialStatus != InstanceStatus.ACTIVE) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.UNSUPPORTED_STATUS;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    initialStatus.getName(),
-                    relationshipTypeGUID,
-                    repositoryName);
-            throw new StatusNotSupportedException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        }
-
-        try {
-            TypeDef relationshipTypeDef = getTypeDefByGUID(userId, relationshipTypeGUID);
-            if (relationshipTypeDef != null) {
-
-                String relationshipTypeName = relationshipTypeDef.getName();
-                IGCEntityGuid igcGuid1 = IGCEntityGuid.fromGuid(entityOneGUID);
-                IGCEntityGuid igcGuid2 = IGCEntityGuid.fromGuid(entityTwoGUID);
-                if (igcGuid1 == null) {
-                    IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-                    String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                            entityOneGUID,
-                            "null",
-                            repositoryName);
-                    throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                            this.getClass().getName(),
-                            methodName,
-                            errorMessage,
-                            errorCode.getSystemAction(),
-                            errorCode.getUserAction());
-                }
-                if (igcGuid2 == null) {
-                    IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-                    String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                            entityTwoGUID,
-                            "null",
-                            repositoryName);
-                    throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                            this.getClass().getName(),
-                            methodName,
-                            errorMessage,
-                            errorCode.getSystemAction(),
-                            errorCode.getUserAction());
-                }
-                String entityOneRid = igcGuid1.getRid();
-                String entityTwoRid = igcGuid2.getRid();
-                String entityOneType = igcGuid1.getAssetType();
-                String entityTwoType = igcGuid2.getAssetType();
-
-                // TODO: do we need to handle potentially prefixed RIDs, because we are not at the moment?
-                // Will not replace these with singular retrievals as probably worth ensuring both ends of the
-                // relationship exist before attempting to create the relationship
-                Reference entityOne = this.igcRestClient.getAssetRefById(entityOneRid);
-                Reference entityTwo = this.igcRestClient.getAssetRefById(entityTwoRid);
-
-                if (entityOne == null) {
-                    IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-                    String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                            entityOneGUID,
-                            entityOneRid,
-                            repositoryName);
-                    throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                            this.getClass().getName(),
-                            methodName,
-                            errorMessage,
-                            errorCode.getSystemAction(),
-                            errorCode.getUserAction());
-                }
-                if (entityTwo == null) {
-                    IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-                    String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                            entityTwoGUID,
-                            entityTwoRid,
-                            repositoryName);
-                    throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                            this.getClass().getName(),
-                            methodName,
-                            errorMessage,
-                            errorCode.getSystemAction(),
-                            errorCode.getUserAction());
-                }
-
-                RelationshipMapping relationshipMapping = igcRepositoryHelper.getRelationshipMappingByTypes(
-                        relationshipTypeName,
-                        entityOneType,
-                        entityTwoType
-                );
-
-                if (relationshipMapping != null) {
-
-                    relationship = RelationshipMapping.addIgcRelationship(
-                            igcomrsRepositoryConnector,
-                            relationshipMapping,
-                            initialProperties,
-                            entityOne,
-                            entityTwo,
-                            userId
-                    );
-
-                } else {
-                    IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-                    String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                            relationshipTypeName,
-                            repositoryName);
-                    throw new TypeErrorException(
-                            errorCode.getHTTPErrorCode(),
-                            this.getClass().getName(),
-                            methodName,
-                            errorMessage,
-                            errorCode.getSystemAction(),
-                            errorCode.getUserAction()
-                    );
-                }
-
-            } else {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        relationshipTypeGUID,
-                        repositoryName);
-                throw new TypeErrorException(
-                        errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction()
-                );
-            }
-        } catch (TypeDefNotKnownException e) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    relationshipTypeGUID,
-                    repositoryName);
-            throw new TypeErrorException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
-        }
-
-        return relationship;
-
-    }
-     */
-
-    /**
-     * {@inheritDoc}
-    @Override
-    public void purgeRelationship(String userId,
-                                  String typeDefGUID,
-                                  String typeDefName,
-                                  String deletedRelationshipGUID) throws
-            InvalidParameterException,
-            RepositoryErrorException,
-            RelationshipNotKnownException,
-            FunctionNotSupportedException,
-            UserNotAuthorizedException {
-
-        final String methodName = "purgeRelationship";
-        final String relationshipParameterName = "deletedRelationshipGUID";
-        super.manageInstanceParameterValidation(userId,
                 typeDefGUID,
                 typeDefName,
-                deletedRelationshipGUID,
-                relationshipParameterName,
+                entityParameterName,
+                homeMetadataCollectionId,
+                homeParameterName,
                 methodName);
 
-        try {
-            TypeDef relationshipTypeDef = getTypeDefByGUID(userId, typeDefGUID);
-            if (relationshipTypeDef != null) {
-
-                String relationshipTypeName = relationshipTypeDef.getName();
-                IGCRelationshipGuid igcRelationshipGuid = IGCRelationshipGuid.fromGuid(deletedRelationshipGUID);
-
-                if (igcRelationshipGuid == null) {
-                    IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN;
-                    String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                            deletedRelationshipGUID,
-                            repositoryName);
-                    throw new RelationshipNotKnownException(errorCode.getHTTPErrorCode(),
-                            this.getClass().getName(),
-                            methodName,
-                            errorMessage,
-                            errorCode.getSystemAction(),
-                            errorCode.getUserAction());
-                }
-
-                String relationshipType = igcRelationshipGuid.getRelationshipType();
-
-                if (!relationshipType.equals(relationshipTypeName)) {
-                    IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN;
-                    String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                            deletedRelationshipGUID,
-                            repositoryName);
-                    throw new RelationshipNotKnownException(errorCode.getHTTPErrorCode(),
-                            this.getClass().getName(),
-                            methodName,
-                            errorMessage,
-                            errorCode.getSystemAction(),
-                            errorCode.getUserAction());
-                }
-
-                RelationshipMapping mapping = igcRepositoryHelper.getRelationshipMappingByGUID(typeDefGUID);
-
-                // pull back the object on one end of the relationship
-                String proxyOneRid = igcRelationshipGuid.getRid1();
-                String proxyTwoRid = igcRelationshipGuid.getRid2();
-                RelationshipMapping.ProxyMapping proxyOneMapping = mapping.getProxyOneMapping();
-                List<String> proxyOneRelationships = proxyOneMapping.getIgcRelationshipProperties();
-
-                IGCSearchCondition forProxyOne = new IGCSearchCondition("_id", "=", proxyOneRid);
-                IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(forProxyOne);
-
-                IGCSearch igcSearch = new IGCSearch(proxyOneMapping.getIgcAssetType(), igcSearchConditionSet);
-                igcSearch.addProperties(proxyOneRelationships);
-                ItemList<Reference> results = igcRestClient.search(igcSearch);
-
-                // only proceed if there is actually anything to remove
-                if (results != null && results.getPaging().getNumTotal() > 0) {
-
-                    IGCUpdate igcUpdate = new IGCUpdate(proxyOneRid);
-                    boolean bChanged = false;
-                    Reference proxyOne = results.getItems().get(0);
-
-                    String proxyOneType = proxyOne.getType();
-                    List<String> pagedRelationships = igcRestClient.getPagedRelationshipPropertiesForType(proxyOneType);
-
-                    // null every property that holds the relationship, but retain the rest of the relationships that
-                    // do not refer to the specific one we have been asked to purge
-                    for (String relationshipAttr : proxyOneRelationships) {
-                        if (pagedRelationships.contains(relationshipAttr)) {
-                            ItemList<Reference> relations = (ItemList<Reference>) igcRestClient.getPropertyByName(proxyOne, relationshipAttr);
-                            relations.getAllPages(igcRestClient);
-                            for (Reference relation : relations.getItems()) {
-                                String relationId = relation.getId();
-                                if (relationId.equals(proxyTwoRid)) {
-                                    bChanged = true;
-                                    if (relations.getPaging().getNumTotal() == 1) {
-                                        // If there is only this one relationship, we should explicitly null it
-                                        igcUpdate.addRelationship(relationshipAttr, null);
-                                    }
-                                } else {
-                                    igcUpdate.addRelationship(relationshipAttr, relationId);
-                                }
-                            }
-                        } else {
-                            // if it is an exclusive (not a paged) relationship attribute, null it directly (so long
-                            // as it matches the one we are trying to delete)
-                            Reference relation = (Reference) igcRestClient.getPropertyByName(proxyOne, relationshipAttr);
-                            String relationId = relation.getId();
-                            if (relationId.equals(proxyTwoRid)) {
-                                bChanged = true;
-                                igcUpdate.addRelationship(relationshipAttr, null);
-                            }
-                        }
-                    }
-
-                    if (bChanged) {
-                        if (!igcRestClient.update(igcUpdate)) {
-                            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.DELETE_RELATIONSHIP_ERROR_UNKNOWN;
-                            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                                    deletedRelationshipGUID,
-                                    proxyOneRid);
-                            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                                    this.getClass().getName(),
-                                    methodName,
-                                    errorMessage,
-                                    errorCode.getSystemAction(),
-                                    errorCode.getUserAction());
-                        }
-                    }
-
-                } else {
-                    IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN;
-                    String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                            deletedRelationshipGUID,
-                            repositoryName);
-                    throw new RelationshipNotKnownException(errorCode.getHTTPErrorCode(),
-                            this.getClass().getName(),
-                            methodName,
-                            errorMessage,
-                            errorCode.getSystemAction(),
-                            errorCode.getUserAction());
-                }
-
+        /*
+         * Validate that the entity GUID is ok
+         */
+        EntityDetail entity = this.isEntityKnown(userId, entityGUID);
+        if (entity != null) {
+            if (metadataCollectionId.equals(entity.getMetadataCollectionId())) {
+                OMRSErrorCode errorCode = OMRSErrorCode.HOME_REFRESH;
+                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(methodName,
+                        entityGUID,
+                        metadataCollectionId,
+                        repositoryName);
+                throw new HomeEntityException(errorCode.getHTTPErrorCode(),
+                        this.getClass().getName(),
+                        methodName,
+                        errorMessage,
+                        errorCode.getSystemAction(),
+                        errorCode.getUserAction());
             }
-        } catch (TypeDefNotKnownException e) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    typeDefGUID,
-                    repositoryName);
-            throw new RelationshipNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
         }
 
+        /*
+         * Send refresh message
+         */
+        checkEventMapperIsConfigured(methodName);
+        eventMapper.sendRefreshEntityRequest(
+                typeDefGUID,
+                typeDefName,
+                entityGUID,
+                homeMetadataCollectionId
+        );
+
     }
+
+    /**
+     * {@inheritDoc}
      */
+    @Override
+    public void refreshRelationshipReferenceCopy(String userId,
+                                                 String relationshipGUID,
+                                                 String typeDefGUID,
+                                                 String typeDefName,
+                                                 String homeMetadataCollectionId) throws
+            InvalidParameterException,
+            RepositoryErrorException,
+            HomeRelationshipException,
+            UserNotAuthorizedException {
+
+        final String methodName = "refreshRelationshipReferenceCopy";
+        final String relationshipParameterName = "relationshipGUID";
+        final String homeParameterName = "homeMetadataCollectionId";
+
+        /*
+         * Validate parameters
+         */
+        super.manageReferenceInstanceParameterValidation(userId,
+                relationshipGUID,
+                typeDefGUID,
+                typeDefName,
+                relationshipParameterName,
+                homeMetadataCollectionId,
+                homeParameterName,
+                methodName);
+
+        Relationship relationship = this.isRelationshipKnown(userId, relationshipGUID);
+        if (relationship != null) {
+            if (metadataCollectionId.equals(relationship.getMetadataCollectionId())) {
+                OMRSErrorCode errorCode = OMRSErrorCode.HOME_REFRESH;
+                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(methodName,
+                        relationshipGUID,
+                        metadataCollectionId,
+                        repositoryName);
+
+                throw new HomeRelationshipException(errorCode.getHTTPErrorCode(),
+                        this.getClass().getName(),
+                        methodName,
+                        errorMessage,
+                        errorCode.getSystemAction(),
+                        errorCode.getUserAction());
+            }
+        }
+
+        /*
+         * Process refresh request
+         */
+        checkEventMapperIsConfigured(methodName);
+        eventMapper.sendRefreshRelationshipRequest(
+                typeDefGUID,
+                typeDefName,
+                relationshipGUID,
+                homeMetadataCollectionId
+        );
+
+    }
+
+    /**
+     * Configure the event mapper that should be used to send any outbound events.
+     *
+     * @param eventMapper the event mapper to use
+     */
+    public void setEventMapper(IGCOMRSRepositoryEventMapper eventMapper) {
+        this.eventMapper = eventMapper;
+    }
 
     /**
      * Retrieves a mapping from attribute name to TypeDefAttribute for all OMRS attributes defined for the provided
@@ -2805,6 +2074,24 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
      */
     public Map<String, TypeDefAttribute> getTypeDefAttributesForType(String omrsTypeName) {
         return typeDefStore.getAllTypeDefAttributesForName(omrsTypeName);
+    }
+
+    /**
+     * Ensure that the event mapper is configured and throw exception if it is not.
+     *
+     * @param methodName the method attempting to use the event mapper
+     */
+    private void checkEventMapperIsConfigured(String methodName) throws RepositoryErrorException {
+        if (eventMapper == null) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.EVENT_MAPPER_NOT_INITIALIZED;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(repositoryName);
+            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        }
     }
 
     /**
