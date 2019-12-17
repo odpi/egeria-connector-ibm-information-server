@@ -3,7 +3,6 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
@@ -42,7 +41,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     private IGCRestClient igcRestClient;
     private IGCOMRSRepositoryConnector igcomrsRepositoryConnector;
     private IGCRepositoryHelper igcRepositoryHelper;
-    private IGCOMRSRepositoryEventMapper eventMapper;
+    private IGCOMRSRepositoryEventMapper eventMapper = null;
 
     private TypeDefStore typeDefStore;
     private AttributeMappingStore attributeMappingStore;
