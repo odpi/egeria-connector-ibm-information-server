@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
@@ -1060,19 +1061,25 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                             }
                         }
                         Identity identity = Identity.getFromString(qualifiedName, igcRestClient);
-                        if (identity == null && repositoryHelper.isEndsWithRegex(qualifiedNameToFind)) {
-                            // If we cannot retrieve a fully qualifiedName (exact match), attempt to retrieve a partial (endsWith)
-                            identity = Identity.getPartialFromString(qualifiedName);
-                        }
-                        if (identity != null) {
-                            // Resolve the asset type directly from the identity, if we can
+                        if (identity != null && !identity.isPartial()) {
+                            // Resolve the asset type directly from the identity, if we can (only possible if it is not
+                            // partial, because if it is partial it may actually need a prefix which is not there)
                             if (log.isDebugEnabled()) { log.debug(" ... proceeding on basis of identity: {}", identity); }
                             String igcType = identity.getAssetType();
                             mappers.add(igcRepositoryHelper.getEntityMappingByIgcType(igcType, prefix));
                         } else {
-                            // Otherwise fall-back to taking the mappings from the entity information received on the
-                            // method itself
-                            mappers = findMappingsForInputs(entityTypeGUID, prefix, userId);
+                            identity = Identity.getPartialFromString(qualifiedName);
+                            if (identity != null) {
+                                // If all we have is a partial identity, get all of the mappers for that asset type
+                                // (to ensure we include both direct-mapped and generated entities - if one is not
+                                // applicable based on the type requested by the method, that will be excluded below)
+                                String igcType = identity.getAssetType();
+                                mappers = igcRepositoryHelper.getEntityMappingsByIgcType(igcType);
+                            } else {
+                                // Otherwise fall-back to taking the mappings from the entity information received on the
+                                // method itself
+                                mappers = findMappingsForInputs(entityTypeGUID, prefix, userId);
+                            }
                         }
                     }
                     for (EntityMapping mapper : mappers) {
@@ -1471,6 +1478,34 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     IGCSearch igcSearch = new IGCSearch();
                     String igcAssetType = igcRepositoryHelper.addTypeToSearch(mapping, igcSearch);
 
+                    // If the type we are searching for is a user type, we need to consider complexity in the search
+                    // criteria as it could be from the qualifiedName, which in this one case is actually a combination
+                    // of various fields on the instance
+                    String newCriteria = searchCriteria;
+                    if (IGCRestConstants.getUserTypes().contains(igcAssetType) && newCriteria != null) {
+                        // In all cases we should take out what is likely to be the full name
+                        String[] tokens = newCriteria.split(" ");
+                        if (tokens.length > 1) {
+                            if (repositoryHelper.isExactMatchRegex(searchCriteria) || repositoryHelper.isStartsWithRegex(searchCriteria)) {
+                                newCriteria = "\\Q";
+                                if (tokens.length == 2) {
+                                    newCriteria += tokens[1];
+                                } else {
+                                    int iLastToken = tokens.length - 1;
+                                    newCriteria += tokens[iLastToken - 1] + " " + tokens[iLastToken];
+                                }
+                            } else if (repositoryHelper.isEndsWithRegex(searchCriteria) || repositoryHelper.isContainsRegex(searchCriteria)) {
+                                newCriteria = ".*\\Q";
+                                if (tokens.length == 2) {
+                                    newCriteria += tokens[1];
+                                } else {
+                                    int iLastToken = tokens.length - 1;
+                                    newCriteria += tokens[iLastToken - 1] + " " + tokens[iLastToken];
+                                }
+                            }
+                        }
+                    }
+
                     // Get list of string properties from the asset type -- these are the list of properties we should use
                     // for the search
                     List<String> properties = igcRestClient.getAllStringPropertiesForType(igcAssetType);
@@ -1495,7 +1530,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                     outerConditions);
 
                             // If the searchCriteria is empty, retrieve all entities of the type (no conditions)
-                            if (searchCriteria != null && !searchCriteria.equals("")) {
+                            if (newCriteria != null && !newCriteria.equals("")) {
 
                                 // POST'd search to IGC doesn't work on v11.7.0.2 using long_description
                                 // Using "searchText" requires using "searchProperties" (no "where" conditions) -- but does not
@@ -1517,7 +1552,6 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                     // Only include the simple-mapped properties in the search here, as any complex-mapped
                                     // properties should be included by the criteria below, thereby excluding results for
                                     // things like 'modified_by' and 'created_by'
-                                    // TODO: confirm this is desired behaviour?
                                     if (simpleMappedIgcProperties.contains(property)) {
                                         innerConditions.addCondition(
                                                 IGCRepositoryHelper.getRegexSearchCondition(
@@ -1525,7 +1559,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                                         repositoryName,
                                                         methodName,
                                                         property,
-                                                        searchCriteria
+                                                        newCriteria
                                                 ));
                                     }
                                 }
@@ -1534,7 +1568,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                         repositoryName,
                                         igcRestClient,
                                         innerConditions,
-                                        searchCriteria);
+                                        newCriteria);
                                 outerConditions.addNestedConditionSet(innerConditions);
 
                             }
@@ -2191,8 +2225,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
      * @return {@code List<EntityMapping>}
      */
     private List<EntityMapping> findMappingsForInputs(String entityTypeGUID,
-                                                     String prefix,
-                                                     String userId) {
+                                                      String prefix,
+                                                      String userId) {
         if (log.isDebugEnabled()) { log.debug("Looking for mappers for GUID {} and prefix: {}", entityTypeGUID, prefix); }
         List<EntityMapping> mappers = new ArrayList<>();
         if (entityTypeGUID != null) {

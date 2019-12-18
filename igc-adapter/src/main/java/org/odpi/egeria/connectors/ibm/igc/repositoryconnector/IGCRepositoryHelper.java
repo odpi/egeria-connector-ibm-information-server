@@ -175,6 +175,14 @@ public class IGCRepositoryHelper {
     EntityMapping getEntityMappingByIgcType(String assetType, String prefix) { return entityMappingStore.getMappingByIgcAssetTypeAndPrefix(assetType, prefix); }
 
     /**
+     * Retrieves all of the entity mappings for the IGC asset type (if any).
+     *
+     * @param assetType the IGC asset type
+     * @return {@code List<EntityMapping>}
+     */
+    List<EntityMapping> getEntityMappingsByIgcType(String assetType) { return entityMappingStore.getMappingsByIgcAssetType(assetType); }
+
+    /**
      * Retrieves the entity mapping by the IGC asset prefix alone.
      *
      * @param prefix the prefix (non-null)
