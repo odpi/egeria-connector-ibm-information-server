@@ -220,13 +220,6 @@ public class Identity {
         String operator = "=";
         if (ctxTypeToSearch.equals("group")) {
             nameProperty = "group_name";
-        } else if (ctxTypeToSearch.equals("user")) {
-            nameProperty = "full_name";
-            operator = "like %{0}";
-            // For users, we cannot search on the unique '_name' and there is no corresponding 'name' property,
-            // so the best we can do is try to cut off the courtesy title portion and search for an ends-with on
-            // the full name...
-            ctxName = ctxName.substring(ctxName.indexOf(" ") + 1);
         }
         String searchFor = (propertyPath == null ? nameProperty : propertyPath + "." + nameProperty);
         if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", searchFor, operator, ctxName); }
@@ -276,28 +269,111 @@ public class Identity {
             }
             // If the propertyPath is empty, we must be searching for just a file folder on its own
             if (propertyPath.equals("")) {
-                // Add the immediate parent folder (cannot do the entire hierarchy in the case of a data file folder
-                int index = dataFilePath.lastIndexOf("/");
-                if (index > 0) {
-                    String parentName = dataFilePath.substring(index + 1);
+                // Add the immediate parent folder (cannot do the entire hierarchy in the case of a data file folder)
+                String parentName = "";
+                if (!dataFilePath.equals("")) {
+                    parentName = dataFilePath;
+                    int index = dataFilePath.lastIndexOf("/");
+                    if (index > 0) {
+                        parentName = dataFilePath.substring(index + 1);
+                    }
+                }
+                if (!parentName.equals("")) {
                     if (log.isDebugEnabled()) { log.debug("Adding search condition: parent_folder.name {} {}", "=", parentName); }
                     IGCSearchCondition cPath = new IGCSearchCondition("parent_folder.name", "=", parentName);
                     igcSearchConditionSet.addCondition(cPath);
                 }
-                // Add the 'host' element as 'host.name'
-                if (log.isDebugEnabled()) { log.debug("Adding search condition: host.name {} {}", "=", dataFileHost); }
-                IGCSearchCondition cHost = new IGCSearchCondition("host.name", "=", dataFileHost);
-                igcSearchConditionSet.addCondition(cHost);
+                // Add the 'host' element as 'host.name' (but only if we found one)
+                if (!dataFileHost.equals("")) {
+                    if (log.isDebugEnabled()) { log.debug("Adding search condition: host.name {} {}", "=", dataFileHost); }
+                    IGCSearchCondition cHost = new IGCSearchCondition("host.name", "=", dataFileHost);
+                    igcSearchConditionSet.addCondition(cHost);
+                }
             } else {
                 // Otherwise, we are looking for some file-related asset within a folder, so add these further conditions
                 // Concatenate the 'data_file_folder' elements into a string with '/' separators, and add as '...data_file.path'
-                if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", propertyPath + ".path", "=", dataFilePath); }
-                IGCSearchCondition cPath = new IGCSearchCondition(propertyPath + ".path", "=", dataFilePath);
-                igcSearchConditionSet.addCondition(cPath);
+                if (!dataFilePath.equals("")) {
+                    if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", propertyPath + ".path", "=", dataFilePath); }
+                    IGCSearchCondition cPath = new IGCSearchCondition(propertyPath + ".path", "=", dataFilePath);
+                    igcSearchConditionSet.addCondition(cPath);
+                }
                 // Add the 'host' element as '...datafile.host.name'
-                if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", propertyPath + ".host.name", "=", dataFileHost); }
-                IGCSearchCondition cHost = new IGCSearchCondition(propertyPath + ".host.name", "=", dataFileHost);
-                igcSearchConditionSet.addCondition(cHost);
+                if (!dataFileHost.equals("")) {
+                    if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", propertyPath + ".host.name", "=", dataFileHost); }
+                    IGCSearchCondition cHost = new IGCSearchCondition(propertyPath + ".host.name", "=", dataFileHost);
+                    igcSearchConditionSet.addCondition(cHost);
+                }
+            }
+        } else if (IGCRestConstants.getUserTypes().contains(assetType)) {
+            // Similarly, users are complicated due to how their unique name is constructed
+            String[] nameTokens = assetName.split(" ");
+            if (nameTokens.length == 1) {
+                // If there is only a single token, use it for an OR-based startsWith search across courtesy title and
+                // first name as this could only be a partial identity, and either could be in the first position
+                IGCSearchCondition cTitle = new IGCSearchCondition("courtesy_title", "like {0}%", nameTokens[0]);
+                IGCSearchCondition fName = new IGCSearchCondition("given_name", "like {0}%", nameTokens[0]);
+                IGCSearchConditionSet nested = new IGCSearchConditionSet();
+                nested.addCondition(cTitle);
+                nested.addCondition(fName);
+                nested.setMatchAnyCondition(true);
+                igcSearchConditionSet.addNestedConditionSet(nested);
+            } else if (nameTokens.length == 2) {
+                // If there are two tokens, this could be...
+                IGCSearchCondition cTitleAlone = new IGCSearchCondition("courtesy_title", "like {0}%", nameTokens[0]);
+                IGCSearchCondition fNameAlone1 = new IGCSearchCondition("given_name", "like {0}%", nameTokens[0]);
+                IGCSearchCondition fNameAlone2 = new IGCSearchCondition("given_name", "like {0}%", nameTokens[1]);
+                IGCSearchCondition lNameAlone = new IGCSearchCondition("surname", "like {0}%", nameTokens[1]);
+                IGCSearchCondition cTitleCombined = new IGCSearchCondition("courtesy_title", "like {0}%", assetName);
+                IGCSearchCondition fNameCombined = new IGCSearchCondition("given_name", "like {0}%", assetName);
+                IGCSearchConditionSet nested = new IGCSearchConditionSet();
+                // ... a multi-word courtesy title alone
+                IGCSearchConditionSet titleCombined = new IGCSearchConditionSet(cTitleCombined);
+                nested.addNestedConditionSet(titleCombined);
+                // ... a courtesy title and first name
+                IGCSearchConditionSet titleAndFname = new IGCSearchConditionSet();
+                titleAndFname.addCondition(cTitleAlone);
+                titleAndFname.addCondition(fNameAlone2);
+                titleAndFname.setMatchAnyCondition(false);
+                nested.addNestedConditionSet(titleAndFname);
+                // ... a multi-word first name
+                IGCSearchConditionSet multiWordFname = new IGCSearchConditionSet();
+                multiWordFname.addCondition(fNameCombined);
+                nested.addNestedConditionSet(multiWordFname);
+                // ... or a first name and last name
+                IGCSearchConditionSet firstAndLast = new IGCSearchConditionSet();
+                firstAndLast.addCondition(fNameAlone1);
+                firstAndLast.addCondition(lNameAlone);
+                firstAndLast.setMatchAnyCondition(false);
+                nested.addNestedConditionSet(firstAndLast);
+                nested.setMatchAnyCondition(true);
+                igcSearchConditionSet.addNestedConditionSet(nested);
+            } else if (nameTokens.length > 2) {
+                // If there are three tokens, this could be...
+                IGCSearchCondition cTitleCombined = new IGCSearchCondition("courtesy_title", "like {0}%", assetName);
+                IGCSearchCondition fullNameCombined = new IGCSearchCondition("full_name", "like {0}%", assetName);
+                IGCSearchCondition cTitleAlone = new IGCSearchCondition("courtesy_title", "like {0}%", nameTokens[0]);
+                StringBuilder combinedName = new StringBuilder();
+                for (int i = 1; i < nameTokens.length; i++) {
+                    combinedName.append(nameTokens[i]).append(" ");
+                }
+                // (remove the last space)
+                combinedName.deleteCharAt(combinedName.length() - 1);
+                IGCSearchCondition fullNameAlone = new IGCSearchCondition("full_name", "like {0}%", combinedName.toString());
+                IGCSearchConditionSet nested = new IGCSearchConditionSet();
+                // ... only a courtesy title, comprised of multi-words (startsWith)
+                IGCSearchConditionSet titleOnly = new IGCSearchConditionSet(cTitleCombined);
+                nested.addNestedConditionSet(titleOnly);
+                // ... only a full name, comprised of multi-word first or last names (startsWith)
+                IGCSearchConditionSet nameOnly = new IGCSearchConditionSet(fullNameCombined);
+                nested.addNestedConditionSet(nameOnly);
+                // ... a single courtesy title with the rest the full name (startsWith)
+                IGCSearchConditionSet titleAndName = new IGCSearchConditionSet();
+                titleAndName.addCondition(cTitleAlone);
+                titleAndName.addCondition(fullNameAlone);
+                titleAndName.setMatchAnyCondition(false);
+                nested.addNestedConditionSet(titleAndName);
+                nested.setMatchAnyCondition(true);
+                igcSearchConditionSet.addNestedConditionSet(nested);
             }
         } else {
             // Build up the search criteria for all of the context first
@@ -311,7 +387,9 @@ public class Identity {
         }
 
         // Then add the final condition for this asset itself
-        addSearchCondition(igcSearchConditionSet, null, assetType, assetName);
+        if (!IGCRestConstants.getUserTypes().contains(assetType)) {
+            addSearchCondition(igcSearchConditionSet, null, assetType, assetName);
+        }
 
         return igcSearchConditionSet;
 

@@ -61,6 +61,15 @@ public class IGCRestConstants {
         return Collections.unmodifiableList(fileTypes);
     }
 
+    private static final List<String> USER_TYPES = createUserTypes();
+    private static List<String> createUserTypes() {
+        ArrayList<String> userTypes = new ArrayList<>();
+        userTypes.add("user");
+        userTypes.add("non_steward_user");
+        userTypes.add("steward_user");
+        return Collections.unmodifiableList(userTypes);
+    }
+
     private static final Map<String, String> IMAM_TYPE_TO_IGC_TYPE = createImamTypetoIgcType();
     private static Map<String, String> createImamTypetoIgcType() {
         Map<String, String> map = new HashMap<>();
@@ -196,6 +205,13 @@ public class IGCRestConstants {
      * @return {@code List<String>}
      */
     public static List<String> getFileTypes() { return FILE_TYPES; }
+
+    /**
+     * Retrieve a list of the asset types that deal with users in some way.
+     *
+     * @return {@code List<String>}
+     */
+    public static List<String> getUserTypes() { return USER_TYPES; }
 
     /**
      * Retrieve a mapping from IMAM type name to IGC type name.
