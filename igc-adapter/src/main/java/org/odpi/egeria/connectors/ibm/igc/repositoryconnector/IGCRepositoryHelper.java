@@ -370,6 +370,9 @@ public class IGCRepositoryHelper {
                                 getAllOfType = (valuesAreEqual && matchCriteria.equals(MatchCriteria.ANY))
                                         || (!valuesAreEqual && matchCriteria.equals(MatchCriteria.NONE));
                                 getNothing = valuesAreEqual && matchCriteria.equals(MatchCriteria.NONE);
+                                if (getNothing) {
+                                    break;
+                                }
                             }
                         }
                     }
@@ -411,69 +414,73 @@ public class IGCRepositoryHelper {
 
             }
 
-            if (classificationLimiters != null) {
-                igcSearchConditionSet.addNestedConditionSet(classificationLimiters);
-            }
-
-            IGCSearchSorting igcSearchSorting = null;
-            if (sequencingProperty == null && sequencingOrder != null) {
-                igcSearchSorting = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
-            }
-
+            // If we marked to get nothing, no point in proceeding with any further search setup as we should skip
+            // searching entirely
             if (!getNothing) {
+                if (classificationLimiters != null) {
+                    igcSearchConditionSet.addNestedConditionSet(classificationLimiters);
+                }
+
+                IGCSearchSorting igcSearchSorting = null;
+                if (sequencingProperty == null && sequencingOrder != null) {
+                    igcSearchSorting = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
+                }
+
                 IGCRepositoryHelper.setConditionsFromMatchCriteria(igcSearchConditionSet, matchCriteria);
-            }
 
-            igcSearch.addProperties(mapping.getAllPropertiesForEntityDetail(igcRestClient, igcAssetType));
-            igcSearch.addConditions(igcSearchConditionSet);
+                igcSearch.addProperties(mapping.getAllPropertiesForEntityDetail(igcRestClient, igcAssetType));
+                igcSearch.addConditions(igcSearchConditionSet);
 
-            setPagingForSearch(igcSearch, fromEntityElement, pageSize);
+                setPagingForSearch(igcSearch, fromEntityElement, pageSize);
 
-            if (igcSearchSorting != null) {
-                igcSearch.addSortingCriteria(igcSearchSorting);
-            }
+                if (igcSearchSorting != null) {
+                    igcSearch.addSortingCriteria(igcSearchSorting);
+                }
 
-            // If searching by qualifiedName, exact match (or starts with) we need to check results
-            // to remove any (non-)generated type based on the qualifiedName (because the search results
-            // will contain both from various iterations of this loop, and only one or the other should be
-            // returned by the search)
-            boolean includeResult = true;
-            if (qualifiedNameRegex != null
-                    && (repositoryHelper.isStartsWithRegex(qualifiedNameRegex) || repositoryHelper.isExactMatchRegex(qualifiedNameRegex))) {
-                String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedNameRegex);
-                String prefix = mapping.getIgcRidPrefix();
-                boolean generatedQN = isQualifiedNameOfGeneratedEntity(unqualifiedName);
-                // If all entities were requested, include regardless, otherwise only if the combo of QN and prefix match
-                includeResult = entityTypeGUID == null || (generatedQN && prefix != null) || (!generatedQN && prefix == null);
-                if (!includeResult) {
-                    // Finally, check if this is a subtype of the type requested for the search if we thus far are not
-                    // meant to include it (eg. if the search is for Referenceable we should actually include it even
-                    // if there is no prefix and it is generated, as long as it is a subtype of Referenceable)
-                    String omrsTypeName = mapping.getOmrsTypeDefName();
-                    try {
-                        TypeDef entityTypeDef = repositoryHelper.getTypeDef(repositoryName,
-                                "entityTypeGUID",
-                                entityTypeGUID,
-                                methodName);
-                        includeResult = repositoryHelper.isTypeOf(metadataCollectionId, omrsTypeName, entityTypeDef.getName());
-                    } catch (TypeErrorException e) {
-                        log.error("Unable to lookup type for inclusion comparison: {}", entityTypeGUID, e);
+                // If searching by qualifiedName, exact match (or starts with) we need to check results
+                // to remove any (non-)generated type based on the qualifiedName (because the search results
+                // will contain both from various iterations of this loop, and only one or the other should be
+                // returned by the search)
+                boolean includeResult = true;
+                if (qualifiedNameRegex != null
+                        && (repositoryHelper.isStartsWithRegex(qualifiedNameRegex) || repositoryHelper.isExactMatchRegex(qualifiedNameRegex))) {
+                    String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedNameRegex);
+                    String prefix = mapping.getIgcRidPrefix();
+                    boolean generatedQN = isQualifiedNameOfGeneratedEntity(unqualifiedName);
+                    // If all entities were requested, include regardless, otherwise only if the combo of QN and prefix match
+                    includeResult = entityTypeGUID == null || (generatedQN && prefix != null) || (!generatedQN && prefix == null);
+                    if (!includeResult) {
+                        // Finally, check if this is a subtype of the type requested for the search if we thus far are not
+                        // meant to include it (eg. if the search is for Referenceable we should actually include it even
+                        // if there is no prefix and it is generated, as long as it is a subtype of Referenceable)
+                        String omrsTypeName = mapping.getOmrsTypeDefName();
+                        try {
+                            TypeDef entityTypeDef = repositoryHelper.getTypeDef(repositoryName,
+                                    "entityTypeGUID",
+                                    entityTypeGUID,
+                                    methodName);
+                            includeResult = repositoryHelper.isTypeOf(metadataCollectionId, omrsTypeName, entityTypeDef.getName());
+                        } catch (TypeErrorException e) {
+                            log.error("Unable to lookup type for inclusion comparison: {}", entityTypeGUID, e);
+                        }
+                    }
+                    if (log.isDebugEnabled()) {
+                        log.debug("Include result for name '{}' and prefix '{}'? {}", unqualifiedName, prefix, includeResult);
                     }
                 }
-                if (log.isDebugEnabled()) { log.debug("Include result for name '{}' and prefix '{}'? {}", unqualifiedName, prefix, includeResult); }
-            }
 
-            if (includeResult) {
-                processResults(
-                        mapping,
-                        this.igcRestClient.search(igcSearch),
-                        entityDetails,
-                        matchProperties,
-                        matchCriteria,
-                        null,
-                        pageSize,
-                        userId
-                );
+                if (includeResult) {
+                    processResults(
+                            mapping,
+                            this.igcRestClient.search(igcSearch),
+                            entityDetails,
+                            matchProperties,
+                            matchCriteria,
+                            null,
+                            pageSize,
+                            userId
+                    );
+                }
             }
         }
     }

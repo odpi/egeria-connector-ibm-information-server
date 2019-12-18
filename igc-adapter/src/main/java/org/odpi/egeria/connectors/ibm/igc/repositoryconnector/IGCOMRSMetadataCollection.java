@@ -1868,11 +1868,47 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 // TODO: handle sequencing -- here or as part of method above?
                 igcRepositoryHelper.setPagingForSearch(igcSearch, fromRelationshipElement, pageSize);
 
-                igcRepositoryHelper.processResults(mapping,
-                        igcRestClient.search(igcSearch),
-                        relationships,
-                        pageSize,
-                        userId);
+                // Ensure we handle NONE semantics and literal values, as we do for findEntitiesByProperty
+                boolean getNothing = false;
+                if (matchProperties != null) {
+
+                    Set<String> mappedOmrsProperties = mapping.getMappedOmrsPropertyNames();
+                    Map<String, InstancePropertyValue> propertiesToMatch = matchProperties.getInstanceProperties();
+                    if (propertiesToMatch == null) {
+                        propertiesToMatch = new HashMap<>();
+                    }
+
+                    if (!mappedOmrsProperties.containsAll(propertiesToMatch.keySet()) && matchCriteria.equals(MatchCriteria.ALL)) {
+                        // If there is some property we are being asked to search but it has no mapping,
+                        // ensure we will get no results
+                        getNothing = true;
+                    } else {
+
+                        if (matchCriteria.equals(MatchCriteria.ANY) || matchCriteria.equals(MatchCriteria.NONE)) {
+                            for (Map.Entry<String, InstancePropertyValue> entry : propertiesToMatch.entrySet()) {
+                                String omrsPropertyName = entry.getKey();
+                                if (mapping.isOmrsPropertyLiteralMapped(omrsPropertyName)) {
+                                    Object literalValue = mapping.getOmrsPropertyLiteralValue(omrsPropertyName);
+                                    boolean valuesAreEqual = IGCRepositoryHelper.equivalentValues(literalValue, entry.getValue());
+                                    getNothing = valuesAreEqual && matchCriteria.equals(MatchCriteria.NONE);
+                                    if (getNothing) {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+
+                }
+
+                if (!getNothing) {
+                    igcRepositoryHelper.processResults(mapping,
+                            igcRestClient.search(igcSearch),
+                            relationships,
+                            pageSize,
+                            userId);
+                }
 
             }
 
