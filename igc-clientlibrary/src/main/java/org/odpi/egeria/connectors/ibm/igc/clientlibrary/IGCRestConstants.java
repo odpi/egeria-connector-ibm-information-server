@@ -2,6 +2,9 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeReference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -129,8 +132,7 @@ public class IGCRestConstants {
 
     private static final Set<String> IGNORE_TYPES = createIgnoreTypes();
     private static Set<String> createIgnoreTypes() {
-        Set<String> set = new HashSet<>();
-        return set;
+        return new HashSet<>();
     }
 
     private static final List<String> SUPER_TYPES = createSuperTypes();
@@ -192,6 +194,20 @@ public class IGCRestConstants {
         return map;
     }
 
+    private static final Set<String> FIXED_INFORMATION_ASSET_PROPERTIES = createFixedInformationAssetProperties();
+    private static Set<String> createFixedInformationAssetProperties() {
+        Set<String> set = new HashSet<>();
+        set.add("read_by_(design)");
+        set.add("read_by_(operational)");
+        set.add("read_by_(static)");
+        set.add("read_by_(user_defined)");
+        set.add("written_by_(design)");
+        set.add("written_by_(operational)");
+        set.add("written_by_(static)");
+        set.add("written_by_(user_defined)");
+        return set;
+    }
+
     /**
      * Retrieve a list of the modification detail properties used by the IGC REST API.
      *
@@ -248,6 +264,13 @@ public class IGCRestConstants {
      * @return {@code Map<String, String>}
      */
     public static Map<String, String> getSubTypeToSuperType() { return SUB_TYPE_TO_SUPER_TYPE; }
+
+    /**
+     * Retrieve the list of properties that should be fixed at the Information Asset object level.
+     *
+     * @return {@code Set<String>}
+     */
+    public static Set<String> getFixedInformationAssetProperties() { return FIXED_INFORMATION_ASSET_PROPERTIES; }
 
     /**
      * Retrieve the name of the Java type for the provided IGC type.

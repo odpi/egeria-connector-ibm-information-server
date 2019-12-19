@@ -58,8 +58,13 @@ public class IGCBeanGenerator {
         HttpHelper.noStrictSSL();
 
         IGCBeanGenerator generator = new IGCBeanGenerator(args[0], args[1], args[2], args[3]);
-        generator.generateSuperTypes();
-        generator.generateForAllIgcTypesInEnvironment();
+        boolean skipInformationAssetGeneration = true;
+        if (args.length > 4) {
+            String upperCased = args[4].toUpperCase();
+            skipInformationAssetGeneration = !(upperCased.equals("NO") || upperCased.equals("FALSE"));
+        }
+        generator.generateSuperTypes(skipInformationAssetGeneration);
+        generator.generateForAllIgcTypesInEnvironment(skipInformationAssetGeneration);
 
     }
 
@@ -79,7 +84,7 @@ public class IGCBeanGenerator {
         superTypeToProperties = new HashMap<>();
     }
 
-    private void generateSuperTypes() {
+    private void generateSuperTypes(boolean skipInformationAssetGeneration) {
 
         // First ensure the target directory has been created / exists
         File dir = new File(BASE_DIRECTORY);
@@ -94,13 +99,17 @@ public class IGCBeanGenerator {
         // and as part of this keep a list of their properties, so any classes that extend them can skip
         // including the same properties and getter / setter methods as overrides
         for (String typeName : IGCRestConstants.getSuperTypes()) {
-            TypeDetails details = igcRestClient.getTypeDetails(typeName);
-            createPOJOForType(details);
+            if (!(skipInformationAssetGeneration && typeName.equals("information_asset")) ) {
+                TypeDetails details = igcRestClient.getTypeDetails(typeName);
+                createPOJOForType(details);
+            } else {
+                superTypeToProperties.put("information_asset", IGCRestConstants.getFixedInformationAssetProperties());
+            }
         }
 
     }
 
-    private void generateForAllIgcTypesInEnvironment() {
+    private void generateForAllIgcTypesInEnvironment(boolean skipInformationAssetGeneration) {
 
         // Then generate the POJOs within that directory
         List<TypeHeader> types = igcRestClient.getTypes(mapper);
@@ -118,7 +127,13 @@ public class IGCBeanGenerator {
             String superTypeClassName = IGCRestConstants.getClassNameForAssetType(superTypeName);
             if (!superTypeClassName.equals("Reference")) {
                 log.info("Injecting subtype information into {}...", superTypeClassName);
-                injectSubTypes(Paths.get(BASE_DIRECTORY + File.separator + superTypeClassName + ".java"), superTypeToSubTypeToClassName.get(superTypeName));
+                Path superTypePath = Paths.get(BASE_DIRECTORY + File.separator + superTypeClassName + ".java");
+                if (superTypeClassName.equals("InformationAsset") && skipInformationAssetGeneration) {
+                    // If we skipped generating InformationAsset itself, we need to remove any pre-existing injected
+                    // subtypes before injecting any new ones
+                    removeInjectedSubtypes(superTypePath);
+                }
+                injectSubTypes(superTypePath, superTypeToSubTypeToClassName.get(superTypeName));
             }
         }
 
