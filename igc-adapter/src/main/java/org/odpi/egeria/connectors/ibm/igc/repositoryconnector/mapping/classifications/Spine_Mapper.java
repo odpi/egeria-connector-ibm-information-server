@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classific
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -54,37 +55,37 @@ public class Spine_Mapper extends ClassificationMapping {
                                              Reference fromIgcObject,
                                              String userId) {
 
-        IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
+        if (fromIgcObject instanceof Term) {
+            ItemList<Category> candidates = ((Term) fromIgcObject).getReferencingCategories();
 
-        ItemList<Reference> candidates = (ItemList<Reference>) igcRestClient.getPropertyByName(fromIgcObject, "referencing_categories");
+            if (candidates != null) {
 
-        if (candidates != null) {
-
-            // This is likely to be a NOOP in most circumstances, otherwise it may be faster to do an explicit search
-            // with a full set of criteria (referencing category name, and its parent category under Classifications)
-            candidates.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
-            boolean foundSpine = false;
-            for (Reference candidate : candidates.getItems()) {
-                if (candidate.getName().equals(getOmrsClassificationType())) {
-                    foundSpine = true;
-                    break;
+                // This is likely to be a NOOP in most circumstances, otherwise it may be faster to do an explicit search
+                // with a full set of criteria (referencing category name, and its parent category under Classifications)
+                candidates.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
+                boolean foundSpine = false;
+                for (Category candidate : candidates.getItems()) {
+                    if (candidate.getName().equals(getOmrsClassificationType())) {
+                        foundSpine = true;
+                        break;
+                    }
                 }
-            }
 
-            if (foundSpine) {
-                try {
-                    Classification classification = getMappedClassification(
-                            igcomrsRepositoryConnector,
-                            null,
-                            fromIgcObject,
-                            userId
-                    );
-                    classifications.add(classification);
-                } catch (RepositoryErrorException e) {
-                    log.error("Unable to map {} classification.", getOmrsClassificationType(), e);
+                if (foundSpine) {
+                    try {
+                        Classification classification = getMappedClassification(
+                                igcomrsRepositoryConnector,
+                                null,
+                                fromIgcObject,
+                                userId
+                        );
+                        classifications.add(classification);
+                    } catch (RepositoryErrorException e) {
+                        log.error("Unable to map {} classification.", getOmrsClassificationType(), e);
+                    }
                 }
-            }
 
+            }
         }
 
     }

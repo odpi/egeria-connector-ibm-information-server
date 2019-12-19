@@ -5,6 +5,8 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataClass;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Filter;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -140,112 +142,115 @@ public class DataClassMapper extends ReferenceableMapper {
         final String methodName = "complexPropertyMappings";
 
         IGCOMRSRepositoryConnector igcomrsRepositoryConnector = entityMap.getRepositoryConnector();
-        IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         Reference igcEntity = entityMap.getIgcEntity();
 
-        OMRSRepositoryHelper repositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
-        String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
+        if (igcEntity instanceof DataClass) {
 
-        /*
-         * setup the OMRS 'dataType' property
-         */
-        // There can be multiple data types defined on an IGC data class...
-        ArrayList<String> dataTypes = (ArrayList<String>) igcRestClient.getPropertyByName(igcEntity, "data_type_filter_elements_enum");
-        String dataType = null;
-        for (String type : dataTypes) {
-            // We'll take the first dataType we find to start with...
-            if (dataType == null) {
-                dataType = type;
-            } else if (type.equals("string") || !type.equals(dataType)) {
-                // But if we find any others, or we find string, we can safely set to "string"
-                // as a catch-all and then short-circuit
-                dataType = "string";
-                break;
+            DataClass dataClass = (DataClass) igcEntity;
+            OMRSRepositoryHelper repositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
+            String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
+
+            /*
+             * setup the OMRS 'dataType' property
+             */
+            // There can be multiple data types defined on an IGC data class...
+            List<String> dataTypes = dataClass.getDataTypeFilterElementsEnum();
+            String dataType = null;
+            for (String type : dataTypes) {
+                // We'll take the first dataType we find to start with...
+                if (dataType == null) {
+                    dataType = type;
+                } else if (type.equals("string") || !type.equals(dataType)) {
+                    // But if we find any others, or we find string, we can safely set to "string"
+                    // as a catch-all and then short-circuit
+                    dataType = "string";
+                    break;
+                }
             }
-        }
 
-        instanceProperties = repositoryHelper.addStringPropertyToInstance(
-                repositoryName,
-                instanceProperties,
-                "dataType",
-                dataType,
-                methodName
-        );
-
-        /*
-         * setup the OMRS 'specificationDetails' property
-         */
-        String dataClassType = (String) igcRestClient.getPropertyByName(igcEntity, "data_class_type_single");
-        instanceProperties = repositoryHelper.addStringPropertyToInstance(
-                repositoryName,
-                instanceProperties,
-                "specification",
-                dataClassType,
-                methodName
-        );
-
-        /*
-         * setup the OMRS 'specification' property
-         */
-        // There are many different flavours of IGC data classes, so the expression used can vary widely...
-        String dataClassDetails = "";
-        switch(dataClassType) {
-            case "Regex":
-                dataClassDetails = (String) igcRestClient.getPropertyByName(igcEntity, "regular_expression_single");
-                break;
-            case "ValidValues":
-                ArrayList<String> validValues = (ArrayList<String>) igcRestClient.getPropertyByName(igcEntity, "valid_value_strings");
-                if (validValues == null || validValues.isEmpty()) {
-                    dataClassDetails = (String) igcRestClient.getPropertyByName(igcEntity, "validValueReferenceFile");
-                } else {
-                    dataClassDetails = String.join(VALUE_DELIMITER, validValues);
-                }
-                break;
-            case "Script":
-                dataClassDetails = (String) igcRestClient.getPropertyByName(igcEntity, "script");
-                break;
-            case "ColumnSimilarity":
-                dataClassDetails = (String) igcRestClient.getPropertyByName(igcEntity, "expression");
-                break;
-            case "UnstructuredFilter":
-                ItemList<Reference> filters = (ItemList<Reference>) igcRestClient.getPropertyByName(igcEntity, "filters");
-                if (!filters.getItems().isEmpty()) {
-                    filters.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
-                    ArrayList<String> filterNames = new ArrayList<>();
-                    for (Reference filter : filters.getItems()) {
-                        filterNames.add(filter.getName());
-                    }
-                    dataClassDetails = String.join(VALUE_DELIMITER, filterNames);
-                }
-                break;
-            default:
-                dataClassDetails = (String) igcRestClient.getPropertyByName(igcEntity, "java_class_name_single");
-                break;
-        }
-        instanceProperties = repositoryHelper.addStringPropertyToInstance(
-                repositoryName,
-                instanceProperties,
-                "specificationDetails",
-                dataClassDetails,
-                methodName
-        );
-
-        /*
-         * setup the OMRS 'userDefined' property
-         * Provider = 'IBM' is only present in v11.7+ to be able to make this determination
-         */
-        IGCVersionEnum igcVersion = igcomrsRepositoryConnector.getIGCVersion();
-        if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
-            String provider = (String) igcRestClient.getPropertyByName(igcEntity, "provider");
-            instanceProperties = repositoryHelper.addBooleanPropertyToInstance(
+            instanceProperties = repositoryHelper.addStringPropertyToInstance(
                     repositoryName,
                     instanceProperties,
-                    "userDefined",
-                    (provider == null || !provider.equals("IBM")),
+                    "dataType",
+                    dataType,
                     methodName
             );
-        }
 
+            /*
+             * setup the OMRS 'specificationDetails' property
+             */
+            String dataClassType = dataClass.getDataClassTypeSingle();
+            instanceProperties = repositoryHelper.addStringPropertyToInstance(
+                    repositoryName,
+                    instanceProperties,
+                    "specification",
+                    dataClassType,
+                    methodName
+            );
+
+            /*
+             * setup the OMRS 'specification' property
+             */
+            // There are many different flavours of IGC data classes, so the expression used can vary widely...
+            String dataClassDetails = "";
+            switch (dataClassType) {
+                case "Regex":
+                    dataClassDetails = dataClass.getRegularExpressionSingle();
+                    break;
+                case "ValidValues":
+                    List<String> validValues = dataClass.getValidValueStrings();
+                    if (validValues == null || validValues.isEmpty()) {
+                        dataClassDetails = dataClass.getValidvaluereferencefile();
+                    } else {
+                        dataClassDetails = String.join(VALUE_DELIMITER, validValues);
+                    }
+                    break;
+                case "Script":
+                    dataClassDetails = dataClass.getScript();
+                    break;
+                case "ColumnSimilarity":
+                    dataClassDetails = dataClass.getExpression();
+                    break;
+                case "UnstructuredFilter":
+                    ItemList<Filter> filters = dataClass.getFilters();
+                    if (!filters.getItems().isEmpty()) {
+                        filters.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
+                        ArrayList<String> filterNames = new ArrayList<>();
+                        for (Filter filter : filters.getItems()) {
+                            filterNames.add(filter.getName());
+                        }
+                        dataClassDetails = String.join(VALUE_DELIMITER, filterNames);
+                    }
+                    break;
+                default:
+                    dataClassDetails = dataClass.getJavaClassNameSingle();
+                    break;
+            }
+            instanceProperties = repositoryHelper.addStringPropertyToInstance(
+                    repositoryName,
+                    instanceProperties,
+                    "specificationDetails",
+                    dataClassDetails,
+                    methodName
+            );
+
+            /*
+             * setup the OMRS 'userDefined' property
+             * Provider = 'IBM' is only present in v11.7+ to be able to make this determination
+             */
+            IGCVersionEnum igcVersion = igcomrsRepositoryConnector.getIGCVersion();
+            if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
+                String provider = dataClass.getProvider();
+                instanceProperties = repositoryHelper.addBooleanPropertyToInstance(
+                        repositoryName,
+                        instanceProperties,
+                        "userDefined",
+                        (provider == null || !provider.equals("IBM")),
+                        methodName
+                );
+            }
+
+        }
         return instanceProperties;
 
     }

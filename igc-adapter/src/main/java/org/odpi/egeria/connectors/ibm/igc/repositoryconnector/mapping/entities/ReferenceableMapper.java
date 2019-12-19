@@ -156,12 +156,13 @@ public class ReferenceableMapper extends EntityMapping {
             for (String propertyName : nonRelationshipsSet) {
                 Object propertyValue = igcRestClient.getPropertyByName(igcEntity, propertyName);
                 String value = null;
-                if (propertyValue instanceof ArrayList) {
+                if (propertyValue instanceof List) {
                     StringBuilder sb = new StringBuilder();
-                    List<Object> list = (List<Object>) propertyValue;
+                    List<?> list = (List<?>) propertyValue;
                     if (!list.isEmpty()) {
                         for (int i = 0; i < list.size() - 1; i++) {
-                            sb.append(list.get(i).toString() + ", ");
+                            sb.append(list.get(i).toString());
+                            sb.append(", ");
                         }
                         sb.append(list.get(list.size() - 1));
                     }

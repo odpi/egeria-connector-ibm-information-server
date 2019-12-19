@@ -4,6 +4,8 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classific
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.CandidateKey;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DatabaseColumn;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -67,59 +69,62 @@ public class PrimaryKeyMapper extends ClassificationMapping {
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
         // Retrieve all assigned_to_terms relationships from this IGC object
-        Boolean bSelectedPK = (Boolean) igcRestClient.getPropertyByName(fromIgcObject, "selected_primary_key");
-        ItemList<Reference> definedPK = (ItemList<Reference>) igcRestClient.getPropertyByName(fromIgcObject, "defined_primary_key");
+        if (fromIgcObject instanceof DatabaseColumn) {
+            DatabaseColumn dbColumn = (DatabaseColumn) fromIgcObject;
+            Boolean bSelectedPK = dbColumn.getSelectedPrimaryKey();
+            ItemList<CandidateKey> definedPK = dbColumn.getDefinedPrimaryKey();
 
-        // If there are no defined PKs, setup a classification only if the user has selected
-        // this column as a primary key
-        if (definedPK.getItems().isEmpty()) {
-            if (bSelectedPK) {
-                try {
-                    InstanceProperties classificationProperties = repositoryHelper.addStringPropertyToInstance(
-                            repositoryName,
-                            null,
-                            "name",
-                            fromIgcObject.getName(),
-                            methodName
-                    );
-                    Classification classification = getMappedClassification(
-                            igcomrsRepositoryConnector,
-                            classificationProperties,
-                            fromIgcObject,
-                            userId
-                    );
-                    classifications.add(classification);
-                } catch (RepositoryErrorException e) {
-                    log.error("Unable to create classification.", e);
+            // If there are no defined PKs, setup a classification only if the user has selected
+            // this column as a primary key
+            if (definedPK.getItems().isEmpty()) {
+                if (bSelectedPK) {
+                    try {
+                        InstanceProperties classificationProperties = repositoryHelper.addStringPropertyToInstance(
+                                repositoryName,
+                                null,
+                                "name",
+                                fromIgcObject.getName(),
+                                methodName
+                        );
+                        Classification classification = getMappedClassification(
+                                igcomrsRepositoryConnector,
+                                classificationProperties,
+                                fromIgcObject,
+                                userId
+                        );
+                        classifications.add(classification);
+                    } catch (RepositoryErrorException e) {
+                        log.error("Unable to create classification.", e);
+                    }
                 }
-            }
-        } else {
+            } else {
 
-            // Otherwise setup primary key classifications for each defined candidate key
-            definedPK.getAllPages(igcRestClient);
-            for (Reference candidateKey : definedPK.getItems()) {
+                // Otherwise setup primary key classifications for each defined candidate key
+                definedPK.getAllPages(igcRestClient);
+                for (CandidateKey candidateKey : definedPK.getItems()) {
 
-                try {
-                    InstanceProperties classificationProperties = repositoryHelper.addStringPropertyToInstance(
-                            repositoryName,
-                            null,
-                            "name",
-                            candidateKey.getName(),
-                            methodName
-                    );
-                    Classification classification = getMappedClassification(
-                            igcomrsRepositoryConnector,
-                            classificationProperties,
-                            fromIgcObject,
-                            userId
-                    );
-                    classifications.add(classification);
-                } catch (RepositoryErrorException e) {
-                    log.error("Unable to create classification.", e);
+                    try {
+                        InstanceProperties classificationProperties = repositoryHelper.addStringPropertyToInstance(
+                                repositoryName,
+                                null,
+                                "name",
+                                candidateKey.getName(),
+                                methodName
+                        );
+                        Classification classification = getMappedClassification(
+                                igcomrsRepositoryConnector,
+                                classificationProperties,
+                                fromIgcObject,
+                                userId
+                        );
+                        classifications.add(classification);
+                    } catch (RepositoryErrorException e) {
+                        log.error("Unable to create classification.", e);
+                    }
+
                 }
 
             }
-
         }
 
     }

@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classific
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.MainObject;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -82,30 +83,29 @@ public class ConfidentialityMapper extends ClassificationMapping {
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
         // Retrieve all assigned_to_terms relationships from this IGC object
-        ItemList<Reference> assignedToTerms = (ItemList<Reference>) igcRestClient.getPropertyByName(fromIgcObject, "assigned_to_terms");
-        if (assignedToTerms != null) {
-            assignedToTerms.getAllPages(igcRestClient);
+        if (fromIgcObject instanceof MainObject) {
+            ItemList<Term> assignedToTerms = ((MainObject) fromIgcObject).getAssignedToTerms();
+            if (assignedToTerms != null) {
+                assignedToTerms.getAllPages(igcRestClient);
 
-            // For each such relationship:
-            for (Reference assignedTerm : assignedToTerms.getItems()) {
+                // For each such relationship:
+                for (Term assignedTerm : assignedToTerms.getItems()) {
 
-                // Retrieve the identity characteristics (ie. the parent category) of the related term
-                Identity termIdentity = assignedTerm.getIdentity(igcRestClient);
-                Identity catIdentity = termIdentity.getParentIdentity();
+                    // Retrieve the identity characteristics (ie. the parent category) of the related term
+                    Identity termIdentity = assignedTerm.getIdentity(igcRestClient);
+                    Identity catIdentity = termIdentity.getParentIdentity();
 
-                // Only do something with the assigned term if its immediate parent category is named
-                // "Confidentiality"
-                if (catIdentity.toString().endsWith("Confidentiality")) {
+                    // Only do something with the assigned term if its immediate parent category is named
+                    // "Confidentiality"
+                    if (catIdentity.toString().endsWith("Confidentiality")) {
 
-                    InstanceProperties classificationProperties = new InstanceProperties();
+                        InstanceProperties classificationProperties = new InstanceProperties();
 
-                    String confidentialityName = assignedTerm.getName();
-                    int spaceIndex = confidentialityName.indexOf(" ");
-                    if (spaceIndex > 0) {
+                        String confidentialityName = assignedTerm.getName();
+                        int spaceIndex = confidentialityName.indexOf(" ");
+                        if (spaceIndex > 0) {
 
-                        String level = confidentialityName.substring(0, spaceIndex);
-
-                        if (level != null) {
+                            String level = confidentialityName.substring(0, spaceIndex);
                             try {
                                 int parsedLevel = Integer.parseInt(level);
                                 classificationProperties = igcomrsRepositoryConnector.getRepositoryHelper().addIntPropertyToInstance(
@@ -118,25 +118,25 @@ public class ConfidentialityMapper extends ClassificationMapping {
                             } catch (NumberFormatException e) {
                                 log.error("Unable to detect a level in the Confidentiality classification: {}", confidentialityName, e);
                             }
-                        }
-                        try {
-                            Classification classification = getMappedClassification(
-                                    igcomrsRepositoryConnector,
-                                    classificationProperties,
-                                    fromIgcObject,
-                                    userId
-                            );
-                            classifications.add(classification);
-                        } catch (RepositoryErrorException e) {
-                            log.error("Unable to map Confidentiality classification.", e);
+                            try {
+                                Classification classification = getMappedClassification(
+                                        igcomrsRepositoryConnector,
+                                        classificationProperties,
+                                        fromIgcObject,
+                                        userId
+                                );
+                                classifications.add(classification);
+                            } catch (RepositoryErrorException e) {
+                                log.error("Unable to map Confidentiality classification.", e);
+                            }
+
+                        } else {
+                            log.error("Unable to detect a level in the Confidentiality classification: {}", confidentialityName);
                         }
 
-                    } else {
-                        log.error("Unable to detect a level in the Confidentiality classification: {}", confidentialityName);
                     }
 
                 }
-
             }
         }
 
@@ -348,10 +348,11 @@ public class ConfidentialityMapper extends ClassificationMapping {
 
             // cull the list of referencing categories to remove any under Confidentiality
             IGCUpdate igcUpdate = new IGCUpdate(igcAsset.getId());
-            ItemList<Reference> assignedToTerms = (ItemList<Reference>) igcRestClient.getPropertyByName(thisTermResults.getItems().get(0), "assigned_to_terms");
+
+            ItemList<Term> assignedToTerms = thisTermResults.getItems().get(0).getAssignedToTerms();
             assignedToTerms.getAllPages(igcRestClient);
             boolean bRemovedOne = false;
-            for (Reference assignedToTerm : assignedToTerms.getItems()) {
+            for (Term assignedToTerm : assignedToTerms.getItems()) {
                 String assignedRid = assignedToTerm.getId();
                 if (confidentialityRids.contains(assignedRid)) {
                     // Drop any confidentiality relationships

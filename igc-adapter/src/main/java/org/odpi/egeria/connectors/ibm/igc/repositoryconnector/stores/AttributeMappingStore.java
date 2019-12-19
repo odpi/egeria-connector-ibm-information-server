@@ -43,7 +43,7 @@ public class AttributeMappingStore {
      * @param mappingClass the AttributeMapping Java class
      * @return boolean false when unable to retrieve AttributeMapping from provided class
      */
-    public boolean addMapping(AttributeTypeDef omrsTypeDef, Class mappingClass) {
+    public boolean addMapping(AttributeTypeDef omrsTypeDef, Class<?> mappingClass) {
 
         AttributeMapping mapping = getAttributeMapper(mappingClass);
 
@@ -148,7 +148,7 @@ public class AttributeMappingStore {
      * @param mappingClass the mapping class to retrieve an instance of
      * @return RelationshipMapping
      */
-    private AttributeMapping getAttributeMapper(Class mappingClass) {
+    private AttributeMapping getAttributeMapper(Class<?> mappingClass) {
         AttributeMapping attributeMapper = null;
         try {
             Method getInstance = mappingClass.getMethod("getInstance", IGCVersionEnum.class);

@@ -61,7 +61,7 @@ public class EntityMappingStore {
      * @param igcomrsRepositoryConnector connectivity via an IGC OMRS Repository Connector
      * @return boolean false if unable to configure an EntityMapping from the provided class
      */
-    public boolean addMapping(TypeDef omrsTypeDef, Class mappingClass, IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
+    public boolean addMapping(TypeDef omrsTypeDef, Class<?> mappingClass, IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
 
         EntityMapping mapping = getEntityMapper(mappingClass);
 
@@ -261,7 +261,7 @@ public class EntityMappingStore {
      * @param mappingClass the Java class implementing the EntityMapping
      * @return EntityMapping
      */
-    private EntityMapping getEntityMapper(Class mappingClass) {
+    private EntityMapping getEntityMapper(Class<?> mappingClass) {
         EntityMapping entityMapper = null;
         try {
             entityMapper = (EntityMapping) mappingClass.getMethod("getInstance", IGCVersionEnum.class).invoke(null, igcomrsRepositoryConnector.getIGCVersion());

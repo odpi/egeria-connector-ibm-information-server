@@ -688,10 +688,10 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 Object relatedValue = change.getNewValue(referenceListProperties);
                 if (log.isDebugEnabled()) { log.debug(" ... found value: {}", relatedValue); }
                 if (relatedValue != null) {
-                    if (Reference.isItemList(relatedValue)) {
+                    if (relatedValue instanceof ItemList) {
 
                         if (log.isDebugEnabled()) { log.debug(" ... found ItemList, processing each item"); }
-                        ItemList<Reference> related = (ItemList<Reference>) relatedValue;
+                        ItemList<?> related = (ItemList<?>) relatedValue;
                         for (Reference relatedAsset : related.getItems()) {
                             processOneOrMoreRelationships(
                                     relationshipMapping,
@@ -703,7 +703,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                             );
                         }
 
-                    } else if (Reference.isReference(relatedValue)) {
+                    } else if (relatedValue instanceof Reference) {
                         if (log.isDebugEnabled()) { log.debug(" ... found single Reference, processing it"); }
                         Reference relatedAsset = (Reference) relatedValue;
                         processOneOrMoreRelationships(
@@ -1534,7 +1534,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                         //  as these entities should have their stubs updated (to no longer refer to a
                                         //  non-existent relationship) -- in fact, that might take care of sending the
                                         //  correct relationship purges for us?
-                                        if (Reference.isReference(relatedResult)) {
+                                        if (relatedResult instanceof Reference) {
                                             Reference relationship = (Reference) relatedResult;
                                             cascadeRelationshipPurge(
                                                     relationshipMapping,
@@ -1545,8 +1545,8 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                                     property,
                                                     iterateOnOne
                                             );
-                                        } else if (Reference.isItemList(relatedResult)) {
-                                            ItemList<Reference> relationships = (ItemList<Reference>) relatedResult;
+                                        } else if (relatedResult instanceof ItemList) {
+                                            ItemList<?> relationships = (ItemList<?>) relatedResult;
                                             for (Reference relationship : relationships.getItems()) {
                                                 cascadeRelationshipPurge(
                                                         relationshipMapping,
@@ -1640,14 +1640,14 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             if (log.isDebugEnabled()) { log.debug(" ... getting child entities from property: {}", property); }
             Object relatedResult = igcRestClient.getPropertyByName(parentObject, property);
             if (relatedResult != null) {
-                if (Reference.isReference(relatedResult)) {
+                if (relatedResult instanceof Reference) {
                     Reference relationship = (Reference) relatedResult;
                     if (!relationship.getId().equals(parentRid)) {
                         if (log.isDebugEnabled()) { log.debug(" ... purging child entity: {}", relationship.getId()); }
                         sendPurgedEntity(relationship.getType(), relationship.getId(), alreadyPurgedRids);
                     }
-                } else if (Reference.isItemList(relatedResult)) {
-                    ItemList<Reference> relationships = (ItemList<Reference>) relatedResult;
+                } else if (relatedResult instanceof ItemList) {
+                    ItemList<?> relationships = (ItemList<?>) relatedResult;
                     for (Reference relationship : relationships.getItems()) {
                         if (!relationship.getId().equals(parentRid)) {
                             if (log.isDebugEnabled()) { log.debug(" ... purging child entity: {}", relationship.getId()); }

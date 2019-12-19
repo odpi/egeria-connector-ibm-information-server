@@ -414,7 +414,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         try {
 
-            Class mappingClass = Class.forName(sbMapperClassname.toString());
+            Class<?> mappingClass = Class.forName(sbMapperClassname.toString());
             if (log.isDebugEnabled()) { log.debug(" ... found mapping class: {}", mappingClass.getCanonicalName()); }
 
             boolean success = false;
@@ -496,7 +496,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         sbMapperClassname.append("Mapper");
 
         try {
-            Class mappingClass = Class.forName(sbMapperClassname.toString());
+            Class<?> mappingClass = Class.forName(sbMapperClassname.toString());
             if (log.isDebugEnabled()) { log.debug(" ... found mapping class: {}", mappingClass.getCanonicalName()); }
             attributeMappingStore.addMapping(newAttributeTypeDef, mappingClass);
         } catch (ClassNotFoundException e) {
