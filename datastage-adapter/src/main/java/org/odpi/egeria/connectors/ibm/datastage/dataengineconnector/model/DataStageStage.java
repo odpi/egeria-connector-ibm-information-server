@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
@@ -55,7 +56,7 @@ class DataStageStage {
      */
     private static void populateWithLinkDetails(IGCRestClient igcRestClient, Stage stage) {
         IGCSearch igcSearch = new IGCSearch("stage");
-        igcSearch.addProperties(DataStageSearchProperties.getLinkSearchProperties());
+        igcSearch.addProperties(DataStageConstants.getLinkSearchProperties());
         IGCSearchCondition byId = new IGCSearchCondition("_id", "=", stage.getId());
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(byId);
         igcSearch.addConditions(conditionSet);

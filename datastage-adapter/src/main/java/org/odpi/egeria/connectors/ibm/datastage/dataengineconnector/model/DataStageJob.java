@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
@@ -217,7 +218,7 @@ public class DataStageJob {
         String jobRid = job.getId();
         if (log.isDebugEnabled()) { log.debug("Retrieving stage details for job: {}", jobRid); }
         IGCSearch igcSearch = new IGCSearch("stage");
-        igcSearch.addProperties(DataStageSearchProperties.getStageSearchProperties());
+        igcSearch.addProperties(DataStageConstants.getStageSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("job_or_container", "=", jobRid);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
@@ -233,7 +234,7 @@ public class DataStageJob {
         String jobRid = job.getId();
         if (log.isDebugEnabled()) { log.debug("Retrieving link details for job: {}", jobRid); }
         IGCSearch igcSearch = new IGCSearch("link");
-        igcSearch.addProperties(DataStageSearchProperties.getLinkSearchProperties());
+        igcSearch.addProperties(DataStageConstants.getLinkSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("job_or_container", "=", jobRid);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
@@ -249,7 +250,7 @@ public class DataStageJob {
         String jobRid = job.getId();
         if (log.isDebugEnabled()) { log.debug("Retrieving stage column details for job: {}", jobRid); }
         IGCSearch igcSearch = new IGCSearch("ds_stage_column");
-        igcSearch.addProperties(DataStageSearchProperties.getStageColumnSearchProperties());
+        igcSearch.addProperties(DataStageConstants.getStageColumnSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("link.job_or_container", "=", jobRid);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
