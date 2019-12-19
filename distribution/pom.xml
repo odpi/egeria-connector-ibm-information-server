@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!-- SPDX-License-Identifier: Apache-2.0 -->
-<!-- Copyright Contributors to the ODPi Egeria project. -->
+<!-- Copyright Contributors to the ODPi Egeria project.  -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <parent>
         <artifactId>egeria-connector-ibm-information-server</artifactId>
         <groupId>org.odpi.egeria</groupId>
         <version>1.3-SNAPSHOT</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
 
+    <artifactId>egeria-connector-ibm-information-server-package</artifactId>
     <name>Egeria Connector for IBM Information Server - packaging</name>
     <description>
-        Bundling of the connectors for distribution and use within an OMAG Server Platform
+        Bundling of the IBM Information Server connectors for distribution and use within an OMAG Server Platform.
     </description>
 
-    <artifactId>egeria-connector-ibm-information-server-package</artifactId>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
@@ -36,32 +39,26 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>${maven-shade.version}</version>
+                <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>assemble</id>
-                        <phase>package</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>single</goal>
                         </goals>
+                        <phase>prepare-package</phase>
                         <configuration>
-                            <artifactSet>
-                                <includes>
-                                    <include>org.odpi.egeria:egeria-connector-ibm-igc-adapter</include>
-                                    <include>org.odpi.egeria:ibm-igc-rest-client-library</include>
-                                    <include>org.odpi.egeria:egeria-connector-ibm-datastage-adapter</include>
-                                    <include>org.odpi.egeria:ibm-ia-rest-client-library</include>
-                                    <include>com.flipkart.zjsonpatch:zjsonpatch</include>
-                                    <include>org.apache.commons:commons-collections4</include>
-                                </includes>
-                            </artifactSet>
+                            <skipAssembly>false</skipAssembly>
+                            <descriptors>
+                                <descriptor>src/main/assemblies/src.xml</descriptor>
+                                <descriptor>src/main/assemblies/javadoc.xml</descriptor>
+                                <descriptor>src/main/assemblies/connectors.xml</descriptor>
+                            </descriptors>
+                            <finalName>egeria-connector-ibm-information-server-${open-metadata.version}</finalName>
+                            <tarLongFileMode>gnu</tarLongFileMode>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
-
 </project>
