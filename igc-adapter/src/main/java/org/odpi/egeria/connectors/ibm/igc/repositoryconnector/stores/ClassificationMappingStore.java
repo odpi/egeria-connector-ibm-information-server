@@ -41,7 +41,7 @@ public class ClassificationMappingStore {
      * @param mappingClass the ClassificationMapping Java class
      * @return boolean false when unable to retrieve ClassificationMapping from provided class
      */
-    public boolean addMapping(TypeDef omrsTypeDef, Class mappingClass) {
+    public boolean addMapping(TypeDef omrsTypeDef, Class<?> mappingClass) {
 
         ClassificationMapping mapping = getClassificationMapper(mappingClass);
 
@@ -131,7 +131,7 @@ public class ClassificationMappingStore {
      * @param mappingClass the mapping class to retrieve an instance of
      * @return ClassificationMapping
      */
-    private ClassificationMapping getClassificationMapper(Class mappingClass) {
+    private ClassificationMapping getClassificationMapper(Class<?> mappingClass) {
         ClassificationMapping classificationMapper = null;
         try {
             Method getInstance = mappingClass.getMethod("getInstance", IGCVersionEnum.class);

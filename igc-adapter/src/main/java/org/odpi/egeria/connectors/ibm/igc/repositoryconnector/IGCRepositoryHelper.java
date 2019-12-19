@@ -630,13 +630,13 @@ public class IGCRepositoryHelper {
                     } else {
                         Object otherEnd = igcRestClient.getPropertyByName(endTwo, igcPropertyName);
                         if (otherEnd != null) {
-                            if (Reference.isReference(otherEnd)) {
+                            if (otherEnd instanceof Reference) {
                                 Reference other = (Reference) otherEnd;
                                 if (other.getType() != null) {
                                     endOnes.addAll(mapper.getProxyOneAssetFromAsset(other, igcRestClient));
                                 }
-                            } else if (Reference.isItemList(otherEnd)) {
-                                ItemList<Reference> otherEnds = (ItemList<Reference>) otherEnd;
+                            } else if (otherEnd instanceof ItemList) {
+                                ItemList<?> otherEnds = (ItemList<?>) otherEnd;
                                 otherEnds.getAllPages(igcRestClient);
                                 for (Reference other : otherEnds.getItems()) {
                                     endOnes.addAll(mapper.getProxyOneAssetFromAsset(other, igcRestClient));
@@ -2102,8 +2102,9 @@ public class IGCRepositoryHelper {
                         // Iterate through all the paged properties and retrieve all pages for each
                         List<String> allPaged = igcRestClient.getPagedRelationshipPropertiesForType(assetType);
                         for (String pagedProperty : allPaged) {
-                            ItemList<Reference> pagedValue = (ItemList<Reference>) igcRestClient.getPropertyByName(fullAsset, pagedProperty);
-                            if (pagedValue != null) {
+                            Object shouldBeItemList = igcRestClient.getPropertyByName(fullAsset, pagedProperty);
+                            if (shouldBeItemList instanceof ItemList) {
+                                ItemList<?> pagedValue = (ItemList<?>) shouldBeItemList;
                                 pagedValue.getAllPages(igcRestClient);
                             }
                         }

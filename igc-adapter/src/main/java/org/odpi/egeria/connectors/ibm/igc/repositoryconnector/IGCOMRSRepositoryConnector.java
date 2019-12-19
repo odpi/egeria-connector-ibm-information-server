@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +43,7 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      * Default constructor used by the OCF Connector Provider.
      */
     public IGCOMRSRepositoryConnector() {
-        // Nothing to do...
+        defaultZones = new ArrayList<>();
     }
 
     /**
@@ -86,8 +87,12 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
         Map<String, Object> proxyProperties = this.connectionBean.getConfigurationProperties();
         if (proxyProperties != null) {
             Object zones = proxyProperties.get(IGCOMRSRepositoryConnectorProvider.DEFAULT_ZONES);
-            if (zones != null) {
-                this.defaultZones = (List<String>) zones;
+            if (zones instanceof List) {
+                for (Object zone : (List<?>) zones) {
+                    if (zone instanceof String) {
+                        this.defaultZones.add((String)zone);
+                    }
+                }
             }
             Object defaultGlossaryName = proxyProperties.get(IGCOMRSRepositoryConnectorProvider.DEFAULT_GLOSSARY_NAME);
             if (defaultGlossaryName != null && !defaultGlossaryName.equals("")) {

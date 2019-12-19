@@ -87,15 +87,14 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      */
     @Override
     public List<Reference> getProxyTwoAssetFromAsset(Reference connectorAsset, IGCRestClient igcRestClient) {
-        String otherAssetType = connectorAsset.getType();
-        if (otherAssetType.equals("connector")) {
+        if (connectorAsset instanceof Connector) {
             Connector withDataConnections = igcRestClient.getAssetWithSubsetOfProperties(
                     connectorAsset.getId(),
                     connectorAsset.getType(),
                     new String[]{ "host", "data_connections" });
-            ItemList<Reference> dataConnections = (ItemList<Reference>) igcRestClient.getPropertyByName(withDataConnections, "data_connections");
+            ItemList<DataConnection> dataConnections = withDataConnections.getDataConnections();
             dataConnections.getAllPages(igcRestClient);
-            return dataConnections.getItems();
+            return new ArrayList<>(dataConnections.getItems());
         } else {
             if (log.isDebugEnabled()) { log.debug("Not a connector asset, just returning as-is: {} of type {}", connectorAsset.getName(), connectorAsset.getType()); }
             List<Reference> referenceAsList = new ArrayList<>();

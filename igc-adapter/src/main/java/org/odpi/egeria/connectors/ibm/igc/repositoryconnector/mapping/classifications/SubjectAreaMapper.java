@@ -5,6 +5,8 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classific
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.MainObject;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -66,46 +68,48 @@ public class SubjectAreaMapper extends ClassificationMapping {
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
         // Retrieve all terms this category is assigned to
-        ItemList<Reference> assignedToTerms = (ItemList<Reference>) igcRestClient.getPropertyByName(fromIgcObject, "assigned_to_terms");
+        if (fromIgcObject instanceof Category) {
+            ItemList<Term> assignedToTerms = ((Category) fromIgcObject).getAssignedToTerms();
 
-        // Only need to continue if there are any terms
-        if (assignedToTerms != null) {
-            assignedToTerms.getAllPages(igcRestClient);
-            if (log.isDebugEnabled()) { log.debug("Looking for SubjectArea mapping within {} candidate terms.", assignedToTerms.getItems().size()); }
+            // Only need to continue if there are any terms
+            if (assignedToTerms != null) {
+                assignedToTerms.getAllPages(igcRestClient);
+                if (log.isDebugEnabled()) { log.debug("Looking for SubjectArea mapping within {} candidate terms.", assignedToTerms.getItems().size()); }
 
-            boolean isSubjectArea = false;
+                boolean isSubjectArea = false;
 
-            // For each such relationship:
-            for (Reference termCandidate : assignedToTerms.getItems()) {
-                // As soon as we find one that starts with Subject Area we can short-circuit out
-                if (termCandidate.getName().equals(getOmrsClassificationType())) {
-                    isSubjectArea = true;
-                    break;
+                // For each such relationship:
+                for (Term termCandidate : assignedToTerms.getItems()) {
+                    // As soon as we find one that starts with Subject Area we can short-circuit out
+                    if (termCandidate.getName().equals(getOmrsClassificationType())) {
+                        isSubjectArea = true;
+                        break;
+                    }
                 }
-            }
 
-            if (isSubjectArea) {
+                if (isSubjectArea) {
 
-                if (log.isDebugEnabled()) { log.debug(" ... found SubjectArea classification."); }
-                InstanceProperties classificationProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(
-                        igcomrsRepositoryConnector.getRepositoryName(),
-                        null,
-                        "name",
-                        fromIgcObject.getName(),
-                        methodName
-                );
-                try {
-                    Classification classification = getMappedClassification(
-                            igcomrsRepositoryConnector,
-                            classificationProperties,
-                            fromIgcObject,
-                            userId
+                    if (log.isDebugEnabled()) { log.debug(" ... found SubjectArea classification."); }
+                    InstanceProperties classificationProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(
+                            igcomrsRepositoryConnector.getRepositoryName(),
+                            null,
+                            "name",
+                            fromIgcObject.getName(),
+                            methodName
                     );
-                    classifications.add(classification);
-                } catch (RepositoryErrorException e) {
-                    log.error("Unable to map classification.", e);
-                }
+                    try {
+                        Classification classification = getMappedClassification(
+                                igcomrsRepositoryConnector,
+                                classificationProperties,
+                                fromIgcObject,
+                                userId
+                        );
+                        classifications.add(classification);
+                    } catch (RepositoryErrorException e) {
+                        log.error("Unable to map classification.", e);
+                    }
 
+                }
             }
         }
 

@@ -57,18 +57,6 @@ public class DataFileFolderNobucket extends InformationAsset {
     @JsonProperty("parent_folder")
     protected DataFileFolderNobucket parentFolder;
 
-    @JsonProperty("read_by_(design)")
-    protected ItemList<InformationAsset> readByDesign;
-
-    @JsonProperty("read_by_(operational)")
-    protected ItemList<InformationAsset> readByOperational;
-
-    @JsonProperty("read_by_(static)")
-    protected ItemList<InformationAsset> readByStatic;
-
-    @JsonProperty("read_by_(user_defined)")
-    protected ItemList<InformationAsset> readByUserDefined;
-
     @JsonProperty("same_as_data_sources")
     protected ItemList<MainObject> sameAsDataSources;
 
@@ -89,18 +77,6 @@ public class DataFileFolderNobucket extends InformationAsset {
 
     @JsonProperty("uses_data_file_definitions")
     protected ItemList<DataFileDefinition> usesDataFileDefinitions;
-
-    @JsonProperty("written_by_(design)")
-    protected ItemList<InformationAsset> writtenByDesign;
-
-    @JsonProperty("written_by_(operational)")
-    protected ItemList<InformationAsset> writtenByOperational;
-
-    @JsonProperty("written_by_(static)")
-    protected ItemList<InformationAsset> writtenByStatic;
-
-    @JsonProperty("written_by_(user_defined)")
-    protected ItemList<InformationAsset> writtenByUserDefined;
 
     /**
      * Retrieve the {@code amazon_s3_data_file_folder} property (displayed as '{@literal Amazon S3 Data File Folder}') of the object.
@@ -243,62 +219,6 @@ public class DataFileFolderNobucket extends InformationAsset {
     public void setParentFolder(DataFileFolderNobucket parentFolder) { this.parentFolder = parentFolder; }
 
     /**
-     * Retrieve the {@code read_by_(design)} property (displayed as '{@literal Read by (Design)}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("read_by_(design)")
-    public ItemList<InformationAsset> getReadByDesign() { return this.readByDesign; }
-
-    /**
-     * Set the {@code read_by_(design)} property (displayed as {@code Read by (Design)}) of the object.
-     * @param readByDesign the value to set
-     */
-    @JsonProperty("read_by_(design)")
-    public void setReadByDesign(ItemList<InformationAsset> readByDesign) { this.readByDesign = readByDesign; }
-
-    /**
-     * Retrieve the {@code read_by_(operational)} property (displayed as '{@literal Read by (Operational)}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("read_by_(operational)")
-    public ItemList<InformationAsset> getReadByOperational() { return this.readByOperational; }
-
-    /**
-     * Set the {@code read_by_(operational)} property (displayed as {@code Read by (Operational)}) of the object.
-     * @param readByOperational the value to set
-     */
-    @JsonProperty("read_by_(operational)")
-    public void setReadByOperational(ItemList<InformationAsset> readByOperational) { this.readByOperational = readByOperational; }
-
-    /**
-     * Retrieve the {@code read_by_(static)} property (displayed as '{@literal Read by (Static)}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("read_by_(static)")
-    public ItemList<InformationAsset> getReadByStatic() { return this.readByStatic; }
-
-    /**
-     * Set the {@code read_by_(static)} property (displayed as {@code Read by (Static)}) of the object.
-     * @param readByStatic the value to set
-     */
-    @JsonProperty("read_by_(static)")
-    public void setReadByStatic(ItemList<InformationAsset> readByStatic) { this.readByStatic = readByStatic; }
-
-    /**
-     * Retrieve the {@code read_by_(user_defined)} property (displayed as '{@literal Read by (User-Defined)}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("read_by_(user_defined)")
-    public ItemList<InformationAsset> getReadByUserDefined() { return this.readByUserDefined; }
-
-    /**
-     * Set the {@code read_by_(user_defined)} property (displayed as {@code Read by (User-Defined)}) of the object.
-     * @param readByUserDefined the value to set
-     */
-    @JsonProperty("read_by_(user_defined)")
-    public void setReadByUserDefined(ItemList<InformationAsset> readByUserDefined) { this.readByUserDefined = readByUserDefined; }
-
-    /**
      * Retrieve the {@code same_as_data_sources} property (displayed as '{@literal Same as Data Sources}') of the object.
      * @return {@code ItemList<MainObject>}
      */
@@ -395,61 +315,5 @@ public class DataFileFolderNobucket extends InformationAsset {
      */
     @JsonProperty("uses_data_file_definitions")
     public void setUsesDataFileDefinitions(ItemList<DataFileDefinition> usesDataFileDefinitions) { this.usesDataFileDefinitions = usesDataFileDefinitions; }
-
-    /**
-     * Retrieve the {@code written_by_(design)} property (displayed as '{@literal Written by (Design)}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("written_by_(design)")
-    public ItemList<InformationAsset> getWrittenByDesign() { return this.writtenByDesign; }
-
-    /**
-     * Set the {@code written_by_(design)} property (displayed as {@code Written by (Design)}) of the object.
-     * @param writtenByDesign the value to set
-     */
-    @JsonProperty("written_by_(design)")
-    public void setWrittenByDesign(ItemList<InformationAsset> writtenByDesign) { this.writtenByDesign = writtenByDesign; }
-
-    /**
-     * Retrieve the {@code written_by_(operational)} property (displayed as '{@literal Written by (Operational)}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("written_by_(operational)")
-    public ItemList<InformationAsset> getWrittenByOperational() { return this.writtenByOperational; }
-
-    /**
-     * Set the {@code written_by_(operational)} property (displayed as {@code Written by (Operational)}) of the object.
-     * @param writtenByOperational the value to set
-     */
-    @JsonProperty("written_by_(operational)")
-    public void setWrittenByOperational(ItemList<InformationAsset> writtenByOperational) { this.writtenByOperational = writtenByOperational; }
-
-    /**
-     * Retrieve the {@code written_by_(static)} property (displayed as '{@literal Written by (Static)}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("written_by_(static)")
-    public ItemList<InformationAsset> getWrittenByStatic() { return this.writtenByStatic; }
-
-    /**
-     * Set the {@code written_by_(static)} property (displayed as {@code Written by (Static)}) of the object.
-     * @param writtenByStatic the value to set
-     */
-    @JsonProperty("written_by_(static)")
-    public void setWrittenByStatic(ItemList<InformationAsset> writtenByStatic) { this.writtenByStatic = writtenByStatic; }
-
-    /**
-     * Retrieve the {@code written_by_(user_defined)} property (displayed as '{@literal Written by (User-Defined)}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("written_by_(user_defined)")
-    public ItemList<InformationAsset> getWrittenByUserDefined() { return this.writtenByUserDefined; }
-
-    /**
-     * Set the {@code written_by_(user_defined)} property (displayed as {@code Written by (User-Defined)}) of the object.
-     * @param writtenByUserDefined the value to set
-     */
-    @JsonProperty("written_by_(user_defined)")
-    public void setWrittenByUserDefined(ItemList<InformationAsset> writtenByUserDefined) { this.writtenByUserDefined = writtenByUserDefined; }
 
 }

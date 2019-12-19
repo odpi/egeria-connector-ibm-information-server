@@ -484,32 +484,6 @@ public class Reference extends ObjectPrinter {
     public void setFullyRetrieved() { fullyRetrieved = true; }
 
     /**
-     * Returns true iff the provided object is a relationship (ie. of class Reference or one of its offspring).
-     *
-     * @param obj the object to check
-     * @return Boolean
-     */
-    @JsonIgnore
-    public static boolean isReference(Object obj) {
-        Class clazz = obj.getClass();
-        while (clazz != null && clazz != Reference.class) {
-            clazz = clazz.getSuperclass();
-        }
-        return (clazz == Reference.class);
-    }
-
-    /**
-     * Returns true iff the provided object is a list of relationships (ie. of class ItemList).
-     *
-     * @param obj the object to check
-     * @return Boolean
-     */
-    @JsonIgnore
-    public static boolean isItemList(Object obj) {
-        return (obj.getClass() == ItemList.class);
-    }
-
-    /**
      * Returns true iff the provided object is a simple type (String, Number, Boolean, Date, etc).
      *
      * @param obj the object to check
@@ -517,7 +491,7 @@ public class Reference extends ObjectPrinter {
      */
     @JsonIgnore
     public static boolean isSimpleType(Object obj) {
-        return (!Reference.isReference(obj) && !Reference.isItemList(obj));
+        return (!(obj instanceof Reference) && !(obj instanceof ItemList));
     }
 
     /**

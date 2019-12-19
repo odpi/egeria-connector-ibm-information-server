@@ -1238,7 +1238,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 Object directRelationships = igcRestClient.getPropertyByName(fromIgcObject, igcRelationshipName);
 
                 // Handle single instance relationship one way
-                if (directRelationships != null && Reference.isReference(directRelationships)) {
+                if (directRelationships instanceof Reference) {
 
                     Reference singleRelationship = (Reference) directRelationships;
                     if (mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, fromIgcObject, singleRelationship)) {
@@ -1253,14 +1253,14 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         );
                     }
 
-                } else if (directRelationships != null && Reference.isItemList(directRelationships)) { // and list of relationships another
+                } else if (directRelationships instanceof ItemList) { // and list of relationships another
 
                     addListOfMappedRelationships(
                             igcomrsRepositoryConnector,
                             mapping,
                             relationships,
                             fromIgcObject,
-                            (ItemList<Reference>) directRelationships,
+                            (ItemList<?>) directRelationships,
                             igcRelationshipName,
                             userId
                     );
@@ -1419,7 +1419,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                      RelationshipMapping mapping,
                                                      List<Relationship> relationships,
                                                      Reference fromIgcObject,
-                                                     ItemList<Reference> igcRelationships,
+                                                     ItemList<?> igcRelationships,
                                                      String igcPropertyName,
                                                      String userId) {
 

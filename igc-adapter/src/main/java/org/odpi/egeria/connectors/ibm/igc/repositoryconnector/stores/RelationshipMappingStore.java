@@ -51,7 +51,7 @@ public class RelationshipMappingStore {
      * @param mappingClass the RelationshipMapping Java class
      * @return boolean false when unable to retrieve RelationshipMapping from provided class
      */
-    public boolean addMapping(TypeDef omrsTypeDef, Class mappingClass) {
+    public boolean addMapping(TypeDef omrsTypeDef, Class<?> mappingClass) {
 
         RelationshipMapping mapping = getRelationshipMapper(mappingClass);
 
@@ -170,7 +170,7 @@ public class RelationshipMappingStore {
      * @param mappingClass the mapping class to retrieve an instance of
      * @return RelationshipMapping
      */
-    private RelationshipMapping getRelationshipMapper(Class mappingClass) {
+    private RelationshipMapping getRelationshipMapper(Class<?> mappingClass) {
         RelationshipMapping relationshipMapper = null;
         try {
             Method getInstance = mappingClass.getMethod("getInstance", IGCVersionEnum.class);

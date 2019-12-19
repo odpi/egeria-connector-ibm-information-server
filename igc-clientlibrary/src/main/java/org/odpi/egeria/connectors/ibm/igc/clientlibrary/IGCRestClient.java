@@ -949,8 +949,12 @@ public class IGCRestClient {
                     zipOutput.putNextEntry(new ZipEntry(directoryName));
                 }
                 File[] files = file.listFiles();
-                for (File subFile : files) {
-                    recursivelyZipFiles(subFile, directoryName + subFile.getName(), zipOutput);
+                if (files != null) {
+                    for (File subFile : files) {
+                        recursivelyZipFiles(subFile, directoryName + subFile.getName(), zipOutput);
+                    }
+                } else {
+                    if (log.isErrorEnabled()) { log.error("No files found for the bundle, cannot create from: {}", file.getCanonicalPath()); }
                 }
             } catch (IOException e) {
                 if (log.isErrorEnabled()) { log.error("Unable to create directory entry in zip file for {}.", directoryName, e); }
@@ -1268,8 +1272,8 @@ public class IGCRestClient {
      *
      * @param clazz the Java Class (POJO) object to register
      */
-    public void registerPOJO(Class clazz) {
-        JsonTypeName typeName = (JsonTypeName) clazz.getAnnotation(JsonTypeName.class);
+    public void registerPOJO(Class<?> clazz) {
+        JsonTypeName typeName = clazz.getAnnotation(JsonTypeName.class);
         if (typeName != null) {
             String typeId = typeName.value();
             this.mapper.registerSubtypes(clazz);
@@ -1285,8 +1289,8 @@ public class IGCRestClient {
      * @param assetType name of the IGC asset
      * @return Class
      */
-    private Class getPOJOForType(String assetType) {
-        Class igcPOJO = null;
+    private Class<?> getPOJOForType(String assetType) {
+        Class<?> igcPOJO = null;
         StringBuilder sbPojoName = new StringBuilder();
         sbPojoName.append(IGCRestConstants.IGC_REST_BASE_MODEL_PKG);
         sbPojoName.append(".");
