@@ -73,14 +73,11 @@ public class EntityMappingStore {
             String igcAssetType = mapping.getIgcAssetType();
             addIgcAssetTypeToGuid(igcAssetType, guid);
             igcAssetDisplayNameToOmrsGuid.put(mapping.getIgcAssetTypeDisplayName(), guid);
-            String prefix = "";
-            if (mapping.getIgcRidPrefix() != null) {
-                prefix = mapping.getIgcRidPrefix();
-            }
+            String prefix = mapping.getIgcRidPrefix();
             String coreKey = getPrefixedTypeKey(igcAssetType, prefix);
             log.debug(" ... adding core mapping from {} to: {}", coreKey, guid);
             igcAssetTypeAndPrefixToOmrsGuid.put(coreKey, guid);
-            if (!prefix.equals("")) {
+            if (prefix != null && !prefix.equals("")) {
                 if (!igcPrefixToOmrsGuids.containsKey(prefix)) {
                     igcPrefixToOmrsGuids.put(prefix, new HashSet<>());
                 }
