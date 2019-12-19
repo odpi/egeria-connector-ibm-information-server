@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Dsjob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -109,7 +110,7 @@ public class DataStageCache {
         long toTime = to.getTime();
         // TODO: may need to modify search criteria for job retrieval to pick up jobs used in changed sequences
         IGCSearch igcSearch = new IGCSearch("dsjob");
-        igcSearch.addProperties(DataStageSearchProperties.getJobSearchProperties());
+        igcSearch.addProperties(DataStageConstants.getJobSearchProperties());
         IGCSearchCondition cTo = new IGCSearchCondition("modified_on", "<=", "" + toTime);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(cTo);
         if (from != null) {

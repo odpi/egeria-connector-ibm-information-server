@@ -20,9 +20,9 @@ import java.util.List;
  */
 public class IGCOMRSRepositoryConnectorProvider extends OMRSRepositoryConnectorProviderBase {
 
-    static final String  connectorTypeGUID = "62cd0d10-4e72-4d75-9fdc-e9b783f98d80";
-    static final String  connectorTypeName = "OMRS IGC Repository Connector";
-    static final String  connectorTypeDescription = "OMRS IGC Repository Connector that processes events from the IBM InfoSphere Information Governance Catalog repository store.";
+    static final String CONNECTOR_TYPE_GUID = "62cd0d10-4e72-4d75-9fdc-e9b783f98d80";
+    static final String CONNECTOR_TYPE_NAME = "OMRS IGC Repository Connector";
+    static final String CONNECTOR_TYPE_DESC = "OMRS IGC Repository Connector that processes events from the IBM InfoSphere Information Governance Catalog repository store.";
 
     public static final String DEFAULT_ZONES = "defaultZones";
     public static final String DEFAULT_GLOSSARY_NAME = "defaultGlossaryName";
@@ -34,15 +34,15 @@ public class IGCOMRSRepositoryConnectorProvider extends OMRSRepositoryConnectorP
      */
     public IGCOMRSRepositoryConnectorProvider() {
 
-        Class connectorClass = IGCOMRSRepositoryConnector.class;
+        Class<?> connectorClass = IGCOMRSRepositoryConnector.class;
         super.setConnectorClassName(connectorClass.getName());
 
         ConnectorType connectorType = new ConnectorType();
         connectorType.setType(ConnectorType.getConnectorTypeType());
-        connectorType.setGUID(connectorTypeGUID);
-        connectorType.setQualifiedName(connectorTypeName);
-        connectorType.setDisplayName(connectorTypeName);
-        connectorType.setDescription(connectorTypeDescription);
+        connectorType.setGUID(CONNECTOR_TYPE_GUID);
+        connectorType.setQualifiedName(CONNECTOR_TYPE_NAME);
+        connectorType.setDisplayName(CONNECTOR_TYPE_NAME);
+        connectorType.setDescription(CONNECTOR_TYPE_DESC);
         connectorType.setConnectorProviderClassName(this.getClass().getName());
 
         List<String> recognizedConfigurationProperties = new ArrayList<>();

@@ -17,23 +17,23 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
  */
 public class IGCOMRSRepositoryEventMapperProvider extends OMRSRepositoryConnectorProviderBase {
 
-    static final String  connectorTypeGUID = "46643e1b-0625-4b7a-96db-4a2153f0ae88";
-    static final String  connectorTypeName = "OMRS IGC Event Mapper Connector";
-    static final String  connectorTypeDescription = "OMRS IGC Event Mapper Connector that processes events from the IBM InfoSphere Information Governance Catalog repository store.";
+    static final String CONNECTOR_TYPE_GUID = "46643e1b-0625-4b7a-96db-4a2153f0ae88";
+    static final String CONNECTOR_TYPE_NAME = "OMRS IGC Event Mapper Connector";
+    static final String CONNECTOR_TYPE_DESC = "OMRS IGC Event Mapper Connector that processes events from the IBM InfoSphere Information Governance Catalog repository store.";
 
     /**
      * Constructor used to initialize the ConnectorProviderBase with the Java class name of the specific
      * OMRS Connector implementation.
      */
     public IGCOMRSRepositoryEventMapperProvider() {
-        Class connectorClass = IGCOMRSRepositoryEventMapper.class;
+        Class<?> connectorClass = IGCOMRSRepositoryEventMapper.class;
         super.setConnectorClassName(connectorClass.getName());
         ConnectorType connectorType = new ConnectorType();
         connectorType.setType(ConnectorType.getConnectorTypeType());
-        connectorType.setGUID(connectorTypeGUID);
-        connectorType.setQualifiedName(connectorTypeName);
-        connectorType.setDisplayName(connectorTypeName);
-        connectorType.setDescription(connectorTypeDescription);
+        connectorType.setGUID(CONNECTOR_TYPE_GUID);
+        connectorType.setQualifiedName(CONNECTOR_TYPE_NAME);
+        connectorType.setDisplayName(CONNECTOR_TYPE_NAME);
+        connectorType.setDescription(CONNECTOR_TYPE_DESC);
         connectorType.setConnectorProviderClassName(this.getClass().getName());
         super.setConnectorTypeProperties(connectorType);
     }

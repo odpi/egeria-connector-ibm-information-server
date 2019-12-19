@@ -196,13 +196,13 @@ public class DataStageConnector extends DataEngineConnectorBase {
         if (exists == null) {
             // Create the entry
             IGCCreate igcCreate = new IGCCreate("information_governance_rule");
-            igcCreate.addProperty("name", SYNC_RULE_NAME);
-            igcCreate.addProperty("short_description", newDescription);
+            igcCreate.addProperty(DataStageConstants.NAME, SYNC_RULE_NAME);
+            igcCreate.addProperty(DataStageConstants.SHORT_DESCRIPTION, newDescription);
             success = igcRestClient.create(igcCreate) != null;
         } else {
             // Update the entry
             IGCUpdate igcUpdate = new IGCUpdate(exists.getId());
-            igcUpdate.addProperty("short_description", newDescription);
+            igcUpdate.addProperty(DataStageConstants.SHORT_DESCRIPTION, newDescription);
             success = igcRestClient.update(igcUpdate);
         }
         if (!success) {
@@ -427,8 +427,8 @@ public class DataStageConnector extends DataEngineConnectorBase {
      */
     private InformationGovernanceRule getJobSyncRule() {
         IGCSearch igcSearch = new IGCSearch("information_governance_rule");
-        igcSearch.addProperty("short_description");
-        IGCSearchCondition condition = new IGCSearchCondition("name", "=", SYNC_RULE_NAME);
+        igcSearch.addProperty(DataStageConstants.SHORT_DESCRIPTION);
+        IGCSearchCondition condition = new IGCSearchCondition(DataStageConstants.NAME, "=", SYNC_RULE_NAME);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
         ItemList<InformationGovernanceRule> results = igcRestClient.search(igcSearch);

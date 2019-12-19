@@ -20,11 +20,11 @@ import java.util.List;
  */
 public class DataStageConnectorProvider extends DataEngineConnectorProviderBase {
 
-    private static final String connectorTypeGUID = "f71e6c48-fa06-4016-8437-7f0e8efcfb39";
-    private static final String connectorTypeName = "DataStage Data Engine Connector";
-    private static final String connectorTypeDescription = "DataStage Data Engine Connector that processes job information from the IBM DataStage ETL engine.";
+    private static final String CONNECTOR_TYPE_GUID = "f71e6c48-fa06-4016-8437-7f0e8efcfb39";
+    private static final String CONNECTOR_TYPE_NAME = "DataStage Data Engine Connector";
+    private static final String CONNECTOR_TYPE_DESC = "DataStage Data Engine Connector that processes job information from the IBM DataStage ETL engine.";
 
-    private static final String pageSize = "pageSize";
+    private static final String PAGE_SIZE = "pageSize";
 
     /**
      * Constructor used to initialize the ConnectorProviderBase with the Java class name of the specific
@@ -32,19 +32,19 @@ public class DataStageConnectorProvider extends DataEngineConnectorProviderBase 
      */
     public DataStageConnectorProvider() {
 
-        Class connectorClass = DataStageConnector.class;
+        Class<?> connectorClass = DataStageConnector.class;
         super.setConnectorClassName(connectorClass.getName());
 
         ConnectorType connectorType = new ConnectorType();
         connectorType.setType(ConnectorType.getConnectorTypeType());
-        connectorType.setGUID(connectorTypeGUID);
-        connectorType.setQualifiedName(connectorTypeName);
-        connectorType.setDisplayName(connectorTypeName);
-        connectorType.setDescription(connectorTypeDescription);
+        connectorType.setGUID(CONNECTOR_TYPE_GUID);
+        connectorType.setQualifiedName(CONNECTOR_TYPE_NAME);
+        connectorType.setDisplayName(CONNECTOR_TYPE_NAME);
+        connectorType.setDescription(CONNECTOR_TYPE_DESC);
         connectorType.setConnectorProviderClassName(this.getClass().getName());
 
         List<String> recognizedConfigurationProperties = new ArrayList<>();
-        recognizedConfigurationProperties.add(pageSize);
+        recognizedConfigurationProperties.add(PAGE_SIZE);
         connectorType.setRecognizedConfigurationProperties(recognizedConfigurationProperties);
 
         super.connectorTypeBean = connectorType;

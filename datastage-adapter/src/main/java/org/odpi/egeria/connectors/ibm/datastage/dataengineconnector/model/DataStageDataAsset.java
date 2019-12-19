@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
@@ -38,11 +39,11 @@ public class DataStageDataAsset {
         IGCSearchCondition byParentId = null;
         if (storeType.equals("database_table") || storeType.equals("view")) {
             igcSearch.addType("database_column");
-            igcSearch.addProperties(DataStageSearchProperties.getDatabaseColumnSearchProperties());
+            igcSearch.addProperties(DataStageConstants.getDatabaseColumnSearchProperties());
             byParentId = new IGCSearchCondition("database_table_or_view", "=", storeRid);
         } else if (storeType.equals("data_file_record")) {
             igcSearch.addType("data_file_field");
-            igcSearch.addProperties(DataStageSearchProperties.getDataFileFieldSearchProperties());
+            igcSearch.addProperties(DataStageConstants.getDataFileFieldSearchProperties());
             byParentId = new IGCSearchCondition("data_file_record", "=", storeRid);
         } else {
             if (log.isWarnEnabled()) { log.warn("Unknown source / target type -- skipping: {}", store); }
