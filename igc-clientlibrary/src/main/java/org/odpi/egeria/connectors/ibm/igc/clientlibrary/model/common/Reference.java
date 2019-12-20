@@ -160,7 +160,6 @@ import java.util.List;
         @JsonSubTypes.Type(value = MwbDatabaseAlias.class, name = "mwb_database_alias"),
         @JsonSubTypes.Type(value = Navigationdescriptor.class, name = "navigationdescriptor"),
         @JsonSubTypes.Type(value = NodeOperation.class, name = "node_operation"),
-        @JsonSubTypes.Type(value = NonStewardUser.class, name = "non_steward_user"),
         @JsonSubTypes.Type(value = OlapJoin.class, name = "olap_join"),
         @JsonSubTypes.Type(value = OlapMemberSource.class, name = "olap_member_source"),
         @JsonSubTypes.Type(value = Olapjoinref.class, name = "olapjoinref"),
@@ -189,8 +188,6 @@ import java.util.List;
         @JsonSubTypes.Type(value = StandardizationObject.class, name = "standardization_object"),
         @JsonSubTypes.Type(value = StandardizationRule.class, name = "standardization_rule"),
         @JsonSubTypes.Type(value = Steward.class, name = "steward"),
-        @JsonSubTypes.Type(value = StewardGroup.class, name = "steward_group"),
-        @JsonSubTypes.Type(value = StewardUser.class, name = "steward_user"),
         @JsonSubTypes.Type(value = TableAnalysis.class, name = "table_analysis"),
         @JsonSubTypes.Type(value = TableAnalysisSummary.class, name = "table_analysis_summary"),
         @JsonSubTypes.Type(value = TableDefinitionProperties.class, name = "table_definition_properties"),
@@ -199,7 +196,6 @@ import java.util.List;
         @JsonSubTypes.Type(value = TransformsFunction.class, name = "transforms_function"),
         @JsonSubTypes.Type(value = Tuple.class, name = "tuple"),
         @JsonSubTypes.Type(value = User.class, name = "user"),
-        @JsonSubTypes.Type(value = UserGroup.class, name = "user_group"),
         @JsonSubTypes.Type(value = UserRole.class, name = "user_role"),
         @JsonSubTypes.Type(value = ValidValue.class, name = "valid_value"),
         @JsonSubTypes.Type(value = ValidValueList.class, name = "valid_value_list"),
@@ -215,7 +211,6 @@ import java.util.List;
         @JsonSubTypes.Type(value = XsdElementGroupReference.class, name = "xsd_element_group_reference"),
         @JsonSubTypes.Type(value = XsdElementReference.class, name = "xsd_element_reference"),
         @JsonSubTypes.Type(value = XsdForeignKey.class, name = "xsd_foreign_key"),
-        @JsonSubTypes.Type(value = XsdPrimaryKey.class, name = "xsd_primary_key"),
         @JsonSubTypes.Type(value = XsdUniqueKey.class, name = "xsd_unique_key"),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)

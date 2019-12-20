@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -21,6 +22,10 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=User.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = NonStewardUser.class, name = "non_steward_user"),
+        @JsonSubTypes.Type(value = StewardUser.class, name = "steward_user"),
+})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("user")
