@@ -149,6 +149,13 @@ public class IGCRestConstants {
         list.add("classificationenabledgroup");
         list.add("reportobject");
         list.add("dsjob");
+        list.add("user");
+        list.add("xsd_element");
+        list.add("xsd_unique_key");
+        list.add("bi_report");
+        list.add("group");
+        list.add("data_rule_definition");
+        list.add("data_rule_set_definition");
         return list;
     }
 
@@ -156,12 +163,19 @@ public class IGCRestConstants {
     private static Map<String, String> createSubTypeToSuperType() {
         Map<String, String> map = new HashMap<>();
         map.put("main_object", "reference");
+        map.put("user", "reference");
+        map.put("group", "reference");
+        map.put("xsd_unique_key", "reference");
         map.put("data_policy", "main_object");
         map.put("host_(engine)", "host");
         map.put("host", "information_asset");
         map.put("Rule_Execution_Result", "information_asset");
         map.put("customattributedef", "information_asset");
         map.put("stage_type", "information_asset");
+        map.put("xsd_element", "information_asset");
+        map.put("bi_report", "information_asset");
+        map.put("data_rule_definition", "information_asset");
+        map.put("data_rule_set_definition", "information_asset");
         map.put("dsstage_type", "stage_type");
         map.put("information_asset", "main_object");
         map.put("database_alias", "datagroup");
@@ -191,6 +205,19 @@ public class IGCRestConstants {
         map.put("reportobject", "information_asset");
         map.put("sequence_job", "dsjob");
         map.put("dsjob", "information_asset");
+        map.put("non_steward_user", "user");
+        map.put("steward_user", "user");
+        map.put("xsd_choice", "xsd_element");
+        map.put("xsd_sequence", "xsd_element");
+        map.put("xsd_primary_key", "xsd_unique_key");
+        map.put("bi_report_nocontext", "bi_report");
+        map.put("bi_report_nofolder", "bi_report");
+        map.put("user_group", "group");
+        map.put("steward_group", "group");
+        map.put("published_data_rule_definition", "data_rule_definition");
+        map.put("non_published_data_rule_definition", "data_rule_definition");
+        map.put("published_data_rule_set", "data_rule_set_definition");
+        map.put("non_published_data_rule_set", "data_rule_set_definition");
         return map;
     }
 

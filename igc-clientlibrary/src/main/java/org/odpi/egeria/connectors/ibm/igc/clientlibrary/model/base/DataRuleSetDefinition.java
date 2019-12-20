@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -22,6 +23,10 @@ import java.util.Date;
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=DataRuleSetDefinition.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = NonPublishedDataRuleSet.class, name = "non_published_data_rule_set"),
+        @JsonSubTypes.Type(value = PublishedDataRuleSet.class, name = "published_data_rule_set"),
+})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("data_rule_set_definition")

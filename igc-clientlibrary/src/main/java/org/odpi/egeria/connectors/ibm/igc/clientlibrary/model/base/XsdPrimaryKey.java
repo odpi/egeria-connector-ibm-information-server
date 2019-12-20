@@ -9,9 +9,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 
 /**
  * POJO for the {@code xsd_primary_key} asset type in IGC, displayed as '{@literal XSD Primary Key}' in the IGC UI.
@@ -25,125 +22,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("xsd_primary_key")
-public class XsdPrimaryKey extends Reference {
-
-    @JsonProperty("name")
-    protected String name;
-
-    @JsonProperty("namespace")
-    protected String namespace;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
-
-    @JsonProperty("referenced_by_xsd_keys")
-    protected ItemList<XsdForeignKey> referencedByXsdKeys;
-
-    @JsonProperty("selector")
-    protected String selector;
-
-    @JsonProperty("xsd_element")
-    protected MainObject xsdElement;
-
-    @JsonProperty("xsd_elements_or_attributes")
-    protected ItemList<MainObject> xsdElementsOrAttributes;
-
-    /**
-     * Retrieve the {@code name} property (displayed as '{@literal Name}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("name")
-    public String getTheName() { return this.name; }
-
-    /**
-     * Set the {@code name} property (displayed as {@code Name}) of the object.
-     * @param name the value to set
-     */
-    @JsonProperty("name")
-    public void setTheName(String name) { this.name = name; }
-
-    /**
-     * Retrieve the {@code namespace} property (displayed as '{@literal Namespace}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("namespace")
-    public String getNamespace() { return this.namespace; }
-
-    /**
-     * Set the {@code namespace} property (displayed as {@code Namespace}) of the object.
-     * @param namespace the value to set
-     */
-    @JsonProperty("namespace")
-    public void setNamespace(String namespace) { this.namespace = namespace; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
-
-    /**
-     * Retrieve the {@code referenced_by_xsd_keys} property (displayed as '{@literal Referenced by XSD Keys}') of the object.
-     * @return {@code ItemList<XsdForeignKey>}
-     */
-    @JsonProperty("referenced_by_xsd_keys")
-    public ItemList<XsdForeignKey> getReferencedByXsdKeys() { return this.referencedByXsdKeys; }
-
-    /**
-     * Set the {@code referenced_by_xsd_keys} property (displayed as {@code Referenced by XSD Keys}) of the object.
-     * @param referencedByXsdKeys the value to set
-     */
-    @JsonProperty("referenced_by_xsd_keys")
-    public void setReferencedByXsdKeys(ItemList<XsdForeignKey> referencedByXsdKeys) { this.referencedByXsdKeys = referencedByXsdKeys; }
-
-    /**
-     * Retrieve the {@code selector} property (displayed as '{@literal Selector}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("selector")
-    public String getSelector() { return this.selector; }
-
-    /**
-     * Set the {@code selector} property (displayed as {@code Selector}) of the object.
-     * @param selector the value to set
-     */
-    @JsonProperty("selector")
-    public void setSelector(String selector) { this.selector = selector; }
-
-    /**
-     * Retrieve the {@code xsd_element} property (displayed as '{@literal XSD Element}') of the object.
-     * @return {@code MainObject}
-     */
-    @JsonProperty("xsd_element")
-    public MainObject getXsdElement() { return this.xsdElement; }
-
-    /**
-     * Set the {@code xsd_element} property (displayed as {@code XSD Element}) of the object.
-     * @param xsdElement the value to set
-     */
-    @JsonProperty("xsd_element")
-    public void setXsdElement(MainObject xsdElement) { this.xsdElement = xsdElement; }
-
-    /**
-     * Retrieve the {@code xsd_elements_or_attributes} property (displayed as '{@literal XSD Elements or Attributes}') of the object.
-     * @return {@code ItemList<MainObject>}
-     */
-    @JsonProperty("xsd_elements_or_attributes")
-    public ItemList<MainObject> getXsdElementsOrAttributes() { return this.xsdElementsOrAttributes; }
-
-    /**
-     * Set the {@code xsd_elements_or_attributes} property (displayed as {@code XSD Elements or Attributes}) of the object.
-     * @param xsdElementsOrAttributes the value to set
-     */
-    @JsonProperty("xsd_elements_or_attributes")
-    public void setXsdElementsOrAttributes(ItemList<MainObject> xsdElementsOrAttributes) { this.xsdElementsOrAttributes = xsdElementsOrAttributes; }
+public class XsdPrimaryKey extends XsdUniqueKey {
 
 }
