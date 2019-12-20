@@ -156,6 +156,7 @@ public class IGCRestConstants {
         list.add("group");
         list.add("data_rule_definition");
         list.add("data_rule_set_definition");
+        list.add("stage_column");
         return list;
     }
 
@@ -187,7 +188,8 @@ public class IGCRestConstants {
         map.put("stored_procedure", "datagroup");
         map.put("design_stored_procedure", "datagroup");
         map.put("datagroup", "information_asset");
-        map.put("ds_stage_column", "data_item");
+        map.put("stage_column", "data_item");
+        map.put("ds_stage_column", "stage_column");
         map.put("parameter", "data_item");
         map.put("routine_argument", "data_item");
         map.put("stage_type_detail", "data_item");

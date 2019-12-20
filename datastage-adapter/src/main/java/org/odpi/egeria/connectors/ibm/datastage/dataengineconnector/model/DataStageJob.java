@@ -29,7 +29,7 @@ public class DataStageJob {
     private JobType type;
     private Map<String, Stage> stageMap;
     private Map<String, Link> linkMap;
-    private Map<String, DsStageColumn> columnMap;
+    private Map<String, StageColumn> columnMap;
     private Map<String, Classificationenabledgroup> fieldMap;
     private Map<String, List<Classificationenabledgroup>> storeToFieldsMap;
     private Map<String, Identity> storeToIdentityMap;
@@ -180,12 +180,12 @@ public class DataStageJob {
     }
 
     /**
-     * Retrieve the complete 'ds_stage_column' object based on its RID.
+     * Retrieve the complete 'stage_column' object based on its RID.
      *
-     * @param rid the RID of the ds_stage_column object
-     * @return DsStageColumn
+     * @param rid the RID of the stage_column object
+     * @return StageColumn
      */
-    public DsStageColumn getStageColumnByRid(String rid) {
+    public StageColumn getStageColumnByRid(String rid) {
         if (log.isDebugEnabled()) { log.debug("Looking up cached stage column: {}", rid); }
         return columnMap.getOrDefault(rid, null);
     }
@@ -249,14 +249,37 @@ public class DataStageJob {
     private void getStageColumnDetailsForLinks() {
         String jobRid = job.getId();
         if (log.isDebugEnabled()) { log.debug("Retrieving stage column details for job: {}", jobRid); }
-        IGCSearch igcSearch = new IGCSearch("ds_stage_column");
+        ItemList<StageColumn> stageCols = getStageColumnDetailsForLinks("stage_column", jobRid);
+        if (stageCols == null) {
+            if (log.isInfoEnabled()) { log.info("Unable to identify stage columns for job by 'stage_column', reverting to 'ds_stage_column'."); }
+            stageCols = getStageColumnDetailsForLinks("ds_stage_column", jobRid);
+        }
+        if (stageCols != null) {
+            buildMap(columnMap, stageCols);
+        } else {
+            log.error("Unable to identify any stage columns for job: {}", jobRid);
+        }
+    }
+
+    /**
+     * Retrieve the details of stage columns within this particular DataStage job using the type provided: some IGC
+     * versions need to retrieve 'stage_column' and others must retrieve 'ds_stage_column'.
+     *
+     * @param usingType the type by which to search for the stage columns
+     * @param jobRid the RID of the job
+     */
+    private ItemList<StageColumn> getStageColumnDetailsForLinks(String usingType, String jobRid) {
+        IGCSearch igcSearch = new IGCSearch(usingType);
         igcSearch.addProperties(DataStageConstants.getStageColumnSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("link.job_or_container", "=", jobRid);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
-        ItemList<DsStageColumn> stageCols = igcRestClient.search(igcSearch);
-        stageCols.getAllPages(igcRestClient);
-        buildMap(columnMap, stageCols);
+        ItemList<StageColumn> stageCols = igcRestClient.search(igcSearch);
+        if (stageCols.getPaging().getNumTotal() > 0) {
+            stageCols.getAllPages(igcRestClient);
+            return stageCols;
+        }
+        return null;
     }
 
     /**

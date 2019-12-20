@@ -42,14 +42,14 @@ class LineageMappingMapping extends BaseMapping {
         // For each stage column defined on the link...
         for (DataItem stageColumnRef : stageColumns.getItems()) {
             String colId = stageColumnRef.getId();
-            DsStageColumn stageColumnFull = job.getStageColumnByRid(colId);
+            StageColumn stageColumnFull = job.getStageColumnByRid(colId);
             String thisColumnName = getFullyQualifiedName(stageColumnFull) + stageNameSuffix;
             if (!bSource) {
                 // Create a LineageMapping from each previous stage column to this stage column
                 ItemList<DataItem> previousColumns = stageColumnFull.getPreviousStageColumns();
                 previousColumns.getAllPages(igcRestClient);
                 for (DataItem previousColumnRef : previousColumns.getItems()) {
-                    DsStageColumn previousColumnFull = job.getStageColumnByRid(previousColumnRef.getId());
+                    StageColumn previousColumnFull = job.getStageColumnByRid(previousColumnRef.getId());
                     LineageMapping lineageMapping = getLineageMapping(getFullyQualifiedName(previousColumnFull) + stageNameSuffix, thisColumnName);
                     lineageMappingsSet.add(lineageMapping);
                 }
@@ -58,7 +58,7 @@ class LineageMappingMapping extends BaseMapping {
                 ItemList<DataItem> nextColumns = stageColumnFull.getNextStageColumns();
                 nextColumns.getAllPages(igcRestClient);
                 for (DataItem nextColumnRef : nextColumns.getItems()) {
-                    DsStageColumn nextColumnFull = job.getStageColumnByRid(nextColumnRef.getId());
+                    StageColumn nextColumnFull = job.getStageColumnByRid(nextColumnRef.getId());
                     LineageMapping lineageMapping = getLineageMapping(thisColumnName, getFullyQualifiedName(nextColumnFull) + stageNameSuffix);
                     lineageMappingsSet.add(lineageMapping);
                 }
@@ -88,7 +88,7 @@ class LineageMappingMapping extends BaseMapping {
         String userId = link.getModifiedBy();
         // For each stage column defined on the link...
         for (DataItem stageColRef : stageColumns.getItems()) {
-            DsStageColumn stageColFull = job.getStageColumnByRid(stageColRef.getId());
+            StageColumn stageColFull = job.getStageColumnByRid(stageColRef.getId());
             String stageColName = getFullyQualifiedName(stageColFull);
             // Create a single mapping between the input stage and the output stage that use this link
             LineageMapping lineageMapping = getLineageMapping(stageColName + "_" + inputStage.getName(), stageColName + "_" + outputStage.getName());
@@ -108,23 +108,27 @@ class LineageMappingMapping extends BaseMapping {
      *
      * @param job the job for which to create the LineageMappings
      * @param fields list of IGC field objects (data_file_field or database_column)
-     * @param relationshipProperty one of 'read_by_(design)' or 'written_by_(design)'
      * @param bSource true if processing a source link, false if a target link
      * @param fullyQualifiedStageName the fully qualifiedName of the stage itself
      * @param stageNameSuffix the stage name for which to create the LineageMappings
      */
-    LineageMappingMapping(DataStageJob job, List<Classificationenabledgroup> fields, String relationshipProperty, boolean bSource, String fullyQualifiedStageName, String stageNameSuffix) {
+    LineageMappingMapping(DataStageJob job, List<Classificationenabledgroup> fields, boolean bSource, String fullyQualifiedStageName, String stageNameSuffix) {
         super(job.getIgcRestClient());
         Set<LineageMapping> lineageMappingsSet = new HashSet<>();
         String userId = job.getJobObject().getModifiedBy();
         // For each field in the data store...
         for (Classificationenabledgroup fieldObj : fields) {
             String field1QN = getFullyQualifiedName(fieldObj);
-            ItemList<InformationAsset> relatedStageCols = (ItemList<InformationAsset>) igcRestClient.getPropertyByName(fieldObj, relationshipProperty);
+            ItemList<InformationAsset> relatedStageCols;
+            if (bSource) {
+                relatedStageCols = fieldObj.getReadByDesign();
+            } else {
+                relatedStageCols = fieldObj.getWrittenByDesign();
+            }
             relatedStageCols.getAllPages(igcRestClient);
             // For each object that reads / writes to that field...
             for (InformationAsset stageColRef : relatedStageCols.getItems()) {
-                DsStageColumn stageColFull = job.getStageColumnByRid(stageColRef.getId());
+                StageColumn stageColFull = job.getStageColumnByRid(stageColRef.getId());
                 if (stageColFull != null) {
                     String field2QN = getFullyQualifiedName(stageColFull);
                     if (bSource) {
