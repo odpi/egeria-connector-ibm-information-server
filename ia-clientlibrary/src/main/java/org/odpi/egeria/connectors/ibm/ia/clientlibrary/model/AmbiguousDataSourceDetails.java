@@ -3,28 +3,8 @@
 package org.odpi.egeria.connectors.ibm.ia.clientlibrary.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AmbiguousDataSourceDetails extends Error {
-
-    @JacksonXmlProperty(isAttribute = true) private String columnName;
-    @JacksonXmlProperty(localName = "Cause")
-    private ErrorList cause;
-
-    public String getColumnName() { return columnName; }
-    public void setColumnName(String columnName) { this.columnName = columnName; }
-
-    public ErrorList getCause() { return cause; }
-    public void setCause(ErrorList cause) { this.cause = cause; }
-
-    @Override
-    public String toString() {
-        String parent = super.toString();
-        return parent.substring(0, parent.length() - 2)
-                + ", \"columnName\": \"" + columnName
-                + "\", \"Cause\": " + (cause == null ? "{}" : cause.toString())
-                + " }";
-    }
+public class AmbiguousDataSourceDetails extends ColumnError {
 
 }
