@@ -35,12 +35,6 @@ public class StandardizationRuleSet extends InformationAsset {
     @JsonProperty("help_text")
     protected String helpText;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
-
     @JsonProperty("transformation_project")
     protected TransformationProject transformationProject;
 
@@ -91,34 +85,6 @@ public class StandardizationRuleSet extends InformationAsset {
      */
     @JsonProperty("help_text")
     public void setHelpText(String helpText) { this.helpText = helpText; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code transformation_project} property (displayed as '{@literal Transformation Project}') of the object.

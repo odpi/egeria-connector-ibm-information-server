@@ -43,13 +43,6 @@ public class DatabaseColumn extends Classificationenabledgroup {
     @JsonProperty("bi_report_query_items")
     protected ItemList<Reportobject> biReportQueryItems;
 
-    /**
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    protected ItemList<BlueprintElementLink> blueprintElements;
-
     @JsonProperty("column_definitions")
     protected ItemList<ColumnDefinition> columnDefinitions;
 
@@ -109,12 +102,6 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     @JsonProperty("has_DataClassifications")
     protected ItemList<Classification> hasDataclassifications;
-
-    @JsonProperty("impacted_by")
-    protected ItemList<InformationAsset> impactedBy;
-
-    @JsonProperty("impacts_on")
-    protected ItemList<InformationAsset> impactsOn;
 
     @JsonProperty("implemented_key")
     protected ItemList<CandidateKey> implementedKey;
@@ -333,24 +320,6 @@ public class DatabaseColumn extends Classificationenabledgroup {
      */
     @JsonProperty("bi_report_query_items")
     public void setBiReportQueryItems(ItemList<Reportobject> biReportQueryItems) { this.biReportQueryItems = biReportQueryItems; }
-
-    /**
-     * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @return {@code ItemList<BlueprintElementLink>}
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public ItemList<BlueprintElementLink> getBlueprintElements() { return this.blueprintElements; }
-
-    /**
-     * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @param blueprintElements the value to set
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
 
     /**
      * Retrieve the {@code column_definitions} property (displayed as '{@literal Column Definitions}') of the object.
@@ -631,34 +600,6 @@ public class DatabaseColumn extends Classificationenabledgroup {
      */
     @JsonProperty("has_DataClassifications")
     public void setHasDataclassifications(ItemList<Classification> hasDataclassifications) { this.hasDataclassifications = hasDataclassifications; }
-
-    /**
-     * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("impacted_by")
-    public ItemList<InformationAsset> getImpactedBy() { return this.impactedBy; }
-
-    /**
-     * Set the {@code impacted_by} property (displayed as {@code Impacted by}) of the object.
-     * @param impactedBy the value to set
-     */
-    @JsonProperty("impacted_by")
-    public void setImpactedBy(ItemList<InformationAsset> impactedBy) { this.impactedBy = impactedBy; }
-
-    /**
-     * Retrieve the {@code impacts_on} property (displayed as '{@literal Impacts on}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("impacts_on")
-    public ItemList<InformationAsset> getImpactsOn() { return this.impactsOn; }
-
-    /**
-     * Set the {@code impacts_on} property (displayed as {@code Impacts on}) of the object.
-     * @param impactsOn the value to set
-     */
-    @JsonProperty("impacts_on")
-    public void setImpactsOn(ItemList<InformationAsset> impactsOn) { this.impactsOn = impactsOn; }
 
     /**
      * Retrieve the {@code implemented_key} property (displayed as '{@literal Implemented Key}') of the object.

@@ -35,13 +35,6 @@ public class Database extends InformationAsset {
     @JsonProperty("bi_reports")
     protected ItemList<BiReport> biReports;
 
-    /**
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    protected ItemList<BlueprintElementLink> blueprintElements;
-
     @JsonProperty("data_connection_mappings")
     protected ItemList<DataConnectionMapping> dataConnectionMappings;
 
@@ -76,26 +69,14 @@ public class Database extends InformationAsset {
     @JsonProperty("host")
     protected Host host;
 
-    @JsonProperty("impacted_by")
-    protected ItemList<InformationAsset> impactedBy;
-
-    @JsonProperty("impacts_on")
-    protected ItemList<InformationAsset> impactsOn;
-
     @JsonProperty("imported_from")
     protected String importedFrom;
-
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
 
     @JsonProperty("location")
     protected String location;
 
     @JsonProperty("mapped_to_mdm_models")
     protected ItemList<MdmModel> mappedToMdmModels;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("suggested_term_assignments")
     protected ItemList<TermAssignment> suggestedTermAssignments;
@@ -144,24 +125,6 @@ public class Database extends InformationAsset {
      */
     @JsonProperty("bi_reports")
     public void setBiReports(ItemList<BiReport> biReports) { this.biReports = biReports; }
-
-    /**
-     * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @return {@code ItemList<BlueprintElementLink>}
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public ItemList<BlueprintElementLink> getBlueprintElements() { return this.blueprintElements; }
-
-    /**
-     * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @param blueprintElements the value to set
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
 
     /**
      * Retrieve the {@code data_connection_mappings} property (displayed as '{@literal Data Connection Mappings}') of the object.
@@ -308,34 +271,6 @@ public class Database extends InformationAsset {
     public void setHost(Host host) { this.host = host; }
 
     /**
-     * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("impacted_by")
-    public ItemList<InformationAsset> getImpactedBy() { return this.impactedBy; }
-
-    /**
-     * Set the {@code impacted_by} property (displayed as {@code Impacted by}) of the object.
-     * @param impactedBy the value to set
-     */
-    @JsonProperty("impacted_by")
-    public void setImpactedBy(ItemList<InformationAsset> impactedBy) { this.impactedBy = impactedBy; }
-
-    /**
-     * Retrieve the {@code impacts_on} property (displayed as '{@literal Impacts on}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("impacts_on")
-    public ItemList<InformationAsset> getImpactsOn() { return this.impactsOn; }
-
-    /**
-     * Set the {@code impacts_on} property (displayed as {@code Impacts on}) of the object.
-     * @param impactsOn the value to set
-     */
-    @JsonProperty("impacts_on")
-    public void setImpactsOn(ItemList<InformationAsset> impactsOn) { this.impactsOn = impactsOn; }
-
-    /**
      * Retrieve the {@code imported_from} property (displayed as '{@literal Imported From}') of the object.
      * @return {@code String}
      */
@@ -348,20 +283,6 @@ public class Database extends InformationAsset {
      */
     @JsonProperty("imported_from")
     public void setImportedFrom(String importedFrom) { this.importedFrom = importedFrom; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
      * Retrieve the {@code location} property (displayed as '{@literal Location}') of the object.
@@ -390,20 +311,6 @@ public class Database extends InformationAsset {
      */
     @JsonProperty("mapped_to_mdm_models")
     public void setMappedToMdmModels(ItemList<MdmModel> mappedToMdmModels) { this.mappedToMdmModels = mappedToMdmModels; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code suggested_term_assignments} property (displayed as '{@literal Suggested Term Assignments}') of the object.

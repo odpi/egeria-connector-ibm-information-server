@@ -39,17 +39,11 @@ public class AmazonS3Bucket extends InformationAsset {
     @JsonProperty("host")
     protected Host host;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("include_for_business_lineage")
     protected Boolean includeForBusinessLineage;
 
     @JsonProperty("location")
     protected String location;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("same_as_data_sources")
     protected ItemList<MainObject> sameAsDataSources;
@@ -123,20 +117,6 @@ public class AmazonS3Bucket extends InformationAsset {
     public void setHost(Host host) { this.host = host; }
 
     /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
      * Retrieve the {@code include_for_business_lineage} property (displayed as '{@literal Include for Business Lineage}') of the object.
      * @return {@code Boolean}
      */
@@ -163,20 +143,6 @@ public class AmazonS3Bucket extends InformationAsset {
      */
     @JsonProperty("location")
     public void setLocation(String location) { this.location = location; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code same_as_data_sources} property (displayed as '{@literal Same as Data Sources}') of the object.

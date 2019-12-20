@@ -63,23 +63,11 @@ public class IdocSegmentType extends InformationAsset {
     @JsonProperty("idoc_type")
     protected IdocType idocType;
 
-    @JsonProperty("impacted_by")
-    protected ItemList<InformationAsset> impactedBy;
-
-    @JsonProperty("impacts_on")
-    protected ItemList<InformationAsset> impactsOn;
-
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("level")
     protected Number level;
 
     @JsonProperty("min_/_max")
     protected List<String> minMax;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("of_idoc_segment_type")
     protected DataItemDefinition ofIdocSegmentType;
@@ -136,48 +124,6 @@ public class IdocSegmentType extends InformationAsset {
     public void setIdocType(IdocType idocType) { this.idocType = idocType; }
 
     /**
-     * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("impacted_by")
-    public ItemList<InformationAsset> getImpactedBy() { return this.impactedBy; }
-
-    /**
-     * Set the {@code impacted_by} property (displayed as {@code Impacted by}) of the object.
-     * @param impactedBy the value to set
-     */
-    @JsonProperty("impacted_by")
-    public void setImpactedBy(ItemList<InformationAsset> impactedBy) { this.impactedBy = impactedBy; }
-
-    /**
-     * Retrieve the {@code impacts_on} property (displayed as '{@literal Impacts on}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("impacts_on")
-    public ItemList<InformationAsset> getImpactsOn() { return this.impactsOn; }
-
-    /**
-     * Set the {@code impacts_on} property (displayed as {@code Impacts on}) of the object.
-     * @param impactsOn the value to set
-     */
-    @JsonProperty("impacts_on")
-    public void setImpactsOn(ItemList<InformationAsset> impactsOn) { this.impactsOn = impactsOn; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
      * Retrieve the {@code level} property (displayed as '{@literal Level}') of the object.
      * @return {@code Number}
      */
@@ -204,20 +150,6 @@ public class IdocSegmentType extends InformationAsset {
      */
     @JsonProperty("min_/_max")
     public void setMinMax(List<String> minMax) { this.minMax = minMax; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code of_idoc_segment_type} property (displayed as '{@literal IDoc Segment Type}') of the object.

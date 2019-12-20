@@ -11,7 +11,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -44,14 +43,8 @@ public class InformationGovernanceRule extends InformationAsset {
     @JsonProperty("implemented_by_assets")
     protected ItemList<InformationAsset> implementedByAssets;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("language")
     protected String language;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("referencing_policies")
     protected ItemList<InformationGovernancePolicy> referencingPolicies;
@@ -127,20 +120,6 @@ public class InformationGovernanceRule extends InformationAsset {
     public void setImplementedByAssets(ItemList<InformationAsset> implementedByAssets) { this.implementedByAssets = implementedByAssets; }
 
     /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
      * Retrieve the {@code language} property (displayed as '{@literal Language}') of the object.
      * @return {@code String}
      */
@@ -153,20 +132,6 @@ public class InformationGovernanceRule extends InformationAsset {
      */
     @JsonProperty("language")
     public void setLanguage(String language) { this.language = language; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code referencing_policies} property (displayed as '{@literal Referencing Policies}') of the object.

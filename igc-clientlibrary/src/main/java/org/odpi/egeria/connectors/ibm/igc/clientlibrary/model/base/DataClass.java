@@ -116,9 +116,6 @@ public class DataClass extends InformationAsset {
     @JsonProperty("filters")
     protected ItemList<Filter> filters;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("java_class_name_single")
     protected String javaClassNameSingle;
 
@@ -137,9 +134,6 @@ public class DataClass extends InformationAsset {
 
     @JsonProperty("length_filter_min")
     protected Number lengthFilterMin;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("parent_data_class")
     protected DataClass parentDataClass;
@@ -425,20 +419,6 @@ public class DataClass extends InformationAsset {
     public void setFilters(ItemList<Filter> filters) { this.filters = filters; }
 
     /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
      * Retrieve the {@code java_class_name_single} property (displayed as '{@literal JAVA Class}') of the object.
      * @return {@code String}
      */
@@ -493,20 +473,6 @@ public class DataClass extends InformationAsset {
      */
     @JsonProperty("length_filter_min")
     public void setLengthFilterMin(Number lengthFilterMin) { this.lengthFilterMin = lengthFilterMin; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code parent_data_class} property (displayed as '{@literal Parent Data Class}') of the object.

@@ -11,7 +11,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -76,9 +75,6 @@ public class DesignColumn extends InformationAsset {
     @JsonProperty("implements_entity_attributes")
     protected ItemList<EntityAttribute> implementsEntityAttributes;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("included_in_design_foreign_key")
     protected ItemList<DesignForeignKey> includedInDesignForeignKey;
 
@@ -93,9 +89,6 @@ public class DesignColumn extends InformationAsset {
 
     @JsonProperty("minimum_length")
     protected Number minimumLength;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     /**
      * Valid values are:
@@ -246,20 +239,6 @@ public class DesignColumn extends InformationAsset {
     public void setImplementsEntityAttributes(ItemList<EntityAttribute> implementsEntityAttributes) { this.implementsEntityAttributes = implementsEntityAttributes; }
 
     /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
      * Retrieve the {@code included_in_design_foreign_key} property (displayed as '{@literal Child Design Foreign Key}') of the object.
      * @return {@code ItemList<DesignForeignKey>}
      */
@@ -328,20 +307,6 @@ public class DesignColumn extends InformationAsset {
      */
     @JsonProperty("minimum_length")
     public void setMinimumLength(Number minimumLength) { this.minimumLength = minimumLength; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code odbc_type} property (displayed as '{@literal ODBC Type}') of the object.

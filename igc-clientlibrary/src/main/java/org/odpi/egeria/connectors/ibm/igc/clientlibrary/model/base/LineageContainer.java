@@ -26,34 +26,14 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 @JsonTypeName("lineage_container")
 public class LineageContainer extends InformationAsset {
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("information_assets")
     protected ItemList<InformationAsset> informationAssets;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("parent_container")
     protected LineageContainer parentContainer;
 
     @JsonProperty("sub_business_container")
     protected ItemList<Category> subBusinessContainer;
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
      * Retrieve the {@code information_assets} property (displayed as '{@literal Contains Information Assets}') of the object.
@@ -68,20 +48,6 @@ public class LineageContainer extends InformationAsset {
      */
     @JsonProperty("information_assets")
     public void setInformationAssets(ItemList<InformationAsset> informationAssets) { this.informationAssets = informationAssets; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code parent_container} property (displayed as '{@literal Parent Container}') of the object.

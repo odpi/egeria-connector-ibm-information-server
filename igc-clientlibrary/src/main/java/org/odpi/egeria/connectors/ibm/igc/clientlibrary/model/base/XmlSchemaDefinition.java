@@ -53,17 +53,11 @@ public class XmlSchemaDefinition extends InformationAsset {
     @JsonProperty("imports_xsd_schemas")
     protected ItemList<MainObject> importsXsdSchemas;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("includes_xsd_schemas")
     protected ItemList<MainObject> includesXsdSchemas;
 
     @JsonProperty("language")
     protected String language;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("overrides_xsd_schemas")
     protected ItemList<MainObject> overridesXsdSchemas;
@@ -210,20 +204,6 @@ public class XmlSchemaDefinition extends InformationAsset {
     public void setImportsXsdSchemas(ItemList<MainObject> importsXsdSchemas) { this.importsXsdSchemas = importsXsdSchemas; }
 
     /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
      * Retrieve the {@code includes_xsd_schemas} property (displayed as '{@literal Includes XML Schema Definitions}') of the object.
      * @return {@code ItemList<MainObject>}
      */
@@ -250,20 +230,6 @@ public class XmlSchemaDefinition extends InformationAsset {
      */
     @JsonProperty("language")
     public void setLanguage(String language) { this.language = language; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code overrides_xsd_schemas} property (displayed as '{@literal Overrides XML Schema Definitions}') of the object.

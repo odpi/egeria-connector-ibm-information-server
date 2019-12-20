@@ -38,12 +38,6 @@ public class DataFileDefinitionRecord extends InformationAsset {
     @JsonProperty("imported_from")
     protected String importedFrom;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
-
     /**
      * Retrieve the {@code alias_(business_name)} property (displayed as '{@literal Alias (Business Name)}') of the object.
      * @return {@code String}
@@ -99,33 +93,5 @@ public class DataFileDefinitionRecord extends InformationAsset {
      */
     @JsonProperty("imported_from")
     public void setImportedFrom(String importedFrom) { this.importedFrom = importedFrom; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
 }

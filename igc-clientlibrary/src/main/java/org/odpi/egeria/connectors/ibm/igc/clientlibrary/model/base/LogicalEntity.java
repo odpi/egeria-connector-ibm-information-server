@@ -11,7 +11,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import java.util.Date;
 
 /**
  * POJO for the {@code logical_entity} asset type in IGC, displayed as '{@literal Logical Entity}' in the IGC UI.
@@ -30,13 +29,6 @@ public class LogicalEntity extends InformationAsset {
     @JsonProperty("alias_(business_name)")
     protected String aliasBusinessName;
 
-    /**
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    protected ItemList<BlueprintElementLink> blueprintElements;
-
     @JsonProperty("entity_attributes")
     protected ItemList<EntityAttribute> entityAttributes;
 
@@ -49,9 +41,6 @@ public class LogicalEntity extends InformationAsset {
     @JsonProperty("imported_from")
     protected String importedFrom;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("logical_data_model")
     protected LogicalDataModel logicalDataModel;
 
@@ -63,9 +52,6 @@ public class LogicalEntity extends InformationAsset {
 
     @JsonProperty("logical_keys")
     protected ItemList<LogicalKey> logicalKeys;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("physical_name")
     protected String physicalName;
@@ -95,24 +81,6 @@ public class LogicalEntity extends InformationAsset {
      */
     @JsonProperty("alias_(business_name)")
     public void setAliasBusinessName(String aliasBusinessName) { this.aliasBusinessName = aliasBusinessName; }
-
-    /**
-     * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @return {@code ItemList<BlueprintElementLink>}
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public ItemList<BlueprintElementLink> getBlueprintElements() { return this.blueprintElements; }
-
-    /**
-     * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @param blueprintElements the value to set
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
 
     /**
      * Retrieve the {@code entity_attributes} property (displayed as '{@literal Entity Attributes}') of the object.
@@ -171,20 +139,6 @@ public class LogicalEntity extends InformationAsset {
     public void setImportedFrom(String importedFrom) { this.importedFrom = importedFrom; }
 
     /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
      * Retrieve the {@code logical_data_model} property (displayed as '{@literal Logical Data Model}') of the object.
      * @return {@code LogicalDataModel}
      */
@@ -239,20 +193,6 @@ public class LogicalEntity extends InformationAsset {
      */
     @JsonProperty("logical_keys")
     public void setLogicalKeys(ItemList<LogicalKey> logicalKeys) { this.logicalKeys = logicalKeys; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code physical_name} property (displayed as '{@literal Physical Name}') of the object.

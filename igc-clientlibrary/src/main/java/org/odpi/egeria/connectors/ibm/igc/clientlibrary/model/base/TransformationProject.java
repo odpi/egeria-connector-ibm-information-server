@@ -11,7 +11,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import java.util.Date;
 
 /**
  * POJO for the {@code transformation_project} asset type in IGC, displayed as '{@literal Transformation Project}' in the IGC UI.
@@ -35,9 +34,6 @@ public class TransformationProject extends InformationAsset {
 
     @JsonProperty("host_(engine)")
     protected HostEngine hostEngine;
-
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
 
     /**
      * Valid values are:
@@ -124,20 +120,6 @@ public class TransformationProject extends InformationAsset {
      */
     @JsonProperty("host_(engine)")
     public void setHostEngine(HostEngine hostEngine) { this.hostEngine = hostEngine; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
      * Retrieve the {@code include_for_lineage} property (displayed as '{@literal Include for Lineage}') of the object.

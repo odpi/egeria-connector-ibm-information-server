@@ -11,7 +11,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -46,14 +45,8 @@ public class DataRuleSet extends InformationAsset {
     @JsonProperty("implemented_bindings")
     protected ItemList<DataItem> implementedBindings;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("metrics")
     protected ItemList<Metric> metrics;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("project")
     protected List<String> project;
@@ -160,20 +153,6 @@ public class DataRuleSet extends InformationAsset {
     public void setImplementedBindings(ItemList<DataItem> implementedBindings) { this.implementedBindings = implementedBindings; }
 
     /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
      * Retrieve the {@code metrics} property (displayed as '{@literal Metrics}') of the object.
      * @return {@code ItemList<Metric>}
      */
@@ -186,20 +165,6 @@ public class DataRuleSet extends InformationAsset {
      */
     @JsonProperty("metrics")
     public void setMetrics(ItemList<Metric> metrics) { this.metrics = metrics; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code project} property (displayed as '{@literal Project}') of the object.

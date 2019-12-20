@@ -11,7 +11,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import java.util.Date;
 
 /**
  * POJO for the {@code table_definition} asset type in IGC, displayed as '{@literal Table Definition}' in the IGC UI.
@@ -26,13 +25,6 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("table_definition")
 public class TableDefinition extends DataItemDefinition {
-
-    /**
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    protected ItemList<BlueprintElementLink> blueprintElements;
 
     @JsonProperty("column_definitions")
     protected ItemList<ColumnDefinition> columnDefinitions;
@@ -61,9 +53,6 @@ public class TableDefinition extends DataItemDefinition {
     @JsonProperty("foreign_keys")
     protected ItemList<ForeignKeyDefinition> foreignKeys;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("included_by_stages")
     protected ItemList<Stage> includedByStages;
 
@@ -90,24 +79,6 @@ public class TableDefinition extends DataItemDefinition {
 
     @JsonProperty("transformation_project")
     protected TransformationProject transformationProject;
-
-    /**
-     * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @return {@code ItemList<BlueprintElementLink>}
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public ItemList<BlueprintElementLink> getBlueprintElements() { return this.blueprintElements; }
-
-    /**
-     * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @param blueprintElements the value to set
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
 
     /**
      * Retrieve the {@code column_definitions} property (displayed as '{@literal Column Definitions}') of the object.
@@ -234,20 +205,6 @@ public class TableDefinition extends DataItemDefinition {
      */
     @JsonProperty("foreign_keys")
     public void setForeignKeys(ItemList<ForeignKeyDefinition> foreignKeys) { this.foreignKeys = foreignKeys; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
      * Retrieve the {@code included_by_stages} property (displayed as '{@literal Included by Stages}') of the object.

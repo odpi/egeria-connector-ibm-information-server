@@ -88,20 +88,11 @@ public class AmazonS3DataFileField extends InformationAsset {
     @JsonProperty("hasDataClassification")
     protected ItemList<Classification> hasdataclassification;
 
-    @JsonProperty("impacted_by")
-    protected ItemList<InformationAsset> impactedBy;
-
-    @JsonProperty("impacts_on")
-    protected ItemList<InformationAsset> impactsOn;
-
     @JsonProperty("implements_design_columns")
     protected ItemList<DesignColumn> implementsDesignColumns;
 
     @JsonProperty("implements_entity_attributes")
     protected ItemList<EntityAttribute> implementsEntityAttributes;
-
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
 
     /**
      * Valid values are:
@@ -159,9 +150,6 @@ public class AmazonS3DataFileField extends InformationAsset {
 
     @JsonProperty("minimum_length")
     protected Number minimumLength;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("nbRecordsTested")
     protected List<Number> nbrecordstested;
@@ -391,34 +379,6 @@ public class AmazonS3DataFileField extends InformationAsset {
     public void setHasdataclassification(ItemList<Classification> hasdataclassification) { this.hasdataclassification = hasdataclassification; }
 
     /**
-     * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("impacted_by")
-    public ItemList<InformationAsset> getImpactedBy() { return this.impactedBy; }
-
-    /**
-     * Set the {@code impacted_by} property (displayed as {@code Impacted by}) of the object.
-     * @param impactedBy the value to set
-     */
-    @JsonProperty("impacted_by")
-    public void setImpactedBy(ItemList<InformationAsset> impactedBy) { this.impactedBy = impactedBy; }
-
-    /**
-     * Retrieve the {@code impacts_on} property (displayed as '{@literal Impacts on}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("impacts_on")
-    public ItemList<InformationAsset> getImpactsOn() { return this.impactsOn; }
-
-    /**
-     * Set the {@code impacts_on} property (displayed as {@code Impacts on}) of the object.
-     * @param impactsOn the value to set
-     */
-    @JsonProperty("impacts_on")
-    public void setImpactsOn(ItemList<InformationAsset> impactsOn) { this.impactsOn = impactsOn; }
-
-    /**
      * Retrieve the {@code implements_design_columns} property (displayed as '{@literal Implements Design Columns}') of the object.
      * @return {@code ItemList<DesignColumn>}
      */
@@ -445,20 +405,6 @@ public class AmazonS3DataFileField extends InformationAsset {
      */
     @JsonProperty("implements_entity_attributes")
     public void setImplementsEntityAttributes(ItemList<EntityAttribute> implementsEntityAttributes) { this.implementsEntityAttributes = implementsEntityAttributes; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
      * Retrieve the {@code inferredDataType} property (displayed as '{@literal Inferred Data Type}') of the object.
@@ -599,20 +545,6 @@ public class AmazonS3DataFileField extends InformationAsset {
      */
     @JsonProperty("minimum_length")
     public void setMinimumLength(Number minimumLength) { this.minimumLength = minimumLength; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code nbRecordsTested} property (displayed as '{@literal Number of Records Tested}') of the object.

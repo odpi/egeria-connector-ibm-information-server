@@ -62,13 +62,6 @@ public class View extends Datagroup {
     @JsonProperty("bi_report_queries")
     protected ItemList<BiReportQuery> biReportQueries;
 
-    /**
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    protected ItemList<BlueprintElementLink> blueprintElements;
-
     @JsonProperty("data_policies")
     protected ItemList<MainObject> dataPolicies;
 
@@ -96,12 +89,6 @@ public class View extends Datagroup {
     @JsonProperty("fieldCount")
     protected List<Number> fieldcount;
 
-    @JsonProperty("impacted_by")
-    protected ItemList<InformationAsset> impactedBy;
-
-    @JsonProperty("impacts_on")
-    protected ItemList<InformationAsset> impactsOn;
-
     @JsonProperty("implements_design_tables_or_views")
     protected ItemList<Datagroup> implementsDesignTablesOrViews;
 
@@ -110,9 +97,6 @@ public class View extends Datagroup {
 
     @JsonProperty("imported_from")
     protected String importedFrom;
-
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
 
     /**
      * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
@@ -305,24 +289,6 @@ public class View extends Datagroup {
     public void setBiReportQueries(ItemList<BiReportQuery> biReportQueries) { this.biReportQueries = biReportQueries; }
 
     /**
-     * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @return {@code ItemList<BlueprintElementLink>}
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public ItemList<BlueprintElementLink> getBlueprintElements() { return this.blueprintElements; }
-
-    /**
-     * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @param blueprintElements the value to set
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
-
-    /**
      * Retrieve the {@code data_policies} property (displayed as '{@literal Data Policies}') of the object.
      * @return {@code ItemList<MainObject>}
      */
@@ -455,34 +421,6 @@ public class View extends Datagroup {
     public void setFieldcount(List<Number> fieldcount) { this.fieldcount = fieldcount; }
 
     /**
-     * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("impacted_by")
-    public ItemList<InformationAsset> getImpactedBy() { return this.impactedBy; }
-
-    /**
-     * Set the {@code impacted_by} property (displayed as {@code Impacted by}) of the object.
-     * @param impactedBy the value to set
-     */
-    @JsonProperty("impacted_by")
-    public void setImpactedBy(ItemList<InformationAsset> impactedBy) { this.impactedBy = impactedBy; }
-
-    /**
-     * Retrieve the {@code impacts_on} property (displayed as '{@literal Impacts on}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("impacts_on")
-    public ItemList<InformationAsset> getImpactsOn() { return this.impactsOn; }
-
-    /**
-     * Set the {@code impacts_on} property (displayed as {@code Impacts on}) of the object.
-     * @param impactsOn the value to set
-     */
-    @JsonProperty("impacts_on")
-    public void setImpactsOn(ItemList<InformationAsset> impactsOn) { this.impactsOn = impactsOn; }
-
-    /**
      * Retrieve the {@code implements_design_tables_or_views} property (displayed as '{@literal Implements Design Tables or Design Views}') of the object.
      * @return {@code ItemList<Datagroup>}
      */
@@ -523,38 +461,6 @@ public class View extends Datagroup {
      */
     @JsonProperty("imported_from")
     public void setImportedFrom(String importedFrom) { this.importedFrom = importedFrom; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
-     * Retrieve the {@code indexes} property (displayed as '{@literal Indexes}') of the object.
-     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
-     * @return {@code ItemList<DatabaseIndex>}
-     */
-    @Deprecated
-    @JsonProperty("indexes")
-    public ItemList<DatabaseIndex> getIndexes() { return this.indexes; }
-
-    /**
-     * Set the {@code indexes} property (displayed as {@code Indexes}) of the object.
-     * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
-     * @param indexes the value to set
-     */
-    @Deprecated
-    @JsonProperty("indexes")
-    public void setIndexes(ItemList<DatabaseIndex> indexes) { this.indexes = indexes; }
 
     /**
      * Retrieve the {@code lineage_service_information} property (displayed as '{@literal Lineage Service Information}') of the object.

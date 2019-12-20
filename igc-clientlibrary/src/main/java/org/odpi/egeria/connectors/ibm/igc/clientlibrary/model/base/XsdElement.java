@@ -62,9 +62,6 @@ public class XsdElement extends InformationAsset {
     @JsonProperty("fraction_digits")
     protected Number fractionDigits;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("is_abstract")
     protected Boolean isAbstract;
 
@@ -119,9 +116,6 @@ public class XsdElement extends InformationAsset {
 
     @JsonProperty("namespace")
     protected String namespace;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("pattern_expression")
     protected List<String> patternExpression;
@@ -324,20 +318,6 @@ public class XsdElement extends InformationAsset {
      */
     @JsonProperty("fraction_digits")
     public void setFractionDigits(Number fractionDigits) { this.fractionDigits = fractionDigits; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
      * Retrieve the {@code is_abstract} property (displayed as '{@literal Abstract}') of the object.
@@ -560,20 +540,6 @@ public class XsdElement extends InformationAsset {
      */
     @JsonProperty("namespace")
     public void setNamespace(String namespace) { this.namespace = namespace; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code pattern_expression} property (displayed as '{@literal Pattern}') of the object.
