@@ -59,14 +59,8 @@ public class XsdComplexType extends InformationAsset {
     @JsonProperty("extends_xsd_simple_type")
     protected XsdSimpleType extendsXsdSimpleType;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("mixed")
     protected Boolean mixed;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("references_xsd_attribute_groups")
     protected ItemList<XsdAttributeGroup> referencesXsdAttributeGroups;
@@ -258,20 +252,6 @@ public class XsdComplexType extends InformationAsset {
     public void setExtendsXsdSimpleType(XsdSimpleType extendsXsdSimpleType) { this.extendsXsdSimpleType = extendsXsdSimpleType; }
 
     /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
      * Retrieve the {@code mixed} property (displayed as '{@literal Mixed}') of the object.
      * @return {@code Boolean}
      */
@@ -284,20 +264,6 @@ public class XsdComplexType extends InformationAsset {
      */
     @JsonProperty("mixed")
     public void setMixed(Boolean mixed) { this.mixed = mixed; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code references_xsd_attribute_groups} property (displayed as '{@literal References XSD Attribute Groups}') of the object.

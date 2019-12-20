@@ -50,21 +50,8 @@ public class AmazonS3DataFileRecord extends InformationAsset {
     @JsonProperty("analysis")
     protected ItemList<FileRecordAnalysis> analysis;
 
-    /**
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    protected ItemList<BlueprintElementLink> blueprintElements;
-
     @JsonProperty("fieldCount")
     protected List<Number> fieldcount;
-
-    @JsonProperty("impacted_by")
-    protected ItemList<InformationAsset> impactedBy;
-
-    @JsonProperty("impacts_on")
-    protected ItemList<InformationAsset> impactsOn;
 
     @JsonProperty("implements_design_tables_or_views")
     protected ItemList<Datagroup> implementsDesignTablesOrViews;
@@ -75,14 +62,8 @@ public class AmazonS3DataFileRecord extends InformationAsset {
     @JsonProperty("imported_from")
     protected String importedFrom;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("include_for_business_lineage")
     protected Boolean includeForBusinessLineage;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("nbRecordTested")
     protected List<Number> nbrecordtested;
@@ -188,24 +169,6 @@ public class AmazonS3DataFileRecord extends InformationAsset {
     public void setAnalysis(ItemList<FileRecordAnalysis> analysis) { this.analysis = analysis; }
 
     /**
-     * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @return {@code ItemList<BlueprintElementLink>}
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public ItemList<BlueprintElementLink> getBlueprintElements() { return this.blueprintElements; }
-
-    /**
-     * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @param blueprintElements the value to set
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
-
-    /**
      * Retrieve the {@code fieldCount} property (displayed as '{@literal Number of Fields}') of the object.
      * @return {@code List<Number>}
      */
@@ -218,34 +181,6 @@ public class AmazonS3DataFileRecord extends InformationAsset {
      */
     @JsonProperty("fieldCount")
     public void setFieldcount(List<Number> fieldcount) { this.fieldcount = fieldcount; }
-
-    /**
-     * Retrieve the {@code impacted_by} property (displayed as '{@literal Impacted by}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("impacted_by")
-    public ItemList<InformationAsset> getImpactedBy() { return this.impactedBy; }
-
-    /**
-     * Set the {@code impacted_by} property (displayed as {@code Impacted by}) of the object.
-     * @param impactedBy the value to set
-     */
-    @JsonProperty("impacted_by")
-    public void setImpactedBy(ItemList<InformationAsset> impactedBy) { this.impactedBy = impactedBy; }
-
-    /**
-     * Retrieve the {@code impacts_on} property (displayed as '{@literal Impacts on}') of the object.
-     * @return {@code ItemList<InformationAsset>}
-     */
-    @JsonProperty("impacts_on")
-    public ItemList<InformationAsset> getImpactsOn() { return this.impactsOn; }
-
-    /**
-     * Set the {@code impacts_on} property (displayed as {@code Impacts on}) of the object.
-     * @param impactsOn the value to set
-     */
-    @JsonProperty("impacts_on")
-    public void setImpactsOn(ItemList<InformationAsset> impactsOn) { this.impactsOn = impactsOn; }
 
     /**
      * Retrieve the {@code implements_design_tables_or_views} property (displayed as '{@literal Implements Design Tables or Design Views}') of the object.
@@ -290,20 +225,6 @@ public class AmazonS3DataFileRecord extends InformationAsset {
     public void setImportedFrom(String importedFrom) { this.importedFrom = importedFrom; }
 
     /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
      * Retrieve the {@code include_for_business_lineage} property (displayed as '{@literal Include for Business Lineage}') of the object.
      * @return {@code Boolean}
      */
@@ -316,20 +237,6 @@ public class AmazonS3DataFileRecord extends InformationAsset {
      */
     @JsonProperty("include_for_business_lineage")
     public void setIncludeForBusinessLineage(Boolean includeForBusinessLineage) { this.includeForBusinessLineage = includeForBusinessLineage; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code nbRecordTested} property (displayed as '{@literal Number of Records Tested}') of the object.

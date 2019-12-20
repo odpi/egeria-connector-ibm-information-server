@@ -11,7 +11,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import java.util.Date;
 
 /**
  * POJO for the {@code attribute_type} asset type in IGC, displayed as '{@literal Attribute Type}' in the IGC UI.
@@ -30,27 +29,14 @@ public class AttributeType extends InformationAsset {
     @JsonProperty("alias_(business_name)")
     protected String aliasBusinessName;
 
-    /**
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    protected ItemList<BlueprintElementLink> blueprintElements;
-
     @JsonProperty("contains_attribute_type_fields")
     protected ItemList<AttributeTypeField> containsAttributeTypeFields;
-
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
 
     @JsonProperty("mdm_model")
     protected MdmModel mdmModel;
 
     @JsonProperty("mdm_model_for_query")
     protected MdmModel mdmModelForQuery;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("referenced_by_attributes")
     protected ItemList<Attribute> referencedByAttributes;
@@ -70,24 +56,6 @@ public class AttributeType extends InformationAsset {
     public void setAliasBusinessName(String aliasBusinessName) { this.aliasBusinessName = aliasBusinessName; }
 
     /**
-     * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @return {@code ItemList<BlueprintElementLink>}
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public ItemList<BlueprintElementLink> getBlueprintElements() { return this.blueprintElements; }
-
-    /**
-     * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @param blueprintElements the value to set
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
-
-    /**
      * Retrieve the {@code contains_attribute_type_fields} property (displayed as '{@literal Contains Attribute Type Fields}') of the object.
      * @return {@code ItemList<AttributeTypeField>}
      */
@@ -100,20 +68,6 @@ public class AttributeType extends InformationAsset {
      */
     @JsonProperty("contains_attribute_type_fields")
     public void setContainsAttributeTypeFields(ItemList<AttributeTypeField> containsAttributeTypeFields) { this.containsAttributeTypeFields = containsAttributeTypeFields; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
      * Retrieve the {@code mdm_model} property (displayed as '{@literal MDM Model}') of the object.
@@ -142,20 +96,6 @@ public class AttributeType extends InformationAsset {
      */
     @JsonProperty("mdm_model_for_query")
     public void setMdmModelForQuery(MdmModel mdmModelForQuery) { this.mdmModelForQuery = mdmModelForQuery; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code referenced_by_attributes} property (displayed as '{@literal Referenced by Attributes}') of the object.

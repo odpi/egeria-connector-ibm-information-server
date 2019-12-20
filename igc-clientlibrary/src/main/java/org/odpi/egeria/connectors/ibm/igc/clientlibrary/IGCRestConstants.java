@@ -226,6 +226,11 @@ public class IGCRestConstants {
     private static final Set<String> FIXED_INFORMATION_ASSET_PROPERTIES = createFixedInformationAssetProperties();
     private static Set<String> createFixedInformationAssetProperties() {
         Set<String> set = new HashSet<>();
+        set.add("blueprint_elements");
+        set.add("impacted_by");
+        set.add("impacts_on");
+        set.add("in_collections");
+        set.add("native_id");
         set.add("read_by_(design)");
         set.add("read_by_(operational)");
         set.add("read_by_(static)");

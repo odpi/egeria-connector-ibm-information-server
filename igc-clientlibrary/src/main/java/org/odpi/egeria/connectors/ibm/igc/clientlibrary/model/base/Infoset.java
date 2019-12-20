@@ -58,14 +58,8 @@ public class Infoset extends InformationAsset {
     @JsonProperty("creator")
     protected String creator;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("instance")
     protected Instance instance;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("object_count")
     protected Number objectCount;
@@ -216,20 +210,6 @@ public class Infoset extends InformationAsset {
     public void setCreator(String creator) { this.creator = creator; }
 
     /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
      * Retrieve the {@code instance} property (displayed as '{@literal Instance}') of the object.
      * @return {@code Instance}
      */
@@ -242,20 +222,6 @@ public class Infoset extends InformationAsset {
      */
     @JsonProperty("instance")
     public void setInstance(Instance instance) { this.instance = instance; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code object_count} property (displayed as '{@literal Number of Objects}') of the object.

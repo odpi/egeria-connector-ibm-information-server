@@ -32,9 +32,6 @@ public class InformationServicesProject extends InformationAsset {
     @JsonProperty("description")
     protected String description;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     /**
      * Retrieve the {@code deployment_status} property (displayed as '{@literal Deployment Status}') of the object.
      * @return {@code Boolean}
@@ -62,19 +59,5 @@ public class InformationServicesProject extends InformationAsset {
      */
     @JsonProperty("description")
     public void setDescription(String description) { this.description = description; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
 }

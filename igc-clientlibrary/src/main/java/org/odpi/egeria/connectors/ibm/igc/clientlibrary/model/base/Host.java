@@ -12,7 +12,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import java.util.Date;
 
 /**
  * POJO for the {@code host} asset type in IGC, displayed as '{@literal Host}' in the IGC UI.
@@ -34,13 +33,6 @@ public class Host extends InformationAsset {
     @JsonProperty("amazon_s3_buckets")
     protected ItemList<AmazonS3Bucket> amazonS3Buckets;
 
-    /**
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    protected ItemList<BlueprintElementLink> blueprintElements;
-
     @JsonProperty("data_connections")
     protected ItemList<Connector> dataConnections;
 
@@ -59,14 +51,8 @@ public class Host extends InformationAsset {
     @JsonProperty("imported_from")
     protected String importedFrom;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("location")
     protected String location;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("network_node")
     protected String networkNode;
@@ -87,24 +73,6 @@ public class Host extends InformationAsset {
      */
     @JsonProperty("amazon_s3_buckets")
     public void setAmazonS3Buckets(ItemList<AmazonS3Bucket> amazonS3Buckets) { this.amazonS3Buckets = amazonS3Buckets; }
-
-    /**
-     * Retrieve the {@code blueprint_elements} property (displayed as '{@literal Blueprint Elements}') of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @return {@code ItemList<BlueprintElementLink>}
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public ItemList<BlueprintElementLink> getBlueprintElements() { return this.blueprintElements; }
-
-    /**
-     * Set the {@code blueprint_elements} property (displayed as {@code Blueprint Elements}) of the object.
-     * @deprecated No longer applicable from 11.7.0.0 onwards.
-     * @param blueprintElements the value to set
-     */
-    @Deprecated
-    @JsonProperty("blueprint_elements")
-    public void setBlueprintElements(ItemList<BlueprintElementLink> blueprintElements) { this.blueprintElements = blueprintElements; }
 
     /**
      * Retrieve the {@code data_connections} property (displayed as '{@literal Data Connections}') of the object.
@@ -191,20 +159,6 @@ public class Host extends InformationAsset {
     public void setImportedFrom(String importedFrom) { this.importedFrom = importedFrom; }
 
     /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
      * Retrieve the {@code location} property (displayed as '{@literal Location}') of the object.
      * @return {@code String}
      */
@@ -217,20 +171,6 @@ public class Host extends InformationAsset {
      */
     @JsonProperty("location")
     public void setLocation(String location) { this.location = location; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code network_node} property (displayed as '{@literal Network Node}') of the object.

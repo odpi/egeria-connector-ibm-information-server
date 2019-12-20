@@ -11,7 +11,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import java.util.Date;
 
 /**
  * POJO for the {@code entity_attribute} asset type in IGC, displayed as '{@literal Entity Attribute}' in the IGC UI.
@@ -39,9 +38,6 @@ public class EntityAttribute extends InformationAsset {
     @JsonProperty("implemented_by_design_columns")
     protected ItemList<DesignColumn> implementedByDesignColumns;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("length")
     protected Number length;
 
@@ -50,9 +46,6 @@ public class EntityAttribute extends InformationAsset {
 
     @JsonProperty("logical_keys")
     protected ItemList<LogicalKey> logicalKeys;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("native_type")
     protected String nativeType;
@@ -75,12 +68,6 @@ public class EntityAttribute extends InformationAsset {
     @JsonProperty("sequence")
     protected Number sequence;
 
-    /**
-     * Up to 11.7.1.0sp2 this appears to be a singular LogicalValidationList, but from 11.7.1.0sp2 onwards it is an
-     * ItemList of those objects. If used as-is in versions prior to 11.7.1.0sp2 this could cause deserialization
-     * errors. If so, simply remove the 'ItemList' wrapping and correct the corresponding getters and setters for
-     * your release.
-     */
     @JsonProperty("validation_list")
     protected ItemList<LogicalValidationList> validationList;
 
@@ -147,20 +134,6 @@ public class EntityAttribute extends InformationAsset {
     public void setImplementedByDesignColumns(ItemList<DesignColumn> implementedByDesignColumns) { this.implementedByDesignColumns = implementedByDesignColumns; }
 
     /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
      * Retrieve the {@code length} property (displayed as '{@literal Length}') of the object.
      * @return {@code Number}
      */
@@ -201,20 +174,6 @@ public class EntityAttribute extends InformationAsset {
      */
     @JsonProperty("logical_keys")
     public void setLogicalKeys(ItemList<LogicalKey> logicalKeys) { this.logicalKeys = logicalKeys; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code native_type} property (displayed as '{@literal Native Type}') of the object.

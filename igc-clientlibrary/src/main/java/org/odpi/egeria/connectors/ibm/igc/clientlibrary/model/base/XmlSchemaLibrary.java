@@ -32,9 +32,6 @@ public class XmlSchemaLibrary extends InformationAsset {
     @JsonProperty("id")
     protected String id;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("xml_schema_definitions")
     protected ItemList<XmlSchemaDefinition> xmlSchemaDefinitions;
 
@@ -65,20 +62,6 @@ public class XmlSchemaLibrary extends InformationAsset {
      */
     @JsonProperty("id")
     public void setTheId(String id) { this.id = id; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
      * Retrieve the {@code xml_schema_definitions} property (displayed as '{@literal XML Schema Definitions}') of the object.

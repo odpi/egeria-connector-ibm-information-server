@@ -30,17 +30,11 @@ public class StageVariable extends InformationAsset {
     @JsonProperty("expression")
     protected List<String> expression;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("length")
     protected Number length;
 
     @JsonProperty("minimum_length")
     protected Number minimumLength;
-
-    @JsonProperty("native_id")
-    protected String nativeId;
 
     @JsonProperty("next_stage_columns")
     protected ItemList<DataItem> nextStageColumns;
@@ -98,20 +92,6 @@ public class StageVariable extends InformationAsset {
     public void setExpression(List<String> expression) { this.expression = expression; }
 
     /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
-
-    /**
      * Retrieve the {@code length} property (displayed as '{@literal Length}') of the object.
      * @return {@code Number}
      */
@@ -138,20 +118,6 @@ public class StageVariable extends InformationAsset {
      */
     @JsonProperty("minimum_length")
     public void setMinimumLength(Number minimumLength) { this.minimumLength = minimumLength; }
-
-    /**
-     * Retrieve the {@code native_id} property (displayed as '{@literal Native ID}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("native_id")
-    public String getNativeId() { return this.nativeId; }
-
-    /**
-     * Set the {@code native_id} property (displayed as {@code Native ID}) of the object.
-     * @param nativeId the value to set
-     */
-    @JsonProperty("native_id")
-    public void setNativeId(String nativeId) { this.nativeId = nativeId; }
 
     /**
      * Retrieve the {@code next_stage_columns} property (displayed as '{@literal Next Stage Columns or Variables}') of the object.
