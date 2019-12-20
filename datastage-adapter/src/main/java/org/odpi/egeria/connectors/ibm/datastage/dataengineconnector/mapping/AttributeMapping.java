@@ -6,6 +6,7 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataSt
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataItem;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.StageColumn;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.openmetadata.accessservices.dataengine.model.Attribute;
 import org.slf4j.Logger;
@@ -40,7 +41,7 @@ class AttributeMapping extends BaseMapping {
             int index = 0;
             for (DataItem stageColumn : stageColumns.getItems()) {
                 String colId = stageColumn.getId();
-                DataItem stageColumnObj = job.getStageColumnByRid(colId);
+                StageColumn stageColumnObj = job.getStageColumnByRid(colId);
                 Attribute attribute = new Attribute();
                 attribute.setQualifiedName(stageColumnObj.getIdentity(igcRestClient).toString() + stageNameSuffix);
                 attribute.setDisplayName(stageColumnObj.getName());

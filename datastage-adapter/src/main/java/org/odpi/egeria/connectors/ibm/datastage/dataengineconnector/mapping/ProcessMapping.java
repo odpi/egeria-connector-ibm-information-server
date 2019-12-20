@@ -37,8 +37,8 @@ public class ProcessMapping extends BaseMapping {
             Dsjob jobObj = job.getJobObject();
             process = getSkeletonProcess(jobObj);
             if (process != null) {
-                PortAliasMapping inputAliasMapping = new PortAliasMapping(job, job.getInputStages(), "reads_from_(design)");
-                PortAliasMapping outputAliasMapping = new PortAliasMapping(job, job.getOutputStages(), "writes_to_(design)");
+                PortAliasMapping inputAliasMapping = new PortAliasMapping(job, job.getInputStages(), PortType.INPUT_PORT);
+                PortAliasMapping outputAliasMapping = new PortAliasMapping(job, job.getOutputStages(), PortType.OUTPUT_PORT);
                 process.getProcess().setPortAliases(Stream.concat(inputAliasMapping.getPortAliases().stream(), outputAliasMapping.getPortAliases().stream()).collect(Collectors.toList()));
                 Set<LineageMapping> lineageMappings = new HashSet<>();
                 for (Link link : job.getAllLinks()) {
@@ -108,9 +108,9 @@ public class ProcessMapping extends BaseMapping {
             Set<PortImplementation> portImplementations = new HashSet<>();
             Set<LineageMapping> lineageMappings = new HashSet<>();
             addImplementationDetails(job, stage, stage.getInputLinks(), PortType.INPUT_PORT, portImplementations, lineageMappings);
-            addDataStoreDetails(job, stage, stage.getReadsFromDesign(), "read_by_(design)", PortType.INPUT_PORT, portImplementations, lineageMappings);
+            addDataStoreDetails(job, stage, stage.getReadsFromDesign(), PortType.INPUT_PORT, portImplementations, lineageMappings);
             addImplementationDetails(job, stage, stage.getOutputLinks(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
-            addDataStoreDetails(job, stage, stage.getWritesToDesign(), "written_by_(design)", PortType.OUTPUT_PORT, portImplementations, lineageMappings);
+            addDataStoreDetails(job, stage, stage.getWritesToDesign(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
             process.getProcess().setPortImplementations(new ArrayList<>(portImplementations));
             process.getProcess().setLineageMappings(new ArrayList<>(lineageMappings));
         }
@@ -139,6 +139,9 @@ public class ProcessMapping extends BaseMapping {
             process.setDescription(getDescription(igcObj));
             process.setOwner(igcObj.getCreatedBy());
             String modifiedBy = igcObj.getModifiedBy();
+            // TODO: this sets the userId for DE OMAS REST invocations to the 'modifiedBy' IIS user string (full user's
+            //  name, including spaces).  Do we need to instead translate this to a principal_id, or even a non-IIS user
+            //  entirely?
             deProcess = new DataEngineProcess(process, modifiedBy);
         }
         return deProcess;
@@ -179,7 +182,6 @@ public class ProcessMapping extends BaseMapping {
      * @param job the job within which the stage exists
      * @param stage the stage for which to add implementation details
      * @param stores the stores for which to create the implementation details
-     * @param dataStoreProperty the property of the stage for which to create the data store-relevant details
      * @param portType the type of port
      * @param portImplementations the list of PortImplementations to append to with implementation details
      * @param lineageMappings the list of LineageMappings to append to with implementation details
@@ -187,7 +189,6 @@ public class ProcessMapping extends BaseMapping {
     private void addDataStoreDetails(DataStageJob job,
                                      Stage stage,
                                      ItemList<InformationAsset> stores,
-                                     String dataStoreProperty,
                                      PortType portType,
                                      Set<PortImplementation> portImplementations,
                                      Set<LineageMapping> lineageMappings) {
@@ -199,7 +200,7 @@ public class ProcessMapping extends BaseMapping {
             List<Classificationenabledgroup> fieldsForStore = job.getFieldsForStore(storeRef.getId());
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, stage, portType, fieldsForStore, fullyQualifiedStageName);
             portImplementations.add(portImplementationMapping.getPortImplementation());
-            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, fieldsForStore, dataStoreProperty, portType == PortType.INPUT_PORT, fullyQualifiedStageName, stageNameSuffix);
+            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, fieldsForStore, portType == PortType.INPUT_PORT, fullyQualifiedStageName, stageNameSuffix);
             lineageMappings.addAll(lineageMappingMapping.getLineageMappings().getLineageMappings());
         }
     }
