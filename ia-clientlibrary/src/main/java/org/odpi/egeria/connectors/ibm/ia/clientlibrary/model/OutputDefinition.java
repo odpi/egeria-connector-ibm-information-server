@@ -11,7 +11,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OutputDefinition {
 
-    @JacksonXmlProperty(isAttribute = true) private OutputType type = OutputType.undefined;
+    @JacksonXmlProperty(isAttribute = true) private OutputType type = OutputType.UNDEFINED;
     @JacksonXmlProperty(isAttribute = true) private Boolean distinctRecords;
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "OutputColumn")

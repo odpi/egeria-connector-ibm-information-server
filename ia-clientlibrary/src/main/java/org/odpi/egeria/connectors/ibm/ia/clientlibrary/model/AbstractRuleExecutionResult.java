@@ -12,7 +12,7 @@ import java.util.Date;
 public class AbstractRuleExecutionResult {
 
     @JacksonXmlProperty(isAttribute = true) private String id;
-    @JacksonXmlProperty(isAttribute = true) private ExecutionStatus status = ExecutionStatus.unknown;
+    @JacksonXmlProperty(isAttribute = true) private ExecutionStatus status = ExecutionStatus.UNKNOWN;
     @JacksonXmlProperty(isAttribute = true) private Date startTime;
     @JacksonXmlProperty(isAttribute = true) private Date endTime;
     @JacksonXmlProperty(isAttribute = true) private String runBy;

@@ -11,7 +11,7 @@ public class JoinCondition {
     @JacksonXmlProperty(isAttribute = true) private String leftKey;
     @JacksonXmlProperty(isAttribute = true) private String rightKey;
     @JacksonXmlProperty(isAttribute = true) private String condition;
-    @JacksonXmlProperty(isAttribute = true) private JoinType joinType = JoinType.inner;
+    @JacksonXmlProperty(isAttribute = true) private JoinType joinType = JoinType.INNER;
 
     public String getLeftKey() { return leftKey; }
     public void setLeftKey(String leftKey) { this.leftKey = leftKey; }

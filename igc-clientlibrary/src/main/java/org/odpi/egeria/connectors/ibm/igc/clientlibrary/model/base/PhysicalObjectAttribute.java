@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 
 /**
  * POJO for the {@code physical_object_attribute} asset type in IGC, displayed as '{@literal Physical Object Attribute}' in the IGC UI.
