@@ -103,30 +103,4 @@ public class AssetZoneMembershipMapper extends ClassificationMapping {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void addClassificationToIGCAsset(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                            Reference igcEntity,
-                                            String entityGUID,
-                                            InstanceProperties initialProperties,
-                                            String userId) throws RepositoryErrorException {
-        final String methodName = "addClassificationToIGCAsset";
-        validateUnsupportedProperties(methodName, initialProperties);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void removeClassificationFromIGCAsset(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                 Reference igcAsset,
-                                                 String entityGUID,
-                                                 String userId)
-            throws RepositoryErrorException {
-        final String methodName = "removeClassificationFromIGCAsset";
-        reportImmutableClassification(methodName, entityGUID);
-    }
-
 }
