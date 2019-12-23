@@ -270,42 +270,6 @@ public abstract class ClassificationMapping extends InstanceMapping {
     }
 
     /**
-     * Implement this method to define how to add an OMRS classification to an existing IGC asset. (Since IGC has no
-     * actual concept of classification, this is left as a method to-be-implemented depending on how the implementation
-     * desires the classification to be represented within IGC.)
-     *
-     * @param igcomrsRepositoryConnector connectivity to the IGC repository via OMRS connector
-     * @param igcAsset the IGC object to which to add the OMRS classification
-     * @param entityGUID the GUID of the OMRS entity (ie. including any prefix)
-     * @param initialProperties the set of classification-specific properties to add to the classification
-     * @param userId the user requesting the classification to be added (currently unused)
-     * @throws RepositoryErrorException on any mismatch between the requested classification and what IGC supports
-     */
-    public abstract void addClassificationToIGCAsset(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                     Reference igcAsset,
-                                                     String entityGUID,
-                                                     InstanceProperties initialProperties,
-                                                     String userId)
-            throws RepositoryErrorException;
-
-    /**
-     * Implement this method to define how to remove an OMRS classification from an existing IGC asset. (Since IGC has
-     * no actual concept of classification, this is left as a method to-be-implemented depending on how the
-     * implementation desires the classification to be represented within IGC.)
-     *
-     * @param igcomrsRepositoryConnector connectivity to the IGC repository via OMRS connector
-     * @param igcAsset the IGC object from which to remove the OMRS classification
-     * @param entityGUID the GUID of the OMRS entity (ie. including any prefix)
-     * @param userId the user requesting the classification to be removed (currently unused)
-     * @throws RepositoryErrorException on any mismatch between the requested classification and what IGC supports
-     */
-    public abstract void removeClassificationFromIGCAsset(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                          Reference igcAsset,
-                                                          String entityGUID,
-                                                          String userId)
-            throws RepositoryErrorException;
-
-    /**
      * Indicates whether this classification mapping matches the provided IGC asset type: that is, this mapping
      * can be used to translate to the provided IGC asset type.
      *
@@ -423,68 +387,6 @@ public abstract class ClassificationMapping extends InstanceMapping {
         }
 
         return classification;
-
-    }
-
-    /**
-     * Validate that the provided classification properties are empty and can therefore be handled by IGC. If they are
-     * not empty, throw a RepositoryErrorException explaining that properties cannot be included in the classification.
-     *
-     * @param methodName the name of the method attempting to process a classification with properties
-     * @param initialProperties the set of classification-specific properties that were sent
-     * @throws RepositoryErrorException on any mismatch between the requested classification and what IGC supports
-     */
-    protected void validateUnsupportedProperties(String methodName,
-                                                 InstanceProperties initialProperties) throws RepositoryErrorException {
-
-        Map<String, InstancePropertyValue> classificationProperties = null;
-        if (initialProperties != null) {
-            classificationProperties = initialProperties.getInstanceProperties();
-        }
-
-        if (classificationProperties != null && !classificationProperties.isEmpty()) {
-
-            log.error("Classification properties are immutable in IGC.");
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_EXCEEDS_REPOSITORY;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    getOmrsClassificationType(),
-                    getIgcAssetType()
-            );
-            throw new RepositoryErrorException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
-
-        }
-    }
-
-    /**
-     * Throw an exception if an immutable classification is requested to be modified.
-     *
-     * @param methodName the name of the method attempting to modify the classification
-     * @param entityGUID the GUID of the entity instance against which the classification is set
-     * @throws RepositoryErrorException indicating the classification is immutable
-     */
-    protected void reportImmutableClassification(String methodName,
-                                                 String entityGUID) throws RepositoryErrorException {
-
-        IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.CLASSIFICATION_NOT_EDITABLE;
-        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                getOmrsClassificationType(),
-                entityGUID
-        );
-        throw new RepositoryErrorException(
-                errorCode.getHTTPErrorCode(),
-                this.getClass().getName(),
-                methodName,
-                errorMessage,
-                errorCode.getSystemAction(),
-                errorCode.getUserAction()
-        );
 
     }
 

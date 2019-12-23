@@ -1247,173 +1247,6 @@ public class IGCRepositoryHelper {
     }
 
     /**
-     * Add the specified classification to the provided entity.
-     *
-     * @param userId the user requesting the addition of the classification
-     * @param entityGUID the GUID of the IGC entity to which to add the classification
-     * @param classificationTypeDef the TypeDef of the classification to add
-     * @param classificationProperties the properties to set on the classification that is to be added
-     * @return Reference - the IGC asset that was classified
-     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where the
-     *                                  metadata collection is stored
-     * @throws EntityNotKnownException the entity identified by the guid is not found in the metadata collection
-     * @throws ClassificationErrorException the requested classification is either not known or not valid for the entity
-     */
-    public Reference classifyEntity(String userId,
-                                    String entityGUID,
-                                    TypeDef classificationTypeDef,
-                                    InstanceProperties classificationProperties) throws
-            RepositoryErrorException,
-            EntityNotKnownException,
-            ClassificationErrorException {
-
-        final String methodName = "classifyEntity";
-
-        String classificationName = classificationTypeDef.getName();
-
-        IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(entityGUID);
-        if (igcGuid == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    entityGUID,
-                    "null",
-                    repositoryName);
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        }
-        String rid = igcGuid.getRid();
-        Reference igcEntity = this.igcRestClient.getAssetRefById(rid);
-
-        if (igcEntity == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    entityGUID,
-                    rid,
-                    repositoryName
-            );
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        }
-
-        ClassificationMapping classificationMapping = getClassificationMappingByTypes(classificationName, igcEntity.getType());
-        if (classificationMapping != null) {
-            classificationMapping.addClassificationToIGCAsset(
-                    igcomrsRepositoryConnector,
-                    igcEntity,
-                    entityGUID,
-                    classificationProperties,
-                    userId
-            );
-        } else {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    classificationName,
-                    repositoryName);
-            throw new ClassificationErrorException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
-        }
-
-        return igcEntity;
-
-    }
-
-    /**
-     * Remove the specified classification from the provided entity.
-     *
-     * @param userId the user requesting the classification removal
-     * @param entityGUID the GUID of the IGC entity from which classification should be removed
-     * @param classificationTypeDef the TypeDef of the classification that should be removed
-     * @return Reference - the IGC asset that was declassified
-     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
-     *                                  the metadata collection is stored
-     * @throws EntityNotKnownException the entity identified by the guid is not found in the metadata collection
-     * @throws ClassificationErrorException the requested classification is not set on the entity
-     */
-    public Reference declassifyEntity(String userId,
-                                      String entityGUID,
-                                      TypeDef classificationTypeDef) throws
-            RepositoryErrorException,
-            EntityNotKnownException,
-            ClassificationErrorException {
-
-        final String methodName = "declassifyEntity";
-
-        String classificationName = classificationTypeDef.getName();
-
-        IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(entityGUID);
-        if (igcGuid == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    entityGUID,
-                    "null",
-                    repositoryName);
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        }
-        String rid = igcGuid.getRid();
-        Reference igcEntity = this.igcRestClient.getAssetRefById(rid);
-
-        if (igcEntity == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    entityGUID,
-                    rid,
-                    repositoryName
-            );
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        }
-
-        ClassificationMapping classificationMapping = getClassificationMappingByTypes(classificationName, igcEntity.getType());
-        if (classificationMapping != null) {
-            classificationMapping.removeClassificationFromIGCAsset(
-                    igcomrsRepositoryConnector,
-                    igcEntity,
-                    entityGUID,
-                    userId
-            );
-        } else {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    classificationName,
-                    repositoryName);
-            throw new ClassificationErrorException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
-        }
-
-        return igcEntity;
-
-    }
-
-    /**
      * Retrieves an instance of a mapping that can be used for the provided parameters (or null if none exists).
      *
      * @param guid the IGC GUID for the entity to be mapped
@@ -1714,44 +1547,50 @@ public class IGCRepositoryHelper {
                         if (igcValue instanceof Boolean) {
                             return ((Boolean) igcValue).booleanValue() == ((Boolean) actualValue.getPrimitiveValue()).booleanValue();
                         }
+                        return compareAsStrings(omrsValue, igcValue);
                     case OM_PRIMITIVE_TYPE_SHORT:
                         if (igcValue instanceof Short) {
                             return ((Short) igcValue).intValue() == ((Short) actualValue.getPrimitiveValue()).intValue();
                         }
+                        return compareAsStrings(omrsValue, igcValue);
                     case OM_PRIMITIVE_TYPE_INT:
                         if (igcValue instanceof Integer) {
                             return ((Integer) igcValue).intValue() == ((Integer) actualValue.getPrimitiveValue()).intValue();
                         }
+                        return compareAsStrings(omrsValue, igcValue);
                     case OM_PRIMITIVE_TYPE_LONG:
                         if (igcValue instanceof Long) {
                             return ((Long) igcValue).longValue() == ((Long) actualValue.getPrimitiveValue()).longValue();
                         }
+                        return compareAsStrings(omrsValue, igcValue);
                     case OM_PRIMITIVE_TYPE_FLOAT:
                         if (igcValue instanceof Float) {
                             return ((Float) igcValue).floatValue() == ((Float) actualValue.getPrimitiveValue()).floatValue();
                         }
+                        return compareAsStrings(omrsValue, igcValue);
                     case OM_PRIMITIVE_TYPE_DOUBLE:
                         if (igcValue instanceof Double) {
                             return ((Double) igcValue).doubleValue() == ((Double) actualValue.getPrimitiveValue()).doubleValue();
                         }
+                        return compareAsStrings(omrsValue, igcValue);
                     case OM_PRIMITIVE_TYPE_BIGINTEGER:
                     case OM_PRIMITIVE_TYPE_BIGDECIMAL:
                         if (igcValue instanceof BigInteger || igcValue instanceof BigDecimal) {
                             return igcValue.equals(actualValue.getPrimitiveValue());
                         }
+                        return compareAsStrings(omrsValue, igcValue);
                     case OM_PRIMITIVE_TYPE_DATE:
                         if (igcValue instanceof Long) {
                             return ((Long) igcValue).longValue() == ((Long) actualValue.getPrimitiveValue()).longValue();
                         } else if (igcValue instanceof Date) {
                             return ((Date) igcValue).getTime() == ((Long) actualValue.getPrimitiveValue()).longValue();
                         }
+                        return compareAsStrings(omrsValue, igcValue);
                     case OM_PRIMITIVE_TYPE_BYTE:
                     case OM_PRIMITIVE_TYPE_CHAR:
                     case OM_PRIMITIVE_TYPE_STRING:
                     default:
-                        omrsValueAsString = omrsValue.valueAsString();
-                        igcValueAsString = igcValue.toString();
-                        return igcValueAsString.equals(omrsValueAsString);
+                        return compareAsStrings(omrsValue, igcValue);
                 }
             case ENUM:
                 String symbolicName = ((EnumPropertyValue) omrsValue).getSymbolicName();
@@ -1769,6 +1608,31 @@ public class IGCRepositoryHelper {
         }
 
         return false;
+
+    }
+
+    /**
+     * Compare the provided values as Strings to determine whether they are equivalent.
+     *
+     * @param omrsValue the OMRS value
+     * @param igcValue the IGC value
+     * @return boolean
+     */
+    private static boolean compareAsStrings(InstancePropertyValue omrsValue, Object igcValue) {
+
+        if (omrsValue == null && igcValue == null) {
+            return true;
+        }
+        if (omrsValue != null && igcValue == null) {
+            return false;
+        }
+        if (omrsValue == null) {
+            return false;
+        }
+
+        String omrsValueAsString = omrsValue.valueAsString();
+        String igcValueAsString = igcValue.toString();
+        return igcValueAsString.equals(omrsValueAsString);
 
     }
 
