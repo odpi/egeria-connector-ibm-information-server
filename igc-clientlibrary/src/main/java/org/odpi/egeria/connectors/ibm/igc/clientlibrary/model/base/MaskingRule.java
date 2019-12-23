@@ -27,25 +27,8 @@ import java.util.Date;
 @JsonTypeName("masking_rule")
 public class MaskingRule extends InformationAsset {
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("rule_logic")
     protected String ruleLogic;
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
      * Retrieve the {@code rule_logic} property (displayed as '{@literal Rule Logic}') of the object.

@@ -99,11 +99,11 @@ public class IGCBeanGenerator {
         // and as part of this keep a list of their properties, so any classes that extend them can skip
         // including the same properties and getter / setter methods as overrides
         for (String typeName : IGCRestConstants.getSuperTypes()) {
-            if (!(skipInformationAssetGeneration && typeName.equals("information_asset")) ) {
+            if (!(skipInformationAssetGeneration && typeName.equals(IGCRestConstants.INFORMATION_ASSET)) ) {
                 TypeDetails details = igcRestClient.getTypeDetails(typeName);
                 createPOJOForType(details);
             } else {
-                superTypeToProperties.put("information_asset", IGCRestConstants.getFixedInformationAssetProperties());
+                superTypeToProperties.put(IGCRestConstants.INFORMATION_ASSET, IGCRestConstants.getFixedInformationAssetProperties());
             }
         }
 
@@ -463,7 +463,7 @@ public class IGCBeanGenerator {
                                 && !knownClass) {
                             // If the object can be put into a collection, is not itself a collection, and is not
                             // already a more specific type, treat it as an information_asset
-                            typeToExtend = "information_asset";
+                            typeToExtend = IGCRestConstants.INFORMATION_ASSET;
                         } else if (propertyName.equals("labels")
                                 && propertyType.equals("label")
                                 && !typeName.equals("main_object")

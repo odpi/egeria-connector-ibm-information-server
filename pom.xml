@@ -95,6 +95,11 @@
         <jackson.version>2.10.1</jackson.version>
         <slf4j.version>1.7.30</slf4j.version>
         <spring.version>5.2.2.RELEASE</spring.version>
+        <junit.platform.version>1.5.2</junit.platform.version>
+        <junit.jupiter.version>5.5.2</junit.jupiter.version>
+        <junit.version>4.12</junit.version>
+        <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
+        <mockito.version>3.2.4</mockito.version>
         <testng.version>7.1.1</testng.version>
         <woodstox.version>6.0.3</woodstox.version>
         <maven-compiler.version>3.8.1</maven-compiler.version>
@@ -233,8 +238,15 @@
         </dependencies>
     </dependencyManagement>
 
+    <!-- Most dependencies pushed down to keep components minimal -->
     <dependencies>
-
+        <!-- Use slf4f-simple anywhere as logging implementation in TEST scope only -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <!-- TODO: temporarily pull from ODPi snapshot repo for Maven, until snapshots are available in Maven Central -->
@@ -291,6 +303,40 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-antrun-plugin</artifactId>
                     <version>${maven-antrun.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${surefire.plugin.version}</version>
+                    <configuration>
+                        <forkCount>3</forkCount>
+                        <reuseForks>true</reuseForks>
+                        <!--suppress UnresolvedMavenProperty -->
+                        <argLine>-Xmx1024m ${argLine}</argLine>
+                        <includes>
+                            <include>**/*Test.java</include>
+                        </includes>
+                        <systemPropertyVariables>
+                            <org.slf4j.simpleLogger.defaultLogLevel>INFO</org.slf4j.simpleLogger.defaultLogLevel>
+                        </systemPropertyVariables>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.junit.jupiter</groupId>
+                            <artifactId>junit-jupiter-engine</artifactId>
+                            <version>${junit.jupiter.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.junit.jupiter</groupId>
+                            <artifactId>junit-jupiter-api</artifactId>
+                            <version>${junit.jupiter.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.mockito</groupId>
+                            <artifactId>mockito-inline</artifactId>
+                            <version>${mockito.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -471,7 +517,9 @@
                                 <ignoredUnusedDeclaredDependency>junit:*</ignoredUnusedDeclaredDependency>
                                 <ignoredUnusedDeclaredDependency>org.junit.platform:*</ignoredUnusedDeclaredDependency>
                                 <!-- Used with slf4j as default implementation in test scope only -->
-                                <ignoredUnusedDeclaredDependency>ch.qos.logback:*</ignoredUnusedDeclaredDependency>
+                                <ignoredUnusedDeclaredDependency>ch.qos.logback:logback-classic:*</ignoredUnusedDeclaredDependency>
+                                <!-- Used with slf4j as default implementation for chassis & apps (more configurable in xml)-->
+                                <ignoredUnusedDeclaredDependency>org.slf4j:slf4j-simple:*</ignoredUnusedDeclaredDependency>
                                 <!-- Ignore these as used for packaging -->
                                 <ignoredUnusedDeclaredDependency>org.odpi.egeria:egeria-connector-ibm-igc-adapter:*</ignoredUnusedDeclaredDependency>
                                 <ignoredUnusedDeclaredDependency>org.odpi.egeria:egeria-connector-ibm-datastage-adapter:*</ignoredUnusedDeclaredDependency>

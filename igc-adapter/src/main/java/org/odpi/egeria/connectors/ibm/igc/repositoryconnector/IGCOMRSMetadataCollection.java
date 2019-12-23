@@ -2035,20 +2035,18 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
          * Validate that the entity GUID is ok
          */
         EntityDetail entity = this.isEntityKnown(userId, entityGUID);
-        if (entity != null) {
-            if (metadataCollectionId.equals(entity.getMetadataCollectionId())) {
-                OMRSErrorCode errorCode = OMRSErrorCode.HOME_REFRESH;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(methodName,
-                        entityGUID,
-                        metadataCollectionId,
-                        repositoryName);
-                throw new HomeEntityException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
-            }
+        if (entity != null && metadataCollectionId.equals(entity.getMetadataCollectionId())) {
+            OMRSErrorCode errorCode = OMRSErrorCode.HOME_REFRESH;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(methodName,
+                    entityGUID,
+                    metadataCollectionId,
+                    repositoryName);
+            throw new HomeEntityException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
         }
 
         /*
@@ -2095,21 +2093,19 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 methodName);
 
         Relationship relationship = this.isRelationshipKnown(userId, relationshipGUID);
-        if (relationship != null) {
-            if (metadataCollectionId.equals(relationship.getMetadataCollectionId())) {
-                OMRSErrorCode errorCode = OMRSErrorCode.HOME_REFRESH;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(methodName,
-                        relationshipGUID,
-                        metadataCollectionId,
-                        repositoryName);
+        if (relationship != null && metadataCollectionId.equals(relationship.getMetadataCollectionId())) {
+            OMRSErrorCode errorCode = OMRSErrorCode.HOME_REFRESH;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(methodName,
+                    relationshipGUID,
+                    metadataCollectionId,
+                    repositoryName);
 
-                throw new HomeRelationshipException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
-            }
+            throw new HomeRelationshipException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
         }
 
         /*

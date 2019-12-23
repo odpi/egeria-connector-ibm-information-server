@@ -2,8 +2,17 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.ia.clientlibrary.model;
 
-public enum BenchmarkBaselineType {
-    similarity,
-    degradation,
-    improvement
+import com.fasterxml.jackson.annotation.JsonValue;
+
+public enum BenchmarkBaselineType implements IAEnum {
+
+    SIMILARITY("similarity"),
+    DEGRADATION("degradation"),
+    IMPROVEMENT("improvement");
+
+    @JsonValue
+    private String value;
+    BenchmarkBaselineType(String value) { this.value = value; }
+    public String getValue() { return value; }
+
 }

@@ -63,6 +63,7 @@ public class GlossaryTermMapper extends ReferenceableMapper {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isOmrsType(IGCRestClient igcRestClient, Reference igcObject) {
         String assetType = IGCRestConstants.getAssetTypeForSearch(igcObject.getType());
         if (assetType.equals("term")) {
