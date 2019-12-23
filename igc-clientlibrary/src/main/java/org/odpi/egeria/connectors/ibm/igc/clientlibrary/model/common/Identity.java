@@ -28,6 +28,12 @@ public class Identity {
     public static final String TYPE_PREFIX = "(";
     private static final String TYPE_POSTFIX = ")";
 
+    private static final String LOG_ADDING_SEARCH_CONDITION = "Adding search condition: {} {} {}";
+    private static final String SEARCH_STARTS_WITH = "like {0}%";
+    private static final String COURTESY_TITLE = "courtesy_title";
+    private static final String GIVEN_NAME = "given_name";
+    private static final String FULL_NAME = "full_name";
+
     private List<Reference> context;
 
     private String assetType;
@@ -222,7 +228,7 @@ public class Identity {
             nameProperty = "group_name";
         }
         String searchFor = (propertyPath == null ? nameProperty : propertyPath + "." + nameProperty);
-        if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", searchFor, operator, ctxName); }
+        if (log.isDebugEnabled()) { log.debug(LOG_ADDING_SEARCH_CONDITION, searchFor, operator, ctxName); }
         IGCSearchCondition condition = new IGCSearchCondition(
                 searchFor,
                 operator,
@@ -279,13 +285,13 @@ public class Identity {
                     }
                 }
                 if (!parentName.equals("")) {
-                    if (log.isDebugEnabled()) { log.debug("Adding search condition: parent_folder.name {} {}", "=", parentName); }
+                    if (log.isDebugEnabled()) { log.debug(LOG_ADDING_SEARCH_CONDITION, "parent_folder.name", "=", parentName); }
                     IGCSearchCondition cPath = new IGCSearchCondition("parent_folder.name", "=", parentName);
                     igcSearchConditionSet.addCondition(cPath);
                 }
                 // Add the 'host' element as 'host.name' (but only if we found one)
                 if (!dataFileHost.equals("")) {
-                    if (log.isDebugEnabled()) { log.debug("Adding search condition: host.name {} {}", "=", dataFileHost); }
+                    if (log.isDebugEnabled()) { log.debug(LOG_ADDING_SEARCH_CONDITION, "host.name", "=", dataFileHost); }
                     IGCSearchCondition cHost = new IGCSearchCondition("host.name", "=", dataFileHost);
                     igcSearchConditionSet.addCondition(cHost);
                 }
@@ -293,13 +299,13 @@ public class Identity {
                 // Otherwise, we are looking for some file-related asset within a folder, so add these further conditions
                 // Concatenate the 'data_file_folder' elements into a string with '/' separators, and add as '...data_file.path'
                 if (!dataFilePath.equals("")) {
-                    if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", propertyPath + ".path", "=", dataFilePath); }
+                    if (log.isDebugEnabled()) { log.debug(LOG_ADDING_SEARCH_CONDITION, propertyPath + ".path", "=", dataFilePath); }
                     IGCSearchCondition cPath = new IGCSearchCondition(propertyPath + ".path", "=", dataFilePath);
                     igcSearchConditionSet.addCondition(cPath);
                 }
                 // Add the 'host' element as '...datafile.host.name'
                 if (!dataFileHost.equals("")) {
-                    if (log.isDebugEnabled()) { log.debug("Adding search condition: {} {} {}", propertyPath + ".host.name", "=", dataFileHost); }
+                    if (log.isDebugEnabled()) { log.debug(LOG_ADDING_SEARCH_CONDITION, propertyPath + ".host.name", "=", dataFileHost); }
                     IGCSearchCondition cHost = new IGCSearchCondition(propertyPath + ".host.name", "=", dataFileHost);
                     igcSearchConditionSet.addCondition(cHost);
                 }
@@ -310,8 +316,8 @@ public class Identity {
             if (nameTokens.length == 1) {
                 // If there is only a single token, use it for an OR-based startsWith search across courtesy title and
                 // first name as this could only be a partial identity, and either could be in the first position
-                IGCSearchCondition cTitle = new IGCSearchCondition("courtesy_title", "like {0}%", nameTokens[0]);
-                IGCSearchCondition fName = new IGCSearchCondition("given_name", "like {0}%", nameTokens[0]);
+                IGCSearchCondition cTitle = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, nameTokens[0]);
+                IGCSearchCondition fName = new IGCSearchCondition(GIVEN_NAME, SEARCH_STARTS_WITH, nameTokens[0]);
                 IGCSearchConditionSet nested = new IGCSearchConditionSet();
                 nested.addCondition(cTitle);
                 nested.addCondition(fName);
@@ -319,12 +325,12 @@ public class Identity {
                 igcSearchConditionSet.addNestedConditionSet(nested);
             } else if (nameTokens.length == 2) {
                 // If there are two tokens, this could be...
-                IGCSearchCondition cTitleAlone = new IGCSearchCondition("courtesy_title", "like {0}%", nameTokens[0]);
-                IGCSearchCondition fNameAlone1 = new IGCSearchCondition("given_name", "like {0}%", nameTokens[0]);
-                IGCSearchCondition fNameAlone2 = new IGCSearchCondition("given_name", "like {0}%", nameTokens[1]);
-                IGCSearchCondition lNameAlone = new IGCSearchCondition("surname", "like {0}%", nameTokens[1]);
-                IGCSearchCondition cTitleCombined = new IGCSearchCondition("courtesy_title", "like {0}%", assetName);
-                IGCSearchCondition fNameCombined = new IGCSearchCondition("given_name", "like {0}%", assetName);
+                IGCSearchCondition cTitleAlone = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, nameTokens[0]);
+                IGCSearchCondition fNameAlone1 = new IGCSearchCondition(GIVEN_NAME, SEARCH_STARTS_WITH, nameTokens[0]);
+                IGCSearchCondition fNameAlone2 = new IGCSearchCondition(GIVEN_NAME, SEARCH_STARTS_WITH, nameTokens[1]);
+                IGCSearchCondition lNameAlone = new IGCSearchCondition("surname", SEARCH_STARTS_WITH, nameTokens[1]);
+                IGCSearchCondition cTitleCombined = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, assetName);
+                IGCSearchCondition fNameCombined = new IGCSearchCondition(GIVEN_NAME, SEARCH_STARTS_WITH, assetName);
                 IGCSearchConditionSet nested = new IGCSearchConditionSet();
                 // ... a multi-word courtesy title alone
                 IGCSearchConditionSet titleCombined = new IGCSearchConditionSet(cTitleCombined);
@@ -349,16 +355,16 @@ public class Identity {
                 igcSearchConditionSet.addNestedConditionSet(nested);
             } else if (nameTokens.length > 2) {
                 // If there are three tokens, this could be...
-                IGCSearchCondition cTitleCombined = new IGCSearchCondition("courtesy_title", "like {0}%", assetName);
-                IGCSearchCondition fullNameCombined = new IGCSearchCondition("full_name", "like {0}%", assetName);
-                IGCSearchCondition cTitleAlone = new IGCSearchCondition("courtesy_title", "like {0}%", nameTokens[0]);
+                IGCSearchCondition cTitleCombined = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, assetName);
+                IGCSearchCondition fullNameCombined = new IGCSearchCondition(FULL_NAME, SEARCH_STARTS_WITH, assetName);
+                IGCSearchCondition cTitleAlone = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, nameTokens[0]);
                 StringBuilder combinedName = new StringBuilder();
                 for (int i = 1; i < nameTokens.length; i++) {
                     combinedName.append(nameTokens[i]).append(" ");
                 }
                 // (remove the last space)
                 combinedName.deleteCharAt(combinedName.length() - 1);
-                IGCSearchCondition fullNameAlone = new IGCSearchCondition("full_name", "like {0}%", combinedName.toString());
+                IGCSearchCondition fullNameAlone = new IGCSearchCondition(FULL_NAME, SEARCH_STARTS_WITH, combinedName.toString());
                 IGCSearchConditionSet nested = new IGCSearchConditionSet();
                 // ... only a courtesy title, comprised of multi-words (startsWith)
                 IGCSearchConditionSet titleOnly = new IGCSearchConditionSet(cTitleCombined);
@@ -467,8 +473,12 @@ public class Identity {
 
         Identity ident = null;
         try {
-            String displayName = igcRestClient.getDisplayNameForType(assetType);
-            if (displayName != null) {
+            if (igcRestClient != null) {
+                String displayName = igcRestClient.getDisplayNameForType(assetType);
+                if (displayName != null) {
+                    ident = new Identity(context, assetType, assetName);
+                }
+            } else {
                 ident = new Identity(context, assetType, assetName);
             }
         } catch (Exception e) {

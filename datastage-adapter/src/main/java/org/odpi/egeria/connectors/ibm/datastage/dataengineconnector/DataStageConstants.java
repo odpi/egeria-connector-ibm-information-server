@@ -32,6 +32,10 @@ public class DataStageConstants {
     private static final String READ_BY_DESIGN = "read_by_(design)";
     private static final String WRITTEN_BY_DESIGN = "written_by_(design)";
 
+    private DataStageConstants() {
+        // Do nothing...
+    }
+
     private static List<String> createJobSearchProperties() {
         List<String> searchProperties = new ArrayList<>();
         searchProperties.add(SHORT_DESCRIPTION);
@@ -148,15 +152,10 @@ public class DataStageConstants {
     public static List<String> getJobSearchProperties() { return JOB_SEARCH_PROPERTIES; }
 
     /**
-     * Retrieve a list of the search properties to use when querying data file fields via the IGC REST API.
+     * Retrieve a list of the search properties to use when querying data fields (file fields or database columns)
+     * via the IGC REST API.
      * @return {@code List<String>}
      */
-    public static List<String> getDataFileFieldSearchProperties() { return DATA_FIELD_SEARCH_PROPERTIES; }
-
-    /**
-     * Retrieve a list of the search properties to use when querying database columns via the IGC REST API.
-     * @return {@code List<String>}
-     */
-    public static List<String> getDatabaseColumnSearchProperties() { return DATA_FIELD_SEARCH_PROPERTIES; }
+    public static List<String> getDataFieldSearchProperties() { return DATA_FIELD_SEARCH_PROPERTIES; }
 
 }

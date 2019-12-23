@@ -39,11 +39,11 @@ public class DataStageDataAsset {
         IGCSearchCondition byParentId = null;
         if (storeType.equals("database_table") || storeType.equals("view")) {
             igcSearch.addType("database_column");
-            igcSearch.addProperties(DataStageConstants.getDatabaseColumnSearchProperties());
+            igcSearch.addProperties(DataStageConstants.getDataFieldSearchProperties());
             byParentId = new IGCSearchCondition("database_table_or_view", "=", storeRid);
         } else if (storeType.equals("data_file_record")) {
             igcSearch.addType("data_file_field");
-            igcSearch.addProperties(DataStageConstants.getDataFileFieldSearchProperties());
+            igcSearch.addProperties(DataStageConstants.getDataFieldSearchProperties());
             byParentId = new IGCSearchCondition("data_file_record", "=", storeRid);
         } else {
             if (log.isWarnEnabled()) { log.warn("Unknown source / target type -- skipping: {}", store); }

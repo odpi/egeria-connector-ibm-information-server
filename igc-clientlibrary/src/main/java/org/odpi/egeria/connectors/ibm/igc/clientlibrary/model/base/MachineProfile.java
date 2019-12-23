@@ -30,9 +30,6 @@ public class MachineProfile extends InformationAsset {
     @JsonProperty("host")
     protected String host;
 
-    @JsonProperty("in_collections")
-    protected ItemList<Collection> inCollections;
-
     @JsonProperty("platform_type")
     protected String platformType;
 
@@ -58,20 +55,6 @@ public class MachineProfile extends InformationAsset {
      */
     @JsonProperty("host")
     public void setHost(String host) { this.host = host; }
-
-    /**
-     * Retrieve the {@code in_collections} property (displayed as '{@literal In Collections}') of the object.
-     * @return {@code ItemList<Collection>}
-     */
-    @JsonProperty("in_collections")
-    public ItemList<Collection> getInCollections() { return this.inCollections; }
-
-    /**
-     * Set the {@code in_collections} property (displayed as {@code In Collections}) of the object.
-     * @param inCollections the value to set
-     */
-    @JsonProperty("in_collections")
-    public void setInCollections(ItemList<Collection> inCollections) { this.inCollections = inCollections; }
 
     /**
      * Retrieve the {@code platform_type} property (displayed as '{@literal Platform Type}') of the object.

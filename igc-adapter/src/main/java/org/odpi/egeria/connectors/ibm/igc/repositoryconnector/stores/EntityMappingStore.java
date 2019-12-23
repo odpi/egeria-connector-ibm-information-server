@@ -5,10 +5,8 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.stores;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDef;
 import org.slf4j.Logger;
@@ -197,7 +195,7 @@ public class EntityMappingStore {
      */
     public Set<EntityMapping> getMappingsByIgcPrefix(String prefix) {
         if (prefix == null) {
-            return null;
+            return Collections.emptySet();
         } else if (igcPrefixToOmrsGuids.containsKey(prefix)) {
             Set<String> guids = igcPrefixToOmrsGuids.get(prefix);
             Set<EntityMapping> mappings = new HashSet<>();
@@ -207,7 +205,7 @@ public class EntityMappingStore {
             return mappings;
         } else {
             if (log.isWarnEnabled()) { log.warn("Unable to find mapping for IGC prefix: {}", prefix); }
-            return null;
+            return Collections.emptySet();
         }
     }
 
@@ -244,7 +242,7 @@ public class EntityMappingStore {
     public EntityMapping getDefaultEntityMapper() {
         EntityMapping referenceable = null;
         try {
-            Class mappingClass = Class.forName(IGCRepositoryHelper.MAPPING_PKG + "entities.ReferenceableMapper");
+            Class<?> mappingClass = Class.forName(IGCRepositoryHelper.MAPPING_PKG + "entities.ReferenceableMapper");
             referenceable = getEntityMapper(mappingClass);
         } catch (ClassNotFoundException e) {
             if (log.isErrorEnabled()) { log.error("Unable to find default ReferenceableMapper class: {}", IGCRepositoryHelper.MAPPING_PKG + "entities.ReferenceableMapper", e); }

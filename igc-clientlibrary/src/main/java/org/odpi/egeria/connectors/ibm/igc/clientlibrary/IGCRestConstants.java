@@ -30,6 +30,20 @@ public class IGCRestConstants {
 
     private static final IGCSearchCondition NO_RESULTS_CONDITION = new IGCSearchCondition("_id", "=", "NONEXISTENT");
 
+    public static final String INFORMATION_ASSET = "information_asset";
+    private static final String NON_STEWARD_USER = "non_steward_user";
+    private static final String STEWARD_USER = "steward_user";
+    private static final String XSD_ELEMENT = "xsd_element";
+    private static final String XSD_UNIQUE_KEY = "xsd_unique_key";
+    private static final String BI_REPORT = "bi_report";
+    private static final String GROUP = "group";
+    private static final String DATA_RULE_DEFINITION = "data_rule_definition";
+    private static final String DATA_RULE_SET_DEFINITION = "data_rule_set_definition";
+    private static final String STAGE_COLUMN = "stage_column";
+    private static final String REFERENCE = "reference";
+    private static final String DATAGROUP = "datagroup";
+    private static final String CLASSIFICATIONENABLEDGROUP = "classificationenabledgroup";
+
     private static final List<String> MODIFICATION_DETAILS = createModificationDetails();
     private static List<String> createModificationDetails() {
         ArrayList<String> modDetails = new ArrayList<>();
@@ -68,8 +82,8 @@ public class IGCRestConstants {
     private static List<String> createUserTypes() {
         ArrayList<String> userTypes = new ArrayList<>();
         userTypes.add("user");
-        userTypes.add("non_steward_user");
-        userTypes.add("steward_user");
+        userTypes.add(NON_STEWARD_USER);
+        userTypes.add(STEWARD_USER);
         return Collections.unmodifiableList(userTypes);
     }
 
@@ -139,23 +153,23 @@ public class IGCRestConstants {
     private static List<String> createSuperTypes() {
         List<String> list = new ArrayList<>();
         list.add("main_object");
-        list.add("information_asset");
+        list.add(INFORMATION_ASSET);
         list.add("host");
         list.add("stage_type");
-        list.add("datagroup");
+        list.add(DATAGROUP);
         list.add("data_item");
         list.add("data_item_definition");
         list.add("data_field");
-        list.add("classificationenabledgroup");
+        list.add(CLASSIFICATIONENABLEDGROUP);
         list.add("reportobject");
         list.add("dsjob");
         list.add("user");
-        list.add("xsd_element");
-        list.add("xsd_unique_key");
-        list.add("bi_report");
-        list.add("group");
-        list.add("data_rule_definition");
-        list.add("data_rule_set_definition");
+        list.add(XSD_ELEMENT);
+        list.add(XSD_UNIQUE_KEY);
+        list.add(BI_REPORT);
+        list.add(GROUP);
+        list.add(DATA_RULE_DEFINITION);
+        list.add(DATA_RULE_SET_DEFINITION);
         list.add("stage_column");
         return list;
     }
@@ -163,63 +177,63 @@ public class IGCRestConstants {
     private static final Map<String, String> SUB_TYPE_TO_SUPER_TYPE = createSubTypeToSuperType();
     private static Map<String, String> createSubTypeToSuperType() {
         Map<String, String> map = new HashMap<>();
-        map.put("main_object", "reference");
-        map.put("user", "reference");
-        map.put("group", "reference");
-        map.put("xsd_unique_key", "reference");
+        map.put("main_object", REFERENCE);
+        map.put("user", REFERENCE);
+        map.put(GROUP, REFERENCE);
+        map.put(XSD_UNIQUE_KEY, REFERENCE);
         map.put("data_policy", "main_object");
         map.put("host_(engine)", "host");
-        map.put("host", "information_asset");
-        map.put("Rule_Execution_Result", "information_asset");
-        map.put("customattributedef", "information_asset");
-        map.put("stage_type", "information_asset");
-        map.put("xsd_element", "information_asset");
-        map.put("bi_report", "information_asset");
-        map.put("data_rule_definition", "information_asset");
-        map.put("data_rule_set_definition", "information_asset");
+        map.put("host", INFORMATION_ASSET);
+        map.put("Rule_Execution_Result", INFORMATION_ASSET);
+        map.put("customattributedef", INFORMATION_ASSET);
+        map.put("stage_type", INFORMATION_ASSET);
+        map.put(XSD_ELEMENT, INFORMATION_ASSET);
+        map.put(BI_REPORT, INFORMATION_ASSET);
+        map.put(DATA_RULE_DEFINITION, INFORMATION_ASSET);
+        map.put(DATA_RULE_SET_DEFINITION, INFORMATION_ASSET);
         map.put("dsstage_type", "stage_type");
-        map.put("information_asset", "main_object");
-        map.put("database_alias", "datagroup");
-        map.put("database_table", "datagroup");
-        map.put("data_file_record", "datagroup");
-        map.put("view", "datagroup");
-        map.put("design_table", "datagroup");
-        map.put("design_view", "datagroup");
-        map.put("stored_procedure", "datagroup");
-        map.put("design_stored_procedure", "datagroup");
-        map.put("datagroup", "information_asset");
+        map.put(INFORMATION_ASSET, "main_object");
+        map.put("database_alias", DATAGROUP);
+        map.put("database_table", DATAGROUP);
+        map.put("data_file_record", DATAGROUP);
+        map.put("view", DATAGROUP);
+        map.put("design_table", DATAGROUP);
+        map.put("design_view", DATAGROUP);
+        map.put("stored_procedure", DATAGROUP);
+        map.put("design_stored_procedure", DATAGROUP);
+        map.put(DATAGROUP, INFORMATION_ASSET);
         map.put("stage_column", "data_item");
-        map.put("ds_stage_column", "stage_column");
+        map.put("ds_stage_column", STAGE_COLUMN);
         map.put("parameter", "data_item");
         map.put("routine_argument", "data_item");
         map.put("stage_type_detail", "data_item");
         map.put("transform_argument", "data_item");
-        map.put("data_item", "information_asset");
+        map.put("data_item", INFORMATION_ASSET);
         map.put("data_element", "data_item_definition");
         map.put("table_definition", "data_item_definition");
         map.put("data_item_definition", "data_item");
         map.put("column_definition", "data_field");
         map.put("data_field", "data_item");
-        map.put("database_column", "classificationenabledgroup");
-        map.put("data_file_field", "classificationenabledgroup");
-        map.put("classificationenabledgroup", "data_field");
+        map.put("database_column", CLASSIFICATIONENABLEDGROUP);
+        map.put("data_file_field", CLASSIFICATIONENABLEDGROUP);
+        map.put(CLASSIFICATIONENABLEDGROUP, "data_field");
         map.put("bi_report_query_item", "reportobject");
-        map.put("reportobject", "information_asset");
+        map.put("reportobject", INFORMATION_ASSET);
         map.put("sequence_job", "dsjob");
-        map.put("dsjob", "information_asset");
-        map.put("non_steward_user", "user");
-        map.put("steward_user", "user");
-        map.put("xsd_choice", "xsd_element");
-        map.put("xsd_sequence", "xsd_element");
-        map.put("xsd_primary_key", "xsd_unique_key");
-        map.put("bi_report_nocontext", "bi_report");
-        map.put("bi_report_nofolder", "bi_report");
-        map.put("user_group", "group");
-        map.put("steward_group", "group");
-        map.put("published_data_rule_definition", "data_rule_definition");
-        map.put("non_published_data_rule_definition", "data_rule_definition");
-        map.put("published_data_rule_set", "data_rule_set_definition");
-        map.put("non_published_data_rule_set", "data_rule_set_definition");
+        map.put("dsjob", INFORMATION_ASSET);
+        map.put(NON_STEWARD_USER, "user");
+        map.put(STEWARD_USER, "user");
+        map.put("xsd_choice", XSD_ELEMENT);
+        map.put("xsd_sequence", XSD_ELEMENT);
+        map.put("xsd_primary_key", XSD_UNIQUE_KEY);
+        map.put("bi_report_nocontext", BI_REPORT);
+        map.put("bi_report_nofolder", BI_REPORT);
+        map.put("user_group", GROUP);
+        map.put("steward_group", GROUP);
+        map.put("published_data_rule_definition", DATA_RULE_DEFINITION);
+        map.put("non_published_data_rule_definition", DATA_RULE_DEFINITION);
+        map.put("published_data_rule_set", DATA_RULE_SET_DEFINITION);
+        map.put("non_published_data_rule_set", DATA_RULE_SET_DEFINITION);
         return map;
     }
 
@@ -416,8 +430,8 @@ public class IGCRestConstants {
             case "host_(engine)":
                 typeForSearch = "host";
                 break;
-            case "non_steward_user":
-            case "steward_user":
+            case NON_STEWARD_USER:
+            case STEWARD_USER:
                 typeForSearch = "user";
                 break;
             default:

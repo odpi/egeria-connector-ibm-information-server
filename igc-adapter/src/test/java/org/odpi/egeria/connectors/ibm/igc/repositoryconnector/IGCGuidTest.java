@@ -9,16 +9,20 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-public class IGCGuidTester {
+public class IGCGuidTest {
 
-    private static String METADATA_COL_ID = "5e74232d-92df-4b81-a401-b100dbfea73a";
-    private static String SAMPLE_RID = "6662c0f2.ee6a64fe.o1h6eveh1.gbvjvq0.ols3j6.0oadmdn8gknhjvmojr3pt";
-    private static String SAMPLE_ASSET_TYPE = "database_schema";
-    private static String SAMPLE_PREFIX = RelationalDBSchemaTypeMapper.IGC_RID_PREFIX;
-    private static String SAMPLE_RELATIONSHIP_TYPE = "AssetSchemaType";
+    private String METADATA_COL_ID = "5e74232d-92df-4b81-a401-b100dbfea73a";
+    private String SAMPLE_RID = "6662c0f2.ee6a64fe.o1h6eveh1.gbvjvq0.ols3j6.0oadmdn8gknhjvmojr3pt";
+    private String SAMPLE_ASSET_TYPE = "database_schema";
+    private String SAMPLE_PREFIX = RelationalDBSchemaTypeMapper.IGC_RID_PREFIX;
+    private String SAMPLE_RELATIONSHIP_TYPE = "AssetSchemaType";
+
+    public IGCGuidTest() {
+        // Do nothing...
+    }
 
     @Test
-    void testValidEntityGuidFormats() {
+    public void testValidEntityGuidFormats() {
 
         IGCEntityGuid igcGuid = new IGCEntityGuid(METADATA_COL_ID, SAMPLE_ASSET_TYPE, SAMPLE_RID);
         IGCEntityGuid igcGuidWithPrefix = new IGCEntityGuid(METADATA_COL_ID, SAMPLE_ASSET_TYPE, SAMPLE_PREFIX, SAMPLE_RID);
@@ -54,7 +58,7 @@ public class IGCGuidTester {
     }
 
     @Test
-    void testValidRelationshipGuidFormats() {
+    public void testValidRelationshipGuidFormats() {
 
         IGCRelationshipGuid igcGuid = new IGCRelationshipGuid(METADATA_COL_ID, SAMPLE_ASSET_TYPE, SAMPLE_ASSET_TYPE, SAMPLE_RID, SAMPLE_RID, SAMPLE_RELATIONSHIP_TYPE);
         IGCRelationshipGuid igcGuidWithPrefix = new IGCRelationshipGuid(METADATA_COL_ID, SAMPLE_ASSET_TYPE, SAMPLE_ASSET_TYPE, null, SAMPLE_PREFIX, SAMPLE_RID, SAMPLE_RID, SAMPLE_RELATIONSHIP_TYPE);
