@@ -106,7 +106,7 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
 
         // Create new REST API client (opens a new session)
         this.igcRestClient = new IGCRestClient(address, igcUser, igcPass);
-        if (this.igcRestClient.isSuccessfullyInitialised()) {
+        if (this.igcRestClient.start()) {
             if (getMaxPageSize() > 0) {
                 this.igcRestClient.setDefaultPageSize(getMaxPageSize());
             }

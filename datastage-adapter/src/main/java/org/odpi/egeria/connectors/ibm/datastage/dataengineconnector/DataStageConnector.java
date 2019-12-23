@@ -109,7 +109,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
         IGCVersionEnum igcVersion;
         // Create new REST API client (opens a new session)
         this.igcRestClient = new IGCRestClient("https://" + address, igcUser, igcPass);
-        if (this.igcRestClient.isSuccessfullyInitialised()) {
+        if (this.igcRestClient.start()) {
             // Set the version based on the IGC client's auto-determination of the IGC environment's version
             igcVersion = this.igcRestClient.getIgcVersion();
             // Set the default page size to whatever is provided as part of config parameters (default to 100)

@@ -71,7 +71,6 @@ public class IGCRestClient {
     private String baseURL;
     private Boolean workflowEnabled = false;
     private List<String> cookies = null;
-    private boolean successfullyInitialised = false;
     private RestTemplate restTemplate;
 
     private IGCVersionEnum igcVersion;
@@ -165,7 +164,15 @@ public class IGCRestClient {
         this.typeToAllProperties = new HashMap<>();
         this.typeToPagedRelationshipProperties = new HashMap<>();
 
-        if (log.isDebugEnabled()) { log.debug("Constructing IGCRestClient..."); }
+    }
+
+    /**
+     * Start the client by trying to connect based on the configured parameters.
+     * @return boolean indicating true if the client was successfully started, or false if not.
+     */
+    public boolean start() {
+
+        boolean successfullyInitialised = false;
 
         // Run a simple initial query to obtain a session and setup the cookies
         if (this.authorization != null) {
@@ -203,19 +210,13 @@ public class IGCRestClient {
                 successfullyInitialised = true;
 
             } else {
-                log.error("Unable to construct IGCRestClient: no authorization provided.");
+                log.error("Unable to start IGCRestClient: no authorization provided.");
             }
 
         }
+        return successfullyInitialised;
 
     }
-
-    /**
-     * Indicates whether the client was successfully initialised (true) or not (false).
-     *
-     * @return boolean
-     */
-    public boolean isSuccessfullyInitialised() { return successfullyInitialised; }
 
     /**
      * Setup the HTTP headers of a request based on either session reuse (forceLogin = false) or forcing a new
