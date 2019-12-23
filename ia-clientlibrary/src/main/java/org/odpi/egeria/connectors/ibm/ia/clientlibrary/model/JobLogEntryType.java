@@ -2,14 +2,23 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.ia.clientlibrary.model;
 
-public enum JobLogEntryType {
-    any,
-    batch,
-    fatal,
-    info,
-    other,
-    reject,
-    reset,
-    started,
-    warning
+import com.fasterxml.jackson.annotation.JsonValue;
+
+public enum JobLogEntryType implements IAEnum {
+
+    ANY("any"),
+    BATCH("batch"),
+    FATAL("fatal"),
+    INFO("info"),
+    OTHER("other"),
+    REJECT("reject"),
+    RESET("reset"),
+    STARTED("started"),
+    WARNING("warning");
+
+    @JsonValue
+    private String value;
+    JobLogEntryType(String value) { this.value = value; }
+    public String getValue() { return value; }
+
 }

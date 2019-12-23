@@ -2,9 +2,18 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.ia.clientlibrary.model;
 
-public enum OutputColumnType {
-    column,
-    variable,
-    expression,
-    metric
+import com.fasterxml.jackson.annotation.JsonValue;
+
+public enum OutputColumnType implements IAEnum {
+
+    COLUMN("column"),
+    VARIABLE("variable"),
+    EXPRESSION("expression"),
+    METRIC("metric");
+
+    @JsonValue
+    private String value;
+    OutputColumnType(String value) { this.value = value; }
+    public String getValue() { return value; }
+
 }

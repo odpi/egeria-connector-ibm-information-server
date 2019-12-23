@@ -2,9 +2,6 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeReference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -170,7 +167,7 @@ public class IGCRestConstants {
         list.add(GROUP);
         list.add(DATA_RULE_DEFINITION);
         list.add(DATA_RULE_SET_DEFINITION);
-        list.add("stage_column");
+        list.add(STAGE_COLUMN);
         return list;
     }
 
@@ -202,7 +199,7 @@ public class IGCRestConstants {
         map.put("stored_procedure", DATAGROUP);
         map.put("design_stored_procedure", DATAGROUP);
         map.put(DATAGROUP, INFORMATION_ASSET);
-        map.put("stage_column", "data_item");
+        map.put(STAGE_COLUMN, "data_item");
         map.put("ds_stage_column", STAGE_COLUMN);
         map.put("parameter", "data_item");
         map.put("routine_argument", "data_item");

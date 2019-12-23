@@ -2,6 +2,15 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.ia.clientlibrary.model;
 
-public enum SuggestionType {
-    all
+import com.fasterxml.jackson.annotation.JsonValue;
+
+public enum SuggestionType implements IAEnum {
+
+    ALL("all");
+
+    @JsonValue
+    private String value;
+    SuggestionType(String value) { this.value = value; }
+    public String getValue() { return value; }
+
 }

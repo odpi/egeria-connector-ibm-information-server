@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 
 /**
  * POJO for the {@code idoc_type} asset type in IGC, displayed as '{@literal IDoc Type}' in the IGC UI.

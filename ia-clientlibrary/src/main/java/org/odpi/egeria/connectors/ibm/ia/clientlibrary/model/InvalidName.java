@@ -3,7 +3,6 @@
 package org.odpi.egeria.connectors.ibm.ia.clientlibrary.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InvalidName extends NameError {

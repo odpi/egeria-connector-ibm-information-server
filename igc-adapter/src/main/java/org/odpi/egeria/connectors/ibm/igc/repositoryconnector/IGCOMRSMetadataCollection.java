@@ -1481,26 +1481,26 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     // If the type we are searching for is a user type, we need to consider complexity in the search
                     // criteria as it could be from the qualifiedName, which in this one case is actually a combination
                     // of various fields on the instance
-                    String newCriteria = searchCriteria;
-                    if (IGCRestConstants.getUserTypes().contains(igcAssetType) && newCriteria != null) {
+                    StringBuilder sbNewCriteria = new StringBuilder();
+                    if (IGCRestConstants.getUserTypes().contains(igcAssetType) && searchCriteria != null) {
                         // In all cases we should take out what is likely to be the full name
-                        String[] tokens = newCriteria.split(" ");
+                        String[] tokens = searchCriteria.split(" ");
                         if (tokens.length > 1) {
                             if (repositoryHelper.isExactMatchRegex(searchCriteria) || repositoryHelper.isStartsWithRegex(searchCriteria)) {
-                                newCriteria = "\\Q";
+                                sbNewCriteria.append("\\Q");
                                 if (tokens.length == 2) {
-                                    newCriteria += tokens[1];
+                                    sbNewCriteria.append(tokens[1]);
                                 } else {
                                     int iLastToken = tokens.length - 1;
-                                    newCriteria += tokens[iLastToken - 1] + " " + tokens[iLastToken];
+                                    sbNewCriteria.append(tokens[iLastToken - 1]).append(" ").append(tokens[iLastToken]);
                                 }
                             } else if (repositoryHelper.isEndsWithRegex(searchCriteria) || repositoryHelper.isContainsRegex(searchCriteria)) {
-                                newCriteria = ".*\\Q";
+                                sbNewCriteria.append(".*\\Q");
                                 if (tokens.length == 2) {
-                                    newCriteria += tokens[1];
+                                    sbNewCriteria.append(tokens[1]);
                                 } else {
                                     int iLastToken = tokens.length - 1;
-                                    newCriteria += tokens[iLastToken - 1] + " " + tokens[iLastToken];
+                                    sbNewCriteria.append(tokens[iLastToken - 1]).append(" ").append(tokens[iLastToken]);
                                 }
                             }
                         }
@@ -1530,6 +1530,10 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                     outerConditions);
 
                             // If the searchCriteria is empty, retrieve all entities of the type (no conditions)
+                            String newCriteria = sbNewCriteria.toString();
+                            if (newCriteria.equals("")) {
+                                newCriteria = searchCriteria;
+                            }
                             if (newCriteria != null && !newCriteria.equals("")) {
 
                                 // POST'd search to IGC doesn't work on v11.7.0.2 using long_description
