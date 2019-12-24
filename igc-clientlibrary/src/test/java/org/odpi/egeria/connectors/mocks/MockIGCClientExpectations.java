@@ -41,6 +41,8 @@ public class MockIGCClientExpectations implements ExpectationInitializer {
         setTypeDetails(mockServerClient, "category");
 
         setExampleFullAsset(mockServerClient, GLOSSARY_RID);
+        setExamplePartAsset(mockServerClient, "category", GLOSSARY_RID);
+        setExampleAssetWithModDetails(mockServerClient, "category", GLOSSARY_RID);
         setExampleRefAsset(mockServerClient, GLOSSARY_RID);
 
         setLogout(mockServerClient);
@@ -116,6 +118,36 @@ public class MockIGCClientExpectations implements ExpectationInitializer {
                 .respond(
                         response()
                                 .withBody(getResourceFileContents("rid_full_" + rid + ".json"))
+                );
+    }
+
+    private void setExamplePartAsset(MockServerClient mockServerClient, String type, String rid) {
+        mockServerClient
+                .withSecure(true)
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/ibm/iis/igc-rest/v1/search")
+                                .withBody("{\"types\":[\"" + type + "\"],\"properties\":[\"short_description\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"_id\",\"operator\":\"=\",\"value\":\"" + rid + "\"}],\"operator\":\"and\"}}")
+                )
+                .respond(
+                        response()
+                                .withBody(getResourceFileContents("rid_part_" + rid + ".json"))
+                );
+    }
+
+    private void setExampleAssetWithModDetails(MockServerClient mockServerClient, String type, String rid) {
+        mockServerClient
+                .withSecure(true)
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/ibm/iis/igc-rest/v1/search")
+                                .withBody("{\"types\":[\"" + type + "\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":2,\"where\":{\"conditions\":[{\"property\":\"_id\",\"operator\":\"=\",\"value\":\"" + rid + "\"}],\"operator\":\"and\"}}")
+                )
+                .respond(
+                        response()
+                                .withBody(getResourceFileContents("rid_mod_" + rid + ".json"))
                 );
     }
 
