@@ -1,0 +1,4446 @@
+[
+  {
+    "_businessLineage": false,
+    "_name": "OMRS Stub",
+    "_plural": "OMRS Stubs",
+    "_id": "$OMRS-Stub",
+    "_class": "MwbExtensions.Xt_OMRS__Stub",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/$OMRS-Stub",
+    "_dataLineage": false,
+    "_group": "Open Metadata Repository Services",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Acl",
+    "_plural": null,
+    "_id": "acl",
+    "_class": "ASCLModel.Acl",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/acl",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "AclEntry",
+    "_plural": null,
+    "_id": "aclentry",
+    "_class": "ASCLModel.AclEntry",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/aclentry",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ActionDescriptor",
+    "_plural": null,
+    "_id": "actiondescriptor",
+    "_class": "Insight.ActionDescriptor",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/actiondescriptor",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Amazon S3 Bucket",
+    "_plural": "Amazon S3 Buckets",
+    "_id": "amazon_s3_bucket",
+    "_class": "ASCLModel.DataFileFolder_S3_Bucket",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/amazon_s3_bucket",
+    "_dataLineage": true,
+    "_group": "Data Files",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Amazon S3 Data File",
+    "_plural": "Amazon S3 Data Files",
+    "_id": "amazon_s3_data_file",
+    "_class": "ASCLModel.DataFile_S3",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/amazon_s3_data_file",
+    "_dataLineage": true,
+    "_group": null,
+    "_parents": [
+      "data_file"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Amazon S3 Data File Field",
+    "_plural": "Amazon S3 Data File Fields",
+    "_id": "amazon_s3_data_file_field",
+    "_class": "ASCLModel.DataFileAttribute_S3",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/amazon_s3_data_file_field",
+    "_dataLineage": true,
+    "_group": null,
+    "_parents": [
+      "data_file_field",
+      "classificationenabledgroup"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Amazon S3 Data File Folder",
+    "_plural": "Amazon S3 Data File Folders",
+    "_id": "amazon_s3_data_file_folder",
+    "_class": "ASCLModel.DataFileFolder_S3_Folder",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/amazon_s3_data_file_folder",
+    "_dataLineage": true,
+    "_group": null,
+    "_parents": [
+      "information_asset",
+      "data_file_folder_nobucket"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Amazon S3 Data File Record",
+    "_plural": "Amazon S3 Data File Records",
+    "_id": "amazon_s3_data_file_record",
+    "_class": "ASCLModel.DataFileElement_S3",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/amazon_s3_data_file_record",
+    "_dataLineage": true,
+    "_group": null,
+    "_parents": [
+      "data_file_record"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Analysis Project",
+    "_plural": null,
+    "_id": "analysis_project",
+    "_class": "investigate.AnalysisProject",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/analysis_project",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "AnalysisSummaryObject",
+    "_plural": null,
+    "_id": "analysissummaryobject",
+    "_class": "ASCLModel.AnalysisSummaryObject",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/analysissummaryobject",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Science Model",
+    "_plural": "Data Science Models",
+    "_id": "analytics_model",
+    "_class": "dsx.AnalyticsModel",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/analytics_model",
+    "_dataLineage": false,
+    "_group": "Data Science",
+    "_parents": [
+      "analytics_object",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Analytics Object",
+    "_plural": "Analytics Objects",
+    "_id": "analytics_object",
+    "_class": "dsx.AnalyticsObject",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/analytics_object",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Science Project",
+    "_plural": "Data Science Projects",
+    "_id": "analytics_project",
+    "_class": "dsx.AnalyticsProject",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/analytics_project",
+    "_dataLineage": false,
+    "_group": "Data Science",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Science Script",
+    "_plural": "Data Science Scripts",
+    "_id": "analytics_script",
+    "_class": "dsx.AnalyticsScript",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/analytics_script",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "analytics_object"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Application",
+    "_plural": "Applications",
+    "_id": "application",
+    "_class": "MwbExtensions.EDS_Application",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/application",
+    "_dataLineage": true,
+    "_group": "Applications",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Application Install",
+    "_plural": null,
+    "_id": "application_install",
+    "_class": "ASCLModel.ApplicationInstall",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/application_install",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ApplicationFunction",
+    "_plural": null,
+    "_id": "applicationfunction",
+    "_class": "Insight.ApplicationFunction",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/applicationfunction",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ApplicationSetting",
+    "_plural": null,
+    "_id": "applicationsetting",
+    "_class": "Insight.ApplicationSetting",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/applicationsetting",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ArchivedTask",
+    "_plural": null,
+    "_id": "archivedtask",
+    "_class": "TaskQueue.ArchivedTask",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/archivedtask",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Array",
+    "_plural": null,
+    "_id": "array",
+    "_class": "ASCLModel.Dimension",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/array",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Steward",
+    "_plural": "Stewards",
+    "_id": "ascl_steward",
+    "_class": "ASCLModel.Steward",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/ascl_steward",
+    "_dataLineage": false,
+    "_group": "Glossary and Governance",
+    "_parents": [
+      "steward",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "AssociativeObject",
+    "_plural": null,
+    "_id": "associativeobject",
+    "_class": "ASCLModel.AssociativeObject",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/associativeobject",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Attribute",
+    "_plural": "Attributes",
+    "_id": "attribute",
+    "_class": "MDM.IISMDMMemberAttribute",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/attribute",
+    "_dataLineage": true,
+    "_group": "Master Data Management",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Attribute Type",
+    "_plural": "Attribute Types",
+    "_id": "attribute_type",
+    "_class": "MDM.IISMDMSegment",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/attribute_type",
+    "_dataLineage": false,
+    "_group": "Master Data Management",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Attribute Type Field",
+    "_plural": "Attribute Type Fields",
+    "_id": "attribute_type_field",
+    "_class": "MDM.IISMDMSegmentField",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/attribute_type_field",
+    "_dataLineage": false,
+    "_group": "Master Data Management",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Automation Rule",
+    "_plural": "Automation Rules",
+    "_id": "automation_rule",
+    "_class": "ASCLRules.AutomationRule",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/automation_rule",
+    "_dataLineage": false,
+    "_group": "Glossary and Governance",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "BI Collection",
+    "_plural": "BI Collections",
+    "_id": "bi_collection",
+    "_class": "ASCLBI.OLAPCollection",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_collection",
+    "_dataLineage": true,
+    "_group": "Business Intelligence",
+    "_parents": [
+      "olapmodelgroup",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "BI Collection Dimension",
+    "_plural": "BI Collection Dimensions",
+    "_id": "bi_collection_dimension",
+    "_class": "ASCLBI.OLAPCubeDimension",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_collection_dimension",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "olapassociation"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "BI Collection Fact",
+    "_plural": "BI Collection Facts",
+    "_id": "bi_collection_fact",
+    "_class": "ASCLBI.OLAPCubeMeasure",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_collection_fact",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "olapassociation"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "BI Collection Member",
+    "_plural": "BI Collection Members",
+    "_id": "bi_collection_member",
+    "_class": "ASCLBI.OLAPMember",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_collection_member",
+    "_dataLineage": true,
+    "_group": "Business Intelligence",
+    "_parents": [
+      "olapobject",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "BI Cube",
+    "_plural": "BI Cubes",
+    "_id": "bi_cube",
+    "_class": "ASCLBI.OLAPCube",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_cube",
+    "_dataLineage": true,
+    "_group": "Business Intelligence",
+    "_parents": [
+      "olapmodelgroup",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "BI Filter",
+    "_plural": "BI Filters",
+    "_id": "bi_filter",
+    "_class": "ASCLBI.OLAPFilter",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_filter",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "olapmodelgroup"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "BI Folder",
+    "_plural": "BI Folders",
+    "_id": "bi_folder",
+    "_class": "ASCLBI.BIFolder",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_folder",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "BI Hierarchy",
+    "_plural": "BI Hierarchies",
+    "_id": "bi_hierarchy",
+    "_class": "ASCLBI.OLAPHierarchy",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_hierarchy",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "olapmodelgroup"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "BI Hierarchy Member",
+    "_plural": null,
+    "_id": "bi_hierarchy_member",
+    "_class": "ASCLBI.OLAPHierarchyMember",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_hierarchy_member",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "olapobject"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "BI Level",
+    "_plural": "BI Levels",
+    "_id": "bi_level",
+    "_class": "ASCLBI.OLAPLevel",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_level",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "olapobject"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "BI Model",
+    "_plural": "BI Models",
+    "_id": "bi_model",
+    "_class": "ASCLBI.OLAPModel",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_model",
+    "_dataLineage": true,
+    "_group": "Business Intelligence",
+    "_parents": [
+      "olapobject",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "BI OLAP Level Element",
+    "_plural": null,
+    "_id": "bi_olap_level_element",
+    "_class": "ASCLBI.OLAPLevelElement",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_olap_level_element",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "olapassociation"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "BI Report",
+    "_plural": "BI Reports",
+    "_id": "bi_report",
+    "_class": "ASCLBI.ReportDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_report",
+    "_dataLineage": true,
+    "_group": "Business Intelligence",
+    "_parents": [
+      "information_asset",
+      "reportobject"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "BI Report Data Item Source",
+    "_plural": null,
+    "_id": "bi_report_data_item_source",
+    "_class": "ASCLBI.ReportDataItemSource",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_report_data_item_source",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "olapassociation"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "BI Report",
+    "_plural": "BI Reports",
+    "_id": "bi_report_nocontext",
+    "_class": "ASCLBI.ReportDef_noContext",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_report_nocontext",
+    "_dataLineage": true,
+    "_group": null,
+    "_parents": [
+      "bi_report"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "BI Report",
+    "_plural": "BI Reports",
+    "_id": "bi_report_nofolder",
+    "_class": "ASCLBI.ReportDef_NoFolder",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_report_nofolder",
+    "_dataLineage": true,
+    "_group": null,
+    "_parents": [
+      "bi_report"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "BI Report Query",
+    "_plural": "BI Report Queries",
+    "_id": "bi_report_query",
+    "_class": "ASCLBI.ReportDataSet",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_report_query",
+    "_dataLineage": true,
+    "_group": "Business Intelligence",
+    "_parents": [
+      "information_asset",
+      "reportobject"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Detail Filter",
+    "_plural": "Detail Filters",
+    "_id": "bi_report_query_detail_filter",
+    "_class": "ASCLBI.ReportQueryDetailFilter",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_report_query_detail_filter",
+    "_dataLineage": true,
+    "_group": null,
+    "_parents": [
+      "information_asset",
+      "reportobject"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "BI Report Query Item",
+    "_plural": "BI Report Query Items",
+    "_id": "bi_report_query_item",
+    "_class": "ASCLBI.ReportQueryItem",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_report_query_item",
+    "_dataLineage": true,
+    "_group": "Business Intelligence",
+    "_parents": [
+      "information_asset",
+      "reportobject"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Summary Filter",
+    "_plural": "Summary Filters",
+    "_id": "bi_report_query_summary_filter",
+    "_class": "ASCLBI.ReportQuerySummaryFilter",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_report_query_summary_filter",
+    "_dataLineage": true,
+    "_group": null,
+    "_parents": [
+      "information_asset",
+      "reportobject"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "BI Report Query Usage",
+    "_plural": "BI Report Query Usages",
+    "_id": "bi_report_query_usage",
+    "_class": "ASCLBI.QueryPageUsage",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_report_query_usage",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "bi_report_query"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "BI Report Section",
+    "_plural": null,
+    "_id": "bi_report_section",
+    "_class": "ASCLBI.ReportGroup",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_report_section",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "reportobject"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "BI Folder",
+    "_plural": "BI Folders",
+    "_id": "bi_root_folder",
+    "_class": "ASCLBI.BIFolder_Root",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_root_folder",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "bi_folder"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "BI Server",
+    "_plural": "BI Servers",
+    "_id": "bi_server",
+    "_class": "ASCLBI.BIServer",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_server",
+    "_dataLineage": false,
+    "_group": "Business Intelligence",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Binary InfoSet Operation",
+    "_plural": "Binary InfoSet Operations",
+    "_id": "binary_infoset_operation",
+    "_class": "siq.BinaryInfosetOperation",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/binary_infoset_operation",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "infoset_operation"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Blueprint Element Link",
+    "_plural": null,
+    "_id": "blueprint_element_link",
+    "_class": "BlueprintModel.BlueprintElementLink",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/blueprint_element_link",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Candidate Key",
+    "_plural": "Candidate Keys",
+    "_id": "candidate_key",
+    "_class": "ASCLModel.CandidateKey_Implemented",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/candidate_key",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Category",
+    "_plural": "Categories",
+    "_id": "category",
+    "_class": "GlossaryExtensions.BusinessCategory",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/category",
+    "_dataLineage": false,
+    "_group": "Glossary and Governance",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Changed Properties",
+    "_plural": null,
+    "_id": "changed_properties",
+    "_class": "XMetaBase.ASCLHistory_Term",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/changed_properties",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ClassDescriptor",
+    "_plural": null,
+    "_id": "classdescriptor",
+    "_class": "Insight.ClassDescriptor",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/classdescriptor",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Classification",
+    "_plural": null,
+    "_id": "classification",
+    "_class": "ASCLAnalysis.Classification",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/classification",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Classification Contribution",
+    "_plural": "Classification Contributions",
+    "_id": "classification_contribution",
+    "_class": "siq.ClassificationContribution",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/classification_contribution",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ClassificationEnabledGroup",
+    "_plural": null,
+    "_id": "classificationenabledgroup",
+    "_class": "ASCLModel.ClassificationEnabledGroup",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/classificationenabledgroup",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_field"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ClassificationTask",
+    "_plural": null,
+    "_id": "classificationtask",
+    "_class": "ASCLAnalysis.ClassificationTask",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/classificationtask",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Collection",
+    "_plural": "Collections",
+    "_id": "collection",
+    "_class": "GlossaryExtensions.AssetCollection",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/collection",
+    "_dataLineage": false,
+    "_group": "Glossary and Governance",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Column Analysis",
+    "_plural": null,
+    "_id": "column_analysis",
+    "_class": "ASCLAnalysis.DataFieldAnalysis_DatabaseField",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/column_analysis",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Column Analysis Summary",
+    "_plural": null,
+    "_id": "column_analysis_summary",
+    "_class": "ASCLModel.DFAnalysisSummary",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/column_analysis_summary",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "analysissummaryobject"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Column Definition",
+    "_plural": "Column Definitions",
+    "_id": "column_definition",
+    "_class": "DataStageX.DSColumnDefinition",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/column_definition",
+    "_dataLineage": false,
+    "_group": "ETL",
+    "_parents": [
+      "data_field",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Composite View",
+    "_plural": "Composite Views",
+    "_id": "composite_view",
+    "_class": "MDM.IISMDMCompositeView",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/composite_view",
+    "_dataLineage": false,
+    "_group": "Master Data Management",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Connector",
+    "_plural": "Connectors",
+    "_id": "connector",
+    "_class": "ASCLModel.Connector",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/connector",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Credential",
+    "_plural": null,
+    "_id": "credential",
+    "_class": "ASCLModel.Credential",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/credential",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Credentials",
+    "_plural": null,
+    "_id": "credentials",
+    "_class": "ASCLModel.UserCredentials",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/credentials",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Custom Attribute",
+    "_plural": null,
+    "_id": "custom_attribute",
+    "_class": "ASCLCustomAttribute.CustomAttribute",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/custom_attribute",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "CustomAttributeVal",
+    "_plural": null,
+    "_id": "customattributeval",
+    "_class": "Insight.CustomAttributeVal",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/customattributeval",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Class",
+    "_plural": "Data Classes",
+    "_id": "data_class",
+    "_class": "ASCLAnalysis.DataClass",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_class",
+    "_dataLineage": false,
+    "_group": "Glossary and Governance",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Class",
+    "_plural": null,
+    "_id": "data_class_old",
+    "_class": "ASCLModel.DataClass",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_class_old",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Connection",
+    "_plural": null,
+    "_id": "data_connection",
+    "_class": "ASCLModel.DataConnection",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_connection",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Connection Mapping",
+    "_plural": "Data Connection Mappings",
+    "_id": "data_connection_mapping",
+    "_class": "MwbStitchingModel.DataSourceAlias",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_connection_mapping",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Element",
+    "_plural": "Data Elements",
+    "_id": "data_element",
+    "_class": "DataStageX.DSDataElement",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_element",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_item_definition"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Item",
+    "_plural": null,
+    "_id": "data_field",
+    "_class": "ASCLModel.DataField",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_field",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_item"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Data File",
+    "_plural": "Data Files",
+    "_id": "data_file",
+    "_class": "ASCLModel.DefaultDataFile",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_file",
+    "_dataLineage": true,
+    "_group": "Data Files",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data File Definition",
+    "_plural": "Data File Definitions",
+    "_id": "data_file_definition",
+    "_class": "ASCLModel.DataFileDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_file_definition",
+    "_dataLineage": false,
+    "_group": "Data Files",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data File Definition Field",
+    "_plural": "Data File Definition Fields",
+    "_id": "data_file_definition_field",
+    "_class": "ASCLModel.DataFileAttributeDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_file_definition_field",
+    "_dataLineage": false,
+    "_group": "Data Files",
+    "_parents": [
+      "data_field",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Data File Definition Record",
+    "_plural": "Data File Definition Records",
+    "_id": "data_file_definition_record",
+    "_class": "ASCLModel.DataFileElementDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_file_definition_record",
+    "_dataLineage": false,
+    "_group": "Data Files",
+    "_parents": [
+      "datagroup",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Data File Field",
+    "_plural": "Data File Fields",
+    "_id": "data_file_field",
+    "_class": "ASCLModel.DataFileAttribute",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_file_field",
+    "_dataLineage": true,
+    "_group": "Data Files",
+    "_parents": [
+      "data_field",
+      "information_asset",
+      "classificationenabledgroup"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Data File Folder",
+    "_plural": "Data File Folders",
+    "_id": "data_file_folder",
+    "_class": "ASCLModel.DefaultFileFolder",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_file_folder",
+    "_dataLineage": true,
+    "_group": null,
+    "_parents": [
+      "information_asset",
+      "data_file_folder_nobucket"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Data File Folder",
+    "_plural": "Data File Folders",
+    "_id": "data_file_folder_nobucket",
+    "_class": "ASCLModel.DataFileFolder_noBucket",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_file_folder_nobucket",
+    "_dataLineage": true,
+    "_group": "Data Files",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Data File Record",
+    "_plural": "Data File Records",
+    "_id": "data_file_record",
+    "_class": "ASCLModel.DataFileElement",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_file_record",
+    "_dataLineage": true,
+    "_group": "Data Files",
+    "_parents": [
+      "datagroup",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Item",
+    "_plural": null,
+    "_id": "data_item",
+    "_class": "ASCLModel.DataItemBase",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_item",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Item Definition",
+    "_plural": null,
+    "_id": "data_item_definition",
+    "_class": "ASCLModel.DataItemDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_item_definition",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_item"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Item Properties",
+    "_plural": null,
+    "_id": "data_item_properties",
+    "_class": "DataStageX.DSDataItemProps",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_item_properties",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Item Value",
+    "_plural": null,
+    "_id": "data_item_value",
+    "_class": "ASCLModel.DataValues",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_item_value",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Map Filter Operation",
+    "_plural": null,
+    "_id": "data_map_filter_operation",
+    "_class": "siq.DataMapFilterOperation",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_map_filter_operation",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "infoset_operation"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Rule",
+    "_plural": "Data Rules",
+    "_id": "data_rule",
+    "_class": "ASCLRules.NonPublishedRuleDefExecutable",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_rule",
+    "_dataLineage": false,
+    "_group": "Data Quality",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Rule Definition",
+    "_plural": "Data Rule Definitions",
+    "_id": "data_rule_definition",
+    "_class": "ASCLRules.DataRuleDefinition",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_rule_definition",
+    "_dataLineage": false,
+    "_group": "Data Quality",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Rule Results",
+    "_plural": null,
+    "_id": "data_rule_results",
+    "_class": "investigate.ExecutionHistory",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_rule_results",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Rule Set",
+    "_plural": "Data Rule Sets",
+    "_id": "data_rule_set",
+    "_class": "ASCLRules.NonPublishedRuleSetExecutable",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_rule_set",
+    "_dataLineage": false,
+    "_group": "Data Quality",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Rule Set Definition",
+    "_plural": "Data Rule Set Definitions",
+    "_id": "data_rule_set_definition",
+    "_class": "ASCLRules.RuleSet",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_rule_set_definition",
+    "_dataLineage": false,
+    "_group": "Data Quality",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Database",
+    "_plural": "Databases",
+    "_id": "database",
+    "_class": "ASCLModel.Database",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database",
+    "_dataLineage": true,
+    "_group": "Databases",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Database Alias",
+    "_plural": "Database Aliases",
+    "_id": "database_alias",
+    "_class": "ASCLModel.DatabaseAlias",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_alias",
+    "_dataLineage": true,
+    "_group": "Databases",
+    "_parents": [
+      "datagroup",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Database Column",
+    "_plural": "Database Columns",
+    "_id": "database_column",
+    "_class": "ASCLModel.DatabaseField",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_column",
+    "_dataLineage": true,
+    "_group": "Databases",
+    "_parents": [
+      "information_asset",
+      "data_field",
+      "classificationenabledgroup"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Database Domain",
+    "_plural": "Database Domains",
+    "_id": "database_domain",
+    "_class": "ASCLModel.DataItemDef_Implemented",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_domain",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_item_definition"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Database Index",
+    "_plural": "Database Indexes",
+    "_id": "database_index",
+    "_class": "ASCLModel.Index",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_index",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Database Schema",
+    "_plural": "Database Schemas",
+    "_id": "database_schema",
+    "_class": "ASCLModel.DataSchema",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_schema",
+    "_dataLineage": true,
+    "_group": "Databases",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Database Table",
+    "_plural": "Database Tables",
+    "_id": "database_table",
+    "_class": "ASCLModel.DatabaseTable",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_table",
+    "_dataLineage": true,
+    "_group": "Databases",
+    "_parents": [
+      "datagroup",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "DataGroup",
+    "_plural": null,
+    "_id": "datagroup",
+    "_class": "ASCLModel.DataGroup",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/datagroup",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "DataSourceAliasGroup",
+    "_plural": "Data Connection Mappings",
+    "_id": "datasourcealiasgroup",
+    "_class": "MwbStitchingModel.DataSourceAliasGroup",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/datasourcealiasgroup",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "DataStage Item",
+    "_plural": null,
+    "_id": "datastage_item",
+    "_class": "DataStageX.DSItem",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/datastage_item",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Derivation",
+    "_plural": null,
+    "_id": "derivation",
+    "_class": "DataStageX.DSDerivation",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/derivation",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Design Column",
+    "_plural": "Design Columns",
+    "_id": "design_column",
+    "_class": "ASCLModel.PhysicalAttribute",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/design_column",
+    "_dataLineage": false,
+    "_group": "Physical Data Models",
+    "_parents": [
+      "data_field",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Design Foreign Key",
+    "_plural": "Design Foreign Keys",
+    "_id": "design_foreign_key",
+    "_class": "ASCLModel.ForeignKey_Design",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/design_foreign_key",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "foreign_key"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Design Key",
+    "_plural": "Design Keys",
+    "_id": "design_key",
+    "_class": "ASCLModel.CandidateKey_Design",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/design_key",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Design Stored Procedure",
+    "_plural": "Design Stored Procedures",
+    "_id": "design_stored_procedure",
+    "_class": "ASCLModel.StoredProcedure_Model",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/design_stored_procedure",
+    "_dataLineage": false,
+    "_group": "Physical Data Models",
+    "_parents": [
+      "datagroup",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Design Stored Procedure Parameter",
+    "_plural": "Design Stored Procedure Parameters",
+    "_id": "design_stored_procedure_parameter",
+    "_class": "ASCLModel.ParameterDef_SPModel",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/design_stored_procedure_parameter",
+    "_dataLineage": false,
+    "_group": "Physical Data Models",
+    "_parents": [
+      "parameter",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Design Table",
+    "_plural": "Design Tables",
+    "_id": "design_table",
+    "_class": "ASCLModel.PhysicalEntity",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/design_table",
+    "_dataLineage": false,
+    "_group": "Physical Data Models",
+    "_parents": [
+      "datagroup",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Design View",
+    "_plural": "Design Views",
+    "_id": "design_view",
+    "_class": "ASCLModel.DesignView",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/design_view",
+    "_dataLineage": false,
+    "_group": "Physical Data Models",
+    "_parents": [
+      "datagroup",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "DevelopmentLog",
+    "_plural": null,
+    "_id": "development_log",
+    "_class": "ASCLHistory.DevelopmentLog",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/development_log",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "term_history"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Directory",
+    "_plural": null,
+    "_id": "directory",
+    "_class": "ASCLModel.Directory",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/directory",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "DirectoryProviderConfiguration",
+    "_plural": null,
+    "_id": "directoryproviderconfiguration",
+    "_class": "ASCLModel.DirectoryProviderConfiguration",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/directoryproviderconfiguration",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "DirectoryProviderProperty",
+    "_plural": null,
+    "_id": "directoryproviderproperty",
+    "_class": "ASCLModel.DirectoryProviderProperty",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/directoryproviderproperty",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Stage Column",
+    "_plural": "Stage Columns",
+    "_id": "ds_stage_column",
+    "_class": "DataStageX.DSStageColumn",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/ds_stage_column",
+    "_dataLineage": true,
+    "_group": null,
+    "_parents": [
+      "data_item",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "DSArgumentMap",
+    "_plural": null,
+    "_id": "dsargumentmap",
+    "_class": "DataStageX.DSArgumentMap",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsargumentmap",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Connection",
+    "_plural": "Data Connections",
+    "_id": "dsdata_connection",
+    "_class": "DataStageX.DSDataConnection",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsdata_connection",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_connection"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Design View",
+    "_plural": null,
+    "_id": "dsdesign_view",
+    "_class": "DataStageX.DSDesignView",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsdesign_view",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "DSExternalDependency",
+    "_plural": null,
+    "_id": "dsexternaldependency",
+    "_class": "DataStageX.DSExternalDependency",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsexternaldependency",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Folder",
+    "_plural": "Folders",
+    "_id": "dsfolder",
+    "_class": "DataStageX.DSFolder",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsfolder",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "DSJCLTemplate",
+    "_plural": null,
+    "_id": "dsjcltemplate",
+    "_class": "DataStageX.DSJCLTemplate",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsjcltemplate",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Job",
+    "_plural": "Jobs",
+    "_id": "dsjob",
+    "_class": "DataStageX.DSJobDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsjob",
+    "_dataLineage": true,
+    "_group": "ETL",
+    "_parents": [
+      "jobdef",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "DSMetaBag",
+    "_plural": null,
+    "_id": "dsmetabag",
+    "_class": "DataStageX.DSMetaBag",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsmetabag",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "DSMFColumnInfo",
+    "_plural": null,
+    "_id": "dsmfcolumninfo",
+    "_class": "DataStageX.DSMFColumnInfo",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsmfcolumninfo",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Parameter",
+    "_plural": "Parameters",
+    "_id": "dsparameter",
+    "_class": "DataStageX.DSParameterDefContainer",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsparameter",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "parameter"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Parameter",
+    "_plural": "Parameters",
+    "_id": "dsparameter_job",
+    "_class": "DataStageX.DSParameterDefJobDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsparameter_job",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "parameter"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Parameter",
+    "_plural": "Parameters",
+    "_id": "dsparameter_set",
+    "_class": "DataStageX.DSParameterDefDSParameterSet",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsparameter_set",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "parameter"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Stage Type",
+    "_plural": "Stage Types",
+    "_id": "dsstage_type",
+    "_class": "DataStageX.DSStageType",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsstage_type",
+    "_dataLineage": false,
+    "_group": "ETL",
+    "_parents": [
+      "stage_type",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Duplicates Operation",
+    "_plural": "Duplicates Operations",
+    "_id": "duplicates_operation",
+    "_class": "siq.DuplicatesOperation",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/duplicates_operation",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "binary_infoset_operation"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Endpoint",
+    "_plural": "Endpoints",
+    "_id": "endpoint",
+    "_class": "StreamsEndPoint.EndPoint",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/endpoint",
+    "_dataLineage": true,
+    "_group": "Streams",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Entity Attribute",
+    "_plural": "Entity Attributes",
+    "_id": "entity_attribute",
+    "_class": "ASCLLogicalModel.Attribute",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/entity_attribute",
+    "_dataLineage": false,
+    "_group": "Logical Data Models",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Entity Type",
+    "_plural": "Entity Types",
+    "_id": "entity_type",
+    "_class": "MDM.IISMDMEntity",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/entity_type",
+    "_dataLineage": false,
+    "_group": "Master Data Management",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Exception Filter Operation",
+    "_plural": null,
+    "_id": "exception_filter_operation",
+    "_class": "siq.ExceptionFilterOperation",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/exception_filter_operation",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "infoset_operation"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Extension Mapping",
+    "_plural": "Extension Mappings",
+    "_id": "extension_mapping",
+    "_class": "MwbExtensions.Mapping",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/extension_mapping",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Extension Mapping Document",
+    "_plural": "Extension Mapping Documents",
+    "_id": "extension_mapping_document",
+    "_class": "MwbExtensions.MappingDoc_User",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/extension_mapping_document",
+    "_dataLineage": true,
+    "_group": "Mappings and Specifications",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Field Analysis",
+    "_plural": null,
+    "_id": "field_analysis",
+    "_class": "ASCLAnalysis.DataFieldAnalysis_FileAttribute",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/field_analysis",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": true,
+    "_name": "File",
+    "_plural": "Files",
+    "_id": "file",
+    "_class": "MwbExtensions.EDS_File",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/file",
+    "_dataLineage": true,
+    "_group": "Files",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Record Analysis",
+    "_plural": null,
+    "_id": "file_record_analysis",
+    "_class": "ASCLAnalysis.DataCollectionAnalysis_FileElement",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/file_record_analysis",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Filter",
+    "_plural": "Filters",
+    "_id": "filter",
+    "_class": "siq.Filter",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/filter",
+    "_dataLineage": false,
+    "_group": "Unstructured Data Sources",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Filter Operation",
+    "_plural": "Filter Operations",
+    "_id": "filter_operation",
+    "_class": "siq.FilterOperation",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/filter_operation",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "infoset_operation"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "FilterConstraint",
+    "_plural": null,
+    "_id": "filterconstraint",
+    "_class": "ASCLModel.FilterConstraint",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/filterconstraint",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Folder",
+    "_plural": "Folders",
+    "_id": "folder",
+    "_class": "ASCLCommonProject.Folder",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/folder",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Foreign Key",
+    "_plural": "Foreign Keys",
+    "_id": "foreign_key",
+    "_class": "ASCLModel.ForeignKey",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/foreign_key",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Foreign Key Definition",
+    "_plural": "Foreign Key Definitions",
+    "_id": "foreign_key_definition",
+    "_class": "DataStageX.DSForeignKeyDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/foreign_key_definition",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Function",
+    "_plural": null,
+    "_id": "function",
+    "_class": "ASCLModel.Function",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/function",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Function Call",
+    "_plural": null,
+    "_id": "function_call",
+    "_class": "DataStageX.DSFunctionCall",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/function_call",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "functioncall"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "FunctionCall",
+    "_plural": null,
+    "_id": "functioncall",
+    "_class": "ASCLModel.FunctionCall",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/functioncall",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "associativeobject"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Group",
+    "_plural": "Groups",
+    "_id": "group",
+    "_class": "ASCLModel.NonStewardGroup",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/group",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "user_group"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "HBase Namespace",
+    "_plural": "HBase Namespaces",
+    "_id": "hbase_namespace",
+    "_class": "ASCLModel.HBaseNamespace",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/hbase_namespace",
+    "_dataLineage": true,
+    "_group": "Databases",
+    "_parents": [
+      "database_schema",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Host",
+    "_plural": "Hosts",
+    "_id": "host",
+    "_class": "ASCLModel.HostSystem",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/host",
+    "_dataLineage": false,
+    "_group": "Databases",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Host (Engine)",
+    "_plural": "Hosts (Engines)",
+    "_id": "host_(engine)",
+    "_class": "ASCLModel.HostSystem_DSEngine",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/host_(engine)",
+    "_dataLineage": false,
+    "_group": "ETL",
+    "_parents": [
+      "host",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "IDoc Field",
+    "_plural": "IDoc Fields",
+    "_id": "idoc_field",
+    "_class": "ASCLModel.SAP_IDOC_Field",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/idoc_field",
+    "_dataLineage": true,
+    "_group": "IDoc Data Sources",
+    "_parents": [
+      "data_field",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "IDoc Segment Type",
+    "_plural": "IDoc Segment Types",
+    "_id": "idoc_segment_type",
+    "_class": "ASCLModel.SAP_IDOC_SegmentType",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/idoc_segment_type",
+    "_dataLineage": true,
+    "_group": "IDoc Data Sources",
+    "_parents": [
+      "information_asset",
+      "data_field"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "IDoc Type",
+    "_plural": "IDoc Types",
+    "_id": "idoc_type",
+    "_class": "ASCLModel.SAP_IDOC_TYPE",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/idoc_type",
+    "_dataLineage": true,
+    "_group": "IDoc Data Sources",
+    "_parents": [
+      "datagroup",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "In Parameter",
+    "_plural": "In Parameters",
+    "_id": "in_parameter",
+    "_class": "MwbExtensions.EDS_InParameter",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/in_parameter",
+    "_dataLineage": true,
+    "_group": "Stored Procedure Definitions",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Index Member",
+    "_plural": null,
+    "_id": "index_member",
+    "_class": "ASCLModel.IndexMember",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/index_member",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "associativeobject"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Inferred Foreign Key",
+    "_plural": null,
+    "_id": "inferred_foreign_key",
+    "_class": "ASCLAnalysis.InferredForeignKey",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/inferred_foreign_key",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Inferred Key",
+    "_plural": "Inferred Keys",
+    "_id": "inferred_key",
+    "_class": "ASCLAnalysis.InferredCandidateKey",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/inferred_key",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Asset",
+    "_plural": null,
+    "_id": "information_asset",
+    "_class": "XMetaBase.XMetaRepositoryObject",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Governance Policy",
+    "_plural": "Information Governance Policies",
+    "_id": "information_governance_policy",
+    "_class": "GlossaryExtensions.Policy",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_policy",
+    "_dataLineage": false,
+    "_group": "Glossary and Governance",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Governance Rule",
+    "_plural": "Information Governance Rules",
+    "_id": "information_governance_rule",
+    "_class": "GlossaryExtensions.BusinessRule",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule",
+    "_dataLineage": false,
+    "_group": "Glossary and Governance",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Server Report",
+    "_plural": "Information Server Reports",
+    "_id": "information_server_report",
+    "_class": "reporting.Report",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_server_report",
+    "_dataLineage": false,
+    "_group": "Information Server Reports",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Server Report (Analysis Project)",
+    "_plural": "Information Server Reports (Analysis Projects)",
+    "_id": "information_server_report_(analysis_project)",
+    "_class": "reporting.Report_Analysis",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_server_report_(analysis_project)",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_server_report"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Server Report (Database)",
+    "_plural": "Information Server Reports (Databases)",
+    "_id": "information_server_report_(database)",
+    "_class": "reporting.Report_DB",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_server_report_(database)",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_server_report"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Server Report (Job)",
+    "_plural": "Information Server Reports (Jobs)",
+    "_id": "information_server_report_(job)",
+    "_class": "reporting.Report_Job",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_server_report_(job)",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_server_report"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Server Report (Mapping Project)",
+    "_plural": "Information Server Reports (Mapping Projects)",
+    "_id": "information_server_report_(mapping_project)",
+    "_class": "reporting.Report_FastTrack",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_server_report_(mapping_project)",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_server_report"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Server Report (Mapping Specification)",
+    "_plural": "Information Server Reports (Mapping Specifications)",
+    "_id": "information_server_report_(mapping_specification)",
+    "_class": "reporting.Report_Specification",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_server_report_(mapping_specification)",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_server_report"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Server Report (Steward)",
+    "_plural": "Information Server Reports (Stewards)",
+    "_id": "information_server_report_(steward)",
+    "_class": "reporting.Report_Steward",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_server_report_(steward)",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_server_report"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Server Report (Job)",
+    "_plural": "Information Server Reports (Jobs)",
+    "_id": "information_server_report_param_(job)",
+    "_class": "reporting.Report_JobParam",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_server_report_param_(job)",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_server_report"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Server Report Parameters",
+    "_plural": "Information Server Report Parameters",
+    "_id": "information_server_report_parameters",
+    "_class": "reporting.Parameter",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_server_report_parameters",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Services Application",
+    "_plural": "Information Services Applications",
+    "_id": "information_services_application",
+    "_class": "rti.RTIApplication",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_services_application",
+    "_dataLineage": true,
+    "_group": "Web Services",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Services Argument",
+    "_plural": "Information Services Arguments",
+    "_id": "information_services_argument",
+    "_class": "rti.ColumnDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_services_argument",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Services Operation",
+    "_plural": "Information Services Operations",
+    "_id": "information_services_operation",
+    "_class": "rti.RTIOperation",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_services_operation",
+    "_dataLineage": true,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Services Project",
+    "_plural": "Information Services Projects",
+    "_id": "information_services_project",
+    "_class": "rti.RTIProject",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_services_project",
+    "_dataLineage": false,
+    "_group": "Web Services",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Information Services Service",
+    "_plural": "Information Services Services",
+    "_id": "information_services_service",
+    "_class": "rti.RTIService",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_services_service",
+    "_dataLineage": true,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "InfoSet",
+    "_plural": "InfoSets",
+    "_id": "infoset",
+    "_class": "siq.Infoset",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/infoset",
+    "_dataLineage": false,
+    "_group": "Unstructured Data Sources",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "InfoSet Operation",
+    "_plural": "InfoSet Operations",
+    "_id": "infoset_operation",
+    "_class": "siq.InfosetOperation",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/infoset_operation",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "InOut Parameter",
+    "_plural": "InOut Parameters",
+    "_id": "inout_parameter",
+    "_class": "MwbExtensions.EDS_InOutParameter",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/inout_parameter",
+    "_dataLineage": true,
+    "_group": "Stored Procedure Definitions",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Input Parameter",
+    "_plural": "Input Parameters",
+    "_id": "input_parameter",
+    "_class": "MwbExtensions.EDS_InputParameter",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/input_parameter",
+    "_dataLineage": true,
+    "_group": "Applications",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "InputPin",
+    "_plural": null,
+    "_id": "inputpin",
+    "_class": "ASCLModel.InputPin",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/inputpin",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "associativeobject"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Instance",
+    "_plural": "Instances",
+    "_id": "instance",
+    "_class": "siq.SIQInstance",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/instance",
+    "_dataLineage": false,
+    "_group": "Unstructured Data Sources",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Rule",
+    "_plural": null,
+    "_id": "inv_data_rule",
+    "_class": "investigate.RuleExecutable_Rule",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/inv_data_rule",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Rule Definition",
+    "_plural": null,
+    "_id": "inv_data_rule_definition",
+    "_class": "investigate.RuleComponent",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/inv_data_rule_definition",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Rule Set",
+    "_plural": null,
+    "_id": "inv_data_rule_set",
+    "_class": "investigate.RuleExecutable_RuleSet",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/inv_data_rule_set",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Rule Set Definition",
+    "_plural": null,
+    "_id": "inv_data_rule_set_definition",
+    "_class": "investigate.RuleSetComponent",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/inv_data_rule_set_definition",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Job",
+    "_plural": null,
+    "_id": "job",
+    "_class": "ASCLModel.Job",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/job",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Job Constraint",
+    "_plural": "Job Constraints",
+    "_id": "job_constraint",
+    "_class": "DataStageX.DSFilterConstraint",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/job_constraint",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "filterconstraint"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Job Fail Event",
+    "_plural": "Job Fail Events",
+    "_id": "job_fail_event",
+    "_class": "OMDModel.x_FailEvent",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/job_fail_event",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Job Input Pin",
+    "_plural": null,
+    "_id": "job_input_pin",
+    "_class": "DataStageX.DSInputPin",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/job_input_pin",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "inputpin"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Job Output Pin",
+    "_plural": null,
+    "_id": "job_output_pin",
+    "_class": "DataStageX.DSOutputPin",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/job_output_pin",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "outputpin"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Job Parameter",
+    "_plural": null,
+    "_id": "job_parameter",
+    "_class": "OMDModel.JobParameter",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/job_parameter",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Job Read Event",
+    "_plural": "Job Read Events",
+    "_id": "job_read_event",
+    "_class": "OMDModel.x_ReadEvent",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/job_read_event",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Job Run",
+    "_plural": "Job Runs",
+    "_id": "job_run",
+    "_class": "OMDModel.JobRun",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/job_run",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Job Run Activity",
+    "_plural": "Job Run Activities",
+    "_id": "job_run_activity",
+    "_class": "OMDModel.ComponentRun",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/job_run_activity",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Job Stage Parameters",
+    "_plural": null,
+    "_id": "job_stage_parameters",
+    "_class": "DataStageX.DSStageParamProps",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/job_stage_parameters",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Job Stage Record",
+    "_plural": null,
+    "_id": "job_stage_record",
+    "_class": "DataStageX.DSStageRecord",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/job_stage_record",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Job Write Event",
+    "_plural": "Job Write Events",
+    "_id": "job_write_event",
+    "_class": "OMDModel.x_WriteEvent",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/job_write_event",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "JobDef",
+    "_plural": null,
+    "_id": "jobdef",
+    "_class": "ASCLModel.JobDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/jobdef",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "KeyComponent",
+    "_plural": null,
+    "_id": "keycomponent",
+    "_class": "ASCLModel.KeyComponent",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/keycomponent",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "associativeobject"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Label",
+    "_plural": "Labels",
+    "_id": "label",
+    "_class": "GlossaryExtensions.BusinessDomain",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/label",
+    "_dataLineage": false,
+    "_group": "Glossary and Governance",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Business Lineage Container",
+    "_plural": "Business Lineage Containers",
+    "_id": "lineage_container",
+    "_class": "GlossaryExtensions.LineageContainer",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/lineage_container",
+    "_dataLineage": false,
+    "_group": "Glossary and Governance",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Lineage Report Template",
+    "_plural": "Lineage Report Templates",
+    "_id": "lineage_report_template",
+    "_class": "UserData.LineageTemplate",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/lineage_report_template",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "LineageFilter",
+    "_plural": null,
+    "_id": "lineagefilter",
+    "_class": "UserData.LineageFilter",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/lineagefilter",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Link",
+    "_plural": null,
+    "_id": "link",
+    "_class": "DataStageX.DSLink",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/link",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "LinkType",
+    "_plural": null,
+    "_id": "linktype",
+    "_class": "ASCLOSLC.LinkType",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/linktype",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Local Container",
+    "_plural": "Local Containers",
+    "_id": "local_container",
+    "_class": "DataStageX.DSLocalContainerDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/local_container",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "referenced_container"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Logical Data Model",
+    "_plural": "Logical Data Models",
+    "_id": "logical_data_model",
+    "_class": "ASCLLogicalModel.LogicalModel",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/logical_data_model",
+    "_dataLineage": false,
+    "_group": "Logical Data Models",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Logical Domain",
+    "_plural": null,
+    "_id": "logical_domain",
+    "_class": "ASCLLogicalModel.Domain",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/logical_domain",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Logical Entity",
+    "_plural": "Logical Entities",
+    "_id": "logical_entity",
+    "_class": "ASCLLogicalModel.Entity",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/logical_entity",
+    "_dataLineage": false,
+    "_group": "Logical Data Models",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Logical Foreign Key",
+    "_plural": "Logical Foreign Keys",
+    "_id": "logical_foreign_key",
+    "_class": "ASCLLogicalModel.Relationship",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/logical_foreign_key",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Logical Inversion Key",
+    "_plural": "Logical Inversion Keys",
+    "_id": "logical_inversion_key",
+    "_class": "ASCLLogicalModel.InversionKey",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/logical_inversion_key",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Logical Key",
+    "_plural": "Logical Keys",
+    "_id": "logical_key",
+    "_class": "ASCLLogicalModel.UniqueKey",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/logical_key",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Logical Validation List",
+    "_plural": "Logical Validation Lists",
+    "_id": "logical_validation_list",
+    "_class": "ASCLLogicalModel.ValidationList",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/logical_validation_list",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Logical Validation Range",
+    "_plural": "Logical Validation Ranges",
+    "_id": "logical_validation_range",
+    "_class": "ASCLLogicalModel.ValidationRange",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/logical_validation_range",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Logical Validation Rule",
+    "_plural": "Logical Validation Rules",
+    "_id": "logical_validation_rule",
+    "_class": "ASCLLogicalModel.ValidationRule",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/logical_validation_rule",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Logical Variable",
+    "_plural": null,
+    "_id": "logical_variable",
+    "_class": "ASCLRules.RuleVariable",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/logical_variable",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Main Object",
+    "_plural": null,
+    "_id": "main_object",
+    "_class": "ASCLModel.MainObject",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/main_object",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Mapping",
+    "_plural": "Mappings",
+    "_id": "mapping",
+    "_class": "msl.Mapping",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/mapping",
+    "_dataLineage": true,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Mapping Component",
+    "_plural": "Mapping Components",
+    "_id": "mapping_component",
+    "_class": "fasttrack.MappingContainerSpecification",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/mapping_component",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Mapping Filter",
+    "_plural": "Mapping Filters",
+    "_id": "mapping_filter",
+    "_class": "msl.ConditionRefinement",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/mapping_filter",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Mapping Join",
+    "_plural": "Mapping Joins",
+    "_id": "mapping_join",
+    "_class": "fasttrack.JoinRefinement",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/mapping_join",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Mapping Project",
+    "_plural": "Mapping Projects",
+    "_id": "mapping_project",
+    "_class": "project.Project",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/mapping_project",
+    "_dataLineage": false,
+    "_group": "Mappings and Specifications",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Mapping Specification",
+    "_plural": "Mapping Specifications",
+    "_id": "mapping_specification",
+    "_class": "fasttrack.MappingSpecification_Nature",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/mapping_specification",
+    "_dataLineage": true,
+    "_group": "Mappings and Specifications",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Match Specification",
+    "_plural": "Match Specifications",
+    "_id": "match_specification",
+    "_class": "DataStageX.DSDataQualitySpec_Match",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/match_specification",
+    "_dataLineage": false,
+    "_group": "Data Quality",
+    "_parents": [
+      "standardization_object",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "MDM Model",
+    "_plural": "MDM Models",
+    "_id": "mdm_model",
+    "_class": "MDM.IISMDMModel",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/mdm_model",
+    "_dataLineage": true,
+    "_group": "Master Data Management",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Member Type",
+    "_plural": "Member Types",
+    "_id": "member_type",
+    "_class": "MDM.IISMDMMember",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/member_type",
+    "_dataLineage": true,
+    "_group": "Master Data Management",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Method",
+    "_plural": "Methods",
+    "_id": "method",
+    "_class": "MwbExtensions.EDS_Method",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/method",
+    "_dataLineage": true,
+    "_group": "Applications",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Metric",
+    "_plural": "Metrics",
+    "_id": "metric",
+    "_class": "investigate.MetricComponent",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/metric",
+    "_dataLineage": false,
+    "_group": "Data Quality",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Model Eval Metric",
+    "_plural": "Model Eval Metrics",
+    "_id": "model_eval_metric",
+    "_class": "dsx.ModelEvalMetric",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/model_eval_metric",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Model Input",
+    "_plural": "Model Inputs",
+    "_id": "model_input",
+    "_class": "dsx.ModelInput",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/model_input",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Model Label",
+    "_plural": "Model Labels",
+    "_id": "model_label",
+    "_class": "dsx.ModelLabel",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/model_label",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Database Alias",
+    "_plural": "Database Aliases",
+    "_id": "mwb_database_alias",
+    "_class": "MwbStitchingModel.DataSourceAliasMapping",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/mwb_database_alias",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "NavigationDescriptor",
+    "_plural": null,
+    "_id": "navigationdescriptor",
+    "_class": "Insight.NavigationDescriptor",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/navigationdescriptor",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Node Operation",
+    "_plural": "Node Operations",
+    "_id": "node_operation",
+    "_class": "siq.NodeOperation",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/node_operation",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "infoset_operation"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Rule Definition",
+    "_plural": "Data Rule Definitions",
+    "_id": "non_published_data_rule_definition",
+    "_class": "ASCLRules.NonPublishedRuleDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/non_published_data_rule_definition",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_rule_definition"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Rule Set Definition",
+    "_plural": "Data Rule Set Definitions",
+    "_id": "non_published_data_rule_set",
+    "_class": "ASCLRules.NonPublishedRuleSet",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/non_published_data_rule_set",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_rule_set_definition"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "User",
+    "_plural": "Users",
+    "_id": "non_steward_user",
+    "_class": "ASCLModel.NonStewardUser",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/non_steward_user",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "user"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Notebook",
+    "_plural": "Notebooks",
+    "_id": "notebook",
+    "_class": "dsx.Notebook",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/notebook",
+    "_dataLineage": false,
+    "_group": "Data Science",
+    "_parents": [
+      "analytics_object",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Object Type",
+    "_plural": "Object Types",
+    "_id": "object_type",
+    "_class": "MwbExtensions.EDS_ObjectType",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/object_type",
+    "_dataLineage": true,
+    "_group": "Applications",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "OLAP Join",
+    "_plural": null,
+    "_id": "olap_join",
+    "_class": "ASCLBI.OLAPJoin",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/olap_join",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "olapmodelgroup"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "OLAP Member Source",
+    "_plural": null,
+    "_id": "olap_member_source",
+    "_class": "ASCLBI.OLAPMemberSource",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/olap_member_source",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "olapassociation"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "OLAPAssociation",
+    "_plural": null,
+    "_id": "olapassociation",
+    "_class": "ASCLBI.OLAPAssociation",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/olapassociation",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "olapobject"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "OLAPHierarchyAssociation",
+    "_plural": null,
+    "_id": "olaphierarchyassociation",
+    "_class": "ASCLBI.OLAPHierarchyAssociation",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/olaphierarchyassociation",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "olapassociation"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "OLAPJoinRef",
+    "_plural": null,
+    "_id": "olapjoinref",
+    "_class": "ASCLBI.OLAPJoinRef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/olapjoinref",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "olapobject"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "OLAPModelGroup",
+    "_plural": null,
+    "_id": "olapmodelgroup",
+    "_class": "ASCLBI.OLAPModelGroup",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/olapmodelgroup",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "olapobject"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "OLAPObject",
+    "_plural": null,
+    "_id": "olapobject",
+    "_class": "ASCLBI.OLAPObject",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/olapobject",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Link",
+    "_plural": null,
+    "_id": "oslc_link",
+    "_class": "ASCLOSLC.Link",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/oslc_link",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Out Parameter",
+    "_plural": "Out Parameters",
+    "_id": "out_parameter",
+    "_class": "MwbExtensions.EDS_OutParameter",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/out_parameter",
+    "_dataLineage": true,
+    "_group": "Stored Procedure Definitions",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Output Value",
+    "_plural": "Output Values",
+    "_id": "output_value",
+    "_class": "MwbExtensions.EDS_OutputValue",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/output_value",
+    "_dataLineage": true,
+    "_group": "Applications",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "OutputPin",
+    "_plural": null,
+    "_id": "outputpin",
+    "_class": "ASCLModel.OutputPin",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/outputpin",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "associativeobject"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Parameter",
+    "_plural": null,
+    "_id": "parameter",
+    "_class": "ASCLModel.ParameterDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/parameter",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_item"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Parameter Set",
+    "_plural": "Parameter Sets",
+    "_id": "parameter_set",
+    "_class": "DataStageX.DSParameterSet",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/parameter_set",
+    "_dataLineage": false,
+    "_group": "ETL",
+    "_parents": [
+      "parameterset",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Parameter Set Definition",
+    "_plural": "Parameter Set Definitions",
+    "_id": "parameter_set_definition",
+    "_class": "DataStageX.DSParameterDef_isParameterSet",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/parameter_set_definition",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "parameter"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ParameterSet",
+    "_plural": null,
+    "_id": "parameterset",
+    "_class": "ASCLModel.ParameterSet",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/parameterset",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ParameterVal",
+    "_plural": null,
+    "_id": "parameterval",
+    "_class": "ASCLModel.ParameterVal",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/parameterval",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "associativeobject"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Physical Data Model",
+    "_plural": "Physical Data Models",
+    "_id": "physical_data_model",
+    "_class": "ASCLModel.PhysicalModel",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/physical_data_model",
+    "_dataLineage": false,
+    "_group": "Physical Data Models",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Physical Domain",
+    "_plural": "Physical Domains",
+    "_id": "physical_domain",
+    "_class": "ASCLModel.DataItemDef_Model",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/physical_domain",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_item_definition"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Physical Object",
+    "_plural": "Physical Objects",
+    "_id": "physical_object",
+    "_class": "MDM.IISMDMPhysicalObject",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/physical_object",
+    "_dataLineage": true,
+    "_group": "Master Data Management",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Physical Object Attribute",
+    "_plural": "Physical Object Attributes",
+    "_id": "physical_object_attribute",
+    "_class": "MDM.IISMDMPhysicalObjectAttribute",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/physical_object_attribute",
+    "_dataLineage": true,
+    "_group": "Master Data Management",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "PrimaryCategory",
+    "_plural": null,
+    "_id": "primarycategory",
+    "_class": "Insight.PrimaryCategory",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/primarycategory",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "PropDescriptor",
+    "_plural": null,
+    "_id": "propdescriptor",
+    "_class": "Insight.PropDescriptor",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/propdescriptor",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ProviderPropertyInfo",
+    "_plural": null,
+    "_id": "providerpropertyinfo",
+    "_class": "ASCLModel.ProviderPropertyInfo",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/providerpropertyinfo",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ProviderPropertyInfoExtended",
+    "_plural": null,
+    "_id": "providerpropertyinfoextended",
+    "_class": "ASCLModel.ProviderPropertyInfoExtended",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/providerpropertyinfoextended",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ProviderPropertyType",
+    "_plural": null,
+    "_id": "providerpropertytype",
+    "_class": "ASCLModel.ProviderPropertyType",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/providerpropertytype",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Rule Definition",
+    "_plural": "Data Rule Definitions",
+    "_id": "published_data_rule_definition",
+    "_class": "ASCLRules.PublishedRuleDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/published_data_rule_definition",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_rule_definition"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Data Rule Set Definition",
+    "_plural": "Data Rule Set Definitions",
+    "_id": "published_data_rule_set",
+    "_class": "ASCLRules.PublishedRuleSet",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/published_data_rule_set",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_rule_set_definition"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Quality Score Problem",
+    "_plural": null,
+    "_id": "quality_problem",
+    "_class": "ASCLAnalysis.QualityProblem",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/quality_problem",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "QualityProblemType",
+    "_plural": null,
+    "_id": "quality_Problem_Type",
+    "_class": "investigate.QualityProblemType",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/quality_Problem_Type",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "QualityProblemType",
+    "_plural": null,
+    "_id": "quality_problem_type_DQR",
+    "_class": "ASCLAnalysis.QualityProblemType",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/quality_problem_type_DQR",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "RShiny App",
+    "_plural": "RShiny Apps",
+    "_id": "r_shiny_app",
+    "_class": "dsx.RShinyApp",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/r_shiny_app",
+    "_dataLineage": false,
+    "_group": "Data Science",
+    "_parents": [
+      "analytics_object",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "RShiny App Object",
+    "_plural": "RShiny App Objects",
+    "_id": "r_shiny_app_object",
+    "_class": "dsx.RShinyAppObject",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/r_shiny_app_object",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Reference Key",
+    "_plural": "Reference Keys",
+    "_id": "reference_key",
+    "_class": "ASCLLogicalModel.ReferenceKey",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/reference_key",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Referenced Container",
+    "_plural": null,
+    "_id": "referenced_container",
+    "_class": "ASCLModel.ContainerDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/referenced_container",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ReportObject",
+    "_plural": null,
+    "_id": "reportobject",
+    "_class": "ASCLBI.ReportObject",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/reportobject",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Result Column",
+    "_plural": "Result Columns",
+    "_id": "result_column",
+    "_class": "MwbExtensions.EDS_ResultColumn",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/result_column",
+    "_dataLineage": true,
+    "_group": "Stored Procedure Definitions",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Role Assignment",
+    "_plural": null,
+    "_id": "role_assignment",
+    "_class": "ASCLModel.RoleAssignment",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/role_assignment",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "associativeobject"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Role Context",
+    "_plural": null,
+    "_id": "role_context",
+    "_class": "ASCLModel.RoleContext",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/role_context",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Tuple",
+    "_plural": "Tuples",
+    "_id": "root_tuple",
+    "_class": "StreamsEndPoint.RootTuple",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/root_tuple",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "tuple"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Routine",
+    "_plural": "Routines",
+    "_id": "routine",
+    "_class": "DataStageX.DSRoutine",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/routine",
+    "_dataLineage": false,
+    "_group": "ETL",
+    "_parents": [
+      "function",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Routine Argument",
+    "_plural": "Routine Arguments",
+    "_id": "routine_argument",
+    "_class": "DataStageX.DSParameterDefDSrRoutine",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/routine_argument",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "parameter"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Rule Execution Result",
+    "_plural": null,
+    "_id": "Rule_Execution_Result",
+    "_class": "investigate.RuleExecutionResult",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/Rule_Execution_Result",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "SAP Connection",
+    "_plural": "SAP Connections",
+    "_id": "sap_connection",
+    "_class": "ASCLModel.SAP_Connection",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/sap_connection",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_connection"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Sequence Job",
+    "_plural": "Sequence Jobs",
+    "_id": "sequence_job",
+    "_class": "DataStageX.x_JOB_SEQUENCE",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/sequence_job",
+    "_dataLineage": true,
+    "_group": null,
+    "_parents": [
+      "dsjob"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Session Configuration",
+    "_plural": null,
+    "_id": "session_configuration",
+    "_class": "ASCLModel.SessionConfiguration",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/session_configuration",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Set Operation",
+    "_plural": "Set Operations",
+    "_id": "set_operation",
+    "_class": "siq.SetOperation",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/set_operation",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "binary_infoset_operation"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Shared Container",
+    "_plural": "Shared Containers",
+    "_id": "shared_container",
+    "_class": "DataStageX.DSSharedContainerDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/shared_container",
+    "_dataLineage": false,
+    "_group": "ETL",
+    "_parents": [
+      "referenced_container",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Stage",
+    "_plural": "Stages",
+    "_id": "stage",
+    "_class": "DataStageX.DSStage",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/stage",
+    "_dataLineage": true,
+    "_group": "ETL",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Stage Column",
+    "_plural": "Stage Columns",
+    "_id": "stage_column",
+    "_class": "DataStageX.DSInOutStageColumn",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/stage_column",
+    "_dataLineage": true,
+    "_group": "ETL",
+    "_parents": [
+      "data_item",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Stage Data Rule Definition",
+    "_plural": null,
+    "_id": "stage_data_rule_definition",
+    "_class": "DataStageX.StageDataRuleDef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/stage_data_rule_definition",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Stage Type",
+    "_plural": null,
+    "_id": "stage_type",
+    "_class": "ASCLModel.StageType",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/stage_type",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Stage Type Detail",
+    "_plural": "Stage Type Details",
+    "_id": "stage_type_detail",
+    "_class": "DataStageX.DSParameterDefDSStageType",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/stage_type_detail",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "parameter"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Stage Variable",
+    "_plural": "Stage Variables",
+    "_id": "stage_variable",
+    "_class": "DataStageX.DSStageVariable",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/stage_variable",
+    "_dataLineage": true,
+    "_group": "ETL",
+    "_parents": [
+      "data_item",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Standardization Object",
+    "_plural": "Standardization Objects",
+    "_id": "standardization_object",
+    "_class": "DataStageX.DSDataQualitySpec",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/standardization_object",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "standardization_rule"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "DataQualitySpec",
+    "_plural": null,
+    "_id": "standardization_rule",
+    "_class": "ASCLModel.DataQualitySpec",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/standardization_rule",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Standardization Rule Set",
+    "_plural": "Standardization Rule Sets",
+    "_id": "standardization_rule_set",
+    "_class": "DataStageX.DSDataQualitySpec_RuleSet",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/standardization_rule_set",
+    "_dataLineage": false,
+    "_group": "Data Quality",
+    "_parents": [
+      "standardization_object",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Steward",
+    "_plural": null,
+    "_id": "steward",
+    "_class": "ASCLModel.Principal",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/steward",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Steward Group",
+    "_plural": "Steward Groups",
+    "_id": "steward_group",
+    "_class": "ASCLModel.StewardGroup",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/steward_group",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "user_group",
+      "ascl_steward"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Steward User",
+    "_plural": "Steward Users",
+    "_id": "steward_user",
+    "_class": "ASCLModel.StewardUser",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/steward_user",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "ascl_steward",
+      "user"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Stored Procedure",
+    "_plural": "Stored Procedures",
+    "_id": "stored_procedure",
+    "_class": "ASCLModel.StoredProcedure_Schema",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/stored_procedure",
+    "_dataLineage": true,
+    "_group": "Databases",
+    "_parents": [
+      "datagroup",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Stored Procedure Definition",
+    "_plural": "Stored Procedure Definitions",
+    "_id": "stored_procedure_definition",
+    "_class": "MwbExtensions.EDS_StoredProcedure",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/stored_procedure_definition",
+    "_dataLineage": true,
+    "_group": "Stored Procedure Definitions",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Stored Procedure Parameter",
+    "_plural": "Stored Procedure Parameters",
+    "_id": "stored_procedure_parameter",
+    "_class": "ASCLModel.ParameterDef_SPSchema",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/stored_procedure_parameter",
+    "_dataLineage": true,
+    "_group": "Databases",
+    "_parents": [
+      "parameter",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Subject Area",
+    "_plural": "Subject Areas",
+    "_id": "subject_area",
+    "_class": "ASCLLogicalModel.SubjectArea",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/subject_area",
+    "_dataLineage": false,
+    "_group": "Logical Data Models",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "System Role",
+    "_plural": null,
+    "_id": "system_role",
+    "_class": "ASCLModel.SystemRole",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/system_role",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Table Analysis",
+    "_plural": null,
+    "_id": "table_analysis",
+    "_class": "ASCLAnalysis.DataCollectionAnalysis_Table_View",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/table_analysis",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Table Analysis Summary",
+    "_plural": null,
+    "_id": "table_analysis_summary",
+    "_class": "ASCLModel.DCAnalysisSummary",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/table_analysis_summary",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "analysissummaryobject"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Table Definition",
+    "_plural": "Table Definitions",
+    "_id": "table_definition",
+    "_class": "DataStageX.DSTableDefinition",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/table_definition",
+    "_dataLineage": true,
+    "_group": "ETL",
+    "_parents": [
+      "data_item_definition",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Table Definition Properties",
+    "_plural": null,
+    "_id": "table_definition_properties",
+    "_class": "DataStageX.DSTableDefProps",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/table_definition_properties",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Term",
+    "_plural": "Terms",
+    "_id": "term",
+    "_class": "GlossaryExtensions.BusinessTerm",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/term",
+    "_dataLineage": false,
+    "_group": "Glossary and Governance",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Suggested Term Assignment",
+    "_plural": null,
+    "_id": "term_assignment",
+    "_class": "GlossaryExtensions.TermAssigment",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/term_assignment",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Term History",
+    "_plural": "Term Histories",
+    "_id": "term_history",
+    "_class": "ASCLHistory.ObjectEvent",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/term_history",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Transform Argument",
+    "_plural": "Transform Arguments",
+    "_id": "transform_argument",
+    "_class": "DataStageX.DSParameterDefDSTransform",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/transform_argument",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "parameter"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Transformation Project",
+    "_plural": "Transformation Projects",
+    "_id": "transformation_project",
+    "_class": "DataStageX.DSProject",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/transformation_project",
+    "_dataLineage": false,
+    "_group": "ETL",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Transforms Function",
+    "_plural": "Transforms Functions",
+    "_id": "transforms_function",
+    "_class": "DataStageX.DSTransform",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/transforms_function",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "function"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Tuple",
+    "_plural": "Tuples",
+    "_id": "tuple",
+    "_class": "StreamsEndPoint.Tuple",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/tuple",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": true,
+    "_name": "Tuple Attribute",
+    "_plural": "Tuple Attributes",
+    "_id": "tuple_attribute",
+    "_class": "StreamsEndPoint.Attribute",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/tuple_attribute",
+    "_dataLineage": true,
+    "_group": "Streams",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "User",
+    "_plural": "Users",
+    "_id": "user",
+    "_class": "ASCLModel.User",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/user",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "steward"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "User Group",
+    "_plural": "User Groups",
+    "_id": "user_group",
+    "_class": "ASCLModel.UserGroup",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/user_group",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "steward"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "User Role",
+    "_plural": null,
+    "_id": "user_role",
+    "_class": "ASCLModel.ContactRole",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/user_role",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Valid Value",
+    "_plural": null,
+    "_id": "valid_value",
+    "_class": "ASCLModel.ValueRule",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/valid_value",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_item_value"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Valid Value List",
+    "_plural": null,
+    "_id": "valid_value_list",
+    "_class": "ASCLModel.ValueList",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/valid_value_list",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_item_value"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Valid Value Range",
+    "_plural": null,
+    "_id": "valid_value_range",
+    "_class": "ASCLModel.ValueRange",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/valid_value_range",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "data_item_value"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Validity Table",
+    "_plural": "Validity Tables",
+    "_id": "validity_table",
+    "_class": "ASCLAnalysis.ValidityTable",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/validity_table",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ValidValueList",
+    "_plural": null,
+    "_id": "validvaluelist",
+    "_class": "Insight.ValidValueList",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/validvaluelist",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "validvalues"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ValidValueRange",
+    "_plural": null,
+    "_id": "validvaluerange",
+    "_class": "Insight.ValidValueRange",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/validvaluerange",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "validvalues"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ValidValueRule",
+    "_plural": null,
+    "_id": "validvaluerule",
+    "_class": "Insight.ValidValueRule",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/validvaluerule",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "validvalues"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "ValidValues",
+    "_plural": null,
+    "_id": "validvalues",
+    "_class": "Insight.ValidValues",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/validvalues",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": true,
+    "_name": "View",
+    "_plural": "Views",
+    "_id": "view",
+    "_class": "ASCLModel.DatabaseView",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/view",
+    "_dataLineage": true,
+    "_group": "Databases",
+    "_parents": [
+      "datagroup",
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Volume",
+    "_plural": "Volumes",
+    "_id": "volume",
+    "_class": "siq.Volume",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/volume",
+    "_dataLineage": false,
+    "_group": "Unstructured Data Sources",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "Volume Contribution",
+    "_plural": "Volume Contributions",
+    "_id": "volume_contribution",
+    "_class": "siq.VolumeContribution",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/volume_contribution",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XML Schema Definition",
+    "_plural": "XML Schema Definitions",
+    "_id": "xml_schema_definition",
+    "_class": "XSDModel.XSDSchema",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xml_schema_definition",
+    "_dataLineage": false,
+    "_group": "XML Schema Definitions",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XML Schema Library",
+    "_plural": "XML Schema Libraries",
+    "_id": "xml_schema_library",
+    "_class": "ContractLibraryModel.ContractLibrary",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xml_schema_library",
+    "_dataLineage": false,
+    "_group": "XML Schema Definitions",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XSD Attribute",
+    "_plural": "XSD Attributes",
+    "_id": "xsd_attribute",
+    "_class": "XSDModel.XSDAttribute_ProperAttribute",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xsd_attribute",
+    "_dataLineage": false,
+    "_group": "XML Schema Definitions",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XSD Attribute Group",
+    "_plural": "XSD Attribute Groups",
+    "_id": "xsd_attribute_group",
+    "_class": "XSDModel.XSDAttributeGroup",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xsd_attribute_group",
+    "_dataLineage": false,
+    "_group": "XML Schema Definitions",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XSD Attribute Reference",
+    "_plural": null,
+    "_id": "xsd_attribute_reference",
+    "_class": "XSDModel.XSDAttribute_Ref",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xsd_attribute_reference",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XSD Choice",
+    "_plural": "XSD Choices",
+    "_id": "xsd_choice",
+    "_class": "XSDModel.XSDElement_Choice",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xsd_choice",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XSD Complex Type",
+    "_plural": "XSD Complex Types",
+    "_id": "xsd_complex_type",
+    "_class": "XSDModel.XSDComplexType",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xsd_complex_type",
+    "_dataLineage": false,
+    "_group": "XML Schema Definitions",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XSD Element",
+    "_plural": "XSD Elements",
+    "_id": "xsd_element",
+    "_class": "XSDModel.XSDElement_Element",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xsd_element",
+    "_dataLineage": false,
+    "_group": "XML Schema Definitions",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XSD Element Group",
+    "_plural": "XSD Element Groups",
+    "_id": "xsd_element_group",
+    "_class": "XSDModel.XSDElementGroup",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xsd_element_group",
+    "_dataLineage": false,
+    "_group": "XML Schema Definitions",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XSD Element Group Reference",
+    "_plural": null,
+    "_id": "xsd_element_group_reference",
+    "_class": "XSDModel.XSDElement_GroupRef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xsd_element_group_reference",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XSD Element Reference",
+    "_plural": null,
+    "_id": "xsd_element_reference",
+    "_class": "XSDModel.XSDElement_Ref",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xsd_element_reference",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XSD Foreign Key",
+    "_plural": "XSD Foreign Keys",
+    "_id": "xsd_foreign_key",
+    "_class": "XSDModel.XSDKeyRef",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xsd_foreign_key",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XSD Primary Key",
+    "_plural": "XSD Primary Keys",
+    "_id": "xsd_primary_key",
+    "_class": "XSDModel.XSDKey",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xsd_primary_key",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": [
+      "xsd_unique_key"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XSD Sequence",
+    "_plural": "XSD Sequences",
+    "_id": "xsd_sequence",
+    "_class": "XSDModel.XSDElement_Sequence",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xsd_sequence",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XSD Simple Type",
+    "_plural": "XSD Simple Types",
+    "_id": "xsd_simple_type",
+    "_class": "XSDModel.XSDSimpleType",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xsd_simple_type",
+    "_dataLineage": false,
+    "_group": "XML Schema Definitions",
+    "_parents": [
+      "information_asset"
+    ]
+  },
+  {
+    "_businessLineage": false,
+    "_name": "XSD Unique Key",
+    "_plural": "XSD Unique Keys",
+    "_id": "xsd_unique_key",
+    "_class": "XSDModel.XSDUnique",
+    "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/xsd_unique_key",
+    "_dataLineage": false,
+    "_group": null,
+    "_parents": []
+  }
+]

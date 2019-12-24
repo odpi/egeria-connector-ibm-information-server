@@ -101,6 +101,7 @@
         <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
         <mockito.version>3.2.4</mockito.version>
         <testng.version>7.1.1</testng.version>
+        <mock-server.version>5.8.0</mock-server.version>
         <woodstox.version>6.0.3</woodstox.version>
         <maven-compiler.version>3.8.1</maven-compiler.version>
         <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
@@ -184,6 +185,18 @@
                 <artifactId>testng</artifactId>
                 <scope>test</scope>
                 <version>${testng.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mock-server</groupId>
+                <artifactId>mockserver-client-java</artifactId>
+                <scope>test</scope>
+                <version>${mock-server.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mock-server</groupId>
+                <artifactId>mockserver-core</artifactId>
+                <scope>test</scope>
+                <version>${mock-server.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.flipkart.zjsonpatch</groupId>
@@ -344,6 +357,11 @@
                             <version>${mockito.version}</version>
                         </dependency>
                     </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.mock-server</groupId>
+                    <artifactId>mockserver-maven-plugin</artifactId>
+                    <version>${mock-server.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>

@@ -34,10 +34,67 @@
             <artifactId>egeria-connector-ibm-datastage-adapter</artifactId>
             <version>${open-metadata.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.odpi.egeria</groupId>
+            <artifactId>ibm-igc-rest-client-library</artifactId>
+            <version>${open-metadata.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-client-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.odpi.egeria</groupId>
+            <artifactId>http-helper</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <!-- Testing -->
+            <plugin>
+                <groupId>org.mock-server</groupId>
+                <artifactId>mockserver-maven-plugin</artifactId>
+                <configuration>
+                    <serverPort>1080</serverPort>
+                    <logLevel>WARN</logLevel>
+                    <initializationClass>org.odpi.egeria.connectors.mocks.MockServerExpectations</initializationClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>process-test-classes</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Packaging -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
