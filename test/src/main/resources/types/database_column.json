@@ -1,0 +1,1544 @@
+{
+  "editInfo": {
+    "sections": [
+      {
+        "displayName": "Header",
+        "name": "Header",
+        "properties": [
+          "short_description",
+          "long_description",
+          "labels",
+          "stewards",
+          "assigned_to_terms",
+          "implements_rules",
+          "governed_by_rules"
+        ]
+      },
+      {
+        "displayName": "General Information",
+        "name": "General Information",
+        "properties": [
+          "selected_classification"
+        ]
+      },
+      {
+        "displayName": "Suggested Term Assignments",
+        "name": "Suggested Term Assignments",
+        "properties": [
+          "suggested_term_assignments"
+        ]
+      },
+      {
+        "displayName": "Notes",
+        "name": "Notes",
+        "properties": [
+          "notes"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "displayName": "Short Description",
+        "name": "short_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Long Description",
+        "name": "long_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Labels",
+        "name": "labels",
+        "type": {
+          "name": "label",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/label"
+        }
+      },
+      {
+        "displayName": "Stewards",
+        "name": "stewards",
+        "type": {
+          "name": "ascl_steward",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/ascl_steward"
+        }
+      },
+      {
+        "displayName": "Assigned to Terms",
+        "name": "assigned_to_terms",
+        "type": {
+          "name": "term",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/term"
+        }
+      },
+      {
+        "displayName": "Implements Rules",
+        "name": "implements_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Governed by Rules",
+        "name": "governed_by_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Selected Data Classification",
+        "name": "selected_classification",
+        "type": {
+          "name": "data_class",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_class"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "_expand": [
+          {
+            "displayName": "Term",
+            "name": "assign_to_term",
+            "type": {
+              "name": "main_object",
+              "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/main_object"
+            },
+            "maxCardinality": 1
+          },
+          {
+            "displayName": "Confidence (Percent)",
+            "name": "confidence_percent",
+            "type": {
+              "name": "number"
+            },
+            "maxCardinality": 1
+          }
+        ],
+        "displayName": "Suggested Term Assignments",
+        "name": "suggested_term_assignments",
+        "type": {
+          "name": "term_assignment",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/term_assignment"
+        }
+      },
+      {
+        "displayName": "Notes",
+        "name": "notes",
+        "type": {
+          "name": "note"
+        }
+      }
+    ]
+  },
+  "_businessLineage": true,
+  "viewInfo": {
+    "sections": [
+      {
+        "displayName": "Header",
+        "name": "Header",
+        "properties": [
+          "name",
+          "short_description",
+          "long_description",
+          "database_table_or_view",
+          "qualityScore",
+          "labels",
+          "stewards",
+          "assigned_to_terms",
+          "implements_rules",
+          "governed_by_rules",
+          "database_table",
+          "view",
+          "database_alias"
+        ]
+      },
+      {
+        "displayName": "Implementation Details",
+        "name": "Implementation Details",
+        "properties": [
+          "implements_entity_attributes",
+          "implements_design_columns"
+        ]
+      },
+      {
+        "displayName": "General Information",
+        "name": "General Information",
+        "properties": [
+          "type",
+          "odbc_type",
+          "data_type",
+          "default_value",
+          "database_domains",
+          "referenced_by_database_columns",
+          "selected_classification",
+          "detected_classifications",
+          "length",
+          "minimum_length",
+          "fraction",
+          "position",
+          "level",
+          "occurs",
+          "start_end_columns",
+          "allows_null_values",
+          "unique",
+          "same_as_data_sources",
+          "references_database_columns",
+          "native_id",
+          "synchronized_from"
+        ]
+      },
+      {
+        "displayName": "Keys and Indexes",
+        "name": "Keys and Indexes",
+        "properties": [
+          "defined_primary_key",
+          "defined_non_primary_key",
+          "implemented_key",
+          "selected_primary_key",
+          "selected_natural_key",
+          "defined_foreign_key",
+          "defined_foreign_key_references",
+          "defined_foreign_key_referenced",
+          "selected_foreign_key",
+          "selected_foreign_key_references",
+          "selected_foreign_key_referenced",
+          "database_indexes",
+          "index",
+          "validity_tables"
+        ]
+      },
+      {
+        "displayName": "Quality Analysis",
+        "name": "Quality Analysis",
+        "properties": [
+          "uniqueFlag",
+          "nullabilityFlag",
+          "constantFlag",
+          "domainType",
+          "numberCompleteValues",
+          "numberValidValues",
+          "numberEmptyValues",
+          "numberNullValues",
+          "numberDistinctValues",
+          "numberFormats",
+          "numberZeroValues",
+          "inferredDataType",
+          "inferredLength",
+          "inferredFormat",
+          "inferredScale",
+          "inferredPrecision",
+          "averageValue",
+          "isInferredForeignKey",
+          "isInferredPrimaryKey",
+          "has_DataClassifications",
+          "nbRecordsTested"
+        ]
+      },
+      {
+        "displayName": "Quality Dimensions",
+        "name": "Quality Dimensions",
+        "properties": [
+          "qualityScore_bubble",
+          "quality_benchmark",
+          "quality_dimension"
+        ]
+      },
+      {
+        "displayName": "Database Column Usage Information",
+        "name": "Database Column Usage Information",
+        "properties": [
+          "column_definitions",
+          "mapped_to_physical_object_attributes",
+          "read_by_(static)",
+          "written_by_(static)",
+          "read_by_(design)",
+          "written_by_(design)",
+          "read_by_(operational)",
+          "written_by_(operational)",
+          "read_by_(user_defined)",
+          "written_by_(user_defined)",
+          "impacted_by",
+          "impacts_on",
+          "used_by_analytics_objects"
+        ]
+      },
+      {
+        "displayName": "BI Report Query Items and BI Collection Members",
+        "name": "BI Report Query Items and BI Collection Members",
+        "properties": [
+          "bi_report_query_items",
+          "bi_collection_members"
+        ]
+      },
+      {
+        "displayName": "Suggested Term Assignments",
+        "name": "Suggested Term Assignments",
+        "properties": [
+          "suggested_term_assignments"
+        ]
+      },
+      {
+        "displayName": "Data Rule Bindings",
+        "name": "Data Rule Bindings",
+        "properties": [
+          "data_rule_definitions",
+          "data_rule_set_definitions",
+          "data_rules",
+          "data_rule_sets"
+        ]
+      },
+      {
+        "displayName": "Data Policies",
+        "name": "Data Policies",
+        "properties": [
+          "data_policies"
+        ]
+      },
+      {
+        "displayName": "In Collections",
+        "name": "In Collections",
+        "properties": [
+          "in_collections"
+        ]
+      },
+      {
+        "displayName": "Notes",
+        "name": "Notes",
+        "properties": [
+          "notes"
+        ]
+      },
+      {
+        "displayName": "Modification Details",
+        "name": "Modification Details",
+        "properties": [
+          "created_by",
+          "created_on",
+          "modified_by",
+          "modified_on"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "displayName": "Name",
+        "name": "name",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Short Description",
+        "name": "short_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Long Description",
+        "name": "long_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Database Table or View",
+        "name": "database_table_or_view",
+        "type": {
+          "name": "datagroup",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/datagroup"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Quality Score",
+        "name": "qualityScore",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Labels",
+        "name": "labels",
+        "type": {
+          "name": "label",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/label"
+        }
+      },
+      {
+        "displayName": "Stewards",
+        "name": "stewards",
+        "type": {
+          "name": "ascl_steward",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/ascl_steward"
+        }
+      },
+      {
+        "displayName": "Assigned to Terms",
+        "name": "assigned_to_terms",
+        "type": {
+          "name": "term",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/term"
+        }
+      },
+      {
+        "displayName": "Implements Rules",
+        "name": "implements_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Governed by Rules",
+        "name": "governed_by_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Database Table",
+        "name": "database_table",
+        "type": {
+          "name": "database_table",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_table"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Database View",
+        "name": "view",
+        "type": {
+          "name": "view",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/view"
+        }
+      },
+      {
+        "displayName": "Database Alias",
+        "name": "database_alias",
+        "type": {
+          "name": "database_alias",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_alias"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Implements Entity Attributes",
+        "name": "implements_entity_attributes",
+        "type": {
+          "name": "entity_attribute",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/entity_attribute"
+        }
+      },
+      {
+        "displayName": "Implements Design Columns",
+        "name": "implements_design_columns",
+        "type": {
+          "name": "design_column",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/design_column"
+        }
+      },
+      {
+        "displayName": "Native Type",
+        "name": "type",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "ODBC Type",
+        "name": "odbc_type",
+        "type": {
+          "name": "enum",
+          "validValues": [
+            {
+              "displayName": "CHAR",
+              "id": "CHAR"
+            },
+            {
+              "displayName": "VARCHAR",
+              "id": "VARCHAR"
+            },
+            {
+              "displayName": "LONGVARCHAR",
+              "id": "LONGVARCHAR"
+            },
+            {
+              "displayName": "WCHAR",
+              "id": "WCHAR"
+            },
+            {
+              "displayName": "WVARCHAR",
+              "id": "WVARCHAR"
+            },
+            {
+              "displayName": "WLONGVARCHAR",
+              "id": "WLONGVARCHAR"
+            },
+            {
+              "displayName": "DECIMAL",
+              "id": "DECIMAL"
+            },
+            {
+              "displayName": "NUMERIC",
+              "id": "NUMERIC"
+            },
+            {
+              "displayName": "SMALLINT",
+              "id": "SMALLINT"
+            },
+            {
+              "displayName": "INTEGER",
+              "id": "INTEGER"
+            },
+            {
+              "displayName": "REAL",
+              "id": "REAL"
+            },
+            {
+              "displayName": "FLOAT",
+              "id": "FLOAT"
+            },
+            {
+              "displayName": "DOUBLE",
+              "id": "DOUBLE"
+            },
+            {
+              "displayName": "BIT",
+              "id": "BIT"
+            },
+            {
+              "displayName": "TINYINT",
+              "id": "TINYINT"
+            },
+            {
+              "displayName": "BIGINT",
+              "id": "BIGINT"
+            },
+            {
+              "displayName": "BINARY",
+              "id": "BINARY"
+            },
+            {
+              "displayName": "VARBINARY",
+              "id": "VARBINARY"
+            },
+            {
+              "displayName": "LONGVARBINARY",
+              "id": "LONGVARBINARY"
+            },
+            {
+              "displayName": "DATE",
+              "id": "DATE"
+            },
+            {
+              "displayName": "TIME",
+              "id": "TIME"
+            },
+            {
+              "displayName": "TIMESTAMP",
+              "id": "TIMESTAMP"
+            },
+            {
+              "displayName": "GUID",
+              "id": "GUID"
+            },
+            {
+              "displayName": "UNKNOWN",
+              "id": "UNKNOWN"
+            }
+          ]
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Data Type",
+        "name": "data_type",
+        "type": {
+          "name": "enum",
+          "validValues": [
+            {
+              "displayName": "INT8",
+              "id": "INT8"
+            },
+            {
+              "displayName": "INT16",
+              "id": "INT16"
+            },
+            {
+              "displayName": "INT32",
+              "id": "INT32"
+            },
+            {
+              "displayName": "INT64",
+              "id": "INT64"
+            },
+            {
+              "displayName": "SFLOAT",
+              "id": "SFLOAT"
+            },
+            {
+              "displayName": "DFLOAT",
+              "id": "DFLOAT"
+            },
+            {
+              "displayName": "QFLOAT",
+              "id": "QFLOAT"
+            },
+            {
+              "displayName": "DECIMAL",
+              "id": "DECIMAL"
+            },
+            {
+              "displayName": "STRING",
+              "id": "STRING"
+            },
+            {
+              "displayName": "BINARY",
+              "id": "BINARY"
+            },
+            {
+              "displayName": "BOOLEAN",
+              "id": "BOOLEAN"
+            },
+            {
+              "displayName": "DATE",
+              "id": "DATE"
+            },
+            {
+              "displayName": "TIME",
+              "id": "TIME"
+            },
+            {
+              "displayName": "DATETIME",
+              "id": "DATETIME"
+            },
+            {
+              "displayName": "DURATION",
+              "id": "DURATION"
+            },
+            {
+              "displayName": "CHOICE",
+              "id": "CHOICE"
+            },
+            {
+              "displayName": "ORDERED_GROUP",
+              "id": "ORDERED_GROUP"
+            },
+            {
+              "displayName": "UNORDERED_GROUP",
+              "id": "UNORDERED_GROUP"
+            },
+            {
+              "displayName": "GUID",
+              "id": "GUID"
+            },
+            {
+              "displayName": "UNKNOWN",
+              "id": "UNKNOWN"
+            },
+            {
+              "displayName": "JSON",
+              "id": "JSON"
+            },
+            {
+              "displayName": "XML",
+              "id": "XML"
+            }
+          ]
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Default Value",
+        "name": "default_value",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Database Domains",
+        "name": "database_domains",
+        "type": {
+          "name": "database_domain",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_domain"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Referenced by Database Columns",
+        "name": "referenced_by_database_columns",
+        "type": {
+          "name": "database_column",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_column"
+        }
+      },
+      {
+        "displayName": "Selected Data Classification",
+        "name": "selected_classification",
+        "type": {
+          "name": "data_class",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_class"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "_expand": [
+          {
+            "displayName": "Asset Name",
+            "name": "_repr_obj",
+            "type": {
+              "name": "classification",
+              "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/classification"
+            }
+          },
+          {
+            "displayName": "Data Class",
+            "name": "data_class",
+            "type": {
+              "name": "data_class",
+              "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_class"
+            },
+            "maxCardinality": 1
+          },
+          {
+            "minCardinality": 1,
+            "displayName": "Type",
+            "name": "detectedState",
+            "type": {
+              "name": "enum",
+              "validValues": [
+                {
+                  "displayName": "Candidate",
+                  "id": "Candidate"
+                },
+                {
+                  "displayName": "Inferred",
+                  "id": "Inferred"
+                }
+              ]
+            },
+            "maxCardinality": 1
+          },
+          {
+            "displayName": "Confidence (Percent)",
+            "name": "confidencePercent",
+            "type": {
+              "name": "number"
+            },
+            "maxCardinality": 1
+          },
+          {
+            "displayName": "Value Frequency",
+            "name": "value_frequency",
+            "type": {
+              "name": "number"
+            },
+            "maxCardinality": 1
+          }
+        ],
+        "displayName": "Detected Data Classifications",
+        "name": "detected_classifications",
+        "type": {
+          "name": "classification",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/classification"
+        }
+      },
+      {
+        "displayName": "Length",
+        "name": "length",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Minimum Length",
+        "name": "minimum_length",
+        "type": {
+          "name": "number"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Fraction",
+        "name": "fraction",
+        "type": {
+          "name": "number"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Position",
+        "name": "position",
+        "type": {
+          "name": "number"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Level",
+        "name": "level",
+        "type": {
+          "name": "number"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Occurs",
+        "name": "occurs",
+        "type": {
+          "name": "string"
+        }
+      },
+      {
+        "displayName": "Starting .. Ending Columns",
+        "name": "start_end_columns",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Allow Null Values",
+        "name": "allows_null_values",
+        "type": {
+          "name": "boolean"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Unique Constraint",
+        "name": "unique",
+        "type": {
+          "name": "boolean"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Same as Data Sources",
+        "name": "same_as_data_sources",
+        "type": {
+          "name": "data_field",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_field"
+        }
+      },
+      {
+        "displayName": "References Database Columns",
+        "name": "references_database_columns",
+        "type": {
+          "name": "database_column",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_column"
+        }
+      },
+      {
+        "displayName": "Native ID",
+        "name": "native_id",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Synchronized From",
+        "name": "synchronized_from",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Defined Primary Key",
+        "name": "defined_primary_key",
+        "type": {
+          "name": "candidate_key",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/candidate_key"
+        }
+      },
+      {
+        "displayName": "Defined Non Primary Key",
+        "name": "defined_non_primary_key",
+        "type": {
+          "name": "candidate_key",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/candidate_key"
+        }
+      },
+      {
+        "displayName": "Implemented Key",
+        "name": "implemented_key",
+        "type": {
+          "name": "candidate_key",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/candidate_key"
+        }
+      },
+      {
+        "displayName": "User Selected Primary Key",
+        "name": "selected_primary_key",
+        "type": {
+          "name": "boolean"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "User Selected Natural Key",
+        "name": "selected_natural_key",
+        "type": {
+          "name": "boolean"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Defined Foreign Key",
+        "name": "defined_foreign_key",
+        "type": {
+          "name": "boolean"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Defined Foreign Key References",
+        "name": "defined_foreign_key_references",
+        "type": {
+          "name": "database_column",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_column"
+        }
+      },
+      {
+        "displayName": "Defined Foreign Key Referenced",
+        "name": "defined_foreign_key_referenced",
+        "type": {
+          "name": "data_field",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_field"
+        }
+      },
+      {
+        "displayName": "User Selected Foreign Key",
+        "name": "selected_foreign_key",
+        "type": {
+          "name": "boolean"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "User Selected Foreign Key References",
+        "name": "selected_foreign_key_references",
+        "type": {
+          "name": "database_column",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_column"
+        }
+      },
+      {
+        "displayName": "User Selected Foreign Key Referenced",
+        "name": "selected_foreign_key_referenced",
+        "type": {
+          "name": "database_column",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_column"
+        }
+      },
+      {
+        "displayName": "Index",
+        "name": "database_indexes",
+        "type": {
+          "name": "database_index",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_index"
+        }
+      },
+      {
+        "displayName": "Index",
+        "name": "index",
+        "type": {
+          "name": "database_index",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_index"
+        }
+      },
+      {
+        "displayName": "Validity Tables",
+        "name": "validity_tables",
+        "type": {
+          "name": "validity_table",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/validity_table"
+        }
+      },
+      {
+        "displayName": "Require Unique Values",
+        "name": "uniqueFlag",
+        "type": {
+          "name": "boolean"
+        }
+      },
+      {
+        "displayName": "Include Null Values",
+        "name": "nullabilityFlag",
+        "type": {
+          "name": "boolean"
+        }
+      },
+      {
+        "displayName": "Include Constant Values",
+        "name": "constantFlag",
+        "type": {
+          "name": "boolean"
+        }
+      },
+      {
+        "displayName": "Domain",
+        "name": "domainType",
+        "type": {
+          "name": "string"
+        }
+      },
+      {
+        "displayName": "Number of Complete Values",
+        "name": "numberCompleteValues",
+        "type": {
+          "name": "number"
+        }
+      },
+      {
+        "displayName": "Number of Valid Values",
+        "name": "numberValidValues",
+        "type": {
+          "name": "number"
+        }
+      },
+      {
+        "displayName": "Number of Empty Values",
+        "name": "numberEmptyValues",
+        "type": {
+          "name": "number"
+        }
+      },
+      {
+        "displayName": "Number of Null Values",
+        "name": "numberNullValues",
+        "type": {
+          "name": "number"
+        }
+      },
+      {
+        "displayName": "Number of Distinct Values",
+        "name": "numberDistinctValues",
+        "type": {
+          "name": "number"
+        }
+      },
+      {
+        "displayName": "Number of Distinct Formats",
+        "name": "numberFormats",
+        "type": {
+          "name": "number"
+        }
+      },
+      {
+        "displayName": "Number of Zero Values",
+        "name": "numberZeroValues",
+        "type": {
+          "name": "number"
+        }
+      },
+      {
+        "displayName": "Inferred Data Type",
+        "name": "inferredDataType",
+        "type": {
+          "name": "enum",
+          "validValues": [
+            {
+              "displayName": "INT8",
+              "id": "INT8"
+            },
+            {
+              "displayName": "INT16",
+              "id": "INT16"
+            },
+            {
+              "displayName": "INT32",
+              "id": "INT32"
+            },
+            {
+              "displayName": "INT64",
+              "id": "INT64"
+            },
+            {
+              "displayName": "SFLOAT",
+              "id": "SFLOAT"
+            },
+            {
+              "displayName": "DFLOAT",
+              "id": "DFLOAT"
+            },
+            {
+              "displayName": "QFLOAT",
+              "id": "QFLOAT"
+            },
+            {
+              "displayName": "DECIMAL",
+              "id": "DECIMAL"
+            },
+            {
+              "displayName": "STRING",
+              "id": "STRING"
+            },
+            {
+              "displayName": "BINARY",
+              "id": "BINARY"
+            },
+            {
+              "displayName": "BOOLEAN",
+              "id": "BOOLEAN"
+            },
+            {
+              "displayName": "DATE",
+              "id": "DATE"
+            },
+            {
+              "displayName": "TIME",
+              "id": "TIME"
+            },
+            {
+              "displayName": "DATETIME",
+              "id": "DATETIME"
+            },
+            {
+              "displayName": "DURATION",
+              "id": "DURATION"
+            },
+            {
+              "displayName": "CHOICE",
+              "id": "CHOICE"
+            },
+            {
+              "displayName": "ORDERED_GROUP",
+              "id": "ORDERED_GROUP"
+            },
+            {
+              "displayName": "UNORDERED_GROUP",
+              "id": "UNORDERED_GROUP"
+            },
+            {
+              "displayName": "GUID",
+              "id": "GUID"
+            },
+            {
+              "displayName": "UNKNOWN",
+              "id": "UNKNOWN"
+            },
+            {
+              "displayName": "JSON",
+              "id": "JSON"
+            },
+            {
+              "displayName": "XML",
+              "id": "XML"
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "Inferred Length",
+        "name": "inferredLength",
+        "type": {
+          "name": "number"
+        }
+      },
+      {
+        "displayName": "Inferred Format",
+        "name": "inferredFormat",
+        "type": {
+          "name": "string"
+        }
+      },
+      {
+        "displayName": "Inferred Scale",
+        "name": "inferredScale",
+        "type": {
+          "name": "number"
+        }
+      },
+      {
+        "displayName": "Inferred Precision",
+        "name": "inferredPrecision",
+        "type": {
+          "name": "number"
+        }
+      },
+      {
+        "displayName": "Average Value",
+        "name": "averageValue",
+        "type": {
+          "name": "string"
+        }
+      },
+      {
+        "displayName": "Inferred Foreign Key",
+        "name": "isInferredForeignKey",
+        "type": {
+          "name": "boolean"
+        }
+      },
+      {
+        "displayName": "Inferred Primary Key",
+        "name": "isInferredPrimaryKey",
+        "type": {
+          "name": "boolean"
+        }
+      },
+      {
+        "displayName": "Detected data Classifications",
+        "name": "has_DataClassifications",
+        "type": {
+          "name": "classification",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/classification"
+        }
+      },
+      {
+        "displayName": "Number of Records Tested",
+        "name": "nbRecordsTested",
+        "type": {
+          "name": "number"
+        }
+      },
+      {
+        "displayName": "Quality Score",
+        "name": "qualityScore_bubble",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Quality Benchmark",
+        "name": "quality_benchmark",
+        "type": {
+          "name": "number"
+        }
+      },
+      {
+        "_expand": [
+          {
+            "displayName": "Quality Problem Type Name",
+            "name": "QualityProblemTypeName",
+            "type": {
+              "name": "string"
+            },
+            "maxCardinality": 1
+          },
+          {
+            "displayName": "Nb Records Tested",
+            "name": "nbRecordsTested",
+            "type": {
+              "name": "number"
+            },
+            "maxCardinality": 1
+          },
+          {
+            "displayName": "Column",
+            "name": "Column",
+            "type": {
+              "name": "string"
+            },
+            "maxCardinality": 1
+          },
+          {
+            "displayName": "Occurrences",
+            "name": "occurrences",
+            "type": {
+              "name": "number"
+            },
+            "maxCardinality": 1
+          },
+          {
+            "displayName": "Percent Occurrences",
+            "name": "percent_occurrences",
+            "type": {
+              "name": "number"
+            },
+            "maxCardinality": 1
+          },
+          {
+            "displayName": "Confidence",
+            "name": "confidence",
+            "type": {
+              "name": "number"
+            },
+            "maxCardinality": 1
+          },
+          {
+            "displayName": "Details",
+            "name": "details",
+            "type": {
+              "name": "string"
+            },
+            "maxCardinality": 1
+          }
+        ],
+        "displayName": "Quality Dimensions",
+        "name": "quality_dimension",
+        "type": {
+          "name": "quality_problem",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/quality_problem"
+        }
+      },
+      {
+        "displayName": "Column Definitions",
+        "name": "column_definitions",
+        "type": {
+          "name": "column_definition",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/column_definition"
+        }
+      },
+      {
+        "displayName": "Mapped to Physical Object Attributes",
+        "name": "mapped_to_physical_object_attributes",
+        "type": {
+          "name": "physical_object_attribute",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/physical_object_attribute"
+        }
+      },
+      {
+        "displayName": "Read by (Static)",
+        "name": "read_by_(static)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Written by (Static)",
+        "name": "written_by_(static)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Read by (Design)",
+        "name": "read_by_(design)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Written by (Design)",
+        "name": "written_by_(design)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Read by (Operational)",
+        "name": "read_by_(operational)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Written by (Operational)",
+        "name": "written_by_(operational)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Read by (User-Defined)",
+        "name": "read_by_(user_defined)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Written by (User-Defined)",
+        "name": "written_by_(user_defined)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Impacted by",
+        "name": "impacted_by",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Impacts on",
+        "name": "impacts_on",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Used By Data Science",
+        "name": "used_by_analytics_objects",
+        "type": {
+          "name": "analytics_object",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/analytics_object"
+        }
+      },
+      {
+        "displayName": "BI Report Query Items",
+        "name": "bi_report_query_items",
+        "type": {
+          "name": "reportobject",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/reportobject"
+        }
+      },
+      {
+        "displayName": "BI Collection Members",
+        "name": "bi_collection_members",
+        "type": {
+          "name": "bi_collection_member",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_collection_member"
+        }
+      },
+      {
+        "_expand": [
+          {
+            "displayName": "Term",
+            "name": "assign_to_term",
+            "type": {
+              "name": "main_object",
+              "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/main_object"
+            },
+            "maxCardinality": 1
+          },
+          {
+            "displayName": "Confidence (Percent)",
+            "name": "confidence_percent",
+            "type": {
+              "name": "number"
+            },
+            "maxCardinality": 1
+          }
+        ],
+        "displayName": "Suggested Term Assignments",
+        "name": "suggested_term_assignments",
+        "type": {
+          "name": "term_assignment",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/term_assignment"
+        }
+      },
+      {
+        "displayName": "Data Rule Definitions",
+        "name": "data_rule_definitions",
+        "type": {
+          "name": "non_published_data_rule_definition",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/non_published_data_rule_definition"
+        }
+      },
+      {
+        "displayName": "Data Rule Set Definitions",
+        "name": "data_rule_set_definitions",
+        "type": {
+          "name": "non_published_data_rule_set",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/non_published_data_rule_set"
+        }
+      },
+      {
+        "displayName": "Data Rules",
+        "name": "data_rules",
+        "type": {
+          "name": "data_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_rule"
+        }
+      },
+      {
+        "displayName": "Data Rule Sets",
+        "name": "data_rule_sets",
+        "type": {
+          "name": "data_rule_set",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_rule_set"
+        }
+      },
+      {
+        "displayName": "Data Policies",
+        "name": "data_policies",
+        "type": {
+          "name": "main_object",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/main_object"
+        }
+      },
+      {
+        "displayName": "In Collections",
+        "name": "in_collections",
+        "type": {
+          "name": "collection",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/collection"
+        }
+      },
+      {
+        "displayName": "Notes",
+        "name": "notes",
+        "type": {
+          "name": "note"
+        }
+      },
+      {
+        "displayName": "Created By",
+        "name": "created_by",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Created On",
+        "name": "created_on",
+        "type": {
+          "name": "datetime"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Modified By",
+        "name": "modified_by",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Modified On",
+        "name": "modified_on",
+        "type": {
+          "name": "datetime"
+        },
+        "maxCardinality": 1
+      }
+    ]
+  },
+  "_name": "Database Column",
+  "_plural": "Database Columns",
+  "_id": "database_column",
+  "_class": "ASCLModel.DatabaseField",
+  "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_column",
+  "_dataLineage": true,
+  "_group": "Databases",
+  "_parents": [
+    "information_asset",
+    "data_field",
+    "classificationenabledgroup"
+  ]
+}

@@ -229,7 +229,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     @Override
     public List<DataEngineSchemaType> getChangedSchemaTypes(Date from, Date to) {
 
-        log.info("Looking for changed SchemaTypes...");
+        if (log.isDebugEnabled()) { log.debug("Looking for changed SchemaTypes..."); }
         Map<String, DataEngineSchemaType> schemaTypeMap = new HashMap<>();
 
         initializeCache(from, to);
@@ -237,13 +237,13 @@ public class DataStageConnector extends DataEngineConnectorBase {
         // Iterate through each job looking for any virtual assets -- these must be created first
         for (DataStageJob job : dataStageCache.getAllJobs()) {
             for (String storeRid : job.getStoreRids()) {
-                log.info(" ... considering store: {}", storeRid);
+                if (log.isDebugEnabled()) { log.debug(" ... considering store: {}", storeRid); }
                 if (DataStageDataAsset.isVirtualAsset(storeRid) && !schemaTypeMap.containsKey(storeRid)) {
-                    log.info(" ... VIRTUAL! Creating a SchemaType ...");
+                    if (log.isDebugEnabled()) { log.debug(" ... VIRTUAL! Creating a SchemaType ..."); }
                     SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(job, job.getStoreIdentityFromRid(storeRid), job.getFieldsForStore(storeRid));
                     DataEngineSchemaType deSchemaType = new DataEngineSchemaType(schemaTypeMapping.getSchemaType(), defaultUserId);
                     try {
-                        log.info(" ... created: {}", objectMapper.writeValueAsString(deSchemaType.getSchemaType()));
+                        if (log.isDebugEnabled()) { log.debug(" ... created: {}", objectMapper.writeValueAsString(deSchemaType.getSchemaType())); }
                     } catch (JsonProcessingException e) {
                         log.error("Unable to serialise to JSON: {}", deSchemaType.getSchemaType(), e);
                     }
@@ -266,7 +266,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     @Override
     public List<DataEnginePortImplementation> getChangedPortImplementations(Date from, Date to) {
         // do nothing -- port implementations will always be handled by other methods
-        return null;
+        return Collections.emptyList();
     }
 
     /**
@@ -279,7 +279,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     @Override
     public List<DataEnginePortAlias> getChangedPortAliases(Date from, Date to) {
         // do nothing -- port aliases will always be handled by other methods
-        return null;
+        return Collections.emptyList();
     }
 
     /**
@@ -331,7 +331,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     @Override
     public List<DataEngineLineageMappings> getChangedLineageMappings(Date from, Date to) {
         // do nothing -- lineage mappings will always be handled by other methods
-        return null;
+        return Collections.emptyList();
     }
 
     /**
@@ -357,13 +357,13 @@ public class DataStageConnector extends DataEngineConnectorBase {
      */
     private List<DataEngineProcess> getProcessesForEachStage(DataStageJob job) {
         List<DataEngineProcess> processes = new ArrayList<>();
-        log.info("Translating processes for each stage...");
+        if (log.isDebugEnabled()) { log.debug("Translating processes for each stage..."); }
         for (Stage stage : job.getAllStages()) {
             ProcessMapping processMapping = new ProcessMapping(job, stage);
             DataEngineProcess process = processMapping.getProcess();
             if (process != null) {
                 try {
-                    log.info(" ... process: {}", objectMapper.writeValueAsString(process));
+                    if (log.isDebugEnabled()) { log.debug(" ... process: {}", objectMapper.writeValueAsString(process)); }
                 } catch (JsonProcessingException e) {
                     log.error("Unable to serialise to JSON: {}", process, e);
                 }
@@ -382,12 +382,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private DataEngineProcess getProcessForJob(DataStageJob job) {
         DataEngineProcess process = null;
         if (!job.getType().equals(DataStageJob.JobType.SEQUENCE)) {
-            log.info("Load process for job...");
+            if (log.isDebugEnabled()) { log.debug("Load process for job..."); }
             ProcessMapping processMapping = new ProcessMapping(job);
             process = processMapping.getProcess();
             if (process != null) {
                 try {
-                    log.info(" ... process: {}", objectMapper.writeValueAsString(process));
+                    if (log.isDebugEnabled()) { log.debug(" ... process: {}", objectMapper.writeValueAsString(process)); }
                 } catch (JsonProcessingException e) {
                     log.error("Unable to serialise to JSON: {}", process, e);
                 }
@@ -406,12 +406,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private DataEngineProcess getProcessForSequence(DataStageJob job, Map<String, DataEngineProcess> jobProcessByRid) {
         DataEngineProcess process = null;
         if (job.getType().equals(DataStageJob.JobType.SEQUENCE)) {
-            log.info("Load process for sequence...");
+            if (log.isDebugEnabled()) { log.debug("Load process for sequence..."); }
             ProcessMapping processMapping = new ProcessMapping(job, jobProcessByRid);
             process = processMapping.getProcess();
             if (process != null) {
                 try {
-                    log.info(" ... process: {}", objectMapper.writeValueAsString(process));
+                    if (log.isDebugEnabled()) { log.debug(" ... process: {}", objectMapper.writeValueAsString(process)); }
                 } catch (JsonProcessingException e) {
                     log.error("Unable to serialise to JSON: {}", process, e);
                 }

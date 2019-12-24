@@ -64,6 +64,7 @@ public class DataStageJob {
 
         getStageDetailsForJob();
         getLinkDetailsForJob();
+        classifyStages(stageMap.values());
         getStageColumnDetailsForLinks();
         classifyFields();
 
@@ -224,7 +225,7 @@ public class DataStageJob {
         igcSearch.addConditions(conditionSet);
         ItemList<Stage> stages = igcRestClient.search(igcSearch);
         stages.getAllPages(igcRestClient);
-        classifyStages(stages);
+        buildMap(stageMap, stages);
     }
 
     /**
@@ -354,17 +355,15 @@ public class DataStageJob {
     /**
      * Group the set of stages for this particular job according to whether they are input or output.
      *
-     * @param stages the list of stages to cache and classify
+     * @param stages the collection of stages to classify
      */
-    private void classifyStages(ItemList<Stage> stages) {
-        List<Stage> listOfStages = stages.getItems();
-        for (Stage candidateStage : listOfStages) {
+    private void classifyStages(Collection<Stage> stages) {
+        for (Stage candidateStage : stages) {
             String rid = candidateStage.getId();
-            stageMap.put(rid, candidateStage);
-            if (DataStageStage.isInputStage(igcRestClient, candidateStage)) {
+            if (DataStageStage.isInputStage(candidateStage)) {
                 inputStageRIDs.add(rid);
             }
-            if (DataStageStage.isOutputStage(igcRestClient, candidateStage)) {
+            if (DataStageStage.isOutputStage(candidateStage)) {
                 outputStageRIDs.add(rid);
             }
         }

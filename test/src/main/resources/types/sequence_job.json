@@ -1,0 +1,433 @@
+{
+  "editInfo": {
+    "sections": [
+      {
+        "displayName": "Header",
+        "name": "Header",
+        "properties": [
+          "labels",
+          "stewards",
+          "assigned_to_terms",
+          "implements_rules",
+          "governed_by_rules"
+        ]
+      },
+      {
+        "displayName": "Lineage Information",
+        "name": "Lineage Information",
+        "properties": [
+          "include_for_lineage__edit"
+        ]
+      },
+      {
+        "displayName": "Notes",
+        "name": "Notes",
+        "properties": [
+          "notes"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "displayName": "Labels",
+        "name": "labels",
+        "type": {
+          "name": "label",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/label"
+        }
+      },
+      {
+        "displayName": "Stewards",
+        "name": "stewards",
+        "type": {
+          "name": "ascl_steward",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/ascl_steward"
+        }
+      },
+      {
+        "displayName": "Assigned to Terms",
+        "name": "assigned_to_terms",
+        "type": {
+          "name": "term",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/term"
+        }
+      },
+      {
+        "displayName": "Implements Rules",
+        "name": "implements_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Governed by Rules",
+        "name": "governed_by_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Include for Lineage",
+        "name": "include_for_lineage__edit",
+        "type": {
+          "name": "enum",
+          "validValues": [
+            {
+              "displayName": "True",
+              "id": "setToTrue"
+            },
+            {
+              "displayName": "False",
+              "id": "setToFalse"
+            },
+            {
+              "displayName": "Default (Transformation Project)",
+              "id": "defaultToProject"
+            }
+          ]
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Notes",
+        "name": "notes",
+        "type": {
+          "name": "note"
+        }
+      }
+    ]
+  },
+  "_businessLineage": false,
+  "viewInfo": {
+    "sections": [
+      {
+        "displayName": "Header",
+        "name": "Header",
+        "properties": [
+          "name",
+          "short_description",
+          "long_description",
+          "transformation_project",
+          "labels",
+          "stewards",
+          "assigned_to_terms",
+          "implements_rules",
+          "governed_by_rules"
+        ]
+      },
+      {
+        "displayName": "Contains Stages or Containers",
+        "name": "Contains Stages or Containers",
+        "properties": [
+          "stages",
+          "references_local_or_shared_containers"
+        ]
+      },
+      {
+        "displayName": "General Information",
+        "name": "General Information",
+        "properties": [
+          "sequences_jobs",
+          "folder",
+          "design_parameters",
+          "parameter_sets",
+          "annotations",
+          "native_id"
+        ]
+      },
+      {
+        "displayName": "Sequence Job Operational Information",
+        "name": "Sequence Job Operational Information",
+        "properties": [
+          "job_runs"
+        ]
+      },
+      {
+        "displayName": "Lineage Information",
+        "name": "Lineage Information",
+        "properties": [
+          "include_for_lineage",
+          "include_for_lineage_description",
+          "include_for_lineage__edit",
+          "inherits_lineage_setting_from_transformation_project"
+        ]
+      },
+      {
+        "displayName": "In Collections",
+        "name": "In Collections",
+        "properties": [
+          "in_collections"
+        ]
+      },
+      {
+        "displayName": "Notes",
+        "name": "Notes",
+        "properties": [
+          "notes"
+        ]
+      },
+      {
+        "displayName": "Modification Details",
+        "name": "Modification Details",
+        "properties": [
+          "created_by",
+          "created_on",
+          "modified_by",
+          "modified_on"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "displayName": "Name",
+        "name": "name",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Short Description",
+        "name": "short_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Long Description",
+        "name": "long_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Transformation Project",
+        "name": "transformation_project",
+        "type": {
+          "name": "transformation_project",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/transformation_project"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Labels",
+        "name": "labels",
+        "type": {
+          "name": "label",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/label"
+        }
+      },
+      {
+        "displayName": "Stewards",
+        "name": "stewards",
+        "type": {
+          "name": "ascl_steward",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/ascl_steward"
+        }
+      },
+      {
+        "displayName": "Assigned to Terms",
+        "name": "assigned_to_terms",
+        "type": {
+          "name": "term",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/term"
+        }
+      },
+      {
+        "displayName": "Implements Rules",
+        "name": "implements_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Governed by Rules",
+        "name": "governed_by_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Stages",
+        "name": "stages",
+        "type": {
+          "name": "stage",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/stage"
+        }
+      },
+      {
+        "displayName": "References Local or Shared Containers",
+        "name": "references_local_or_shared_containers",
+        "type": {
+          "name": "referenced_container",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/referenced_container"
+        }
+      },
+      {
+        "displayName": "Sequences Jobs",
+        "name": "sequences_jobs",
+        "type": {
+          "name": "dsjob",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsjob"
+        }
+      },
+      {
+        "displayName": "Folder",
+        "name": "folder",
+        "type": {
+          "name": "dsfolder",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsfolder"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Parameters",
+        "name": "design_parameters",
+        "type": {
+          "name": "dsparameter_job",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsparameter_job"
+        }
+      },
+      {
+        "displayName": "Parameter Sets",
+        "name": "parameter_sets",
+        "type": {
+          "name": "parameter_set_definition",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/parameter_set_definition"
+        }
+      },
+      {
+        "displayName": "Annotations",
+        "name": "annotations",
+        "type": {
+          "name": "string"
+        }
+      },
+      {
+        "displayName": "Native ID",
+        "name": "native_id",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Job Runs",
+        "name": "job_runs",
+        "type": {
+          "name": "job_run",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/job_run"
+        }
+      },
+      {
+        "displayName": "Include for Lineage",
+        "name": "include_for_lineage",
+        "type": {
+          "name": "boolean"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Include for Lineage",
+        "name": "include_for_lineage_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Include for Lineage",
+        "name": "include_for_lineage__edit",
+        "type": {
+          "name": "enum",
+          "validValues": [
+            {
+              "displayName": "True",
+              "id": "setToTrue"
+            },
+            {
+              "displayName": "False",
+              "id": "setToFalse"
+            },
+            {
+              "displayName": "Default (Transformation Project)",
+              "id": "defaultToProject"
+            }
+          ]
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Inherits Lineage Setting from Transformation Project",
+        "name": "inherits_lineage_setting_from_transformation_project",
+        "type": {
+          "name": "boolean"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "In Collections",
+        "name": "in_collections",
+        "type": {
+          "name": "collection",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/collection"
+        }
+      },
+      {
+        "displayName": "Notes",
+        "name": "notes",
+        "type": {
+          "name": "note"
+        }
+      },
+      {
+        "displayName": "Created By",
+        "name": "created_by",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Created On",
+        "name": "created_on",
+        "type": {
+          "name": "datetime"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Modified By",
+        "name": "modified_by",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Modified On",
+        "name": "modified_on",
+        "type": {
+          "name": "datetime"
+        },
+        "maxCardinality": 1
+      }
+    ]
+  },
+  "_name": "Sequence Job",
+  "_plural": "Sequence Jobs",
+  "_id": "sequence_job",
+  "_class": "DataStageX.x_JOB_SEQUENCE",
+  "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/sequence_job",
+  "_dataLineage": true,
+  "_group": null,
+  "_parents": [
+    "dsjob"
+  ]
+}
