@@ -1,0 +1,1572 @@
+{
+  "paging": {
+    "numTotal": 22,
+    "pageSize": 100,
+    "end": 21,
+    "begin": 0
+  },
+  "items": [
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "BONUS",
+      "_type": "database_column",
+      "length": "",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT32",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "BONUS",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dha62cl.d4mcdj.nmftacdf02d0nptse418k",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dha62cl.d4mcdj.nmftacdf02d0nptse418k"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p5kdk0m.gkob4g.5p83utgve8ah17pe60j9d",
+      "position": 16,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p5kdk0m.gkob4g.5p83utgve8ah17pe60j9d"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "CITY",
+      "_type": "database_column",
+      "length": "40",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": 0,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "STRING",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "CITY",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dha2tiv.he2k0k.5oqollb9fptj3chfeapi8",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dha2tiv.he2k0k.5oqollb9fptj3chfeapi8"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p5k466s.6nhlhl.s7lr6f5ud7iq63md94vsh",
+      "position": 19,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p5k466s.6nhlhl.s7lr6f5ud7iq63md94vsh"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "DEPT",
+      "_type": "database_column",
+      "length": "",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT32",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "DEPT",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dgp8l67.pfouhl.aic86eshc1sc99h7loc7q",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dgp8l67.pfouhl.aic86eshc1sc99h7loc7q"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p53rj3v.vk2em3.1eo53ij6d42bm2r7pimom",
+      "position": 8,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p53rj3v.vk2em3.1eo53ij6d42bm2r7pimom"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "EMPSTATUS",
+      "_type": "database_column",
+      "length": "",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT32",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "EMPSTATUS",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dha5305.jj5dm5.3098m840947e9f6s20rm4",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dha5305.jj5dm5.3098m840947e9f6s20rm4"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p53qgs6.7eum7e.vcesjghf7mfkg02q9hv16",
+      "position": 4,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p53qgs6.7eum7e.vcesjghf7mfkg02q9hv16"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "ETYPE",
+      "_type": "database_column",
+      "length": "",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT32",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "ETYPE",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dgoj8cf.t3cl4l.gpvripdlp609jq248p5pj",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dgoj8cf.t3cl4l.gpvripdlp609jq248p5pj"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p53r6nt.177kri.dv5vjksv9aovg5r61u3b6",
+      "position": 14,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p53r6nt.177kri.dv5vjksv9aovg5r61u3b6"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "FNAME",
+      "_type": "database_column",
+      "length": "40",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": 0,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "STRING",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "FNAME",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dgomdfv.7ht2tn.fqco914b7o0b4ndjrleu7",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dgomdfv.7ht2tn.fqco914b7o0b4ndjrleu7"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p53umpc.2m0tv3.n4pmie966rjuvno4qbv8e",
+      "position": 5,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p53umpc.2m0tv3.n4pmie966rjuvno4qbv8e"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "HDR",
+      "_type": "database_column",
+      "length": "",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT32",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "HDR",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dgof1kr.554bqc.q90seq1r4h3s7sbd1gicd",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dgof1kr.554bqc.q90seq1r4h3s7sbd1gicd"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p540nhr.oojbif.not4dbgt6tdfim52496ou",
+      "position": 1,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p540nhr.oojbif.not4dbgt6tdfim52496ou"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "HOL",
+      "_type": "database_column",
+      "length": "",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT32",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "HOL",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dgp17uo.i4pjrg.0nq5gehoagto4u7j2j69k",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dgp17uo.i4pjrg.0nq5gehoagto4u7j2j69k"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p5krtsn.v02f5n.6vgktkp424s5fdjv6bl2v",
+      "position": 12,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p5krtsn.v02f5n.6vgktkp424s5fdjv6bl2v"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "LNAME",
+      "_type": "database_column",
+      "length": "40",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": 0,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "STRING",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LNAME",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dgov6n3.lgb41v.rk8pp37bktr1u43apurs4",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dgov6n3.lgb41v.rk8pp37bktr1u43apurs4"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p53te5v.ntsu0t.823t6e9e2kro9c5hdgjlm",
+      "position": 6,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p53te5v.ntsu0t.823t6e9e2kro9c5hdgjlm"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "LOCATION",
+      "_type": "database_column",
+      "length": "40",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": 0,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "STRING",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LOCATION",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dha811i.t7scc2.hcb822b8qsrb8l2hjd73c",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dha811i.t7scc2.hcb822b8qsrb8l2hjd73c"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p5ktul6.89jbhe.46jqkv78in1461087sll0",
+      "position": 10,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p5ktul6.89jbhe.46jqkv78in1461087sll0"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "LOCCODE",
+      "_type": "database_column",
+      "length": "",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT32",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LOCCODE",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dhq8hgs.mlqnl0.mdkvjiuc2vndveelrqc2s",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dhq8hgs.mlqnl0.mdkvjiuc2vndveelrqc2s"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p5k9p8f.opocu8.v51gihkht6k2l4kauska5",
+      "position": 11,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p5k9p8f.opocu8.v51gihkht6k2l4kauska5"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "LVL",
+      "_type": "database_column",
+      "length": "",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT32",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LVL",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dha4243.9h5aj4.oevtspbk8k3btcan5poao",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dha4243.9h5aj4.oevtspbk8k3btcan5poao"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p5kvrd8.bj3dac.jk9c3jsh9qmcmcdcos1fg",
+      "position": 9,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p5kvrd8.bj3dac.jk9c3jsh9qmcmcdcos1fg"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "PNUM",
+      "_type": "database_column",
+      "length": "",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT32",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "PNUM",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dfnbpf8.qqlj92.apbqtmb9763qq122r5t7s",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dfnbpf8.qqlj92.apbqtmb9763qq122r5t7s"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p5k2f1a.rqe7ff.9r4oi8sabs64lg8tbqo81",
+      "position": 7,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p5k2f1a.rqe7ff.9r4oi8sabs64lg8tbqo81"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "RECTYPE",
+      "_type": "database_column",
+      "length": "",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT32",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "RECTYPE",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dg7m7aa.28e788.5fu894shsv1qp19jqeorm",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dg7m7aa.28e788.5fu894shsv1qp19jqeorm"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p5kv67b.8ltkd2.jm557sfca789qfdr7hmeg",
+      "position": 2,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p5kv67b.8ltkd2.jm557sfca789qfdr7hmeg"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "ROLE",
+      "_type": "database_column",
+      "length": "40",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": 0,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "STRING",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "ROLE",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dgotf8d.qq6nkk.fs50v4mgl47eivbd75jl8",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dgotf8d.qq6nkk.fs50v4mgl47eivbd75jl8"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p5k2onc.c4qug5.r592mt9p4sjeq3lhmud61",
+      "position": 13,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p5k2onc.c4qug5.r592mt9p4sjeq3lhmud61"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "SALARY",
+      "_type": "database_column",
+      "length": "",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT32",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "SALARY",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dh9r34k.ejt9qp.bd72clg76jh4c3ud23aur",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dh9r34k.ejt9qp.bd72clg76jh4c3ud23aur"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p5k3rd1.78g5s1.c7d1lkuj4j2b08jmg56v1",
+      "position": 15,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p5k3rd1.78g5s1.c7d1lkuj4j2b08jmg56v1"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "SERVICE",
+      "_type": "database_column",
+      "length": "",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT32",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "SERVICE",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dgoo5ce.t5nnfm.tqgj44hq4u8l0p4qmvg7n",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dgoo5ce.t5nnfm.tqgj44hq4u8l0p4qmvg7n"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p53vdqa.hd4q6m.0dcl9q6vdjlnmpi56sfme",
+      "position": 3,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p53vdqa.hd4q6m.0dcl9q6vdjlnmpi56sfme"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "SNUM",
+      "_type": "database_column",
+      "length": "",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT32",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "SNUM",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dha1768.6di4hb.ckoc45p6pgju7n0p3o0r0",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dha1768.6di4hb.ckoc45p6pgju7n0p3o0r0"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p5kn8ip.m0c9n8.4j8n57dn02t8as8c4csi7",
+      "position": 17,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p5kn8ip.m0c9n8.4j8n57dn02t8as8c4csi7"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "STATE",
+      "_type": "database_column",
+      "length": "40",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": 0,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "STRING",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "STATE",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dgop2sh.46pri3.50m08bg91t46r14h7nklf",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dgop2sh.46pri3.50m08bg91t46r14h7nklf"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p5kqltl.63a1i6.iiq97niitic4saokh0h9f",
+      "position": 20,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p5kqltl.63a1i6.iiq97niitic4saokh0h9f"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "STREET",
+      "_type": "database_column",
+      "length": "40",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": 0,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "STRING",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "STREET",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dg875m8.jr3g18.jauc3933ug07mlofvkstp",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dg875m8.jr3g18.jauc3933ug07mlofvkstp"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p5kkel4.v0in11.e81eo8rkaql85rvvmuo9b",
+      "position": 18,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p5kkel4.v0in11.e81eo8rkaql85rvvmuo9b"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "TAX",
+      "_type": "database_column",
+      "length": "",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT32",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "TAX",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dh9c5ju.eg89i8.4op034vnuflnc0min7q6e",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dh9c5ju.eg89i8.4op034vnuflnc0min7q6e"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p5l0909.rbe6ca.2u1s1dnueg18s5f25vdk8",
+      "position": 21,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p5l0909.rbe6ca.2u1s1dnueg18s5f25vdk8"
+    },
+    {
+      "modified_on": "2019-12-10T16:18:47Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "TAXP",
+      "_type": "database_column",
+      "length": "",
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:18:47Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "EMPLSANL",
+          "_type": "database",
+          "_id": "b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e83759b.001mts4r2.p5k8j7d.4fkj79.l1fduk7otv97nq03h3tpp"
+        },
+        {
+          "_name": "DB2INST1",
+          "_type": "database_schema",
+          "_id": "b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.c1fb060b.001mts4r2.p5k6s4v.n0bsuk.0q48qrt6k76ca1uuoer59"
+        },
+        {
+          "_name": "EMPSALARYANALYSIS",
+          "_type": "database_table",
+          "_id": "b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4r2.p5ktjrv.hdk8rd.mi5vb5n6bcpsi129jrsu0"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT32",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "TAXP",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.dgovgmp.dkmqbh.3rhvgup1u8i5rtc3p5ne4",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.dgovgmp.dkmqbh.3rhvgup1u8i5rtc3p5ne4"
+          }
+        ]
+      },
+      "_id": "b1c497ce.60641b50.001mts4r2.p5l0isc.n9nhf6.7lgn9rh832r4km5baosm8",
+      "position": 22,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4r2.p5l0isc.n9nhf6.7lgn9rh832r4km5baosm8"
+    }
+  ]
+}

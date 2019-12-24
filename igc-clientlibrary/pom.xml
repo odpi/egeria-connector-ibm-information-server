@@ -63,12 +63,10 @@
             <artifactId>testng</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.mock-server</groupId>
-            <artifactId>mockserver-client-java</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mock-server</groupId>
-            <artifactId>mockserver-core</artifactId>
+            <groupId>org.odpi.egeria</groupId>
+            <artifactId>egeria-connector-ibm-information-server-test</artifactId>
+            <version>${open-metadata.version}</version>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>
@@ -92,7 +90,7 @@
                 <configuration>
                     <serverPort>1080</serverPort>
                     <logLevel>WARN</logLevel>
-                    <initializationClass>org.odpi.egeria.connectors.mocks.MockIGCClientExpectations</initializationClass>
+                    <initializationClass>org.odpi.egeria.connectors.ibm.information.server.mocks.MockServerExpectations</initializationClass>
                 </configuration>
                 <executions>
                     <execution>

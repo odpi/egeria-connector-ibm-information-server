@@ -1,0 +1,1514 @@
+{
+  "paging": {
+    "numTotal": 16,
+    "pageSize": 100,
+    "end": 15,
+    "begin": 0
+  },
+  "items": [
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "ROLE: nullable string",
+      "allows_null_values": true,
+      "expression": [],
+      "_name": "ROLE",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "odbc_type": "VARCHAR",
+      "_type": "stage_column",
+      "length": 0,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "ROLE",
+            "_type": "data_file_field",
+            "_id": "b1c497ce.60641b50.001mts4ph.b7mbsvf.p7qril.8au918jrttnopqf0eql37",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b7mbsvf.p7qril.8au918jrttnopqf0eql37"
+          }
+        ]
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink3",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "ROLE",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0kr5s.3einkj.0osqfi3tobvlfvronhgg4",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0kr5s.3einkj.0osqfi3tobvlfvronhgg4"
+          }
+        ]
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ic00jso.iqhidq.vf40rc05bspda2mt58fb9",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic00jso.iqhidq.vf40rc05bspda2mt58fb9",
+      "key": false
+    },
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "expression": [],
+      "_name": "ROLE",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "ROLE",
+            "_type": "database_column",
+            "_id": "b1c497ce.60641b50.001mts4qb.ntk9n83.1ugf93.08bgdcqo1agb71h44f4g8",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4qb.ntk9n83.1ugf93.08bgdcqo1agb71h44f4g8"
+          }
+        ]
+      },
+      "odbc_type": "VARCHAR",
+      "_type": "stage_column",
+      "length": 40,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "ROLE",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ic00jso.iqhidq.vf40rc05bspda2mt58fb9",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic00jso.iqhidq.vf40rc05bspda2mt58fb9"
+          }
+        ]
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink4",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0kr5s.3einkj.0osqfi3tobvlfvronhgg4",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0kr5s.3einkj.0osqfi3tobvlfvronhgg4",
+      "key": false
+    },
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "expression": [],
+      "_name": "PNUM",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "PNUM",
+            "_type": "database_column",
+            "_id": "b1c497ce.60641b50.001mts4qb.nu57hu1.1r6ei8.f74hetc6gg57k3d37e9s9",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4qb.nu57hu1.1r6ei8.f74hetc6gg57k3d37e9s9"
+          }
+        ]
+      },
+      "odbc_type": "INTEGER",
+      "_type": "stage_column",
+      "length": 4,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "PNUM",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0m7u8.nu2t6v.f4ar6tda2iq7losm4limk",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0m7u8.nu2t6v.f4ar6tda2iq7losm4limk"
+          }
+        ]
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink4",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ibvpasu.j4q5s8.7hc9qn1h89045hfrl3d16",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ibvpasu.j4q5s8.7hc9qn1h89045hfrl3d16",
+      "key": true
+    },
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "PNUM: not nullable int64",
+      "allows_null_values": true,
+      "expression": [],
+      "_name": "PNUM",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "odbc_type": "UNKNOWN",
+      "_type": "stage_column",
+      "length": 0,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "PNUM",
+            "_type": "data_file_field",
+            "_id": "b1c497ce.60641b50.001mts4ph.b86gv9k.rnrvkg.r22oncj0r0o99fl80250v",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b86gv9k.rnrvkg.r22oncj0r0o99fl80250v"
+          }
+        ]
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink3",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "PNUM",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ibvpasu.j4q5s8.7hc9qn1h89045hfrl3d16",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ibvpasu.j4q5s8.7hc9qn1h89045hfrl3d16"
+          }
+        ]
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0m7u8.nu2t6v.f4ar6tda2iq7losm4limk",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0m7u8.nu2t6v.f4ar6tda2iq7losm4limk",
+      "key": false
+    },
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "LVL: nullable int64",
+      "allows_null_values": true,
+      "expression": [],
+      "_name": "LVL",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "odbc_type": "BIGINT",
+      "_type": "stage_column",
+      "length": 18,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LVL",
+            "_type": "data_file_field",
+            "_id": "b1c497ce.60641b50.001mts4ph.b86jtfe.ndl0db.no43e9691va8d5spqlju0",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b86jtfe.ndl0db.no43e9691va8d5spqlju0"
+          }
+        ]
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink3",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LVL",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0jn25.e1s977.fj4kit6j6rh8mu4j1pk4o",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0jn25.e1s977.fj4kit6j6rh8mu4j1pk4o"
+          }
+        ]
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ibvplso.2tfngi.n85si4kki8kr60qmq5e36",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ibvplso.2tfngi.n85si4kki8kr60qmq5e36",
+      "key": false
+    },
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "expression": [],
+      "_name": "LVL",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LVL",
+            "_type": "database_column",
+            "_id": "b1c497ce.60641b50.001mts4qb.nu4fcv0.cun09o.1qk8p38q3h6rgaqgs6n1k",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4qb.nu4fcv0.cun09o.1qk8p38q3h6rgaqgs6n1k"
+          }
+        ]
+      },
+      "odbc_type": "INTEGER",
+      "_type": "stage_column",
+      "length": 4,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LVL",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ibvplso.2tfngi.n85si4kki8kr60qmq5e36",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ibvplso.2tfngi.n85si4kki8kr60qmq5e36"
+          }
+        ]
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink4",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0jn25.e1s977.fj4kit6j6rh8mu4j1pk4o",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0jn25.e1s977.fj4kit6j6rh8mu4j1pk4o",
+      "key": false
+    },
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "LOCCODE: nullable int64",
+      "allows_null_values": true,
+      "expression": [],
+      "_name": "LOCCODE",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "odbc_type": "BIGINT",
+      "_type": "stage_column",
+      "length": 18,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LOCCODE",
+            "_type": "data_file_field",
+            "_id": "b1c497ce.60641b50.001mts4ph.b7lfu6i.ebbkfu.gsgcgoh0d5qc31q9jce19",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b7lfu6i.ebbkfu.gsgcgoh0d5qc31q9jce19"
+          }
+        ]
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink3",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LOCCODE",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0aei5.t1n79u.o092p2ujpli4f8pvnkeur",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0aei5.t1n79u.o092p2ujpli4f8pvnkeur"
+          }
+        ]
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ic06t80.kgh3ql.7m0ip4c706ng9dsvc6ua3",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic06t80.kgh3ql.7m0ip4c706ng9dsvc6ua3",
+      "key": false
+    },
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "expression": [],
+      "_name": "LOCCODE",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LOCCODE",
+            "_type": "database_column",
+            "_id": "b1c497ce.60641b50.001mts4qb.ntk8180.m2dkjc.teep98d9h3vn2959tbpcg",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4qb.ntk8180.m2dkjc.teep98d9h3vn2959tbpcg"
+          }
+        ]
+      },
+      "odbc_type": "INTEGER",
+      "_type": "stage_column",
+      "length": 4,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LOCCODE",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ic06t80.kgh3ql.7m0ip4c706ng9dsvc6ua3",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic06t80.kgh3ql.7m0ip4c706ng9dsvc6ua3"
+          }
+        ]
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink4",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0aei5.t1n79u.o092p2ujpli4f8pvnkeur",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0aei5.t1n79u.o092p2ujpli4f8pvnkeur",
+      "key": false
+    },
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "LNAME: nullable string",
+      "allows_null_values": true,
+      "expression": [],
+      "_name": "LNAME",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "odbc_type": "VARCHAR",
+      "_type": "stage_column",
+      "length": 0,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LNAME",
+            "_type": "data_file_field",
+            "_id": "b1c497ce.60641b50.001mts4ph.b86rtll.gj10g8.l0s9nqls7ou9m9oi6dd1o",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b86rtll.gj10g8.l0s9nqls7ou9m9oi6dd1o"
+          }
+        ]
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink3",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LNAME",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0hvol.hlgc1d.td2j33991r261v6327vpg",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0hvol.hlgc1d.td2j33991r261v6327vpg"
+          }
+        ]
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0brk8.ofrlsl.8muj92lstvgiobsm9dhd7",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0brk8.ofrlsl.8muj92lstvgiobsm9dhd7",
+      "key": false
+    },
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "expression": [],
+      "_name": "LNAME",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LNAME",
+            "_type": "database_column",
+            "_id": "b1c497ce.60641b50.001mts4qb.ntk8b8o.222e1b.b98sktqlcvokko8fash2g",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4qb.ntk8b8o.222e1b.b98sktqlcvokko8fash2g"
+          }
+        ]
+      },
+      "odbc_type": "VARCHAR",
+      "_type": "stage_column",
+      "length": 120,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "LNAME",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0brk8.ofrlsl.8muj92lstvgiobsm9dhd7",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0brk8.ofrlsl.8muj92lstvgiobsm9dhd7"
+          }
+        ]
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink4",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0hvol.hlgc1d.td2j33991r261v6327vpg",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0hvol.hlgc1d.td2j33991r261v6327vpg",
+      "key": false
+    },
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "FNAME: nullable string",
+      "allows_null_values": true,
+      "expression": [],
+      "_name": "FNAME",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "odbc_type": "VARCHAR",
+      "_type": "stage_column",
+      "length": 0,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "FNAME",
+            "_type": "data_file_field",
+            "_id": "b1c497ce.60641b50.001mts4ph.b7lengv.vq2dl6.j8naupksd4vg8rj9tru49",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b7lengv.vq2dl6.j8naupksd4vg8rj9tru49"
+          }
+        ]
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink3",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "FNAME",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0hmo8.i2nlav.1cghbj88l43m1gqmimlag",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0hmo8.i2nlav.1cghbj88l43m1gqmimlag"
+          }
+        ]
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ic00tv3.7qkqhp.b2j11tojld094041ee64p",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic00tv3.7qkqhp.b2j11tojld094041ee64p",
+      "key": false
+    },
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "expression": [],
+      "_name": "FNAME",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "FNAME",
+            "_type": "database_column",
+            "_id": "b1c497ce.60641b50.001mts4qb.ntke0ct.ovi8d8.00a4p51i6msl88rpfukr4",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4qb.ntke0ct.ovi8d8.00a4p51i6msl88rpfukr4"
+          }
+        ]
+      },
+      "odbc_type": "VARCHAR",
+      "_type": "stage_column",
+      "length": 40,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "FNAME",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ic00tv3.7qkqhp.b2j11tojld094041ee64p",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic00tv3.7qkqhp.b2j11tojld094041ee64p"
+          }
+        ]
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink4",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0hmo8.i2nlav.1cghbj88l43m1gqmimlag",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0hmo8.i2nlav.1cghbj88l43m1gqmimlag",
+      "key": false
+    },
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "expression": [],
+      "_name": "EMPSTATUS",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "EMPSTATUS",
+            "_type": "database_column",
+            "_id": "b1c497ce.60641b50.001mts4qb.ntk578n.q38d7j.1cu4p6vp0bh5u5qe3dedv",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4qb.ntk578n.q38d7j.1cu4p6vp0bh5u5qe3dedv"
+          }
+        ]
+      },
+      "odbc_type": "INTEGER",
+      "_type": "stage_column",
+      "length": 4,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "EMPSTATUS",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0en38.kb6nas.o71k95lo3arod2u97kuvf",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0en38.kb6nas.o71k95lo3arod2u97kuvf"
+          }
+        ]
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink4",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0as40.amlp4c.eek2i0mrg14m8ap8tua3r",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0as40.amlp4c.eek2i0mrg14m8ap8tua3r",
+      "key": false
+    },
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "EMPSTATUS: nullable int64",
+      "allows_null_values": true,
+      "expression": [],
+      "_name": "EMPSTATUS",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "odbc_type": "BIGINT",
+      "_type": "stage_column",
+      "length": 18,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "EMPSTATUS",
+            "_type": "data_file_field",
+            "_id": "b1c497ce.60641b50.001mts4ph.b86qr2a.vlhbbd.0us35f5rbmlrlkqgse5co",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b86qr2a.vlhbbd.0us35f5rbmlrlkqgse5co"
+          }
+        ]
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink3",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "EMPSTATUS",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0as40.amlp4c.eek2i0mrg14m8ap8tua3r",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0as40.amlp4c.eek2i0mrg14m8ap8tua3r"
+          }
+        ]
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ic0en38.kb6nas.o71k95lo3arod2u97kuvf",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic0en38.kb6nas.o71k95lo3arod2u97kuvf",
+      "key": false
+    },
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "expression": [],
+      "_name": "DEPT",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "DEPT",
+            "_type": "database_column",
+            "_id": "b1c497ce.60641b50.001mts4qb.ntk0miu.418lel.j1lf6ar4e9bltku1v2b0n",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4qb.ntk0miu.418lel.j1lf6ar4e9bltku1v2b0n"
+          }
+        ]
+      },
+      "odbc_type": "INTEGER",
+      "_type": "stage_column",
+      "length": 4,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "DEPT",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ic05409.il49u9.8s8i8sc9ogjt20mdo4ljd",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic05409.il49u9.8s8i8sc9ogjt20mdo4ljd"
+          }
+        ]
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink4",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic061g6.5g03et.7aj0fhvf401qc110jglht"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ic01ac3.puh8br.pqc7ph3611ojiiu6urjtp",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic01ac3.puh8br.pqc7ph3611ojiiu6urjtp",
+      "key": false
+    },
+    {
+      "modified_on": "2019-12-10T16:20:52Z",
+      "short_description": "DEPT: nullable int64",
+      "allows_null_values": true,
+      "expression": [],
+      "_name": "DEPT",
+      "writes_to_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "odbc_type": "BIGINT",
+      "_type": "stage_column",
+      "length": 18,
+      "long_description": "",
+      "created_by": "Administrator IIS",
+      "minimum_length": 0,
+      "reads_from_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "DEPT",
+            "_type": "data_file_field",
+            "_id": "b1c497ce.60641b50.001mts4ph.b7ma6mg.9eu4k8.e6q359gbrh0f23f63c3i7",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b7ma6mg.9eu4k8.e6q359gbrh0f23f63c3i7"
+          }
+        ]
+      },
+      "previous_stage_columns": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "created_on": "2019-12-10T16:20:52Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "dstage1",
+          "_type": "transformation_project",
+          "_id": "c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.60f7eb8a.001mtr384.6aedetj.k1imud.umv5epir0v64m8jl3gbu0"
+        },
+        {
+          "_name": "file_to_EMPLOYEE",
+          "_type": "dsjob",
+          "_id": "c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.43058877.001mts4t0.icfuoe6.jgkei5.q2o0d2okuqi3seok0qf2h"
+        },
+        {
+          "_name": "DSLink3",
+          "_type": "link",
+          "_id": "c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.78bf4d29.001mts4t0.ic0f1h7.7j83o4.rcijnk4lutb2lhk4a804v"
+        }
+      ],
+      "next_stage_columns": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "DEPT",
+            "_type": "stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t0.ic01ac3.puh8br.pqc7ph3611ojiiu6urjtp",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic01ac3.puh8br.pqc7ph3611ojiiu6urjtp"
+          }
+        ]
+      },
+      "modified_by": "Administrator IIS",
+      "_id": "c2e76d84.cf7a27f9.001mts4t0.ic05409.il49u9.8s8i8sc9ogjt20mdo4ljd",
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t0.ic05409.il49u9.8s8i8sc9ogjt20mdo4ljd",
+      "key": false
+    }
+  ]
+}

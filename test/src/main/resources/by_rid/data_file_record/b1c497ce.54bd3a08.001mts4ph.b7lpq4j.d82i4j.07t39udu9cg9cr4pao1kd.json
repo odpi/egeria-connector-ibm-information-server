@@ -1,0 +1,811 @@
+{
+  "paging": {
+    "numTotal": 9,
+    "pageSize": 100,
+    "end": 8,
+    "begin": 0
+  },
+  "items": [
+    {
+      "modified_on": "2019-12-10T16:17:08Z",
+      "short_description": "",
+      "allows_null_values": true,
+      "_name": "F1",
+      "_type": "data_file_field",
+      "length": null,
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "F1",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.1npmjs5.2bfo2f.9jn12c3ththdrhuh7gsmf",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.1npmjs5.2bfo2f.9jn12c3ththdrhuh7gsmf"
+          }
+        ]
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:17:08Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "/",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h"
+        },
+        {
+          "_name": "data",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65"
+        },
+        {
+          "_name": "files",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g"
+        },
+        {
+          "_name": "CocoPharma",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8"
+        },
+        {
+          "_name": "Location-WorkLocation.csv",
+          "_type": "data_file",
+          "_id": "b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1"
+        },
+        {
+          "_name": "Location-WorkLocation",
+          "_type": "data_file_record",
+          "_id": "b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd"
+        }
+      ],
+      "unique": false,
+      "data_type": "STRING",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "_id": "b1c497ce.60641b50.001mts4ph.b7m2hd3.o0eq2q.5u14551p5f1908ge1hvcj",
+      "position": 3,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b7m2hd3.o0eq2q.5u14551p5f1908ge1hvcj"
+    },
+    {
+      "modified_on": "2019-12-10T16:17:08Z",
+      "short_description": "",
+      "allows_null_values": true,
+      "_name": "F2",
+      "_type": "data_file_field",
+      "length": null,
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "F2",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.1n90omd.dbuav6.ln5f44vj3v27habl165m1",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.1n90omd.dbuav6.ln5f44vj3v27habl165m1"
+          }
+        ]
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:17:08Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "/",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h"
+        },
+        {
+          "_name": "data",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65"
+        },
+        {
+          "_name": "files",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g"
+        },
+        {
+          "_name": "CocoPharma",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8"
+        },
+        {
+          "_name": "Location-WorkLocation.csv",
+          "_type": "data_file",
+          "_id": "b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1"
+        },
+        {
+          "_name": "Location-WorkLocation",
+          "_type": "data_file_record",
+          "_id": "b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd"
+        }
+      ],
+      "unique": false,
+      "data_type": "STRING",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "_id": "b1c497ce.60641b50.001mts4ph.b7m6lk4.94aft7.3jrf76kjmf1kme2hsh1fb",
+      "position": 4,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b7m6lk4.94aft7.3jrf76kjmf1kme2hsh1fb"
+    },
+    {
+      "modified_on": "2019-12-10T16:17:08Z",
+      "short_description": "",
+      "allows_null_values": true,
+      "_name": "F3",
+      "_type": "data_file_field",
+      "length": null,
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "F3",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.1npfhhh.387qjf.3kpvrnom620d0t7di208j",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.1npfhhh.387qjf.3kpvrnom620d0t7di208j"
+          }
+        ]
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:17:08Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "/",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h"
+        },
+        {
+          "_name": "data",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65"
+        },
+        {
+          "_name": "files",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g"
+        },
+        {
+          "_name": "CocoPharma",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8"
+        },
+        {
+          "_name": "Location-WorkLocation.csv",
+          "_type": "data_file",
+          "_id": "b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1"
+        },
+        {
+          "_name": "Location-WorkLocation",
+          "_type": "data_file_record",
+          "_id": "b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd"
+        }
+      ],
+      "unique": false,
+      "data_type": "STRING",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "_id": "b1c497ce.60641b50.001mts4ph.b86fc5c.g6ic02.umlqa3543rupqus59uhef",
+      "position": 5,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b86fc5c.g6ic02.umlqa3543rupqus59uhef"
+    },
+    {
+      "modified_on": "2019-12-10T16:17:08Z",
+      "short_description": "",
+      "allows_null_values": true,
+      "_name": "F4",
+      "_type": "data_file_field",
+      "length": null,
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "F4",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.1npips5.4767i0.28vf6anfuvsklbo1qsghr",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.1npips5.4767i0.28vf6anfuvsklbo1qsghr"
+          }
+        ]
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:17:08Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "/",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h"
+        },
+        {
+          "_name": "data",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65"
+        },
+        {
+          "_name": "files",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g"
+        },
+        {
+          "_name": "CocoPharma",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8"
+        },
+        {
+          "_name": "Location-WorkLocation.csv",
+          "_type": "data_file",
+          "_id": "b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1"
+        },
+        {
+          "_name": "Location-WorkLocation",
+          "_type": "data_file_record",
+          "_id": "b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd"
+        }
+      ],
+      "unique": false,
+      "data_type": "STRING",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "_id": "b1c497ce.60641b50.001mts4ph.b7ltuto.47ssh6.u5imj7vrsc5dk6pd8rcdt",
+      "position": 6,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b7ltuto.47ssh6.u5imj7vrsc5dk6pd8rcdt"
+    },
+    {
+      "modified_on": "2019-12-10T16:17:08Z",
+      "short_description": "",
+      "allows_null_values": true,
+      "_name": "F5",
+      "_type": "data_file_field",
+      "length": null,
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "F5",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.1npr2nc.iehf2m.jrv35dcuklnh423uc20eg",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.1npr2nc.iehf2m.jrv35dcuklnh423uc20eg"
+          }
+        ]
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:17:08Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "/",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h"
+        },
+        {
+          "_name": "data",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65"
+        },
+        {
+          "_name": "files",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g"
+        },
+        {
+          "_name": "CocoPharma",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8"
+        },
+        {
+          "_name": "Location-WorkLocation.csv",
+          "_type": "data_file",
+          "_id": "b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1"
+        },
+        {
+          "_name": "Location-WorkLocation",
+          "_type": "data_file_record",
+          "_id": "b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd"
+        }
+      ],
+      "unique": false,
+      "data_type": "STRING",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "_id": "b1c497ce.60641b50.001mts4ph.b86elko.v4me71.pniktp04so8pgpnirhi0f",
+      "position": 7,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b86elko.v4me71.pniktp04so8pgpnirhi0f"
+    },
+    {
+      "modified_on": "2019-12-10T16:17:08Z",
+      "short_description": "",
+      "allows_null_values": true,
+      "_name": "F6",
+      "_type": "data_file_field",
+      "length": null,
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "F6",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.1npdh6v.l1bm5i.63p5lshli6vq50asuu8ht",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.1npdh6v.l1bm5i.63p5lshli6vq50asuu8ht"
+          }
+        ]
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:17:08Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "/",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h"
+        },
+        {
+          "_name": "data",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65"
+        },
+        {
+          "_name": "files",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g"
+        },
+        {
+          "_name": "CocoPharma",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8"
+        },
+        {
+          "_name": "Location-WorkLocation.csv",
+          "_type": "data_file",
+          "_id": "b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1"
+        },
+        {
+          "_name": "Location-WorkLocation",
+          "_type": "data_file_record",
+          "_id": "b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd"
+        }
+      ],
+      "unique": false,
+      "data_type": "STRING",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "_id": "b1c497ce.60641b50.001mts4ph.b7lrq72.bih37r.egbu4ec112b7vugiuodpd",
+      "position": 8,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b7lrq72.bih37r.egbu4ec112b7vugiuodpd"
+    },
+    {
+      "modified_on": "2019-12-10T16:17:08Z",
+      "short_description": "",
+      "allows_null_values": true,
+      "_name": "F7",
+      "_type": "data_file_field",
+      "length": null,
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "F7",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.1npq0qv.1c591u.o2qik60jeqdrh83ihhuh0",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.1npq0qv.1c591u.o2qik60jeqdrh83ihhuh0"
+          }
+        ]
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:17:08Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "/",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h"
+        },
+        {
+          "_name": "data",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65"
+        },
+        {
+          "_name": "files",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g"
+        },
+        {
+          "_name": "CocoPharma",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8"
+        },
+        {
+          "_name": "Location-WorkLocation.csv",
+          "_type": "data_file",
+          "_id": "b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1"
+        },
+        {
+          "_name": "Location-WorkLocation",
+          "_type": "data_file_record",
+          "_id": "b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd"
+        }
+      ],
+      "unique": false,
+      "data_type": "STRING",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "_id": "b1c497ce.60641b50.001mts4ph.b86dv28.b5nfrh.kpafcg9e2da81mpiaqjvn",
+      "position": 9,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b86dv28.b5nfrh.kpafcg9e2da81mpiaqjvn"
+    },
+    {
+      "modified_on": "2019-12-10T16:17:08Z",
+      "short_description": "",
+      "allows_null_values": false,
+      "_name": "WLID",
+      "_type": "data_file_field",
+      "length": null,
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "WLID",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.1npngak.e6gcah.8d0erscus7e46b538sfgv",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.1npngak.e6gcah.8d0erscus7e46b538sfgv"
+          }
+        ]
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:17:08Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "/",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h"
+        },
+        {
+          "_name": "data",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65"
+        },
+        {
+          "_name": "files",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g"
+        },
+        {
+          "_name": "CocoPharma",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8"
+        },
+        {
+          "_name": "Location-WorkLocation.csv",
+          "_type": "data_file",
+          "_id": "b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1"
+        },
+        {
+          "_name": "Location-WorkLocation",
+          "_type": "data_file_record",
+          "_id": "b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd"
+        }
+      ],
+      "unique": false,
+      "data_type": "INT64",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "_id": "b1c497ce.60641b50.001mts4ph.b86jc8l.lfiki9.10puku31pvttdaibdvpc0",
+      "position": 1,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b86jc8l.lfiki9.10puku31pvttdaibdvpc0"
+    },
+    {
+      "modified_on": "2019-12-10T16:17:08Z",
+      "short_description": "",
+      "allows_null_values": true,
+      "_name": "WLName",
+      "_type": "data_file_field",
+      "length": null,
+      "default_value": "",
+      "long_description": "",
+      "read_by_(design)": {
+        "paging": {
+          "numTotal": 1,
+          "pageSize": 1,
+          "end": 0,
+          "begin": 0
+        },
+        "items": [
+          {
+            "_name": "WLName",
+            "_type": "ds_stage_column",
+            "_id": "c2e76d84.cf7a27f9.001mts4t1.1npockf.qc64bo.bj7r9mumfvkndnfrk81hv",
+            "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/c2e76d84.cf7a27f9.001mts4t1.1npockf.qc64bo.bj7r9mumfvkndnfrk81hv"
+          }
+        ]
+      },
+      "created_by": "InformationServerSystemUser",
+      "minimum_length": null,
+      "fraction": null,
+      "created_on": "2019-12-10T16:17:08Z",
+      "_context": [
+        {
+          "_name": "INFOSVR",
+          "_type": "host_(engine)",
+          "_id": "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh"
+        },
+        {
+          "_name": "/",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b75bpqi.vgg0ee.9b1aajpfn0cgh159d134h"
+        },
+        {
+          "_name": "data",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b7lkg5d.mi8ll9.h6u92aup5vdbaj4sohc65"
+        },
+        {
+          "_name": "files",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86mhdf.9ss47v.psl7jkujnc2n6pcu2582g"
+        },
+        {
+          "_name": "CocoPharma",
+          "_type": "data_file_folder",
+          "_id": "b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8"
+        },
+        {
+          "_name": "Location-WorkLocation.csv",
+          "_type": "data_file",
+          "_id": "b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.6e76d866.001mts4ph.b7585jp.47vits.8eka4ktulikhvvklk3do1"
+        },
+        {
+          "_name": "Location-WorkLocation",
+          "_type": "data_file_record",
+          "_id": "b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd",
+          "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.54bd3a08.001mts4ph.b7lpq4j.d82i4j.07t39udu9cg9cr4pao1kd"
+        }
+      ],
+      "unique": false,
+      "data_type": "STRING",
+      "modified_by": "InformationServerSystemUser",
+      "written_by_(design)": {
+        "paging": {
+          "numTotal": 0,
+          "pageSize": 0,
+          "end": -1,
+          "begin": 0
+        },
+        "items": []
+      },
+      "_id": "b1c497ce.60641b50.001mts4ph.b7lhscd.eilnp6.jo2mag071dprqhqo0jtqp",
+      "position": 2,
+      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/b1c497ce.60641b50.001mts4ph.b7lhscd.eilnp6.jo2mag071dprqhqo0jtqp"
+    }
+  ]
+}
