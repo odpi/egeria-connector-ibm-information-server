@@ -21,9 +21,9 @@ import static org.mockserver.model.Parameter.param;
 /**
  * Setup a mock server to act as an IGC REST API endpoint against which we can do some thorough testing.
  */
-public class MockServerExpectations implements ExpectationInitializer {
+public class MockIGCClientExpectations implements ExpectationInitializer {
 
-    private static final Logger log = LoggerFactory.getLogger(MockServerExpectations.class);
+    private static final Logger log = LoggerFactory.getLogger(MockIGCClientExpectations.class);
 
     private static final String GLOSSARY_RID = "6662c0f2.ee6a64fe.00263pfar.1a0mm9a.lfjd3c.rmgl1cdd5fcd4bijur3g3";
 
