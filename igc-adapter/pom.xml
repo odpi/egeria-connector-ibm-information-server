@@ -77,14 +77,10 @@
         <dependency>
             <groupId>org.odpi.egeria</groupId>
             <artifactId>repository-services-implementation</artifactId>
-            <version>${open-metadata.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.odpi.egeria</groupId>
             <artifactId>open-metadata-types</artifactId>
-            <version>${open-metadata.version}</version>
-            <scope>test</scope>
         </dependency>
 
     </dependencies>
