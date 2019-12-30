@@ -1,18 +1,1 @@
-{
-  "paging": {
-    "numTotal": 1,
-    "pageSize": 100,
-    "end": 0,
-    "begin": 0
-  },
-  "items": [
-    {
-      "short_description": "GENERATED -- DO NOT UPDATE: last synced at 2019-12-24T20:02:00.000Z",
-      "_name": "Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS",
-      "_context": [],
-      "_type": "information_governance_rule",
-      "_id": "6662c0f2.e1b13efc.001muec10.9jc4uj6.ipcl02.1jsbiukl0lr2vv411sarh",
-      "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/assets/6662c0f2.e1b13efc.001muec10.9jc4uj6.ipcl02.1jsbiukl0lr2vv411sarh"
-    }
-  ]
-}
+{"paging":{"numTotal":1,"pageSize":100,"end":0,"begin":0},"items":[{"short_description":"GENERATED -- DO NOT UPDATE: last synced at 2019-12-24T20:02:00.000Z","_name":"Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS","_context":[],"_type":"information_governance_rule","_id":"6662c0f2.e1b13efc.001muec10.9jc4uj6.ipcl02.1jsbiukl0lr2vv411sarh","_url":"https://infosvr:9446/ibm/iis/igc-rest/v1/assets/6662c0f2.e1b13efc.001muec10.9jc4uj6.ipcl02.1jsbiukl0lr2vv411sarh"}]}

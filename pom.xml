@@ -104,6 +104,7 @@
         <testng.version>7.1.1</testng.version>
         <mock-server.version>5.8.0</mock-server.version>
         <sleepycat.version>18.3.12</sleepycat.version>
+        <rhino.version>1.7.11</rhino.version>
         <woodstox.version>6.0.3</woodstox.version>
         <maven-compiler.version>3.8.1</maven-compiler.version>
         <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
@@ -257,13 +258,6 @@
                 <version>${open-metadata.version}</version>
                 <scope>provided</scope>
             </dependency>
-            <!-- this dependency is necessary to ensure we do not use an outdated version of sleepycat for the next dependency -->
-            <dependency>
-                <groupId>com.sleepycat</groupId>
-                <artifactId>je</artifactId>
-                <version>${sleepycat.version}</version>
-                <scope>test</scope>
-            </dependency>
             <dependency>
                 <groupId>org.odpi.egeria</groupId>
                 <artifactId>repository-services-implementation</artifactId>
@@ -274,6 +268,19 @@
                 <groupId>org.odpi.egeria</groupId>
                 <artifactId>open-metadata-types</artifactId>
                 <version>${open-metadata.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- Following dependencies are to ensure we use updated versions of libraries that others are dependent upon -->
+            <dependency>
+                <groupId>com.sleepycat</groupId>
+                <artifactId>je</artifactId>
+                <version>${sleepycat.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mozilla</groupId>
+                <artifactId>rhino</artifactId>
+                <version>${rhino.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

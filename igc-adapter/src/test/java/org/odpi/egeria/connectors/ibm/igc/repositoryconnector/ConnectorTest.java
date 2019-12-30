@@ -16,11 +16,8 @@ import org.odpi.openmetadata.repositoryservices.auditlog.OMRSAuditLogDestination
 import org.odpi.openmetadata.repositoryservices.connectors.stores.archivestore.properties.OpenMetadataArchive;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.archivestore.properties.OpenMetadataArchiveTypeStore;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.OMRSMetadataCollection;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Classification;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.EntityDetail;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.EntitySummary;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDef;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDef;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.*;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.*;
 import org.odpi.openmetadata.repositoryservices.localrepository.repositorycontentmanager.OMRSRepositoryContentHelper;
 import org.odpi.openmetadata.repositoryservices.localrepository.repositorycontentmanager.OMRSRepositoryContentManager;
@@ -29,9 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.testng.Assert.*;
 
@@ -51,15 +47,29 @@ public class ConnectorTest {
     private List<AttributeTypeDef> supportedAttributeTypeDefs;
     private List<TypeDef> supportedTypeDefs;
 
+    private String exampleTableGuid;
+
+    /**
+     * Construct base objects
+     */
     public ConnectorTest() {
         HttpHelper.noStrictSSL();
         metadataCollectionId = UUID.randomUUID().toString();
         supportedAttributeTypeDefs = new ArrayList<>();
         supportedTypeDefs = new ArrayList<>();
+
+        String exampleTableRid = MockConstants.TABLE_RID;
+        IGCEntityGuid igcEntityGuid = new IGCEntityGuid(metadataCollectionId, "database_table", exampleTableRid);
+        assertNotNull(igcEntityGuid);
+        exampleTableGuid = igcEntityGuid.asGuid();
+
     }
 
+    /**
+     * Initialize the connector with some basic values.
+     */
     @BeforeSuite
-    void startConnector() {
+    public void startConnector() {
 
         Connection mockConnection = new MockConnection();
         OMRSAuditLogDestination destination = new OMRSAuditLogDestination(null);
@@ -84,19 +94,21 @@ public class ConnectorTest {
         OMRSMetadataCollection collection = igcomrsRepositoryConnector.getMetadataCollection();
         assertTrue(collection instanceof IGCOMRSMetadataCollection);
         igcomrsMetadataCollection = (IGCOMRSMetadataCollection) collection;
+        try {
+            assertEquals(igcomrsMetadataCollection.getMetadataCollectionId(MockConstants.EGERIA_USER), metadataCollectionId);
+        } catch (RepositoryErrorException e) {
+            log.error("Unable to match metadata collection IDs.", e);
+            assertNotNull(e);
+        }
 
     }
 
+    /**
+     * Initialize all of the open metadata types that the connector could support.
+     */
     @BeforeTest
-    void initAllOpenTypes() {
-        // TODO: need to send in the open metadata types to initialize the repository helper and validator, and to do
-        //  this it will probably be simplest to somehow standup a mock Kafka topic for the cohort?  Or do we give up
-        //  at this point because this is frankly far too complicated for a set of unit tests, and really it is the CTS
-        //  that should do the thorough testing of the MetadataCollection class -- we should instead just focus on the
-        //  underlying mappings that are used by the class and be sure that these work as intended?
-        //  (Nope, even that probably will not be sufficient as the basic mapping relies on being able to retrieve the
-        //  attribute definitions from the type definitions in order to programmatically run through the mappings
-        //  themselves...)
+    public void initAllOpenTypes() {
+
         OpenMetadataArchive archive = new OpenMetadataTypesArchive().getOpenMetadataArchive();
         OpenMetadataArchiveTypeStore typeStore = archive.getArchiveTypeStore();
         List<AttributeTypeDef> attributeTypeDefList = typeStore.getAttributeTypeDefs();
@@ -145,40 +157,147 @@ public class ConnectorTest {
         }
     }
 
+    /**
+     * Test the supported open metadata types.
+     */
     @Test
-    void verifySupportedTypes() {
+    public void verifySupportedTypes() {
+
         for (AttributeTypeDef attributeTypeDef : supportedAttributeTypeDefs) {
             try {
                 assertTrue(igcomrsMetadataCollection.verifyAttributeTypeDef(MockConstants.EGERIA_USER, attributeTypeDef));
             } catch (InvalidParameterException | RepositoryErrorException | InvalidTypeDefException e) {
-                log.error("Unable to verify attribute type definition: {}", attributeTypeDef.getName());
+                log.error("Unable to verify attribute type definition: {}", attributeTypeDef.getName(), e);
                 assertNotNull(e);
             }
         }
+
         for (TypeDef typeDef : supportedTypeDefs) {
             try {
                 assertTrue(igcomrsMetadataCollection.verifyTypeDef(MockConstants.EGERIA_USER, typeDef));
             } catch (InvalidParameterException | RepositoryErrorException | InvalidTypeDefException | TypeDefNotSupportedException e) {
-                log.error("Unable to verify type definition: {}", typeDef.getName());
+                log.error("Unable to verify type definition: {}", typeDef.getName(), e);
                 assertNotNull(e);
             }
         }
+
+        try {
+            TypeDefGallery typeDefGallery = igcomrsMetadataCollection.getAllTypes(MockConstants.EGERIA_USER);
+            assertNotNull(typeDefGallery);
+            List<AttributeTypeDef> fromGalleryATD = typeDefGallery.getAttributeTypeDefs();
+            List<TypeDef> fromGalleryTD = typeDefGallery.getTypeDefs();
+            assertTrue(fromGalleryATD.containsAll(supportedAttributeTypeDefs));
+            assertTrue(supportedAttributeTypeDefs.containsAll(fromGalleryATD));
+            assertTrue(fromGalleryTD.containsAll(supportedTypeDefs));
+            assertTrue(supportedTypeDefs.containsAll(fromGalleryTD));
+        } catch (RepositoryErrorException | InvalidParameterException e) {
+            log.error("Unable to retrieve all types.", e);
+            assertNotNull(e);
+        }
+
     }
 
+    /**
+     * Test searching for open metadata types.
+     */
     @Test
-    void testRelationalTableMapper() {
+    public void testFindTypes() {
 
-        String tableRid = MockConstants.getTableRids().get("EMPLOYEE");
+        List<TypeDef> entityTypeDefs = findTypeDefsByCategory(TypeDefCategory.ENTITY_DEF);
+        applyAssertionsToTypeDefs(entityTypeDefs, TypeDefCategory.ENTITY_DEF);
+
+        List<TypeDef> classificationTypeDefs = findTypeDefsByCategory(TypeDefCategory.CLASSIFICATION_DEF);
+        applyAssertionsToTypeDefs(classificationTypeDefs, TypeDefCategory.CLASSIFICATION_DEF);
+
+        List<TypeDef> relationshipTypeDefs = findTypeDefsByCategory(TypeDefCategory.RELATIONSHIP_DEF);
+        applyAssertionsToTypeDefs(relationshipTypeDefs, TypeDefCategory.RELATIONSHIP_DEF);
+
+        try {
+            List<TypeDef> searchResults = igcomrsMetadataCollection.searchForTypeDefs(MockConstants.EGERIA_USER, ".*a.*");
+            assertNotNull(searchResults);
+            assertFalse(searchResults.isEmpty());
+            List<String> names = searchResults.stream().map(TypeDef::getName).collect(Collectors.toList());
+            assertTrue(names.contains("RelationalTable"));
+            assertTrue(names.contains("CategoryHierarchyLink"));
+            assertTrue(names.contains("Confidentiality"));
+        } catch (InvalidParameterException | RepositoryErrorException e) {
+            log.error("Unable to search for TypeDefs with contains string.", e);
+            assertNotNull(e);
+        }
+
+    }
+
+    private List<TypeDef> findTypeDefsByCategory(TypeDefCategory typeDefCategory) {
+        List<TypeDef> typeDefs = null;
+        try {
+            typeDefs = igcomrsMetadataCollection.findTypeDefsByCategory(MockConstants.EGERIA_USER, typeDefCategory);
+        } catch (InvalidParameterException | RepositoryErrorException e) {
+            log.error("Unable to search for TypeDefs from category: {}", typeDefCategory.getName(), e);
+            assertNotNull(e);
+        }
+        return typeDefs;
+    }
+
+    private void applyAssertionsToTypeDefs(List<TypeDef> typeDefs, TypeDefCategory typeDefCategory) {
+        assertNotNull(typeDefs);
+        assertFalse(typeDefs.isEmpty());
+        for (TypeDef typeDef : typeDefs) {
+            assertEquals(typeDef.getCategory(), typeDefCategory);
+        }
+    }
+
+    /**
+     * Test direct type def retrievals
+     */
+    @Test
+    public void testTypeDefRetrievals() {
+
+        final String relationalTableGUID = "ce7e72b8-396a-4013-8688-f9d973067425";
+        final String relationalTableName = "RelationalTable";
+
+        try {
+            TypeDef byGUID = igcomrsMetadataCollection.getTypeDefByGUID(MockConstants.EGERIA_USER, relationalTableGUID);
+            TypeDef byName = igcomrsMetadataCollection.getTypeDefByName(MockConstants.EGERIA_USER, relationalTableName);
+            assertNotNull(byGUID);
+            assertNotNull(byName);
+            assertEquals(byGUID.getName(), relationalTableName);
+            assertEquals(byName.getGUID(), relationalTableGUID);
+            assertEquals(byGUID, byName);
+        } catch (InvalidParameterException | RepositoryErrorException | TypeDefNotKnownException e) {
+            log.error("Unable to retrieve type definition: {} / {}", relationalTableGUID, relationalTableName, e);
+            assertNotNull(e);
+        }
+
+    }
+
+    /**
+     * Test the findEntitiesBy... operations
+     */
+    @Test
+    public void testFindEntityOps() {
+        // TODO: write a test against a relatively limited set that can be put easily into mocks
+    }
+
+    /**
+     * Test the findRelationshipsBy... operations
+     */
+    @Test
+    public void testFindRelationshipOps() {
+        // TODO: write a test against a relatively limited set that can be put easily into mocks
+    }
+
+    /**
+     * Test the RelationalTable mapping
+     */
+    @Test
+    public void testRelationalTableMapper() {
 
         try {
 
-            IGCEntityGuid igcEntityGuid = new IGCEntityGuid(igcomrsMetadataCollection.getMetadataCollectionId(MockConstants.EGERIA_USER), "database_table", tableRid);
-            assertNotNull(igcEntityGuid);
-
-            EntitySummary entitySummary = igcomrsMetadataCollection.getEntitySummary(MockConstants.EGERIA_USER, igcEntityGuid.asGuid());
+            EntitySummary entitySummary = igcomrsMetadataCollection.getEntitySummary(MockConstants.EGERIA_USER, exampleTableGuid);
             assertNotNull(entitySummary);
 
-            EntityDetail entityDetail = igcomrsMetadataCollection.getEntityDetail(MockConstants.EGERIA_USER, igcEntityGuid.asGuid());
+            EntityDetail entityDetail = igcomrsMetadataCollection.isEntityKnown(MockConstants.EGERIA_USER, exampleTableGuid);
             assertNotNull(entityDetail);
             assertEquals(entityDetail.getType().getTypeDefName(), "RelationalTable");
             assertNotNull(entityDetail.getCreateTime());
@@ -195,7 +314,58 @@ public class ConnectorTest {
             assertTrue(classification.getVersion() > 0);
 
         } catch (RepositoryErrorException | InvalidParameterException | EntityNotKnownException e) {
-            log.error("Unable to retrieve entity detail for: {}", tableRid);
+            log.error("Unable to retrieve entity detail for: {}", exampleTableGuid);
+            assertNull(e);
+        } catch (Exception e) {
+            log.error("Failed with unexpected exception!", e);
+            assertNull(e);
+        }
+
+    }
+
+    /**
+     * Test the relationships retrieval from an entity
+     */
+    @Test
+    public void testRelationalTableRelationships() {
+
+        List<Relationship> relationships = null;
+
+        try {
+
+            relationships = igcomrsMetadataCollection.getRelationshipsForEntity(
+                    MockConstants.EGERIA_USER,
+                    exampleTableGuid,
+                    null,
+                    0,
+                    null,
+                    null,
+                    null,
+                    null,
+                    0
+            );
+
+        } catch (RepositoryErrorException | InvalidParameterException | EntityNotKnownException e) {
+            log.error("Unable to retrieve relationships for: {}", exampleTableGuid);
+            assertNull(e);
+        } catch (Exception e) {
+            log.error("Failed with unexpected exception!", e);
+            assertNull(e);
+        }
+
+        assertNotNull(relationships);
+        assertFalse(relationships.isEmpty());
+
+        List<String> relationshipTypes = relationships.stream().map(Relationship::getType).map(InstanceType::getTypeDefName).collect(Collectors.toList());
+        assertTrue(relationshipTypes.contains("AttributeForSchema"));
+        assertTrue(relationshipTypes.contains("NestedSchemaAttribute"));
+
+        String relationshipGuid = relationships.get(0).getGUID();
+        try {
+            Relationship retrievedByGuid = igcomrsMetadataCollection.getRelationship(MockConstants.EGERIA_USER, relationshipGuid);
+            assertNotNull(retrievedByGuid);
+        } catch (InvalidParameterException | RepositoryErrorException | RelationshipNotKnownException e) {
+            log.error("Unable to retrieve relationship by GUID: {}", relationshipGuid);
             assertNull(e);
         } catch (Exception e) {
             log.error("Failed with unexpected exception!", e);
