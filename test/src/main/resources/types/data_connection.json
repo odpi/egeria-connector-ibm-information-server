@@ -1,0 +1,191 @@
+{
+  "editInfo": {
+    "sections": [
+      {
+        "displayName": "Header",
+        "name": "Header",
+        "properties": [
+          "short_description",
+          "long_description"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "displayName": "Short Description",
+        "name": "short_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Long Description",
+        "name": "long_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      }
+    ]
+  },
+  "_businessLineage": false,
+  "viewInfo": {
+    "sections": [
+      {
+        "displayName": "Header",
+        "name": "Header",
+        "properties": [
+          "name",
+          "short_description",
+          "long_description",
+          "host"
+        ]
+      },
+      {
+        "displayName": "Imports Database",
+        "name": "Imports Database",
+        "properties": [
+          "imports_database"
+        ]
+      },
+      {
+        "displayName": "General Information",
+        "name": "General Information",
+        "properties": [
+          "data_connectors",
+          "connection_string",
+          "imported_from",
+          "native_id"
+        ]
+      },
+      {
+        "displayName": "Modification Details",
+        "name": "Modification Details",
+        "properties": [
+          "created_by",
+          "created_on",
+          "modified_by",
+          "modified_on"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "displayName": "Name",
+        "name": "name",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Short Description",
+        "name": "short_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Long Description",
+        "name": "long_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Host",
+        "name": "host",
+        "type": {
+          "name": "host",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/host"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Imports Database",
+        "name": "imports_database",
+        "type": {
+          "name": "database",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Data Connectors",
+        "name": "data_connectors",
+        "type": {
+          "name": "connector",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/connector"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Connection String",
+        "name": "connection_string",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Imported From",
+        "name": "imported_from",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Native ID",
+        "name": "native_id",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Created By",
+        "name": "created_by",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Created On",
+        "name": "created_on",
+        "type": {
+          "name": "datetime"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Modified By",
+        "name": "modified_by",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Modified On",
+        "name": "modified_on",
+        "type": {
+          "name": "datetime"
+        },
+        "maxCardinality": 1
+      }
+    ]
+  },
+  "_name": "Data Connection",
+  "_plural": null,
+  "_id": "data_connection",
+  "_class": "ASCLModel.DataConnection",
+  "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_connection",
+  "_dataLineage": false,
+  "_group": null,
+  "_parents": []
+}

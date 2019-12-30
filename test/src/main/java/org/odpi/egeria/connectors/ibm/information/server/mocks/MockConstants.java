@@ -19,6 +19,8 @@ public class MockConstants {
     public static final String IGC_USER = "isadmin";
     public static final String IGC_PASS = "isadmin";
 
+    public static final String EGERIA_USER = "admin";
+
     private static final Map<String, String> JOB_RIDS = createJobRidMap();
     private static Map<String, String> createJobRidMap() {
         Map<String, String> map = new HashMap<>();
@@ -46,22 +48,6 @@ public class MockConstants {
         return Collections.unmodifiableMap(map);
     }
 
-    private static final Set<String> TYPES = createTypes();
-    private static Set<String> createTypes() {
-        Set<String> set = new HashSet<>();
-        set.add("category");
-        set.add("data_file_field");
-        set.add("database_column");
-        set.add("ds_stage_column");
-        set.add("dsjob");
-        set.add("link");
-        set.add("sequence_job");
-        set.add("stage");
-        set.add("stage_column");
-        set.add("term");
-        return Collections.unmodifiableSet(set);
-    }
-
     /**
      * Get a mapping of job name to RID for the jobs that are mocked.
      * @return {@code Map<String, String>}
@@ -79,11 +65,5 @@ public class MockConstants {
      * @return {@code Map<String, String>}
      */
     public static Map<String, String> getTableRids() { return TABLE_RIDS; }
-
-    /**
-     * Get a listing of the types that are mocked.
-     * @return {@code Set<String>}
-     */
-    public static Set<String> getTypes() { return TYPES; }
 
 }

@@ -1,0 +1,608 @@
+{
+  "editInfo": {
+    "sections": [
+      {
+        "displayName": "Header",
+        "name": "Header",
+        "properties": [
+          "short_description",
+          "long_description",
+          "labels",
+          "stewards",
+          "assigned_to_terms",
+          "implements_rules",
+          "governed_by_rules"
+        ]
+      },
+      {
+        "displayName": "General Information",
+        "name": "General Information",
+        "properties": [
+          "alias_(business_name)"
+        ]
+      },
+      {
+        "displayName": "Suggested Term Assignments",
+        "name": "Suggested Term Assignments",
+        "properties": [
+          "suggested_term_assignments"
+        ]
+      },
+      {
+        "displayName": "Notes",
+        "name": "Notes",
+        "properties": [
+          "notes"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "displayName": "Short Description",
+        "name": "short_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Long Description",
+        "name": "long_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Labels",
+        "name": "labels",
+        "type": {
+          "name": "label",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/label"
+        }
+      },
+      {
+        "displayName": "Stewards",
+        "name": "stewards",
+        "type": {
+          "name": "ascl_steward",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/ascl_steward"
+        }
+      },
+      {
+        "displayName": "Assigned to Terms",
+        "name": "assigned_to_terms",
+        "type": {
+          "name": "term",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/term"
+        }
+      },
+      {
+        "displayName": "Implements Rules",
+        "name": "implements_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Governed by Rules",
+        "name": "governed_by_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Alias (Business Name)",
+        "name": "alias_(business_name)",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "_expand": [
+          {
+            "displayName": "Term",
+            "name": "assign_to_term",
+            "type": {
+              "name": "main_object",
+              "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/main_object"
+            },
+            "maxCardinality": 1
+          },
+          {
+            "displayName": "Confidence (Percent)",
+            "name": "confidence_percent",
+            "type": {
+              "name": "number"
+            },
+            "maxCardinality": 1
+          }
+        ],
+        "displayName": "Suggested Term Assignments",
+        "name": "suggested_term_assignments",
+        "type": {
+          "name": "term_assignment",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/term_assignment"
+        }
+      },
+      {
+        "displayName": "Notes",
+        "name": "notes",
+        "type": {
+          "name": "note"
+        }
+      }
+    ]
+  },
+  "_businessLineage": true,
+  "viewInfo": {
+    "sections": [
+      {
+        "displayName": "Header",
+        "name": "Header",
+        "properties": [
+          "name",
+          "short_description",
+          "long_description",
+          "host",
+          "labels",
+          "stewards",
+          "assigned_to_terms",
+          "implements_rules",
+          "governed_by_rules"
+        ]
+      },
+      {
+        "displayName": "Database Schemas",
+        "name": "Database Schemas",
+        "properties": [
+          "database_schemas"
+        ]
+      },
+      {
+        "displayName": "General Information",
+        "name": "General Information",
+        "properties": [
+          "alias_(business_name)",
+          "location",
+          "dbms",
+          "dbms_server_instance",
+          "dbms_vendor",
+          "dbms_version",
+          "database_type",
+          "imported_from",
+          "native_id",
+          "synchronized_from"
+        ]
+      },
+      {
+        "displayName": "Database Usage Information",
+        "name": "Database Usage Information",
+        "properties": [
+          "data_connections",
+          "data_connection_mappings",
+          "mapped_to_mdm_models",
+          "read_by_(static)",
+          "written_by_(static)",
+          "read_by_(design)",
+          "written_by_(design)",
+          "read_by_(operational)",
+          "written_by_(operational)",
+          "read_by_(user_defined)",
+          "written_by_(user_defined)",
+          "impacted_by",
+          "impacts_on"
+        ]
+      },
+      {
+        "displayName": "BI Reports and BI Models",
+        "name": "BI Reports and BI Models",
+        "properties": [
+          "bi_reports",
+          "bi_models"
+        ]
+      },
+      {
+        "displayName": "Suggested Term Assignments",
+        "name": "Suggested Term Assignments",
+        "properties": [
+          "suggested_term_assignments"
+        ]
+      },
+      {
+        "displayName": "In Collections",
+        "name": "In Collections",
+        "properties": [
+          "in_collections"
+        ]
+      },
+      {
+        "displayName": "Notes",
+        "name": "Notes",
+        "properties": [
+          "notes"
+        ]
+      },
+      {
+        "displayName": "Modification Details",
+        "name": "Modification Details",
+        "properties": [
+          "created_by",
+          "created_on",
+          "modified_by",
+          "modified_on"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "displayName": "Name",
+        "name": "name",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Short Description",
+        "name": "short_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Long Description",
+        "name": "long_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Host",
+        "name": "host",
+        "type": {
+          "name": "host",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/host"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Labels",
+        "name": "labels",
+        "type": {
+          "name": "label",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/label"
+        }
+      },
+      {
+        "displayName": "Stewards",
+        "name": "stewards",
+        "type": {
+          "name": "ascl_steward",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/ascl_steward"
+        }
+      },
+      {
+        "displayName": "Assigned to Terms",
+        "name": "assigned_to_terms",
+        "type": {
+          "name": "term",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/term"
+        }
+      },
+      {
+        "displayName": "Implements Rules",
+        "name": "implements_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Governed by Rules",
+        "name": "governed_by_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Database Schemas",
+        "name": "database_schemas",
+        "type": {
+          "name": "database_schema",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database_schema"
+        }
+      },
+      {
+        "displayName": "Alias (Business Name)",
+        "name": "alias_(business_name)",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Location",
+        "name": "location",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "DBMS",
+        "name": "dbms",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "DBMS Server Instance",
+        "name": "dbms_server_instance",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "DBMS Vendor",
+        "name": "dbms_vendor",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "DBMS Version",
+        "name": "dbms_version",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Database Type",
+        "name": "database_type",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Imported From",
+        "name": "imported_from",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Native ID",
+        "name": "native_id",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Synchronized From",
+        "name": "synchronized_from",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Data Connections",
+        "name": "data_connections",
+        "type": {
+          "name": "data_connection",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_connection"
+        }
+      },
+      {
+        "displayName": "Data Connection Mappings",
+        "name": "data_connection_mappings",
+        "type": {
+          "name": "data_connection_mapping",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_connection_mapping"
+        }
+      },
+      {
+        "displayName": "Mapped to MDM Models",
+        "name": "mapped_to_mdm_models",
+        "type": {
+          "name": "mdm_model",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/mdm_model"
+        }
+      },
+      {
+        "displayName": "Read by (Static)",
+        "name": "read_by_(static)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Written by (Static)",
+        "name": "written_by_(static)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Read by (Design)",
+        "name": "read_by_(design)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Written by (Design)",
+        "name": "written_by_(design)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Read by (Operational)",
+        "name": "read_by_(operational)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Written by (Operational)",
+        "name": "written_by_(operational)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Read by (User-Defined)",
+        "name": "read_by_(user_defined)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Written by (User-Defined)",
+        "name": "written_by_(user_defined)",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Impacted by",
+        "name": "impacted_by",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "Impacts on",
+        "name": "impacts_on",
+        "type": {
+          "name": "information_asset",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_asset"
+        }
+      },
+      {
+        "displayName": "BI Reports",
+        "name": "bi_reports",
+        "type": {
+          "name": "bi_report",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_report"
+        }
+      },
+      {
+        "displayName": "BI Models",
+        "name": "bi_models",
+        "type": {
+          "name": "bi_model",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/bi_model"
+        }
+      },
+      {
+        "_expand": [
+          {
+            "displayName": "Term",
+            "name": "assign_to_term",
+            "type": {
+              "name": "main_object",
+              "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/main_object"
+            },
+            "maxCardinality": 1
+          },
+          {
+            "displayName": "Confidence (Percent)",
+            "name": "confidence_percent",
+            "type": {
+              "name": "number"
+            },
+            "maxCardinality": 1
+          }
+        ],
+        "displayName": "Suggested Term Assignments",
+        "name": "suggested_term_assignments",
+        "type": {
+          "name": "term_assignment",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/term_assignment"
+        }
+      },
+      {
+        "displayName": "In Collections",
+        "name": "in_collections",
+        "type": {
+          "name": "collection",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/collection"
+        }
+      },
+      {
+        "displayName": "Notes",
+        "name": "notes",
+        "type": {
+          "name": "note"
+        }
+      },
+      {
+        "displayName": "Created By",
+        "name": "created_by",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Created On",
+        "name": "created_on",
+        "type": {
+          "name": "datetime"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Modified By",
+        "name": "modified_by",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Modified On",
+        "name": "modified_on",
+        "type": {
+          "name": "datetime"
+        },
+        "maxCardinality": 1
+      }
+    ]
+  },
+  "_name": "Database",
+  "_plural": "Databases",
+  "_id": "database",
+  "_class": "ASCLModel.Database",
+  "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/database",
+  "_dataLineage": true,
+  "_group": "Databases",
+  "_parents": [
+    "information_asset"
+  ]
+}

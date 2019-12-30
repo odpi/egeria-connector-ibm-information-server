@@ -9,11 +9,14 @@ import org.mockserver.matchers.Times;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
@@ -39,6 +42,7 @@ public class MockServerExpectations implements ExpectationInitializer {
 
         initializeTypeDetails(mockServerClient);
         initializeIGCClientExpectations(mockServerClient);
+        initializeIGCConnectorExpectations(mockServerClient);
         initializeDataStageConnectorExpectations(mockServerClient);
 
     }
@@ -46,8 +50,11 @@ public class MockServerExpectations implements ExpectationInitializer {
     private void initializeTypeDetails(MockServerClient mockServerClient) {
 
         setTypesQuery(mockServerClient);
-        for (String type : MockConstants.getTypes()) {
-            setTypeDetails(mockServerClient, type);
+        Resource[] typeFiles = getFilesMatchingPattern("types/*.json");
+        if (typeFiles != null) {
+            for (Resource typeFile : typeFiles) {
+                setTypeDetails(mockServerClient, typeFile.getFilename());
+            }
         }
 
     }
@@ -64,6 +71,19 @@ public class MockServerExpectations implements ExpectationInitializer {
         setExampleRefAsset(mockServerClient, GLOSSARY_RID);
 
         setLogout(mockServerClient);
+
+    }
+
+    private void initializeIGCConnectorExpectations(MockServerClient mockServerClient) {
+
+        setUploadBundle(mockServerClient);
+
+        Resource[] instanceExamples = getFilesMatchingPattern("by_rid/**/*.json");
+        if (instanceExamples != null) {
+            for (Resource instanceExample : instanceExamples) {
+                setDetailsByRidQuery(mockServerClient, instanceExample);
+            }
+        }
 
     }
 
@@ -131,7 +151,8 @@ public class MockServerExpectations implements ExpectationInitializer {
         );
     }
 
-    private void setTypeDetails(MockServerClient mockServerClient, String typeName) {
+    private void setTypeDetails(MockServerClient mockServerClient, String typeFilename) {
+        String typeName = typeFilename.substring(0, typeFilename.indexOf(".json"));
         mockServerClient
                 .withSecure(true)
                 .when(
@@ -222,6 +243,20 @@ public class MockServerExpectations implements ExpectationInitializer {
                 );
     }
 
+    private void setUploadBundle(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(
+                        request()
+                                .withMethod("PUT")
+                                .withPath("/ibm/iis/igc-rest/v1/bundles")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                );
+    }
+
     private void setJobSyncRuleQueryEmpty(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
@@ -289,7 +324,7 @@ public class MockServerExpectations implements ExpectationInitializer {
                 )
                 .respond(
                         response()
-                                .withBody(getResourceFileContents("by_rid" + File.separator + "stage" + File.separator + rid + ".json"))
+                                .withBody(getResourceFileContents("by_parent_rid" + File.separator + "stage" + File.separator + rid + ".json"))
                 );
     }
 
@@ -309,7 +344,7 @@ public class MockServerExpectations implements ExpectationInitializer {
                 )
                 .respond(
                         response()
-                                .withBody(getResourceFileContents("by_rid" + File.separator + "link" + File.separator + rid + ".json"))
+                                .withBody(getResourceFileContents("by_parent_rid" + File.separator + "link" + File.separator + rid + ".json"))
                 );
     }
 
@@ -329,7 +364,7 @@ public class MockServerExpectations implements ExpectationInitializer {
                 )
                 .respond(
                         response()
-                                .withBody(getResourceFileContents("by_rid" + File.separator + "stage_column" + File.separator + rid + ".json"))
+                                .withBody(getResourceFileContents("by_parent_rid" + File.separator + "stage_column" + File.separator + rid + ".json"))
                 );
     }
 
@@ -349,7 +384,7 @@ public class MockServerExpectations implements ExpectationInitializer {
                 )
                 .respond(
                         response()
-                                .withBody(getResourceFileContents("by_rid" + File.separator + "ds_stage_column" + File.separator + rid + ".json"))
+                                .withBody(getResourceFileContents("by_parent_rid" + File.separator + "ds_stage_column" + File.separator + rid + ".json"))
                 );
     }
 
@@ -369,7 +404,7 @@ public class MockServerExpectations implements ExpectationInitializer {
                 )
                 .respond(
                         response()
-                                .withBody(getResourceFileContents("by_rid" + File.separator + "data_file_record" + File.separator + rid + ".json"))
+                                .withBody(getResourceFileContents("by_parent_rid" + File.separator + "data_file_field" + File.separator + rid + ".json"))
                 );
     }
 
@@ -389,8 +424,40 @@ public class MockServerExpectations implements ExpectationInitializer {
                 )
                 .respond(
                         response()
-                                .withBody(getResourceFileContents("by_rid" + File.separator + "database_table" + File.separator + rid + ".json"))
+                                .withBody(getResourceFileContents("by_parent_rid" + File.separator + "database_column" + File.separator + rid + ".json"))
                 );
+    }
+
+    private void setDetailsByRidQuery(MockServerClient mockServerClient, Resource resource) {
+        URL url = null;
+        try {
+            url = resource.getURL();
+        } catch (IOException e) {
+            log.error("Unable to retrieve detailed file from: {}", resource, e);
+        }
+        if (url != null) {
+            String filename = url.getFile();
+            String rid = filename.substring(filename.lastIndexOf("/") + 1, filename.indexOf(".json"));
+            String path = filename.substring(filename.indexOf("/") + 1, filename.lastIndexOf("/"));
+            String type = path.substring(path.lastIndexOf("/") + 1);
+            mockServerClient
+                    .withSecure(true)
+                    .when(
+                            request()
+                                    .withMethod("POST")
+                                    .withPath("/ibm/iis/igc-rest/v1/search")
+                                    .withBody(
+                                            json(
+                                                    "{\"types\":[\"" + type + "\"],\"where\":{\"conditions\":[{\"property\":\"_id\",\"operator\":\"=\",\"value\":\"" + rid + "\"}],\"operator\":\"and\"}}",
+                                                    MatchType.ONLY_MATCHING_FIELDS
+                                            )
+                                    )
+                    )
+                    .respond(
+                            response()
+                                    .withBody(getResourceFileContents("by_rid" + File.separator + type + File.separator + rid + ".json"))
+                    );
+        }
     }
 
     /**
@@ -408,6 +475,23 @@ public class MockServerExpectations implements ExpectationInitializer {
         }
         if (reader != null) {
             return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        }
+        return null;
+
+    }
+
+    /**
+     * Retrieve the set of resources that match the specified pattern.
+     * @param pattern to match for retrieving resources
+     * @return {@code Resource[]}
+     */
+    private Resource[] getFilesMatchingPattern(String pattern) {
+
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        try {
+            return resolver.getResources(pattern);
+        } catch(IOException e) {
+            log.error("Unable to find any matches to pattern: {}", pattern, e);
         }
         return null;
 
