@@ -440,7 +440,7 @@ public class IGCRestClient {
             log.warn("Request failed -- session may have expired, retrying...", e);
             // If the response was forbidden (fails with exception), the session may have expired -- create a new one
             response = openNewSessionWithUpload(
-                    url,
+                    endpoint,
                     method,
                     file,
                     forceLogin

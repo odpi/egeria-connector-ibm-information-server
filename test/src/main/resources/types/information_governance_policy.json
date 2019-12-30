@@ -1,0 +1,446 @@
+{
+  "editInfo": {
+    "sections": [
+      {
+        "displayName": "Header",
+        "name": "Header",
+        "properties": [
+          "name",
+          "short_description",
+          "long_description",
+          "parent_policy",
+          "labels",
+          "stewards",
+          "language"
+        ]
+      },
+      {
+        "displayName": "General Information",
+        "name": "General Information",
+        "properties": [
+          "translations"
+        ]
+      },
+      {
+        "displayName": "Subpolicies",
+        "name": "Subpolicies",
+        "properties": [
+          "subpolicies"
+        ]
+      },
+      {
+        "displayName": "Information Governance Rules",
+        "name": "Information Governance Rules",
+        "properties": [
+          "information_governance_rules"
+        ]
+      },
+      {
+        "displayName": "Notes",
+        "name": "Notes",
+        "properties": [
+          "notes"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "minCardinality": 1,
+        "displayName": "Name",
+        "name": "name",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Short Description",
+        "name": "short_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Long Description",
+        "name": "long_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Parent Policy",
+        "name": "parent_policy",
+        "type": {
+          "name": "information_governance_policy",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_policy"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Labels",
+        "name": "labels",
+        "type": {
+          "name": "label",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/label"
+        }
+      },
+      {
+        "displayName": "Stewards",
+        "name": "stewards",
+        "type": {
+          "name": "ascl_steward",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/ascl_steward"
+        }
+      },
+      {
+        "displayName": "Language",
+        "name": "language",
+        "type": {
+          "name": "enum",
+          "validValues": []
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Translations",
+        "name": "translations",
+        "type": {
+          "name": "information_governance_policy",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_policy"
+        }
+      },
+      {
+        "displayName": "Subpolicies",
+        "name": "subpolicies",
+        "type": {
+          "name": "information_governance_policy",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_policy"
+        }
+      },
+      {
+        "displayName": "Information Governance Rules",
+        "name": "information_governance_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Notes",
+        "name": "notes",
+        "type": {
+          "name": "note"
+        }
+      }
+    ]
+  },
+  "_businessLineage": false,
+  "viewInfo": {
+    "sections": [
+      {
+        "displayName": "Header",
+        "name": "Header",
+        "properties": [
+          "name",
+          "short_description",
+          "long_description",
+          "parent_policy",
+          "labels",
+          "stewards",
+          "language"
+        ]
+      },
+      {
+        "displayName": "General Information",
+        "name": "General Information",
+        "properties": [
+          "translations",
+          "native_id"
+        ]
+      },
+      {
+        "displayName": "Subpolicies",
+        "name": "Subpolicies",
+        "properties": [
+          "subpolicies"
+        ]
+      },
+      {
+        "displayName": "Information Governance Rules",
+        "name": "Information Governance Rules",
+        "properties": [
+          "information_governance_rules"
+        ]
+      },
+      {
+        "displayName": "In Collections",
+        "name": "In Collections",
+        "properties": [
+          "in_collections"
+        ]
+      },
+      {
+        "displayName": "Notes",
+        "name": "Notes",
+        "properties": [
+          "notes"
+        ]
+      },
+      {
+        "displayName": "Workflow State",
+        "name": "Workflow State",
+        "properties": [
+          "workflow_current_state",
+          "workflow_stored_state",
+          "glossary_type"
+        ]
+      },
+      {
+        "displayName": "Modification Details",
+        "name": "Modification Details",
+        "properties": [
+          "created_by",
+          "created_on",
+          "modified_by",
+          "modified_on"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "minCardinality": 1,
+        "displayName": "Name",
+        "name": "name",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Short Description",
+        "name": "short_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Long Description",
+        "name": "long_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Parent Policy",
+        "name": "parent_policy",
+        "type": {
+          "name": "information_governance_policy",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_policy"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Labels",
+        "name": "labels",
+        "type": {
+          "name": "label",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/label"
+        }
+      },
+      {
+        "displayName": "Stewards",
+        "name": "stewards",
+        "type": {
+          "name": "ascl_steward",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/ascl_steward"
+        }
+      },
+      {
+        "displayName": "Language",
+        "name": "language",
+        "type": {
+          "name": "enum",
+          "validValues": []
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Translations",
+        "name": "translations",
+        "type": {
+          "name": "information_governance_policy",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_policy"
+        }
+      },
+      {
+        "displayName": "Native ID",
+        "name": "native_id",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Subpolicies",
+        "name": "subpolicies",
+        "type": {
+          "name": "information_governance_policy",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_policy"
+        }
+      },
+      {
+        "displayName": "Information Governance Rules",
+        "name": "information_governance_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "In Collections",
+        "name": "in_collections",
+        "type": {
+          "name": "collection",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/collection"
+        }
+      },
+      {
+        "displayName": "Notes",
+        "name": "notes",
+        "type": {
+          "name": "note"
+        }
+      },
+      {
+        "displayName": "Workflow Current State",
+        "name": "workflow_current_state",
+        "type": {
+          "name": "string"
+        }
+      },
+      {
+        "displayName": "Workflow Stored State",
+        "name": "workflow_stored_state",
+        "type": {
+          "name": "enum",
+          "validValues": [
+            {
+              "displayName": "DRAFT",
+              "id": "DRAFT"
+            },
+            {
+              "displayName": "WAITING_APPROVAL",
+              "id": "WAITING_APPROVAL"
+            },
+            {
+              "displayName": "APPROVED",
+              "id": "APPROVED"
+            }
+          ]
+        }
+      },
+      {
+        "displayName": "Glossary Type",
+        "name": "glossary_type",
+        "type": {
+          "name": "enum",
+          "validValues": [
+            {
+              "displayName": "PUBLISHED",
+              "id": "PUBLISHED"
+            },
+            {
+              "displayName": "DRAFT",
+              "id": "DRAFT"
+            }
+          ]
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Created By",
+        "name": "created_by",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Created On",
+        "name": "created_on",
+        "type": {
+          "name": "datetime"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Modified By",
+        "name": "modified_by",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Modified On",
+        "name": "modified_on",
+        "type": {
+          "name": "datetime"
+        },
+        "maxCardinality": 1
+      }
+    ]
+  },
+  "_name": "Information Governance Policy",
+  "_plural": "Information Governance Policies",
+  "_id": "information_governance_policy",
+  "_class": "GlossaryExtensions.Policy",
+  "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_policy",
+  "_dataLineage": false,
+  "_group": "Glossary and Governance",
+  "createInfo": {
+    "properties": [
+      {
+        "minCardinality": 1,
+        "displayName": "Name",
+        "name": "name",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Parent Policy",
+        "name": "parent_policy",
+        "type": {
+          "name": "information_governance_policy",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_policy"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Short Description",
+        "name": "short_description",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Native ID",
+        "name": "native_id",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      }
+    ]
+  },
+  "_parents": [
+    "information_asset"
+  ]
+}

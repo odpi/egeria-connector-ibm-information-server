@@ -1,0 +1,209 @@
+{
+  "editInfo": {
+    "sections": [
+      {
+        "displayName": "Header",
+        "name": "Header",
+        "properties": [
+          "data_class",
+          "classifies_asset",
+          "detectedState",
+          "confidencePercent",
+          "threshold",
+          "value_frequency"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "displayName": "Data Class",
+        "name": "data_class",
+        "type": {
+          "name": "data_class",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_class"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "minCardinality": 1,
+        "displayName": "Asset",
+        "name": "classifies_asset",
+        "type": {
+          "name": "main_object",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/main_object"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "minCardinality": 1,
+        "displayName": "Type",
+        "name": "detectedState",
+        "type": {
+          "name": "enum",
+          "validValues": [
+            {
+              "displayName": "Candidate",
+              "id": "Candidate"
+            },
+            {
+              "displayName": "Inferred",
+              "id": "Inferred"
+            }
+          ]
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Confidence (Percent)",
+        "name": "confidencePercent",
+        "type": {
+          "name": "number"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Threshold",
+        "name": "threshold",
+        "type": {
+          "name": "number"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Value Frequency",
+        "name": "value_frequency",
+        "type": {
+          "name": "number"
+        },
+        "maxCardinality": 1
+      }
+    ]
+  },
+  "_businessLineage": false,
+  "viewInfo": {
+    "sections": [
+      {
+        "displayName": "Header",
+        "name": "Header",
+        "properties": [
+          "data_class",
+          "classifies_asset",
+          "selected",
+          "detected",
+          "detectedState",
+          "confidencePercent",
+          "threshold",
+          "value_frequency",
+          "date",
+          "column_analysis"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "displayName": "Data Class",
+        "name": "data_class",
+        "type": {
+          "name": "data_class",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/data_class"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "minCardinality": 1,
+        "displayName": "Asset",
+        "name": "classifies_asset",
+        "type": {
+          "name": "main_object",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/main_object"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Selected",
+        "name": "selected",
+        "type": {
+          "name": "boolean"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Detected",
+        "name": "detected",
+        "type": {
+          "name": "boolean"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "minCardinality": 1,
+        "displayName": "Type",
+        "name": "detectedState",
+        "type": {
+          "name": "enum",
+          "validValues": [
+            {
+              "displayName": "Candidate",
+              "id": "Candidate"
+            },
+            {
+              "displayName": "Inferred",
+              "id": "Inferred"
+            }
+          ]
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Confidence (Percent)",
+        "name": "confidencePercent",
+        "type": {
+          "name": "number"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Threshold",
+        "name": "threshold",
+        "type": {
+          "name": "number"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Value Frequency",
+        "name": "value_frequency",
+        "type": {
+          "name": "number"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Date",
+        "name": "date",
+        "type": {
+          "name": "datetime"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Detected from Column Analysis",
+        "name": "column_analysis",
+        "type": {
+          "name": "main_object",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/main_object"
+        }
+      }
+    ]
+  },
+  "_name": "Classification",
+  "_plural": null,
+  "_id": "classification",
+  "_class": "ASCLAnalysis.Classification",
+  "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/classification",
+  "_dataLineage": false,
+  "_group": null,
+  "_parents": [
+    "information_asset"
+  ]
+}
