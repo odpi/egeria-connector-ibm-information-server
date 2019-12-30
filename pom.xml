@@ -122,9 +122,19 @@
         <!-- Sonar configuration - exclusions to all processing, coverage only exclusions, and duplicate exclusions -->
         <!-- fvt skipped as it causes resource limits to be exceeded. generated code contaminates stats so removed  -->
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.exclusions>**/model/base/**</sonar.exclusions>
-        <sonar.coverage.exclusions>**/model/base/**</sonar.coverage.exclusions>
-        <sonar.cpd.exclusions>**/model/base/**</sonar.cpd.exclusions>
+        <sonar.exclusions>
+            **/model/base/**,
+            **/ia/clientlibrary/model/**
+        </sonar.exclusions>
+        <sonar.coverage.exclusions>
+            **/model/base/**,
+            **/ia/clientlibrary/model/**,
+            **/test/**
+        </sonar.coverage.exclusions>
+        <sonar.cpd.exclusions>
+            **/model/base/**,
+            **/ia/clientlibrary/model/**
+        </sonar.cpd.exclusions>
     </properties>
 
     <dependencyManagement>
