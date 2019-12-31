@@ -82,6 +82,14 @@
             <groupId>org.odpi.egeria</groupId>
             <artifactId>open-metadata-types</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.odpi.egeria</groupId>
+            <artifactId>admin-services-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.odpi.egeria</groupId>
+            <artifactId>connector-configuration-factory</artifactId>
+        </dependency>
 
     </dependencies>
 

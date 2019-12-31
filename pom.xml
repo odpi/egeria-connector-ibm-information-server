@@ -280,6 +280,18 @@
                 <version>${open-metadata.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.odpi.egeria</groupId>
+                <artifactId>admin-services-api</artifactId>
+                <version>${open-metadata.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.odpi.egeria</groupId>
+                <artifactId>connector-configuration-factory</artifactId>
+                <version>${open-metadata.version}</version>
+                <scope>test</scope>
+            </dependency>
             <!-- Following dependencies are to ensure we use updated versions of libraries that others are dependent upon -->
             <dependency>
                 <groupId>com.sleepycat</groupId>

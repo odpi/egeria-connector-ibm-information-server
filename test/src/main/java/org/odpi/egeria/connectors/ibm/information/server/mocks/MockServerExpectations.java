@@ -20,10 +20,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
-import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.Parameter.param;
+import static org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants.*;
 
 /**
  * Setup a mock server to act as an IGC REST API endpoint against which we can do some thorough testing.
@@ -31,8 +31,6 @@ import static org.mockserver.model.Parameter.param;
 public class MockServerExpectations implements ExpectationInitializer {
 
     private static final Logger log = LoggerFactory.getLogger(MockServerExpectations.class);
-
-    private static final String GLOSSARY_RID = "6662c0f2.ee6a64fe.00263pfar.1a0mm9a.lfjd3c.rmgl1cdd5fcd4bijur3g3";
 
     /**
      * Setup the expectations we will need to respond to various tests.
@@ -68,10 +66,9 @@ public class MockServerExpectations implements ExpectationInitializer {
         setTypesQuery(mockServerClient);
         setBundlesQuery(mockServerClient);
 
-        setExampleFullAsset(mockServerClient, GLOSSARY_RID);
-        setExamplePartAsset(mockServerClient, "category", GLOSSARY_RID);
-        setExampleAssetWithModDetails(mockServerClient, "category", GLOSSARY_RID);
-        setExampleRefAsset(mockServerClient, GLOSSARY_RID);
+        String glossaryIgcType = "category";
+        setExamplePartAsset(mockServerClient, glossaryIgcType, MockConstants.GLOSSARY_RID);
+        setExampleAssetWithModDetails(mockServerClient, glossaryIgcType, MockConstants.GLOSSARY_RID);
 
         setLogout(mockServerClient);
 
@@ -107,11 +104,30 @@ public class MockServerExpectations implements ExpectationInitializer {
             }
         }
 
+        Resource[] fullExamples = getFilesMatchingPattern("full_by_rid/*.json");
+        if (fullExamples != null) {
+            for (Resource fullExample : fullExamples) {
+                setFullByRidQuery(mockServerClient, fullExample);
+            }
+        }
+
     }
 
     private void initializeIGCConnectorExpectations(MockServerClient mockServerClient) {
 
         setUploadBundle(mockServerClient);
+
+        // Setup responses for specific test cases
+
+        // Glossary tests
+        setGlossaryQueryByPropertyValue(mockServerClient);
+        setCategoriesInGlossary(mockServerClient);
+        setTermsInGlossary(mockServerClient);
+
+        // GlossaryCategory tests
+        setCategoryQueryByPropertyValue(mockServerClient);
+        setParentCategoryQuery(mockServerClient);
+        setTermsInCategory(mockServerClient);
 
     }
 
@@ -127,198 +143,89 @@ public class MockServerExpectations implements ExpectationInitializer {
     private void setStartupQuery(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
-                .when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/ibm/iis/igc-rest/v1/search")
-                                .withBody("{\"types\":[\"category\",\"term\",\"information_governance_policy\",\"information_governance_rule\"],\"pageSize\":1,\"workflowMode\":\"draft\"}")
-                ).respond(
-                response()
-                        .withBody(getResourceFileContents("no_results.json"))
-        );
+                .when(searchRequest("{\"types\":[\"category\",\"term\",\"information_governance_policy\",\"information_governance_rule\"],\"pageSize\":1,\"workflowMode\":\"draft\"}"))
+                .respond(withResponse(getResourceFileContents("no_results.json")));
     }
 
     private void setTypesQuery(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/ibm/iis/igc-rest/v1/types")
-                ).respond(
-                response()
-                        .withBody(getResourceFileContents("types.json"))
-        );
+                .when(typesRequest())
+                .respond(withResponse(getResourceFileContents("types.json")));
     }
 
     private void setBundlesQuery(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/ibm/iis/igc-rest/v1/bundles")
-                ).respond(
-                response()
-                        .withBody("[\"OMRS\"]")
-        );
+                .when(bundlesRequest())
+                .respond(withResponse("[\"OMRS\"]"));
     }
 
     private void setTypeDetails(MockServerClient mockServerClient, String typeFilename) {
         String typeName = typeFilename.substring(0, typeFilename.indexOf(".json"));
         mockServerClient
                 .withSecure(true)
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/ibm/iis/igc-rest/v1/types/" + typeName)
+                .when(typesRequest(typeName)
                                 .withQueryStringParameters(
                                         param("showViewProperties", "true"),
                                         param("showCreateProperties", "true"),
                                         param("showEditProperties", "true")
                                 )
-                ).respond(
-                response()
-                        .withBody(getResourceFileContents("types" + File.separator + typeName + ".json"))
-        );
-    }
-
-    private void setExampleFullAsset(MockServerClient mockServerClient, String rid) {
-        mockServerClient
-                .withSecure(true)
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/ibm/iis/igc-rest/v1/assets/" + rid)
                 )
-                .respond(
-                        response()
-                                .withBody(getResourceFileContents("rid_full_" + rid + ".json"))
-                );
+                .respond(withResponse(getResourceFileContents("types" + File.separator + typeName + ".json")));
     }
 
     private void setExamplePartAsset(MockServerClient mockServerClient, String type, String rid) {
         mockServerClient
                 .withSecure(true)
-                .when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/ibm/iis/igc-rest/v1/search")
-                                .withBody("{\"types\":[\"" + type + "\"],\"properties\":[\"short_description\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"_id\",\"operator\":\"=\",\"value\":\"" + rid + "\"}],\"operator\":\"and\"}}")
-                )
-                .respond(
-                        response()
-                                .withBody(getResourceFileContents("rid_part_" + rid + ".json"))
-                );
+                .when(searchRequest("{\"types\":[\"" + type + "\"],\"properties\":[\"short_description\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"_id\",\"operator\":\"=\",\"value\":\"" + rid + "\"}],\"operator\":\"and\"}}"))
+                .respond(withResponse(getResourceFileContents("rid_part_" + rid + ".json")));
     }
 
     private void setExampleAssetWithModDetails(MockServerClient mockServerClient, String type, String rid) {
         mockServerClient
                 .withSecure(true)
-                .when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/ibm/iis/igc-rest/v1/search")
-                                .withBody("{\"types\":[\"" + type + "\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":2,\"where\":{\"conditions\":[{\"property\":\"_id\",\"operator\":\"=\",\"value\":\"" + rid + "\"}],\"operator\":\"and\"}}")
-                )
-                .respond(
-                        response()
-                                .withBody(getResourceFileContents("rid_mod_" + rid + ".json"))
-                );
-    }
-
-    private void setExampleRefAsset(MockServerClient mockServerClient, String rid) {
-        mockServerClient
-                .withSecure(true)
-                .when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/ibm/iis/igc-rest/v1/search")
-                                .withBody("{\"types\":[\"main_object\",\"classification\",\"label\",\"user\",\"group\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"_id\",\"operator\":\"=\",\"value\":\"" + rid + "\"}],\"operator\":\"and\"}}")
-                )
-                .respond(
-                        response()
-                                .withBody(getResourceFileContents("rid_ref_" + rid + ".json"))
-                );
+                .when(searchRequest("{\"types\":[\"" + type + "\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":2,\"where\":{\"conditions\":[{\"property\":\"_id\",\"operator\":\"=\",\"value\":\"" + rid + "\"}],\"operator\":\"and\"}}"))
+                .respond(withResponse(getResourceFileContents("rid_mod_" + rid + ".json")));
     }
 
     private void setLogout(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/ibm/iis/igc-rest/v1/logout")
-                )
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                );
+                .when(logoutRequest())
+                .respond(response().withStatusCode(200));
     }
 
     private void setUploadBundle(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
-                .when(
-                        request()
-                                .withMethod("PUT")
-                                .withPath("/ibm/iis/igc-rest/v1/bundles")
-                )
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                );
+                .when(upsertBundleRequest())
+                .respond(response().withStatusCode(200));
     }
 
     private void setJobSyncRuleQueryEmpty(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
-                .when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/ibm/iis/igc-rest/v1/search")
-                                .withBody("{\"types\":[\"information_governance_rule\"],\"properties\":[\"short_description\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"=\",\"value\":\"Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS\"}],\"operator\":\"and\"}}"),
-                        Times.exactly(1)
-                )
-                .respond(
-                        response()
-                                .withBody(getResourceFileContents("no_results.json"))
-        );
+                .when(jobSyncRuleRequest(), Times.exactly(1))
+                .respond(withResponse(getResourceFileContents("no_results.json")));
     }
 
     private void setJobSyncRuleQueryFull(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
-                .when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/ibm/iis/igc-rest/v1/search")
-                                .withBody("{\"types\":[\"information_governance_rule\"],\"properties\":[\"short_description\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"=\",\"value\":\"Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS\"}],\"operator\":\"and\"}}")
-                )
-                .respond(
-                        response()
-                                .withBody(getResourceFileContents("job_sync_rule.json"))
-                );
+                .when(jobSyncRuleRequest())
+                .respond(withResponse(getResourceFileContents("job_sync_rule.json")));
     }
 
     private void setJobChangeQuery(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
-                .when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/ibm/iis/igc-rest/v1/search")
-                                .withBody(
-                                        json(
-                                                "{\"types\":[\"dsjob\"],\"properties\":[\"short_description\",\"long_description\",\"references_local_or_shared_containers\",\"type\",\"reads_from_(design)\",\"writes_to_(design)\",\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"modified_on\",\"operator\":\"<=\"}],\"operator\":\"and\"}}",
-                                                MatchType.ONLY_MATCHING_FIELDS
-                                        )
-                                )
-                )
-                .respond(
-                        response()
-                                .withBody(getResourceFileContents("changed_jobs.json"))
-                );
+                .when(searchRequest(
+                        json(
+                                "{\"types\":[\"dsjob\"],\"properties\":[\"short_description\",\"long_description\",\"references_local_or_shared_containers\",\"type\",\"reads_from_(design)\",\"writes_to_(design)\",\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"modified_on\",\"operator\":\"<=\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        )))
+                .respond(withResponse(getResourceFileContents("changed_jobs.json")));
     }
 
     private void setDetailsByRidQuery(MockServerClient mockServerClient, Resource resource) {
@@ -330,26 +237,16 @@ public class MockServerExpectations implements ExpectationInitializer {
         }
         if (url != null) {
             String filename = url.getFile();
-            String rid = filename.substring(filename.lastIndexOf("/") + 1, filename.indexOf(".json"));
-            String path = filename.substring(filename.indexOf("/") + 1, filename.lastIndexOf("/"));
-            String type = path.substring(path.lastIndexOf("/") + 1);
+            String rid = getRidFromFilename(filename);
+            String type = getTypeFromFilename(filename);
             mockServerClient
                     .withSecure(true)
-                    .when(
-                            request()
-                                    .withMethod("POST")
-                                    .withPath("/ibm/iis/igc-rest/v1/search")
-                                    .withBody(
-                                            json(
-                                                    "{\"types\":[\"" + type + "\"],\"where\":{\"conditions\":[{\"property\":\"_id\",\"operator\":\"=\",\"value\":\"" + rid + "\"}]}}",
-                                                    MatchType.ONLY_MATCHING_FIELDS
-                                            )
-                                    )
-                    )
-                    .respond(
-                            response()
-                                    .withBody(getResourceFileContents("by_rid" + File.separator + type + File.separator + rid + ".json"))
-                    );
+                    .when(searchRequest(
+                            json(
+                                    "{\"types\":[\"" + type + "\"],\"where\":{\"conditions\":[{\"property\":\"_id\",\"operator\":\"=\",\"value\":\"" + rid + "\"}]}}",
+                                    MatchType.ONLY_MATCHING_FIELDS
+                            )))
+                    .respond(withResponse(getResourceFileContents("by_rid" + File.separator + type + File.separator + rid + ".json")));
         }
     }
 
@@ -362,9 +259,8 @@ public class MockServerExpectations implements ExpectationInitializer {
         }
         if (url != null) {
             String filename = url.getFile();
-            String rid = filename.substring(filename.lastIndexOf("/") + 1, filename.indexOf(".json"));
-            String path = filename.substring(filename.indexOf("/") + 1, filename.lastIndexOf("/"));
-            String type = path.substring(path.lastIndexOf("/") + 1);
+            String rid = getRidFromFilename(filename);
+            String type = getTypeFromFilename(filename);
             String property = null;
             switch (type) {
                 case "database_schema":
@@ -374,21 +270,12 @@ public class MockServerExpectations implements ExpectationInitializer {
             if (property != null) {
                 mockServerClient
                         .withSecure(true)
-                        .when(
-                                request()
-                                        .withMethod("POST")
-                                        .withPath("/ibm/iis/igc-rest/v1/search")
-                                        .withBody(
-                                                json(
-                                                        "{\"types\":[\"" + type + "\"],\"where\":{\"conditions\":[{\"property\":\"" + property + "\",\"operator\":\"=\",\"value\":\"" + rid + "\"}]}}",
-                                                        MatchType.ONLY_MATCHING_FIELDS
-                                                )
-                                        )
-                        )
-                        .respond(
-                                response()
-                                        .withBody(getResourceFileContents("by_child_rid" + File.separator + type + File.separator + rid + ".json"))
-                        );
+                        .when(searchRequest(
+                                json(
+                                        "{\"types\":[\"" + type + "\"],\"where\":{\"conditions\":[{\"property\":\"" + property + "\",\"operator\":\"=\",\"value\":\"" + rid + "\"}]}}",
+                                        MatchType.ONLY_MATCHING_FIELDS
+                                )))
+                        .respond(withResponse(getResourceFileContents("by_child_rid" + File.separator + type + File.separator + rid + ".json")));
             }
         }
     }
@@ -402,9 +289,8 @@ public class MockServerExpectations implements ExpectationInitializer {
         }
         if (url != null) {
             String filename = url.getFile();
-            String rid = filename.substring(filename.lastIndexOf("/") + 1, filename.indexOf(".json"));
-            String path = filename.substring(filename.indexOf("/") + 1, filename.lastIndexOf("/"));
-            String type = path.substring(path.lastIndexOf("/") + 1);
+            String rid = getRidFromFilename(filename);
+            String type = getTypeFromFilename(filename);
             String property = null;
             switch (type) {
                 case "database_column":
@@ -425,21 +311,12 @@ public class MockServerExpectations implements ExpectationInitializer {
             if (property != null) {
                 mockServerClient
                         .withSecure(true)
-                        .when(
-                                request()
-                                        .withMethod("POST")
-                                        .withPath("/ibm/iis/igc-rest/v1/search")
-                                        .withBody(
-                                                json(
-                                                        "{\"types\":[\"" + type + "\"],\"where\":{\"conditions\":[{\"property\":\"" + property + "\",\"operator\":\"=\",\"value\":\"" + rid + "\"}]}}",
-                                                        MatchType.ONLY_MATCHING_FIELDS
-                                                )
-                                        )
-                        )
-                        .respond(
-                                response()
-                                        .withBody(getResourceFileContents("by_parent_rid" + File.separator + type + File.separator + rid + ".json"))
-                        );
+                        .when(searchRequest(
+                                json(
+                                        "{\"types\":[\"" + type + "\"],\"where\":{\"conditions\":[{\"property\":\"" + property + "\",\"operator\":\"=\",\"value\":\"" + rid + "\"}]}}",
+                                        MatchType.ONLY_MATCHING_FIELDS
+                                )))
+                        .respond(withResponse(getResourceFileContents("by_parent_rid" + File.separator + type + File.separator + rid + ".json")));
             }
         }
     }
@@ -453,39 +330,109 @@ public class MockServerExpectations implements ExpectationInitializer {
         }
         if (url != null) {
             String filename = url.getFile();
-            String rid = filename.substring(filename.lastIndexOf("/") + 1, filename.indexOf(".json"));
+            String rid = getRidFromFilename(filename);
             mockServerClient
                     .withSecure(true)
-                    .when(
-                            request()
-                                    .withMethod("POST")
-                                    .withPath("/ibm/iis/igc-rest/v1/search")
-                                    .withBody(
-                                            json(
-                                                    "{\"types\":[\"main_object\",\"classification\",\"label\",\"user\",\"group\"],\"where\":{\"conditions\":[{\"property\":\"_id\",\"operator\":\"=\",\"value\":\"" + rid + "\"}]}}",
-                                                    MatchType.ONLY_MATCHING_FIELDS
-                                            )
-                                    )
-                    )
-                    .respond(
-                            response()
-                                    .withBody(getResourceFileContents("ref_by_rid" + File.separator + rid + ".json"))
-                    );
+                    .when(searchRequest(
+                            json(
+                                    "{\"types\":[\"main_object\",\"classification\",\"label\",\"user\",\"group\"],\"where\":{\"conditions\":[{\"property\":\"_id\",\"operator\":\"=\",\"value\":\"" + rid + "\"}]}}",
+                                    MatchType.ONLY_MATCHING_FIELDS
+                            )))
+                    .respond(withResponse(getResourceFileContents("ref_by_rid" + File.separator + rid + ".json")));
         }
+    }
+
+    private void setFullByRidQuery(MockServerClient mockServerClient, Resource resource) {
+        URL url = null;
+        try {
+            url = resource.getURL();
+        } catch (IOException e) {
+            log.error("Unable to retrieve full details file from: {}", resource, e);
+        }
+        if (url != null) {
+            String filename = url.getFile();
+            String rid = getRidFromFilename(filename);
+            mockServerClient
+                    .withSecure(true)
+                    .when(assetByRidRequest(rid))
+                    .respond(withResponse(getResourceFileContents("full_by_rid" + File.separator + rid + ".json")));
+        }
+    }
+
+    private String getRidFromFilename(String filename) {
+        return filename.substring(filename.lastIndexOf("/") + 1, filename.indexOf(".json"));
+    }
+
+    private String getTypeFromFilename(String filename) {
+        String path = filename.substring(filename.indexOf("/") + 1, filename.lastIndexOf("/"));
+        return path.substring(path.lastIndexOf("/") + 1);
     }
 
     private void setDefaultSearchResponseToNoResults(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
-                .when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/ibm/iis/igc-rest/v1/search")
+                .when(MockConstants.searchRequest())
+                .respond(withResponse(getResourceFileContents("no_results.json")));
+    }
+
+    private void setGlossaryQueryByPropertyValue(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        json(
+                                "{\"types\":[\"category\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"parent_category\",\"operator\":\"isNull\",\"negated\":false},{\"property\":\"name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"a\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"a\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"a\"},{\"property\":\"language\",\"operator\":\"like %{0}%\",\"value\":\"a\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        ))
                 )
-                .respond(
-                        response()
-                                .withBody(getResourceFileContents("no_results.json"))
-                );
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "glossary_by_property_value.json")));
+    }
+
+    private void setCategoriesInGlossary(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"category_path\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"}],\"operator\":\"and\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "categories_in_glossary.json")));
+    }
+
+    private void setTermsInGlossary(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"parent_category.category_path\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"},{\"property\":\"parent_category\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "terms_in_glossary.json")));
+    }
+
+    private void setCategoryQueryByPropertyValue(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        json(
+                                "{\"types\":[\"category\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"parent_category\",\"operator\":\"isNull\",\"negated\":true},{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"e\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"e\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        ))
+                )
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "category_by_property_value.json")));
+    }
+
+    private void setParentCategoryQuery(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"subcategories\",\"operator\":\"=\",\"value\":\"" + CATEGORY_RID + "\"}],\"operator\":\"and\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "parent_category.json")));
+    }
+
+    private void setTermsInCategory(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"parent_category\",\"operator\":\"=\",\"value\":\"" + CATEGORY_RID + "\"},{\"property\":\"referencing_categories\",\"operator\":\"=\",\"value\":\"" + CATEGORY_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "terms_in_category.json")));
     }
 
     /**
