@@ -245,20 +245,32 @@ public class EntityMappingInstance {
      */
     public final void initializeEntitySummary() {
         if (omrsSummary == null) {
-            omrsSummary = new EntitySummary();
-            IGCEntityGuid igcEntityGuid = igcomrsMetadataCollection.getIgcRepositoryHelper().getEntityGuid(
-                    igcEntityType,
-                    mapping.getIgcRidPrefix(),
-                    igcEntityRid);
-            omrsSummary.setGUID(igcEntityGuid.asGuid());
-            if (!alreadyRetrieved && (igcEntity == null || !igcEntity.isFullyRetrieved())) {
-                igcEntity = igcomrsRepositoryConnector.getIGCRestClient().getAssetWithSubsetOfProperties(
-                        igcEntityRid,
-                        igcEntityType,
-                        igcPropertiesToRetrieve
+            try {
+                // TODO: replace call below to getSkeletonEntitySummary when available, to avoid always creating
+                //  EntityDetail objects even when only a summary was requested
+                omrsSummary = igcomrsRepositoryConnector.getRepositoryHelper().getSkeletonEntity(
+                        igcomrsRepositoryConnector.getRepositoryName(),
+                        igcomrsRepositoryConnector.getMetadataCollectionId(),
+                        InstanceProvenanceType.LOCAL_COHORT,
+                        userId,
+                        mapping.getOmrsTypeDefName()
                 );
+                IGCEntityGuid igcEntityGuid = igcomrsMetadataCollection.getIgcRepositoryHelper().getEntityGuid(
+                        igcEntityType,
+                        mapping.getIgcRidPrefix(),
+                        igcEntityRid);
+                omrsSummary.setGUID(igcEntityGuid.asGuid());
+                if (!alreadyRetrieved && (igcEntity == null || !igcEntity.isFullyRetrieved())) {
+                    igcEntity = igcomrsRepositoryConnector.getIGCRestClient().getAssetWithSubsetOfProperties(
+                            igcEntityRid,
+                            igcEntityType,
+                            igcPropertiesToRetrieve
+                    );
+                }
+                omrsSummary.setInstanceURL(igcEntity.getUrl());
+            } catch (TypeErrorException e) {
+                log.error("Unable to get skeleton summary entity, defaulting to basic summary.", e);
             }
-            omrsSummary.setInstanceURL(igcEntity.getUrl());
         }
     }
 

@@ -22,9 +22,10 @@ import org.odpi.openmetadata.repositoryservices.auditlog.OMRSAuditingComponent;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.archivestore.properties.OpenMetadataArchive;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.archivestore.properties.OpenMetadataArchiveTypeStore;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.OMRSMetadataCollection;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.eventmanagement.OMRSRepositoryEventExchangeRule;
 import org.odpi.openmetadata.repositoryservices.eventmanagement.OMRSRepositoryEventManager;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.*;
@@ -482,6 +483,250 @@ public class ConnectorTest {
 
     }
 
+    /**
+     * Test searching GlossaryTerm by property value.
+     */
+    @Test
+    public void testTermFindByPropertyValue() {
+
+        List<EntityDetail> results = testFindEntitiesByPropertyValue(
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                ".*\\QAddress\\E.*",
+                6
+        );
+
+    }
+
+    /**
+     * Test searching GlossaryTerm by property.
+     */
+    @Test
+    public void testTermFindByProperty() {
+
+        Map<String, String> matchProperties = new HashMap<>();
+        matchProperties.put("displayName", ".*\\QAddress\\E.*");
+
+        List<EntityDetail> results = testFindEntitiesByProperty(
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                matchProperties,
+                MatchCriteria.ALL,
+                6
+        );
+
+    }
+
+    /**
+     * Test searching GlossaryTerm by any of multiple properties.
+     */
+    @Test
+    public void testTermFindByPropertiesAny() {
+
+        Map<String, String> matchProperties = new HashMap<>();
+        matchProperties.put("displayName", ".*\\QAddress\\E.*");
+        matchProperties.put("summary", ".*\\QNumber\\E.*");
+
+        List<EntityDetail> results = testFindEntitiesByProperty(
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                matchProperties,
+                MatchCriteria.ANY,
+                7
+        );
+
+    }
+
+    /**
+     * Test searching GlossaryTerm by all of multiple properties.
+     */
+    @Test
+    public void testTermFindByPropertiesAll() {
+
+        Map<String, String> matchProperties = new HashMap<>();
+        matchProperties.put("displayName", ".*\\QAddress\\E.*");
+        matchProperties.put("summary", ".*\\Qnumber\\E.*");
+
+        List<EntityDetail> results = testFindEntitiesByProperty(
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                matchProperties,
+                MatchCriteria.ALL,
+                1
+        );
+
+        EntityDetail single = results.get(0);
+        testQualifiedNameEquality("(category)=Coco Pharmaceuticals::(term)=Address Line 1", single.getProperties().getPropertyValue("qualifiedName"));
+
+    }
+
+    /**
+     * Test searching a supertype by property value.
+     */
+    @Test
+    public void testSupertypeFindByPropertyValue() {
+
+        Set<String> possibleTypes = new HashSet<>();
+        possibleTypes.add("Asset");
+        possibleTypes.add("Database");
+
+        List<EntityDetail> results = testFindEntitiesByPropertyValue(
+                "896d14c2-7522-4f6c-8519-757711943fe6",
+                possibleTypes,
+                null,
+                ".*\\QCOMPDIR\\E.*",
+                1
+        );
+
+    }
+
+    /**
+     * Test searching everything by property value.
+     */
+    @Test
+    public void testAllTypesFindByPropertyValue() {
+
+        Set<String> possibleTypes = new HashSet<>();
+        possibleTypes.add("GlossaryTerm");
+        possibleTypes.add("DataClass");
+
+        List<EntityDetail> results = testFindEntitiesByPropertyValue(
+                possibleTypes,
+                ".*\\QAddress\\E.*",
+                13
+        );
+
+    }
+
+    /**
+     * Test searching everything by property value and limiting by classification.
+     */
+    @Test
+    public void testAllTypesFindByPropertyValueAndLimitByClassification() {
+
+        Set<String> possibleTypes = new HashSet<>();
+        possibleTypes.add("GlossaryTerm");
+
+        Set<String> classifications = new HashSet<>();
+        classifications.add("Confidentiality");
+
+        List<EntityDetail> results = testFindEntitiesByPropertyValue(
+                possibleTypes,
+                classifications,
+                ".*\\QAddress\\E.*",
+                6
+        );
+
+    }
+
+    /**
+     * Test searching by classification.
+     */
+    @Test
+    public void testFindByClassification() {
+
+        Map<String, Integer> properties = new HashMap<>();
+        properties.put("level", 3);
+
+        List<EntityDetail> results = testFindEntitiesByClassification(
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                "Confidentiality",
+                properties,
+                MatchCriteria.ALL,
+                12);
+
+    }
+
+    /**
+     * Test retrieving a GlossaryTerm as an EntityDetail directly.
+     */
+    @Test
+    public void testGetGlossaryTermDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("summary", "Street and street number");
+        expectedValues.put("displayName", "Address Line 1");
+        expectedValues.put("qualifiedName", "(category)=Coco Pharmaceuticals::(term)=Address Line 1");
+
+        EntityDetail detail = testEntityDetail(
+                "term",
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                null,
+                MockConstants.TERM_RID,
+                expectedValues
+        );
+
+        testConfidentialityLevel3(detail.getClassifications());
+
+    }
+
+    /**
+     * Test retrieving a GlossaryTerm as an EntitySummary directly.
+     */
+    @Test
+    public void testGetGlossaryTermSummary() {
+
+        EntitySummary summary = testEntitySummary(
+                "term",
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                null,
+                MockConstants.TERM_RID
+        );
+
+        testConfidentialityLevel3(summary.getClassifications());
+
+    }
+
+    private void testConfidentialityLevel3(List<Classification> classifications) {
+        assertNotNull(classifications);
+        assertFalse(classifications.isEmpty());
+        Classification first = classifications.get(0);
+        assertEquals(first.getType().getTypeDefName(), "Confidentiality");
+        assertTrue(first.getVersion() > 1);
+        int level = getIntegerValue(first.getProperties(), "level");
+        assertEquals(level, 3);
+    }
+
+    /**
+     * Test GlossaryTerm relationship retrieval.
+     */
+    @Test
+    public void testGlossaryTermRelationships() {
+
+        String expectedProxyOneQN = "gen!GL@(category)=Coco Pharmaceuticals";
+        String expectedProxyTwoQN = "(category)=Coco Pharmaceuticals::(term)=Address Line 1";
+
+        Set<String> proxyOneTypes = new HashSet<>();
+        proxyOneTypes.add("RelationalColumn");
+        proxyOneTypes.add("TabularColumn");
+
+        Set<String> proxyTwoTypes = new HashSet<>();
+        proxyTwoTypes.add(MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME);
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 2,
+                        "SemanticAssignment", proxyOneTypes, proxyTwoTypes,
+                        null, expectedProxyTwoQN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(2, 3,
+                        "TermAnchor", "Glossary", MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                        expectedProxyOneQN, expectedProxyTwoQN)
+        );
+
+        List<Relationship> relationships = testRelationshipsForEntity(
+                "term",
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                null,
+                MockConstants.TERM_RID,
+                3,
+                relationshipExpectations
+        );
+
+    }
+
     // TODO: implement a set of tests below that mirror what was implemented in Postman -- test all the same types,
     //  relationships, REST endpoints (directly as MetadataCollection method calls), and scripted test assertions
 
@@ -516,6 +761,26 @@ public class ConnectorTest {
     }
 
     /**
+     * Translate the provided OMRS property name into a simple integer value.
+     * @param properties the OMRS InstanceProperties from which to retrieve the OMRS value
+     * @param propertyName the name of the property for which to retrieve the value
+     * @return int
+     */
+    private int getIntegerValue(InstanceProperties properties, String propertyName) {
+        String value = null;
+        try {
+            value = AttributeMapping.getIgcValueFromPropertyValue(properties.getPropertyValue(propertyName));
+        } catch (PropertyErrorException e) {
+            log.error("Unable to translate {}.", propertyName, e);
+            assertNull(e);
+        } catch (Exception e) {
+            log.error("Unexpected exception translating {}.", propertyName, e);
+            assertNull(e);
+        }
+        return Integer.parseInt(value);
+    }
+
+    /**
      * Executes a common set of tests against a list of EntityDetail objects after first searching for them by property
      * value.
      *
@@ -529,14 +794,146 @@ public class ConnectorTest {
                                                                String typeName,
                                                                String queryString,
                                                                int totalNumberExpected) {
+        Set<String> types = new HashSet<>();
+        if (typeName != null) {
+            types.add(typeName);
+        }
+        return testFindEntitiesByPropertyValue(typeGUID, types, null, queryString, totalNumberExpected);
+    }
+
+    /**
+     * Executes a common set of tests against a list of EntityDetail objects after first searching for them by property
+     * value.
+     *
+     * @param possibleTypes the names of the types that could be returned by the search
+     * @param queryString the string criteria by which to search
+     * @param totalNumberExpected the total number of expected results
+     * @return {@List<EntityDetail>} the results of the query
+     */
+    private List<EntityDetail> testFindEntitiesByPropertyValue(Set<String> possibleTypes,
+                                                               String queryString,
+                                                               int totalNumberExpected) {
+        return testFindEntitiesByPropertyValue(null, possibleTypes, null, queryString, totalNumberExpected);
+    }
+
+    /**
+     * Executes a common set of tests against a list of EntityDetail objects after first searching for them by property
+     * value.
+     *
+     * @param possibleTypes the names of the types that could be returned by the search
+     * @param classificationLimiters the names of classifications by which to limit the results (or null if not to limit)
+     * @param queryString the string criteria by which to search
+     * @param totalNumberExpected the total number of expected results
+     * @return {@List<EntityDetail>} the results of the query
+     */
+    private List<EntityDetail> testFindEntitiesByPropertyValue(Set<String> possibleTypes,
+                                                               Set<String> classificationLimiters,
+                                                               String queryString,
+                                                               int totalNumberExpected) {
+        return testFindEntitiesByPropertyValue(null, possibleTypes, classificationLimiters, queryString, totalNumberExpected);
+    }
+
+    /**
+     * Executes a common set of tests against a list of EntityDetail objects after first searching for them by property
+     * value.
+     *
+     * @param typeGUID the entity type GUID to search
+     * @param possibleTypes the names of the types that could be returned by the search
+     * @param classificationLimiters the names of classifications by which to limit the results (or null if not to limit)
+     * @param queryString the string criteria by which to search
+     * @param totalNumberExpected the total number of expected results
+     * @return {@List<EntityDetail>} the results of the query
+     */
+    private List<EntityDetail> testFindEntitiesByPropertyValue(String typeGUID,
+                                                               Set<String> possibleTypes,
+                                                               Set<String> classificationLimiters,
+                                                               String queryString,
+                                                               int totalNumberExpected) {
 
         List<EntityDetail> results = null;
+        List<String> classifications = null;
+        if (classificationLimiters != null) {
+            classifications = new ArrayList<>(classificationLimiters);
+        }
 
         try {
             results = igcomrsMetadataCollection.findEntitiesByPropertyValue(
                     MockConstants.EGERIA_USER,
                     typeGUID,
                     queryString,
+                    0,
+                    null,
+                    classifications,
+                    null,
+                    null,
+                    null,
+                    MockConstants.EGERIA_PAGESIZE
+            );
+        } catch (InvalidParameterException | TypeErrorException | RepositoryErrorException | PropertyErrorException | PagingErrorException | FunctionNotSupportedException | UserNotAuthorizedException e) {
+            log.error("Unable to search for entities of type '{}' by property value.", typeGUID, e);
+            assertNull(e);
+        } catch (Exception e) {
+            log.error("Unexpected exception trying to search for entities of type '{}' by property value.", typeGUID, e);
+            assertNull(e);
+        }
+
+        if (totalNumberExpected <= 0) {
+            assertTrue(results == null || results.isEmpty());
+        } else {
+            assertNotNull(results);
+            assertFalse(results.isEmpty());
+            assertEquals(results.size(), totalNumberExpected);
+            for (EntityDetail result : results) {
+                assertTrue(possibleTypes.contains(result.getType().getTypeDefName()));
+                assertTrue(result.getVersion() > 1);
+            }
+        }
+
+        return results;
+
+    }
+
+    /**
+     * Executes a common set of tests against a list of EntityDetail objects after first searching for them by property.
+     *
+     * @param typeGUID the entity type GUID to search
+     * @param typeName the name of the type to search
+     * @param properties the properties to match against
+     * @param matchCriteria the criteria by which to match
+     * @param totalNumberExpected the total number of expected results
+     * @return {@List<EntityDetail>} the results of the query
+     */
+    private List<EntityDetail> testFindEntitiesByProperty(String typeGUID,
+                                                          String typeName,
+                                                          Map<String, String> properties,
+                                                          MatchCriteria matchCriteria,
+                                                          int totalNumberExpected) {
+
+        final String methodName = "testFindEntitiesByProperty";
+        List<EntityDetail> results = null;
+
+        OMRSRepositoryHelper helper = igcomrsRepositoryConnector.getRepositoryHelper();
+        String repoName = igcomrsRepositoryConnector.getRepositoryName();
+
+        InstanceProperties matchProperties = new InstanceProperties();
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+            String propertyName = entry.getKey();
+            String value = entry.getValue();
+            matchProperties = helper.addStringPropertyToInstance(
+                    repoName,
+                    matchProperties,
+                    propertyName,
+                    value,
+                    methodName
+            );
+        }
+
+        try {
+            results = igcomrsMetadataCollection.findEntitiesByProperty(
+                    MockConstants.EGERIA_USER,
+                    typeGUID,
+                    matchProperties,
+                    matchCriteria,
                     0,
                     null,
                     null,
@@ -546,10 +943,86 @@ public class ConnectorTest {
                     MockConstants.EGERIA_PAGESIZE
             );
         } catch (InvalidParameterException | TypeErrorException | RepositoryErrorException | PropertyErrorException | PagingErrorException | FunctionNotSupportedException | UserNotAuthorizedException e) {
-            log.error("Unable to search for {} entities by property value.", typeName, e);
+            log.error("Unable to search for {} entities by property: {}", typeName, matchProperties, e);
             assertNull(e);
         } catch (Exception e) {
-            log.error("Unexpected exception trying to search for {} entities by property value.", typeName, e);
+            log.error("Unexpected exception trying to search for {} entities by property: {}", typeName, matchProperties, e);
+            assertNull(e);
+        }
+
+        if (totalNumberExpected <= 0) {
+            assertTrue(results == null || results.isEmpty());
+        } else {
+            assertNotNull(results);
+            assertFalse(results.isEmpty());
+            assertEquals(results.size(), totalNumberExpected);
+            for (EntityDetail result : results) {
+                assertEquals(result.getType().getTypeDefName(), typeName);
+                assertTrue(result.getVersion() > 1);
+            }
+        }
+
+        return results;
+
+    }
+
+    /**
+     * Executes a common set of tests against a list of EntityDetail objects after first searching for them by
+     * classification property.
+     *
+     * @param typeGUID the entity type GUID to search
+     * @param typeName the name of the type to search
+     * @param classificationName the name of the classification by which to limit the results
+     * @param properties the properties of the classification to match against
+     * @param matchCriteria the criteria by which to match
+     * @param totalNumberExpected the total number of expected results
+     * @return {@List<EntityDetail>} the results of the query
+     */
+    private List<EntityDetail> testFindEntitiesByClassification(String typeGUID,
+                                                                String typeName,
+                                                                String classificationName,
+                                                                Map<String, Integer> properties,
+                                                                MatchCriteria matchCriteria,
+                                                                int totalNumberExpected) {
+
+        final String methodName = "testFindEntitiesByClassification";
+        List<EntityDetail> results = null;
+
+        OMRSRepositoryHelper helper = igcomrsRepositoryConnector.getRepositoryHelper();
+        String repoName = igcomrsRepositoryConnector.getRepositoryName();
+
+        InstanceProperties matchClassificationProperties = new InstanceProperties();
+        for (Map.Entry<String, Integer> entry : properties.entrySet()) {
+            String propertyName = entry.getKey();
+            int value = entry.getValue();
+            matchClassificationProperties = helper.addIntPropertyToInstance(
+                    repoName,
+                    matchClassificationProperties,
+                    propertyName,
+                    value,
+                    methodName
+            );
+        }
+
+        try {
+            results = igcomrsMetadataCollection.findEntitiesByClassification(
+                    MockConstants.EGERIA_USER,
+                    typeGUID,
+                    classificationName,
+                    matchClassificationProperties,
+                    matchCriteria,
+                    0,
+                    null,
+                    null,
+                    null,
+                    null,
+                    MockConstants.EGERIA_PAGESIZE
+            );
+        } catch (InvalidParameterException | TypeErrorException | RepositoryErrorException | PropertyErrorException | PagingErrorException | FunctionNotSupportedException | UserNotAuthorizedException e) {
+            log.error("Unable to search for {} entities by classification {} with properties: {}", typeName, classificationName, matchClassificationProperties, e);
+            assertNull(e);
+        } catch (Exception e) {
+            log.error("Unexpected exception trying to search for {} entities by classification {} with properties: {}", typeName, classificationName, matchClassificationProperties, e);
             assertNull(e);
         }
 
@@ -597,10 +1070,46 @@ public class ConnectorTest {
         assertNotNull(detail);
         assertEquals(detail.getType().getTypeDefName(), omrsType);
         assertTrue(detail.getVersion() > 1);
+        assertNotNull(detail.getMetadataCollectionId());
 
         testExpectedValuesForEquality(detail.getProperties(), expectedValues);
 
         return detail;
+
+    }
+
+    /**
+     * Executes a common set of tests against an EntitySummary object after first directly retrieving it.
+     *
+     * @param igcType the type of IGC object
+     * @param omrsType the type of OMRS object
+     * @param prefix the prefix for a generated entity (or null if none)
+     * @param rid the RID of the IGC object
+     * @return EntitySummary that is retrieved
+     */
+    private EntitySummary testEntitySummary(String igcType, String omrsType, String prefix, String rid) {
+
+        EntitySummary summary = null;
+
+        try {
+            IGCEntityGuid guid = new IGCEntityGuid(metadataCollectionId, igcType, prefix, rid);
+            summary = igcomrsMetadataCollection.getEntitySummary(MockConstants.EGERIA_USER, guid.asGuid());
+        } catch (RepositoryErrorException | InvalidParameterException | EntityNotKnownException e) {
+            log.error("Unable to retrieve entity detail for {}.", omrsType, e);
+            assertNull(e);
+        } catch (Exception e) {
+            log.error("Unexpected exception retrieving {} detail.", omrsType, e);
+            assertNull(e);
+        }
+
+        assertNotNull(summary);
+        assertEquals(summary.getType().getTypeDefName(), omrsType);
+        assertTrue(summary.getVersion() > 1);
+        assertNotNull(summary.getMetadataCollectionId());
+
+        log.warn("Found this summary, or detail? {}", summary);
+
+        return summary;
 
     }
 
@@ -668,20 +1177,19 @@ public class ConnectorTest {
             assertNotNull(relationships);
             assertFalse(relationships.isEmpty());
             assertEquals(relationships.size(), totalNumberExpected);
-        }
-
-        for (RelationshipExpectation relationshipExpectation : relationshipExpectations) {
-            for (int i = relationshipExpectation.getStartIndex(); i < relationshipExpectation.getFinishIndex(); i++) {
-                Relationship candidate = relationships.get(i);
-                assertEquals(candidate.getType().getTypeDefName(), relationshipExpectation.getOmrsType());
-                EntityProxy one = candidate.getEntityOneProxy();
-                EntityProxy two = candidate.getEntityTwoProxy();
-                assertEquals(one.getType().getTypeDefName(), relationshipExpectation.getProxyOneType());
-                assertTrue(one.getVersion() > 1);
-                testQualifiedNameEquality(relationshipExpectation.getExpectedProxyOneQN(), one.getUniqueProperties().getPropertyValue("qualifiedName"));
-                assertEquals(two.getType().getTypeDefName(), relationshipExpectation.getProxyTwoType());
-                assertTrue(two.getVersion() > 1);
-                testQualifiedNameEquality(relationshipExpectation.getExpectedProxyTwoQN(), two.getUniqueProperties().getPropertyValue("qualifiedName"));
+            for (RelationshipExpectation relationshipExpectation : relationshipExpectations) {
+                for (int i = relationshipExpectation.getStartIndex(); i < relationshipExpectation.getFinishIndex(); i++) {
+                    Relationship candidate = relationships.get(i);
+                    assertEquals(candidate.getType().getTypeDefName(), relationshipExpectation.getOmrsType());
+                    EntityProxy one = candidate.getEntityOneProxy();
+                    EntityProxy two = candidate.getEntityTwoProxy();
+                    assertTrue(relationshipExpectation.getProxyOneTypes().contains(one.getType().getTypeDefName()));
+                    assertTrue(one.getVersion() > 1);
+                    testQualifiedNameEquality(relationshipExpectation.getExpectedProxyOneQN(), one.getUniqueProperties().getPropertyValue("qualifiedName"));
+                    assertTrue(relationshipExpectation.getProxyTwoTypes().contains(two.getType().getTypeDefName()));
+                    assertTrue(two.getVersion() > 1);
+                    testQualifiedNameEquality(relationshipExpectation.getExpectedProxyTwoQN(), two.getUniqueProperties().getPropertyValue("qualifiedName"));
+                }
             }
         }
 
@@ -714,17 +1222,23 @@ public class ConnectorTest {
         private int startIndex;
         private int finishIndex;
         private String omrsType;
-        private String proxyOneType;
-        private String proxyTwoType;
+        private Set<String> proxyOneTypes;
+        private Set<String> proxyTwoTypes;
         private String expectedProxyOneQN;
         private String expectedProxyTwoQN;
 
+        private RelationshipExpectation() {
+            proxyOneTypes = new HashSet<>();
+            proxyTwoTypes = new HashSet<>();
+        }
+
         RelationshipExpectation(int startIndex, int finishIndex, String omrsType, String proxyOneType, String proxyTwoType) {
+            this();
             this.startIndex = startIndex;
             this.finishIndex = finishIndex;
             this.omrsType = omrsType;
-            this.proxyOneType = proxyOneType;
-            this.proxyTwoType = proxyTwoType;
+            this.proxyOneTypes.add(proxyOneType);
+            this.proxyTwoTypes.add(proxyTwoType);
         }
 
         RelationshipExpectation(int startIndex,
@@ -739,11 +1253,27 @@ public class ConnectorTest {
             this.expectedProxyTwoQN = expectedProxyTwoQN;
         }
 
+        RelationshipExpectation(int startIndex,
+                                int finishIndex,
+                                String omrsType,
+                                Set<String> proxyOneTypes,
+                                Set<String> proxyTwoTypes,
+                                String expectedProxyOneQN,
+                                String expectedProxyTwoQN) {
+            this.startIndex = startIndex;
+            this.finishIndex = finishIndex;
+            this.omrsType = omrsType;
+            this.proxyOneTypes = proxyOneTypes;
+            this.proxyTwoTypes = proxyTwoTypes;
+            this.expectedProxyOneQN = expectedProxyOneQN;
+            this.expectedProxyTwoQN = expectedProxyTwoQN;
+        }
+
         int getStartIndex() { return startIndex; }
         int getFinishIndex() { return finishIndex; }
         String getOmrsType() { return omrsType; }
-        String getProxyOneType() { return proxyOneType; }
-        String getProxyTwoType() { return proxyTwoType; }
+        Set<String> getProxyOneTypes() { return proxyOneTypes; }
+        Set<String> getProxyTwoTypes() { return proxyTwoTypes; }
         String getExpectedProxyOneQN() { return expectedProxyOneQN; }
         String getExpectedProxyTwoQN() { return expectedProxyTwoQN; }
 
