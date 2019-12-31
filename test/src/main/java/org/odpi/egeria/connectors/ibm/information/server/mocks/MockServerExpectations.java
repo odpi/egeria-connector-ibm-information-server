@@ -126,8 +126,30 @@ public class MockServerExpectations implements ExpectationInitializer {
 
         // GlossaryCategory tests
         setCategoryQueryByPropertyValue(mockServerClient);
-        setParentCategoryQuery(mockServerClient);
+        setParentCategoryForCategory(mockServerClient);
         setTermsInCategory(mockServerClient);
+
+        // GlossaryTerm search tests
+        setTermQueryByPropertyValue(mockServerClient);
+        setTermQueryByPropertyName(mockServerClient);
+        setTermQueryByPropertiesAny(mockServerClient);
+        setTermQueryByPropertiesAll(mockServerClient);
+
+        // Supertype search tests (can skip folder and schema as they return no results, so our catch-all will handle)
+        setSupertypeQueryForFile(mockServerClient);
+        setSupertypeQueryForDatabase(mockServerClient);
+
+        // All types search tests (can skip many as they will return no results, so our catch-all will handle)
+        setAllTypesQueryForTerm(mockServerClient);
+        setAllTypesQueryForDataClass(mockServerClient);
+
+        // Limit by classification tests (can skip many as they will return no results)
+        setTermConfidentialityQueryByPropertyValue(mockServerClient);
+        setTermConfidentialityQueryByLevel(mockServerClient);
+
+        // GlossaryTerm relationships
+        setAssetsAssignedToTerm(mockServerClient);
+        setParentCategoryForTerm(mockServerClient);
 
     }
 
@@ -417,13 +439,13 @@ public class MockServerExpectations implements ExpectationInitializer {
                 .respond(withResponse(getResourceFileContents("by_case" + File.separator + "category_by_property_value.json")));
     }
 
-    private void setParentCategoryQuery(MockServerClient mockServerClient) {
+    private void setParentCategoryForCategory(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
                         "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"subcategories\",\"operator\":\"=\",\"value\":\"" + CATEGORY_RID + "\"}],\"operator\":\"and\"}}"
                 ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "parent_category.json")));
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "parent_category_for_category.json")));
     }
 
     private void setTermsInCategory(MockServerClient mockServerClient) {
@@ -433,6 +455,144 @@ public class MockServerExpectations implements ExpectationInitializer {
                         "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"parent_category\",\"operator\":\"=\",\"value\":\"" + CATEGORY_RID + "\"},{\"property\":\"referencing_categories\",\"operator\":\"=\",\"value\":\"" + CATEGORY_RID + "\"}],\"operator\":\"or\"}}"
                 ))
                 .respond(withResponse(getResourceFileContents("by_case" + File.separator + "terms_in_category.json")));
+    }
+
+    private void setTermQueryByPropertyValue(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        json(
+                                "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        ))
+                )
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "term_by_property_value.json")));
+    }
+
+    private void setTermQueryByPropertyName(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        json(
+                                "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        ))
+                )
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "term_by_property_name.json")));
+    }
+
+    private void setTermQueryByPropertiesAny(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        json(
+                                "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Number\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        ))
+                )
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "term_by_properties_any.json")));
+    }
+
+    private void setTermQueryByPropertiesAll(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        json(
+                                "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"number\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        ))
+                )
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "term_by_properties_all.json")));
+    }
+
+    private void setSupertypeQueryForFile(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        json(
+                                "{\"types\":[\"data_file\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        ))
+                )
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "supertype_for_files.json")));
+    }
+
+    private void setSupertypeQueryForDatabase(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        json(
+                                "{\"types\":[\"database\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"dbms\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"dbms_server_instance\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"dbms_version\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"imported_from\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        ))
+                )
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "supertype_for_databases.json")));
+    }
+
+    private void setAllTypesQueryForTerm(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        json(
+                                "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        ))
+                )
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "all_types_for_terms.json")));
+    }
+
+    private void setAllTypesQueryForDataClass(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        json(
+                                "{\"types\":[\"data_class\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"class_code\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"expression\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"provider\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"data_class_type_single\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"valid_value_strings\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"data_type_filter_elements_enum\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"validValueReferenceFile\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"java_class_name_single\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"regular_expression_single\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"script\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        ))
+                )
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "all_types_for_data_classes.json")));
+    }
+
+    private void setTermConfidentialityQueryByPropertyValue(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        json(
+                                "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"},{\"conditions\":[{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"}],\"operator\":\"and\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        ))
+                )
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "term_by_property_value_and_classification.json")));
+    }
+
+    private void setTermConfidentialityQueryByLevel(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        json(
+                                "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"},{\"property\":\"assigned_to_terms.name\",\"operator\":\"like {0}%\",\"value\":\"3 \"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        ))
+                )
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "term_by_confidentiality_level.json")));
+    }
+
+    private void setAssetsAssignedToTerm(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"main_object\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"assigned_to_terms\",\"operator\":\"=\",\"value\":\"" + TERM_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "assets_assigned_to_term.json")));
+    }
+
+    private void setParentCategoryForTerm(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"terms\",\"operator\":\"=\",\"value\":\"" + TERM_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "parent_category_for_term.json")));
     }
 
     /**

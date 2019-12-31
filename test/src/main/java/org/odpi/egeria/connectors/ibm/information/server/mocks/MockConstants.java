@@ -23,11 +23,16 @@ public class MockConstants {
     public static final String EGERIA_USER = "admin";
     public static final int EGERIA_PAGESIZE = 100;
 
+    public static final String EGERIA_GLOSSARY_TERM_TYPE_GUID = "0db3e6ec-f5ef-4d75-ae38-b7ee6fd6ec0a";
+    public static final String EGERIA_GLOSSARY_TERM_TYPE_NAME = "GlossaryTerm";
+
     public static final String GLOSSARY_RID = "6662c0f2.ee6a64fe.00263pfar.1a0mm9a.lfjd3c.rmgl1cdd5fcd4bijur3g3";
     public static final String GLOSSARY_NAME = "Coco Pharmaceuticals";
     public static final String GLOSSARY_DESC = "This glossary contains Glossary Terms and Categories that are related to the Coco Pharmaceuticals data";
 
+    // RIDs used for specific scenarios to test mappers
     public static final String CATEGORY_RID = "6662c0f2.ee6a64fe.o1h6evehs.j0f25pn.ihsrb3.m7984f1jgfencf15nopk0";
+    public static final String TERM_RID = "6662c0f2.e1b1ec6c.00263shl8.8c6cjg1.thoiqd.g2jiimda7gvarsup8a3bb";
 
     public static final String TABLE_RID = "b1c497ce.54bd3a08.001mts4qn.7n9a341.3l2hic.d867phul07pgt3478ctim";
     public static final String TABLE_NAME = "CONTACTEMAIL";
