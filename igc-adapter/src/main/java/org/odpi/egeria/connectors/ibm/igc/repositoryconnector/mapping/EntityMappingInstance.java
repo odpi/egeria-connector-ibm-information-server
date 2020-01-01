@@ -246,9 +246,7 @@ public class EntityMappingInstance {
     public final void initializeEntitySummary() {
         if (omrsSummary == null) {
             try {
-                // TODO: replace call below to getSkeletonEntitySummary when available, to avoid always creating
-                //  EntityDetail objects even when only a summary was requested
-                omrsSummary = igcomrsRepositoryConnector.getRepositoryHelper().getSkeletonEntity(
+                omrsSummary = igcomrsRepositoryConnector.getRepositoryHelper().getSkeletonEntitySummary(
                         igcomrsRepositoryConnector.getRepositoryName(),
                         igcomrsRepositoryConnector.getMetadataCollectionId(),
                         InstanceProvenanceType.LOCAL_COHORT,
