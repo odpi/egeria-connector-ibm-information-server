@@ -4,7 +4,9 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
 import org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.ContactDetailsMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.GlossaryMapper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.RelationalDBSchemaTypeMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mocks.MockConnection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
 import org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants;
@@ -59,8 +61,6 @@ public class ConnectorTest {
     private List<AttributeTypeDef> supportedAttributeTypeDefs;
     private List<TypeDef> supportedTypeDefs;
 
-    private String exampleTableGuid;
-
     /**
      * Construct base objects.
      */
@@ -70,11 +70,6 @@ public class ConnectorTest {
         metadataCollectionId = UUID.randomUUID().toString();
         supportedAttributeTypeDefs = new ArrayList<>();
         supportedTypeDefs = new ArrayList<>();
-
-        String exampleTableRid = MockConstants.TABLE_RID;
-        IGCEntityGuid igcEntityGuid = new IGCEntityGuid(metadataCollectionId, "database_table", exampleTableRid);
-        assertNotNull(igcEntityGuid);
-        exampleTableGuid = igcEntityGuid.asGuid();
 
     }
 
@@ -87,7 +82,7 @@ public class ConnectorTest {
         Connection mockConnection = new MockConnection();
         OMRSAuditLogDestination destination = new OMRSAuditLogDestination(null);
         OMRSAuditLog auditLog = new OMRSAuditLog(destination, -1, "ConnectorTest", "Testing of the connector", null);
-        contentManager = new OMRSRepositoryContentManager(auditLog);
+        contentManager = new OMRSRepositoryContentManager(MockConstants.EGERIA_USER, auditLog);
         eventManager = new OMRSRepositoryEventManager("Mock Outbound EventManager",
                 new OMRSRepositoryEventExchangeRule(OpenMetadataExchangeRule.SELECTED_TYPES, Collections.emptyList()),
                 new OMRSRepositoryContentValidator(contentManager),
@@ -727,8 +722,567 @@ public class ConnectorTest {
 
     }
 
-    // TODO: implement a set of tests below that mirror what was implemented in Postman -- test all the same types,
-    //  relationships, REST endpoints (directly as MetadataCollection method calls), and scripted test assertions
+    /**
+     * Test retrieving a Database as an EntityDetail directly.
+     */
+    @Test
+    public void testGetDatabaseDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("name", "COMPDIR");
+        expectedValues.put("type", "DB2");
+        expectedValues.put("instance", "db2inst1");
+
+        EntityDetail detail = testEntityDetail(
+                "database",
+                "Database",
+                null,
+                MockConstants.DATABASE_RID,
+                expectedValues
+        );
+
+    }
+
+    /**
+     * Test Database relationship retrieval.
+     */
+    @Test
+    public void testDatabaseRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test retrieving a Connection as an EntityDetail directly.
+     */
+    @Test
+    public void testGetConnectionDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("displayName", "CocoPharma_COMPDIR_ibm-db2");
+        expectedValues.put("qualifiedName", "(data_connection)=CocoPharma_COMPDIR_ibm-db2");
+
+        EntityDetail detail = testEntityDetail(
+                "data_connection",
+                "Connection",
+                null,
+                MockConstants.DATA_CONNECTION_RID,
+                expectedValues
+        );
+
+    }
+
+    /**
+     * Test Connection relationship retrieval.
+     */
+    @Test
+    public void testConnectionRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test retrieving an Endpoint as an EntityDetail directly.
+     */
+    @Test
+    public void testGetEndpointDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("qualifiedName", "(host_(engine))=INFOSVR");
+
+        EntityDetail detail = testEntityDetail(
+                "host",
+                "Endpoint",
+                null,
+                MockConstants.HOST_RID,
+                expectedValues
+        );
+
+    }
+
+    /**
+     * Test Endpoint relationship retrieval.
+     */
+    @Test
+    public void testEndpointRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test retrieving a DeployedDatabaseSchema as an EntityDetail directly.
+     */
+    @Test
+    public void testGetDeployedDatabaseSchemaDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("name", "DB2INST1");
+
+        EntityDetail detail = testEntityDetail(
+                "database_schema",
+                "DeployedDatabaseSchema",
+                null,
+                MockConstants.DATABASE_SCHEMA_RID,
+                expectedValues
+        );
+
+    }
+
+    /**
+     * Test DeployedDatabaseSchema relationship retrieval.
+     */
+    @Test
+    public void testDeployedDatabaseSchemaRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test retrieving a RelationalDBSchemaType as an EntityDetail directly.
+     */
+    @Test
+    public void testGetRelationalDBSchemaTypeDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("displayName", "DB2INST1");
+
+        EntityDetail detail = testEntityDetail(
+                "database_schema",
+                "RelationalDBSchemaType",
+                RelationalDBSchemaTypeMapper.IGC_RID_PREFIX,
+                MockConstants.DATABASE_SCHEMA_RID,
+                expectedValues
+        );
+
+    }
+
+    /**
+     * Test RelationalDBSchemaType relationship retrieval.
+     */
+    @Test
+    public void testRelationalDBSchemaTypeRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test retrieving a RelationalTable as an EntityDetail directly.
+     */
+    @Test
+    public void testGetRelationalTableDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("displayName", "CONTACTEMAIL");
+
+        EntityDetail detail = testEntityDetail(
+                "database_table",
+                "RelationalTable",
+                null,
+                MockConstants.DATABASE_TABLE_RID,
+                expectedValues
+        );
+
+    }
+
+    /**
+     * Test RelationalTable relationship retrieval.
+     */
+    @Test
+    public void testRelationalTableRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test retrieving a RelationalColumn as an EntityDetail directly.
+     */
+    @Test
+    public void testGetRelationalColumnDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("displayName", "EMAIL");
+
+        EntityDetail detail = testEntityDetail(
+                "database_column",
+                "RelationalColumn",
+                null,
+                MockConstants.DATABASE_COLUMN_RID,
+                expectedValues
+        );
+
+        int length = getIntegerValue(detail.getProperties(), "length");
+        assertEquals(length, 120);
+
+        List<Classification> classifications = detail.getClassifications();
+        testTypeEmbeddedAttributeWithStringDataType(detail.getClassifications());
+
+    }
+
+    private void testTypeEmbeddedAttributeWithStringDataType(List<Classification> classifications) {
+        assertNotNull(classifications);
+        assertFalse(classifications.isEmpty());
+        assertEquals(classifications.size(), 1);
+        Classification first = classifications.get(0);
+        assertEquals(first.getType().getTypeDefName(), "TypeEmbeddedAttribute");
+        String dataType = getStringValue(first.getProperties(), "dataType");
+        assertEquals(dataType, "STRING");
+    }
+
+    /**
+     * Test RelationalColumn relationship retrieval.
+     */
+    @Test
+    public void testRelationalColumnRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test retrieving a RelationalColumn as an EntitySummary directly.
+     */
+    @Test
+    public void testGetRelationalColumnSummary() {
+
+        EntitySummary summary = testEntitySummary(
+                "database_column",
+                "RelationalColumn",
+                null,
+                MockConstants.DATABASE_COLUMN_RID
+        );
+
+    }
+
+    /**
+     * Test DataClassAssignment (proposed) relationship retrieval.
+     */
+    @Test
+    public void testProposedDataClassAssignmentRelationship() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test DataClassAssignment (discovered) relationship retrieval.
+     */
+    @Test
+    public void testDiscoveredDataClassAssignmentRelationship() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test retrieving a DataClass as an EntityDetail directly.
+     */
+    @Test
+    public void testGetDataClassDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("name", "Email Address");
+        expectedValues.put("example", "paul_fowler@aol.com");
+        expectedValues.put("qualifiedName", "(data_class)=Email Address");
+
+        EntityDetail detail = testEntityDetail(
+                "data_class",
+                "DataClass",
+                null,
+                MockConstants.DATA_CLASS_RID,
+                expectedValues
+        );
+
+    }
+
+    /**
+     * Test DataClass relationship retrieval.
+     */
+    @Test
+    public void testDataClassRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test retrieving a Connection as an EntityDetail directly.
+     */
+    @Test
+    public void testGetConnectionFSDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("displayName", "LOCALFS");
+        expectedValues.put("qualifiedName", "(data_connection)=LOCALFS");
+
+        EntityDetail detail = testEntityDetail(
+                "data_connection",
+                "Connection",
+                null,
+                MockConstants.DATA_CONNECTION_RID_FS,
+                expectedValues
+        );
+
+    }
+
+    /**
+     * Test Connection relationship retrieval.
+     */
+    @Test
+    public void testConnectionFSRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test DataFileFolder (root) relationship retrieval.
+     */
+    @Test
+    public void testRootDataFileFolderRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test DataFileFolder (data) relationship retrieval.
+     */
+    @Test
+    public void testDataDataFileFolderRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test DataFileFolder (files) relationship retrieval.
+     */
+    @Test
+    public void testFilesDataFileFolderRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test DataFileFolder (CocoPharma) relationship retrieval.
+     */
+    @Test
+    public void testCocoPharmaDataFileFolderRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test retrieving a DataFile as an EntityDetail directly.
+     */
+    @Test
+    public void testGetDataFileDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("qualifiedName", "(host_(engine))=INFOSVR::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv");
+
+        EntityDetail detail = testEntityDetail(
+                "data_file",
+                "DataFile",
+                null,
+                MockConstants.DATA_FILE_RID,
+                expectedValues
+        );
+
+    }
+
+    /**
+     * Test DataFile relationship retrieval.
+     */
+    @Test
+    public void testDataFileRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test retrieving a TabularSchemaType as an EntityDetail directly.
+     */
+    @Test
+    public void testGetTabularSchemaTypeDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("displayName", "CompDir-ContactEmail");
+        expectedValues.put("qualifiedName", "(host_(engine))=INFOSVR::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail");
+
+        EntityDetail detail = testEntityDetail(
+                "data_file_record",
+                "TabularSchemaType",
+                null,
+                MockConstants.DATA_FILE_RECORD_RID,
+                expectedValues
+        );
+
+    }
+
+    /**
+     * Test TabularSchemaType relationship retrieval.
+     */
+    @Test
+    public void testTabularSchemaTypeRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test retrieving a TabularColumn as an EntityDetail directly.
+     */
+    @Test
+    public void testGetTabularColumnDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("displayName", "Email");
+
+        EntityDetail detail = testEntityDetail(
+                "data_file_field",
+                "TabularColumn",
+                null,
+                MockConstants.DATA_FILE_FIELD_RID,
+                expectedValues
+        );
+
+        testTypeEmbeddedAttributeWithStringDataType(detail.getClassifications());
+
+    }
+
+    /**
+     * Test TabularColumn relationship retrieval.
+     */
+    @Test
+    public void testTabularColumnRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test retrieving a GlossaryTerm classified as a SpineObject as an EntityDetail directly.
+     */
+    @Test
+    public void testGetSpineObjectDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("displayName", "Employee");
+        expectedValues.put("qualifiedName", "(category)=Coco Pharmaceuticals::(term)=Employee");
+
+        EntityDetail detail = testEntityDetail(
+                "term",
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                null,
+                MockConstants.SPINE_OBJECT_RID,
+                expectedValues
+        );
+
+        List<Classification> classifications = detail.getClassifications();
+        assertNotNull(classifications);
+        assertFalse(classifications.isEmpty());
+        assertEquals(classifications.size(), 1);
+        Classification first = classifications.get(0);
+        assertEquals(first.getType().getTypeDefName(), "SpineObject");
+        assertTrue(first.getVersion() > 1);
+
+    }
+
+    /**
+     * Test retrieving a GlossaryCategory classified as a SubjectArea as an EntityDetail directly.
+     */
+    @Test
+    public void testGetSubjectAreaDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("displayName", "Organization");
+        expectedValues.put("qualifiedName", "(category)=Coco Pharmaceuticals::(category)=Organization");
+
+        EntityDetail detail = testEntityDetail(
+                "category",
+                "GlossaryCategory",
+                null,
+                MockConstants.SUBJECT_AREA_RID,
+                expectedValues
+        );
+
+        List<Classification> classifications = detail.getClassifications();
+        assertNotNull(classifications);
+        assertFalse(classifications.isEmpty());
+        assertEquals(classifications.size(), 1);
+        Classification first = classifications.get(0);
+        assertEquals(first.getType().getTypeDefName(), "SubjectArea");
+        assertTrue(first.getVersion() > 1);
+
+    }
+
+    /**
+     * Test retrieving a GovernancePolicy as an EntityDetail directly.
+     */
+    @Test
+    public void testGetGovernancePolicyDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("title", "Confidential information should be masked when user does not have specific access to its Subject Area");
+        expectedValues.put("qualifiedName", "(information_governance_policy)=Data Access Policies::(information_governance_policy)=Confidential information should be masked when user does not have specific access to its Subject Area");
+
+        EntityDetail detail = testEntityDetail(
+                "information_governance_policy",
+                "GovernancePolicy",
+                null,
+                MockConstants.INFORMATION_GOVERNANCE_POLICY_RID,
+                expectedValues
+        );
+
+    }
+
+    /**
+     * Test retrieving a Person as an EntityDetail directly.
+     */
+    @Test
+    public void testGetPersonDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("name", "ggeeke");
+        expectedValues.put("fullName", "Gary Geeke");
+        expectedValues.put("jobTitle", "IT Infrastructure Administrator");
+
+        EntityDetail detail = testEntityDetail(
+                "user",
+                "Person",
+                null,
+                MockConstants.USER_RID,
+                expectedValues
+        );
+
+    }
+
+    /**
+     * Test Person relationship retrieval.
+     */
+    @Test
+    public void testPersonRelationships() {
+        // TODO: implement, after adding case-specific queries to MockServerExpectations
+    }
+
+    /**
+     * Test retrieving a ContactDetails as an EntityDetail directly.
+     */
+    @Test
+    public void testGetContactDetailsDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("contactMethodValue", "gary.geeke@cocopharmaceutical.com");
+
+        EntityDetail detail = testEntityDetail(
+                "user",
+                "ContactDetails",
+                ContactDetailsMapper.IGC_RID_PREFIX,
+                MockConstants.USER_RID,
+                expectedValues
+        );
+
+        InstancePropertyValue contactMethodType = detail.getProperties().getPropertyValue("contactMethodType");
+        assertEquals(contactMethodType.getInstancePropertyCategory(), InstancePropertyCategory.ENUM);
+        EnumPropertyValue contactMethodEnum = (EnumPropertyValue) contactMethodType;
+        assertEquals(contactMethodEnum.getOrdinal(), 0);
+        assertEquals(contactMethodEnum.getSymbolicName(), "Email");
+
+    }
+
+    /**
+     * Test retrieving a Team as an EntityDetail directly.
+     */
+    @Test
+    public void testGetTeamDetail() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("name", "cocopharma_it_ops");
+        expectedValues.put("description", "IT Operations");
+
+        EntityDetail detail = testEntityDetail(
+                "group",
+                "Team",
+                null,
+                MockConstants.GROUP_RID,
+                expectedValues
+        );
+
+    }
 
     @AfterSuite
     public void stopConnector() {
