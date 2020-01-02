@@ -49,6 +49,45 @@ The IBM DataStage Data Engine Proxy Connector works through a combination of the
 
 ## Getting started
 
+### TL;DR for IGC
+
+The quick version:
+
+1. Download the latest Egeria core from: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/server-chassis-spring/1.3-SNAPSHOT/server-chassis-spring-1.3-SNAPSHOT.jar
+1. Download the latest IBM Information Server connector from: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/1.3-SNAPSHOT/egeria-connector-ibm-information-server-package-1.3-SNAPSHOT-jar-with-dependencies.jar
+1. Rename the downloaded file to `egeria-server-chassis-spring.jar`.
+1. Run the following command to start Egeria from the command-line, waiting for the final line of output indicating the
+    server is running and ready for configuration:
+    ```bash
+    $ export STRICT_SSL=false
+    $ java -Dloader.path=. -jar egeria-server-chassis-spring.jar
+     ODPi Egeria
+        ____   __  ___ ___    ______   _____                                 ____   _         _     ___
+       / __ \ /  |/  //   |  / ____/  / ___/ ___   ____ _   __ ___   ____   / _  \ / / __    / /  / _ /__   ____ _  _
+      / / / // /|_/ // /| | / / __    \__ \ / _ \ / __/| | / // _ \ / __/  / /_/ // //   |  / _\ / /_ /  | /  _// || |
+     / /_/ // /  / // ___ |/ /_/ /   ___/ //  __// /   | |/ //  __// /    /  __ // // /  \ / /_ /  _// / // /  / / / /
+     \____//_/  /_//_/  |_|\____/   /____/ \___//_/    |___/ \___//_/    /_/    /_/ \__/\//___//_/   \__//_/  /_/ /_/
+    
+     :: Powered by Spring Boot (v2.2.2.RELEASE) ::
+    
+    
+    No OMAG servers listed in startup configuration
+    Thu Jan 02 11:30:10 GMT 2020 OMAG server platform ready for more configuration
+    ```
+1. In another shell / command-line window, run the following commands to configure Egeria and startup its services --
+    making sure to replace the hostnames and port numbers with those relevant to your own environment (`localhost:9092`
+    for your own Kafka bus, `infosvr:59092` with the Information Server-embedded Kafka host and port, `infosvr` with
+    the hostname of your Information Server domain (services) tier, `9446` with the port number of your Information
+    Server domain (services) tier, `isadmin` with the username for your Information Server environment, and `isadmin`
+    with the password for your Information Server environment):
+    ```bash
+    $ curl -X POST -H "Content-Type: application/json" --data '{"producer":{"bootstrap.servers":"localhost:9092"},"consumer":{"bootstrap.servers":"localhost:9092"}}' "http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic"
+    $ curl -X POST "http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/cohorts/mycohort"
+    $ curl -X POST -H "Content-Type: application/json" --data '{"class":"Connection","connectorType":{"class":"ConnectorType","connectorProviderClassName":"org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider"},"endpoint":{"class":"Endpoint","address":"infosvr:9446","protocol":"https"},"userId":"isadmin","clearPassword":"isadmin","configurationProperties":{"defaultZones":["default"]}}' "http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/local-repository/mode/repository-proxy/connection"
+    $ curl -X POST "http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/local-repository/event-mapper-details?connectorProvider=org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapperProvider&eventSource=infosvr:59092"
+    $ curl -X POST "http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/instance"
+    ```
+
 ### Enable IGC's events
 
 To start using the connector, you will need an IGC environment, running either version 11.5 or 11.7 of the software.
