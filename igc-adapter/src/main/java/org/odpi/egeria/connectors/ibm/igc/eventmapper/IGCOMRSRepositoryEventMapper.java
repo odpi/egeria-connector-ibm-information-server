@@ -1039,7 +1039,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 if (stub == null) {
                     sendNewRelationship(relationship);
                 } else {
-                    sendUpdatedRelationship(relationship);
+                    sendUpdatedRelationship(relationship, stub);
                 }
                 // Note: no need to call back to processAsset with prefixed GUID as it will have been handled already
                 // by the base asset being processed
@@ -1076,16 +1076,23 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      * Send an event out on OMRS topic for an updated relationship.
      *
      * @param relationship the updated relationship to publish
+     * @param stub the OMRS stub for the asset, containing the last version for which we successfully sent an event
      */
-    private void sendUpdatedRelationship(Relationship relationship) {
+    private void sendUpdatedRelationship(Relationship relationship, OMRSStub stub) {
         if (relationship != null) {
+            Relationship old = relationship;
+            // If we can, set the old version of the relationship based on the last-shared payload
+            Reference igcStubObject = getIgcAssetFromStubPayload(stub);
+            if (igcStubObject != null) {
+                old.setVersion(igcStubObject.getModifiedOn().getTime());
+            }
             repositoryEventProcessor.processUpdatedRelationshipEvent(
                     sourceName,
                     metadataCollectionId,
                     originatorServerName,
                     originatorServerType,
                     null,
-                    null,
+                    old,
                     relationship
             );
         }
