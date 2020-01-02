@@ -15,11 +15,14 @@ and this repository contains Egeria connectors for some of those modules:
     provided here both for reference purposes and also to provide an integration point to older versions of the software
     (from v11.5.0.1 onwards).
 
-    Note that currently the implemented connector is read-only: it only implements those methods necessary to search,
-    retrieve, and communicate metadata from IGC out into the cohort -- it does *not* currently implement the ability to
-    update IGC based on events received from other members of the cohort.
+    Note that this open connector is read-only: it only implements those methods necessary to search, retrieve, and
+    communicate metadata from IGC out into the cohort -- it does *not* implement the ability to update IGC based on
+    events received from other members of the cohort.
 
     Furthermore, [only a subset of the overall Open Metadata Types are currently implemented](docs/mappings/README.md).
+    
+    For a write-supporting connector you should use the connector that is provided as part of IBM Information Server
+    itself, though be aware that this is only available in recent versions of v11.7.
 
 - [IBM InfoSphere DataStage](https://www.ibm.com/marketplace/datastage) is a high-performance ETL module within the
     suite, and is pre-integrated to IGC. The connector implemented for this module is a Data Engine Proxy, translating
@@ -58,17 +61,30 @@ notification in your IGC environment:
 
 There should not be any need to restart the environment after enabling the event notification.
 
-### Build connector and copy to OMAG Server Platform
+### Obtain the connector
 
-After building the connector project (`mvn clean install`) the connector is available as:
+You can either download the latest released or snapshot version of the connector directly from ODPi, or build the
+connector yourself. In both cases, once you have the jar file for the connector
+(`egeria-connector-ibm-information-server-package-VERSION-jar-with-dependencies.jar`) this needs to be copied to a
+location where it can be run alongside the OMAG Server Platform from Egeria core itself. For example, this could be
+placing the file into the `/lib` directory as `/lib/egeria-connector-ibm-information-server-package-VERSION-jar-with-dependencies.jar`.
+
+#### Download from ODPi
+
+To download a pre-built version of the connector, use either of the following URLs (depending on whether you want an
+officially-released version or the latest snapshot):
+
+- Release: https://odpi.jfrog.io/odpi/egeria-release-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/1.3/egeria-connector-ibm-information-server-package-1.3-jar-with-dependencies.jar
+- Snapshot: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/1.3-SNAPSHOT/egeria-connector-ibm-information-server-package-1.3-SNAPSHOT-jar-with-dependencies.jar
+
+#### Building the connector yourself
+
+Alternatively, you can build the connector yourself. To do this, you'll need to first clone this repository and then
+build through Maven using `mvn clean install`. After building, the connector is available as:
 
 ```text
-distribution/target/egeria-connector-ibm-information-server-package-VERSION.jar
+distribution/target/egeria-connector-ibm-information-server-package-VERSION-jar-with-dependencies.jar
 ```
-
-Simply copy this file to a location where it can be run alongside the OMAG Server
-Platform from the Egeria core (in the example below, the file would be copied to
-`/lib/egeria-connector-ibm-information-server-package-VERSION.jar`).
 
 ### Configure security
 
@@ -88,7 +104,9 @@ environment, so is inherently insecure.
 
 ### Startup the OMAG Server Platform
 
-You can startup the OMAG Server Platform with this connector ready-to-be-configured by running:
+You can startup the OMAG Server Platform with this connector ready-to-be-configured by running the following
+(this example assumes you've placed the connector jar file in the `/lib` directory, if you are using a different
+location simply change the `-Dloader.path=` to point to the location you have used):
 
 ```bash
 $ java -Dloader.path=/lib -jar server-chassis-spring-VERSION.jar
@@ -102,7 +120,9 @@ in the `/lib` directory as part of the classpath of the OMAG Server Platform.)
 You will need to configure the OMAG Server Platform as follows (order is important) to make use of the IGC connector.
 For example payloads and endpoints, see the [Postman samples](samples).
 
-1. Configure your event bus for Egeria, by POSTing a payload like the following:
+1. Configure your event bus for Egeria, by POSTing a payload like the following (replace the `localhost:9092` with the
+    hostname and port number where your Kafka bus is running, and assuming you are running the OMAG Server Platform
+    locally at its default port of `8080`):
 
     ```json
     {
@@ -118,16 +138,19 @@ For example payloads and endpoints, see the [Postman samples](samples).
     to:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{server}}/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic
+    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic
     ```
 
 1. Configure the cohort, by POSTing something like the following:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{server}}/cohorts/cocoCohort
+    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/cohorts/mycohort
     ```
 
-1. Configure the IGC connector, by POSTing a payload like the following:
+1. Configure the IGC connector, by POSTing a payload like the following, replacing the `{{igc_host}}` with the hostname
+    of your IGC instance, `{{igc_port}}` with the port number of its domain (services) tier, `{{igc_user}}` with the
+    username of a user able to access the REST API (eg. `isadmin`), and `{{igc_password}}` with the password for that
+    user:
 
     ```json
     {
@@ -144,7 +167,7 @@ For example payloads and endpoints, see the [Postman samples](samples).
         "userId": "{{igc_user}}",
         "clearPassword": "{{igc_password}}",
         "configurationProperties": {
-            "defaultZones": [ "x", "y", "z" ]
+            "defaultZones": [ "default" ]
         }
     }
     ```
@@ -152,14 +175,11 @@ For example payloads and endpoints, see the [Postman samples](samples).
     to:
 
     ```
-    {{baseURL}}/open-metadata/admin-services/users/{{user}}/servers/{{server}}/local-repository/mode/repository-proxy/connection
+    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/local-repository/mode/repository-proxy/connection
     ```
 
-    The payload should include the hostname and port of your IGC environment's domain (services) tier,
-    and a `username` and `password` through which the REST API can be accessed.
-    
     You can optionally also provide a list of zone names that will be used as default zones for all Assets retrieved
-    from IGC through the proxy.
+    from IGC through the proxy (in the example above this is a single zone called `default`).
 
     Note that you also need to provide the `connectorProvider` parameter, set to the name of the IGC
     connectorProvider class (value as given above).
@@ -167,19 +187,20 @@ For example payloads and endpoints, see the [Postman samples](samples).
 1. Configure the event mapper for IGC, by POSTing something like the following:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{server}}/local-repository/event-mapper-details?connectorProvider=org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapperProvider&eventSource=my.igc.services.host.com:59092
+    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/local-repository/event-mapper-details?connectorProvider=org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapperProvider&eventSource=my.igc.services.host.com:59092
     ```
 
-    The hostname provided at the end should be the host on which your IGC-embedded kafka bus is running, and include
-    the appropriate port number for connecting to that bus. (For v11.5 this is your domain (services) tier and port `59092`,
-    whereas in the latest versions of 11.7 it may be running on your Unified Governance / Enterprise Search tier, on port
-    `9092`.)
+    The hostname provided at the end (`my.igc.services.host.com`) should be replaced with the host on which your
+    IGC-embedded kafka bus is running, and include the appropriate port number for connecting to that bus.
+    (For v11.5 this is your domain (services) tier and port `59092`, whereas in the latest versions of 11.7 it may be
+    running on your Unified Governance / Enterprise Search tier, on port `9092`. In both cases the port will need to be
+    network-accessible by the host where you are running Egeria itself for any events to be picked up by Egeria.)
 
 1. The connector and event mapper should now be configured, and you should now be able
     to start the instance by POSTing something like the following:
 
    ```
-   POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{server}}/instance
+   POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/instance
    ```
 
 After following these instructions, your IGC instance will be participating in the Egeria cohort. For those objects
@@ -192,13 +213,15 @@ You will need to configure the OMAG Server Platform as follows (order is importa
 For example payloads and endpoints, see the [Postman samples](samples).
 
 1. Configure a local Egeria metadata repository for the access services, by POSTing something like the following
-    (to use the graph repository):
+    (to use the graph repository, and assuming you are running the OMAG Server Platform locally at its default port of
+    `8080`):
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{omas_server}}/local-repository/mode/local-graph-repository
+    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/omas_server/local-repository/mode/local-graph-repository
     ```
 
-1. Configure your event bus for the access services, by POSTing a payload like the following:
+1. Configure your event bus for the access services, by POSTing a payload like the following (replace the
+    `localhost:9092` with the hostname and port number where your Kafka bus is running):
 
     ```json
     {
@@ -214,36 +237,39 @@ For example payloads and endpoints, see the [Postman samples](samples).
     to:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{omas_server}}/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic
+    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/omas_server/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic
     ```
 
 1. Enable the access services by POSTing something like the following:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{omas_server}}/access-services?serviceMode=ENABLED
+    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/omas_server/access-services?serviceMode=ENABLED
     ```
 
 1. The access services should now be configured, and you should now be able to start them by POSTing something like the
     following:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{omas_server}}/instance
+    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/omas_server/instance
     ```
 
 1. Configure a local metadata repository for the DataStage connector, by POSTing something like the following
     (to use the in-memory repository):
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{ds_server}}/local-repository/mode/in-memory-repository
+    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/datastage_proxy/local-repository/mode/in-memory-repository
     ```
 
-1. Configure the DataStage connector, by POSTing a payload like the following:
+1. Configure the DataStage connector, by POSTing a payload like the following, replacing the `{{igc_host}}` with the
+    hostname of your IGC instance, `{{igc_port}}` with the port number of its domain (services) tier, `{{igc_user}}`
+    with the username of a user able to access the REST API (eg. `isadmin`), and `{{igc_password}}` with the password
+    for that user:
 
     ```json
     {
         "class": "DataEngineProxyConfig",
         "accessServiceRootURL": "http://localhost:8080",
-        "accessServiceServerName": "omas",
+        "accessServiceServerName": "omas_server",
         "dataEngineConnection": {
             "class": "Connection",
             "connectorType": {
@@ -252,11 +278,11 @@ For example payloads and endpoints, see the [Postman samples](samples).
             },
             "endpoint": {
                 "class": "Endpoint",
-                "address": "{{ds_host}}:{{ds_port}}",
+                "address": "{{igc_host}}:{{igc_port}}",
                 "protocol": "https"
             },
-            "userId": "{{username}}",
-            "clearPassword": "{{password}}"
+            "userId": "{{igc_user}}",
+            "clearPassword": "{{igc_password}}"
         },
         "pollIntervalInSeconds": 60
     }
@@ -265,13 +291,10 @@ For example payloads and endpoints, see the [Postman samples](samples).
     to:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{ds_server}}/data-engine-proxy-service/configuration
+    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/datastage_proxy/data-engine-proxy-service/configuration
     ```
 
-    The payload should include the hostname and port of your Information Server environment's domain (services) tier,
-    and a `username` and `password` through which the IGC module's REST API can be accessed.
-
-    Note that you also need to provide the `connectorProvider` parameter, set to the name of the DataStage
+    Note that you need to provide the `connectorProvider` parameter, set to the name of the DataStage
     connectorProvider class (value as given above).
 
     Finally, note that we specify the connector should poll for changes at a particular interval. This is because
@@ -283,7 +306,7 @@ For example payloads and endpoints, see the [Postman samples](samples).
     the following:
 
    ```
-   POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{ds_server}}/instance
+   POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/datastage_proxy/instance
    ```
 
 After following these instructions, your DataStage environment will be polled for any changes (including creation of new)
