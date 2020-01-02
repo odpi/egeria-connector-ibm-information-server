@@ -353,9 +353,9 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         detectedClassifications.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
 
         // For each of the detected classifications, create a new DataClassAssignment relationship
-        for (Reference detectedClassification : detectedClassifications.getItems()) {
+        for (Classification detectedClassification : detectedClassifications.getItems()) {
 
-            Reference classifiedObj = (Reference) igcRestClient.getPropertyByName(detectedClassification, "classifies_asset");
+            Reference classifiedObj = detectedClassification.getClassifiesAsset();
 
             /* Only proceed with the classified object if it is not a 'main_object' asset
              * (in this scenario, 'main_object' represents ColumnAnalysisMaster objects that are not accessible
@@ -377,7 +377,6 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                             detectedClassification.getId()
                     );
 
-                    Object confidence = igcRestClient.getPropertyByName(detectedClassification, "confidencePercent");
                     InstanceProperties relationshipProperties = relationship.getProperties();
                     if (relationshipProperties == null) {
                         relationshipProperties = new InstanceProperties();
@@ -385,8 +384,9 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
 
                     /* Before adding to the overall set of relationships, setup the relationship properties
                      * we have in IGC from the 'classification' object. */
+                    Number confidence = detectedClassification.getConfidencepercent();
                     if (confidence != null) {
-                        int confidenceVal = ((Number)confidence).intValue();
+                        int confidenceVal = confidence.intValue();
                         relationshipProperties = repositoryHelper.addIntPropertyToInstance(
                                 repositoryName,
                                 relationshipProperties,
@@ -402,24 +402,24 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                                 methodName
                         );
                     }
-                    Object threshold = igcRestClient.getPropertyByName(detectedClassification, P_THRESHOLD);
+                    Number threshold = detectedClassification.getThreshold();
                     if (threshold != null) {
                         relationshipProperties = repositoryHelper.addFloatPropertyToInstance(
                                 repositoryName,
                                 relationshipProperties,
                                 P_THRESHOLD,
-                                (Float) threshold,
+                                threshold.floatValue(),
                                 methodName
                         );
                     }
                     if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
-                        Object valFreq = igcRestClient.getPropertyByName(detectedClassification, "value_frequency");
+                        Number valFreq = detectedClassification.getValueFrequency();
                         if (valFreq != null) {
                             relationshipProperties = repositoryHelper.addLongPropertyToInstance(
                                     repositoryName,
                                     relationshipProperties,
                                     "valueFrequency",
-                                    ((Double) valFreq).longValue(),
+                                    valFreq.longValue(),
                                     methodName
                             );
                         }
@@ -546,7 +546,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         detectedClassifications.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
 
         // For each of the detected classifications, create a new DataClassAssignment relationship
-        for (Reference detectedClassification : detectedClassifications.getItems()) {
+        for (Classification detectedClassification : detectedClassifications.getItems()) {
 
             Reference dataClassObj = (Reference) igcRestClient.getPropertyByName(detectedClassification, "data_class");
 
@@ -570,7 +570,6 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                             detectedClassification.getId()
                     );
 
-                    Object confidence = igcRestClient.getPropertyByName(detectedClassification, "confidencePercent");
                     InstanceProperties relationshipProperties = relationship.getProperties();
                     if (relationshipProperties == null) {
                         relationshipProperties = new InstanceProperties();
@@ -578,8 +577,9 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
 
                     /* Before adding to the overall set of relationships, setup the relationship properties
                      * we have in IGC from the 'classification' object. */
+                    Number confidence = detectedClassification.getConfidencepercent();
                     if (confidence != null) {
-                        int confidenceVal = ((Number)confidence).intValue();
+                        int confidenceVal = confidence.intValue();
                         relationshipProperties = repositoryHelper.addIntPropertyToInstance(
                                 repositoryName,
                                 relationshipProperties,
@@ -595,24 +595,24 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                                 methodName
                         );
                     }
-                    Object threshold = igcRestClient.getPropertyByName(detectedClassification, P_THRESHOLD);
+                    Number threshold = detectedClassification.getThreshold();
                     if (threshold != null) {
                         relationshipProperties = repositoryHelper.addFloatPropertyToInstance(
                                 repositoryName,
                                 relationshipProperties,
                                 P_THRESHOLD,
-                                (Float) threshold,
+                                threshold.floatValue(),
                                 methodName
                         );
                     }
                     if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
-                        Object valFreq = igcRestClient.getPropertyByName(detectedClassification, "value_frequency");
+                        Number valFreq = detectedClassification.getValueFrequency();
                         if (valFreq != null) {
                             relationshipProperties = repositoryHelper.addLongPropertyToInstance(
                                     repositoryName,
                                     relationshipProperties,
                                     "valueFrequency",
-                                    ((Double) valFreq).longValue(),
+                                    valFreq.longValue(),
                                     methodName
                             );
                         }
