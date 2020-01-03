@@ -115,13 +115,13 @@ public class ConnectorTest {
         }
 
         ConnectorConfigurationFactory connectorConfigurationFactory = new ConnectorConfigurationFactory();
-        Connection eventMapperConnection = connectorConfigurationFactory.getRepositoryEventMapperConnection(
-                "MockIGCServer",
-                "org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapperProvider",
-                null,
-                "localhost:1080"
-        );
         try {
+            Connection eventMapperConnection = connectorConfigurationFactory.getRepositoryEventMapperConnection(
+                    "MockIGCServer",
+                    "org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapperProvider",
+                    null,
+                    "localhost:1080"
+            );
             Object connector = connectorBroker.getConnector(eventMapperConnection);
             assertTrue(connector instanceof IGCOMRSRepositoryEventMapper);
             igcomrsRepositoryEventMapper = (IGCOMRSRepositoryEventMapper) connector;
