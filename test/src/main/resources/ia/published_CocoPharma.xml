@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iaapi:Project xmlns:iaapi="http://www.ibm.com/investigate/api/iaapi" name="CocoPharma">
+    <PublishedResults>
+        <Table name="EMPSALARYANALYSIS" publicationDateOfAnalysisResults="2019-12-10T16:30:42+00:00"/>
+        <Table name="CONTACTPHONE" publicationDateOfAnalysisResults="2019-12-10T16:28:49+00:00"/>
+        <Table name="PATIENT" publicationDateOfAnalysisResults="2019-12-10T16:30:08+00:00"/>
+        <Table name="EMPLOYEE" publicationDateOfAnalysisResults="2019-12-10T16:27:45+00:00"/>
+        <Table name="CONTACTEMAIL" publicationDateOfAnalysisResults="2019-12-10T16:30:06+00:00"/>
+        <Table name="CONTACTLIST" publicationDateOfAnalysisResults="2019-12-10T16:29:35+00:00"/>
+        <Table name="WORKLOCATION" publicationDateOfAnalysisResults="2019-12-10T16:27:44+00:00"/>
+        <Table name="DEPT" publicationDateOfAnalysisResults="2019-12-10T16:26:00+00:00"/>
+    </PublishedResults>
+</iaapi:Project>

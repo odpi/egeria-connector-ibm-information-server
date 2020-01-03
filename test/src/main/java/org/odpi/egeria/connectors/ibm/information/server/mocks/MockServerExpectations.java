@@ -40,6 +40,7 @@ public class MockServerExpectations implements ExpectationInitializer {
 
         initializeTypeDetails(mockServerClient);
         initializeIGCClientExpectations(mockServerClient);
+        initializeIAClientExpectations(mockServerClient);
         initializeExampleInstances(mockServerClient);
         initializeIGCConnectorExpectations(mockServerClient);
         initializeDataStageConnectorExpectations(mockServerClient);
@@ -70,7 +71,30 @@ public class MockServerExpectations implements ExpectationInitializer {
         setExamplePartAsset(mockServerClient, glossaryIgcType, MockConstants.GLOSSARY_RID);
         setExampleAssetWithModDetails(mockServerClient, glossaryIgcType, MockConstants.GLOSSARY_RID);
 
-        setLogout(mockServerClient);
+        setIGCLogout(mockServerClient);
+
+    }
+
+    private void initializeIAClientExpectations(MockServerClient mockServerClient) {
+
+        setProjectsQuery(mockServerClient);
+        setProjectDetailQuery(mockServerClient, IA_PROJECT_NAME);
+        setPublishedResultsQuery(mockServerClient, IA_PROJECT_NAME);
+
+        setColumnAnalysisResultsQuery(mockServerClient, IA_PROJECT_NAME, IA_TABLE_NAME);
+        setDataQualityResultsQuery(mockServerClient, IA_PROJECT_NAME, IA_TABLE_NAME);
+        setDataQualityResultsQuery(mockServerClient, IA_PROJECT_NAME, IA_TABLE_NAME_WITH_DQ_PROBLEMS);
+
+        setRunColumnAnalysis(mockServerClient, IA_PROJECT_NAME, IA_TABLE_NAME);
+        setRunDataQualityAnalysis(mockServerClient, IA_PROJECT_NAME, IA_TABLE_NAME);
+        setRunningColumnAnalysis(mockServerClient, IA_CA_SCHEDULE_ID, IA_TABLE_NAME);
+        setRunningDataQualityAnalysis(mockServerClient, IA_DQ_SCHEDULE_ID, IA_TABLE_NAME);
+        setCompleteColumnAnalysis(mockServerClient, IA_CA_SCHEDULE_ID, IA_TABLE_NAME);
+        setCompleteDataQualityAnalysis(mockServerClient, IA_DQ_SCHEDULE_ID, IA_TABLE_NAME);
+
+        setPublishResults(mockServerClient, IA_PROJECT_NAME, IA_TABLE_NAME);
+
+        setIALogout(mockServerClient);
 
     }
 
@@ -219,10 +243,10 @@ public class MockServerExpectations implements ExpectationInitializer {
                 .respond(withResponse(getResourceFileContents("rid_mod_" + rid + ".json")));
     }
 
-    private void setLogout(MockServerClient mockServerClient) {
+    private void setIGCLogout(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
-                .when(logoutRequest())
+                .when(igcLogoutRequest())
                 .respond(response().withStatusCode(200));
     }
 
@@ -807,6 +831,103 @@ public class MockServerExpectations implements ExpectationInitializer {
                         "{\"types\":[\"data_file_record\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_fields\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FIELD_RID + "\"}],\"operator\":\"or\"}}"
                 ))
                 .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_record.json")));
+    }
+
+    private void setProjectsQuery(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getProjectsRequest())
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "projects.xml")));
+    }
+
+    private void setProjectDetailQuery(MockServerClient mockServerClient, String projectName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getProjectDetailsRequest(projectName))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "project_" + projectName + ".xml")));
+    }
+
+    private void setPublishedResultsQuery(MockServerClient mockServerClient, String projectName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getPublishedResultsRequest(projectName))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "published_" + projectName + ".xml")));
+    }
+
+    private void setColumnAnalysisResultsQuery(MockServerClient mockServerClient, String projectName, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getColumnAnalysisResultsRequest(projectName, tableName))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "ca_" + tableName + ".xml")));
+    }
+
+    private void setDataQualityResultsQuery(MockServerClient mockServerClient, String projectName, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getDataQualityResultsRequest(projectName, tableName))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "dq_" + tableName + ".xml")));
+    }
+
+    private void setRunColumnAnalysis(MockServerClient mockServerClient, String projectName, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getExecuteTaskRequest(
+                        "<?xml version='1.0' encoding='UTF-8'?><iaapi:Project xmlns:iaapi=\"http://www.ibm.com/investigate/api/iaapi\" name=\"" + projectName + "\"><Tasks><RunColumnAnalysis><Column name=\"" + tableName + ".*\"/></RunColumnAnalysis></Tasks></iaapi:Project>"
+                ))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "run_ca_" + tableName + ".xml")));
+    }
+
+    private void setRunDataQualityAnalysis(MockServerClient mockServerClient, String projectName, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getExecuteTaskRequest(
+                        "<?xml version='1.0' encoding='UTF-8'?><iaapi:Project xmlns:iaapi=\"http://www.ibm.com/investigate/api/iaapi\" name=\"" + projectName + "\"><Tasks><RunDataQualityAnalysis><Table name=\"" + tableName + "\"/></RunDataQualityAnalysis></Tasks></iaapi:Project>"
+                ))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "run_dq_" + tableName + ".xml")));
+    }
+
+    private void setRunningColumnAnalysis(MockServerClient mockServerClient, String scheduleId, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getTaskStatusRequest(scheduleId), Times.exactly(1))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "running_ca_" + tableName + ".xml")));
+    }
+
+    private void setRunningDataQualityAnalysis(MockServerClient mockServerClient, String scheduleId, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getTaskStatusRequest(scheduleId), Times.exactly(1))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "running_dq_" + tableName + ".xml")));
+    }
+
+    private void setCompleteColumnAnalysis(MockServerClient mockServerClient, String scheduleId, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getTaskStatusRequest(scheduleId))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "complete_ca_" + tableName + ".xml")));
+    }
+
+    private void setCompleteDataQualityAnalysis(MockServerClient mockServerClient, String scheduleId, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getTaskStatusRequest(scheduleId))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "complete_dq_" + tableName + ".xml")));
+    }
+
+    private void setPublishResults(MockServerClient mockServerClient, String projectName, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getPublishResultsRequest(
+                        "<?xml version='1.0' encoding='UTF-8'?><iaapi:Project xmlns:iaapi=\"http://www.ibm.com/investigate/api/iaapi\" name=\"" + projectName + "\"><Tasks><PublishResults><Table name=\"" + tableName + "\"/></PublishResults></Tasks></iaapi:Project>"
+                ))
+                .respond(response().withStatusCode(200));
+    }
+
+    private void setIALogout(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(iaLogoutRequest())
+                .respond(response().withStatusCode(200));
     }
 
     /**

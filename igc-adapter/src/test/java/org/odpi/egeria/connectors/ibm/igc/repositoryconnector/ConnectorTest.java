@@ -1974,8 +1974,6 @@ public class ConnectorTest {
         assertTrue(summary.getVersion() > 1);
         assertNotNull(summary.getMetadataCollectionId());
 
-        log.warn("Found this summary, or detail? {}", summary);
-
         return summary;
 
     }

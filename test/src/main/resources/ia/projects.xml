@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iaapi:Projects xmlns:iaapi="http://www.ibm.com/investigate/api/iaapi">
+    <Project name="CocoPharma"/>
+    <Project name="DataLakeWorkspace">
+        <description>Workspace with optimal settings to run a quick analysis on large number of data sets.</description>
+    </Project>
+    <Project name="InDepthAnalysisWorkspace">
+        <description>Workspace with optimal settings to run in depth analysis on small number of data sets.</description>
+    </Project>
+    <Project name="PIIWorkspace">
+        <description>Workspace with optimal settings for PII search.</description>
+    </Project>
+    <Project name="UGDefaultWorkspace"/>
+</iaapi:Projects>

@@ -510,6 +510,7 @@
                         <exclude>cts/results/**/*.remote</exclude>
                         <exclude>cts/results/**/*.deployment</exclude>
                         <exclude>cts/results/**/*.configmap</exclude>
+                        <exclude>**/resources/ia/*.xml</exclude>
                     </excludes>
                     <licenseFamilies>
                         <licenseFamily implementation="org.apache.rat.license.SimpleLicenseFamily">

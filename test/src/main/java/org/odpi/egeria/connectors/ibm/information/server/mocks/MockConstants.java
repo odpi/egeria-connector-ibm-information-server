@@ -8,6 +8,7 @@ import org.mockserver.model.JsonBody;
 
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
+import static org.mockserver.model.Parameter.param;
 
 /**
  * A set of constants that can be re-used across various modules' tests.
@@ -31,7 +32,7 @@ public class MockConstants {
     public static final String GLOSSARY_DESC = "This glossary contains Glossary Terms and Categories that are related to the Coco Pharmaceuticals data";
     public static final String GLOSSARY_QN = "gen!GL@(category)=Coco Pharmaceuticals";
 
-    // RIDs used for specific scenarios to test mappers
+    // RIDs used for specific scenarios to test IGC mappers
     public static final String CATEGORY_RID = "6662c0f2.ee6a64fe.o1h6evehs.j0f25pn.ihsrb3.m7984f1jgfencf15nopk0";
     public static final String TERM_RID = "6662c0f2.e1b1ec6c.00263shl8.8c6cjg1.thoiqd.g2jiimda7gvarsup8a3bb";
     public static final String HOST_RID = "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh";
@@ -68,12 +69,22 @@ public class MockConstants {
     public static final String USER_QN = "(steward_user)=Mr. Gary Geeke";
     public static final String GROUP_RID = "b1c497ce.8a5be154.001mts4th.nmdbb31.7flfke.0b7taja56pjhs73o553iq";
 
+    // Examples used for specific scenarios to test IA client
+    public static final String IA_PROJECT_NAME = "CocoPharma";
+    public static final String IA_TABLE_NAME = "INFOSVR.COMPDIR.DB2INST1.CONTACTEMAIL";
+    public static final String IA_TABLE_NAME_WITH_DQ_PROBLEMS = "INFOSVR.EMPLSANL.DB2INST1.EMPSALARYANALYSIS";
+    public static final String IA_CA_SCHEDULE_ID = "d70c6594.80cb2b5c.001muqrfs.a21f89o.a90986.6i2ig951fma0dtk23k0h7";
+    public static final String IA_DQ_SCHEDULE_ID = "d70c6594.80cb2b5c.001muqr88.hpidg9f.il4mkc.rid1t6lqls0k16jlj3isu";
+
+    private static final String IGC_REST_EP = "/ibm/iis/igc-rest/v1/";
+    private static final String IA_REST_EP = "/ibm/iis/ia/api/";
+
     /**
      * Create a mock IGC search request.
      * @return HttpRequest
      */
     public static HttpRequest searchRequest() {
-        return request().withMethod("POST").withPath("/ibm/iis/igc-rest/v1/search");
+        return request().withMethod("POST").withPath(IGC_REST_EP + "search");
     }
 
     /**
@@ -99,7 +110,7 @@ public class MockConstants {
      * @return HttpRequest
      */
     public static HttpRequest typesRequest() {
-        return request().withMethod("GET").withPath("/ibm/iis/igc-rest/v1/types");
+        return request().withMethod("GET").withPath(IGC_REST_EP + "types");
     }
 
     /**
@@ -108,7 +119,7 @@ public class MockConstants {
      * @return HttpRequest
      */
     public static HttpRequest typesRequest(String typeName) {
-        return request().withMethod("GET").withPath("/ibm/iis/igc-rest/v1/types/" + typeName);
+        return request().withMethod("GET").withPath(IGC_REST_EP + "types/" + typeName);
     }
 
     /**
@@ -117,7 +128,7 @@ public class MockConstants {
      * @return HttpRequest
      */
     public static HttpRequest assetByRidRequest(String rid) {
-        return request().withMethod("GET").withPath("/ibm/iis/igc-rest/v1/assets/" + rid);
+        return request().withMethod("GET").withPath(IGC_REST_EP + "assets/" + rid);
     }
 
     /**
@@ -125,7 +136,7 @@ public class MockConstants {
      * @return HttpRequest
      */
     public static HttpRequest bundlesRequest() {
-        return request().withMethod("GET").withPath("/ibm/iis/igc-rest/v1/bundles");
+        return request().withMethod("GET").withPath(IGC_REST_EP + "bundles");
     }
 
     /**
@@ -133,7 +144,7 @@ public class MockConstants {
      * @return HttpRequest
      */
     public static HttpRequest upsertBundleRequest() {
-        return request().withMethod("PUT").withPath("/ibm/iis/igc-rest/v1/bundles");
+        return request().withMethod("PUT").withPath(IGC_REST_EP + "bundles");
     }
 
     /**
@@ -148,8 +159,97 @@ public class MockConstants {
      * Create a mock IGC logout request.
      * @return HttpRequest
      */
-    public static HttpRequest logoutRequest() {
-        return request().withMethod("GET").withPath("/ibm/iis/igc-rest/v1/logout");
+    public static HttpRequest igcLogoutRequest() {
+        return request().withMethod("GET").withPath(IGC_REST_EP + "logout");
+    }
+
+    /**
+     * Create a mock IA projects list request.
+     * @return HttpRequest
+     */
+    public static HttpRequest getProjectsRequest() {
+        return request().withMethod("GET").withPath(IA_REST_EP + "projects");
+    }
+
+    /**
+     * Create a mock IA project details request.
+     * @param projectName name of the project for which to obtain details
+     * @return HttpRequest
+     */
+    public static HttpRequest getProjectDetailsRequest(String projectName) {
+        return request().withMethod("GET").withPath(IA_REST_EP + "project").withQueryStringParameter("projectName", projectName);
+    }
+
+    /**
+     * Create a mock IA published results request.
+     * @param projectName name of the project for which to obtain published results
+     * @return HttpRequest
+     */
+    public static HttpRequest getPublishedResultsRequest(String projectName) {
+        return request().withMethod("GET").withPath(IA_REST_EP + "publishedResults").withQueryStringParameter("projectName", projectName);
+    }
+
+    /**
+     * Create a mock IA column analysis results request.
+     * @param projectName name of the project for which to obtain column analysis results
+     * @param tableName name of the table for which to obtain column analysis results
+     * @return HttpRequest
+     */
+    public static HttpRequest getColumnAnalysisResultsRequest(String projectName, String tableName) {
+        return request().withMethod("GET").withPath(IA_REST_EP + "columnAnalysis/results")
+                .withQueryStringParameters(
+                        param("projectName", projectName),
+                        param("columnName", tableName + ".*")
+                );
+    }
+
+    /**
+     * Create a mock IA data quality analysis results request.
+     * @param projectName name of the project for which to obtain data quality results
+     * @param tableName name of the table for which to obtain data quality results
+     * @return HttpRequest
+     */
+    public static HttpRequest getDataQualityResultsRequest(String projectName, String tableName) {
+        return request().withMethod("GET").withPath(IA_REST_EP + "dataQualityAnalysis/results")
+                .withQueryStringParameters(
+                        param("projectName", projectName),
+                        param("tableName", tableName)
+                );
+    }
+
+    /**
+     * Create a mock IA task execution request.
+     * @param body the details of the task to execute
+     * @return HttpRequest
+     */
+    public static HttpRequest getExecuteTaskRequest(String body) {
+        return request().withMethod("POST").withPath(IA_REST_EP + "executeTasks").withBody(body);
+    }
+
+    /**
+     * Create a mock IA task status request.
+     * @param scheduleId the scheduleId of the task for which to request the status
+     * @return HttpRequest
+     */
+    public static HttpRequest getTaskStatusRequest(String scheduleId) {
+        return request().withMethod("GET").withPath(IA_REST_EP + "analysisStatus").withQueryStringParameter("scheduleID", scheduleId);
+    }
+
+    /**
+     * Create a mock IA publish results request.
+     * @param body the details of the results to publish
+     * @return HttpRequest
+     */
+    public static HttpRequest getPublishResultsRequest(String body) {
+        return request().withMethod("POST").withPath(IA_REST_EP + "publishResults").withBody(body);
+    }
+
+    /**
+     * Create a mock IA logout request.
+     * @return HttpRequest
+     */
+    public static HttpRequest iaLogoutRequest() {
+        return request().withMethod("GET").withPath(IA_REST_EP + "logout");
     }
 
     /**

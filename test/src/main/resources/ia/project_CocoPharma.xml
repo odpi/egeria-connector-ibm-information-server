@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iaapi:Project xmlns:iaapi="http://www.ibm.com/investigate/api/iaapi" name="CocoPharma">
+    <DataSources>
+        <DataSource host="INFOSVR" name="LOCATION">
+            <Schema name="DB2INST1">
+                <Table name="WORKLOCATION">
+                    <Column name="WLNAME"/>
+                    <Column name="ADDR5"/>
+                    <Column name="ADDR6"/>
+                    <Column name="ADDR4"/>
+                    <Column name="ADDR7"/>
+                    <Column name="ADDR3"/>
+                    <Column name="ADDR2"/>
+                    <Column name="WLID"/>
+                    <Column name="ADDR1"/>
+                </Table>
+            </Schema>
+        </DataSource>
+        <DataSource host="INFOSVR" name="EMPLOYEE">
+            <Schema name="DB2INST1">
+                <Table name="EMPLOYEE">
+                    <Column name="LVL"/>
+                    <Column name="DEPT"/>
+                    <Column name="LNAME"/>
+                    <Column name="ROLE"/>
+                    <Column name="FNAME"/>
+                    <Column name="LOCCODE"/>
+                    <Column name="EMPSTATUS"/>
+                    <Column name="PNUM"/>
+                </Table>
+                <Table name="DEPT">
+                    <Column name="DEPCODE"/>
+                    <Column name="DEPNAME"/>
+                    <Column name="MANAGER"/>
+                </Table>
+            </Schema>
+        </DataSource>
+        <DataSource host="INFOSVR" name="EMPLSANL">
+            <Schema name="DB2INST1">
+                <Table name="EMPSALARYANALYSIS">
+                    <Column name="EMPSTATUS"/>
+                    <Column name="LOCATION"/>
+                    <Column name="BONUS"/>
+                    <Column name="PNUM"/>
+                    <Column name="FNAME"/>
+                    <Column name="LVL"/>
+                    <Column name="STREET"/>
+                    <Column name="RECTYPE"/>
+                    <Column name="HDR"/>
+                    <Column name="SERVICE"/>
+                    <Column name="HOL"/>
+                    <Column name="CITY"/>
+                    <Column name="TAXP"/>
+                    <Column name="ROLE"/>
+                    <Column name="LOCCODE"/>
+                    <Column name="SNUM"/>
+                    <Column name="LNAME"/>
+                    <Column name="TAX"/>
+                    <Column name="ETYPE"/>
+                    <Column name="STATE"/>
+                    <Column name="DEPT"/>
+                    <Column name="SALARY"/>
+                </Table>
+            </Schema>
+        </DataSource>
+        <DataSource host="INFOSVR" name="PATIENT">
+            <Schema name="DB2INST1">
+                <Table name="PATIENT">
+                    <Column name="LH_ADDR_2"/>
+                    <Column name="PATIENTID"/>
+                    <Column name="LH_ADDR_5"/>
+                    <Column name="LH_ADDR_4"/>
+                    <Column name="TRIAL"/>
+                    <Column name="LH_ADDR_3"/>
+                    <Column name="LH_ADDR_1"/>
+                    <Column name="PATIENT"/>
+                </Table>
+            </Schema>
+        </DataSource>
+        <DataSource host="INFOSVR" name="COMPDIR">
+            <Schema name="DB2INST1">
+                <Table name="CONTACTPHONE">
+                    <Column name="RECID"/>
+                    <Column name="NUMBER"/>
+                    <Column name="CONTACTTYPE"/>
+                </Table>
+                <Table name="CONTACTEMAIL">
+                    <Column name="ETYPE"/>
+                    <Column name="REDIF"/>
+                    <Column name="EMAIL"/>
+                </Table>
+                <Table name="CONTACTLIST">
+                    <Column name="CONTACTTYPE"/>
+                    <Column name="FIRSTNAME"/>
+                    <Column name="JOBTITLE"/>
+                    <Column name="LASTNAME"/>
+                    <Column name="COMPANY"/>
+                    <Column name="WORKLOCATION"/>
+                    <Column name="RECID"/>
+                </Table>
+            </Schema>
+        </DataSource>
+    </DataSources>
+    <DataRuleDefinitions>
+        <DataRuleDefinition folder="All" name="r_00001" status="CANDIDATE">
+            <description>Checks that department code is valid</description>
+            <LongDescription></LongDescription>
+            <Policies/>
+            <Variables>
+                <Variable dataType="any" name="dept_code"/>
+                <Variable dataType="any" name="dept_code_list"/>
+            </Variables>
+            <ExecutableRules>
+                <ExecutableRule folder="All" name="rx_00001" excludeDuplicates="false">
+                    <description></description>
+                    <LongDescription></LongDescription>
+                    <Notes/>
+                    <Policies/>
+                    <OutputDefinition type="FailingRecords">
+                        <OutputColumn name="dept_code" type="variable" value="dept_code"/>
+                        <OutputColumn name="PNUM" type="column" value="INFOSVR.EMPLOYEE.DB2INST1.EMPLOYEE.PNUM"/>
+                    </OutputDefinition>
+                    <Bindings>
+                        <Binding var="dept_code">
+                            <Column name="INFOSVR.EMPLOYEE.DB2INST1.EMPLOYEE.DEPT"/>
+                        </Binding>
+                        <Binding var="dept_code_list">
+                            <Column name="INFOSVR.EMPLOYEE.DB2INST1.DEPT.DEPCODE"/>
+                        </Binding>
+                    </Bindings>
+                </ExecutableRule>
+            </ExecutableRules>
+            <expression>dept_code in_reference_column  dept_code_list</expression>
+        </DataRuleDefinition>
+        <DataRuleDefinition folder="All" name="v_00001" status="CANDIDATE">
+            <description>Checks that contact type is valid</description>
+            <LongDescription></LongDescription>
+            <Policies/>
+            <Variables>
+                <Variable dataType="any" name="contact_type"/>
+            </Variables>
+            <ExecutableRules>
+                <ExecutableRule folder="All" name="vx_00001_CONTACTTYPE" excludeDuplicates="false">
+                    <description></description>
+                    <LongDescription></LongDescription>
+                    <Notes/>
+                    <Policies/>
+                    <OutputDefinition type="FailingRecords">
+                        <OutputColumn name="contact_type" type="variable" value="contact_type"/>
+                        <OutputColumn name="RECID" type="column" value="INFOSVR.COMPDIR.DB2INST1.CONTACTLIST.RECID"/>
+                    </OutputDefinition>
+                    <Bindings>
+                        <Binding var="contact_type">
+                            <Column name="INFOSVR.COMPDIR.DB2INST1.CONTACTLIST.CONTACTTYPE"/>
+                        </Binding>
+                    </Bindings>
+                </ExecutableRule>
+            </ExecutableRules>
+            <expression>contact_type in_reference_list  {'E','P','C'}</expression>
+        </DataRuleDefinition>
+        <DataRuleDefinition folder="All" name="v_00002" status="CANDIDATE">
+            <description>Checks for valid email type</description>
+            <LongDescription></LongDescription>
+            <Policies/>
+            <Variables>
+                <Variable dataType="any" name="email_type"/>
+            </Variables>
+            <ExecutableRules>
+                <ExecutableRule folder="All" name="vx_00002_CONTACTEMAIL" excludeDuplicates="false">
+                    <description></description>
+                    <LongDescription></LongDescription>
+                    <Notes/>
+                    <Policies/>
+                    <OutputDefinition type="FailingRecords">
+                        <OutputColumn name="email_type" type="variable" value="email_type"/>
+                        <OutputColumn name="REDIF" type="column" value="INFOSVR.COMPDIR.DB2INST1.CONTACTEMAIL.REDIF"/>
+                    </OutputDefinition>
+                    <Bindings>
+                        <Binding var="email_type">
+                            <Column name="INFOSVR.COMPDIR.DB2INST1.CONTACTEMAIL.ETYPE"/>
+                        </Binding>
+                    </Bindings>
+                </ExecutableRule>
+            </ExecutableRules>
+            <expression>email_type in_reference_list  {'S','C'}</expression>
+        </DataRuleDefinition>
+        <DataRuleDefinition folder="All" name="v_00003" status="CANDIDATE">
+            <description>Checks that employee level is valid</description>
+            <LongDescription></LongDescription>
+            <Policies/>
+            <Variables>
+                <Variable dataType="numeric" name="emp_level"/>
+            </Variables>
+            <expression>emp_level &lt;=10</expression>
+        </DataRuleDefinition>
+        <DataRuleDefinition folder="All" name="v_00004" status="CANDIDATE">
+            <description>Checks that employee status is valid</description>
+            <LongDescription></LongDescription>
+            <Policies/>
+            <Variables>
+                <Variable dataType="numeric" name="emp_status"/>
+            </Variables>
+            <expression>emp_status &lt;=7</expression>
+        </DataRuleDefinition>
+        <RuleSetDefinition folder="All" name="vs_00001" separateVariablesByRule="false">
+            <description>Checks that a salary analysis record is valid</description>
+            <LongDescription></LongDescription>
+            <Policies/>
+            <Variables>
+                <Variable dataType="numeric" name="emp_level"/>
+                <Variable dataType="numeric" name="emp_status"/>
+            </Variables>
+            <ExecutableRules>
+                <ExecutableRule folder="All" name="vsx_00001_EMPLOYEE" excludeDuplicates="false">
+                    <description></description>
+                    <LongDescription></LongDescription>
+                    <Notes/>
+                    <Policies/>
+                    <OutputDefinition type="FailingRecords">
+                        <OutputColumn name="emp_level" type="variable" value="emp_level"/>
+                        <OutputColumn name="emp_status" type="variable" value="emp_status"/>
+                        <OutputColumn name="PNUM" type="column" value="INFOSVR.EMPLOYEE.DB2INST1.EMPLOYEE.PNUM"/>
+                    </OutputDefinition>
+                    <Bindings>
+                        <Binding var="emp_level">
+                            <Column name="INFOSVR.EMPLOYEE.DB2INST1.EMPLOYEE.LVL"/>
+                        </Binding>
+                        <Binding var="emp_status">
+                            <Column name="INFOSVR.EMPLOYEE.DB2INST1.EMPLOYEE.EMPSTATUS"/>
+                        </Binding>
+                    </Bindings>
+                </ExecutableRule>
+                <ExecutableRule folder="All" name="vsx_00001_EMPSALARYANALYSIS" excludeDuplicates="false">
+                    <description></description>
+                    <LongDescription></LongDescription>
+                    <Notes/>
+                    <Policies/>
+                    <OutputDefinition type="FailingRecords">
+                        <OutputColumn name="emp_level" type="variable" value="emp_level"/>
+                        <OutputColumn name="emp_status" type="variable" value="emp_status"/>
+                        <OutputColumn name="PNUM" type="column" value="INFOSVR.EMPLSANL.DB2INST1.EMPSALARYANALYSIS.PNUM"/>
+                    </OutputDefinition>
+                    <Bindings>
+                        <Binding var="emp_status">
+                            <Column name="INFOSVR.EMPLSANL.DB2INST1.EMPSALARYANALYSIS.EMPSTATUS"/>
+                        </Binding>
+                        <Binding var="emp_level">
+                            <Column name="INFOSVR.EMPLSANL.DB2INST1.EMPSALARYANALYSIS.LVL"/>
+                        </Binding>
+                    </Bindings>
+                </ExecutableRule>
+            </ExecutableRules>
+            <RuleDefinitionReference ruleName="v_00003"/>
+            <RuleDefinitionReference ruleName="v_00004"/>
+        </RuleSetDefinition>
+    </DataRuleDefinitions>
+    <Folders>
+        <Folder name="All">
+            <description>Global category for all QualityComponents</description>
+            <LongDescription>Global category for all QualityComponents</LongDescription>
+        </Folder>
+    </Folders>
+</iaapi:Project>

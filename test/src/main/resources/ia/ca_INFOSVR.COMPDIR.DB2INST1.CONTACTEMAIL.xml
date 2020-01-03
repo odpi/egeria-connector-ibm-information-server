@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iaapi:Project xmlns:iaapi="http://www.ibm.com/investigate/api/iaapi" name="CocoPharma">
+    <DataSources>
+        <DataSource name="COMPDIR">
+            <Schema name="DB2INST1">
+                <Table name="CONTACTEMAIL">
+                    <Column name="ETYPE" publishedOn="2019-12-10T16:30:06+00:00">
+                        <ColumnAnalysisResults>
+                            <RuntimeMetaData analysisDate="2019-12-10T16:26:49+00:00" runTime="205806" sampleUsed="false"/>
+                            <Cardinality count="2" definedCardinalityType="not_constrained" inferredCardinalityType="not_constrained" maxValue="S" minValue="C" percent="5.882352828979492" selectedCardinalityType="not_constrained" sequence="2" totalRows="34"/>
+                            <DataType definedIsEmpty="false" definedLength="1" definedNullability="false" definedPrecision="0" definedScale="0" definedType="string" inferredIsConstant="false" inferredIsEmpty="false" inferredLength="1" inferredNullability="false" inferredPrecision="0" inferredScale="0" inferredType="string" selectedIsConstant="false" selectedIsEmpty="false" selectedLength="1" selectedNullability="false" selectedPrecision="0" selectedScale="0" selectedType="string"/>
+                            <DataClass classificationDate="2019-12-10T16:26:50+00:00" classificationStatus="processing_completed" inferredClass="Indicator" selectedClass="Indicator"/>
+                            <Format analysisDate="2019-12-10T16:26:49+00:00" analysisStatus="processing_completed" generalFormat="A" generalFormatPercent="100.0"/>
+                            <CompletenessAnalysis analysisDate="2019-12-10T16:26:49+00:00" analysisStatus="processing_completed"/>
+                            <DomainAnalysis analysisDate="2019-12-10T16:26:49+00:00" analysisStatus="processing_completed"/>
+                            <Notes/>
+                            <Terms>
+                                <Term name="Coco Pharmaceuticals/Email Type"/>
+                            </Terms>
+                        </ColumnAnalysisResults>
+                    </Column>
+                    <Column name="REDIF" publishedOn="2019-12-10T16:30:06+00:00">
+                        <ColumnAnalysisResults>
+                            <RuntimeMetaData analysisDate="2019-12-10T16:26:49+00:00" runTime="205806" sampleUsed="false"/>
+                            <Cardinality count="26" definedCardinalityType="not_constrained" inferredCardinalityType="not_constrained" maxValue="26" minValue="1" percent="76.47058868408203" selectedCardinalityType="not_constrained" sequence="1" totalRows="34"/>
+                            <DataType definedIsEmpty="false" definedLength="0" definedNullability="false" definedPrecision="0" definedScale="0" definedType="int32" inferredIsConstant="false" inferredIsEmpty="false" inferredLength="2" inferredNullability="false" inferredPrecision="2" inferredScale="0" inferredType="int8" selectedIsConstant="false" selectedIsEmpty="false" selectedLength="2" selectedNullability="false" selectedPrecision="2" selectedScale="0" selectedType="int8"/>
+                            <DataClass classificationDate="2019-12-10T16:26:49+00:00" classificationStatus="processing_completed" inferredClass="Unknown" selectedClass="Unknown"/>
+                            <Format analysisDate="2019-12-10T16:26:49+00:00" analysisStatus="processing_completed" generalFormat="NA" generalFormatPercent="100.0"/>
+                            <CompletenessAnalysis analysisDate="2019-12-10T16:26:49+00:00" analysisStatus="processing_completed"/>
+                            <DomainAnalysis analysisDate="2019-12-10T16:26:49+00:00" analysisStatus="processing_completed"/>
+                            <Notes/>
+                            <Terms>
+                                <Term name="Coco Pharmaceuticals/Employee Identifier"/>
+                            </Terms>
+                        </ColumnAnalysisResults>
+                    </Column>
+                    <Column name="REDIF" publishedOn="2019-12-10T16:30:06+00:00">
+                        <ColumnAnalysisResults>
+                            <RuntimeMetaData analysisDate="2019-12-10T16:26:49+00:00" runTime="205806" sampleUsed="false"/>
+                            <Cardinality count="26" definedCardinalityType="not_constrained" inferredCardinalityType="not_constrained" maxValue="26" minValue="1" percent="76.47058868408203" selectedCardinalityType="not_constrained" sequence="1" totalRows="34"/>
+                            <DataType definedIsEmpty="false" definedLength="0" definedNullability="false" definedPrecision="0" definedScale="0" definedType="int32" inferredIsConstant="false" inferredIsEmpty="false" inferredLength="2" inferredNullability="false" inferredPrecision="2" inferredScale="0" inferredType="int8" selectedIsConstant="false" selectedIsEmpty="false" selectedLength="2" selectedNullability="false" selectedPrecision="2" selectedScale="0" selectedType="int8"/>
+                            <DataClass classificationDate="2019-12-10T16:26:49+00:00" classificationStatus="processing_completed" inferredClass="Unknown" selectedClass="Unknown"/>
+                            <Format analysisDate="2019-12-10T16:26:49+00:00" analysisStatus="processing_completed" generalFormat="NA" generalFormatPercent="100.0"/>
+                            <CompletenessAnalysis analysisDate="2019-12-10T16:26:49+00:00" analysisStatus="processing_completed"/>
+                            <DomainAnalysis analysisDate="2019-12-10T16:26:49+00:00" analysisStatus="processing_completed"/>
+                            <Notes/>
+                            <Terms>
+                                <Term name="Coco Pharmaceuticals/Employee Identifier"/>
+                            </Terms>
+                        </ColumnAnalysisResults>
+                    </Column>
+                    <Column name="EMAIL" publishedOn="2019-12-10T16:30:06+00:00">
+                        <ColumnAnalysisResults>
+                            <RuntimeMetaData analysisDate="2019-12-10T16:26:49+00:00" runTime="205806" sampleUsed="false"/>
+                            <Cardinality count="34" definedCardinalityType="not_constrained" inferredCardinalityType="unique" maxValue="zach@cocopharmaceutical.com" minValue="SJKSeeker@SecIncConSvcs.gmail" percent="100.0" selectedCardinalityType="unique" sequence="3" totalRows="34"/>
+                            <DataType definedIsEmpty="false" definedLength="120" definedNullability="false" definedPrecision="0" definedScale="0" definedType="string" inferredIsConstant="false" inferredIsEmpty="false" inferredLength="38" inferredNullability="false" inferredPrecision="0" inferredScale="0" inferredType="string" selectedIsConstant="false" selectedIsEmpty="false" selectedLength="38" selectedNullability="false" selectedPrecision="0" selectedScale="0" selectedType="string"/>
+                            <DataClass classificationDate="2019-12-10T16:26:50+00:00" classificationStatus="processing_completed" inferredClass="Email Address" selectedClass="Email Address"/>
+                            <Format analysisDate="2019-12-10T16:26:49+00:00" analysisStatus="processing_completed" generalFormat="NA" generalFormatPercent="100.0"/>
+                            <CompletenessAnalysis analysisDate="2019-12-10T16:26:49+00:00" analysisStatus="processing_completed"/>
+                            <DomainAnalysis analysisDate="2019-12-10T16:26:49+00:00" analysisStatus="processing_completed"/>
+                            <Notes/>
+                            <Terms>
+                                <Term name="Coco Pharmaceuticals/Email Address"/>
+                            </Terms>
+                        </ColumnAnalysisResults>
+                    </Column>
+                </Table>
+            </Schema>
+        </DataSource>
+    </DataSources>
+</iaapi:Project>
