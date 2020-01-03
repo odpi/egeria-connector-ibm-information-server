@@ -51,7 +51,7 @@ public class ClientTest {
 
     @Test
     void testInvalidClient() {
-        assertThrows(NullPointerException.class, () -> new IGCRestClient("http://localhost:1080", "isadmin", "isadmin"));
+        assertThrows(RuntimeException.class, () -> new IGCRestClient("http://localhost:1080", "isadmin", "isadmin"));
     }
 
     @Test

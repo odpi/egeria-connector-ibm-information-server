@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
@@ -1102,9 +1103,27 @@ public class IGCRepositoryHelper {
 
         final String methodName = "getEntityDetailFromFullAsset";
 
-        if (log.isDebugEnabled()) { log.debug("getEntityDetailFromFullAsset with guid = {}", guid); }
+        validateGuidAndType(guid, methodName);
 
-        EntityDetail detail;
+        // Otherwise, retrieve the mapping dynamically based on the type of asset
+        EntityMappingInstance entityMap = getMappingInstanceForParameters(guid, asset, userId);
+
+        return getEntityDetailFromMapInstance(entityMap, guid.getGeneratedPrefix(), guid.getAssetType(), methodName);
+
+    }
+
+    /**
+     * Validate that the provided GUID is available within the IGC environment.
+     * @param guid the GUID to check
+     * @param methodName the name of the method looking for the GUID
+     * @throws EntityNotKnownException when the GUID is null
+     * @throws RepositoryErrorException when the type of object described by the GUID is an IGC 'main_object'
+     */
+    private void validateGuidAndType(IGCEntityGuid guid,
+                                     String methodName) throws EntityNotKnownException, RepositoryErrorException {
+
+        if (log.isDebugEnabled()) { log.debug("{} with guid = {}", methodName, guid); }
+
         if (guid == null) {
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("null",
@@ -1117,7 +1136,6 @@ public class IGCRepositoryHelper {
                     errorCode.getSystemAction(),
                     errorCode.getUserAction());
         }
-        String prefix = guid.getGeneratedPrefix();
         String igcType = guid.getAssetType();
 
         // If we could not find any asset by the provided guid, throw an ENTITY_NOT_KNOWN exception
@@ -1136,32 +1154,39 @@ public class IGCRepositoryHelper {
                     errorMessage,
                     errorCode.getSystemAction(),
                     errorCode.getUserAction());
-        } else {
-
-            // Otherwise, retrieve the mapping dynamically based on the type of asset
-            EntityMappingInstance entityMap = getMappingInstanceForParameters(
-                    guid,
-                    asset,
-                    userId);
-
-            if (entityMap != null) {
-                // 2. Apply the mapping to the object, and retrieve the resulting EntityDetail
-                detail = EntityMapping.getEntityDetail(entityMap);
-            } else {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        (prefix == null ? "" : prefix) + igcType,
-                        repositoryName);
-                throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
-            }
-
         }
 
+    }
+
+    /**
+     * Apply the mapping to the object and retrieve the resulting EntityDetail.
+     * @param mappingInstance the mapping instance to apply
+     * @param prefix the IGC prefix (or null if none)
+     * @param igcType the IGC object type
+     * @param methodName the name of the method applying the mapping
+     * @return EntityDetail
+     * @throws RepositoryErrorException if there is no mapping for the type
+     */
+    private EntityDetail getEntityDetailFromMapInstance(EntityMappingInstance mappingInstance,
+                                                        String prefix,
+                                                        String igcType,
+                                                        String methodName) throws RepositoryErrorException {
+
+        EntityDetail detail;
+        if (mappingInstance != null) {
+            detail = EntityMapping.getEntityDetail(mappingInstance);
+        } else {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    (prefix == null ? "" : prefix) + igcType,
+                    repositoryName);
+            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        }
         return detail;
 
     }
@@ -1181,68 +1206,19 @@ public class IGCRepositoryHelper {
 
         final String methodName = "getEntityDetail";
 
-        if (log.isDebugEnabled()) { log.debug("getEntityDetail with guid = {}", guid); }
-
         EntityDetail detail;
-        if (guid == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("null",
-                    "null",
-                    repositoryName);
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        }
+        validateGuidAndType(guid, methodName);
         String prefix = guid.getGeneratedPrefix();
         String igcType = guid.getAssetType();
 
-        // If we could not find any asset by the provided guid, throw an ENTITY_NOT_KNOWN exception
-        if (igcType.equals(DEFAULT_IGC_TYPE)) {
-            /* If the asset type returned has an IGC-listed type of 'main_object', it isn't one that the REST API
-             * of IGC supports (eg. a data rule detail object, a column analysis master object, etc)...
-             * Trying to further process it will result in failed REST API requests; so we should skip these objects */
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.UNSUPPORTED_OBJECT_TYPE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    guid.asGuid(),
-                    igcType,
-                    repositoryName);
-            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        } else {
+        // Otherwise, retrieve the mapping dynamically based on the type of asset
+        EntityMappingInstance entityMap = getMappingInstanceForParameters(
+                igcType,
+                guid.getRid(),
+                prefix,
+                userId);
 
-            // Otherwise, retrieve the mapping dynamically based on the type of asset
-            EntityMappingInstance entityMap = getMappingInstanceForParameters(
-                    igcType,
-                    guid.getRid(),
-                    prefix,
-                    userId);
-
-            if (entityMap != null) {
-                // 2. Apply the mapping to the object, and retrieve the resulting EntityDetail
-                detail = EntityMapping.getEntityDetail(entityMap);
-            } else {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        (prefix == null ? "" : prefix) + igcType,
-                        repositoryName);
-                throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
-            }
-
-        }
-
-        return detail;
+        return getEntityDetailFromMapInstance(entityMap, prefix, igcType, methodName);
 
     }
 

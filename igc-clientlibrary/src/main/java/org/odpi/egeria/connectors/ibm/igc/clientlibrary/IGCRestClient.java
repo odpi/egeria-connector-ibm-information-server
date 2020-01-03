@@ -134,7 +134,7 @@ public class IGCRestClient {
 
         if (baseURL == null || !baseURL.startsWith("https://")) {
             if (log.isErrorEnabled()) { log.error("Cannot instantiate IGCRestClient -- baseURL must be https: {}", baseURL); }
-            throw new NullPointerException();
+            throw new RuntimeException("Cannot instantiate IGCRestClient -- baseURL must be https: " + baseURL);
         }
 
         this.baseURL = baseURL;

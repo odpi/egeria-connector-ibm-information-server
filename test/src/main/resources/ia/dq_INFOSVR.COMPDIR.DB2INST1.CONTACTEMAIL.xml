@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iaapi:Project xmlns:iaapi="http://www.ibm.com/investigate/api/iaapi" name="CocoPharma">
+    <DataSources>
+        <DataSource name="COMPDIR">
+            <Schema name="DB2INST1">
+                <Table name="CONTACTEMAIL" qualityScore="1.0">
+                    <Column name="ETYPE"/>
+                    <Column name="REDIF"/>
+                    <Column name="REDIF"/>
+                    <Column name="EMAIL"/>
+                </Table>
+            </Schema>
+        </DataSource>
+    </DataSources>
+</iaapi:Project>

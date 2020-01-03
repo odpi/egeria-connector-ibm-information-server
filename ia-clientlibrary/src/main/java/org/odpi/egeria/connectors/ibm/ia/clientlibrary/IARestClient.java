@@ -110,7 +110,7 @@ public class IARestClient {
 
         if (baseURL == null || !baseURL.startsWith("https://")) {
             if (log.isErrorEnabled()) { log.error("Cannot instantiate IARestClient -- baseURL must be https: {}", baseURL); }
-            throw new NullPointerException();
+            throw new RuntimeException("Cannot instantiate IARestClient -- baseURL must be https: " + baseURL);
         }
 
         this.baseURL = baseURL;
@@ -293,7 +293,7 @@ public class IARestClient {
         String body = null;
         if (response == null) {
             log.error("Unable to complete request -- check IA environment connectivity and authentication details.");
-            throw new NullPointerException("Unable to complete request -- check IA environment connectivity and authentication details.");
+            throw new RuntimeException("Unable to complete request -- check IA environment connectivity and authentication details.");
         } else if (response.hasBody()) {
             // We MUST minimize the XML response in order for it to be properly de-serialized by Jackson
             // (otherwise an <A></A> with a newline in-between is interpreted has having a long '      ' value rather
@@ -473,7 +473,7 @@ public class IARestClient {
     public Project getFormatDistribution(String projectName,
                                          String columnName) {
         if (columnName == null) {
-            throw new NullPointerException("The 'columnName' parameter is required for 'getFormatDistribution'.");
+            throw new RuntimeException("The 'columnName' parameter is required for 'getFormatDistribution'.");
         }
         return makeColumnBasedRequest(projectName, columnName, EP_FORMAT_DISTRIBUTION, "getFormatDistribution");
     }
@@ -488,7 +488,7 @@ public class IARestClient {
     public Project getFrequencyDistribution(String projectName,
                                             String columnName) {
         if (columnName == null) {
-            throw new NullPointerException("The 'columnName' parameter is required for 'getFrequencyDistribution'.");
+            throw new RuntimeException("The 'columnName' parameter is required for 'getFrequencyDistribution'.");
         }
         return makeColumnBasedRequest(projectName, columnName, EP_FREQ_DISTRIBUTION, "getFrequencyDistribution");
     }
@@ -569,16 +569,17 @@ public class IARestClient {
      *
      * @param projectName the name of the project from which to publish analysis results
      * @param tableName the fully-qualified name of the table for which to publish results
+     * @return boolean indicating the success (true) of publishing or not (false)
      */
-    public void publishResults(String projectName,
-                               String tableName) {
+    public boolean publishResults(String projectName,
+                                  String tableName) {
         Table table = new Table();
         table.setName(tableName);
         List<Table> tables = new ArrayList<>();
         tables.add(table);
         PublishResults toPublish = new PublishResults();
         toPublish.setTableList(tables);
-        publishResults(projectName, toPublish);
+        return publishResults(projectName, toPublish);
     }
 
     /**
@@ -616,19 +617,38 @@ public class IARestClient {
     }
 
     /**
+     * Retrieve the simple, unqualified representation of the provided qualified name. For example, given a name like
+     * {@code DB2INST1.TABLE.COLUMN} this will return {@code COLUMN}.
+     *
+     * @param qualifiedName the qualified name to simplify
+     * @return String the simplified name
+     */
+    public static String getUnqualifiedNameFromQualifiedName(String qualifiedName) {
+        if (qualifiedName == null) {
+            return null;
+        }
+        if (qualifiedName.contains(".")) {
+            return qualifiedName.substring(qualifiedName.lastIndexOf(".") + 1);
+        }
+        return qualifiedName;
+    }
+
+    /**
      * Publish the results from the specified project, using the details provided.
      *
      * @param projectName the name of the project from which to publish results
      * @param details the details of which column(s) and options to use for publishing
+     * @return boolean indicating the success (true) of publishing or not (false)
      */
-    private void publishResults(String projectName,
-                                PublishResults details) {
+    private boolean publishResults(String projectName,
+                                   PublishResults details) {
         String xmlPayload = getTaskPayload(projectName, details);
         if (log.isInfoEnabled()) { log.info("Task request payload: " + xmlPayload); }
         String response = makeRequest(EP_PUBLISH, HttpMethod.POST, xmlPayload);
         if (response != null) {
-            throw new NullPointerException("Error publishing: " + response);
+            throw new RuntimeException("Error publishing: " + response);
         }
+        return true;
     }
 
     /**

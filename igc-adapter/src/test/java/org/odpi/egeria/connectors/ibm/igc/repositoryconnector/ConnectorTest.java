@@ -94,6 +94,7 @@ public class ConnectorTest {
             Object connector = connectorBroker.getConnector(mockConnection);
             assertTrue(connector instanceof IGCOMRSRepositoryConnector);
             igcomrsRepositoryConnector = (IGCOMRSRepositoryConnector) connector;
+            igcomrsRepositoryConnector.setAuditLog(auditLog);
             igcomrsRepositoryConnector.setRepositoryHelper(new OMRSRepositoryContentHelper(contentManager));
             igcomrsRepositoryConnector.setRepositoryValidator(new OMRSRepositoryContentValidator(contentManager));
             igcomrsRepositoryConnector.setMetadataCollectionId(metadataCollectionId);
@@ -114,16 +115,17 @@ public class ConnectorTest {
         }
 
         ConnectorConfigurationFactory connectorConfigurationFactory = new ConnectorConfigurationFactory();
-        Connection eventMapperConnection = connectorConfigurationFactory.getRepositoryEventMapperConnection(
-                "MockIGCServer",
-                "org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapperProvider",
-                null,
-                "localhost:1080"
-        );
         try {
+            Connection eventMapperConnection = connectorConfigurationFactory.getRepositoryEventMapperConnection(
+                    "MockIGCServer",
+                    "org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapperProvider",
+                    null,
+                    "localhost:1080"
+            );
             Object connector = connectorBroker.getConnector(eventMapperConnection);
             assertTrue(connector instanceof IGCOMRSRepositoryEventMapper);
             igcomrsRepositoryEventMapper = (IGCOMRSRepositoryEventMapper) connector;
+            igcomrsRepositoryEventMapper.setAuditLog(auditLog);
             igcomrsRepositoryEventMapper.setRepositoryEventProcessor(eventManager);
             igcomrsRepositoryEventMapper.initialize("Mock IGC Event Mapper", igcomrsRepositoryConnector);
             igcomrsRepositoryEventMapper.start();
@@ -356,7 +358,7 @@ public class ConnectorTest {
 
         Map<String, String> expectedValues = new HashMap<>();
         expectedValues.put("displayName", "Coco Pharmaceuticals");
-        expectedValues.put("qualifiedName", "gen!GL@(category)=Coco Pharmaceuticals");
+        expectedValues.put("qualifiedName", MockConstants.GLOSSARY_QN);
 
         EntityDetail detail = testEntityDetail(
                 "category",
@@ -482,7 +484,7 @@ public class ConnectorTest {
      * Test searching GlossaryTerm by property value.
      */
     @Test
-    public void testTermFindByPropertyValue() {
+    public void testGlossaryTermFindByPropertyValue() {
 
         List<EntityDetail> results = testFindEntitiesByPropertyValue(
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
@@ -497,7 +499,7 @@ public class ConnectorTest {
      * Test searching GlossaryTerm by property.
      */
     @Test
-    public void testTermFindByProperty() {
+    public void testGlossaryTermFindByProperty_displayName() {
 
         Map<String, String> matchProperties = new HashMap<>();
         matchProperties.put("displayName", ".*\\QAddress\\E.*");
@@ -516,7 +518,7 @@ public class ConnectorTest {
      * Test searching GlossaryTerm by any of multiple properties.
      */
     @Test
-    public void testTermFindByPropertiesAny() {
+    public void testGlossaryTermFindByProperties_ANY() {
 
         Map<String, String> matchProperties = new HashMap<>();
         matchProperties.put("displayName", ".*\\QAddress\\E.*");
@@ -536,7 +538,7 @@ public class ConnectorTest {
      * Test searching GlossaryTerm by all of multiple properties.
      */
     @Test
-    public void testTermFindByPropertiesAll() {
+    public void testGlossaryTermFindByProperties_ALL() {
 
         Map<String, String> matchProperties = new HashMap<>();
         matchProperties.put("displayName", ".*\\QAddress\\E.*");
@@ -559,7 +561,7 @@ public class ConnectorTest {
      * Test searching a supertype by property value.
      */
     @Test
-    public void testSupertypeFindByPropertyValue() {
+    public void testAssetFindByPropertyValue() {
 
         Set<String> possibleTypes = new HashSet<>();
         possibleTypes.add("Asset");
@@ -597,7 +599,7 @@ public class ConnectorTest {
      * Test searching everything by property value and limiting by classification.
      */
     @Test
-    public void testAllTypesFindByPropertyValueAndLimitByClassification() {
+    public void testAllTypesFindByPropertyValue_limitToConfidentiality() {
 
         Set<String> possibleTypes = new HashSet<>();
         possibleTypes.add("GlossaryTerm");
@@ -618,7 +620,7 @@ public class ConnectorTest {
      * Test searching by classification.
      */
     @Test
-    public void testFindByClassification() {
+    public void testGlossaryTermFindByClassification() {
 
         Map<String, Integer> properties = new HashMap<>();
         properties.put("level", 3);
@@ -748,7 +750,28 @@ public class ConnectorTest {
      */
     @Test
     public void testDatabaseRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 1,
+                        "DataContentForDataSet", "Database", "DeployedDatabaseSchema",
+                        MockConstants.DATABASE_QN, MockConstants.DATABASE_SCHEMA_QN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 2,
+                        "ConnectionToAsset", "Connection", "Database",
+                        MockConstants.DATA_CONNECTION_QN, MockConstants.DATABASE_QN)
+        );
+
+        List<Relationship> relationships = testRelationshipsForEntity(
+                "database",
+                "Database",
+                null,
+                MockConstants.DATABASE_RID,
+                2,
+                relationshipExpectations
+        );
+
     }
 
     /**
@@ -759,7 +782,7 @@ public class ConnectorTest {
 
         Map<String, String> expectedValues = new HashMap<>();
         expectedValues.put("displayName", "CocoPharma_COMPDIR_ibm-db2");
-        expectedValues.put("qualifiedName", "(data_connection)=CocoPharma_COMPDIR_ibm-db2");
+        expectedValues.put("qualifiedName", MockConstants.DATA_CONNECTION_QN);
 
         EntityDetail detail = testEntityDetail(
                 "data_connection",
@@ -776,7 +799,35 @@ public class ConnectorTest {
      */
     @Test
     public void testConnectionRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
+
+        String expectedConnectorTypeQN = MockConstants.HOST_QN + "::(connector)=DB2Connector";
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 1,
+                        "ConnectionToAsset", "Connection", "Database",
+                        MockConstants.DATA_CONNECTION_QN, MockConstants.DATABASE_QN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 2,
+                        "ConnectionConnectorType", "Connection", "ConnectorType",
+                        MockConstants.DATA_CONNECTION_QN, expectedConnectorTypeQN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(2, 3,
+                        "ConnectionEndpoint", "Endpoint", "Connection",
+                        MockConstants.HOST_QN, MockConstants.DATA_CONNECTION_QN)
+        );
+
+        List<Relationship> relationships = testRelationshipsForEntity(
+                "data_connection",
+                "Connection",
+                null,
+                MockConstants.DATA_CONNECTION_RID,
+                3,
+                relationshipExpectations
+        );
+
     }
 
     /**
@@ -786,7 +837,7 @@ public class ConnectorTest {
     public void testGetEndpointDetail() {
 
         Map<String, String> expectedValues = new HashMap<>();
-        expectedValues.put("qualifiedName", "(host_(engine))=INFOSVR");
+        expectedValues.put("qualifiedName", MockConstants.HOST_QN);
 
         EntityDetail detail = testEntityDetail(
                 "host",
@@ -803,7 +854,23 @@ public class ConnectorTest {
      */
     @Test
     public void testEndpointRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 7,
+                        "ConnectionEndpoint", "Endpoint", "Connection",
+                        MockConstants.HOST_QN, null)
+        );
+
+        List<Relationship> relationships = testRelationshipsForEntity(
+                "host",
+                "Endpoint",
+                null,
+                MockConstants.HOST_RID,
+                7,
+                relationshipExpectations
+        );
+
     }
 
     /**
@@ -830,7 +897,30 @@ public class ConnectorTest {
      */
     @Test
     public void testDeployedDatabaseSchemaRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
+
+        String expectedSchemaTypeQN = "gen!RDBST@" + MockConstants.DATABASE_SCHEMA_QN;
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 1,
+                        "AssetSchemaType", "DeployedDatabaseSchema", "RelationalDBSchemaType",
+                        MockConstants.DATABASE_SCHEMA_QN, expectedSchemaTypeQN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 2,
+                        "DataContentForDataSet", "Database", "DeployedDatabaseSchema",
+                        MockConstants.DATABASE_QN, MockConstants.DATABASE_SCHEMA_QN)
+        );
+
+        List<Relationship> relationships = testRelationshipsForEntity(
+                "database_schema",
+                "DeployedDatabaseSchema",
+                null,
+                MockConstants.DATABASE_SCHEMA_RID,
+                2,
+                relationshipExpectations
+        );
+
     }
 
     /**
@@ -857,7 +947,30 @@ public class ConnectorTest {
      */
     @Test
     public void testRelationalDBSchemaTypeRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
+
+        String expectedSchemaTypeQN = "gen!RDBST@" + MockConstants.DATABASE_SCHEMA_QN;
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 1,
+                        "AssetSchemaType", "DeployedDatabaseSchema", "RelationalDBSchemaType",
+                        MockConstants.DATABASE_SCHEMA_QN, expectedSchemaTypeQN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 4,
+                        "AttributeForSchema", "RelationalDBSchemaType", "RelationalTable",
+                        expectedSchemaTypeQN, null)
+        );
+
+        List<Relationship> relationships = testRelationshipsForEntity(
+                "database_schema",
+                "DeployedDatabaseSchema",
+                RelationalDBSchemaTypeMapper.IGC_RID_PREFIX,
+                MockConstants.DATABASE_SCHEMA_RID,
+                4,
+                relationshipExpectations
+        );
+
     }
 
     /**
@@ -884,7 +997,30 @@ public class ConnectorTest {
      */
     @Test
     public void testRelationalTableRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
+
+        String expectedSchemaTypeQN = "gen!RDBST@" + MockConstants.DATABASE_SCHEMA_QN;
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 1,
+                        "AttributeForSchema", "RelationalDBSchemaType", "RelationalTable",
+                        expectedSchemaTypeQN, MockConstants.DATABASE_TABLE_QN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 4,
+                        "NestedSchemaAttribute", "RelationalTable", "RelationalColumn",
+                        MockConstants.DATABASE_TABLE_QN, null)
+        );
+
+        List<Relationship> relationships = testRelationshipsForEntity(
+                "database_table",
+                "RelationalTable",
+                null,
+                MockConstants.DATABASE_TABLE_RID,
+                4,
+                relationshipExpectations
+        );
+
     }
 
     /**
@@ -927,7 +1063,59 @@ public class ConnectorTest {
      */
     @Test
     public void testRelationalColumnRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
+
+        String expectedTermQN = "(category)=Coco Pharmaceuticals::(term)=Email Address";
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 1,
+                        "SemanticAssignment", "RelationalColumn", "GlossaryTerm",
+                        MockConstants.DATABASE_COLUMN_QN, expectedTermQN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 5,
+                        "DataClassAssignment", "RelationalColumn", "DataClass",
+                        MockConstants.DATABASE_COLUMN_QN, null)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(5, 6,
+                        "NestedSchemaAttribute", "RelationalTable", "RelationalColumn",
+                        MockConstants.DATABASE_TABLE_QN, MockConstants.DATABASE_COLUMN_QN)
+        );
+
+        List<Relationship> relationships = testRelationshipsForEntity(
+                "database_column",
+                "RelationalColumn",
+                null,
+                MockConstants.DATABASE_COLUMN_RID,
+                6,
+                relationshipExpectations
+        );
+
+        testDiscoveredDataClasses(relationships, 1, 4);
+        testProposedDataClasses(relationships, 4, 5);
+
+    }
+
+    private void testDiscoveredDataClasses(List<Relationship> relationships, int startIndex, int finishIndex) {
+        for (int i = startIndex; i < finishIndex; i++) {
+            Relationship assignment = relationships.get(i);
+            InstanceProperties properties = assignment.getProperties();
+            int confidence = getIntegerValue(properties, "confidence");
+            assertEquals(confidence, 100);
+            EnumPropertyValue status = getEnumValue(properties, "status");
+            assertEquals(status.getOrdinal(), 0);
+            assertEquals(status.getSymbolicName(), "Discovered");
+        }
+    }
+
+    private void testProposedDataClasses(List<Relationship> relationships, int startIndex, int finishIndex) {
+        for (int i = startIndex; i < finishIndex; i++) {
+            Relationship assignment = relationships.get(i);
+            EnumPropertyValue status = getEnumValue(assignment.getProperties(), "status");
+            assertEquals(status.getOrdinal(), 1);
+            assertEquals(status.getSymbolicName(), "Proposed");
+        }
     }
 
     /**
@@ -946,22 +1134,6 @@ public class ConnectorTest {
     }
 
     /**
-     * Test DataClassAssignment (proposed) relationship retrieval.
-     */
-    @Test
-    public void testProposedDataClassAssignmentRelationship() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
-    }
-
-    /**
-     * Test DataClassAssignment (discovered) relationship retrieval.
-     */
-    @Test
-    public void testDiscoveredDataClassAssignmentRelationship() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
-    }
-
-    /**
      * Test retrieving a DataClass as an EntityDetail directly.
      */
     @Test
@@ -970,7 +1142,7 @@ public class ConnectorTest {
         Map<String, String> expectedValues = new HashMap<>();
         expectedValues.put("name", "Email Address");
         expectedValues.put("example", "paul_fowler@aol.com");
-        expectedValues.put("qualifiedName", "(data_class)=Email Address");
+        expectedValues.put("qualifiedName", MockConstants.DATA_CLASS_QN);
 
         EntityDetail detail = testEntityDetail(
                 "data_class",
@@ -987,7 +1159,26 @@ public class ConnectorTest {
      */
     @Test
     public void testDataClassRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 3,
+                        "DataClassAssignment", "RelationalColumn", "DataClass",
+                        MockConstants.DATABASE_COLUMN_QN, MockConstants.DATA_CLASS_QN)
+        );
+
+        List<Relationship> relationships = testRelationshipsForEntity(
+                "data_class",
+                "DataClass",
+                null,
+                MockConstants.DATA_CLASS_RID,
+                3,
+                relationshipExpectations
+        );
+
+        testDiscoveredDataClasses(relationships, 0, 2);
+        testProposedDataClasses(relationships, 2, 3);
+
     }
 
     /**
@@ -998,7 +1189,7 @@ public class ConnectorTest {
 
         Map<String, String> expectedValues = new HashMap<>();
         expectedValues.put("displayName", "LOCALFS");
-        expectedValues.put("qualifiedName", "(data_connection)=LOCALFS");
+        expectedValues.put("qualifiedName", MockConstants.DATA_CONNECTION_QN_FS);
 
         EntityDetail detail = testEntityDetail(
                 "data_connection",
@@ -1015,39 +1206,67 @@ public class ConnectorTest {
      */
     @Test
     public void testConnectionFSRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
+
+        String expectedFolderQN = MockConstants.HOST_QN + "::(data_file_folder)=/";
+        String expectedConnectorTypeQN = MockConstants.HOST_QN + "::(connector)=LocalFileConnector";
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 1,
+                        "ConnectionToAsset", "Connection", "FileFolder",
+                        MockConstants.DATA_CONNECTION_QN_FS, expectedFolderQN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 2,
+                        "ConnectionConnectorType", "Connection", "ConnectorType",
+                        MockConstants.DATA_CONNECTION_QN_FS, expectedConnectorTypeQN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(2, 3,
+                        "ConnectionEndpoint", "Endpoint", "Connection",
+                        MockConstants.HOST_QN, MockConstants.DATA_CONNECTION_QN_FS)
+        );
+
+        List<Relationship> relationships = testRelationshipsForEntity(
+                "data_connection",
+                "Connection",
+                null,
+                MockConstants.DATA_CONNECTION_RID_FS,
+                3,
+                relationshipExpectations
+        );
+
     }
 
     /**
      * Test DataFileFolder (root) relationship retrieval.
      */
     @Test
-    public void testRootDataFileFolderRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
-    }
+    public void testDataFileFolderRelationships() {
 
-    /**
-     * Test DataFileFolder (data) relationship retrieval.
-     */
-    @Test
-    public void testDataDataFileFolderRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
-    }
+        String expectedParentFolderQN = MockConstants.HOST_QN + "::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files";
 
-    /**
-     * Test DataFileFolder (files) relationship retrieval.
-     */
-    @Test
-    public void testFilesDataFileFolderRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
-    }
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 1,
+                        "FolderHierarchy", "FileFolder", "FileFolder",
+                        expectedParentFolderQN, MockConstants.DATA_FILE_FOLDER_QN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 9,
+                        "NestedFile", "FileFolder", "DataFile",
+                        MockConstants.DATA_FILE_FOLDER_QN, null)
+        );
 
-    /**
-     * Test DataFileFolder (CocoPharma) relationship retrieval.
-     */
-    @Test
-    public void testCocoPharmaDataFileFolderRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
+        List<Relationship> relationships = testRelationshipsForEntity(
+                "data_file_folder",
+                "FileFolder",
+                null,
+                MockConstants.DATA_FILE_FOLDER_RID,
+                9,
+                relationshipExpectations
+        );
+
     }
 
     /**
@@ -1057,7 +1276,7 @@ public class ConnectorTest {
     public void testGetDataFileDetail() {
 
         Map<String, String> expectedValues = new HashMap<>();
-        expectedValues.put("qualifiedName", "(host_(engine))=INFOSVR::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv");
+        expectedValues.put("qualifiedName", MockConstants.DATA_FILE_QN);
 
         EntityDetail detail = testEntityDetail(
                 "data_file",
@@ -1074,7 +1293,28 @@ public class ConnectorTest {
      */
     @Test
     public void testDataFileRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 1,
+                        "AssetSchemaType", "DataFile", "TabularSchemaType",
+                        MockConstants.DATA_FILE_QN, MockConstants.DATA_FILE_RECORD_QN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 2,
+                        "NestedFile", "FileFolder", "DataFile",
+                        MockConstants.DATA_FILE_FOLDER_QN, MockConstants.DATA_FILE_QN)
+        );
+
+        List<Relationship> relationships = testRelationshipsForEntity(
+                "data_file",
+                "DataFile",
+                null,
+                MockConstants.DATA_FILE_RID,
+                2,
+                relationshipExpectations
+        );
+
     }
 
     /**
@@ -1085,7 +1325,7 @@ public class ConnectorTest {
 
         Map<String, String> expectedValues = new HashMap<>();
         expectedValues.put("displayName", "CompDir-ContactEmail");
-        expectedValues.put("qualifiedName", "(host_(engine))=INFOSVR::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files::(data_file_folder)=CocoPharma::(data_file)=CompDir-ContactEmail.csv::(data_file_record)=CompDir-ContactEmail");
+        expectedValues.put("qualifiedName", MockConstants.DATA_FILE_RECORD_QN);
 
         EntityDetail detail = testEntityDetail(
                 "data_file_record",
@@ -1102,7 +1342,28 @@ public class ConnectorTest {
      */
     @Test
     public void testTabularSchemaTypeRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 1,
+                        "AssetSchemaType", "DataFile", "TabularSchemaType",
+                        MockConstants.DATA_FILE_QN, MockConstants.DATA_FILE_RECORD_QN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 4,
+                        "AttributeForSchema", "TabularSchemaType", "TabularColumn",
+                        MockConstants.DATA_FILE_RECORD_QN, null)
+        );
+
+        List<Relationship> relationships = testRelationshipsForEntity(
+                "data_file_record",
+                "TabularSchemaType",
+                null,
+                MockConstants.DATA_FILE_RECORD_RID,
+                4,
+                relationshipExpectations
+        );
+
     }
 
     /**
@@ -1131,7 +1392,30 @@ public class ConnectorTest {
      */
     @Test
     public void testTabularColumnRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
+
+        String expectedTermQN = "(category)=Coco Pharmaceuticals::(term)=Email Address";
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 1,
+                        "SemanticAssignment", "TabularColumn", "GlossaryTerm",
+                        MockConstants.DATA_FILE_FIELD_QN, expectedTermQN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 2,
+                        "AttributeForSchema", "TabularSchemaType", "TabularColumn",
+                        MockConstants.DATA_FILE_RECORD_QN, MockConstants.DATA_FILE_FIELD_QN)
+        );
+
+        List<Relationship> relationships = testRelationshipsForEntity(
+                "data_file_field",
+                "TabularColumn",
+                null,
+                MockConstants.DATA_FILE_FIELD_RID,
+                2,
+                relationshipExpectations
+        );
+
     }
 
     /**
@@ -1142,7 +1426,7 @@ public class ConnectorTest {
 
         Map<String, String> expectedValues = new HashMap<>();
         expectedValues.put("displayName", "Employee");
-        expectedValues.put("qualifiedName", "(category)=Coco Pharmaceuticals::(term)=Employee");
+        expectedValues.put("qualifiedName", MockConstants.SPINE_OBJECT_QN);
 
         EntityDetail detail = testEntityDetail(
                 "term",
@@ -1170,7 +1454,7 @@ public class ConnectorTest {
 
         Map<String, String> expectedValues = new HashMap<>();
         expectedValues.put("displayName", "Organization");
-        expectedValues.put("qualifiedName", "(category)=Coco Pharmaceuticals::(category)=Organization");
+        expectedValues.put("qualifiedName", MockConstants.SUBJECT_AREA_QN);
 
         EntityDetail detail = testEntityDetail(
                 "category",
@@ -1198,7 +1482,7 @@ public class ConnectorTest {
 
         Map<String, String> expectedValues = new HashMap<>();
         expectedValues.put("title", "Confidential information should be masked when user does not have specific access to its Subject Area");
-        expectedValues.put("qualifiedName", "(information_governance_policy)=Data Access Policies::(information_governance_policy)=Confidential information should be masked when user does not have specific access to its Subject Area");
+        expectedValues.put("qualifiedName", MockConstants.INFORMATION_GOVERNANCE_POLICY_QN);
 
         EntityDetail detail = testEntityDetail(
                 "information_governance_policy",
@@ -1220,6 +1504,7 @@ public class ConnectorTest {
         expectedValues.put("name", "ggeeke");
         expectedValues.put("fullName", "Gary Geeke");
         expectedValues.put("jobTitle", "IT Infrastructure Administrator");
+        expectedValues.put("qualifiedName", MockConstants.USER_QN);
 
         EntityDetail detail = testEntityDetail(
                 "user",
@@ -1236,7 +1521,25 @@ public class ConnectorTest {
      */
     @Test
     public void testPersonRelationships() {
-        // TODO: implement, after adding case-specific queries to MockServerExpectations
+
+        String expectedContactDetailsQN = "gen!CD@" + MockConstants.USER_QN;
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 1,
+                        "ContactThrough", "Person", "ContactDetails",
+                        MockConstants.USER_QN, expectedContactDetailsQN)
+        );
+
+        List<Relationship> relationships = testRelationshipsForEntity(
+                "user",
+                "Person",
+                null,
+                MockConstants.USER_RID,
+                1,
+                relationshipExpectations
+        );
+
     }
 
     /**
@@ -1256,9 +1559,7 @@ public class ConnectorTest {
                 expectedValues
         );
 
-        InstancePropertyValue contactMethodType = detail.getProperties().getPropertyValue("contactMethodType");
-        assertEquals(contactMethodType.getInstancePropertyCategory(), InstancePropertyCategory.ENUM);
-        EnumPropertyValue contactMethodEnum = (EnumPropertyValue) contactMethodType;
+        EnumPropertyValue contactMethodEnum = getEnumValue(detail.getProperties(), "contactMethodType");
         assertEquals(contactMethodEnum.getOrdinal(), 0);
         assertEquals(contactMethodEnum.getSymbolicName(), "Email");
 
@@ -1332,6 +1633,18 @@ public class ConnectorTest {
             assertNull(e);
         }
         return Integer.parseInt(value);
+    }
+
+    /**
+     * Translate the provided OMRS property name into an enumeration value.
+     * @param properties the OMRS InstanceProperties from which to retrieve the OMRS value
+     * @param propertyName the name of the property for which to retrieve the value
+     * @return EnumPropertyValue
+     */
+    private EnumPropertyValue getEnumValue(InstanceProperties properties, String propertyName) {
+        InstancePropertyValue value = properties.getPropertyValue(propertyName);
+        assertEquals(value.getInstancePropertyCategory(), InstancePropertyCategory.ENUM);
+        return (EnumPropertyValue) value;
     }
 
     /**
@@ -1661,8 +1974,6 @@ public class ConnectorTest {
         assertTrue(summary.getVersion() > 1);
         assertNotNull(summary.getMetadataCollectionId());
 
-        log.warn("Found this summary, or detail? {}", summary);
-
         return summary;
 
     }
@@ -1679,7 +1990,7 @@ public class ConnectorTest {
                 String propertyName = expected.getKey();
                 String expectedValue = expected.getValue();
                 String foundValue = getStringValue(properties, propertyName);
-                assertEquals(expectedValue, foundValue);
+                assertEquals(foundValue, expectedValue);
             }
         }
     }
@@ -1760,7 +2071,7 @@ public class ConnectorTest {
         if (expectedQN != null) {
             try {
                 String foundQN = AttributeMapping.getIgcValueFromPropertyValue(foundValue);
-                assertEquals(expectedQN, foundQN);
+                assertEquals(foundQN, expectedQN);
             } catch (PropertyErrorException e) {
                 log.error("Unable to test equality of qualifiedName.", e);
                 assertNull(e);

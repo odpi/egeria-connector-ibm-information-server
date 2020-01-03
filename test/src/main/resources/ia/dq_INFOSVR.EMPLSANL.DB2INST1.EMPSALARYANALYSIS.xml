@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iaapi:Project xmlns:iaapi="http://www.ibm.com/investigate/api/iaapi" name="CocoPharma">
+    <DataSources>
+        <DataSource name="EMPLSANL">
+            <Schema name="DB2INST1">
+                <Table name="EMPSALARYANALYSIS" qualityScore="0.9976076555023923">
+                    <Column name="EMPSTATUS"/>
+                    <Column name="LOCATION"/>
+                    <Column name="BONUS" qualityScore="0.9473684210526315">
+                        <DataQualityProblems>
+                            <DataQualityProblem confidence="1.0" description="Values have been found that do not seem to have the same domain as the majority of values in the same column. These values could be potential domain violations." frequency="1" prevalence="0.05263157894736842" problemCode="SuspectValues" problemName="Suspect values"/>
+                        </DataQualityProblems>
+                    </Column>
+                    <Column name="PNUM"/>
+                    <Column name="FNAME"/>
+                    <Column name="LVL"/>
+                    <Column name="STREET"/>
+                    <Column name="RECTYPE"/>
+                    <Column name="HDR"/>
+                    <Column name="SERVICE"/>
+                    <Column name="HOL"/>
+                    <Column name="CITY"/>
+                    <Column name="TAXP"/>
+                    <Column name="ROLE"/>
+                    <Column name="LOCCODE"/>
+                    <Column name="SNUM"/>
+                    <Column name="LNAME"/>
+                    <Column name="TAX"/>
+                    <Column name="ETYPE"/>
+                    <Column name="STATE"/>
+                    <Column name="DEPT"/>
+                    <Column name="SALARY"/>
+                </Table>
+            </Schema>
+        </DataSource>
+    </DataSources>
+</iaapi:Project>

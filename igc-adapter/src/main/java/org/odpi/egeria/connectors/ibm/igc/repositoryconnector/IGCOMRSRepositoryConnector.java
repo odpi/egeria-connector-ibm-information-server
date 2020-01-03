@@ -2,6 +2,8 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSAuditCode;
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
@@ -59,10 +61,30 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
         super.initialize(connectorInstanceId, connectionProperties);
 
         final String methodName = "initialize";
-        if (log.isDebugEnabled()) { log.debug("Initializing IGCOMRSRepositoryConnector..."); }
+
+        if (auditLog != null) {
+            IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.REPOSITORY_SERVICE_INITIALIZING;
+            auditLog.logRecord(methodName,
+                    auditCode.getLogMessageId(),
+                    auditCode.getSeverity(),
+                    auditCode.getFormattedLogMessage(),
+                    null,
+                    auditCode.getSystemAction(),
+                    auditCode.getUserAction());
+        }
 
         EndpointProperties endpointProperties = connectionProperties.getEndpoint();
         if (endpointProperties == null) {
+            if (auditLog != null) {
+                IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.REST_CLIENT_FAILURE;
+                auditLog.logRecord(methodName,
+                        auditCode.getLogMessageId(),
+                        auditCode.getSeverity(),
+                        auditCode.getFormattedLogMessage(),
+                        null,
+                        auditCode.getSystemAction(),
+                        auditCode.getUserAction());
+            }
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("null");
             throw new OMRSRuntimeException(
@@ -119,6 +141,16 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
                 this.igcRestClient.registerPOJO(OMRSStub.class);
                 successfulInit = success;
             } catch (RepositoryErrorException e) {
+                if (auditLog != null) {
+                    IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.OMRS_BUNDLE_FAILURE;
+                    auditLog.logRecord(methodName,
+                            auditCode.getLogMessageId(),
+                            auditCode.getSeverity(),
+                            auditCode.getFormattedLogMessage(),
+                            null,
+                            auditCode.getSystemAction(),
+                            auditCode.getUserAction());
+                }
                 log.error("Unable to create necessary OMRS objects -- failing.", e);
                 successfulInit = false;
             }
@@ -127,6 +159,16 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
         }
 
         if (!successfulInit) {
+            if (auditLog != null) {
+                IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.REST_CLIENT_FAILURE;
+                auditLog.logRecord(methodName,
+                        auditCode.getLogMessageId(),
+                        auditCode.getSeverity(),
+                        auditCode.getFormattedLogMessage(address),
+                        null,
+                        auditCode.getSystemAction(),
+                        auditCode.getUserAction());
+            }
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
             throw new OMRSRuntimeException(
@@ -137,6 +179,17 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
                     errorCode.getSystemAction(),
                     errorCode.getUserAction()
             );
+        } else {
+            if (auditLog != null) {
+                IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.REPOSITORY_SERVICE_INITIALIZED;
+                auditLog.logRecord(methodName,
+                        auditCode.getLogMessageId(),
+                        auditCode.getSeverity(),
+                        auditCode.getFormattedLogMessage(getServerName()),
+                        null,
+                        auditCode.getSystemAction(),
+                        auditCode.getUserAction());
+            }
         }
 
     }
@@ -180,6 +233,16 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
 
         // Close the session on the IGC REST client
         this.igcRestClient.disconnect();
+        if (auditLog != null) {
+            IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.REPOSITORY_SERVICE_SHUTDOWN;
+            auditLog.logRecord("disconnect",
+                    auditCode.getLogMessageId(),
+                    auditCode.getSeverity(),
+                    auditCode.getFormattedLogMessage(getServerName()),
+                    null,
+                    auditCode.getSystemAction(),
+                    auditCode.getUserAction());
+        }
 
     }
 

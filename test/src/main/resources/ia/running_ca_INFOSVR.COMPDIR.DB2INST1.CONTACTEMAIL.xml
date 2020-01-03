@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iaapi:TaskExecutionSchedule xmlns:iaapi="http://www.ibm.com/investigate/api/iaapi" scheduleId="d70c6594.80cb2b5c.001muqrfs.a21f89o.a90986.6i2ig951fma0dtk23k0h7">
+    <TaskExecution executionDate="2020-01-03T12:44:52+00:00" executionId="d70c6594.80cb2b5c.001muqrfs.a21f89o.a90986.6i2ig951fma0dtk23k0h7-ef5d07cc-f558-447e-b78e-3f142a194aec" executionTime="0" progress="0" status="running">
+        <Jobs/>
+    </TaskExecution>
+</iaapi:TaskExecutionSchedule>

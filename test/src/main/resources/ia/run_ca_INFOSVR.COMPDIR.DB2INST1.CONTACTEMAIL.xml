@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iaapi:TaskExecutionReport xmlns:iaapi="http://www.ibm.com/investigate/api/iaapi">
+    <ScheduledTasks>
+        <ScheduledTask scheduleId="d70c6594.80cb2b5c.001muqrfs.a21f89o.a90986.6i2ig951fma0dtk23k0h7" taskType="ColumnAnalysis"/>
+    </ScheduledTasks>
+    <Warnings/>
+</iaapi:TaskExecutionReport>

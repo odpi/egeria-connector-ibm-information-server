@@ -40,6 +40,7 @@ public class MockServerExpectations implements ExpectationInitializer {
 
         initializeTypeDetails(mockServerClient);
         initializeIGCClientExpectations(mockServerClient);
+        initializeIAClientExpectations(mockServerClient);
         initializeExampleInstances(mockServerClient);
         initializeIGCConnectorExpectations(mockServerClient);
         initializeDataStageConnectorExpectations(mockServerClient);
@@ -70,7 +71,30 @@ public class MockServerExpectations implements ExpectationInitializer {
         setExamplePartAsset(mockServerClient, glossaryIgcType, MockConstants.GLOSSARY_RID);
         setExampleAssetWithModDetails(mockServerClient, glossaryIgcType, MockConstants.GLOSSARY_RID);
 
-        setLogout(mockServerClient);
+        setIGCLogout(mockServerClient);
+
+    }
+
+    private void initializeIAClientExpectations(MockServerClient mockServerClient) {
+
+        setProjectsQuery(mockServerClient);
+        setProjectDetailQuery(mockServerClient, IA_PROJECT_NAME);
+        setPublishedResultsQuery(mockServerClient, IA_PROJECT_NAME);
+
+        setColumnAnalysisResultsQuery(mockServerClient, IA_PROJECT_NAME, IA_TABLE_NAME);
+        setDataQualityResultsQuery(mockServerClient, IA_PROJECT_NAME, IA_TABLE_NAME);
+        setDataQualityResultsQuery(mockServerClient, IA_PROJECT_NAME, IA_TABLE_NAME_WITH_DQ_PROBLEMS);
+
+        setRunColumnAnalysis(mockServerClient, IA_PROJECT_NAME, IA_TABLE_NAME);
+        setRunDataQualityAnalysis(mockServerClient, IA_PROJECT_NAME, IA_TABLE_NAME);
+        setRunningColumnAnalysis(mockServerClient, IA_CA_SCHEDULE_ID, IA_TABLE_NAME);
+        setRunningDataQualityAnalysis(mockServerClient, IA_DQ_SCHEDULE_ID, IA_TABLE_NAME);
+        setCompleteColumnAnalysis(mockServerClient, IA_CA_SCHEDULE_ID, IA_TABLE_NAME);
+        setCompleteDataQualityAnalysis(mockServerClient, IA_DQ_SCHEDULE_ID, IA_TABLE_NAME);
+
+        setPublishResults(mockServerClient, IA_PROJECT_NAME, IA_TABLE_NAME);
+
+        setIALogout(mockServerClient);
 
     }
 
@@ -120,36 +144,44 @@ public class MockServerExpectations implements ExpectationInitializer {
         // Setup responses for specific test cases
 
         // Glossary tests
-        setGlossaryQueryByPropertyValue(mockServerClient);
-        setCategoriesInGlossary(mockServerClient);
-        setTermsInGlossary(mockServerClient);
+        setGlossaryFindByPropertyValue(mockServerClient);
+        setGlossaryRelationships(mockServerClient);
 
         // GlossaryCategory tests
-        setCategoryQueryByPropertyValue(mockServerClient);
-        setParentCategoryForCategory(mockServerClient);
-        setTermsInCategory(mockServerClient);
+        setGlossaryCategoryFindByPropertyValue(mockServerClient);
+        setGlossaryCategoryRelationships(mockServerClient);
 
         // GlossaryTerm search tests
-        setTermQueryByPropertyValue(mockServerClient);
-        setTermQueryByPropertyName(mockServerClient);
-        setTermQueryByPropertiesAny(mockServerClient);
-        setTermQueryByPropertiesAll(mockServerClient);
+        setGlossaryTermFindByPropertyValue(mockServerClient);
+        setGlossaryTermFindByProperty_displayName(mockServerClient);
+        setGlossaryTermFindByProperties_ANY(mockServerClient);
+        setGlossaryTermFindByProperties_ALL(mockServerClient);
 
         // Supertype search tests (can skip folder and schema as they return no results, so our catch-all will handle)
-        setSupertypeQueryForFile(mockServerClient);
-        setSupertypeQueryForDatabase(mockServerClient);
+        setAssetFindByPropertyValue(mockServerClient);
 
         // All types search tests (can skip many as they will return no results, so our catch-all will handle)
-        setAllTypesQueryForTerm(mockServerClient);
-        setAllTypesQueryForDataClass(mockServerClient);
+        setAllTypesFindByPropertyValue(mockServerClient);
 
         // Limit by classification tests (can skip many as they will return no results)
-        setTermConfidentialityQueryByPropertyValue(mockServerClient);
-        setTermConfidentialityQueryByLevel(mockServerClient);
+        setAllTypesFindByPropertyValue_limitToConfidentiality(mockServerClient);
+        setGlossaryTermFindByClassification(mockServerClient);
 
-        // GlossaryTerm relationships
-        setAssetsAssignedToTerm(mockServerClient);
-        setParentCategoryForTerm(mockServerClient);
+        // Relationship tests
+        setGlossaryTermRelationships(mockServerClient);
+        setDatabaseRelationships(mockServerClient);
+        setConnectionRelationships(mockServerClient);
+        setEndpointRelationships(mockServerClient);
+        setDeployedDatabaseSchemaRelationships(mockServerClient);
+        setRelationalDBSchemaTypeRelationships(mockServerClient);
+        setRelationalTableRelationships(mockServerClient);
+        setRelationalColumnRelationships(mockServerClient);
+        setDataClassRelationships(mockServerClient);
+        setConnectionFSRelationships(mockServerClient);
+        setDataFileFolderRelationships(mockServerClient);
+        setDataFileRelationships(mockServerClient);
+        setTabularSchemaTypeRelationships(mockServerClient);
+        setTabularColumnRelationships(mockServerClient);
 
     }
 
@@ -211,10 +243,10 @@ public class MockServerExpectations implements ExpectationInitializer {
                 .respond(withResponse(getResourceFileContents("rid_mod_" + rid + ".json")));
     }
 
-    private void setLogout(MockServerClient mockServerClient) {
+    private void setIGCLogout(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
-                .when(logoutRequest())
+                .when(igcLogoutRequest())
                 .respond(response().withStatusCode(200));
     }
 
@@ -397,7 +429,8 @@ public class MockServerExpectations implements ExpectationInitializer {
                 .respond(withResponse(getResourceFileContents("no_results.json")));
     }
 
-    private void setGlossaryQueryByPropertyValue(MockServerClient mockServerClient) {
+    private void setGlossaryFindByPropertyValue(MockServerClient mockServerClient) {
+        String caseName = "GlossaryFindByPropertyValue";
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
@@ -406,28 +439,27 @@ public class MockServerExpectations implements ExpectationInitializer {
                                 MatchType.ONLY_MATCHING_FIELDS
                         ))
                 )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "glossary_by_property_value.json")));
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
     }
 
-    private void setCategoriesInGlossary(MockServerClient mockServerClient) {
+    private void setGlossaryRelationships(MockServerClient mockServerClient) {
+        String caseName = "GlossaryRelationships";
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
                         "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"category_path\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"}],\"operator\":\"and\"}}"
                 ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "categories_in_glossary.json")));
-    }
-
-    private void setTermsInGlossary(MockServerClient mockServerClient) {
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "categories.json")));
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
                         "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"parent_category.category_path\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"},{\"property\":\"parent_category\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"}],\"operator\":\"or\"}}"
                 ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "terms_in_glossary.json")));
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "terms.json")));
     }
 
-    private void setCategoryQueryByPropertyValue(MockServerClient mockServerClient) {
+    private void setGlossaryCategoryFindByPropertyValue(MockServerClient mockServerClient) {
+        String caseName = "GlossaryCategoryFindByPropertyValue";
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
@@ -436,28 +468,27 @@ public class MockServerExpectations implements ExpectationInitializer {
                                 MatchType.ONLY_MATCHING_FIELDS
                         ))
                 )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "category_by_property_value.json")));
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
     }
 
-    private void setParentCategoryForCategory(MockServerClient mockServerClient) {
+    private void setGlossaryCategoryRelationships(MockServerClient mockServerClient) {
+        String caseName = "GlossaryCategoryRelationships";
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
                         "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"subcategories\",\"operator\":\"=\",\"value\":\"" + CATEGORY_RID + "\"}],\"operator\":\"and\"}}"
                 ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "parent_category_for_category.json")));
-    }
-
-    private void setTermsInCategory(MockServerClient mockServerClient) {
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "parent_category.json")));
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
                         "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"parent_category\",\"operator\":\"=\",\"value\":\"" + CATEGORY_RID + "\"},{\"property\":\"referencing_categories\",\"operator\":\"=\",\"value\":\"" + CATEGORY_RID + "\"}],\"operator\":\"or\"}}"
                 ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "terms_in_category.json")));
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "terms.json")));
     }
 
-    private void setTermQueryByPropertyValue(MockServerClient mockServerClient) {
+    private void setGlossaryTermFindByPropertyValue(MockServerClient mockServerClient) {
+        String caseName = "GlossaryTermFindByPropertyValue";
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
@@ -466,10 +497,11 @@ public class MockServerExpectations implements ExpectationInitializer {
                                 MatchType.ONLY_MATCHING_FIELDS
                         ))
                 )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "term_by_property_value.json")));
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
     }
 
-    private void setTermQueryByPropertyName(MockServerClient mockServerClient) {
+    private void setGlossaryTermFindByProperty_displayName(MockServerClient mockServerClient) {
+        String caseName = "GlossaryTermFindByProperty_displayName";
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
@@ -478,10 +510,11 @@ public class MockServerExpectations implements ExpectationInitializer {
                                 MatchType.ONLY_MATCHING_FIELDS
                         ))
                 )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "term_by_property_name.json")));
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
     }
 
-    private void setTermQueryByPropertiesAny(MockServerClient mockServerClient) {
+    private void setGlossaryTermFindByProperties_ANY(MockServerClient mockServerClient) {
+        String caseName = "GlossaryTermFindByProperties_ANY";
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
@@ -490,10 +523,11 @@ public class MockServerExpectations implements ExpectationInitializer {
                                 MatchType.ONLY_MATCHING_FIELDS
                         ))
                 )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "term_by_properties_any.json")));
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
     }
 
-    private void setTermQueryByPropertiesAll(MockServerClient mockServerClient) {
+    private void setGlossaryTermFindByProperties_ALL(MockServerClient mockServerClient) {
+        String caseName = "GlossaryTermFindByProperties_ALL";
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
@@ -502,10 +536,11 @@ public class MockServerExpectations implements ExpectationInitializer {
                                 MatchType.ONLY_MATCHING_FIELDS
                         ))
                 )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "term_by_properties_all.json")));
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
     }
 
-    private void setSupertypeQueryForFile(MockServerClient mockServerClient) {
+    private void setAssetFindByPropertyValue(MockServerClient mockServerClient) {
+        String caseName = "AssetFindByPropertyValue";
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
@@ -514,10 +549,7 @@ public class MockServerExpectations implements ExpectationInitializer {
                                 MatchType.ONLY_MATCHING_FIELDS
                         ))
                 )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "supertype_for_files.json")));
-    }
-
-    private void setSupertypeQueryForDatabase(MockServerClient mockServerClient) {
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results_data_file.json")));
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
@@ -526,10 +558,11 @@ public class MockServerExpectations implements ExpectationInitializer {
                                 MatchType.ONLY_MATCHING_FIELDS
                         ))
                 )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "supertype_for_databases.json")));
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results_database.json")));
     }
 
-    private void setAllTypesQueryForTerm(MockServerClient mockServerClient) {
+    private void setAllTypesFindByPropertyValue(MockServerClient mockServerClient) {
+        String caseName = "AllTypesFindByPropertyValue";
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
@@ -538,10 +571,7 @@ public class MockServerExpectations implements ExpectationInitializer {
                                 MatchType.ONLY_MATCHING_FIELDS
                         ))
                 )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "all_types_for_terms.json")));
-    }
-
-    private void setAllTypesQueryForDataClass(MockServerClient mockServerClient) {
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results_term.json")));
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
@@ -550,10 +580,11 @@ public class MockServerExpectations implements ExpectationInitializer {
                                 MatchType.ONLY_MATCHING_FIELDS
                         ))
                 )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "all_types_for_data_classes.json")));
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results_data_class.json")));
     }
 
-    private void setTermConfidentialityQueryByPropertyValue(MockServerClient mockServerClient) {
+    private void setAllTypesFindByPropertyValue_limitToConfidentiality(MockServerClient mockServerClient) {
+        String caseName = "AllTypesFindByPropertyValue_limitToConfidentiality";
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
@@ -562,10 +593,11 @@ public class MockServerExpectations implements ExpectationInitializer {
                                 MatchType.ONLY_MATCHING_FIELDS
                         ))
                 )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "term_by_property_value_and_classification.json")));
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
     }
 
-    private void setTermConfidentialityQueryByLevel(MockServerClient mockServerClient) {
+    private void setGlossaryTermFindByClassification(MockServerClient mockServerClient) {
+        String caseName = "GlossaryTermFindByClassification";
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
@@ -574,25 +606,328 @@ public class MockServerExpectations implements ExpectationInitializer {
                                 MatchType.ONLY_MATCHING_FIELDS
                         ))
                 )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "term_by_confidentiality_level.json")));
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
     }
 
-    private void setAssetsAssignedToTerm(MockServerClient mockServerClient) {
+    private void setGlossaryTermRelationships(MockServerClient mockServerClient) {
+        String caseName = "GlossaryTermRelationships";
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
                         "{\"types\":[\"main_object\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"assigned_to_terms\",\"operator\":\"=\",\"value\":\"" + TERM_RID + "\"}],\"operator\":\"or\"}}"
                 ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "assets_assigned_to_term.json")));
-    }
-
-    private void setParentCategoryForTerm(MockServerClient mockServerClient) {
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "assigned_assets.json")));
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.searchRequest(
                         "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"terms\",\"operator\":\"=\",\"value\":\"" + TERM_RID + "\"}],\"operator\":\"or\"}}"
                 ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "parent_category_for_term.json")));
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "parent_category.json")));
+    }
+
+    private void setDatabaseRelationships(MockServerClient mockServerClient) {
+        String caseName = "DatabaseRelationships";
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"database_schema\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database\",\"operator\":\"=\",\"value\":\"" + DATABASE_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database_schema.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"data_connection\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"imports_database\",\"operator\":\"=\",\"value\":\"" + DATABASE_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_connection.json")));
+    }
+
+    private void setConnectionRelationships(MockServerClient mockServerClient) {
+        String caseName = "ConnectionRelationships";
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"database\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connections\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"connector\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connections\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "connector.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"connector\"],\"properties\":[\"host\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connections\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID + "\"}],\"operator\":\"and\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "host.json")));
+    }
+
+    private void setEndpointRelationships(MockServerClient mockServerClient) {
+        String caseName = "EndpointRelationships";
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"data_connection\"],\"properties\":[\"name\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connectors.host\",\"operator\":\"=\",\"value\":\"" + HOST_RID + "\"}],\"operator\":\"and\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_connection.json")));
+    }
+
+    private void setDeployedDatabaseSchemaRelationships(MockServerClient mockServerClient) {
+        String caseName = "DeployedDatabaseSchemaRelationships";
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"database\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_schemas\",\"operator\":\"=\",\"value\":\"" + DATABASE_SCHEMA_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database.json")));
+    }
+
+    private void setRelationalDBSchemaTypeRelationships(MockServerClient mockServerClient) {
+        String caseName = "RelationalDBSchemaTypeRelationships";
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"database_table\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_schema\",\"operator\":\"=\",\"value\":\"" + DATABASE_SCHEMA_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database_table.json")));
+    }
+
+    private void setRelationalTableRelationships(MockServerClient mockServerClient) {
+        String caseName = "RelationalTableRelationships";
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"database_schema\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_tables\",\"operator\":\"=\",\"value\":\"" + DATABASE_TABLE_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database_schema.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"database_column\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_table_or_view\",\"operator\":\"=\",\"value\":\"" + DATABASE_TABLE_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database_column.json")));
+    }
+
+    private void setRelationalColumnRelationships(MockServerClient mockServerClient) {
+        String caseName = "RelationalColumnRelationships";
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"assigned_assets\",\"operator\":\"=\",\"value\":\"" + DATABASE_COLUMN_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "term.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"classification\"],\"properties\":[\"data_class\",\"confidencePercent\",\"threshold\",\"value_frequency\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"classifies_asset\",\"operator\":\"=\",\"value\":\"" + DATABASE_COLUMN_RID + "\"}],\"operator\":\"and\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "classification.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"database_table\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_columns\",\"operator\":\"=\",\"value\":\"" + DATABASE_COLUMN_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database_table.json")));
+    }
+
+    private void setDataClassRelationships(MockServerClient mockServerClient) {
+        String caseName = "DataClassRelationships";
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"classification\"],\"properties\":[\"classifies_asset\",\"confidencePercent\",\"threshold\",\"value_frequency\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"" + DATA_CLASS_RID + "\"}],\"operator\":\"and\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "classification.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"amazon_s3_data_file_field\",\"data_file_field\",\"database_column\"],\"properties\":[\"selected_classification\",\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"selected_classification\",\"operator\":\"=\",\"value\":\"" + DATA_CLASS_RID + "\"}],\"operator\":\"and\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_item.json")));
+    }
+
+    private void setConnectionFSRelationships(MockServerClient mockServerClient) {
+        String caseName = "ConnectionFSRelationships";
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"data_file_folder\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connection\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID_FS + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_folder.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"connector\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connections\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID_FS + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "connector.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"connector\"],\"properties\":[\"host\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connections\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID_FS + "\"}],\"operator\":\"and\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "host.json")));
+    }
+
+    private void setDataFileFolderRelationships(MockServerClient mockServerClient) {
+        String caseName = "DataFileFolderRelationships";
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"data_file_folder\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_folders\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FOLDER_RID + "\"}],\"operator\":\"and\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_folder.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"data_file\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"parent_folder\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FOLDER_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file.json")));
+    }
+
+    private void setDataFileRelationships(MockServerClient mockServerClient) {
+        String caseName = "DataFileRelationships";
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"data_file_record\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_record.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"data_file_folder\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_files\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_folder.json")));
+    }
+
+    private void setTabularSchemaTypeRelationships(MockServerClient mockServerClient) {
+        String caseName = "TabularSchemaTypeRelationships";
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"data_file\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_records\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_RECORD_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"data_file_field\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_record\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_RECORD_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_field.json")));
+    }
+
+    private void setTabularColumnRelationships(MockServerClient mockServerClient) {
+        String caseName = "TabularColumnRelationships";
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"assigned_assets\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FIELD_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "term.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        "{\"types\":[\"data_file_record\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_fields\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FIELD_RID + "\"}],\"operator\":\"or\"}}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_record.json")));
+    }
+
+    private void setProjectsQuery(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getProjectsRequest())
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "projects.xml")));
+    }
+
+    private void setProjectDetailQuery(MockServerClient mockServerClient, String projectName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getProjectDetailsRequest(projectName))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "project_" + projectName + ".xml")));
+    }
+
+    private void setPublishedResultsQuery(MockServerClient mockServerClient, String projectName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getPublishedResultsRequest(projectName))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "published_" + projectName + ".xml")));
+    }
+
+    private void setColumnAnalysisResultsQuery(MockServerClient mockServerClient, String projectName, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getColumnAnalysisResultsRequest(projectName, tableName))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "ca_" + tableName + ".xml")));
+    }
+
+    private void setDataQualityResultsQuery(MockServerClient mockServerClient, String projectName, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getDataQualityResultsRequest(projectName, tableName))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "dq_" + tableName + ".xml")));
+    }
+
+    private void setRunColumnAnalysis(MockServerClient mockServerClient, String projectName, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getExecuteTaskRequest(
+                        "<?xml version='1.0' encoding='UTF-8'?><iaapi:Project xmlns:iaapi=\"http://www.ibm.com/investigate/api/iaapi\" name=\"" + projectName + "\"><Tasks><RunColumnAnalysis><Column name=\"" + tableName + ".*\"/></RunColumnAnalysis></Tasks></iaapi:Project>"
+                ))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "run_ca_" + tableName + ".xml")));
+    }
+
+    private void setRunDataQualityAnalysis(MockServerClient mockServerClient, String projectName, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getExecuteTaskRequest(
+                        "<?xml version='1.0' encoding='UTF-8'?><iaapi:Project xmlns:iaapi=\"http://www.ibm.com/investigate/api/iaapi\" name=\"" + projectName + "\"><Tasks><RunDataQualityAnalysis><Table name=\"" + tableName + "\"/></RunDataQualityAnalysis></Tasks></iaapi:Project>"
+                ))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "run_dq_" + tableName + ".xml")));
+    }
+
+    private void setRunningColumnAnalysis(MockServerClient mockServerClient, String scheduleId, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getTaskStatusRequest(scheduleId), Times.exactly(1))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "running_ca_" + tableName + ".xml")));
+    }
+
+    private void setRunningDataQualityAnalysis(MockServerClient mockServerClient, String scheduleId, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getTaskStatusRequest(scheduleId), Times.exactly(1))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "running_dq_" + tableName + ".xml")));
+    }
+
+    private void setCompleteColumnAnalysis(MockServerClient mockServerClient, String scheduleId, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getTaskStatusRequest(scheduleId))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "complete_ca_" + tableName + ".xml")));
+    }
+
+    private void setCompleteDataQualityAnalysis(MockServerClient mockServerClient, String scheduleId, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getTaskStatusRequest(scheduleId))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "complete_dq_" + tableName + ".xml")));
+    }
+
+    private void setPublishResults(MockServerClient mockServerClient, String projectName, String tableName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getPublishResultsRequest(
+                        "<?xml version='1.0' encoding='UTF-8'?><iaapi:Project xmlns:iaapi=\"http://www.ibm.com/investigate/api/iaapi\" name=\"" + projectName + "\"><Tasks><PublishResults><Table name=\"" + tableName + "\"/></PublishResults></Tasks></iaapi:Project>"
+                ))
+                .respond(response().withStatusCode(200));
+    }
+
+    private void setIALogout(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(iaLogoutRequest())
+                .respond(response().withStatusCode(200));
     }
 
     /**
