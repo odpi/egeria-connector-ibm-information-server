@@ -12,12 +12,11 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.mockserver.model.HttpResponse.response;
@@ -65,6 +64,8 @@ public class MockServerExpectations implements ExpectationInitializer {
 
         setStartupQuery(mockServerClient);
         setTypesQuery(mockServerClient);
+        setMultipageSearch(mockServerClient);
+        setSortedSearch(mockServerClient);
         setBundlesQuery(mockServerClient);
 
         String glossaryIgcType = "category";
@@ -91,6 +92,8 @@ public class MockServerExpectations implements ExpectationInitializer {
         setRunningDataQualityAnalysis(mockServerClient, IA_DQ_SCHEDULE_ID, IA_TABLE_NAME);
         setCompleteColumnAnalysis(mockServerClient, IA_CA_SCHEDULE_ID, IA_TABLE_NAME);
         setCompleteDataQualityAnalysis(mockServerClient, IA_DQ_SCHEDULE_ID, IA_TABLE_NAME);
+        setFormatDistribution(mockServerClient, IA_PROJECT_NAME, IA_COLUMN_NAME);
+        setFrequencyDistribution(mockServerClient, IA_PROJECT_NAME, IA_COLUMN_NAME);
 
         setPublishResults(mockServerClient, IA_PROJECT_NAME, IA_TABLE_NAME);
 
@@ -206,6 +209,39 @@ public class MockServerExpectations implements ExpectationInitializer {
                 .withSecure(true)
                 .when(typesRequest())
                 .respond(withResponse(getResourceFileContents("types.json")));
+    }
+
+    private void setMultipageSearch(MockServerClient mockServerClient) {
+        List<String> properties = new ArrayList<>();
+        properties.add("created_by");
+        properties.add("created_on");
+        properties.add("modified_by");
+        properties.add("modified_on");
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(
+                        json(
+                                "{\"types\":[\"term\"],\"pageSize\":2,\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        )))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "TermFindMultipage" + File.separator + "results_1.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(nextPageRequest("term", properties, "2", "2"))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "TermFindMultipage" + File.separator + "results_2.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(nextPageRequest("term", properties, "2", "4"))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "TermFindMultipage" + File.separator + "results_3.json")));
+    }
+
+    private void setSortedSearch(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(
+                        "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":2,\"where\":{\"conditions\":[{\"property\":\"short_description\",\"operator\":\"<>\",\"value\":\"\"},{\"property\":\"name\",\"operator\":\"in\",\"value\":[\"Address Line 2\"],\"negated\":false}],\"operator\":\"and\"},\"sorts\":[{\"property\":\"name\",\"ascending\":true}]}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "TermFindSorting" + File.separator + "results_positive.json")));
     }
 
     private void setBundlesQuery(MockServerClient mockServerClient) {
@@ -921,6 +957,20 @@ public class MockServerExpectations implements ExpectationInitializer {
                         "<?xml version='1.0' encoding='UTF-8'?><iaapi:Project xmlns:iaapi=\"http://www.ibm.com/investigate/api/iaapi\" name=\"" + projectName + "\"><Tasks><PublishResults><Table name=\"" + tableName + "\"/></PublishResults></Tasks></iaapi:Project>"
                 ))
                 .respond(response().withStatusCode(200));
+    }
+
+    private void setFormatDistribution(MockServerClient mockServerClient, String projectName, String columnName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getFormatDistributionRequest(projectName, columnName))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "format_" + columnName + ".xml")));
+    }
+
+    private void setFrequencyDistribution(MockServerClient mockServerClient, String projectName, String columnName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getFrequencyDistributionRequest(projectName, columnName))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "frequency_" + columnName + ".xml")));
     }
 
     private void setIALogout(MockServerClient mockServerClient) {

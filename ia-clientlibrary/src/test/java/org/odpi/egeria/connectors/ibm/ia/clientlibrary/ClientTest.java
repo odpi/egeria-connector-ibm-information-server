@@ -49,6 +49,38 @@ public class ClientTest {
         List<String> tablesInProject = iaRestClient.getTablesInProject(project);
         assertNotNull(tablesInProject);
         assertFalse(tablesInProject.isEmpty());
+        List<String> columnsInProject = iaRestClient.getColumnsInProject(project);
+        assertNotNull(columnsInProject);
+        assertFalse(columnsInProject.isEmpty());
+    }
+
+    @Test
+    public void testGetDistributions() {
+
+        assertThrows(RuntimeException.class, () -> iaRestClient.getFormatDistribution(MockConstants.IA_PROJECT_NAME, null));
+        Map<String, List<Format>> formatDistribution = iaRestClient.getFormatDistribution(MockConstants.IA_PROJECT_NAME, MockConstants.IA_COLUMN_NAME);
+        assertNotNull(formatDistribution);
+        assertEquals(formatDistribution.size(), 1);
+        for (Map.Entry<String, List<Format>> entry : formatDistribution.entrySet()) {
+            String fqColName = entry.getKey();
+            List<Format> formats = entry.getValue();
+            assertTrue(MockConstants.IA_COLUMN_NAME.endsWith(fqColName));
+            assertNotNull(formats);
+            assertFalse(formats.isEmpty());
+        }
+
+        assertThrows(RuntimeException.class, () -> iaRestClient.getFrequencyDistribution(MockConstants.IA_PROJECT_NAME, null));
+        Map<String, List<Value>> freqValues = iaRestClient.getFrequencyDistribution(MockConstants.IA_PROJECT_NAME, MockConstants.IA_COLUMN_NAME);
+        assertNotNull(freqValues);
+        assertEquals(freqValues.size(), 1);
+        for (Map.Entry<String, List<Value>> entry : freqValues.entrySet()) {
+            String fqColName = entry.getKey();
+            List<Value> values = entry.getValue();
+            assertTrue(MockConstants.IA_COLUMN_NAME.endsWith(fqColName));
+            assertNotNull(values);
+            assertFalse(values.isEmpty());
+        }
+
     }
 
     @Test

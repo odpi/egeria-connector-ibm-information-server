@@ -147,16 +147,14 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     public void start() throws ConnectorCheckedException {
 
         super.start();
-        if (auditLog != null) {
-            IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.EVENT_MAPPER_STARTING;
-            auditLog.logRecord("start",
-                    auditCode.getLogMessageId(),
-                    auditCode.getSeverity(),
-                    auditCode.getFormattedLogMessage(),
-                    null,
-                    auditCode.getSystemAction(),
-                    auditCode.getUserAction());
-        }
+        IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.EVENT_MAPPER_STARTING;
+        auditLog.logRecord("start",
+                auditCode.getLogMessageId(),
+                auditCode.getSeverity(),
+                auditCode.getFormattedLogMessage(),
+                null,
+                auditCode.getSystemAction(),
+                auditCode.getUserAction());
         this.igcKafkaConsumer = new IGCKafkaConsumerThread();
         this.igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
         this.igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
@@ -194,16 +192,14 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             running.set(true);
             try (final Consumer<Long, String> consumer = new KafkaConsumer<>(igcKafkaProperties)) {
                 consumer.subscribe(Collections.singletonList(igcKafkaTopic));
-                if (auditLog != null) {
-                    IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.EVENT_MAPPER_RUNNING;
-                    auditLog.logRecord("run",
-                            auditCode.getLogMessageId(),
-                            auditCode.getSeverity(),
-                            auditCode.getFormattedLogMessage(igcomrsRepositoryConnector.getServerName()),
-                            null,
-                            auditCode.getSystemAction(),
-                            auditCode.getUserAction());
-                }
+                IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.EVENT_MAPPER_RUNNING;
+                auditLog.logRecord("run",
+                        auditCode.getLogMessageId(),
+                        auditCode.getSeverity(),
+                        auditCode.getFormattedLogMessage(igcomrsRepositoryConnector.getServerName()),
+                        null,
+                        auditCode.getSystemAction(),
+                        auditCode.getUserAction());
                 // TODO: Likely need to tweak these settings to give further processing time for large events
                 //  like IMAM shares -- or even switch to manual offset management rather than auto-commits
                 //  (see: https://kafka.apache.org/0110/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html)
@@ -214,18 +210,15 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                             processEvent(event.value());
                         }
                     } catch (Exception e) {
-                        if (auditLog != null) {
-                            IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.EVENT_MAPPER_CONSUMER_FAILURE;
-                            auditLog.logException("consumer failure",
-                                    auditCode.getLogMessageId(),
-                                    auditCode.getSeverity(),
-                                    auditCode.getFormattedLogMessage(),
-                                    null,
-                                    auditCode.getSystemAction(),
-                                    auditCode.getUserAction(),
-                                    e);
-                        }
-                        log.error("Failed trying to consume IGC events from Kafka.", e);
+                        auditCode = IGCOMRSAuditCode.EVENT_MAPPER_CONSUMER_FAILURE;
+                        auditLog.logException("consumer failure",
+                                auditCode.getLogMessageId(),
+                                auditCode.getSeverity(),
+                                auditCode.getFormattedLogMessage(),
+                                null,
+                                auditCode.getSystemAction(),
+                                auditCode.getUserAction(),
+                                e);
                     }
                 }
             }
@@ -1797,16 +1790,14 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     public void disconnect() throws ConnectorCheckedException {
         super.disconnect();
         igcKafkaConsumer.stop();
-        if (auditLog != null) {
-            IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.EVENT_MAPPER_SHUTDOWN;
-            auditLog.logRecord("disconnect",
-                    auditCode.getLogMessageId(),
-                    auditCode.getSeverity(),
-                    auditCode.getFormattedLogMessage(igcomrsRepositoryConnector.getServerName()),
-                    null,
-                    auditCode.getSystemAction(),
-                    auditCode.getUserAction());
-        }
+        IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.EVENT_MAPPER_SHUTDOWN;
+        auditLog.logRecord("disconnect",
+                auditCode.getLogMessageId(),
+                auditCode.getSeverity(),
+                auditCode.getFormattedLogMessage(igcomrsRepositoryConnector.getServerName()),
+                null,
+                auditCode.getSystemAction(),
+                auditCode.getUserAction());
     }
 
     /**

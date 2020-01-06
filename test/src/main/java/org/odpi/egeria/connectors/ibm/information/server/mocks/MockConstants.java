@@ -6,6 +6,10 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.mockserver.model.JsonBody;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.Parameter.param;
@@ -72,6 +76,7 @@ public class MockConstants {
     // Examples used for specific scenarios to test IA client
     public static final String IA_PROJECT_NAME = "CocoPharma";
     public static final String IA_TABLE_NAME = "INFOSVR.COMPDIR.DB2INST1.CONTACTEMAIL";
+    public static final String IA_COLUMN_NAME = IA_TABLE_NAME + ".EMAIL";
     public static final String IA_TABLE_NAME_WITH_DQ_PROBLEMS = "INFOSVR.EMPLSANL.DB2INST1.EMPSALARYANALYSIS";
     public static final String IA_CA_SCHEDULE_ID = "d70c6594.80cb2b5c.001muqrfs.a21f89o.a90986.6i2ig951fma0dtk23k0h7";
     public static final String IA_DQ_SCHEDULE_ID = "d70c6594.80cb2b5c.001muqr88.hpidg9f.il4mkc.rid1t6lqls0k16jlj3isu";
@@ -103,6 +108,27 @@ public class MockConstants {
      */
     public static HttpRequest searchRequest(JsonBody body) {
         return searchRequest().withBody(body);
+    }
+
+    /**
+     * Create a mock IGC next page request based on the provided parameters.
+     * (Note that this should really have a 'where' clause to better restrict the query, but getting such a clause
+     *  working seems far too convoluted to be worth it, as neither trying to allow mock-server itself to URL-encode it
+     *  nor up-front URL-encoding the string seem to work.)
+     * @param types the types to search
+     * @param properties the properties to include in the results
+     * @param pageSize the number of results per page
+     * @param begin the result index to start from
+     * @return HttpRequest
+     */
+    public static HttpRequest nextPageRequest(String types, List<String> properties, String pageSize, String begin) {
+        return request().withMethod("GET").withPath(IGC_REST_EP + "search")
+                .withQueryStringParameters(
+                        param("types", types),
+                        param("properties", properties),
+                        param("pageSize", pageSize),
+                        param("begin", begin)
+                );
     }
 
     /**
@@ -200,6 +226,34 @@ public class MockConstants {
                 .withQueryStringParameters(
                         param("projectName", projectName),
                         param("columnName", tableName + ".*")
+                );
+    }
+
+    /**
+     * Create a mock IA format distribution request.
+     * @param projectName name of the project for which to obtain the format distribution
+     * @param columnName name of the column for which to obtain the format distribution
+     * @return HttpRequest
+     */
+    public static HttpRequest getFormatDistributionRequest(String projectName, String columnName) {
+        return request().withMethod("GET").withPath(IA_REST_EP + "columnAnalysis/formatDistribution")
+                .withQueryStringParameters(
+                        param("projectName", projectName),
+                        param("columnName", columnName)
+                );
+    }
+
+    /**
+     * Create a mock IA frequency distribution request.
+     * @param projectName name of the project for which to obtain the frequency distribution
+     * @param columnName name of the column for which to obtain the frequency distribution
+     * @return HttpRequest
+     */
+    public static HttpRequest getFrequencyDistributionRequest(String projectName, String columnName) {
+        return request().withMethod("GET").withPath(IA_REST_EP + "columnAnalysis/frequencyDistribution")
+                .withQueryStringParameters(
+                        param("projectName", projectName),
+                        param("columnName", columnName)
                 );
     }
 

@@ -108,11 +108,6 @@ public class IARestClient {
      */
     private IARestClient(String baseURL, String authorization) {
 
-        if (baseURL == null || !baseURL.startsWith("https://")) {
-            if (log.isErrorEnabled()) { log.error("Cannot instantiate IARestClient -- baseURL must be https: {}", baseURL); }
-            throw new RuntimeException("Cannot instantiate IARestClient -- baseURL must be https: " + baseURL);
-        }
-
         this.baseURL = baseURL;
         this.authorization = authorization;
         XMLInputFactory inputFactory = new WstxInputFactory();
@@ -140,10 +135,6 @@ public class IARestClient {
         converters.add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
 
         if (log.isDebugEnabled()) { log.debug("Constructing IARestClient..."); }
-
-        if (this.authorization == null) {
-            log.error("Unable to construct IARestClient: no authorization provided.");
-        }
 
     }
 
@@ -464,33 +455,71 @@ public class IARestClient {
     }
 
     /**
-     * Retrieve the column analysis results for the specified IA project and column.
+     * Retrieve the column analysis results for the specified IA project and column(s).  You can specify a
+     * wildcard ({@code *}) character for any of the elements of the qualified columnName (eg. the table and column).
      *
      * @param projectName the name of the IA project for which to retrieve format distribution results
      * @param columnName the qualified name of the column for which to retrieve analysis results
-     * @return Project - containing only the format distribution results details
+     * @return {@code Map<String, List<Format>>} - keyed by qualified column name with a list of the format
+     *          values for each column
      */
-    public Project getFormatDistribution(String projectName,
-                                         String columnName) {
+    public Map<String, List<Format>> getFormatDistribution(String projectName,
+                                                           String columnName) {
         if (columnName == null) {
             throw new RuntimeException("The 'columnName' parameter is required for 'getFormatDistribution'.");
         }
-        return makeColumnBasedRequest(projectName, columnName, EP_FORMAT_DISTRIBUTION, "getFormatDistribution");
+        Project response = makeColumnBasedRequest(projectName, columnName, EP_FORMAT_DISTRIBUTION, "getFormatDistribution");
+        Map<String, List<Format>> map = new HashMap<>();
+        List<DataSource> dataSourceList = response.getDataSources();
+        for (DataSource source : dataSourceList) {
+            String dataSourceName = source.getName();
+            for (Schema schema : source.getSchemas()) {
+                String schemaName = schema.getName();
+                for (Table table : schema.getTables()) {
+                    String tableName = table.getName();
+                    for (Column column : table.getColumns()) {
+                        String name = column.getName();
+                        String qualifiedName = dataSourceName + "." + schemaName + "." + tableName + "." + name;
+                        map.put(qualifiedName, column.getColumnAnalysisResults().getFormatDistribution().getFormats());
+                    }
+                }
+            }
+        }
+        return map;
     }
 
     /**
-     * Retrieve the frequency distribution of values for the specified IA project and column.
+     * Retrieve the frequency distribution of values for the specified IA project and column(s).  You can specify a
+     * wildcard ({@code *}) character for any of the elements of the qualified columnName (eg. the table and column).
      *
      * @param projectName the name of the IA project for which to retrieve format distribution results
      * @param columnName the qualified name of the column for which to retrieve analysis results
-     * @return Project - containing only the format distribution results details
+     * @return {@code Map<String, List<Value>>} - keyed by qualified column name with a list of the frequency
+     *          distribution values for each column
      */
-    public Project getFrequencyDistribution(String projectName,
-                                            String columnName) {
+    public Map<String, List<Value>> getFrequencyDistribution(String projectName,
+                                                             String columnName) {
         if (columnName == null) {
             throw new RuntimeException("The 'columnName' parameter is required for 'getFrequencyDistribution'.");
         }
-        return makeColumnBasedRequest(projectName, columnName, EP_FREQ_DISTRIBUTION, "getFrequencyDistribution");
+        Project response = makeColumnBasedRequest(projectName, columnName, EP_FREQ_DISTRIBUTION, "getFrequencyDistribution");
+        Map<String, List<Value>> map = new HashMap<>();
+        List<DataSource> dataSourceList = response.getDataSources();
+        for (DataSource source : dataSourceList) {
+            String dataSourceName = source.getName();
+            for (Schema schema : source.getSchemas()) {
+                String schemaName = schema.getName();
+                for (Table table : schema.getTables()) {
+                    String tableName = table.getName();
+                    for (Column column : table.getColumns()) {
+                        String name = column.getName();
+                        String qualifiedName = dataSourceName + "." + schemaName + "." + tableName + "." + name;
+                        map.put(qualifiedName, column.getColumnAnalysisResults().getFrequencyDistribution().getValues());
+                    }
+                }
+            }
+        }
+        return map;
     }
 
     /**
