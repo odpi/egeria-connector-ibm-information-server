@@ -1290,7 +1290,7 @@ public class IGCRestClient {
      * @param assetType name of the IGC asset
      * @return Class
      */
-    private Class<?> getPOJOForType(String assetType) {
+    public Class<?> getPOJOForType(String assetType) {
         Class<?> igcPOJO = null;
         StringBuilder sbPojoName = new StringBuilder();
         sbPojoName.append(IGCRestConstants.IGC_REST_BASE_MODEL_PKG);

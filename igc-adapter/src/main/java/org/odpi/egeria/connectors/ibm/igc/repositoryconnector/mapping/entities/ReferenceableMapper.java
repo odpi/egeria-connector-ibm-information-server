@@ -225,7 +225,15 @@ public class ReferenceableMapper extends EntityMapping {
             // Check if the qualifiedName has a generated prefix -- need to remove prior to next steps, if so...
             unqualifiedName = IGCRepositoryHelper.getSearchableQualifiedName(unqualifiedName);
             if (log.isDebugEnabled()) { log.debug("Looking up identity: {}", unqualifiedName); }
-            Identity identity = Identity.getFromString(unqualifiedName, igcRestClient);
+            Identity.StringType stringType = Identity.StringType.EXACT;
+            if (repositoryHelper.isEndsWithRegex(qualifiedName)) {
+                stringType = Identity.StringType.ENDS_WITH;
+            } else if (repositoryHelper.isStartsWithRegex(qualifiedName)) {
+                stringType = Identity.StringType.STARTS_WITH;
+            } else if (repositoryHelper.isContainsRegex(qualifiedName)) {
+                stringType = Identity.StringType.CONTAINS;
+            }
+            Identity identity = Identity.getFromString(unqualifiedName, igcRestClient, stringType);
             boolean skip = false;
 
             if (repositoryHelper.isStartsWithRegex(qualifiedName)) {
@@ -233,13 +241,14 @@ public class ReferenceableMapper extends EntityMapping {
                 // for everything and trim the results after they've been returned
                 if (log.isDebugEnabled()) { log.debug(". . . running expensive startsWith query on: {}", qualifiedName); }
             } else if (repositoryHelper.isEndsWithRegex(qualifiedName)) {
-                // for an endsWith, we only know the lower portions of the context, which we should be able to
-                // therefore search directly
-                identity = Identity.getPartialFromString(unqualifiedName);
                 if (identity != null) {
+                    // for an endsWith, we only know the lower portions of the context, which we should be able to
+                    // therefore search directly
                     if (log.isDebugEnabled()) { log.debug(". . .found identity: {}", identity.toString()); }
                     IGCSearchConditionSet nested = identity.getSearchCriteria();
                     igcSearchConditionSet.addNestedConditionSet(nested);
+                } else {
+                    if (log.isDebugEnabled()) { log.debug(". . . running expensive endsWith query on: {}", qualifiedName); }
                 }
             } else if (repositoryHelper.isContainsRegex(qualifiedName)) {
                 // for a contains, we only know some middle portion of the context, so the best we can do is search

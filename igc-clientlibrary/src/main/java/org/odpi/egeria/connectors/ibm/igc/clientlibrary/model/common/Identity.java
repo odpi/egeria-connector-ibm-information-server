@@ -9,10 +9,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * A representation of the unique characteristics of a particular asset, without relying on a unique ID string.
@@ -27,6 +24,8 @@ public class Identity {
     private static final String SEPARATOR_FOR_TYPE_AND_NAME = "=";
     public static final String TYPE_PREFIX = "(";
     private static final String TYPE_POSTFIX = ")";
+
+    public enum StringType { EXACT, STARTS_WITH, ENDS_WITH, CONTAINS }
 
     private static final String LOG_ADDING_SEARCH_CONDITION = "Adding search condition: {} {} {}";
     private static final String SEARCH_STARTS_WITH = "like {0}%";
@@ -423,11 +422,12 @@ public class Identity {
      *
      * @param identity the string representing a qualified identity
      * @param igcRestClient connectivity to an IGC environment
+     * @param stringType the type of string from which to construct the identity
      * @return Identity
      * @see #toString()
      */
-    public static Identity getFromString(String identity, IGCRestClient igcRestClient) {
-        return getFromString(identity, igcRestClient, true);
+    public static Identity getFromString(String identity, IGCRestClient igcRestClient, StringType stringType) {
+        return getFromString(identity, igcRestClient, stringType, true);
     }
 
     /**
@@ -436,78 +436,23 @@ public class Identity {
      *
      * @param identity the string representing a qualified identity
      * @param igcRestClient connectivity to an IGC environment
+     * @param stringType the type of string from which to construct the identity
      * @param warnOnNotFound indicates whether to log a warning (true) or not (false) in case the type inferred from
      *                       the identity cannot be found
      * @return Identity
      * @see #toString()
      */
-    public static Identity getFromString(String identity, IGCRestClient igcRestClient, boolean warnOnNotFound) {
-
-        List<Reference> context = new ArrayList<>();
-
-        String assetType = null;
-        String assetName = null;
-        List<String> components = getComponentsOfIdentityString(identity);
-        if (components != null) {
-            for (int i = 0; i < components.size(); i++) {
-                String component = components.get(i);
-                List<String> tokens = getTokensOfComponent(component);
-                if (tokens.size() == 2) {
-                    String type = tokens.get(0);
-                    String name = tokens.get(1);
-                    if (i == components.size() - 1) {
-                        assetType = type;
-                        assetName = name;
-                    } else {
-                        Reference item = new Reference(name, type);
-                        context.add(item);
-                    }
-                } else {
-                    // If we could not form the tokens as we expect, short-circuit out as we cannot reconstruct
-                    // the identity from this string
-                    assetType = null;
-                    break;
-                }
-            }
-        }
-
-        Identity ident = null;
-        try {
-            if (igcRestClient != null) {
-                String displayName = igcRestClient.getDisplayNameForType(assetType);
-                if (displayName != null) {
-                    ident = new Identity(context, assetType, assetName);
-                }
-            } else {
-                ident = new Identity(context, assetType, assetName);
-            }
-        } catch (Exception e) {
-            if (log.isWarnEnabled() && warnOnNotFound) { log.warn("Unable to find registered IGC type '{}' -- cannot construct an IGC identity.", assetType); }
-        }
-        return ident;
-
-    }
-
-    /**
-     * Attempt to build a partial Identity based on the received partial identity string (or null if completely unable
-     * to parse into even a partial Identity).
-     *
-     * @param identity the string representing a qualified identity
-     * @return String
-     */
-    public static Identity getPartialFromString(String identity) {
+    public static Identity getFromString(String identity, IGCRestClient igcRestClient, StringType stringType, boolean warnOnNotFound) {
 
         List<Reference> context = new ArrayList<>();
 
         String assetType = null;
         String assetName = null;
         String assetId = null;
-
-        // At a minimum, try to find one component of an identity
         List<String> components = getComponentsOfIdentityString(identity);
-        if (components == null) {
+        if (components.isEmpty()) {
             // If there are not multiple items in the identity string, try to parse just a single one out
-            List<String> tokens = getTokensOfComponent(identity);
+            List<String> tokens = getTokensOfComponent(identity, igcRestClient);
             boolean nothingDone = parseTokensIntoContext(tokens, context);
             if (!context.isEmpty() && !nothingDone) {
                 Reference item = popLastRefFromContext(context);
@@ -518,7 +463,7 @@ public class Identity {
         } else {
             for (int i = 0; i < components.size(); i++) {
                 String component = components.get(i);
-                List<String> tokens = getTokensOfComponent(component);
+                List<String> tokens = getTokensOfComponent(component, igcRestClient);
                 boolean nothingDone = parseTokensIntoContext(tokens, context);
                 if (i == components.size() - 1 && !context.isEmpty() && !nothingDone) {
                     Reference item = popLastRefFromContext(context);
@@ -530,9 +475,25 @@ public class Identity {
         }
 
         Identity ident = null;
-        // We need at least some contextual items or an assetType to construct even a partial identity
-        if (!context.isEmpty() || assetType != null) {
-            ident = new Identity(context, assetType, assetName, assetId, true);
+        try {
+            if (igcRestClient != null) {
+                String displayName = igcRestClient.getDisplayNameForType(assetType);
+                if (displayName != null) {
+                    if (stringType.equals(StringType.EXACT)) {
+                        ident = new Identity(context, assetType, assetName);
+                    } else {
+                        ident = new Identity(context, assetType, assetName, assetId, true);
+                    }
+                }
+            } else {
+                if (stringType.equals(StringType.EXACT)) {
+                    ident = new Identity(context, assetType, assetName);
+                } else {
+                    ident = new Identity(context, assetType, assetName, assetId, true);
+                }
+            }
+        } catch (Exception e) {
+            if (log.isWarnEnabled() && warnOnNotFound) { log.warn("Unable to find registered IGC type '{}' -- cannot construct an IGC identity.", assetType); }
         }
         return ident;
 
@@ -547,15 +508,15 @@ public class Identity {
             list.add(identity);
             return list;
         } else {
-            return null;
+            return Collections.emptyList();
         }
     }
 
-    private static List<String> getTokensOfComponent(String component) {
+    private static List<String> getTokensOfComponent(String component, IGCRestClient igcRestClient) {
         List<String> pair = new ArrayList<>();
         if (component.contains(SEPARATOR_FOR_TYPE_AND_NAME)) {
             String[] tokens = component.split(SEPARATOR_FOR_TYPE_AND_NAME);
-            String type = getTypeFromComponentToken(tokens[0]);
+            String type = getTypeFromComponentToken(tokens[0], igcRestClient);
             if (type != null) {
                 pair.add(type);
                 if (tokens.length == 2) {
@@ -566,7 +527,7 @@ public class Identity {
                 }
             }
         } else {
-            String type = getTypeFromComponentToken(component);
+            String type = getTypeFromComponentToken(component, igcRestClient);
             if (type != null) {
                 pair.add(type);
             }
@@ -574,9 +535,16 @@ public class Identity {
         return pair;
     }
 
-    private static String getTypeFromComponentToken(String token) {
+    private static String getTypeFromComponentToken(String token, IGCRestClient igcRestClient) {
         if (token.contains(TYPE_PREFIX) && token.contains(TYPE_POSTFIX)) {
-            return token.substring(token.indexOf(TYPE_PREFIX) + 1, token.lastIndexOf(TYPE_POSTFIX));
+            // Only return the type name if it is one that we recognize (can resolve to a POJO class)
+            String type = token.substring(token.indexOf(TYPE_PREFIX) + 1, token.lastIndexOf(TYPE_POSTFIX));
+            Class<?> pojo = igcRestClient.getPOJOForType(type);
+            if (pojo != null) {
+                return type;
+            } else {
+                return null;
+            }
         } else {
             return null;
         }
