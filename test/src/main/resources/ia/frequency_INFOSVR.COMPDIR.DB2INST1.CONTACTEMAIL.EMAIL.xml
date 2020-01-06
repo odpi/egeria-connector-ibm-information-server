@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iaapi:Project xmlns:iaapi="http://www.ibm.com/investigate/api/iaapi" name="CocoPharma">
+    <DataSources>
+        <DataSource name="COMPDIR">
+            <Schema name="DB2INST1">
+                <Table name="CONTACTEMAIL">
+                    <Column name="EMAIL">
+                        <ColumnAnalysisResults>
+                            <Terms>
+                                <Term name="Coco Pharmaceuticals/Email Address">
+                                </Term>
+                            </Terms>
+                            <FrequencyDistribution>
+                                <Value frequency="1" percent="2.94117647">SJKSeeker@SecIncConSvcs.gmail</Value>
+                                <Value frequency="1" percent="2.94117647">SteveStarter@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">TerriDaring@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">angela.cummings@hh-care.org</Value>
+                                <Value frequency="1" percent="2.94117647">ivor@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">jules.keeper@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">julie.stitched@hh-care.org</Value>
+                                <Value frequency="1" percent="2.94117647">lemmie.stage@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">polly@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">reggie.mint@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">robert.nitter@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">robert.records@hh-care.org</Value>
+                                <Value frequency="1" percent="2.94117647">sally.counter@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">tania@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">terri@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">tessa@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">tom.tally@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">zach@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">ZachNow@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">callie.quartile@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">callie@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">des.signa@pretend.ibm.com</Value>
+                                <Value frequency="1" percent="2.94117647">erin.overview@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">faith.broker@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">gary.geeke@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">grant.able@hh-care.org</Value>
+                                <Value frequency="1" percent="2.94117647">harry.hopeful@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">ivor.padlock@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">nancy.noah@pretend.ibm.com</Value>
+                                <Value frequency="1" percent="2.94117647">peter.profile@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">polly.tasker@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">steve@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">tania.tidie@cocopharmaceutical.com</Value>
+                                <Value frequency="1" percent="2.94117647">tessa.tube@cocopharmaceutical.com</Value>
+                            </FrequencyDistribution>
+                        </ColumnAnalysisResults>
+                    </Column>
+                </Table>
+            </Schema>
+        </DataSource>
+    </DataSources>
+</iaapi:Project>

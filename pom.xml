@@ -124,15 +124,24 @@
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.exclusions>
             **/model/base/**,
+            **/model/types/**,
+            **/model/events/**,
+            **/igc/clientlibrary/model/IGCBeanGenerator.*,
             **/ia/clientlibrary/model/**
         </sonar.exclusions>
         <sonar.coverage.exclusions>
             **/model/base/**,
+            **/model/types/**,
+            **/model/events/**,
+            **/igc/clientlibrary/model/IGCBeanGenerator.*,
             **/ia/clientlibrary/model/**,
             **/test/**
         </sonar.coverage.exclusions>
         <sonar.cpd.exclusions>
             **/model/base/**,
+            **/model/types/**,
+            **/model/events/**,
+            **/igc/clientlibrary/model/IGCBeanGenerator.*,
             **/ia/clientlibrary/model/**
         </sonar.cpd.exclusions>
     </properties>

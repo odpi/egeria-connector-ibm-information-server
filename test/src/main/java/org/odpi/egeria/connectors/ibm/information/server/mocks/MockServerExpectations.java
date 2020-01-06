@@ -91,6 +91,8 @@ public class MockServerExpectations implements ExpectationInitializer {
         setRunningDataQualityAnalysis(mockServerClient, IA_DQ_SCHEDULE_ID, IA_TABLE_NAME);
         setCompleteColumnAnalysis(mockServerClient, IA_CA_SCHEDULE_ID, IA_TABLE_NAME);
         setCompleteDataQualityAnalysis(mockServerClient, IA_DQ_SCHEDULE_ID, IA_TABLE_NAME);
+        setFormatDistribution(mockServerClient, IA_PROJECT_NAME, IA_COLUMN_NAME);
+        setFrequencyDistribution(mockServerClient, IA_PROJECT_NAME, IA_COLUMN_NAME);
 
         setPublishResults(mockServerClient, IA_PROJECT_NAME, IA_TABLE_NAME);
 
@@ -921,6 +923,20 @@ public class MockServerExpectations implements ExpectationInitializer {
                         "<?xml version='1.0' encoding='UTF-8'?><iaapi:Project xmlns:iaapi=\"http://www.ibm.com/investigate/api/iaapi\" name=\"" + projectName + "\"><Tasks><PublishResults><Table name=\"" + tableName + "\"/></PublishResults></Tasks></iaapi:Project>"
                 ))
                 .respond(response().withStatusCode(200));
+    }
+
+    private void setFormatDistribution(MockServerClient mockServerClient, String projectName, String columnName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getFormatDistributionRequest(projectName, columnName))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "format_" + columnName + ".xml")));
+    }
+
+    private void setFrequencyDistribution(MockServerClient mockServerClient, String projectName, String columnName) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getFrequencyDistributionRequest(projectName, columnName))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "frequency_" + columnName + ".xml")));
     }
 
     private void setIALogout(MockServerClient mockServerClient) {

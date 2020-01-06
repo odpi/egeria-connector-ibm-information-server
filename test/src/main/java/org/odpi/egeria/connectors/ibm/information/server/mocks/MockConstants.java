@@ -72,6 +72,7 @@ public class MockConstants {
     // Examples used for specific scenarios to test IA client
     public static final String IA_PROJECT_NAME = "CocoPharma";
     public static final String IA_TABLE_NAME = "INFOSVR.COMPDIR.DB2INST1.CONTACTEMAIL";
+    public static final String IA_COLUMN_NAME = IA_TABLE_NAME + ".EMAIL";
     public static final String IA_TABLE_NAME_WITH_DQ_PROBLEMS = "INFOSVR.EMPLSANL.DB2INST1.EMPSALARYANALYSIS";
     public static final String IA_CA_SCHEDULE_ID = "d70c6594.80cb2b5c.001muqrfs.a21f89o.a90986.6i2ig951fma0dtk23k0h7";
     public static final String IA_DQ_SCHEDULE_ID = "d70c6594.80cb2b5c.001muqr88.hpidg9f.il4mkc.rid1t6lqls0k16jlj3isu";
@@ -200,6 +201,34 @@ public class MockConstants {
                 .withQueryStringParameters(
                         param("projectName", projectName),
                         param("columnName", tableName + ".*")
+                );
+    }
+
+    /**
+     * Create a mock IA format distribution request.
+     * @param projectName name of the project for which to obtain the format distribution
+     * @param columnName name of the column for which to obtain the format distribution
+     * @return HttpRequest
+     */
+    public static HttpRequest getFormatDistributionRequest(String projectName, String columnName) {
+        return request().withMethod("GET").withPath(IA_REST_EP + "columnAnalysis/formatDistribution")
+                .withQueryStringParameters(
+                        param("projectName", projectName),
+                        param("columnName", columnName)
+                );
+    }
+
+    /**
+     * Create a mock IA frequency distribution request.
+     * @param projectName name of the project for which to obtain the frequency distribution
+     * @param columnName name of the column for which to obtain the frequency distribution
+     * @return HttpRequest
+     */
+    public static HttpRequest getFrequencyDistributionRequest(String projectName, String columnName) {
+        return request().withMethod("GET").withPath(IA_REST_EP + "columnAnalysis/frequencyDistribution")
+                .withQueryStringParameters(
+                        param("projectName", projectName),
+                        param("columnName", columnName)
                 );
     }
 

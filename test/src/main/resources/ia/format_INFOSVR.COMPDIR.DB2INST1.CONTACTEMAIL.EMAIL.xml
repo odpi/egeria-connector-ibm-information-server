@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iaapi:Project xmlns:iaapi="http://www.ibm.com/investigate/api/iaapi" name="CocoPharma">
+    <DataSources>
+        <DataSource name="COMPDIR">
+            <Schema name="DB2INST1">
+                <Table name="CONTACTEMAIL">
+                    <Column name="EMAIL">
+                        <ColumnAnalysisResults>
+                            <FormatDistribution>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaa.aaaaa@aaaaaaa.aaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaaaa.aaaa@aaaaaaa.aaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaaaa.aaaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="3" distValuePercent="8.823529243469238" generalFormat="aaaaa.aaaaaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="8.823529243469238" recordCount="3"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="AaaaaAaaaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="AAAAaaaaa@AaaAaaAaaAaaa.aaaaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaaaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaaaa.aaaa@aa-aaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="AaaaaAaaaaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaaaaa.aaaaaaaa@aa-aaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="2" distValuePercent="5.882352828979492" generalFormat="aaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="5.882352828979492" recordCount="2"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaaaaa.aaaaaaa@aa-aaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaaa.aaaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaaaa.aaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="AaaaAaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaaaaa.aaaaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="3" distValuePercent="8.823529243469238" generalFormat="aaaaa.aaaaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="8.823529243469238" recordCount="3"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaaa.aaaaaaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaaaaa.aaaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="5" distValuePercent="14.70588207244873" generalFormat="aaaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="14.70588207244873" recordCount="5"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaa.aaaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaaaa.aaaaaaaa@aa-aaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaaaaa.aaaaaaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaaa.aaaaaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                                <Format distValueCount="1" distValuePercent="2.941176414489746" generalFormat="aaaaaa.aaaa@aaaaaaaaaaaaaaaaaa.aaa" generalFormatPercent="2.941176414489746" recordCount="1"/>
+                            </FormatDistribution>
+                        </ColumnAnalysisResults>
+                    </Column>
+                </Table>
+            </Schema>
+        </DataSource>
+    </DataSources>
+</iaapi:Project>
