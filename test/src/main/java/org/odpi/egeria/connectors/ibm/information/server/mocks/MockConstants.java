@@ -6,8 +6,6 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.mockserver.model.JsonBody;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.mockserver.model.HttpRequest.request;
@@ -72,6 +70,7 @@ public class MockConstants {
     public static final String USER_RID = "b1c497ce.285feb.001mts4th.dq2dkb2.ggbeni.vl04tnd0t0bjgmlg5a35vn0";
     public static final String USER_QN = "(steward_user)=Mr. Gary Geeke";
     public static final String GROUP_RID = "b1c497ce.8a5be154.001mts4th.nmdbb31.7flfke.0b7taja56pjhs73o553iq";
+    public static final String RID_FOR_CREATE_AND_UPDATE = "6662c0f2.e1b1ec6c.001muv34k.s0rtkp1.c38mtf.60ltvrgr67q6l6pq5t3qi";
 
     // Examples used for specific scenarios to test IA client
     public static final String IA_PROJECT_NAME = "CocoPharma";
@@ -171,6 +170,25 @@ public class MockConstants {
      */
     public static HttpRequest upsertBundleRequest() {
         return request().withMethod("PUT").withPath(IGC_REST_EP + "bundles");
+    }
+
+    /**
+     * Create a mock IGC asset creation request.
+     * @param body what should be created
+     * @return HttpRequest
+     */
+    public static HttpRequest createAssetRequest(String body) {
+        return request().withMethod("POST").withPath(IGC_REST_EP + "assets").withBody(body);
+    }
+
+    /**
+     * Create a mock IGC asset update request.
+     * @param rid the RID of the asset to update
+     * @param body what should be updated
+     * @return HttpRequest
+     */
+    public static HttpRequest updateAssetRequest(String rid, String body) {
+        return request().withMethod("PUT").withPath(IGC_REST_EP + "assets/" + rid).withBody(body);
     }
 
     /**

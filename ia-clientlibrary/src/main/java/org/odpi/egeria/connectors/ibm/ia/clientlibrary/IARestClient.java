@@ -470,17 +470,19 @@ public class IARestClient {
         }
         Project response = makeColumnBasedRequest(projectName, columnName, EP_FORMAT_DISTRIBUTION, "getFormatDistribution");
         Map<String, List<Format>> map = new HashMap<>();
-        List<DataSource> dataSourceList = response.getDataSources();
-        for (DataSource source : dataSourceList) {
-            String dataSourceName = source.getName();
-            for (Schema schema : source.getSchemas()) {
-                String schemaName = schema.getName();
-                for (Table table : schema.getTables()) {
-                    String tableName = table.getName();
-                    for (Column column : table.getColumns()) {
-                        String name = column.getName();
-                        String qualifiedName = dataSourceName + "." + schemaName + "." + tableName + "." + name;
-                        map.put(qualifiedName, column.getColumnAnalysisResults().getFormatDistribution().getFormats());
+        if (response != null) {
+            List<DataSource> dataSourceList = response.getDataSources();
+            for (DataSource source : dataSourceList) {
+                String dataSourceName = source.getName();
+                for (Schema schema : source.getSchemas()) {
+                    String schemaName = schema.getName();
+                    for (Table table : schema.getTables()) {
+                        String tableName = table.getName();
+                        for (Column column : table.getColumns()) {
+                            String name = column.getName();
+                            String qualifiedName = dataSourceName + "." + schemaName + "." + tableName + "." + name;
+                            map.put(qualifiedName, column.getColumnAnalysisResults().getFormatDistribution().getFormats());
+                        }
                     }
                 }
             }
@@ -504,17 +506,19 @@ public class IARestClient {
         }
         Project response = makeColumnBasedRequest(projectName, columnName, EP_FREQ_DISTRIBUTION, "getFrequencyDistribution");
         Map<String, List<Value>> map = new HashMap<>();
-        List<DataSource> dataSourceList = response.getDataSources();
-        for (DataSource source : dataSourceList) {
-            String dataSourceName = source.getName();
-            for (Schema schema : source.getSchemas()) {
-                String schemaName = schema.getName();
-                for (Table table : schema.getTables()) {
-                    String tableName = table.getName();
-                    for (Column column : table.getColumns()) {
-                        String name = column.getName();
-                        String qualifiedName = dataSourceName + "." + schemaName + "." + tableName + "." + name;
-                        map.put(qualifiedName, column.getColumnAnalysisResults().getFrequencyDistribution().getValues());
+        if (response != null) {
+            List<DataSource> dataSourceList = response.getDataSources();
+            for (DataSource source : dataSourceList) {
+                String dataSourceName = source.getName();
+                for (Schema schema : source.getSchemas()) {
+                    String schemaName = schema.getName();
+                    for (Table table : schema.getTables()) {
+                        String tableName = table.getName();
+                        for (Column column : table.getColumns()) {
+                            String name = column.getName();
+                            String qualifiedName = dataSourceName + "." + schemaName + "." + tableName + "." + name;
+                            map.put(qualifiedName, column.getColumnAnalysisResults().getFrequencyDistribution().getValues());
+                        }
                     }
                 }
             }
@@ -530,7 +534,7 @@ public class IARestClient {
      * @return Project - containing only the data quality analysis results details
      */
     private Project getDataQualityAnalysisResults(String projectName,
-                                                 String tableName) {
+                                                  String tableName) {
         return makeTableBasedRequest(projectName, tableName, EP_DQ_ANALYSIS_RESULTS, "getDataQualityAnalysisResults");
     }
 
