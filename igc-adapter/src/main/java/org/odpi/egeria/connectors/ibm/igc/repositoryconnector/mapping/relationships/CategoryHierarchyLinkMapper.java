@@ -3,9 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
@@ -53,16 +51,27 @@ public class CategoryHierarchyLinkMapper extends RelationshipMapping {
     public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                     Reference oneObject,
                                                     Reference otherObject) {
+        return isCategoryRelationship(igcomrsRepositoryConnector, oneObject, otherObject);
+    }
+
+    /**
+     * Indicates whether the relationship between the provided objects is category-related (true) or not (false). When
+     * not category-related it is likely because one end is either a Classification or a Glossary.
+     *
+     * @param igcomrsRepositoryConnector connection to the IGC environment
+     * @param oneObject the IGC object to consider for inclusion on one end of the relationship
+     * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
+     * @return boolean
+     */
+    public static boolean isCategoryRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                 Reference oneObject,
+                                                 Reference otherObject) {
         if (log.isDebugEnabled()) { log.debug("Considering inclusion of objects: {} ({}) and {} ({})", oneObject.getName(), oneObject.getType(), otherObject.getName(), otherObject.getType()); }
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         boolean isGlossary = GlossaryMapper.isGlossary(igcRestClient, oneObject) || GlossaryMapper.isGlossary(igcRestClient, otherObject);
-        if (isGlossary) {
-            if (log.isDebugEnabled()) { log.debug(" ... skipping, Glossary-level category."); }
-        }
+        if (isGlossary && log.isDebugEnabled()) { log.debug(" ... skipping, Glossary-level category."); }
         boolean isClassification = ClassificationMapping.isClassification(igcRestClient, oneObject) || ClassificationMapping.isClassification(igcRestClient, otherObject);
-        if (isClassification) {
-            if (log.isDebugEnabled()) { log.debug(" ... skipping, classification object."); }
-        }
+        if (isClassification && log.isDebugEnabled()) { log.debug(" ... skipping, classification object."); }
         return !isGlossary && !isClassification;
     }
 
