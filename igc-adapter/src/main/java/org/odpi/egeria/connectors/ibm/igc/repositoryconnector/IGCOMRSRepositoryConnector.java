@@ -13,6 +13,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.OMRSStub;
+import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
 import org.odpi.openmetadata.frameworks.connectors.properties.EndpointProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.OMRSMetadataCollection;
@@ -62,29 +63,8 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
 
         final String methodName = "initialize";
 
-        if (auditLog != null) {
-            IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.REPOSITORY_SERVICE_INITIALIZING;
-            auditLog.logRecord(methodName,
-                    auditCode.getLogMessageId(),
-                    auditCode.getSeverity(),
-                    auditCode.getFormattedLogMessage(),
-                    null,
-                    auditCode.getSystemAction(),
-                    auditCode.getUserAction());
-        }
-
         EndpointProperties endpointProperties = connectionProperties.getEndpoint();
         if (endpointProperties == null) {
-            if (auditLog != null) {
-                IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.REST_CLIENT_FAILURE;
-                auditLog.logRecord(methodName,
-                        auditCode.getLogMessageId(),
-                        auditCode.getSeverity(),
-                        auditCode.getFormattedLogMessage(),
-                        null,
-                        auditCode.getSystemAction(),
-                        auditCode.getUserAction());
-            }
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("null");
             throw new OMRSRuntimeException(
@@ -141,34 +121,24 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
                 this.igcRestClient.registerPOJO(OMRSStub.class);
                 successfulInit = success;
             } catch (RepositoryErrorException e) {
-                if (auditLog != null) {
-                    IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.OMRS_BUNDLE_FAILURE;
-                    auditLog.logRecord(methodName,
-                            auditCode.getLogMessageId(),
-                            auditCode.getSeverity(),
-                            auditCode.getFormattedLogMessage(),
-                            null,
-                            auditCode.getSystemAction(),
-                            auditCode.getUserAction());
-                }
-                log.error("Unable to create necessary OMRS objects -- failing.", e);
                 successfulInit = false;
+                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.OMRS_BUNDLE_FAILURE;
+                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
+                throw new OMRSRuntimeException(
+                        errorCode.getHTTPErrorCode(),
+                        this.getClass().getName(),
+                        methodName,
+                        errorMessage,
+                        errorCode.getSystemAction(),
+                        errorCode.getUserAction(),
+                        e
+                );
             }
         } else {
             successfulInit = false;
         }
 
         if (!successfulInit) {
-            if (auditLog != null) {
-                IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.REST_CLIENT_FAILURE;
-                auditLog.logRecord(methodName,
-                        auditCode.getLogMessageId(),
-                        auditCode.getSeverity(),
-                        auditCode.getFormattedLogMessage(address),
-                        null,
-                        auditCode.getSystemAction(),
-                        auditCode.getUserAction());
-            }
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
             throw new OMRSRuntimeException(
@@ -179,19 +149,35 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
                     errorCode.getSystemAction(),
                     errorCode.getUserAction()
             );
-        } else {
-            if (auditLog != null) {
-                IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.REPOSITORY_SERVICE_INITIALIZED;
-                auditLog.logRecord(methodName,
-                        auditCode.getLogMessageId(),
-                        auditCode.getSeverity(),
-                        auditCode.getFormattedLogMessage(getServerName()),
-                        null,
-                        auditCode.getSystemAction(),
-                        auditCode.getUserAction());
-            }
         }
 
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void start() throws ConnectorCheckedException {
+        super.start();
+        final String methodName = "start";
+        IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.REPOSITORY_SERVICE_STARTING;
+        auditLog.logRecord(methodName,
+                auditCode.getLogMessageId(),
+                auditCode.getSeverity(),
+                auditCode.getFormattedLogMessage(),
+                null,
+                auditCode.getSystemAction(),
+                auditCode.getUserAction());
+        if (successfulInit) {
+            auditCode = IGCOMRSAuditCode.REPOSITORY_SERVICE_STARTED;
+            auditLog.logRecord(methodName,
+                    auditCode.getLogMessageId(),
+                    auditCode.getSeverity(),
+                    auditCode.getFormattedLogMessage(getServerName()),
+                    null,
+                    auditCode.getSystemAction(),
+                    auditCode.getUserAction());
+        }
     }
 
     /**

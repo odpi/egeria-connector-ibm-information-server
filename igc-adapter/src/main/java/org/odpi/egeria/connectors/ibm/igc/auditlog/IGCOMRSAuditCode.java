@@ -21,9 +21,9 @@ import java.text.MessageFormat;
  */
 public enum IGCOMRSAuditCode {
 
-    REPOSITORY_SERVICE_INITIALIZING("OMRS-IGC-REPOSITORY-0001",
+    REPOSITORY_SERVICE_STARTING("OMRS-IGC-REPOSITORY-0001",
             OMRSAuditLogRecordSeverity.INFO,
-            "The IBM Information Governance Catalog proxy is initializing a new server instance",
+            "The IBM Information Governance Catalog proxy is starting a new server instance",
             "The local server has started up a new instance of the IBM Information Governance Catalog proxy.",
             "No action is required.  This is part of the normal operation of the service."),
     REST_CLIENT_FAILURE("OMRS-IGC-REPOSITORY-0002",
@@ -36,10 +36,10 @@ public enum IGCOMRSAuditCode {
             "Unable to upload the required OMRS OpenIGC bundle",
             "The system was unable to either generate or upload the OMRS OpenIGC bundle needed to handle open metadata.",
             "Check the system logs and diagnose or report the problem."),
-    REPOSITORY_SERVICE_INITIALIZED("OMRS-IGC-REPOSITORY-0004",
+    REPOSITORY_SERVICE_STARTED("OMRS-IGC-REPOSITORY-0004",
             OMRSAuditLogRecordSeverity.INFO,
-            "The IBM Information Governance Catalog proxy has initialized a new instance for server {0}",
-            "The local server has completed initialization of a new instance.",
+            "The IBM Information Governance Catalog proxy has started a new instance for server {0}",
+            "The local server has completed startup of a new instance.",
             "No action is required.  This is part of the normal operation of the service."),
     REPOSITORY_SERVICE_SHUTDOWN("OMRS-IGC-REPOSITORY-0005",
             OMRSAuditLogRecordSeverity.INFO,
