@@ -11,6 +11,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants;
 import org.odpi.openmetadata.http.HttpHelper;
 import org.testng.annotations.*;
@@ -164,6 +165,38 @@ public class ClientTest {
         assertEquals(paging.getPageSize().intValue(), 2);
         assertEquals(paging.getBeginIndex().intValue(), 2);
         assertEquals(paging.getEndIndex().intValue(), 3);
+
+    }
+
+    @Test
+    void testSearchNegationAndSorting() {
+
+        IGCSearchSorting igcSearchSorting = new IGCSearchSorting("name");
+
+        List<String> listOfValues = new ArrayList<>();
+        listOfValues.add("Address Line 2");
+        IGCSearchCondition desc = new IGCSearchCondition("short_description", "=", "", true);
+        IGCSearchCondition name = new IGCSearchCondition("name", listOfValues, false);
+        IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(desc);
+        igcSearchConditionSet.addCondition(name);
+
+        IGCSearch igcSearch = new IGCSearch("term", igcSearchConditionSet);
+        igcSearch.addProperties(IGCRestConstants.getModificationProperties());
+        igcSearch.setPageSize(2);
+        igcSearch.addSortingCriteria(igcSearchSorting);
+        ItemList<Term> results = igcRestClient.search(igcSearch);
+        assertNotNull(results);
+        assertFalse(results.getItems().isEmpty());
+        assertEquals(results.getItems().size(), 1);
+
+        igcSearchConditionSet.setNegateAll(true);
+        igcSearch = new IGCSearch("term", igcSearchConditionSet);
+        igcSearch.addProperties(IGCRestConstants.getModificationProperties());
+        igcSearch.setPageSize(2);
+        igcSearch.addSortingCriteria(igcSearchSorting);
+        results = igcRestClient.search(igcSearch);
+        assertNotNull(results);
+        assertTrue(results.getItems().isEmpty());
 
     }
 

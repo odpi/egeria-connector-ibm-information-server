@@ -38,14 +38,11 @@ public class IGCSearchCondition {
      * @param value the value to compare the property against
      */
     public IGCSearchCondition(String property, String operator, String value) {
-        if (value == null) {
-            this.property = property;
-            this.operator = "isNull";
-            this.negated = false;
-        } else {
-            this.property = property;
+        this(property, "isNull", false);
+        if (value != null) {
             this.operator = operator;
             this.value = value;
+            this.negated = null;
         }
     }
 
@@ -84,19 +81,15 @@ public class IGCSearchCondition {
      * @param negated whether to invert (negate) the comparison operator or not
      */
     public IGCSearchCondition(String property, String operator, String value, Boolean negated) {
-        if (value == null) {
-            this.property = property;
-            this.operator = "isNull";
-            this.negated = negated;
-        } else {
-            this.property = property;
+        this(property, "isNull", negated);
+        if (value != null) {
             if (operator.equals("=") && negated) {
                 // This is a more reliable 'does not equal' for both strings and numbers, the
                 // negated condition does not work for numbers
                 this.operator = "<>";
+                this.negated = null;
             } else {
                 this.operator = operator;
-                this.negated = negated;
             }
             this.value = value;
         }
@@ -134,9 +127,7 @@ public class IGCSearchCondition {
      * @param negated whether to invert (negate) the comparison operator or not
      */
     public IGCSearchCondition(String property, List<String> listOfValues, Boolean negated) {
-        this.property = property;
-        this.operator = "in";
-        this.values = listOfValues;
+        this(property, listOfValues);
         this.negated = negated;
     }
 

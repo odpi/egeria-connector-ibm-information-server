@@ -14,7 +14,6 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.*;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +65,7 @@ public class MockServerExpectations implements ExpectationInitializer {
         setStartupQuery(mockServerClient);
         setTypesQuery(mockServerClient);
         setMultipageSearch(mockServerClient);
+        setSortedSearch(mockServerClient);
         setBundlesQuery(mockServerClient);
 
         String glossaryIgcType = "category";
@@ -233,6 +233,15 @@ public class MockServerExpectations implements ExpectationInitializer {
                 .withSecure(true)
                 .when(nextPageRequest("term", properties, "2", "4"))
                 .respond(withResponse(getResourceFileContents("by_case" + File.separator + "TermFindMultipage" + File.separator + "results_3.json")));
+    }
+
+    private void setSortedSearch(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(
+                        "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":2,\"where\":{\"conditions\":[{\"property\":\"short_description\",\"operator\":\"<>\",\"value\":\"\"},{\"property\":\"name\",\"operator\":\"in\",\"value\":[\"Address Line 2\"],\"negated\":false}],\"operator\":\"and\"},\"sorts\":[{\"property\":\"name\",\"ascending\":true}]}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "TermFindSorting" + File.separator + "results_positive.json")));
     }
 
     private void setBundlesQuery(MockServerClient mockServerClient) {

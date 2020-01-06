@@ -37,8 +37,7 @@ public class IGCSearchSorting {
      * @param property the property of an asset type to search against
      */
     public IGCSearchSorting(String property) {
-        this.property = property;
-        this.ascending = true;
+        this(property, true);
     }
 
     public String getProperty() { return this.property; }
