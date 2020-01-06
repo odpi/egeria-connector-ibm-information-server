@@ -19,7 +19,6 @@ import java.util.*;
 public class Identity {
 
     private static final Logger log = LoggerFactory.getLogger(Identity.class);
-    private static final String SEPARATOR_FOR_RID = "__RID__";
     private static final String SEPARATOR_FOR_COMPONENTS = "::";
     private static final String SEPARATOR_FOR_TYPE_AND_NAME = "=";
     public static final String TYPE_PREFIX = "(";
@@ -404,11 +403,10 @@ public class Identity {
      * Return true if the provided string appears to be an identity string (partial or complete), or false otherwise.
      *
      * @param candidate the string to test as an identity string
-     * @return int the count of identifying characteristics of an identity string (max 7)
+     * @return int the count of identifying characteristics of an identity string (max 6)
      */
     public static int isIdentityString(String candidate) {
         int charCount = 0;
-        charCount += (candidate.contains(SEPARATOR_FOR_RID) ? 1 : 0);
         charCount += (candidate.contains(SEPARATOR_FOR_COMPONENTS) ? 2 : 0);
         charCount += (candidate.contains(SEPARATOR_FOR_TYPE_AND_NAME) ? 2 : 0);
         charCount += (candidate.contains(TYPE_PREFIX) ? 1 : 0);
