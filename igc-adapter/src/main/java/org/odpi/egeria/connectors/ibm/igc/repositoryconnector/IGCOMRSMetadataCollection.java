@@ -1061,26 +1061,27 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                 log.debug(" ... generated name with prefix {} and name: {}", prefix, qualifiedName);
                             }
                         }
-                        Identity identity = Identity.getFromString(qualifiedName, igcRestClient);
+                        Identity.StringType stringType = Identity.StringType.EXACT;
+                        if (repositoryHelper.isEndsWithRegex(qualifiedNameToFind)) {
+                            stringType = Identity.StringType.ENDS_WITH;
+                        }
+                        Identity identity = Identity.getFromString(qualifiedName, igcRestClient, stringType);
                         if (identity != null && !identity.isPartial()) {
                             // Resolve the asset type directly from the identity, if we can (only possible if it is not
                             // partial, because if it is partial it may actually need a prefix which is not there)
                             if (log.isDebugEnabled()) { log.debug(" ... proceeding on basis of identity: {}", identity); }
                             String igcType = identity.getAssetType();
                             mappers.add(igcRepositoryHelper.getEntityMappingByIgcType(igcType, prefix));
+                        } else if (identity != null) {
+                            // If all we have is a partial identity, get all of the mappers for that asset type
+                            // (to ensure we include both direct-mapped and generated entities - if one is not
+                            // applicable based on the type requested by the method, that will be excluded below)
+                            String igcType = identity.getAssetType();
+                            mappers = igcRepositoryHelper.getEntityMappingsByIgcType(igcType);
                         } else {
-                            identity = Identity.getPartialFromString(qualifiedName);
-                            if (identity != null) {
-                                // If all we have is a partial identity, get all of the mappers for that asset type
-                                // (to ensure we include both direct-mapped and generated entities - if one is not
-                                // applicable based on the type requested by the method, that will be excluded below)
-                                String igcType = identity.getAssetType();
-                                mappers = igcRepositoryHelper.getEntityMappingsByIgcType(igcType);
-                            } else {
-                                // Otherwise fall-back to taking the mappings from the entity information received on the
-                                // method itself
-                                mappers = findMappingsForInputs(entityTypeGUID, prefix, userId);
-                            }
+                            // Otherwise fall-back to taking the mappings from the entity information received on the
+                            // method itself
+                            mappers = findMappingsForInputs(entityTypeGUID, prefix, userId);
                         }
                     }
                     for (EntityMapping mapper : mappers) {
