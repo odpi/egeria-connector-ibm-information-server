@@ -6,6 +6,10 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.mockserver.model.JsonBody;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.Parameter.param;
@@ -104,6 +108,27 @@ public class MockConstants {
      */
     public static HttpRequest searchRequest(JsonBody body) {
         return searchRequest().withBody(body);
+    }
+
+    /**
+     * Create a mock IGC next page request based on the provided parameters.
+     * (Note that this should really have a 'where' clause to better restrict the query, but getting such a clause
+     *  working seems far too convoluted to be worth it, as neither trying to allow mock-server itself to URL-encode it
+     *  nor up-front URL-encoding the string seem to work.)
+     * @param types the types to search
+     * @param properties the properties to include in the results
+     * @param pageSize the number of results per page
+     * @param begin the result index to start from
+     * @return HttpRequest
+     */
+    public static HttpRequest nextPageRequest(String types, List<String> properties, String pageSize, String begin) {
+        return request().withMethod("GET").withPath(IGC_REST_EP + "search")
+                .withQueryStringParameters(
+                        param("types", types),
+                        param("properties", properties),
+                        param("pageSize", pageSize),
+                        param("begin", begin)
+                );
     }
 
     /**

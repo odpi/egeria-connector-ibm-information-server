@@ -12,12 +12,12 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.mockserver.model.HttpResponse.response;
@@ -65,6 +65,7 @@ public class MockServerExpectations implements ExpectationInitializer {
 
         setStartupQuery(mockServerClient);
         setTypesQuery(mockServerClient);
+        setMultipageSearch(mockServerClient);
         setBundlesQuery(mockServerClient);
 
         String glossaryIgcType = "category";
@@ -208,6 +209,30 @@ public class MockServerExpectations implements ExpectationInitializer {
                 .withSecure(true)
                 .when(typesRequest())
                 .respond(withResponse(getResourceFileContents("types.json")));
+    }
+
+    private void setMultipageSearch(MockServerClient mockServerClient) {
+        List<String> properties = new ArrayList<>();
+        properties.add("created_by");
+        properties.add("created_on");
+        properties.add("modified_by");
+        properties.add("modified_on");
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(
+                        json(
+                                "{\"types\":[\"term\"],\"pageSize\":2,\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        )))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "TermFindMultipage" + File.separator + "results_1.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(nextPageRequest("term", properties, "2", "2"))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "TermFindMultipage" + File.separator + "results_2.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(nextPageRequest("term", properties, "2", "4"))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "TermFindMultipage" + File.separator + "results_3.json")));
     }
 
     private void setBundlesQuery(MockServerClient mockServerClient) {
