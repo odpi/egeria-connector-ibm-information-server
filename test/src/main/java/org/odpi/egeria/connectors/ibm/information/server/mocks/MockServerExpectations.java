@@ -6,6 +6,7 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.client.initialize.ExpectationInitializer;
 import org.mockserver.matchers.MatchType;
 import org.mockserver.matchers.Times;
+import org.mockserver.model.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -67,6 +68,9 @@ public class MockServerExpectations implements ExpectationInitializer {
         setMultipageSearch(mockServerClient);
         setSortedSearch(mockServerClient);
         setBundlesQuery(mockServerClient);
+
+        setCreateAssetRequest(mockServerClient);
+        setUpdateAssetRequest(mockServerClient);
 
         String glossaryIgcType = "category";
         setExamplePartAsset(mockServerClient, glossaryIgcType, MockConstants.GLOSSARY_RID);
@@ -291,6 +295,29 @@ public class MockServerExpectations implements ExpectationInitializer {
                 .withSecure(true)
                 .when(upsertBundleRequest())
                 .respond(response().withStatusCode(200));
+    }
+
+    private void setCreateAssetRequest(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(createAssetRequest(
+                        "{\"_type\":\"term\",\"name\":\"Test Term\",\"parent_category\":\"6662c0f2.ee6a64fe.001ms73o0.ft1a1dd.er0dsi.i5q6hj16mo65b060fndnp\",\"status\":\"CANDIDATE\"}"
+                ))
+                .respond(
+                        response()
+                                .withStatusCode(201)
+                                .withHeader("Location","https://infosvr:9446/ibm/iis/igc-rest/v1/assets/" + RID_FOR_CREATE_AND_UPDATE)
+                );
+    }
+
+    private void setUpdateAssetRequest(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(updateAssetRequest(
+                        RID_FOR_CREATE_AND_UPDATE,
+                        "{\"short_description\":\"Just a test short description.\",\"assigned_to_terms\":{\"items\":[\"" + TERM_RID + "\"],\"mode\":\"add\"},\"parent_category\":\"" + CATEGORY_RID + "\"}"
+                ))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "TermUpsert" + File.separator + "update.json")));
     }
 
     private void setJobSyncRuleQueryEmpty(MockServerClient mockServerClient) {

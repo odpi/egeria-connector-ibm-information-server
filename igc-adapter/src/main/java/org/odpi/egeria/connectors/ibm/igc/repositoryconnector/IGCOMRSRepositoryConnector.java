@@ -173,7 +173,7 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
             auditLog.logRecord(methodName,
                     auditCode.getLogMessageId(),
                     auditCode.getSeverity(),
-                    auditCode.getFormattedLogMessage(getServerName()),
+                    auditCode.getFormattedLogMessage(getServerName(), getIGCVersion().getVersionString()),
                     null,
                     auditCode.getSystemAction(),
                     auditCode.getUserAction());

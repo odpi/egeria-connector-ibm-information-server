@@ -12,6 +12,8 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants;
 import org.odpi.openmetadata.http.HttpHelper;
 import org.testng.annotations.*;
@@ -34,32 +36,32 @@ public class ClientTest {
     }
 
     @BeforeSuite
-    void startClient() {
+    public void startClient() {
         assertTrue(igcRestClient.start());
     }
 
     @Test
-    void testVersionRetrieval() {
+    public void testVersionRetrieval() {
         assertEquals(igcRestClient.getIgcVersion(), IGCVersionEnum.V11710);
     }
 
     @Test
-    void testBaseURL() {
+    public void testBaseURL() {
         assertEquals(igcRestClient.getBaseURL(), "https://localhost:1080");
     }
 
     @Test
-    void testDefaultPageSizeRetrieval() {
+    public void testDefaultPageSizeRetrieval() {
         assertEquals(igcRestClient.getDefaultPageSize(), 100);
     }
 
     @Test
-    void testInvalidClient() {
+    public void testInvalidClient() {
         assertThrows(RuntimeException.class, () -> new IGCRestClient("http://localhost:1080", "isadmin", "isadmin"));
     }
 
     @Test
-    void testTypeDetails() {
+    public void testTypeDetails() {
         List<String> termProperties = igcRestClient.getAllPropertiesForType("term");
         assertNotNull(termProperties);
         assertTrue(termProperties.contains("long_description"));
@@ -78,7 +80,7 @@ public class ClientTest {
     }
 
     @Test
-    void testFullAssetRetrievalAndSerDe() {
+    public void testFullAssetRetrievalAndSerDe() {
 
         Reference testFull = igcRestClient.getAssetById(MockConstants.GLOSSARY_RID);
         assertNotNull(testFull);
@@ -106,7 +108,7 @@ public class ClientTest {
     }
 
     @Test
-    void testPartialAssetRetrievalAndSerDe() {
+    public void testPartialAssetRetrievalAndSerDe() {
         List<String> properties = new ArrayList<>();
         properties.add("short_description");
         Reference testPart = igcRestClient.getAssetWithSubsetOfProperties(MockConstants.GLOSSARY_RID, "category", properties);
@@ -119,7 +121,7 @@ public class ClientTest {
     }
 
     @Test
-    void testAssetRefRetrievalAndSerDe() {
+    public void testAssetRefRetrievalAndSerDe() {
         Reference testPart = igcRestClient.getAssetRefById(MockConstants.GLOSSARY_RID);
         assertNotNull(testPart);
         assertTrue(testPart instanceof Category);
@@ -128,7 +130,7 @@ public class ClientTest {
     }
 
     @Test
-    void testSearchAndPaging() {
+    public void testSearchAndPaging() {
 
         IGCSearchCondition igcSearchCondition = new IGCSearchCondition("name", "like %{0}%", "address");
         IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(igcSearchCondition);
@@ -169,7 +171,7 @@ public class ClientTest {
     }
 
     @Test
-    void testSearchNegationAndSorting() {
+    public void testSearchNegationAndSorting() {
 
         IGCSearchSorting igcSearchSorting = new IGCSearchSorting("name");
 
@@ -201,10 +203,33 @@ public class ClientTest {
     }
 
     @Test
-    void testExistingBundles() {
+    public void testExistingBundles() {
         List<String> bundles = igcRestClient.getOpenIgcBundles();
         assertNotNull(bundles);
         assertTrue(bundles.contains("OMRS"));
+    }
+
+    @Test
+    public void testCreate() {
+        IGCCreate igcCreate = new IGCCreate("term");
+        igcCreate.addProperty("name", "Test Term");
+        igcCreate.addProperty("status", "CANDIDATE");
+        igcCreate.addProperty("parent_category", "6662c0f2.ee6a64fe.001ms73o0.ft1a1dd.er0dsi.i5q6hj16mo65b060fndnp");
+        assertTrue(igcCreate.hasProperty("name"));
+        String rid = igcRestClient.create(igcCreate);
+        assertNotNull(rid);
+        assertEquals(rid, MockConstants.RID_FOR_CREATE_AND_UPDATE);
+    }
+
+    @Test
+    public void testUpdate() {
+        IGCUpdate igcUpdate = new IGCUpdate(MockConstants.RID_FOR_CREATE_AND_UPDATE);
+        igcUpdate.addProperty("short_description", "Just a test short description.");
+        igcUpdate.addRelationship("assigned_to_terms", MockConstants.TERM_RID);
+        igcUpdate.setRelationshipUpdateMode(IGCUpdate.UpdateMode.APPEND);
+        igcUpdate.addExclusiveRelationship("parent_category", MockConstants.CATEGORY_RID);
+        boolean result = igcRestClient.update(igcUpdate);
+        assertTrue(result);
     }
 
     @AfterSuite
