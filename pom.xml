@@ -301,6 +301,12 @@
                 <version>${open-metadata.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.odpi.egeria</groupId>
+                <artifactId>inmemory-open-metadata-topic-connector</artifactId>
+                <version>${open-metadata.version}</version>
+                <scope>test</scope>
+            </dependency>
             <!-- Following dependencies are to ensure we use updated versions of libraries that others are dependent upon -->
             <dependency>
                 <groupId>com.sleepycat</groupId>
@@ -520,6 +526,7 @@
                         <exclude>cts/results/**/*.deployment</exclude>
                         <exclude>cts/results/**/*.configmap</exclude>
                         <exclude>**/resources/ia/*.xml</exclude>
+                        <exclude>**/resources/openigc/*.xml</exclude>
                     </excludes>
                     <licenseFamilies>
                         <licenseFamily implementation="org.apache.rat.license.SimpleLicenseFamily">

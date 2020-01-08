@@ -71,6 +71,7 @@ public class MockConstants {
     public static final String USER_QN = "(steward_user)=Mr. Gary Geeke";
     public static final String GROUP_RID = "b1c497ce.8a5be154.001mts4th.nmdbb31.7flfke.0b7taja56pjhs73o553iq";
     public static final String RID_FOR_CREATE_AND_UPDATE = "6662c0f2.e1b1ec6c.001muv34k.s0rtkp1.c38mtf.60ltvrgr67q6l6pq5t3qi";
+    public static final String TERM_RID_FOR_EVENT = "6662c0f2.e1b1ec6c.00263sgva.eo5q0s7.o5rf5s.q22k66bdjh8h341n1hi1e";
 
     // Examples used for specific scenarios to test IA client
     public static final String IA_PROJECT_NAME = "CocoPharma";
@@ -189,6 +190,15 @@ public class MockConstants {
      */
     public static HttpRequest updateAssetRequest(String rid, String body) {
         return request().withMethod("PUT").withPath(IGC_REST_EP + "assets/" + rid).withBody(body);
+    }
+
+    /**
+     * Create a mock OpenIGC asset creation request.
+     * @param body what should be created
+     * @return HttpRequest
+     */
+    public static HttpRequest createOpenIGCAssetRequest(String body) {
+        return request().withMethod("POST").withPath(IGC_REST_EP + "bundles/assets").withBody(body);
     }
 
     /**

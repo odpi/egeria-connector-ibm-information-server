@@ -10,8 +10,10 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.R
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mocks.MockConnection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
 import org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants;
+import org.odpi.openmetadata.adapters.eventbus.topic.inmemory.InMemoryOpenMetadataTopicConnector;
 import org.odpi.openmetadata.adapters.repositoryservices.ConnectorConfigurationFactory;
 import org.odpi.openmetadata.adminservices.configuration.properties.OpenMetadataExchangeRule;
+import org.odpi.openmetadata.frameworks.connectors.Connector;
 import org.odpi.openmetadata.frameworks.connectors.ConnectorBroker;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectionCheckedException;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
@@ -21,6 +23,7 @@ import org.odpi.openmetadata.opentypes.OpenMetadataTypesArchive;
 import org.odpi.openmetadata.repositoryservices.auditlog.OMRSAuditLog;
 import org.odpi.openmetadata.repositoryservices.auditlog.OMRSAuditLogDestination;
 import org.odpi.openmetadata.repositoryservices.auditlog.OMRSAuditingComponent;
+import org.odpi.openmetadata.repositoryservices.connectors.omrstopic.OMRSTopicConnector;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.archivestore.properties.OpenMetadataArchive;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.archivestore.properties.OpenMetadataArchiveTypeStore;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.OMRSMetadataCollection;
@@ -30,6 +33,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.eventmanagement.OMRSRepositoryEventExchangeRule;
 import org.odpi.openmetadata.repositoryservices.eventmanagement.OMRSRepositoryEventManager;
+import org.odpi.openmetadata.repositoryservices.eventmanagement.OMRSRepositoryEventPublisher;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.*;
 import org.odpi.openmetadata.repositoryservices.localrepository.repositorycontentmanager.OMRSRepositoryContentHelper;
 import org.odpi.openmetadata.repositoryservices.localrepository.repositorycontentmanager.OMRSRepositoryContentManager;
@@ -55,6 +59,7 @@ public class ConnectorTest {
     private IGCOMRSRepositoryEventMapper igcomrsRepositoryEventMapper;
     private OMRSRepositoryContentManager contentManager;
     private OMRSRepositoryEventManager eventManager;
+    private InMemoryOpenMetadataTopicConnector inMemoryEventConnector;
 
     private String metadataCollectionId;
 
@@ -70,6 +75,7 @@ public class ConnectorTest {
         metadataCollectionId = UUID.randomUUID().toString();
         supportedAttributeTypeDefs = new ArrayList<>();
         supportedTypeDefs = new ArrayList<>();
+        inMemoryEventConnector = new InMemoryOpenMetadataTopicConnector();
 
     }
 
@@ -87,6 +93,16 @@ public class ConnectorTest {
                 new OMRSRepositoryEventExchangeRule(OpenMetadataExchangeRule.SELECTED_TYPES, Collections.emptyList()),
                 new OMRSRepositoryContentValidator(contentManager),
                 new OMRSAuditLog(destination, OMRSAuditingComponent.REPOSITORY_EVENT_MANAGER));
+
+        // TODO: setup eventManager with the InMemoryTopicConnector, so that it writes to memory rather than Kafka
+        List<Connector> inMemoryConnector = new ArrayList<>();
+        inMemoryConnector.add(inMemoryEventConnector);
+        OMRSTopicConnector omrsTopicConnector = new OMRSTopicConnector();
+        omrsTopicConnector.initializeEmbeddedConnectors(inMemoryConnector);
+        OMRSRepositoryEventPublisher publisher = new OMRSRepositoryEventPublisher("Mock EventPublisher",
+                omrsTopicConnector,
+                auditLog.createNewAuditLog(OMRSAuditingComponent.EVENT_PUBLISHER));
+        eventManager.registerRepositoryEventProcessor(publisher);
 
         ConnectorBroker connectorBroker = new ConnectorBroker();
 
@@ -1582,6 +1598,21 @@ public class ConnectorTest {
                 MockConstants.GROUP_RID,
                 expectedValues
         );
+
+    }
+
+    @Test
+    public void testAddEntityEvent() {
+
+        // TODO: Update the mock used for looking up this event to remove certain relationships, so they are detected
+        //  as changes and need to flow through an update (and various new relationship events)
+        try {
+            igcomrsRepositoryEventMapper.processEvent("{\"ASSET_NAME\":\"Email Address\",\"ACTION\":\"CREATE\",\"ASSET_CONTEXT\":\"Coco Pharmaceuticals\",\"TIMESTAMP\":\"1578339969042\",\"ASSET_TYPE\":\"Term\",\"eventType\":\"IGC_BUSINESSTERM_EVENT\",\"USER\":\"isadmin\",\"CHANGEWORKFLOWSTATE\":\"false\",\"ASSET_RID\":\"" + MockConstants.TERM_RID_FOR_EVENT + "\"}");
+        } catch (Exception e) {
+            log.error("Hit unexpected exception during event processing.", e);
+            assertNull(e);
+        }
+        // TODO: determine how to check the output / outcome of events themselves...
 
     }
 
