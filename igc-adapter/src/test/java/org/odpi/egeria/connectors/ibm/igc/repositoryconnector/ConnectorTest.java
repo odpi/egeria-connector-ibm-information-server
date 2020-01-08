@@ -28,6 +28,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.archivestore.p
 import org.odpi.openmetadata.repositoryservices.connectors.stores.archivestore.properties.OpenMetadataArchiveTypeStore;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.OMRSMetadataCollection;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
@@ -279,6 +280,11 @@ public class ConnectorTest {
         List<TypeDef> relationshipTypeDefs = findTypeDefsByCategory(TypeDefCategory.RELATIONSHIP_DEF);
         applyAssertionsToTypeDefs(relationshipTypeDefs, TypeDefCategory.RELATIONSHIP_DEF);
 
+        Map<String, Object> typeDefProperties = new HashMap<>();
+        typeDefProperties.put("qualifiedName", null);
+        TypeDefProperties matchProperties = new TypeDefProperties();
+        matchProperties.setTypeDefProperties(typeDefProperties);
+
         try {
             List<TypeDef> searchResults = igcomrsMetadataCollection.searchForTypeDefs(MockConstants.EGERIA_USER, ".*a.*");
             assertNotNull(searchResults);
@@ -287,6 +293,10 @@ public class ConnectorTest {
             assertTrue(names.contains("RelationalTable"));
             assertTrue(names.contains("CategoryHierarchyLink"));
             assertTrue(names.contains("Confidentiality"));
+            List<TypeDef> typeDefsByProperty = igcomrsMetadataCollection.findTypeDefsByProperty(MockConstants.EGERIA_USER, matchProperties);
+            assertNotNull(typeDefsByProperty);
+            names = typeDefsByProperty.stream().map(TypeDef::getName).collect(Collectors.toList());
+            assertTrue(names.contains("Referenceable"));
         } catch (InvalidParameterException | RepositoryErrorException e) {
             log.error("Unable to search for TypeDefs with contains string.", e);
             assertNull(e);
@@ -341,6 +351,33 @@ public class ConnectorTest {
             assertNull(e);
         } catch (Exception e) {
             log.error("Unexpected exception trying retrieve type definition.", e);
+            assertNull(e);
+        }
+
+    }
+
+    /**
+     * Test direct attribute type def retrievals.
+     */
+    @Test
+    public void testAttributeTypeDefRetrievals() {
+
+        final String dataClassAssignmentGUID = "2611892f-0527-478f-8843-a3aa2b9abb47";
+        final String dataClassAssignmentName = "DataClassAssignmentStatus";
+
+        try {
+            AttributeTypeDef byGUID = igcomrsMetadataCollection.getAttributeTypeDefByGUID(MockConstants.EGERIA_USER, dataClassAssignmentGUID);
+            AttributeTypeDef byName = igcomrsMetadataCollection.getAttributeTypeDefByName(MockConstants.EGERIA_USER, dataClassAssignmentName);
+            assertNotNull(byGUID);
+            assertNotNull(byName);
+            assertEquals(byGUID.getName(), dataClassAssignmentName);
+            assertEquals(byName.getGUID(), dataClassAssignmentGUID);
+            assertEquals(byGUID, byName);
+        } catch (InvalidParameterException | RepositoryErrorException | TypeDefNotKnownException e) {
+            log.error("Unable to retrieve attribute type definition: {} / {}", dataClassAssignmentGUID, dataClassAssignmentName, e);
+            assertNull(e);
+        } catch (Exception e) {
+            log.error("Unexpected exception trying retrieve attribute type definition.", e);
             assertNull(e);
         }
 
@@ -1601,6 +1638,51 @@ public class ConnectorTest {
 
     }
 
+    /**
+     * Test searching relationships.
+     */
+    @Test
+    public void testForeignKeyFindByPropertyValue() {
+
+        String relationshipType = "3cd4e0e7-fdbf-47a6-ae88-d4b3205e0c07";
+        String typeName = "ForeignKey";
+
+        Map<String, String> properties = new HashMap<>();
+        properties.put("confidence", "100");
+
+        List<Relationship> results = testFindRelationshipsByProperty(
+                relationshipType,
+                typeName,
+                properties,
+                MatchCriteria.ALL,
+                3);
+
+    }
+
+    /**
+     * Test searching entities by qualifiedName.
+     */
+    @Test
+    public void testFindEntitiesByQualifiedName() {
+
+        Set<String> possibleTypes = new HashSet<>();
+        possibleTypes.add("RelationalColumn");
+
+        List<EntityDetail> results = testFindEntitiesByPropertyValue(
+                possibleTypes,
+                "\\Q" + MockConstants.DATABASE_COLUMN_QN + "\\E",
+                1);
+
+        for (EntityDetail result : results) {
+            String qualifiedName = getStringValue(result.getProperties(), "qualifiedName");
+            assertEquals(qualifiedName, MockConstants.DATABASE_COLUMN_QN);
+        }
+
+    }
+
+    /**
+     * Test an event through the event mapper.
+     */
     @Test
     public void testAddEntityEvent() {
 
@@ -1686,7 +1768,7 @@ public class ConnectorTest {
      * @param typeName the name of the type to search
      * @param queryString the string criteria by which to search
      * @param totalNumberExpected the total number of expected results
-     * @return {@List<EntityDetail>} the results of the query
+     * @return {@code List<EntityDetail>} the results of the query
      */
     private List<EntityDetail> testFindEntitiesByPropertyValue(String typeGUID,
                                                                String typeName,
@@ -1706,7 +1788,7 @@ public class ConnectorTest {
      * @param possibleTypes the names of the types that could be returned by the search
      * @param queryString the string criteria by which to search
      * @param totalNumberExpected the total number of expected results
-     * @return {@List<EntityDetail>} the results of the query
+     * @return {@code List<EntityDetail>} the results of the query
      */
     private List<EntityDetail> testFindEntitiesByPropertyValue(Set<String> possibleTypes,
                                                                String queryString,
@@ -1722,7 +1804,7 @@ public class ConnectorTest {
      * @param classificationLimiters the names of classifications by which to limit the results (or null if not to limit)
      * @param queryString the string criteria by which to search
      * @param totalNumberExpected the total number of expected results
-     * @return {@List<EntityDetail>} the results of the query
+     * @return {@code List<EntityDetail>} the results of the query
      */
     private List<EntityDetail> testFindEntitiesByPropertyValue(Set<String> possibleTypes,
                                                                Set<String> classificationLimiters,
@@ -1740,7 +1822,7 @@ public class ConnectorTest {
      * @param classificationLimiters the names of classifications by which to limit the results (or null if not to limit)
      * @param queryString the string criteria by which to search
      * @param totalNumberExpected the total number of expected results
-     * @return {@List<EntityDetail>} the results of the query
+     * @return {@code List<EntityDetail>} the results of the query
      */
     private List<EntityDetail> testFindEntitiesByPropertyValue(String typeGUID,
                                                                Set<String> possibleTypes,
@@ -1799,7 +1881,7 @@ public class ConnectorTest {
      * @param properties the properties to match against
      * @param matchCriteria the criteria by which to match
      * @param totalNumberExpected the total number of expected results
-     * @return {@List<EntityDetail>} the results of the query
+     * @return {@code List<EntityDetail>} the results of the query
      */
     private List<EntityDetail> testFindEntitiesByProperty(String typeGUID,
                                                           String typeName,
@@ -1874,7 +1956,7 @@ public class ConnectorTest {
      * @param properties the properties of the classification to match against
      * @param matchCriteria the criteria by which to match
      * @param totalNumberExpected the total number of expected results
-     * @return {@List<EntityDetail>} the results of the query
+     * @return {@code List<EntityDetail>} the results of the query
      */
     private List<EntityDetail> testFindEntitiesByClassification(String typeGUID,
                                                                 String typeName,
@@ -1931,6 +2013,78 @@ public class ConnectorTest {
             assertFalse(results.isEmpty());
             assertEquals(results.size(), totalNumberExpected);
             for (EntityDetail result : results) {
+                assertEquals(result.getType().getTypeDefName(), typeName);
+                assertTrue(result.getVersion() > 1);
+            }
+        }
+
+        return results;
+
+    }
+
+    /**
+     * Executes a common set of tests against a list of Relationship objects after first searching for them by property.
+     *
+     * @param typeGUID the relationship type GUID to search
+     * @param typeName the name of the type to search
+     * @param properties the properties to match against
+     * @param matchCriteria the criteria by which to match
+     * @param totalNumberExpected the total number of expected results
+     * @return {@code List<Relationship>} the results of the query
+     */
+    private List<Relationship> testFindRelationshipsByProperty(String typeGUID,
+                                                               String typeName,
+                                                               Map<String, String> properties,
+                                                               MatchCriteria matchCriteria,
+                                                               int totalNumberExpected) {
+
+        final String methodName = "testFindRelationshipsByProperty";
+        List<Relationship> results = null;
+
+        OMRSRepositoryHelper helper = igcomrsRepositoryConnector.getRepositoryHelper();
+        String repoName = igcomrsRepositoryConnector.getRepositoryName();
+
+        InstanceProperties matchProperties = new InstanceProperties();
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+            String propertyName = entry.getKey();
+            String value = entry.getValue();
+            matchProperties = helper.addStringPropertyToInstance(
+                    repoName,
+                    matchProperties,
+                    propertyName,
+                    value,
+                    methodName
+            );
+        }
+
+        try {
+            results = igcomrsMetadataCollection.findRelationshipsByProperty(
+                    MockConstants.EGERIA_USER,
+                    typeGUID,
+                    matchProperties,
+                    matchCriteria,
+                    0,
+                    null,
+                    null,
+                    null,
+                    null,
+                    MockConstants.EGERIA_PAGESIZE
+            );
+        } catch (InvalidParameterException | TypeErrorException | RepositoryErrorException | PropertyErrorException | PagingErrorException | FunctionNotSupportedException | UserNotAuthorizedException e) {
+            log.error("Unable to search for {} relationships by property: {}", typeName, matchProperties, e);
+            assertNull(e);
+        } catch (Exception e) {
+            log.error("Unexpected exception trying to search for {} relationships by property: {}", typeName, matchProperties, e);
+            assertNull(e);
+        }
+
+        if (totalNumberExpected <= 0) {
+            assertTrue(results == null || results.isEmpty());
+        } else {
+            assertNotNull(results);
+            assertFalse(results.isEmpty());
+            assertEquals(results.size(), totalNumberExpected);
+            for (Relationship result : results) {
                 assertEquals(result.getType().getTypeDefName(), typeName);
                 assertTrue(result.getVersion() > 1);
             }

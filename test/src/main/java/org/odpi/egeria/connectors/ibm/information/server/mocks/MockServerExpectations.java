@@ -76,6 +76,9 @@ public class MockServerExpectations implements ExpectationInitializer {
         setExamplePartAsset(mockServerClient, glossaryIgcType, MockConstants.GLOSSARY_RID);
         setExampleAssetWithModDetails(mockServerClient, glossaryIgcType, MockConstants.GLOSSARY_RID);
 
+        setQualifiedNameSearch(mockServerClient);
+        setForeignKeyFindByPropertyValue(mockServerClient);
+
         setIGCLogout(mockServerClient);
 
     }
@@ -284,6 +287,29 @@ public class MockServerExpectations implements ExpectationInitializer {
                 .withSecure(true)
                 .when(searchRequest("{\"types\":[\"" + type + "\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":2,\"where\":{\"conditions\":[{\"property\":\"_id\",\"operator\":\"=\",\"value\":\"" + rid + "\"}],\"operator\":\"and\"}}"))
                 .respond(withResponse(getResourceFileContents("rid_mod_" + rid + ".json")));
+    }
+
+    private void setQualifiedNameSearch(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(
+                        json(
+                                "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"database_table_or_view.name\",\"operator\":\"=\",\"value\":\"CONTACTEMAIL\"},{\"property\":\"database_table_or_view.database_schema.name\",\"operator\":\"=\",\"value\":\"DB2INST1\"},{\"property\":\"database_table_or_view.database_schema.database.name\",\"operator\":\"=\",\"value\":\"COMPDIR\"},{\"property\":\"database_table_or_view.database_schema.database.host.name\",\"operator\":\"=\",\"value\":\"INFOSVR\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"EMAIL\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        )))
+                .respond(withResponse(getResourceFileContents("by_rid" + File.separator + "database_column" + File.separator + DATABASE_COLUMN_RID + ".json")));
+    }
+
+    private void setForeignKeyFindByPropertyValue(MockServerClient mockServerClient) {
+        String caseName = "ForeignKeyFindByPropertyValue";
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(
+                        json(
+                                "{\"types\":[\"database_column\"],\"properties\":[\"defined_foreign_key_references\",\"selected_foreign_key_references\"],\"where\":{\"conditions\":[{\"property\":\"defined_foreign_key_references\",\"operator\":\"isNull\",\"negated\":true},{\"property\":\"selected_foreign_key_references\",\"operator\":\"isNull\",\"negated\":true}],\"operator\":\"or\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        )))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
     }
 
     private void setIGCLogout(MockServerClient mockServerClient) {
