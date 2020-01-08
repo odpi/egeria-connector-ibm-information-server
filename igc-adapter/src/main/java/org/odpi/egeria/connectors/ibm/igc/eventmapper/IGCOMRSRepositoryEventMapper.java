@@ -280,11 +280,14 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 case "IA_DATARULESET_DEFINITION_CREATED_EVENT":
                 case "IA_DATARULESET_DEFINITION_DELETED_EVENT":
                 case "IA_COLUMN_ANALYSIS_SUBMITTED_EVENT":
+                case "IA_COLUMN_ANALYSES_SUBMITTED_EVENT":
                 case "IA_COLUMN_ANALYSIS_STARTED_EVENT":
                 case "IA_COLUMN_ANALYSIS_FINISHED_EVENT":
                 case "IA_COLUMN_ANALYSIS_FAILED_EVENT":
                 case "IA_PROFILE_BATCH_COMPLETED_EVENT":
                 case "IA_DATAQUALITY_ANALYSIS_SUBMITTED":
+                case "IA_DATAQUALITY_ANALYSIS_SUBMITTED_EVENT":
+                case "IA_DATAQUALITY_ANALYSES_SUBMITTED_EVENT":
                 case "IA_DATAQUALITY_ANALYSIS_STARTED_EVENT":
                 case "IA_DATAQUALITY_ANALYSIS_FINISHED_EVENT":
                 case "IA_DATAQUALITY_ANALYSIS_FAILED_EVENT":
@@ -1011,7 +1014,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         // Send the appropriate patch-defined action
                         switch (changeType) {
                             case "add":
-                                sendNewRelationship(relationship);
+                                sendNewRelationship(relationship, relationshipLevelRid);
                                 break;
                             case "replace":
                                 sendReplacedRelationship(
@@ -1019,6 +1022,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                         relationship,
                                         proxyOne,
                                         proxyTwo,
+                                        relationshipLevelRid,
                                         referenceListProperties,
                                         change
                                 );
@@ -1080,7 +1084,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 if (log.isDebugEnabled()) { log.debug(" ... retrieved relationship: {}", relationship); }
                 // If there was no stub, this is a new entity
                 if (stub == null) {
-                    sendNewRelationship(relationship);
+                    sendNewRelationship(relationship, null);
                 } else {
                     sendUpdatedRelationship(relationship, stub);
                 }
@@ -1101,8 +1105,9 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      * Send an event out on OMRS topic for a new relationship.
      *
      * @param relationship the new relationship to publish
+     * @param relationshipLevelRid the RID of the IGC asset that exists at relationship-level, or null if none
      */
-    private void sendNewRelationship(Relationship relationship) {
+    private void sendNewRelationship(Relationship relationship, String relationshipLevelRid) {
         if (relationship != null) {
             repositoryEventProcessor.processNewRelationshipEvent(
                     sourceName,
@@ -1112,11 +1117,18 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     null,
                     relationship
             );
+            if (relationshipLevelRid != null) {
+                Reference relationshipLevelAsset = igcRestClient.getAssetById(relationshipLevelRid);
+                if (relationshipLevelAsset != null) {
+                    igcRepositoryHelper.upsertOMRSStubForAsset(relationshipLevelAsset);
+                }
+            }
         }
     }
 
     /**
-     * Send an event out on OMRS topic for an updated relationship.
+     * Send an event out on OMRS topic for an updated relationship (only ever used for self-referencing / generated
+     * entities, as all others will send a replaced relationship).
      *
      * @param relationship the updated relationship to publish
      * @param stub the OMRS stub for the asset, containing the last version for which we successfully sent an event
@@ -1138,6 +1150,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     old,
                     relationship
             );
+            // Note that we will never upsert an OMRS stub here as this is only used for self-referencing relationships
         }
     }
 
@@ -1149,6 +1162,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      * @param relationship the new relationship
      * @param proxyOne the IGC asset used as proxyOne of the new relationship
      * @param proxyTwo the IGC asset used as proxyTwo of the new relationship
+     * @param relationshipLevelRid the RID of the IGC asset that exists at relationship-level, or null if none
      * @param referenceListProperties the list of IGC property names that contain reference lists
      * @param change the change that indicated this relationship replacement
      */
@@ -1156,6 +1170,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                           Relationship relationship,
                                           Reference proxyOne,
                                           Reference proxyTwo,
+                                          String relationshipLevelRid,
                                           List<String> referenceListProperties,
                                           ChangeSet.Change change) {
 
@@ -1223,7 +1238,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         } else {
             if (log.isWarnEnabled()) { log.warn("Unable to find any previous version for the relationship replacement (null) -- sending only new: {}", newRelationshipGUID); }
         }
-        sendNewRelationship(relationship);
+        sendNewRelationship(relationship, relationshipLevelRid);
 
     }
 

@@ -6,7 +6,7 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.client.initialize.ExpectationInitializer;
 import org.mockserver.matchers.MatchType;
 import org.mockserver.matchers.Times;
-import org.mockserver.model.Header;
+import org.mockserver.model.JsonBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -189,6 +189,9 @@ public class MockServerExpectations implements ExpectationInitializer {
         setDataFileRelationships(mockServerClient);
         setTabularSchemaTypeRelationships(mockServerClient);
         setTabularColumnRelationships(mockServerClient);
+
+        // Event tests
+        setEventTest(mockServerClient);
 
     }
 
@@ -894,6 +897,60 @@ public class MockServerExpectations implements ExpectationInitializer {
                         "{\"types\":[\"data_file_record\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_fields\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FIELD_RID + "\"}],\"operator\":\"or\"}}"
                 ))
                 .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_record.json")));
+    }
+
+    private void setEventTest(MockServerClient mockServerClient) {
+
+        String caseName = "TermAddEvent";
+
+        setStubCreations(mockServerClient);
+        setStubLookups(mockServerClient, caseName);
+
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.searchRequest(
+                        json(
+                                "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"_id\",\"operator\":\"=\",\"value\":\"" + TERM_RID_FOR_EVENT + "\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"parent_category.category_path\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"},{\"property\":\"parent_category\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        )))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "TermAnchor.json")));
+
+    }
+
+    private void setStubCreations(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.createOpenIGCAssetRequest())
+                .respond(withResponse(getResourceFileContents("openigc" + File.separator + "stub_term.json")));
+    }
+
+    private void setStubLookups(MockServerClient mockServerClient, String caseName) {
+        JsonBody termRequest = json(
+                "{\"types\":[\"$OMRS-Stub\"],\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"=\",\"value\":\"term_" + TERM_RID_FOR_EVENT + "\"}],\"operator\":\"and\"}}",
+                MatchType.ONLY_MATCHING_FIELDS
+        );
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(termRequest), Times.exactly(1))
+                .respond(withResponse(getResourceFileContents("no_results.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(termRequest))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "term_" + TERM_RID_FOR_EVENT + ".json")));
+        // For the remainder of relationships just get a stub back directly...
+        setStubLookupForRid(mockServerClient, caseName, "database_column", "b1c497ce.60641b50.001mts4qn.7n94g9l.d6kb7r.l766qqrh375qc8dngkpni");
+        setStubLookupForRid(mockServerClient, caseName, "data_file_field", "b1c497ce.60641b50.001mts4ph.b86ofl8.toj5lt.0vrgjai9knc4h9k0hpr08");
+        setStubLookupForRid(mockServerClient, caseName, "category", "6662c0f2.ee6a64fe.00263pfar.1a0mm9a.lfjd3c.rmgl1cdd5fcd4bijur3g3");
+    }
+
+    private void setStubLookupForRid(MockServerClient mockServerClient, String caseName, String type, String rid) {
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(json(
+                        "{\"types\":[\"$OMRS-Stub\"],\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"=\",\"value\":\"" + type + "_" + rid + "\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                )))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + type + "_" + rid + ".json")));
     }
 
     private void setProjectsQuery(MockServerClient mockServerClient) {
