@@ -420,7 +420,21 @@ public abstract class RelationshipMapping extends InstanceMapping {
         // likely to be the same regardless -- instead always start from TWO and retrieve ONE
         ProxyMapping pm = getProxyTwoMapping();
         IGCSearch igcSearch = new IGCSearch(pm.getIgcAssetType());
-        igcSearch.addProperties(pm.getRealIgcRelationshipProperties());
+
+        List<String> relationshipProperties = pm.getRealIgcRelationshipProperties();
+
+        // However, only retrieve objects when the relationship property itself is not null (that is, where there
+        // actually is such a relationship set)
+        if (!relationshipProperties.isEmpty()) {
+            igcSearch.addProperties(relationshipProperties);
+            IGCSearchConditionSet conditions = new IGCSearchConditionSet();
+            for (String property : relationshipProperties) {
+                IGCSearchCondition condition = new IGCSearchCondition(property, "isNull", true);
+                conditions.addCondition(condition);
+            }
+            conditions.setMatchAnyCondition(true);
+            igcSearch.addConditions(conditions);
+        }
 
         return igcSearch;
 

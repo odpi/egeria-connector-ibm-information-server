@@ -167,14 +167,15 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             Map<String, Object> properties = matchCriteria.getTypeDefProperties();
             for (TypeDef candidate : typeDefs) {
                 List<TypeDefAttribute> candidateProperties = candidate.getPropertiesDefinition();
-                for (TypeDefAttribute candidateAttribute : candidateProperties) {
-                    String candidateName = candidateAttribute.getAttributeName();
-                    if (properties.containsKey(candidateName)) {
-                        results.add(candidate);
+                if (candidateProperties != null) {
+                    for (TypeDefAttribute candidateAttribute : candidateProperties) {
+                        String candidateName = candidateAttribute.getAttributeName();
+                        if (properties.containsKey(candidateName)) {
+                            results.add(candidate);
+                        }
                     }
                 }
             }
-            results = typeDefs;
         }
 
         return results;
@@ -269,16 +270,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         TypeDef found = typeDefStore.getTypeDefByGUID(guid);
 
         if (found == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    guid,
-                    repositoryName);
-            throw new TypeDefNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseTypeDefNotKnownException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, guid, methodName);
         }
 
         return found;
@@ -300,16 +292,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         AttributeTypeDef found = attributeMappingStore.getAttributeTypeDefByGUID(guid);
         if (found == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ATTRIBUTE_TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    guid,
-                    repositoryName);
-            throw new TypeDefNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseTypeDefNotKnownException(IGCOMRSErrorCode.ATTRIBUTE_TYPEDEF_NOT_MAPPED, guid, methodName);
         }
         return found;
 
@@ -331,16 +314,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         TypeDef found = typeDefStore.getTypeDefByName(name);
 
         if (found == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    name,
-                    repositoryName);
-            throw new TypeDefNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseTypeDefNotKnownException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, name, methodName);
         }
 
         return found;
@@ -362,16 +336,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         AttributeTypeDef found = attributeMappingStore.getAttributeTypeDefByName(name);
         if (found == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ATTRIBUTE_TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    name,
-                    repositoryName);
-            throw new TypeDefNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseTypeDefNotKnownException(IGCOMRSErrorCode.ATTRIBUTE_TYPEDEF_NOT_MAPPED, name, methodName);
         }
         return found;
     }
@@ -434,32 +399,14 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
             if (!success) {
                 typeDefStore.addUnimplementedTypeDef(newTypeDef);
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        omrsTypeDefName,
-                        repositoryName);
-                throw new TypeDefNotSupportedException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
+                raiseTypeDefNotSupportedException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, omrsTypeDefName, methodName);
             } else {
                 typeDefStore.addTypeDef(newTypeDef);
             }
 
         } catch (ClassNotFoundException e) {
             typeDefStore.addUnimplementedTypeDef(newTypeDef);
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    omrsTypeDefName,
-                    repositoryName);
-            throw new TypeDefNotSupportedException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseTypeDefNotSupportedException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, omrsTypeDefName, methodName);
         }
 
         checkEventMapperIsConfigured(methodName);
@@ -501,16 +448,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             if (log.isDebugEnabled()) { log.debug(" ... found mapping class: {}", mappingClass.getCanonicalName()); }
             attributeMappingStore.addMapping(newAttributeTypeDef, mappingClass);
         } catch (ClassNotFoundException e) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ATTRIBUTE_TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    omrsTypeDefName,
-                    repositoryName);
-            throw new TypeDefNotSupportedException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseTypeDefNotSupportedException(IGCOMRSErrorCode.ATTRIBUTE_TYPEDEF_NOT_MAPPED, omrsTypeDefName, methodName);
         }
 
         checkEventMapperIsConfigured(methodName);
@@ -567,16 +505,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         // If we know the TypeDef is unimplemented, immediately throw an exception stating as much
         if (typeDefStore.getUnimplementedTypeDefByGUID(guid, false) != null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    typeDef.getName(),
-                    repositoryName);
-            throw new TypeDefNotSupportedException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseTypeDefNotSupportedException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, typeDef.getName(), methodName);
+            return false;
         } else if (typeDefStore.getTypeDefByGUID(guid) != null) {
 
             List<String> gaps = new ArrayList<>();
@@ -610,16 +540,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             // If we were unable to verify everything, throw exception indicating it is not a supported TypeDef
             if (!gaps.isEmpty()) {
                 if (log.isWarnEnabled()) { log.warn("Unable to verify type definition {} due to missing property mappings for: {}", typeDef.getName(), String.join(", ", gaps)); }
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        typeDef.getName(),
-                        repositoryName);
-                throw new TypeDefNotSupportedException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
+                raiseTypeDefNotSupportedException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, typeDef.getName(), methodName);
+                return false;
             } else {
                 // Everything checked out, so return true
                 return true;
@@ -702,20 +624,10 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         // Lookup the basic asset based on the RID (strip off prefix (indicating a generated type), if there)
         IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(guid);
         if (igcGuid == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    guid,
-                    "null",
-                    repositoryName);
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseEntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN, guid, "<null>", methodName);
         }
 
-        EntitySummary summary;
+        EntitySummary summary = null;
         String igcType = igcGuid.getAssetType();
         String prefix = igcGuid.getGeneratedPrefix();
 
@@ -728,12 +640,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     guid,
                     igcType,
                     repositoryName);
-            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseRepositoryErrorException(errorCode, errorMessage, methodName);
         } else {
 
             // Otherwise, retrieve the mapping dynamically based on the type of asset
@@ -751,12 +658,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                         prefix + igcType,
                         repositoryName);
-                throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
+                raiseRepositoryErrorException(errorCode, errorMessage, methodName);
             }
 
         }
@@ -780,17 +682,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         // Lookup the basic asset based on the RID (strip off prefix (indicating a generated type), if there)
         IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(guid);
         if (igcGuid == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    guid,
-                    "null",
-                    repositoryName);
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseEntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN, guid, "<null>", methodName);
         }
 
         return igcRepositoryHelper.getEntityDetail(userId, igcGuid);
@@ -861,14 +753,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         // Immediately throw unimplemented exception if trying to retrieve historical view or sequence by property
         if (asOfTime != null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.NO_HISTORY;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(repositoryName);
-            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseFunctionNotSupportedException(IGCOMRSErrorCode.NO_HISTORY, methodName);
         } else if (sequencingProperty != null
                 || (sequencingOrder != null
                 &&
@@ -892,17 +777,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             // 0. see if the entityGUID has a prefix (indicating a generated type)
             IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(entityGUID);
             if (igcGuid == null) {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        entityGUID,
-                        "null",
-                        repositoryName);
-                throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
+                raiseEntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN, entityGUID, "<null>", methodName);
             }
             String rid = igcGuid.getRid();
             String prefix = igcGuid.getGeneratedPrefix();
@@ -931,12 +806,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                         prefix + igcType,
                         repositoryName);
-                    throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                            this.getClass().getName(),
-                            methodName,
-                            errorMessage,
-                            errorCode.getSystemAction(),
-                            errorCode.getUserAction());
+                raiseRepositoryErrorException(errorCode, errorMessage, methodName);
             }
 
         }
@@ -1019,14 +889,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         // Immediately throw unimplemented exception if trying to retrieve historical view
         if (asOfTime != null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.NO_HISTORY;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(repositoryName);
-            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseFunctionNotSupportedException(IGCOMRSErrorCode.NO_HISTORY, methodName);
         } else if (limitResultsByStatus == null
                 || (limitResultsByStatus.size() == 1 && limitResultsByStatus.contains(InstanceStatus.ACTIVE))) {
 
@@ -1261,14 +1124,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         // Immediately throw unimplemented exception if trying to retrieve historical view
         if (asOfTime != null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.NO_HISTORY;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(repositoryName);
-            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseFunctionNotSupportedException(IGCOMRSErrorCode.NO_HISTORY, methodName);
         } else if (limitResultsByStatus == null
                 || (limitResultsByStatus.size() == 1 && limitResultsByStatus.contains(InstanceStatus.ACTIVE))) {
 
@@ -1426,14 +1282,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         // Immediately throw unimplemented exception if trying to retrieve historical view
         if (asOfTime != null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.NO_HISTORY;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(repositoryName);
-            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseFunctionNotSupportedException(IGCOMRSErrorCode.NO_HISTORY, methodName);
         } else if (limitResultsByStatus == null
                 || (limitResultsByStatus.size() == 1 && limitResultsByStatus.contains(InstanceStatus.ACTIVE))) {
 
@@ -1667,16 +1516,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         // Translate the key properties of the GUID into IGC-retrievables
         IGCRelationshipGuid igcRelationshipGuid = IGCRelationshipGuid.fromGuid(guid);
         if (igcRelationshipGuid == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    guid,
-                    repositoryName);
-            throw new RelationshipNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseRelationshipNotKnownException(IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN, guid, methodName);
         }
         String proxyOneRid = igcRelationshipGuid.getRid1();
         String proxyTwoRid = igcRelationshipGuid.getRid2();
@@ -1728,12 +1568,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     omrsRelationshipName,
                     repositoryName);
-            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseRepositoryErrorException(errorCode, errorMessage, methodName);
         }
 
         Relationship found = null;
@@ -1755,24 +1590,10 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
                     omrsRelationshipName,
                     repositoryName);
-            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseRepositoryErrorException(errorCode, errorMessage, methodName);
         }
         if (relationships.isEmpty()) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    guid,
-                    repositoryName);
-            throw new RelationshipNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseRelationshipNotKnownException(IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN, guid, methodName);
         } else if (relationships.size() > 1) {
             // Iterate through the found relationships if there is more than one, and return the first one whose
             // GUID matches the one requested
@@ -1786,16 +1607,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         }
 
         if (found == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    guid,
-                    repositoryName);
-            throw new RelationshipNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseRelationshipNotKnownException(IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN, guid, methodName);
         }
 
         return found;
@@ -1841,14 +1653,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         // Immediately throw unimplemented exception if trying to retrieve historical view
         if (asOfTime != null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.NO_HISTORY;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(repositoryName);
-            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseFunctionNotSupportedException(IGCOMRSErrorCode.NO_HISTORY, methodName);
         } else if (limitResultsByStatus == null
                 || (limitResultsByStatus.size() == 1 && limitResultsByStatus.contains(InstanceStatus.ACTIVE))) {
 
@@ -1961,14 +1766,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         // Immediately throw unimplemented exception if trying to retrieve historical view
         if (asOfTime != null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.NO_HISTORY;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(repositoryName);
-            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseFunctionNotSupportedException(IGCOMRSErrorCode.NO_HISTORY, methodName);
         } else if (limitResultsByStatus == null
                 || (limitResultsByStatus.size() == 1 && limitResultsByStatus.contains(InstanceStatus.ACTIVE))) {
 
@@ -2156,12 +1954,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         if (eventMapper == null) {
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.EVENT_MAPPER_NOT_INITIALIZED;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(repositoryName);
-            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseRepositoryErrorException(errorCode, errorMessage, methodName);
         }
     }
 
@@ -2287,6 +2080,116 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             }
         }
         return mappers;
+    }
+
+    /**
+     * Throw a TypeDefNotKnownException using the provided information.
+     * @param errorCode the error code to use for the exception
+     * @param typeDef the type def that is not known
+     * @param methodName the name of the method throwing the exception
+     * @throws TypeDefNotKnownException always
+     */
+    private void raiseTypeDefNotKnownException(IGCOMRSErrorCode errorCode, String typeDef, String methodName) throws TypeDefNotKnownException {
+        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                typeDef,
+                repositoryName);
+        throw new TypeDefNotKnownException(errorCode.getHTTPErrorCode(),
+                this.getClass().getName(),
+                methodName,
+                errorMessage,
+                errorCode.getSystemAction(),
+                errorCode.getUserAction());
+    }
+
+    /**
+     * Throw a TypeDefNotSupportedException using the provided information.
+     * @param errorCode the error code to use for the exception
+     * @param typeDef the type def that is not supported
+     * @param methodName the name of the method throwing the exception
+     * @throws TypeDefNotSupportedException always
+     */
+    private void raiseTypeDefNotSupportedException(IGCOMRSErrorCode errorCode, String typeDef, String methodName) throws TypeDefNotSupportedException {
+        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                typeDef,
+                repositoryName);
+        throw new TypeDefNotSupportedException(errorCode.getHTTPErrorCode(),
+                this.getClass().getName(),
+                methodName,
+                errorMessage,
+                errorCode.getSystemAction(),
+                errorCode.getUserAction());
+    }
+
+    /**
+     * Throw an EntityNotKnownException using the provided information.
+     * @param errorCode the error code to use for the exception
+     * @param guid the GUID of the entity that is not known
+     * @param rid the IGC RID of the entity that is not known
+     * @param methodName the name of the method throwing the exception
+     * @throws EntityNotKnownException always
+     */
+    private void raiseEntityNotKnownException(IGCOMRSErrorCode errorCode, String guid, String rid, String methodName) throws EntityNotKnownException {
+        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                guid,
+                rid,
+                repositoryName);
+        throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
+                this.getClass().getName(),
+                methodName,
+                errorMessage,
+                errorCode.getSystemAction(),
+                errorCode.getUserAction());
+    }
+
+    /**
+     * Throw a RepositoryErrorException using the provided information.
+     * @param errorCode the error code to use for the exception
+     * @param errorMessage the formatted error message
+     * @param methodName the name of the method throwing the exception
+     * @throws RepositoryErrorException always
+     */
+    private void raiseRepositoryErrorException(IGCOMRSErrorCode errorCode, String errorMessage, String methodName) throws RepositoryErrorException {
+        throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+                this.getClass().getName(),
+                methodName,
+                errorMessage,
+                errorCode.getSystemAction(),
+                errorCode.getUserAction());
+    }
+
+    /**
+     * Throw a FunctionNotSupportedException using the provided information.
+     * @param errorCode the error code to use for the exception
+     * @param methodName the name of the method throwing the exception
+     * @throws FunctionNotSupportedException always
+     */
+    private void raiseFunctionNotSupportedException(IGCOMRSErrorCode errorCode, String methodName) throws FunctionNotSupportedException {
+        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(repositoryName);
+        throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
+                this.getClass().getName(),
+                methodName,
+                errorMessage,
+                errorCode.getSystemAction(),
+                errorCode.getUserAction());
+    }
+
+    /**
+     * Throw a RelationshipNotKnownException using the provided information.
+     * @param errorCode the error code to use for the exception
+     * @param relationship information about the relationship that is not known
+     * @param methodName the name of the method throwing the exception
+     * @throws RelationshipNotKnownException always
+     */
+    private void raiseRelationshipNotKnownException(IGCOMRSErrorCode errorCode, String relationship, String methodName) throws RelationshipNotKnownException {
+        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                relationship,
+                repositoryName);
+        throw new RelationshipNotKnownException(errorCode.getHTTPErrorCode(),
+                this.getClass().getName(),
+                methodName,
+                errorMessage,
+                errorCode.getSystemAction(),
+                errorCode.getUserAction());
     }
 
 }
