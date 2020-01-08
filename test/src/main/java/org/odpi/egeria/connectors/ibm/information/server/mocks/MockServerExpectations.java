@@ -920,7 +920,7 @@ public class MockServerExpectations implements ExpectationInitializer {
     private void setStubCreations(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
-                .when(MockConstants.createOpenIGCAssetRequest(getResourceFileContents("openigc" + File.separator + "stub_term.xml")))
+                .when(MockConstants.createOpenIGCAssetRequest())
                 .respond(withResponse(getResourceFileContents("openigc" + File.separator + "stub_term.json")));
     }
 

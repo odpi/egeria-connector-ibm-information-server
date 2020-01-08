@@ -193,12 +193,13 @@ public class MockConstants {
     }
 
     /**
-     * Create a mock OpenIGC asset creation request.
-     * @param body what should be created
+     * Create a mock OpenIGC asset creation request. (Note that this will work for only a single asset, as no body
+     * can be reliably provided given that the ordering of JSON elements within the body can vary from one build
+     * environment to another.)
      * @return HttpRequest
      */
-    public static HttpRequest createOpenIGCAssetRequest(String body) {
-        return request().withMethod("POST").withPath(IGC_REST_EP + "bundles/assets").withBody(body);
+    public static HttpRequest createOpenIGCAssetRequest() {
+        return request().withMethod("POST").withPath(IGC_REST_EP + "bundles/assets");
     }
 
     /**
