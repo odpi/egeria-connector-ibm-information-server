@@ -104,6 +104,42 @@ public class IdentityTest {
 
     }
 
+    @Test
+    public void testSearchCriteriaEdges() {
+
+        String userExamplePart1 = "(non_steward_user)=Firstname";
+        String userExamplePart2 = "(steward_user)=Ms. Firstna";
+        String dataFileFolder = "(host_(engine))=INFOSVR::(data_file_folder)=/::(data_file_folder)=data";
+        String term = "(category)=Some Category::(term)=Some Term";
+
+        Identity part = Identity.getFromString(userExamplePart1, igcRestClient, Identity.StringType.STARTS_WITH, false);
+        assertNotNull(part);
+        IGCSearchConditionSet conditions = part.getSearchCriteria();
+        assertNotNull(conditions);
+        assertEquals(conditions.size(), 1);
+        assertTrue(conditions.getConditionSetObject().toString().contains("courtesy_title"));
+
+        part = Identity.getFromString(userExamplePart2, igcRestClient, Identity.StringType.STARTS_WITH, false);
+        assertNotNull(part);
+        conditions = part.getSearchCriteria();
+        assertNotNull(conditions);
+        assertEquals(conditions.size(), 1);
+        assertTrue(conditions.getConditionSetObject().toString().contains("surname"));
+
+        Identity full = Identity.getFromString(dataFileFolder, igcRestClient, Identity.StringType.EXACT, false);
+        assertNotNull(full);
+        conditions = full.getSearchCriteria();
+        assertNotNull(conditions);
+        assertEquals(conditions.size(), 3);
+
+        full = Identity.getFromString(term, igcRestClient, Identity.StringType.EXACT, false);
+        assertNotNull(full);
+        conditions = full.getSearchCriteria();
+        assertNotNull(conditions);
+        assertEquals(conditions.size(), 2);
+
+    }
+
     @AfterSuite
     void stopClient() {
         igcRestClient.disconnect();
