@@ -676,7 +676,7 @@ public class IARestClient {
     private boolean publishResults(String projectName,
                                    PublishResults details) {
         String xmlPayload = getTaskPayload(projectName, details);
-        if (log.isInfoEnabled()) { log.info("Task request payload: " + xmlPayload); }
+        if (log.isDebugEnabled()) { log.debug("Task request payload: " + xmlPayload); }
         String response = makeRequest(EP_PUBLISH, HttpMethod.POST, xmlPayload);
         if (response != null) {
             throw new RuntimeException("Error publishing: " + response);
@@ -728,7 +728,7 @@ public class IARestClient {
                                                 Object details,
                                                 String methodName) {
         String xmlPayload = getTaskPayload(projectName, details);
-        if (log.isInfoEnabled()) { log.info("Task request payload: " + xmlPayload); }
+        if (log.isDebugEnabled()) { log.debug("Task request payload: " + xmlPayload); }
         String response = makeRequest(EP_EXECUTE_TASK, HttpMethod.POST, xmlPayload);
         TaskExecutionReport taskExecutionReport = null;
         try {
