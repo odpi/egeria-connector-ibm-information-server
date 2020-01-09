@@ -9,15 +9,15 @@ public class IGCException extends RuntimeException {
 
     /**
      * Default constructor used for creating an IGCException when an unexpected error has been caught.
-     * @param errorMessage
+     * @param errorMessage description of the error
      */
     public IGCException(String errorMessage) { super(errorMessage); }
 
     /**
      * Constructor used for creating an IGCException when an unexpected error has been caught that was caused by
      * some other error.
-     * @param errorMessage  description of error
-     * @param caughtError   previous error causing this exception
+     * @param errorMessage description of error
+     * @param caughtError previous error causing this exception
      */
     public IGCException(String errorMessage, Throwable caughtError) {
         super(errorMessage, caughtError);
