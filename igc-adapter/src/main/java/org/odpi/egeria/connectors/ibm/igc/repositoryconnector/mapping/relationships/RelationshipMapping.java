@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -26,6 +27,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.OMRSErrorCode;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.OMRSRuntimeException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.TypeErrorException;
 import org.slf4j.Logger;
@@ -1019,7 +1021,20 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
         if (igcType != null) {
 
-            IGCOMRSMetadataCollection igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
+            IGCOMRSMetadataCollection igcomrsMetadataCollection;
+            try {
+                igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
+            } catch (RepositoryErrorException e) {
+                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
+                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(igcomrsRepositoryConnector.getServerName());
+                throw new OMRSRuntimeException(errorCode.getHTTPErrorCode(),
+                        RelationshipMapping.class.getName(),
+                        methodName,
+                        errorMessage,
+                        errorCode.getSystemAction(),
+                        errorCode.getUserAction(),
+                        e);
+            }
             IGCRepositoryHelper igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
             EntityMappingInstance entityMap = igcRepositoryHelper.getMappingInstanceForParameters(
                     igcObj.getType(),

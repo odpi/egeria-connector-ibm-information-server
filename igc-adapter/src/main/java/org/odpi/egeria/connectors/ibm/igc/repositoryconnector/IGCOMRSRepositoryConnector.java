@@ -6,19 +6,11 @@ import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSAuditCode;
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.OMRSStub;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
-import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
 import org.odpi.openmetadata.frameworks.connectors.properties.EndpointProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.OMRSMetadataCollection;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryConnector;
-import org.odpi.openmetadata.repositoryservices.ffdc.exception.OMRSRuntimeException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +29,6 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
 
     private List<String> defaultZones;
 
-    private boolean successfulInit;
-
     /**
      * Default constructor used by the OCF Connector Provider.
      */
@@ -47,69 +37,19 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
     }
 
     /**
-     * Call made by the ConnectorProvider to initialize the Connector with the base services.
-     *
-     * @param connectorInstanceId   unique id for the connector instance   useful for messages etc
-     * @param connectionProperties   POJO for the configuration used to create the connector.
+     * {@inheritDoc}
      */
     @Override
-    public void initialize(String               connectorInstanceId,
-                           ConnectionProperties connectionProperties) {
-
-        super.initialize(connectorInstanceId, connectionProperties);
-
-        final String methodName = "initialize";
-
-        EndpointProperties endpointProperties = connectionProperties.getEndpoint();
-        if (endpointProperties == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("null");
-            throw new OMRSRuntimeException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
-        }
-        String address = endpointProperties.getProtocol() + "://" + endpointProperties.getAddress();
-
-        String igcUser = connectionProperties.getUserId();
-        String igcPass = connectionProperties.getClearPassword();
-
-        // Retrieve connection details
-        Map<String, Object> proxyProperties = this.connectionBean.getConfigurationProperties();
-        if (proxyProperties != null) {
-            Object zones = proxyProperties.get(IGCOMRSRepositoryConnectorProvider.DEFAULT_ZONES);
-            if (zones instanceof List) {
-                for (Object zone : (List<?>) zones) {
-                    if (zone instanceof String) {
-                        this.defaultZones.add((String)zone);
-                    }
-                }
-            }
-        }
-
-        // Create new REST API client (opens a new session)
-        this.igcRestClient = new IGCRestClient(address, igcUser, igcPass);
-        if (this.igcRestClient.start()) {
-            if (getMaxPageSize() > 0) {
-                this.igcRestClient.setDefaultPageSize(getMaxPageSize());
-            }
-
-            // Set the version based on the IGC client's auto-determination of the IGC environment's version
-            this.igcVersion = this.igcRestClient.getIgcVersion();
-
+    public OMRSMetadataCollection getMetadataCollection() throws RepositoryErrorException {
+        final String methodName = "getMetadataCollection";
+        if (metadataCollection == null) {
+            // If the metadata collection has not yet been created, attempt to create it now
             try {
-                boolean success = upsertOMRSBundleZip();
-                this.igcRestClient.registerPOJO(OMRSStub.class);
-                successfulInit = success;
-            } catch (RepositoryErrorException e) {
-                successfulInit = false;
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.OMRS_BUNDLE_FAILURE;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
-                throw new OMRSRuntimeException(
+                connectToIGC(methodName);
+            } catch (ConnectorCheckedException e) {
+                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
+                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(getServerName());
+                throw new RepositoryErrorException(
                         errorCode.getHTTPErrorCode(),
                         this.getClass().getName(),
                         methodName,
@@ -119,23 +59,8 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
                         e
                 );
             }
-        } else {
-            successfulInit = false;
         }
-
-        if (!successfulInit) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
-            throw new OMRSRuntimeException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
-        }
-
+        return super.getMetadataCollection();
     }
 
     /**
@@ -143,8 +68,10 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      */
     @Override
     public void start() throws ConnectorCheckedException {
+
         super.start();
         final String methodName = "start";
+
         IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.REPOSITORY_SERVICE_STARTING;
         auditLog.logRecord(methodName,
                 auditCode.getLogMessageId(),
@@ -153,16 +80,21 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
                 null,
                 auditCode.getSystemAction(),
                 auditCode.getUserAction());
-        if (successfulInit) {
-            auditCode = IGCOMRSAuditCode.REPOSITORY_SERVICE_STARTED;
-            auditLog.logRecord(methodName,
-                    auditCode.getLogMessageId(),
-                    auditCode.getSeverity(),
-                    auditCode.getFormattedLogMessage(getServerName(), getIGCVersion().getVersionString()),
-                    null,
-                    auditCode.getSystemAction(),
-                    auditCode.getUserAction());
+
+        if (metadataCollection == null) {
+            // If the metadata collection has not yet been created, attempt to create it now
+            connectToIGC(methodName);
         }
+
+        auditCode = IGCOMRSAuditCode.REPOSITORY_SERVICE_STARTED;
+        auditLog.logRecord(methodName,
+                auditCode.getLogMessageId(),
+                auditCode.getSeverity(),
+                auditCode.getFormattedLogMessage(getServerName(), getIGCVersion().getVersionString()),
+                null,
+                auditCode.getSystemAction(),
+                auditCode.getUserAction());
+
     }
 
     /**
@@ -172,28 +104,6 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      */
     public IGCVersionEnum getIGCVersion() {
         return this.igcVersion;
-    }
-
-    /**
-     * Set up the unique Id for this metadata collection.
-     *
-     * @param metadataCollectionId - String unique Id
-     */
-    @Override
-    public void setMetadataCollectionId(String metadataCollectionId) {
-        this.metadataCollectionId = metadataCollectionId;
-
-        /*
-         * Initialize the metadata collection only once the connector is properly set up.
-         * (Meaning we will NOT initialise the collection if the connector failed to setup properly.)
-         */
-        if (successfulInit) {
-            metadataCollection = new IGCOMRSMetadataCollection(this,
-                    serverName,
-                    repositoryHelper,
-                    repositoryValidator,
-                    metadataCollectionId);
-        }
     }
 
     /**
@@ -217,24 +127,6 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
 
     }
 
-
-    /**
-     * Returns the metadata collection object that provides an OMRS abstraction of the metadata within
-     * a metadata repository.
-     *
-     * @return OMRSMetadataCollection - metadata information retrieved from the metadata repository.
-     */
-    @Override
-    public OMRSMetadataCollection getMetadataCollection() {
-
-        if (metadataCollection == null) {
-            throw new NullPointerException("Local metadata collection id is not set up");
-        }
-
-        return metadataCollection;
-    }
-
-
     /**
      * Access the IGC REST API client directly.
      *
@@ -248,6 +140,127 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      * @return {@code List<String>}
      */
     public List<String> getDefaultZones() { return this.defaultZones; }
+
+    /**
+     * Connect to the IBM Information Governance Catalog host.
+     *
+     * @param methodName the name of the method connecting to IGC
+     */
+    private void connectToIGC(String methodName) throws ConnectorCheckedException {
+
+        EndpointProperties endpointProperties = connectionProperties.getEndpoint();
+        if (endpointProperties == null) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("null");
+            throw new ConnectorCheckedException(
+                    errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction()
+            );
+        }
+
+        String address = endpointProperties.getProtocol() + "://" + endpointProperties.getAddress();
+
+        String igcUser = connectionProperties.getUserId();
+        String igcPass = connectionProperties.getClearPassword();
+
+        // Retrieve connection details
+        Map<String, Object> proxyProperties = this.connectionBean.getConfigurationProperties();
+        if (proxyProperties != null) {
+            Object zones = proxyProperties.get(IGCOMRSRepositoryConnectorProvider.DEFAULT_ZONES);
+            if (zones instanceof List) {
+                for (Object zone : (List<?>) zones) {
+                    if (zone instanceof String) {
+                        this.defaultZones.add((String)zone);
+                    }
+                }
+            }
+        }
+
+        boolean successfulInit;
+
+        IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.CONNECTING_TO_IGC;
+        auditLog.logRecord(methodName,
+                auditCode.getLogMessageId(),
+                auditCode.getSeverity(),
+                auditCode.getFormattedLogMessage(address),
+                null,
+                auditCode.getSystemAction(),
+                auditCode.getUserAction());
+
+        // Create new REST API client (opens a new session)
+        try {
+            this.igcRestClient = new IGCRestClient(address, igcUser, igcPass);
+            if (this.igcRestClient.start()) {
+                if (getMaxPageSize() > 0) {
+                    this.igcRestClient.setDefaultPageSize(getMaxPageSize());
+                }
+                // Set the version based on the IGC client's auto-determination of the IGC environment's version
+                this.igcVersion = this.igcRestClient.getIgcVersion();
+                boolean success = upsertOMRSBundleZip();
+                this.igcRestClient.registerPOJO(OMRSStub.class);
+                successfulInit = success;
+            } else {
+                successfulInit = false;
+            }
+        } catch (RepositoryErrorException e) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.OMRS_BUNDLE_FAILURE;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
+            throw new ConnectorCheckedException(
+                    errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction(),
+                    e
+            );
+        } catch (Exception e) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
+            throw new ConnectorCheckedException(
+                    errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction(),
+                    e
+            );
+        }
+
+        if (!successfulInit) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
+            throw new ConnectorCheckedException(
+                    errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction()
+            );
+        }
+
+        auditCode = IGCOMRSAuditCode.CONNECTED_TO_IGC;
+        auditLog.logRecord(methodName,
+                auditCode.getLogMessageId(),
+                auditCode.getSeverity(),
+                auditCode.getFormattedLogMessage(address),
+                null,
+                auditCode.getSystemAction(),
+                auditCode.getUserAction());
+
+        metadataCollection = new IGCOMRSMetadataCollection(this,
+                serverName,
+                repositoryHelper,
+                repositoryValidator,
+                metadataCollectionId);
+
+    }
 
     /**
      * Generates a zip file for the OMRS OpenIGC bundle, needed to enable change tracking for the event mapper.

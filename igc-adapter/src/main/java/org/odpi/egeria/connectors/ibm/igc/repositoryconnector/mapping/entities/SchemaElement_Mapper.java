@@ -19,6 +19,8 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.OMRSRuntimeException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +83,20 @@ public class SchemaElement_Mapper extends ReferenceableMapper {
         Reference igcEntity = entityMap.getIgcEntity();
 
         OMRSRepositoryHelper repositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
-        IGCRepositoryHelper igcRepositoryHelper = ((IGCOMRSMetadataCollection)igcomrsRepositoryConnector.getMetadataCollection()).getIgcRepositoryHelper();
+        IGCRepositoryHelper igcRepositoryHelper;
+        try {
+            igcRepositoryHelper = ((IGCOMRSMetadataCollection)igcomrsRepositoryConnector.getMetadataCollection()).getIgcRepositoryHelper();
+        } catch (RepositoryErrorException e) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(igcomrsRepositoryConnector.getServerName());
+            throw new OMRSRuntimeException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction(),
+                    e);
+        }
         String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
 
         // setup the OMRS 'anchorGUID' property

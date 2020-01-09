@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
@@ -13,6 +14,8 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.OMRSRuntimeException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.TypeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +47,31 @@ public class EntityMappingInstance {
     private List<Relationship> omrsRelationships;
 
     /**
+     * Create the basic elements of a new mapping.
+     *
+     * @param mapping the definition of the mapping to carry out
+     * @param igcomrsRepositoryConnector connectivity to an IGC repository
+     */
+    private EntityMappingInstance(EntityMapping mapping,
+                                  IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
+        this.mapping = mapping;
+        this.igcomrsRepositoryConnector = igcomrsRepositoryConnector;
+        try {
+            this.igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
+        } catch (RepositoryErrorException e) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(igcomrsRepositoryConnector.getServerName());
+            throw new OMRSRuntimeException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    "EntityMappingInstance",
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction(),
+                    e);
+        }
+    }
+
+    /**
      * Creates a new mapping specific to the provided metadata object.
      *
      * @param mapping the definition of the mapping to carry out
@@ -58,9 +86,7 @@ public class EntityMappingInstance {
                                  String igcEntityRid,
                                  String userId) {
 
-        this.mapping = mapping;
-        this.igcomrsRepositoryConnector = igcomrsRepositoryConnector;
-        this.igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
+        this(mapping, igcomrsRepositoryConnector);
         this.igcEntityType = igcEntityType;
         this.igcEntityRid = igcEntityRid;
         this.userId = userId;
@@ -99,9 +125,7 @@ public class EntityMappingInstance {
                                  IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                  Reference igcEntity,
                                  String userId) {
-        this.mapping = mapping;
-        this.igcomrsRepositoryConnector = igcomrsRepositoryConnector;
-        this.igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
+        this(mapping, igcomrsRepositoryConnector);
         this.igcEntity = igcEntity;
         this.igcEntityType = igcEntity.getType();
         this.igcEntityRid = igcEntity.getId();
