@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSAuditCode;
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
@@ -26,7 +27,10 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCRelations
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.OMRSStub;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
+import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
+import org.odpi.openmetadata.repositoryservices.auditlog.OMRSAuditLog;
 import org.odpi.openmetadata.repositoryservices.connectors.openmetadatatopic.OpenMetadataTopicListener;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.OMRSMetadataCollection;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Classification;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.EntityDetail;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Relationship;
@@ -79,33 +83,38 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         this.sourceName = "IGCOMRSRepositoryEventMapper";
     }
 
-
     /**
-     * Pass additional information to the connector needed to process events.
+     * Indicates that the connector is completely configured and can begin processing.
      *
-     * @param repositoryEventMapperName repository event mapper name used for the source of the OMRS events.
-     * @param repositoryConnector ths is the connector to the local repository that the event mapper is processing
-     *                            events from.  The repository connector is used to retrieve additional information
-     *                            necessary to fill out the OMRS Events.
+     * @throws ConnectorCheckedException there is a problem within the connector.
      */
     @Override
-    public void initialize(String                  repositoryEventMapperName,
-                           OMRSRepositoryConnector repositoryConnector) {
+    public void start() throws ConnectorCheckedException {
 
-        super.initialize(repositoryEventMapperName, repositoryConnector);
+        super.start();
 
-        if (auditLog != null) {
-            IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.EVENT_MAPPER_INITIALIZING;
-            auditLog.logRecord("initialize",
-                    auditCode.getLogMessageId(),
-                    auditCode.getSeverity(),
-                    auditCode.getFormattedLogMessage(),
-                    null,
-                    auditCode.getSystemAction(),
-                    auditCode.getUserAction());
-        }
+        IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.EVENT_MAPPER_STARTING;
+        auditLog.logRecord("start",
+                auditCode.getLogMessageId(),
+                auditCode.getSeverity(),
+                auditCode.getFormattedLogMessage(),
+                null,
+                auditCode.getSystemAction(),
+                auditCode.getUserAction());
 
         // Setup IGC OMRS Repository connectivity
+        if ( !(repositoryConnector instanceof IGCOMRSRepositoryConnector) ) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.EVENT_MAPPER_IMPROPERLY_INITIALIZED;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(repositoryConnector.getServerName());
+            throw new ConnectorCheckedException(
+                    errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    "start",
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction()
+            );
+        }
         this.igcomrsRepositoryConnector = (IGCOMRSRepositoryConnector) this.repositoryConnector;
         this.igcVersion = igcomrsRepositoryConnector.getIGCVersion();
         this.igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
@@ -124,41 +133,22 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         // Setup ObjectMapper for (de-)serialisation of events
         this.mapper = new ObjectMapper();
 
-        if (auditLog != null) {
-            IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.EVENT_MAPPER_INITIALIZED;
-            auditLog.logRecord("initialize",
-                    auditCode.getLogMessageId(),
-                    auditCode.getSeverity(),
-                    auditCode.getFormattedLogMessage(igcomrsRepositoryConnector.getServerName()),
-                    null,
-                    auditCode.getSystemAction(),
-                    auditCode.getUserAction());
-        }
-
-    }
-
-
-    /**
-     * Indicates that the connector is completely configured and can begin processing.
-     *
-     * @throws ConnectorCheckedException there is a problem within the connector.
-     */
-    @Override
-    public void start() throws ConnectorCheckedException {
-
-        super.start();
-        IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.EVENT_MAPPER_STARTING;
-        auditLog.logRecord("start",
-                auditCode.getLogMessageId(),
-                auditCode.getSeverity(),
-                auditCode.getFormattedLogMessage(),
-                null,
-                auditCode.getSystemAction(),
-                auditCode.getUserAction());
         this.igcKafkaConsumer = new IGCKafkaConsumerThread();
-        this.igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
-        this.igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
-        igcomrsMetadataCollection.setEventMapper(this);
+        try {
+            this.igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
+            this.igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
+            igcomrsMetadataCollection.setEventMapper(this);
+        } catch (RepositoryErrorException e) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(igcomrsRepositoryConnector.getServerName());
+            throw new ConnectorCheckedException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    "start",
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction(),
+                    e);
+        }
         this.metadataCollectionId = igcomrsRepositoryConnector.getMetadataCollectionId();
         this.originatorServerName = igcomrsRepositoryConnector.getServerName();
         this.originatorServerType = igcomrsRepositoryConnector.getServerType();

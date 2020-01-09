@@ -121,10 +121,10 @@ public class ConnectorTest {
             assertNull(e);
         }
 
-        OMRSMetadataCollection collection = igcomrsRepositoryConnector.getMetadataCollection();
-        assertTrue(collection instanceof IGCOMRSMetadataCollection);
-        igcomrsMetadataCollection = (IGCOMRSMetadataCollection) collection;
         try {
+            OMRSMetadataCollection collection = igcomrsRepositoryConnector.getMetadataCollection();
+            assertTrue(collection instanceof IGCOMRSMetadataCollection);
+            igcomrsMetadataCollection = (IGCOMRSMetadataCollection) collection;
             assertEquals(igcomrsMetadataCollection.getMetadataCollectionId(MockConstants.EGERIA_USER), metadataCollectionId);
         } catch (RepositoryErrorException e) {
             log.error("Unable to match metadata collection IDs.", e);
