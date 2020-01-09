@@ -4,6 +4,8 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCIOException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.slf4j.Logger;
@@ -537,10 +539,15 @@ public class Identity {
         if (token.contains(TYPE_PREFIX) && token.contains(TYPE_POSTFIX)) {
             // Only return the type name if it is one that we recognize (can resolve to a POJO class)
             String type = token.substring(token.indexOf(TYPE_PREFIX) + 1, token.lastIndexOf(TYPE_POSTFIX));
-            Class<?> pojo = igcRestClient.getPOJOForType(type);
-            if (pojo != null) {
-                return type;
-            } else {
+            try {
+                Class<?> pojo = igcRestClient.getPOJOForType(type);
+                if (pojo != null) {
+                    return type;
+                } else {
+                    return null;
+                }
+            } catch (IGCIOException e) {
+                log.warn("Unable to find type '{}', skipping from identity", type, e);
                 return null;
             }
         } else {
