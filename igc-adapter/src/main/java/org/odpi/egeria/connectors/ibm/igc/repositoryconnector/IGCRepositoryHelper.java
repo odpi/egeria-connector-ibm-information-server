@@ -1033,51 +1033,35 @@ public class IGCRepositoryHelper {
 
         List<Relationship> alRelationships = new ArrayList<>();
         if (guid == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("null",
-                    "null",
-                    repositoryName);
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        }
-
-        String rid = guid.getRid();
-        String prefix = guid.getGeneratedPrefix();
-        String igcType = guid.getAssetType();
-
-        // Ensure the entity mapping actually exists (if not, throw error to that effect)
-        EntityMappingInstance entityMap = getMappingInstanceForParameters(
-                igcType,
-                rid,
-                prefix,
-                userId);
-
-        if (entityMap != null) {
-            // 2. Apply the mapping to the object, and retrieve the resulting relationships
-            alRelationships.addAll(
-                    EntityMapping.getMappedRelationships(
-                            guid,
-                            entityMap,
-                            null,
-                            0,
-                            null,
-                            100)
-            );
+            raiseEntityNotKnownException(methodName, "<null>", "<null>", repositoryName);
         } else {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    prefix + igcType,
-                    repositoryName);
-            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+
+            String rid = guid.getRid();
+            String prefix = guid.getGeneratedPrefix();
+            String igcType = guid.getAssetType();
+
+            // Ensure the entity mapping actually exists (if not, throw error to that effect)
+            EntityMappingInstance entityMap = getMappingInstanceForParameters(
+                    igcType,
+                    rid,
+                    prefix,
+                    userId);
+
+            if (entityMap != null) {
+                // 2. Apply the mapping to the object, and retrieve the resulting relationships
+                alRelationships.addAll(
+                        EntityMapping.getMappedRelationships(
+                                guid,
+                                entityMap,
+                                null,
+                                0,
+                                null,
+                                100)
+                );
+            } else {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, methodName, prefix + igcType, repositoryName);
+            }
+
         }
 
         return alRelationships;
@@ -1125,35 +1109,17 @@ public class IGCRepositoryHelper {
         if (log.isDebugEnabled()) { log.debug("{} with guid = {}", methodName, guid); }
 
         if (guid == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("null",
-                    "null",
-                    repositoryName);
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
-        }
-        String igcType = guid.getAssetType();
+            raiseEntityNotKnownException(methodName, "<null>", "<null>", repositoryName);
+        } else {
+            String igcType = guid.getAssetType();
 
-        // If we could not find any asset by the provided guid, throw an ENTITY_NOT_KNOWN exception
-        if (igcType.equals(DEFAULT_IGC_TYPE)) {
-            /* If the asset type returned has an IGC-listed type of 'main_object', it isn't one that the REST API
-             * of IGC supports (eg. a data rule detail object, a column analysis master object, etc)...
-             * Trying to further process it will result in failed REST API requests; so we should skip these objects */
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.UNSUPPORTED_OBJECT_TYPE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    guid.asGuid(),
-                    igcType,
-                    repositoryName);
-            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            // If we could not find any asset by the provided guid, throw an ENTITY_NOT_KNOWN exception
+            if (igcType.equals(DEFAULT_IGC_TYPE)) {
+                /* If the asset type returned has an IGC-listed type of 'main_object', it isn't one that the REST API
+                 * of IGC supports (eg. a data rule detail object, a column analysis master object, etc)...
+                 * Trying to further process it will result in failed REST API requests; so we should skip these objects */
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNSUPPORTED_OBJECT_TYPE, methodName, guid.asGuid(), igcType, repositoryName);
+            }
         }
 
     }
@@ -1172,20 +1138,11 @@ public class IGCRepositoryHelper {
                                                         String igcType,
                                                         String methodName) throws RepositoryErrorException {
 
-        EntityDetail detail;
+        EntityDetail detail = null;
         if (mappingInstance != null) {
             detail = EntityMapping.getEntityDetail(mappingInstance);
         } else {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    (prefix == null ? "" : prefix) + igcType,
-                    repositoryName);
-            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseRepositoryErrorException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, methodName, (prefix == null ? "" : prefix) + igcType, repositoryName);
         }
         return detail;
 
@@ -2007,6 +1964,40 @@ public class IGCRepositoryHelper {
             }
         }
         return sort;
+    }
+
+    /**
+     * Raise a RepositoryErrorException using the provided parameters.
+     * @param errorCode the error code for the exception
+     * @param methodName the method raising the exception
+     * @param params any additional parameters for the formatting of the error message
+     * @throws RepositoryErrorException always
+     */
+    private void raiseRepositoryErrorException(IGCOMRSErrorCode errorCode, String methodName, String ...params) throws RepositoryErrorException {
+        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
+        throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+                this.getClass().getName(),
+                methodName,
+                errorMessage,
+                errorCode.getSystemAction(),
+                errorCode.getUserAction());
+    }
+
+    /**
+     * Raise an EntityNotKnownException using the provided parameters.
+     * @param methodName the method raising the exception
+     * @param params any additional parameters for the formatting of the error message
+     * @throws EntityNotKnownException always
+     */
+    private void raiseEntityNotKnownException(String methodName, String ...params) throws EntityNotKnownException {
+        IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
+        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
+        throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
+                this.getClass().getName(),
+                methodName,
+                errorMessage,
+                errorCode.getSystemAction(),
+                errorCode.getUserAction());
     }
 
 }
