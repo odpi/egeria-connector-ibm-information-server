@@ -63,6 +63,7 @@ public class ConnectorTest {
     private InMemoryOpenMetadataTopicConnector inMemoryEventConnector;
 
     private String metadataCollectionId;
+    private String otherMetadataCollectionId;
 
     private List<AttributeTypeDef> supportedAttributeTypeDefs;
     private List<TypeDef> supportedTypeDefs;
@@ -74,6 +75,7 @@ public class ConnectorTest {
 
         HttpHelper.noStrictSSL();
         metadataCollectionId = UUID.randomUUID().toString();
+        otherMetadataCollectionId = UUID.randomUUID().toString();
         supportedAttributeTypeDefs = new ArrayList<>();
         supportedTypeDefs = new ArrayList<>();
         inMemoryEventConnector = new InMemoryOpenMetadataTopicConnector();
@@ -380,6 +382,85 @@ public class ConnectorTest {
             log.error("Unexpected exception trying retrieve attribute type definition.", e);
             assertNull(e);
         }
+
+    }
+
+    /**
+     * Ensure all methods that can take the 'asOfTime' parameter throw a FunctionNotSupportedException when the
+     * value is non-null.
+     */
+    @Test
+    public void testAsOfTimeMethods() {
+
+        String ignoredEntityTypeGUID = MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID;
+        String ignoredRelationshipTypeGUID = "4df37335-7f0c-4ced-82df-3b2fd07be1bd";
+        Date now = new Date();
+
+        assertThrows(FunctionNotSupportedException.class, () -> igcomrsMetadataCollection.getRelationshipsForEntity(MockConstants.EGERIA_USER,
+                ignoredEntityTypeGUID,
+                ignoredRelationshipTypeGUID,
+                0,
+                null,
+                now,
+                null,
+                null,
+                MockConstants.EGERIA_PAGESIZE));
+
+        assertThrows(FunctionNotSupportedException.class, () -> igcomrsMetadataCollection.findEntitiesByProperty(MockConstants.EGERIA_USER,
+                ignoredEntityTypeGUID,
+                null,
+                null,
+                0,
+                null,
+                null,
+                now,
+                null,
+                null,
+                MockConstants.EGERIA_PAGESIZE));
+
+        assertThrows(FunctionNotSupportedException.class, () -> igcomrsMetadataCollection.findEntitiesByClassification(MockConstants.EGERIA_USER,
+                ignoredEntityTypeGUID,
+                "Confidentiality",
+                null,
+                null,
+                0,
+                null,
+                now,
+                null,
+                null,
+                MockConstants.EGERIA_PAGESIZE));
+
+        assertThrows(FunctionNotSupportedException.class, () -> igcomrsMetadataCollection.findEntitiesByPropertyValue(MockConstants.EGERIA_USER,
+                ignoredEntityTypeGUID,
+                "ignore",
+                0,
+                null,
+                null,
+                now,
+                null,
+                null,
+                MockConstants.EGERIA_PAGESIZE));
+
+        assertThrows(FunctionNotSupportedException.class, () -> igcomrsMetadataCollection.findRelationshipsByProperty(MockConstants.EGERIA_USER,
+                ignoredRelationshipTypeGUID,
+                null,
+                null,
+                0,
+                null,
+                now,
+                null,
+                null,
+                MockConstants.EGERIA_PAGESIZE));
+
+        assertThrows(FunctionNotSupportedException.class, () -> igcomrsMetadataCollection.findRelationshipsByPropertyValue(MockConstants.EGERIA_USER,
+                ignoredRelationshipTypeGUID,
+                "ignore",
+                0,
+                null,
+                now,
+                null,
+                null,
+                MockConstants.EGERIA_PAGESIZE));
 
     }
 
@@ -1939,6 +2020,23 @@ public class ConnectorTest {
             for (EntityDetail result : results) {
                 assertEquals(result.getType().getTypeDefName(), typeName);
                 assertTrue(result.getVersion() > 1);
+
+                // TODO: need to understand how the refresh request methods are actually meant to work...
+                /*
+                try {
+                    igcomrsMetadataCollection.refreshEntityReferenceCopy(MockConstants.EGERIA_USER,
+                            result.getGUID(),
+                            result.getType().getTypeDefGUID(),
+                            result.getType().getTypeDefName(),
+                            result.getMetadataCollectionId());
+                } catch (InvalidParameterException | RepositoryErrorException | HomeEntityException | UserNotAuthorizedException e) {
+                    log.error("Unable to send a refresh event for entity GUID: {}", result.getGUID());
+                    assertNull(e);
+                } catch (Exception e) {
+                    log.error("Unexpected exception trying to send a refresh event for entity GUID: {}", result.getGUID(), e);
+                    assertNull(e);
+                }*/
+
             }
         }
 
@@ -2087,6 +2185,19 @@ public class ConnectorTest {
             for (Relationship result : results) {
                 assertEquals(result.getType().getTypeDefName(), typeName);
                 assertTrue(result.getVersion() > 1);
+
+                try {
+                    Relationship foundAgain = igcomrsMetadataCollection.isRelationshipKnown(MockConstants.EGERIA_USER, result.getGUID());
+                    assertNotNull(foundAgain);
+                    assertEquals(foundAgain, result);
+                } catch (InvalidParameterException | RepositoryErrorException e) {
+                    log.error("Unable to find relationship again by GUID: {}", result.getGUID());
+                    assertNull(e);
+                } catch (Exception e) {
+                    log.error("Unexpected exception trying to find relationship again by GUID: {}", result.getGUID(), e);
+                    assertNull(e);
+                }
+
             }
         }
 
@@ -2229,6 +2340,7 @@ public class ConnectorTest {
             assertEquals(relationships.size(), totalNumberExpected);
             for (RelationshipExpectation relationshipExpectation : relationshipExpectations) {
                 for (int i = relationshipExpectation.getStartIndex(); i < relationshipExpectation.getFinishIndex(); i++) {
+
                     Relationship candidate = relationships.get(i);
                     assertEquals(candidate.getType().getTypeDefName(), relationshipExpectation.getOmrsType());
                     EntityProxy one = candidate.getEntityOneProxy();
@@ -2239,6 +2351,23 @@ public class ConnectorTest {
                     assertTrue(relationshipExpectation.getProxyTwoTypes().contains(two.getType().getTypeDefName()));
                     assertTrue(two.getVersion() > 1);
                     testQualifiedNameEquality(relationshipExpectation.getExpectedProxyTwoQN(), two.getUniqueProperties().getPropertyValue("qualifiedName"));
+
+                    // TODO: need to understand how the refresh request methods are actually meant to work...
+                    /*
+                    try {
+                        igcomrsMetadataCollection.refreshRelationshipReferenceCopy(MockConstants.EGERIA_USER,
+                                candidate.getGUID(),
+                                candidate.getType().getTypeDefGUID(),
+                                candidate.getType().getTypeDefName(),
+                                otherMetadataCollectionId);
+                    } catch (InvalidParameterException | RepositoryErrorException | HomeRelationshipException | UserNotAuthorizedException e) {
+                        log.error("Unable to send a refresh event for relationship GUID: {}", candidate.getGUID());
+                        assertNull(e);
+                    } catch (Exception e) {
+                        log.error("Unexpected exception trying to send a refresh event for relationship GUID: {}", candidate.getGUID(), e);
+                        assertNull(e);
+                    }*/
+
                 }
             }
         }
