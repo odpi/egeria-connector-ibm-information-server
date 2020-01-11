@@ -1713,15 +1713,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             relationship.setType(instanceType);
         } catch (TypeErrorException e) {
             if (log.isErrorEnabled()) { log.error("Unable to construct and set InstanceType -- skipping relationship: {}", omrsRelationshipName); }
-            OMRSErrorCode errorCode = OMRSErrorCode.INVALID_INSTANCE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(methodName,
-                    omrsRelationshipDef.getName());
-            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                    RelationshipMapping.class.getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseRepositoryErrorException(OMRSErrorCode.INVALID_INSTANCE, methodName, methodName, omrsRelationshipDef.getName());
         }
 
         IGCRelationshipGuid igcRelationshipGuid = RelationshipMapping.getRelationshipGUID(
@@ -1746,8 +1738,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
             String ridForEP1 = igcRelationshipGuid.getRid1();
             String ridForEP2 = igcRelationshipGuid.getRid2();
 
-            EntityProxy ep1;
-            EntityProxy ep2;
+            EntityProxy ep1 = null;
+            EntityProxy ep2 = null;
 
             if (relationshipLevelRid != null
                     || (ridForEP1.equals(proxyOne.getId()) && ridForEP2.equals(proxyTwo.getId()))) {
@@ -1780,18 +1772,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 if (log.isErrorEnabled()) { log.error("Unable to determine both ends of the relationship {} from {} to {}", omrsRelationshipName, proxyOne.getId(), proxyTwo.getId()); }
                 String omrsEndOneProperty = omrsRelationshipDef.getEndDef1().getAttributeName();
                 String omrsEndTwoProperty = omrsRelationshipDef.getEndDef2().getAttributeName();
-                OMRSErrorCode errorCode = OMRSErrorCode.INVALID_RELATIONSHIP_ENDS;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(methodName,
-                        repositoryName,
-                        omrsRelationshipName,
-                        omrsEndOneProperty,
-                        omrsEndTwoProperty);
-                throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                        RelationshipMapping.class.getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
+                raiseRepositoryErrorException(OMRSErrorCode.INVALID_RELATIONSHIP_ENDS, methodName, methodName, repositoryName, omrsRelationshipName, omrsEndOneProperty, omrsEndTwoProperty);
             }
 
             // Set the the version of the relationship to the epoch time of whichever end of the relationship has
@@ -1845,18 +1826,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             if (log.isErrorEnabled()) { log.error("Unable to construct relationship GUID -- skipping relationship: {}", omrsRelationshipName); }
             String omrsEndOneProperty = omrsRelationshipDef.getEndDef1().getAttributeName();
             String omrsEndTwoProperty = omrsRelationshipDef.getEndDef2().getAttributeName();
-            OMRSErrorCode errorCode = OMRSErrorCode.INVALID_RELATIONSHIP_ENDS;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(methodName,
-                    repositoryName,
-                    omrsRelationshipName,
-                    omrsEndOneProperty,
-                    omrsEndTwoProperty);
-            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                    RelationshipMapping.class.getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseRepositoryErrorException(OMRSErrorCode.INVALID_RELATIONSHIP_ENDS, methodName, methodName, repositoryName, omrsRelationshipName, omrsEndOneProperty, omrsEndTwoProperty);
         }
 
         return relationship;
@@ -1864,151 +1834,20 @@ public abstract class RelationshipMapping extends InstanceMapping {
     }
 
     /**
-     * Adds the provided relationship to IGC (if possible), or throws a RepositoryErrorException if the relationship
-     * cannot be created in IGC.
-     *
-     * @param igcomrsRepositoryConnector connectivity via an IGC OMRS Repository Connector
-     * @param relationshipMapping relationship mapping definition
-     * @param initialProperties the properties to set on the relationship
-     * @param proxyOne IGC object representing the first proxy of the relationship
-     * @param proxyTwo IGC object representing the second proxy of the relationship
-     * @param userId userId through which to create the relationship
-     * @return Relationship the created OMRS relationship
-     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
-     *                                  the metadata collection is stored
+     * Throws a RepositoryErrorException using the provided parameters
+     * @param errorCode the error code for the exception
+     * @param methodName the name of the method throwing the exception
+     * @param params the parameters used for formatting the message for the exception
+     * @throws RepositoryErrorException always
      */
-    public static Relationship addIgcRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                  RelationshipMapping relationshipMapping,
-                                                  InstanceProperties initialProperties,
-                                                  Reference proxyOne,
-                                                  Reference proxyTwo,
-                                                  String userId) throws RepositoryErrorException {
-
-        String omrsRelationshipType = relationshipMapping.getOmrsRelationshipType();
-        String propertyUsed;
-        Map<String, InstancePropertyValue> relationshipProperties = null;
-        if (initialProperties != null) {
-            relationshipProperties = initialProperties.getInstanceProperties();
-        }
-
-        if (!relationshipMapping.isSelfReferencing()) {
-
-            IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
-            String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
-            String methodName = "addIgcRelationship";
-            String className = "RelationshipMapping";
-
-            // If there is a relationship-level asset, these cannot be created, so we need to simply fail
-            if (relationshipMapping.hasRelationshipLevelAsset()) {
-                String relationshipLevelAssetType = relationshipMapping.getRelationshipLevelIgcAsset();
-                if (igcRestClient.isCreatable(relationshipLevelAssetType)) {
-                    // TODO: for creatable relationship-level assets, create a new one to represent this relationship
-                    //  (this should never be reached as there currently are no such assets in IGC)
-                    if (log.isInfoEnabled()) { log.info("Creating a relationship-level asset for IGC type {} is not yet implemented.", relationshipLevelAssetType); }
-                }
-                OMRSErrorCode errorCode = OMRSErrorCode.REPOSITORY_LOGIC_ERROR;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        repositoryName,
-                        methodName,
-                        "Cannot create relationship for IGC asset type: " + relationshipLevelAssetType
-                );
-                throw new RepositoryErrorException(
-                        errorCode.getHTTPErrorCode(),
-                        className,
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction()
-                );
-            } else if (relationshipProperties != null && !relationshipProperties.isEmpty()) {
-                OMRSErrorCode errorCode = OMRSErrorCode.REPOSITORY_LOGIC_ERROR;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        repositoryName,
-                        methodName,
-                        "Cannot capture any relationship-level properties in IGC: " + initialProperties
-                );
-                throw new RepositoryErrorException(
-                        errorCode.getHTTPErrorCode(),
-                        className,
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction()
-                );
-            }
-
-            List<String> igcRelationshipProperties = null;
-            String entityToUpdateRid = null;
-            String relatedEntityRid = null;
-            switch (relationshipMapping.getOptimalStart()) {
-                case ONE:
-                case OPPOSITE:
-                    igcRelationshipProperties = relationshipMapping.getProxyOneMapping().getIgcRelationshipProperties();
-                    entityToUpdateRid = proxyOne.getId();
-                    relatedEntityRid = proxyTwo.getId();
-                    break;
-                case TWO:
-                    igcRelationshipProperties = relationshipMapping.getProxyTwoMapping().getIgcRelationshipProperties();
-                    entityToUpdateRid = proxyTwo.getId();
-                    relatedEntityRid = proxyOne.getId();
-                    break;
-                case CUSTOM:
-                    break;
-            }
-
-            if (igcRelationshipProperties != null && !igcRelationshipProperties.isEmpty()) {
-                // Pick the first property and use that to setup the relationship
-                IGCUpdate igcUpdate = new IGCUpdate(entityToUpdateRid);
-                propertyUsed = igcRelationshipProperties.get(0);
-                igcUpdate.addRelationship(propertyUsed, relatedEntityRid);
-                igcUpdate.setRelationshipUpdateMode(IGCUpdate.UpdateMode.APPEND);
-                if (!igcomrsRepositoryConnector.getIGCRestClient().update(igcUpdate)) {
-                    OMRSErrorCode errorCode = OMRSErrorCode.REPOSITORY_LOGIC_ERROR;
-                    String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                            repositoryName,
-                            methodName,
-                            "Failed to create relationship: " + omrsRelationshipType
-                    );
-                    throw new RepositoryErrorException(
-                            errorCode.getHTTPErrorCode(),
-                            className,
-                            methodName,
-                            errorMessage,
-                            errorCode.getSystemAction(),
-                            errorCode.getUserAction()
-                    );
-                }
-            } else {
-                OMRSErrorCode errorCode = OMRSErrorCode.REPOSITORY_LOGIC_ERROR;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        repositoryName,
-                        methodName,
-                        "Cannot create relationships of this type: " + omrsRelationshipType
-                );
-                throw new RepositoryErrorException(
-                        errorCode.getHTTPErrorCode(),
-                        className,
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction()
-                );
-            }
-
-        } else {
-            if (log.isInfoEnabled()) { log.info("Relationship {} is self-referencing in IGC; skipping.", omrsRelationshipType); }
-            propertyUsed = RelationshipMapping.SELF_REFERENCE_SENTINEL;
-        }
-
-        return getMappedRelationship(
-                igcomrsRepositoryConnector,
-                relationshipMapping,
-                proxyOne,
-                proxyTwo,
-                propertyUsed,
-                userId
-        );
-
+    private static void raiseRepositoryErrorException(OMRSErrorCode errorCode, String methodName, String ...params) throws RepositoryErrorException {
+        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
+        throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+                RelationshipMapping.class.getName(),
+                methodName,
+                errorMessage,
+                errorCode.getSystemAction(),
+                errorCode.getUserAction());
     }
 
 }
