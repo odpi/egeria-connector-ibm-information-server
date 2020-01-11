@@ -46,6 +46,7 @@ public class ConnectorTest {
             Object connector = connectorBroker.getConnector(mockConnection);
             assertTrue(connector instanceof DataStageConnector);
             dataStageConnector = (DataStageConnector) connector;
+            dataStageConnector.start();
         } catch (ConnectionCheckedException | ConnectorCheckedException e) {
             log.error("Unable to retrieve a connection through the broker.", e);
             assertNull(e);

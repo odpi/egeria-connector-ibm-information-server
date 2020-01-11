@@ -33,7 +33,6 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.archivestore.p
 import org.odpi.openmetadata.repositoryservices.connectors.stores.archivestore.properties.OpenMetadataArchiveTypeStore;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.OMRSMetadataCollection;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
@@ -223,9 +222,6 @@ public class ConnectorTest {
         }
     }
 
-    /**
-     * Test the supported open metadata types.
-     */
     @Test
     public void verifySupportedTypes() {
 
@@ -272,9 +268,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test searching for open metadata types.
-     */
     @Test
     public void testFindTypes() {
 
@@ -336,9 +329,6 @@ public class ConnectorTest {
         }
     }
 
-    /**
-     * Test direct type def retrievals.
-     */
     @Test
     public void testTypeDefRetrievals() {
 
@@ -363,9 +353,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test direct attribute type def retrievals.
-     */
     @Test
     public void testAttributeTypeDefRetrievals() {
 
@@ -390,10 +377,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Ensure all methods that can take the 'asOfTime' parameter throw a FunctionNotSupportedException when the
-     * value is non-null.
-     */
     @Test
     public void testAsOfTimeMethods() {
 
@@ -469,9 +452,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test Glossary search, by property value.
-     */
     @Test
     public void testGlossaryFindByPropertyValue() {
 
@@ -489,9 +469,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test Glossary direct retrieval by GUID.
-     */
     @Test
     public void testGetGlossary() {
 
@@ -509,9 +486,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test Glossary relationship retrievals.
-     */
     @Test
     public void testGlossaryRelationships() {
 
@@ -540,9 +514,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test Category search, by property value.
-     */
     @Test
     public void testCategoryFindByPropertyValue() {
 
@@ -560,9 +531,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test GlossaryCategory direct retrieval by GUID.
-     */
     @Test
     public void testGetGlossaryCategory() {
 
@@ -580,9 +548,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test GlossaryCategory relationship retrievals.
-     */
     @Test
     public void testGlossaryCategoryRelationships() {
 
@@ -619,9 +584,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test searching GlossaryTerm by property value.
-     */
     @Test
     public void testGlossaryTermFindByPropertyValue() {
 
@@ -634,9 +596,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test searching GlossaryTerm by property.
-     */
     @Test
     public void testGlossaryTermFindByProperty_displayName() {
 
@@ -653,9 +612,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test searching GlossaryTerm by any of multiple properties.
-     */
     @Test
     public void testGlossaryTermFindByProperties_ANY() {
 
@@ -673,9 +629,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test searching GlossaryTerm by all of multiple properties.
-     */
     @Test
     public void testGlossaryTermFindByProperties_ALL() {
 
@@ -696,9 +649,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test searching a supertype by property value.
-     */
     @Test
     public void testAssetFindByPropertyValue() {
 
@@ -716,9 +666,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test searching everything by property value.
-     */
     @Test
     public void testAllTypesFindByPropertyValue() {
 
@@ -734,9 +681,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test searching everything by property value and limiting by classification.
-     */
     @Test
     public void testAllTypesFindByPropertyValue_limitToConfidentiality() {
 
@@ -755,9 +699,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test searching by classification.
-     */
     @Test
     public void testGlossaryTermFindByClassification() {
 
@@ -774,9 +715,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a GlossaryTerm as an EntityDetail directly.
-     */
     @Test
     public void testGetGlossaryTermDetail() {
 
@@ -797,9 +735,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a GlossaryTerm as an EntitySummary directly.
-     */
     @Test
     public void testGetGlossaryTermSummary() {
 
@@ -824,9 +759,6 @@ public class ConnectorTest {
         assertEquals(level, 3);
     }
 
-    /**
-     * Test GlossaryTerm relationship retrieval.
-     */
     @Test
     public void testGlossaryTermRelationships() {
 
@@ -863,9 +795,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a Database as an EntityDetail directly.
-     */
     @Test
     public void testGetDatabaseDetail() {
 
@@ -884,9 +813,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test Database relationship retrieval.
-     */
     @Test
     public void testDatabaseRelationships() {
 
@@ -913,9 +839,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a Connection as an EntityDetail directly.
-     */
     @Test
     public void testGetConnectionDetail() {
 
@@ -933,9 +856,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test Connection relationship retrieval.
-     */
     @Test
     public void testConnectionRelationships() {
 
@@ -969,9 +889,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving an Endpoint as an EntityDetail directly.
-     */
     @Test
     public void testGetEndpointDetail() {
 
@@ -988,9 +905,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test Endpoint relationship retrieval.
-     */
     @Test
     public void testEndpointRelationships() {
 
@@ -1012,9 +926,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a DeployedDatabaseSchema as an EntityDetail directly.
-     */
     @Test
     public void testGetDeployedDatabaseSchemaDetail() {
 
@@ -1031,9 +942,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test DeployedDatabaseSchema relationship retrieval.
-     */
     @Test
     public void testDeployedDatabaseSchemaRelationships() {
 
@@ -1062,9 +970,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a RelationalDBSchemaType as an EntityDetail directly.
-     */
     @Test
     public void testGetRelationalDBSchemaTypeDetail() {
 
@@ -1081,9 +986,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test RelationalDBSchemaType relationship retrieval.
-     */
     @Test
     public void testRelationalDBSchemaTypeRelationships() {
 
@@ -1112,9 +1014,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a RelationalTable as an EntityDetail directly.
-     */
     @Test
     public void testGetRelationalTableDetail() {
 
@@ -1131,9 +1030,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test RelationalTable relationship retrieval.
-     */
     @Test
     public void testRelationalTableRelationships() {
 
@@ -1162,9 +1058,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a RelationalColumn as an EntityDetail directly.
-     */
     @Test
     public void testGetRelationalColumnDetail() {
 
@@ -1197,9 +1090,6 @@ public class ConnectorTest {
         assertEquals(dataType, "STRING");
     }
 
-    /**
-     * Test RelationalColumn relationship retrieval.
-     */
     @Test
     public void testRelationalColumnRelationships() {
 
@@ -1257,9 +1147,7 @@ public class ConnectorTest {
         }
     }
 
-    /**
-     * Test retrieving a RelationalColumn as an EntitySummary directly.
-     */
+
     @Test
     public void testGetRelationalColumnSummary() {
 
@@ -1272,9 +1160,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a DataClass as an EntityDetail directly.
-     */
     @Test
     public void testGetDataClassDetail() {
 
@@ -1293,9 +1178,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test DataClass relationship retrieval.
-     */
     @Test
     public void testDataClassRelationships() {
 
@@ -1320,9 +1202,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a Connection as an EntityDetail directly.
-     */
     @Test
     public void testGetConnectionFSDetail() {
 
@@ -1340,9 +1219,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test Connection relationship retrieval.
-     */
     @Test
     public void testConnectionFSRelationships() {
 
@@ -1377,9 +1253,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test DataFileFolder (root) relationship retrieval.
-     */
     @Test
     public void testDataFileFolderRelationships() {
 
@@ -1408,9 +1281,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a DataFile as an EntityDetail directly.
-     */
     @Test
     public void testGetDataFileDetail() {
 
@@ -1427,9 +1297,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test DataFile relationship retrieval.
-     */
     @Test
     public void testDataFileRelationships() {
 
@@ -1456,9 +1323,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a TabularSchemaType as an EntityDetail directly.
-     */
     @Test
     public void testGetTabularSchemaTypeDetail() {
 
@@ -1476,9 +1340,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test TabularSchemaType relationship retrieval.
-     */
     @Test
     public void testTabularSchemaTypeRelationships() {
 
@@ -1505,9 +1366,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a TabularColumn as an EntityDetail directly.
-     */
     @Test
     public void testGetTabularColumnDetail() {
 
@@ -1526,9 +1384,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test TabularColumn relationship retrieval.
-     */
     @Test
     public void testTabularColumnRelationships() {
 
@@ -1557,9 +1412,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a GlossaryTerm classified as a SpineObject as an EntityDetail directly.
-     */
     @Test
     public void testGetSpineObjectDetail() {
 
@@ -1585,9 +1437,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a GlossaryCategory classified as a SubjectArea as an EntityDetail directly.
-     */
     @Test
     public void testGetSubjectAreaDetail() {
 
@@ -1613,9 +1462,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a GovernancePolicy as an EntityDetail directly.
-     */
     @Test
     public void testGetGovernancePolicyDetail() {
 
@@ -1633,9 +1479,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a Person as an EntityDetail directly.
-     */
     @Test
     public void testGetPersonDetail() {
 
@@ -1655,9 +1498,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test Person relationship retrieval.
-     */
     @Test
     public void testPersonRelationships() {
 
@@ -1681,9 +1521,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a ContactDetails as an EntityDetail directly.
-     */
     @Test
     public void testGetContactDetailsDetail() {
 
@@ -1704,9 +1541,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test retrieving a Team as an EntityDetail directly.
-     */
     @Test
     public void testGetTeamDetail() {
 
@@ -1724,9 +1558,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test searching relationships.
-     */
     @Test
     public void testForeignKeyFindByPropertyValue() {
 
@@ -1745,9 +1576,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test searching entities by qualifiedName.
-     */
     @Test
     public void testFindEntitiesByQualifiedName() {
 
@@ -1766,9 +1594,6 @@ public class ConnectorTest {
 
     }
 
-    /**
-     * Test the ChangeSet class that calculates differences in JSON payloads.
-     */
     @Test
     public void testChangeSet() {
 
@@ -1824,6 +1649,7 @@ public class ConnectorTest {
         assertEquals(newModifiedOn.getIgcPropertyName(), "modified_on");
         assertEquals(newModifiedOn.getIgcPropertyPath(), "/modified_on");
         assertEquals(newModifiedOn.getOp(), "replace");
+        assertNotNull(newModifiedOn.getOldValue(referenceListProperties));
 
     }
 
@@ -1834,9 +1660,6 @@ public class ConnectorTest {
         return change.get(0);
     }
 
-    /**
-     * Test an event through the event mapper.
-     */
     @Test
     public void testAddEntityEvent() {
 

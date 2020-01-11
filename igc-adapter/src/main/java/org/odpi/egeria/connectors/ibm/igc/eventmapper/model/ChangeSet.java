@@ -115,7 +115,7 @@ public class ChangeSet {
                 flags
         );
         if (log.isDebugEnabled()) {
-            log.debug("Found the following changes: {}", this.patch.toString());
+            log.debug("Found the following changes: {}", this.patch);
         }
         ArrayNode changes = (ArrayNode) this.patch;
         for (int i = 0; i < changes.size(); i++) {
@@ -139,11 +139,11 @@ public class ChangeSet {
                 if (changePath.endsWith("/_id") && !changePath.equals("/_id")) {
                     // This is likely an exclusive relationship (eg. 'parent_category')
                     if (log.isDebugEnabled()) {
-                        log.debug("Found an exclusive relationship change: {}", change.toString());
+                        log.debug("Found an exclusive relationship change: {}", change);
                     }
                     JsonNode consolidatedChange = consolidateChangedObject(change, changePath, currentAsset);
                     if (log.isDebugEnabled()) {
-                        log.debug(" ... consolidated to: {}", consolidatedChange.toString());
+                        log.debug(" ... consolidated to: {}", consolidatedChange);
                     }
                     theChange = new Change(consolidatedChange, stubPayload);
                 } else {
@@ -197,7 +197,7 @@ public class ChangeSet {
             // Otherwise just return the object directly (there is only one)
             // We need to remove the leading '/' before doing so...
             String relationshipPath = objectPath.substring(1);
-            if (log.isDebugEnabled()) { log.debug(" ... returning object: {}", asset.path(relationshipPath).toString()); }
+            if (log.isDebugEnabled()) { log.debug(" ... returning object: {}", asset.path(relationshipPath)); }
             return asset.path(relationshipPath);
         }
     }
@@ -298,16 +298,16 @@ public class ChangeSet {
 
             // If the operation is an 'add', there will not be any old value so we should simply return null
             if (!getOp().equals("add")) {
-                String path = getIgcPropertyPath();
-                if (path.contains("/items/")) {
-                    JsonNode obj = getObjectFromIndex(path, this.from);
-                    oldValue = getValueFromJSON(obj, referenceListProperties, path);
+                String propertyPath = getIgcPropertyPath();
+                if (propertyPath.contains("/items/")) {
+                    JsonNode obj = getObjectFromIndex(propertyPath, this.from);
+                    oldValue = getValueFromJSON(obj, referenceListProperties, propertyPath);
                 } else {
-                    String candidatePath = path;
+                    String candidatePath = propertyPath;
                     if (candidatePath.startsWith("/")) {
                         candidatePath = candidatePath.substring(1);
                     }
-                    oldValue = getValueFromJSON(this.from.path(candidatePath), referenceListProperties, path);
+                    oldValue = getValueFromJSON(this.from.path(candidatePath), referenceListProperties, propertyPath);
                 }
             }
 
@@ -327,18 +327,15 @@ public class ChangeSet {
                                         List<String> referenceListProperties,
                                         String path) {
 
-            Object value = null;
+            Object propertyValue = null;
             JsonNodeType jsonType = node.getNodeType();
             switch (jsonType) {
                 // TODO: how to translate an array?
-                case NULL:
-                    value = null;
-                    break;
                 case BOOLEAN:
-                    value = node.asBoolean();
+                    propertyValue = node.asBoolean();
                     break;
                 case NUMBER:
-                    value = node.asDouble();
+                    propertyValue = node.asDouble();
                     break;
                 case OBJECT:
                     // If an object, must be a Reference (or ReferenceList) -- read it in as one
@@ -346,20 +343,20 @@ public class ChangeSet {
                     // a list, as the JSON Patch is only giving us a singular Reference (the paging we need for
                     // the list is split off on other change operations)
                     if (referenceListProperties.contains(getIgcPropertyName()) && !path.contains("/items/")) {
-                        value = igcRestClient.readJSONIntoItemList(node.toString());
+                        propertyValue = igcRestClient.readJSONIntoItemList(node.toString());
                     } else {
-                        value = igcRestClient.readJSONIntoPOJO(node.toString());
+                        propertyValue = igcRestClient.readJSONIntoPOJO(node.toString());
                     }
                     break;
                 case STRING:
-                    value = node.asText();
+                    propertyValue = node.asText();
                     break;
                 default:
                     if (log.isWarnEnabled()) { log.warn("Unhandled value type '{}': {}", jsonType, node); }
                     break;
             }
 
-            return value;
+            return propertyValue;
 
         }
 

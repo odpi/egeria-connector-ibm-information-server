@@ -949,6 +949,10 @@ public class MockServerExpectations implements ExpectationInitializer {
                 .withSecure(true)
                 .when(MockConstants.createOpenIGCAssetRequest())
                 .respond(withResponse(getResourceFileContents("openigc" + File.separator + "stub_term.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.createOpenIGCAssetRequest())
+                .respond(withResponse(getResourceFileContents("openigc" + File.separator + "stub_database_column.json")));
     }
 
     private void setStubLookups(MockServerClient mockServerClient, String caseName) {
@@ -964,10 +968,22 @@ public class MockServerExpectations implements ExpectationInitializer {
                 .withSecure(true)
                 .when(searchRequest(termRequest))
                 .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "term_" + TERM_RID_FOR_EVENT + ".json")));
+        JsonBody dbColRequest = json(
+                "{\"types\":[\"$OMRS-Stub\"],\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"=\",\"value\":\"database_column_" + DATABASE_COLUMN_RID + "\"}],\"operator\":\"and\"}}",
+                MatchType.ONLY_MATCHING_FIELDS
+        );
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(dbColRequest), Times.exactly(1))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database_column_" + DATABASE_COLUMN_RID + "_first.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(dbColRequest))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database_column_" + DATABASE_COLUMN_RID + "_updated.json")));
         // For the remainder of relationships just get a stub back directly...
-        setStubLookupForRid(mockServerClient, caseName, "database_column", "b1c497ce.60641b50.001mts4qn.7n94g9l.d6kb7r.l766qqrh375qc8dngkpni");
         setStubLookupForRid(mockServerClient, caseName, "data_file_field", "b1c497ce.60641b50.001mts4ph.b86ofl8.toj5lt.0vrgjai9knc4h9k0hpr08");
         setStubLookupForRid(mockServerClient, caseName, "category", "6662c0f2.ee6a64fe.00263pfar.1a0mm9a.lfjd3c.rmgl1cdd5fcd4bijur3g3");
+        setStubLookupForRid(mockServerClient, caseName, "data_class", "f4951817.e469fa50.001mtr2gq.ng3g6if.07a45h.1pc9rf31o2aaqf0uc4v02");
     }
 
     private void setStubLookupForRid(MockServerClient mockServerClient, String caseName, String type, String rid) {

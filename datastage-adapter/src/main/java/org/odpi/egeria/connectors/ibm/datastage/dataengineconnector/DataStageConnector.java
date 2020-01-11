@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.ProcessMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.SchemaTypeMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.*;
@@ -54,92 +55,75 @@ public class DataStageConnector extends DataEngineConnectorBase {
     }
 
     /**
-     * Call made by the ConnectorProvider to initialize the Connector with the base services.
-     *
-     * @param connectorInstanceId   unique id for the connector instance useful for messages etc
-     * @param connectionProperties   POJO for the configuration used to create the connector.
+     * {@inheritDoc}
      */
     @Override
     public void initialize(String               connectorInstanceId,
                            ConnectionProperties connectionProperties) {
         super.initialize(connectorInstanceId, connectionProperties);
+        this.objectMapper = new ObjectMapper();
+        this.dataStageCache = null;
+    }
 
-        final String methodName = "initialize";
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void start() throws ConnectorCheckedException {
+
+        super.start();
+        final String methodName = "start";
 
         if (log.isInfoEnabled()) { log.info("Initializing DataStageDataEngineConnector..."); }
 
         EndpointProperties endpointProperties = connectionProperties.getEndpoint();
         if (endpointProperties == null) {
-            DataStageErrorCode errorCode = DataStageErrorCode.CONNECTION_FAILURE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("null");
-            throw new OCFRuntimeException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
-        }
-        String address = endpointProperties.getAddress();
-        if (address == null || address.equals("")) {
-            DataStageErrorCode errorCode = DataStageErrorCode.CONNECTION_FAILURE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
-            throw new OCFRuntimeException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
-        }
-
-        String igcUser = connectionProperties.getUserId();
-        String igcPass = connectionProperties.getClearPassword();
-
-        Map<String, Object> proxyProperties = this.connectionBean.getConfigurationProperties();
-        Integer igcPage = null;
-        if (proxyProperties != null) {
-            igcPage = (Integer) proxyProperties.get("pageSize");
-        }
-
-        this.defaultUserId = igcUser;
-
-        IGCVersionEnum igcVersion;
-        // Create new REST API client (opens a new session)
-        this.igcRestClient = new IGCRestClient("https://" + address, igcUser, igcPass);
-        if (this.igcRestClient.start()) {
-            // Set the version based on the IGC client's auto-determination of the IGC environment's version
-            igcVersion = this.igcRestClient.getIgcVersion();
-            // Set the default page size to whatever is provided as part of config parameters (default to 100)
-            if (igcPage != null) {
-                this.igcRestClient.setDefaultPageSize(igcPage);
-            } else {
-                this.igcRestClient.setDefaultPageSize(100);
-            }
+            raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, null, "<null>");
         } else {
-            DataStageErrorCode errorCode = DataStageErrorCode.CONNECTION_FAILURE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
-            throw new OCFRuntimeException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
-        }
+            String address = endpointProperties.getAddress();
+            if (address == null || address.equals("")) {
+                raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, null, address);
+            } else {
 
-        // Create a new SoftwareServerCapability representing this Data Engine
-        SoftwareServerCapability sscDataEngine = new SoftwareServerCapability();
-        sscDataEngine.setEngineType("IBM InfoSphere DataStage");
-        sscDataEngine.setEngineVersion(igcVersion.getVersionString());
-        sscDataEngine.setQualifiedName("ibm-datastage@" + address);
-        sscDataEngine.setDisplayName(address);
-        dataEngine = new DataEngineSoftwareServerCapability(sscDataEngine, defaultUserId);
-        this.objectMapper = new ObjectMapper();
-        this.dataStageCache = null;
+                String igcUser = connectionProperties.getUserId();
+                String igcPass = connectionProperties.getClearPassword();
+
+                Map<String, Object> proxyProperties = this.connectionBean.getConfigurationProperties();
+                Integer igcPage = null;
+                if (proxyProperties != null) {
+                    igcPage = (Integer) proxyProperties.get("pageSize");
+                }
+
+                this.defaultUserId = igcUser;
+
+                IGCVersionEnum igcVersion;
+                // Create new REST API client (opens a new session)
+                this.igcRestClient = new IGCRestClient("https://" + address, igcUser, igcPass);
+                if (this.igcRestClient.start()) {
+
+                    // Set the version based on the IGC client's auto-determination of the IGC environment's version
+                    igcVersion = this.igcRestClient.getIgcVersion();
+                    // Set the default page size to whatever is provided as part of config parameters (default to 100)
+                    if (igcPage != null) {
+                        this.igcRestClient.setDefaultPageSize(igcPage);
+                    } else {
+                        this.igcRestClient.setDefaultPageSize(100);
+                    }
+
+                    // Create a new SoftwareServerCapability representing this Data Engine
+                    SoftwareServerCapability sscDataEngine = new SoftwareServerCapability();
+                    sscDataEngine.setEngineType("IBM InfoSphere DataStage");
+                    sscDataEngine.setEngineVersion(igcVersion.getVersionString());
+                    sscDataEngine.setQualifiedName("ibm-datastage@" + address);
+                    sscDataEngine.setDisplayName(address);
+                    dataEngine = new DataEngineSoftwareServerCapability(sscDataEngine, defaultUserId);
+
+                } else {
+                    raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, null, address);
+                }
+
+            }
+        }
 
     }
 
@@ -185,10 +169,9 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * Persist the date and time at which changes were last successfully synchronized.
      *
      * @param time the date and time at which changes were last successfully synchronized
-     * @throws OCFRuntimeException if there is any problem persisting the date and time
      */
     @Override
-    public void setChangesLastSynced(Date time) throws OCFRuntimeException {
+    public void setChangesLastSynced(Date time) {
         final String methodName = "setChangesLastSynced";
         InformationGovernanceRule exists = getJobSyncRule();
         String newDescription = SYNC_RULE_DESC + SYNC_DATE_FORMAT.format(time);
@@ -433,6 +416,27 @@ public class DataStageConnector extends DataEngineConnectorBase {
         igcSearch.addConditions(conditionSet);
         ItemList<InformationGovernanceRule> results = igcRestClient.search(igcSearch);
         return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
+    }
+
+    /**
+     * Throws a ConnectorCheckedException using the provided parameters.
+     * @param errorCode the error code for the exception
+     * @param methodName the name of the method throwing the exception
+     * @param cause the underlying cause of the exception (or null if none)
+     * @param params any parameters for formatting the error message
+     * @throws ConnectorCheckedException always
+     */
+    private void raiseConnectorCheckedException(DataStageErrorCode errorCode, String methodName, Throwable cause, String ...params) throws ConnectorCheckedException {
+        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
+        throw new ConnectorCheckedException(
+                errorCode.getHTTPErrorCode(),
+                this.getClass().getName(),
+                methodName,
+                errorMessage,
+                errorCode.getSystemAction(),
+                errorCode.getUserAction(),
+                cause
+        );
     }
 
 }

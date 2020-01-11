@@ -27,17 +27,13 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCRelations
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.OMRSStub;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
-import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
-import org.odpi.openmetadata.repositoryservices.auditlog.OMRSAuditLog;
 import org.odpi.openmetadata.repositoryservices.connectors.openmetadatatopic.OpenMetadataTopicListener;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.OMRSMetadataCollection;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Classification;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.EntityDetail;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Relationship;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDef;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryConnector;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryeventmapper.OMRSRepositoryEventMapperBase;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.*;
 import org.slf4j.Logger;
@@ -93,8 +89,10 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         super.start();
 
+        final String methodName = "start";
+
         IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.EVENT_MAPPER_STARTING;
-        auditLog.logRecord("start",
+        auditLog.logRecord(methodName,
                 auditCode.getLogMessageId(),
                 auditCode.getSeverity(),
                 auditCode.getFormattedLogMessage(),
@@ -109,7 +107,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             throw new ConnectorCheckedException(
                     errorCode.getHTTPErrorCode(),
                     this.getClass().getName(),
-                    "start",
+                    methodName,
                     errorMessage,
                     errorCode.getSystemAction(),
                     errorCode.getUserAction()
@@ -143,7 +141,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(igcomrsRepositoryConnector.getServerName());
             throw new ConnectorCheckedException(errorCode.getHTTPErrorCode(),
                     this.getClass().getName(),
-                    "start",
+                    methodName,
                     errorMessage,
                     errorCode.getSystemAction(),
                     errorCode.getUserAction(),
@@ -465,17 +463,6 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     }
 
     /**
-     * Attempt to retrieve the EntityDetail object for the provided OMRS stub, and handle any errors if unable
-     * to do so.
-     *
-     * @param stub the OMRS stub for which to retrieve an EntityDetail object
-     * @return EntityDetail
-     */
-    private EntityDetail getEntityDetailForStub(OMRSStub stub) {
-        return getEntityDetailForStubWithGUID(stub, null);
-    }
-
-    /**
      * Attempt to retrieve the EntityDetail object for the provided OMRS stub, using the provided Repository ID (RID).
      * Useful for when the RID indicates there is some generated entity that does not actually exist on its own in
      * IGC. Will handle any errors if unable to retrieve the asset, and the EntityDetail will simply be null.
@@ -504,37 +491,6 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             }
         }
         return detail;
-
-    }
-
-    /**
-     * Attempt to retrieve the Relationships for the provided OMRS stub, using the provided Repository ID (RID).
-     * Will handle any errors if unable to retrieve the asset, and the list of relationships will simply be null.
-     *
-     * @param stub the OMRS stub for which to retrieve the Relationships
-     * @param guid the IGC GUID to use for the asset
-     * @return {@code List<Relationship>}
-     */
-    private List<Relationship> getRelationshipsForStubWithGUID(OMRSStub stub, IGCEntityGuid guid) {
-
-        List<Relationship> relationships = null;
-        if (log.isDebugEnabled()) { log.debug("Retrieving Relationships for stub: {}", stub); }
-        Reference asset = getIgcAssetFromStubPayload(stub);
-        if (asset != null) {
-            // If no RID was provided, take it from the asset we retrieved
-            if (guid == null) {
-                guid = igcRepositoryHelper.getEntityGuid(asset.getType(), null, asset.getId());
-            }
-            if (log.isDebugEnabled()) { log.debug(" ... retrieved asset from stub: {}", asset); }
-            try {
-                relationships = igcRepositoryHelper.getRelationshipsFromFullAsset(localServerUserId, guid, asset);
-            } catch (EntityNotKnownException e) {
-                if (log.isErrorEnabled()) { log.error("Unable to find Relationships for stub with GUID: {}", guid, e); }
-            } catch (RepositoryErrorException e) {
-                if (log.isErrorEnabled()) { log.error("Unexpected error in retrieving Relationships for stub: {}", stub.getId(), e); }
-            }
-        }
-        return relationships;
 
     }
 
@@ -645,7 +601,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     log.debug(" ... properties that changed: {}", changedProperties);
                     for (String propertyName : changedProperties) {
                         log.debug(" ...... details for property '{}'", propertyName);
-                        log.debug(" .......... {}", changeSet.getChangesForProperty(propertyName).toString());
+                        log.debug(" .......... {}", changeSet.getChangesForProperty(propertyName));
                     }
                     log.debug(" ... before: {}", stub.getPayload());
                     log.debug(" ... now:    {}", igcRestClient.getValueAsJSON(latestVersion));
