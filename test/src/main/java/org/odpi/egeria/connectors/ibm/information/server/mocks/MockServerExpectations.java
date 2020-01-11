@@ -194,6 +194,7 @@ public class MockServerExpectations implements ExpectationInitializer {
         setTabularColumnRelationships(mockServerClient);
 
         // Event tests
+        setChangeSetTest(mockServerClient);
         setEventTest(mockServerClient);
 
     }
@@ -977,6 +978,22 @@ public class MockServerExpectations implements ExpectationInitializer {
                         MatchType.ONLY_MATCHING_FIELDS
                 )))
                 .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + type + "_" + rid + ".json")));
+    }
+
+    private void setChangeSetTest(MockServerClient mockServerClient) {
+        String caseName = "ChangeSetTest";
+        JsonBody termRequest = json(
+                "{\"types\":[\"$OMRS-Stub\"],\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"=\",\"value\":\"term_" + TERM_RID + "\"}],\"operator\":\"and\"}}",
+                MatchType.ONLY_MATCHING_FIELDS
+        );
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(termRequest), Times.exactly(1))
+                .respond(withResponse(getResourceFileContents("no_results.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(termRequest))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "term_" + TERM_RID + ".json")));
     }
 
     private void setProjectsQuery(MockServerClient mockServerClient) {

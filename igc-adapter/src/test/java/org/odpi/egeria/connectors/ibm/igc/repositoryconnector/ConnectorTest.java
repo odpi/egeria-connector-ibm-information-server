@@ -2,13 +2,18 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapper;
+import org.odpi.egeria.connectors.ibm.igc.eventmapper.model.ChangeSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.ContactDetailsMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.GlossaryMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.RelationalDBSchemaTypeMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mocks.MockConnection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.OMRSStub;
 import org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants;
 import org.odpi.openmetadata.adapters.eventbus.topic.inmemory.InMemoryOpenMetadataTopicConnector;
 import org.odpi.openmetadata.adapters.repositoryservices.ConnectorConfigurationFactory;
@@ -1759,6 +1764,74 @@ public class ConnectorTest {
             assertEquals(qualifiedName, MockConstants.DATABASE_COLUMN_QN);
         }
 
+    }
+
+    /**
+     * Test the ChangeSet class that calculates differences in JSON payloads.
+     */
+    @Test
+    public void testChangeSet() {
+
+        IGCRepositoryHelper helper = igcomrsMetadataCollection.getIgcRepositoryHelper();
+        IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
+
+        List<String> referenceListProperties = igcRestClient.getPagedRelationshipPropertiesForType("term");
+
+        Reference testTerm = igcRestClient.getAssetById(MockConstants.TERM_RID);
+        OMRSStub testStub = helper.getOMRSStubForAsset(testTerm);
+
+        // Initial test will be against a non-existent stub
+        ChangeSet test = new ChangeSet(igcRestClient, testTerm, testStub);
+        Set<String> changedProperties = test.getChangedProperties();
+        assertNotNull(changedProperties);
+        assertEquals(changedProperties.size(), 19);
+
+        ChangeSet.Change newAssignedAssetInstance = getSingleChange(test, "assigned_assets");
+        assertEquals(newAssignedAssetInstance.getIgcPropertyName(), "assigned_assets");
+        assertEquals(newAssignedAssetInstance.getIgcPropertyPath(), "/assigned_assets");
+        assertEquals(newAssignedAssetInstance.getOp(), "add");
+        assertNull(newAssignedAssetInstance.getOldValue(referenceListProperties));
+        Object assignedAssets = newAssignedAssetInstance.getNewValue(referenceListProperties);
+        assertTrue(assignedAssets instanceof ItemList);
+        ItemList<Reference> actualAssets = (ItemList<Reference>) assignedAssets;
+        List<Reference> listOfAssets = actualAssets.getItems();
+        assertNotNull(listOfAssets);
+        assertEquals(listOfAssets.size(), 2);
+
+        // Next test will have a stub populated so changes will not all be adds
+        testStub = helper.getOMRSStubForAsset(testTerm);
+        test = new ChangeSet(igcRestClient, testTerm, testStub);
+        changedProperties = test.getChangedProperties();
+        assertNotNull(changedProperties);
+        assertEquals(changedProperties.size(), 27);
+
+        newAssignedAssetInstance = getSingleChange(test, "assigned_assets");
+        assertEquals(newAssignedAssetInstance.getIgcPropertyName(), "assigned_assets");
+        assertEquals(newAssignedAssetInstance.getIgcPropertyPath(), "/assigned_assets/items/0");
+        assertEquals(newAssignedAssetInstance.getOp(), "add");
+        assertNull(newAssignedAssetInstance.getOldValue(referenceListProperties)); // because it is an 'add'
+        assignedAssets = newAssignedAssetInstance.getNewValue(referenceListProperties);
+        assertTrue(assignedAssets instanceof Reference); // because we are only adding 1 new relationship
+        Reference actualAsset = (Reference) assignedAssets;
+        assertNotNull(actualAsset);
+
+        ChangeSet.Change newReplacedBy = getSingleChange(test, "replaced_by");
+        assertEquals(newReplacedBy.getIgcPropertyName(), "replaced_by");
+        assertEquals(newReplacedBy.getIgcPropertyPath(), "/replaced_by");
+        assertEquals(newReplacedBy.getOp(), "remove");
+
+        ChangeSet.Change newModifiedOn = getSingleChange(test, "modified_on");
+        assertEquals(newModifiedOn.getIgcPropertyName(), "modified_on");
+        assertEquals(newModifiedOn.getIgcPropertyPath(), "/modified_on");
+        assertEquals(newModifiedOn.getOp(), "replace");
+
+    }
+
+    private ChangeSet.Change getSingleChange(ChangeSet changes, String propertyName) {
+        List<ChangeSet.Change> change = changes.getChangesForProperty(propertyName);
+        assertNotNull(change);
+        assertEquals(change.size(), 1);
+        return change.get(0);
     }
 
     /**
