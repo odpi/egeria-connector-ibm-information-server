@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 /* Copyright Contributors to the ODPi Egeria project. */
-package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector;
+package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog;
 
 import java.text.MessageFormat;
 
