@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
@@ -38,6 +39,7 @@ public class ClientTest {
     @BeforeSuite
     public void startClient() {
         assertTrue(igcRestClient.start());
+        assertFalse(igcRestClient.isWorkflowEnabled());
     }
 
     @Test
@@ -48,6 +50,12 @@ public class ClientTest {
     @Test
     public void testBaseURL() {
         assertEquals(igcRestClient.getBaseURL(), "https://localhost:1080");
+    }
+
+    @Test
+    public void testInvalidURL() {
+        IGCRestClient invalid = new IGCRestClient("127.0.0.1", "80", "admin", "admin");
+        assertThrows(IGCConnectivityException.class, () -> invalid.start());
     }
 
     @Test
@@ -98,6 +106,23 @@ public class ClientTest {
 
         Identity identity = category.getIdentity(igcRestClient);
         assertNotNull(identity);
+
+        String fullAsJSON = igcRestClient.getValueAsJSON(category);
+        assertNotNull(fullAsJSON);
+        Reference backAgain = igcRestClient.readJSONIntoPOJO(fullAsJSON);
+        assertNotNull(backAgain);
+        String againAsJSON = igcRestClient.getValueAsJSON(backAgain);
+        assertEquals(againAsJSON, fullAsJSON);
+
+        ItemList<Term> terms = category.getTerms();
+        assertNotNull(terms);
+        assertEquals(terms.getPaging().getNumTotal().intValue(), 42);
+        String itemListAsJSON = terms.toString();
+        ItemList<Term> listAgain = igcRestClient.readJSONIntoItemList(itemListAsJSON);
+        assertNotNull(listAgain);
+        assertEquals(listAgain.getPaging().getNumTotal().intValue(), 42);
+        String listAgainAsJSON = listAgain.toString();
+        assertEquals(listAgainAsJSON, itemListAsJSON);
 
         // Note that in this case they will not be equal because there is no context on this root-level category,
         // so a search will always be run and the results with only mod details (and context) returned
