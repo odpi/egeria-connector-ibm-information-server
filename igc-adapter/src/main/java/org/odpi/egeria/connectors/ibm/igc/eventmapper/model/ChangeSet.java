@@ -167,7 +167,7 @@ public class ChangeSet {
      *
      * @return {@code Set<String>}
      */
-    public Set<String> getChangedProperties() { return this.changesByProperty.keySet(); }
+    public Set<String> getChangedProperties() { return new TreeSet<>(this.changesByProperty.keySet()); }
 
     /**
      * Retrieve the list of changes for the provided IGC property name.

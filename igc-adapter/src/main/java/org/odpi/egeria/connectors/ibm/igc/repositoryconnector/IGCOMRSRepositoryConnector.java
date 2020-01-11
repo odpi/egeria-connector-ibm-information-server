@@ -12,8 +12,6 @@ import org.odpi.openmetadata.frameworks.connectors.properties.EndpointProperties
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.OMRSMetadataCollection;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryConnector;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
 import java.util.ArrayList;
@@ -21,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
-
-    private static final Logger log = LoggerFactory.getLogger(IGCOMRSRepositoryConnector.class);
 
     private IGCRestClient igcRestClient;
     private IGCVersionEnum igcVersion;
@@ -47,17 +43,7 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
             try {
                 connectToIGC(methodName);
             } catch (ConnectorCheckedException e) {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(getServerName());
-                throw new RepositoryErrorException(
-                        errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction(),
-                        e
-                );
+                raiseRepositoryErrorException(IGCOMRSErrorCode.REST_CLIENT_FAILURE, methodName, e, getServerName());
             }
         }
         return super.getMetadataCollection();
@@ -150,115 +136,77 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
 
         EndpointProperties endpointProperties = connectionProperties.getEndpoint();
         if (endpointProperties == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("null");
-            throw new ConnectorCheckedException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
-        }
+            raiseConnectorCheckedException(IGCOMRSErrorCode.REST_CLIENT_FAILURE, methodName, null, "<null>");
+        } else {
 
-        String address = endpointProperties.getProtocol() + "://" + endpointProperties.getAddress();
+            String address = endpointProperties.getProtocol() + "://" + endpointProperties.getAddress();
 
-        String igcUser = connectionProperties.getUserId();
-        String igcPass = connectionProperties.getClearPassword();
+            String igcUser = connectionProperties.getUserId();
+            String igcPass = connectionProperties.getClearPassword();
 
-        // Retrieve connection details
-        Map<String, Object> proxyProperties = this.connectionBean.getConfigurationProperties();
-        if (proxyProperties != null) {
-            Object zones = proxyProperties.get(IGCOMRSRepositoryConnectorProvider.DEFAULT_ZONES);
-            if (zones instanceof List) {
-                for (Object zone : (List<?>) zones) {
-                    if (zone instanceof String) {
-                        this.defaultZones.add((String)zone);
+            // Retrieve connection details
+            Map<String, Object> proxyProperties = this.connectionBean.getConfigurationProperties();
+            if (proxyProperties != null) {
+                Object zones = proxyProperties.get(IGCOMRSRepositoryConnectorProvider.DEFAULT_ZONES);
+                if (zones instanceof List) {
+                    for (Object zone : (List<?>) zones) {
+                        if (zone instanceof String) {
+                            this.defaultZones.add((String) zone);
+                        }
                     }
                 }
             }
-        }
 
-        boolean successfulInit;
+            boolean successfulInit = false;
 
-        IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.CONNECTING_TO_IGC;
-        auditLog.logRecord(methodName,
-                auditCode.getLogMessageId(),
-                auditCode.getSeverity(),
-                auditCode.getFormattedLogMessage(address),
-                null,
-                auditCode.getSystemAction(),
-                auditCode.getUserAction());
+            IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.CONNECTING_TO_IGC;
+            auditLog.logRecord(methodName,
+                    auditCode.getLogMessageId(),
+                    auditCode.getSeverity(),
+                    auditCode.getFormattedLogMessage(address),
+                    null,
+                    auditCode.getSystemAction(),
+                    auditCode.getUserAction());
 
-        // Create new REST API client (opens a new session)
-        try {
-            this.igcRestClient = new IGCRestClient(address, igcUser, igcPass);
-            if (this.igcRestClient.start()) {
-                if (getMaxPageSize() > 0) {
-                    this.igcRestClient.setDefaultPageSize(getMaxPageSize());
+            // Create new REST API client (opens a new session)
+            try {
+                this.igcRestClient = new IGCRestClient(address, igcUser, igcPass);
+                if (this.igcRestClient.start()) {
+                    if (getMaxPageSize() > 0) {
+                        this.igcRestClient.setDefaultPageSize(getMaxPageSize());
+                    }
+                    // Set the version based on the IGC client's auto-determination of the IGC environment's version
+                    this.igcVersion = this.igcRestClient.getIgcVersion();
+                    boolean success = upsertOMRSBundleZip();
+                    this.igcRestClient.registerPOJO(OMRSStub.class);
+                    successfulInit = success;
                 }
-                // Set the version based on the IGC client's auto-determination of the IGC environment's version
-                this.igcVersion = this.igcRestClient.getIgcVersion();
-                boolean success = upsertOMRSBundleZip();
-                this.igcRestClient.registerPOJO(OMRSStub.class);
-                successfulInit = success;
-            } else {
-                successfulInit = false;
+            } catch (RepositoryErrorException e) {
+                raiseConnectorCheckedException(IGCOMRSErrorCode.OMRS_BUNDLE_FAILURE, methodName, e, address);
+            } catch (Exception e) {
+                raiseConnectorCheckedException(IGCOMRSErrorCode.REST_CLIENT_FAILURE, methodName, e, "<null>");
             }
-        } catch (RepositoryErrorException e) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.OMRS_BUNDLE_FAILURE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
-            throw new ConnectorCheckedException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction(),
-                    e
-            );
-        } catch (Exception e) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
-            throw new ConnectorCheckedException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction(),
-                    e
-            );
+
+            if (!successfulInit) {
+                raiseConnectorCheckedException(IGCOMRSErrorCode.REST_CLIENT_FAILURE, methodName, null, "<null>");
+            }
+
+            auditCode = IGCOMRSAuditCode.CONNECTED_TO_IGC;
+            auditLog.logRecord(methodName,
+                    auditCode.getLogMessageId(),
+                    auditCode.getSeverity(),
+                    auditCode.getFormattedLogMessage(address),
+                    null,
+                    auditCode.getSystemAction(),
+                    auditCode.getUserAction());
+
+            metadataCollection = new IGCOMRSMetadataCollection(this,
+                    serverName,
+                    repositoryHelper,
+                    repositoryValidator,
+                    metadataCollectionId);
+
         }
-
-        if (!successfulInit) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(address);
-            throw new ConnectorCheckedException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
-        }
-
-        auditCode = IGCOMRSAuditCode.CONNECTED_TO_IGC;
-        auditLog.logRecord(methodName,
-                auditCode.getLogMessageId(),
-                auditCode.getSeverity(),
-                auditCode.getFormattedLogMessage(address),
-                null,
-                auditCode.getSystemAction(),
-                auditCode.getUserAction());
-
-        metadataCollection = new IGCOMRSMetadataCollection(this,
-                serverName,
-                repositoryHelper,
-                repositoryValidator,
-                metadataCollectionId);
 
     }
 
@@ -274,18 +222,51 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
         ClassPathResource bundleResource = new ClassPathResource("OMRS.zip");
         boolean success = this.igcRestClient.upsertOpenIgcBundle("OMRS", bundleResource);
         if (!success) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.OMRS_BUNDLE_FAILURE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage("open");
-            throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+            raiseRepositoryErrorException(IGCOMRSErrorCode.OMRS_BUNDLE_FAILURE, methodName, null, "open");
         }
 
         return success;
 
+    }
+
+    /**
+     * Throws a ConnectorCheckedException using the provided parameters.
+     * @param errorCode the error code for the exception
+     * @param methodName the name of the method throwing the exception
+     * @param cause the underlying cause of the exception (or null if none)
+     * @param params any parameters for formatting the error message
+     * @throws ConnectorCheckedException always
+     */
+    private void raiseConnectorCheckedException(IGCOMRSErrorCode errorCode, String methodName, Throwable cause, String ...params) throws ConnectorCheckedException {
+        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
+        throw new ConnectorCheckedException(
+                errorCode.getHTTPErrorCode(),
+                this.getClass().getName(),
+                methodName,
+                errorMessage,
+                errorCode.getSystemAction(),
+                errorCode.getUserAction(),
+                cause
+        );
+    }
+
+    /**
+     * Throws a RepositoryErrorException using the provided parameters.
+     * @param errorCode the error code for the exception
+     * @param methodName the name of the method throwing the exception
+     * @param cause the underlying cause of the exception (or null if none)
+     * @param params any parameters for formatting the error message
+     * @throws RepositoryErrorException always
+     */
+    private void raiseRepositoryErrorException(IGCOMRSErrorCode errorCode, String methodName, Throwable cause, String ...params) throws RepositoryErrorException {
+        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
+        throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+                this.getClass().getName(),
+                methodName,
+                errorMessage,
+                errorCode.getSystemAction(),
+                errorCode.getUserAction(),
+                cause);
     }
 
 }
