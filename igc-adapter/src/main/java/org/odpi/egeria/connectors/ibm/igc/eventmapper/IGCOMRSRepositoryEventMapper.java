@@ -1463,160 +1463,153 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         if (alreadyPurgedRids.contains(rid)) {
             if (log.isDebugEnabled()) { log.debug("Received RID has already been purged -- skipping: {}", rid); }
         } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Purging entity of type '{}' with RID: {}", igcAssetType, rid);
-            }
+            if (log.isDebugEnabled()) { log.debug("Purging entity of type '{}' with RID: {}", igcAssetType, rid); }
+
             OMRSStub stub = igcRepositoryHelper.getOMRSStubForAsset(rid, igcAssetType);
-            Reference fromObject = getIgcAssetFromStubPayload(stub);
+            // If there is no stub, there should not be any information that was sent previously in an event for us
+            // to need to purge anything, so we should be able to skip the rest and continue on our way
+            if (stub != null) {
 
-            // Purge entities by getting all mappers used for that entity (ie. *Type generated entities
-            // as well as non-generated entities)
-            List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(igcAssetType, localServerUserId);
-            for (EntityMapping referenceableMapper : referenceableMappers) {
+                Reference fromObject = getIgcAssetFromStubPayload(stub);
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Checking via: {}", referenceableMapper.getClass().getName());
-                }
-                if (referenceableMapper.isOmrsType(igcRestClient, fromObject)) {
+                // Purge entities by getting all mappers used for that entity (ie. *Type generated entities
+                // as well as non-generated entities)
+                List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(igcAssetType, localServerUserId);
+                for (EntityMapping referenceableMapper : referenceableMappers) {
 
-                    List<PurgeMarker> purgeMarkers = new ArrayList<>();
-                    String ridPrefix = referenceableMapper.getIgcRidPrefix();
-                    IGCEntityGuid igcEntityGuid = igcRepositoryHelper.getEntityGuid(igcAssetType, ridPrefix, rid);
-                    // First purge any relationships that exist against this entity
-                    List<RelationshipMapping> relationshipMappers = referenceableMapper.getRelationshipMappers();
-                    for (RelationshipMapping relationshipMapping : relationshipMappers) {
+                    if (log.isDebugEnabled()) { log.debug("Checking via: {}", referenceableMapper.getClass().getName()); }
+                    if (referenceableMapper.isOmrsType(igcRestClient, fromObject)) {
 
-                        if (log.isDebugEnabled()) {
-                            log.debug("Checking for relationships via: {}", relationshipMapping.getClass().getName());
-                        }
-                        RelationshipMapping.ProxyMapping pmOne = relationshipMapping.getProxyOneMapping();
-                        RelationshipMapping.ProxyMapping pmTwo = relationshipMapping.getProxyTwoMapping();
-                        try {
-                            RelationshipDef relationshipDef = (RelationshipDef) igcomrsMetadataCollection.getTypeDefByName(
-                                    localServerUserId,
-                                    relationshipMapping.getOmrsRelationshipType()
-                            );
-                            RelationshipMapping.ContainedType childEnd = relationshipMapping.getContainedType();
-                            // TODO: not quite as simple as this just checking types, as the IGC type could match both ends...
-                            if ((childEnd.equals(RelationshipMapping.ContainedType.ONE) && pmTwo.matchesAssetType(igcAssetType))
-                                    || (childEnd.equals(RelationshipMapping.ContainedType.TWO) && pmOne.matchesAssetType(igcAssetType))) {
-                                // If the child entities are at one end of the relationship, and we are starting from the
-                                // other, then recursively purge
-                                if (log.isDebugEnabled()) {
-                                    log.debug(" ... containment detected for type '{}' and relationship {}", igcAssetType, relationshipMapping.getClass().getName());
+                        List<PurgeMarker> purgeMarkers = new ArrayList<>();
+                        String ridPrefix = referenceableMapper.getIgcRidPrefix();
+                        IGCEntityGuid igcEntityGuid = igcRepositoryHelper.getEntityGuid(igcAssetType, ridPrefix, rid);
+                        // First purge any relationships that exist against this entity
+                        List<RelationshipMapping> relationshipMappers = referenceableMapper.getRelationshipMappers();
+                        for (RelationshipMapping relationshipMapping : relationshipMappers) {
+
+                            if (log.isDebugEnabled()) { log.debug("Checking for relationships via: {}", relationshipMapping.getClass().getName()); }
+                            RelationshipMapping.ProxyMapping pmOne = relationshipMapping.getProxyOneMapping();
+                            RelationshipMapping.ProxyMapping pmTwo = relationshipMapping.getProxyTwoMapping();
+                            try {
+                                RelationshipDef relationshipDef = (RelationshipDef) igcomrsMetadataCollection.getTypeDefByName(
+                                        localServerUserId,
+                                        relationshipMapping.getOmrsRelationshipType()
+                                );
+                                RelationshipMapping.ContainedType childEnd = relationshipMapping.getContainedType();
+                                // TODO: not quite as simple as this just checking types, as the IGC type could match both ends...
+                                if ((childEnd.equals(RelationshipMapping.ContainedType.ONE) && pmTwo.matchesAssetType(igcAssetType))
+                                        || (childEnd.equals(RelationshipMapping.ContainedType.TWO) && pmOne.matchesAssetType(igcAssetType))) {
+                                    // If the child entities are at one end of the relationship, and we are starting from the
+                                    // other, then recursively purge
+                                    if (log.isDebugEnabled()) { log.debug(" ... containment detected for type '{}' and relationship {}", igcAssetType, relationshipMapping.getClass().getName()); }
+                                    // Need to ensure all relationships are purged BEFORE recursing on entities, otherwise
+                                    // for recursed entities we will inevitably need to try to delete a parent-child relationship
+                                    // where one end (eg. the child) has already been purged and therefore a stub for it cannot be
+                                    // retrieved
+                                    purgeMarkers.add(new PurgeMarker(fromObject, relationshipDef, relationshipMapping));
                                 }
-                                // Need to ensure all relationships are purged BEFORE recursing on entities, otherwise
-                                // for recursed entities we will inevitably need to try to delete a parent-child relationship
-                                // where one end (eg. the child) has already been purged and therefore a stub for it cannot be
-                                // retrieved
-                                purgeMarkers.add(new PurgeMarker(fromObject, relationshipDef, relationshipMapping));
-                            }
 
-                            // Irrespective of containment and the potential need to recurse, remove the relationship
-                            List<String> propertyNames = null;
-                            List<Reference> endOne = new ArrayList<>();
-                            List<Reference> endTwo = new ArrayList<>();
-                            boolean iterateOnOne = false;
-                            if (pmOne.matchesAssetType(igcAssetType)) {
-                                if (log.isDebugEnabled()) {
-                                    log.debug(" ... setting 'from' to end1: {}", igcAssetType);
+                                // Irrespective of containment and the potential need to recurse, remove the relationship
+                                List<String> propertyNames = null;
+                                List<Reference> endOne = new ArrayList<>();
+                                List<Reference> endTwo = new ArrayList<>();
+                                boolean iterateOnOne = false;
+                                if (pmOne.matchesAssetType(igcAssetType)) {
+                                    if (log.isDebugEnabled()) { log.debug(" ... setting 'from' to end1: {}", igcAssetType); }
+                                    propertyNames = pmOne.getIgcRelationshipProperties();
+                                    endOne.addAll(relationshipMapping.getProxyOneAssetFromAsset(fromObject, igcRestClient));
+                                    iterateOnOne = true;
+                                } else if (pmTwo.matchesAssetType(igcAssetType)) {
+                                    if (log.isDebugEnabled()) { log.debug(" ... setting 'from' to end2: {}", igcAssetType); }
+                                    propertyNames = pmTwo.getIgcRelationshipProperties();
+                                    endTwo.addAll(relationshipMapping.getProxyTwoAssetFromAsset(fromObject, igcRestClient));
+                                    iterateOnOne = false;
+                                } else {
+                                    log.warn("Unable to match the purged entity '{}' to either end of relationship: {}", igcAssetType, relationshipDef.getName());
                                 }
-                                propertyNames = pmOne.getIgcRelationshipProperties();
-                                endOne.addAll(relationshipMapping.getProxyOneAssetFromAsset(fromObject, igcRestClient));
-                                iterateOnOne = true;
-                            } else if (pmTwo.matchesAssetType(igcAssetType)) {
-                                if (log.isDebugEnabled()) {
-                                    log.debug(" ... setting 'from' to end2: {}", igcAssetType);
-                                }
-                                propertyNames = pmTwo.getIgcRelationshipProperties();
-                                endTwo.addAll(relationshipMapping.getProxyTwoAssetFromAsset(fromObject, igcRestClient));
-                                iterateOnOne = false;
-                            } else {
-                                log.warn("Unable to match the purged entity '{}' to either end of relationship: {}", igcAssetType, relationshipDef.getName());
-                            }
-                            if (propertyNames != null) {
-                                for (String property : propertyNames) {
-                                    if (log.isDebugEnabled()) {
-                                        log.debug(" ... checking for relationship on property: {}", property);
-                                    }
-                                    Object relatedResult = igcRestClient.getPropertyByName(fromObject, property);
-                                    if (relatedResult != null) {
-                                        // TODO: we should also cache up all of the relationship ends that are NOT purged,
-                                        //  as these entities should have their stubs updated (to no longer refer to a
-                                        //  non-existent relationship) -- in fact, that might take care of sending the
-                                        //  correct relationship purges for us?
-                                        if (relatedResult instanceof Reference) {
-                                            Reference relationship = (Reference) relatedResult;
-                                            cascadeRelationshipPurge(
-                                                    relationshipMapping,
-                                                    relationshipDef,
-                                                    endOne,
-                                                    endTwo,
-                                                    relationship,
-                                                    property,
-                                                    iterateOnOne
-                                            );
-                                        } else if (relatedResult instanceof ItemList) {
-                                            ItemList<?> relationships = (ItemList<?>) relatedResult;
-                                            for (Reference relationship : relationships.getItems()) {
-                                                cascadeRelationshipPurge(
-                                                        relationshipMapping,
-                                                        relationshipDef,
-                                                        endOne,
-                                                        endTwo,
-                                                        relationship,
-                                                        property,
-                                                        iterateOnOne
-                                                );
+                                if (propertyNames != null) {
+                                    for (String property : propertyNames) {
+                                        if (log.isDebugEnabled()) { log.debug(" ... checking for relationship on property: {}", property); }
+                                        Object relatedResult = igcRestClient.getPropertyByName(fromObject, property);
+                                        if (relatedResult != null) {
+                                            // TODO: we should also cache up all of the relationship ends that are NOT purged,
+                                            //  as these entities should have their stubs updated (to no longer refer to a
+                                            //  non-existent relationship) -- in fact, that might take care of sending the
+                                            //  correct relationship purges for us?
+                                            if (relatedResult instanceof Reference) {
+                                                Reference relationship = (Reference) relatedResult;
+                                                if (relationship.getType() != null) {
+                                                    // In cases of an exclusive relationship, there could be an empty
+                                                    // object rather than null, but this semantically still means there
+                                                    // is no relationship so treat it as a null relationship (skip it)
+                                                    cascadeRelationshipPurge(
+                                                            relationshipMapping,
+                                                            relationshipDef,
+                                                            endOne,
+                                                            endTwo,
+                                                            relationship,
+                                                            property,
+                                                            iterateOnOne
+                                                    );
+                                                }
+                                            } else if (relatedResult instanceof ItemList) {
+                                                ItemList<?> relationships = (ItemList<?>) relatedResult;
+                                                for (Reference relationship : relationships.getItems()) {
+                                                    cascadeRelationshipPurge(
+                                                            relationshipMapping,
+                                                            relationshipDef,
+                                                            endOne,
+                                                            endTwo,
+                                                            relationship,
+                                                            property,
+                                                            iterateOnOne
+                                                    );
+                                                }
                                             }
                                         }
                                     }
                                 }
+                            } catch (RepositoryErrorException | TypeDefNotKnownException | InvalidParameterException e) {
+                                log.error("Unable to retrieve the relationship type definition for '{}' -- cannot purge relationship.", relationshipMapping.getOmrsRelationshipType(), e);
                             }
-                        } catch (RepositoryErrorException | TypeDefNotKnownException | InvalidParameterException e) {
-                            log.error("Unable to retrieve the relationship type definition for '{}' -- cannot purge relationship.", relationshipMapping.getOmrsRelationshipType(), e);
+
                         }
 
-                    }
-
-                    // Recurse on any purges we've marked
-                    for (PurgeMarker purgeMarker : purgeMarkers) {
-                        recurseOnContainedEntities(purgeMarker, alreadyPurgedRids);
-                    }
-
-                    // Then remove the entity itself
-                    EntityDetail detail = getEntityDetailForStubWithGUID(stub, igcEntityGuid);
-                    if (detail != null) {
-                        if (log.isDebugEnabled()) {
-                            log.debug(" ... purging entity: {}", igcEntityGuid.asGuid());
+                        // Recurse on any purges we've marked
+                        for (PurgeMarker purgeMarker : purgeMarkers) {
+                            recurseOnContainedEntities(purgeMarker, alreadyPurgedRids);
                         }
-                        repositoryEventProcessor.processDeletePurgedEntityEvent(
-                                sourceName,
-                                metadataCollectionId,
-                                originatorServerName,
-                                originatorServerType,
-                                null,
-                                detail
-                        );
-                        // and mark it as purged, so that we don't attempt to purge again during the recursion
-                        alreadyPurgedRids.add(igcEntityGuid.getRid());
+
+                        // Then remove the entity itself
+                        EntityDetail detail = getEntityDetailForStubWithGUID(stub, igcEntityGuid);
+                        if (detail != null) {
+                            if (log.isDebugEnabled()) { log.debug(" ... purging entity: {}", igcEntityGuid.asGuid()); }
+                            repositoryEventProcessor.processDeletePurgedEntityEvent(
+                                    sourceName,
+                                    metadataCollectionId,
+                                    originatorServerName,
+                                    originatorServerType,
+                                    null,
+                                    detail
+                            );
+                            // and mark it as purged, so that we don't attempt to purge again during the recursion
+                            alreadyPurgedRids.add(igcEntityGuid.getRid());
+                        } else {
+                            if (log.isWarnEnabled()) { log.warn("No stub information exists for purged GUID {} -- cannot generated purgeEntity event.", igcEntityGuid.asGuid()); }
+                        }
+
                     } else {
-                        if (log.isWarnEnabled()) {
-                            log.warn("No stub information exists for purged GUID {} -- cannot generated purgeEntity event.", igcEntityGuid.asGuid());
-                        }
+                        log.info("Type ({}) did not match mapper, skipped: {}", igcAssetType, referenceableMapper.getClass().getName());
                     }
-
-                } else {
-                    log.info("Type ({}) did not match mapper, skipped: {}", igcAssetType, referenceableMapper.getClass().getName());
                 }
-            }
 
-            // Finally, remove the stub (so that if such an asset is created in the future it is recognised as new
-            // rather than an update)
-            if (log.isDebugEnabled()) {
-                log.debug("Deleting stub: {}", rid);
+                // Finally, remove the stub (so that if such an asset is created in the future it is recognised as new
+                // rather than an update)
+                if (log.isDebugEnabled()) { log.debug("Deleting stub: {}", rid); }
+                igcRepositoryHelper.deleteOMRSStubForAsset(rid, igcAssetType);
+            } else {
+                log.info("No stub information exists for RID {} of type {} -- cannot generated purgeEntity event.", rid, igcAssetType);
             }
-            igcRepositoryHelper.deleteOMRSStubForAsset(rid, igcAssetType);
         }
 
     }

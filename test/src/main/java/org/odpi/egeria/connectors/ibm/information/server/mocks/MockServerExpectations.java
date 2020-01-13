@@ -195,7 +195,8 @@ public class MockServerExpectations implements ExpectationInitializer {
 
         // Event tests
         setChangeSetTest(mockServerClient);
-        setEventTest(mockServerClient);
+        setTermAddEvent(mockServerClient);
+        setDataFileDeleteEvent(mockServerClient);
 
     }
 
@@ -926,7 +927,7 @@ public class MockServerExpectations implements ExpectationInitializer {
                 .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_record.json")));
     }
 
-    private void setEventTest(MockServerClient mockServerClient) {
+    private void setTermAddEvent(MockServerClient mockServerClient) {
 
         String caseName = "TermAddEvent";
 
@@ -944,6 +945,28 @@ public class MockServerExpectations implements ExpectationInitializer {
 
     }
 
+    private void setDataFileDeleteEvent(MockServerClient mockServerClient) {
+
+        String caseName = "DataFileDeleteEvent";
+
+        setDeletionDetail(mockServerClient, caseName, "data_file", "b1c497ce.6e76d866.001mts4ph.b7m9lbt.m84k14.b8dvbq9op20klkftn4ro7");
+        setDeletionDetail(mockServerClient, caseName, "data_file_record", "b1c497ce.54bd3a08.001mts4ph.b7m3p9e.c1m5u4.qfcpu5sv2fmlp3ej8ffhj");
+        setDeletionDetail(mockServerClient, caseName, "data_file_field", "b1c497ce.60641b50.001mts4ph.b75dalt.59n30t.apvv8opio0bm9t60s96lh");
+        setDeletionDetail(mockServerClient, caseName, "data_file_field", "b1c497ce.60641b50.001mts4ph.b75a2vb.jpldmv.h2n1pd5bj6ed5naskcuh1");
+        setDeletionDetail(mockServerClient, caseName, "data_file_field", "b1c497ce.60641b50.001mts4ph.b7logan.ga9gvm.j9d35qlopvumnpjjlptfl");
+
+        setStubLookupForRid(mockServerClient, caseName, "data_file_folder", "b1c497ce.11727c74.001mts4ph.b86popc.fmed0i.m91ns5n533hivl7v9hop8");
+        setStubLookupForRid(mockServerClient, caseName, "term", "6662c0f2.e1b1ec6c.00263phiu.ns4tojl.pbf2qr.91blj7n4rsg7ddf37590i");
+        setStubLookupForRid(mockServerClient, caseName, "term", "6662c0f2.e1b1ec6c.00263sh0s.jh26jeo.qf1k24.ip1nbj5vhcv53hif03093");
+        setStubLookupForRid(mockServerClient, caseName, "term", "6662c0f2.e1b1ec6c.00263sh0h.2dhc38v.3iblsu.ul800cuokr2uebhpbqurd");
+
+    }
+
+    private void setDeletionDetail(MockServerClient mockServerClient, String caseName, String type, String rid) {
+        setStubLookupForRid(mockServerClient, caseName, type, rid);
+        setStubDeletion(mockServerClient, type, rid);
+    }
+
     private void setStubCreations(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
@@ -953,6 +976,14 @@ public class MockServerExpectations implements ExpectationInitializer {
                 .withSecure(true)
                 .when(MockConstants.createOpenIGCAssetRequest())
                 .respond(withResponse(getResourceFileContents("openigc" + File.separator + "stub_database_column.json")));
+    }
+
+    private void setStubDeletion(MockServerClient mockServerClient, String type, String rid) {
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.deleteOMRSStubRequest(type, rid))
+                .respond(withResponse(getResourceFileContents("openigc" + File.separator + "stub_database_column.json")));
+        // Note that it doesn't really matter what we respond with as the contents are not used anyway
     }
 
     private void setStubLookups(MockServerClient mockServerClient, String caseName) {

@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -96,10 +97,15 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
             dataConnections.getAllPages(igcRestClient);
             return new ArrayList<>(dataConnections.getItems());
         } else {
-            if (log.isDebugEnabled()) { log.debug("Not a connector asset, just returning as-is: {} of type {}", connectorAsset.getName(), connectorAsset.getType()); }
-            List<Reference> referenceAsList = new ArrayList<>();
-            referenceAsList.add(connectorAsset);
-            return referenceAsList;
+            if (connectorAsset != null) {
+                if (log.isDebugEnabled()) { log.debug("Not a connector asset, just returning as-is: {} of type {}", connectorAsset.getName(), connectorAsset.getType()); }
+                List<Reference> referenceAsList = new ArrayList<>();
+                referenceAsList.add(connectorAsset);
+                return referenceAsList;
+            } else {
+                if (log.isWarnEnabled()) { log.warn("Received a null object, returning an empty list."); }
+                return Collections.emptyList();
+            }
         }
     }
 
