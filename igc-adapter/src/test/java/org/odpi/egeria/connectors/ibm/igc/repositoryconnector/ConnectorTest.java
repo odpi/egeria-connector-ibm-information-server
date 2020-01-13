@@ -1661,19 +1661,48 @@ public class ConnectorTest {
     }
 
     @Test
-    public void testAddEntityEvent() {
+    public void testTermAddEvent() {
 
-        // TODO: Update the mock used for looking up this event to remove certain relationships, so they are detected
-        //  as changes and need to flow through an update (and various new relationship events)
+        // TODO: determine how to check the output / outcome of events themselves...
+        // TODO: confirm that this generates all of the following:
+        //  - ???
         try {
             igcomrsRepositoryEventMapper.processEvent("{\"ASSET_NAME\":\"Email Address\",\"ACTION\":\"CREATE\",\"ASSET_CONTEXT\":\"Coco Pharmaceuticals\",\"TIMESTAMP\":\"1578339969042\",\"ASSET_TYPE\":\"Term\",\"eventType\":\"IGC_BUSINESSTERM_EVENT\",\"USER\":\"isadmin\",\"CHANGEWORKFLOWSTATE\":\"false\",\"ASSET_RID\":\"" + MockConstants.TERM_RID_FOR_EVENT + "\"}");
         } catch (Exception e) {
-            log.error("Hit unexpected exception during event processing.", e);
+            log.error("Hit unexpected exception during add event processing.", e);
             assertNull(e);
         }
-        // TODO: determine how to check the output / outcome of events themselves...
 
     }
+
+    @Test
+    public void testDataFileDeleteEvent() {
+
+        // TODO: confirm that this generates all of the following:
+        //  - purge entities for: 1x DataFile, 1x TabularSchemaType, 3x TabularColumn
+        //  - purge relationships for: 1x NestedDataFile, ???, 3x SemanticAssignment (to each TabularColumn)
+        //  Note that the following will not be generated (as they would come based on other IGC update events)
+        //  - update entities for: 1x DataFileFolder, 3x GlossaryTerm
+        try {
+            igcomrsRepositoryEventMapper.processEvent("{\"ASSET_NAME\":\"CompDir-ContactPhone.csv\",\"ACTION\":\"DELETE\",\"ASSET_CONTEXT\":\"INFOSVR >> / >> data >> files >> CocoPharma\",\"TIMESTAMP\":\"1578340621093\",\"ASSET_TYPE\":\"Data File\",\"eventType\":\"IGC_ASSET_EVENT\",\"USER\":\"isadmin\",\"ASSET_RID\":\"" + MockConstants.DATA_FILE_RID_FOR_DELETE_EVENT + "\"}");
+        } catch (Exception e) {
+            log.error("Hit unexpected exception during delete event processing.", e);
+            assertNull(e);
+        }
+
+    }
+
+    // TODO: additional tests for coverage (in approximate order of priority)
+    //  - relationship search for data class assignment based on relationship properties
+    //  - entity search for data class based on various complex properties
+    //  - entity search for file based on fileType property
+    //  - entity search for contact details based on contactMethodValue, contactMethodType properties
+    //  - entity search for governance definition based on domain property
+    //  - entity search by qualifiedName property using contains, endswith regexes
+    //  - entity search for schema element based on anchorGUID property (exact match)
+    //  - entity search for schema type based on namespace property
+    //  - entity search limited by PrimaryKey classification
+    //  - entity search limited by SubjectArea classification
 
     @AfterSuite
     public void stopConnector() {

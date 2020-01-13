@@ -72,6 +72,7 @@ public class MockConstants {
     public static final String GROUP_RID = "b1c497ce.8a5be154.001mts4th.nmdbb31.7flfke.0b7taja56pjhs73o553iq";
     public static final String RID_FOR_CREATE_AND_UPDATE = "6662c0f2.e1b1ec6c.001muv34k.s0rtkp1.c38mtf.60ltvrgr67q6l6pq5t3qi";
     public static final String TERM_RID_FOR_EVENT = "6662c0f2.e1b1ec6c.00263sgva.eo5q0s7.o5rf5s.q22k66bdjh8h341n1hi1e";
+    public static final String DATA_FILE_RID_FOR_DELETE_EVENT = "b1c497ce.6e76d866.001mts4ph.b7m9lbt.m84k14.b8dvbq9op20klkftn4ro7";
 
     // Examples used for specific scenarios to test IA client
     public static final String IA_PROJECT_NAME = "CocoPharma";
@@ -200,6 +201,17 @@ public class MockConstants {
      */
     public static HttpRequest createOpenIGCAssetRequest() {
         return request().withMethod("POST").withPath(IGC_REST_EP + "bundles/assets");
+    }
+
+    /**
+     * Create a mock OpenIGC asset deletion request for the removal of an OMRS Stub.
+     * @param type the type of the IGC asset whose stub should be deleted
+     * @param rid the RID of the IGC asset whose stub should be deleted
+     * @return HttpRequest
+     */
+    public static HttpRequest deleteOMRSStubRequest(String type, String rid) {
+        return request().withMethod("DELETE").withPath(IGC_REST_EP + "bundles/assets")
+                .withBody("<?xml version=\"1.0\" encoding=\"UTF-8\"?><doc xmlns=\"http://www.ibm.com/iis/flow-doc\"><assets><asset class=\"$OMRS-Stub\" repr=\"" + type + "_" + rid + "\" ID=\"stub1\"><attribute name=\"name\" value=\"" + type + "_" + rid + "\"></attribute></asset></assets><assetsToDelete>stub1</assetsToDelete></doc>");
     }
 
     /**
