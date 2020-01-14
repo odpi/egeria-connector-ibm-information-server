@@ -193,6 +193,10 @@ public class MockServerExpectations implements ExpectationInitializer {
         setTabularSchemaTypeRelationships(mockServerClient);
         setTabularColumnRelationships(mockServerClient);
 
+        // Complex search tests
+        setFindDataClassByProperty(mockServerClient);
+        setFindDataClassAssignmentByProperty(mockServerClient);
+
         // Event tests
         setChangeSetTest(mockServerClient);
         setTermAddEvent(mockServerClient);
@@ -925,6 +929,45 @@ public class MockServerExpectations implements ExpectationInitializer {
                         "{\"types\":[\"data_file_record\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_fields\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FIELD_RID + "\"}],\"operator\":\"or\"}}"
                 ))
                 .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_record.json")));
+    }
+
+    private void setFindDataClassByProperty(MockServerClient mockServerClient) {
+        String caseName = "FindDataClassByProperty";
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(
+                        json(
+                                getResourceFileContents("by_case" + File.separator + caseName + File.separator + "query.json"),
+                                MatchType.ONLY_MATCHING_FIELDS
+                        )))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
+    }
+
+    private void setFindDataClassAssignmentByProperty(MockServerClient mockServerClient) {
+        String caseName = "FindDataClassAssignmentByProperty";
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(
+                        json("{\"types\":[\"classification\"],\"where\":{\"conditions\":[{\"property\":\"confidencePercent\",\"operator\":\"=\",\"value\":\"100\"},{\"property\":\"value_frequency\",\"operator\":\"=\",\"value\":\"34\"},{\"property\":\"confidencePercent\",\"operator\":\"=\",\"value\":\"100\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        )))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(
+                        json(
+                                "{\"types\":[\"classification\"],\"where\":{\"conditions\":[{\"property\":\"classifies_asset\",\"operator\":\"=\",\"value\":\"b1c497ce.60641b50.001mv7qhr.03up14t.lob6gp.ktaasfbn0lqab0c6ee9rl\"},{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"f4951817.e469fa50.001mtr2gq.i03lpp2.ff6ti2.b6ol04ugdbtt6u6eojunp\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        )))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "classifies_asset_b1c497ce.60641b50.001mv7qhr.03up14t.lob6gp.ktaasfbn0lqab0c6ee9rl.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(
+                        json(
+                                "{\"types\":[\"classification\"],\"where\":{\"conditions\":[{\"property\":\"classifies_asset\",\"operator\":\"=\",\"value\":\"b1c497ce.60641b50.001mv7qhr.03u3le8.ttmqon.c22r98a4u4ptdi8cvbmtu\"},{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"f4951817.e469fa50.001mtr2gq.nsrej8a.75d8rp.ud414oj262acep64l8dpq\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        )))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "classifies_asset_b1c497ce.60641b50.001mv7qhr.03u3le8.ttmqon.c22r98a4u4ptdi8cvbmtu.json")));
     }
 
     private void setTermAddEvent(MockServerClient mockServerClient) {
