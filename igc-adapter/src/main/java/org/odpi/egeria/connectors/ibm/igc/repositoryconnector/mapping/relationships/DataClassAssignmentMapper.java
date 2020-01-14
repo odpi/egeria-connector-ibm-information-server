@@ -6,7 +6,9 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classification;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataClass;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.MainObject;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -24,10 +26,7 @@ import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorEx
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,7 +61,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         setOptimalStart(OptimalStart.CUSTOM);
         addAlternativePropertyFromOne("selected_classification");
         addAlternativePropertyFromTwo("classifications_selected");
-        setRelationshipLevelIgcAsset("classification");
+        setRelationshipLevelIgcAsset("classification", "classifies_asset", "data_class");
         addMappedOmrsProperty("confidence");
         addMappedOmrsProperty(P_THRESHOLD);
         addMappedOmrsProperty("partialMatch");
@@ -154,6 +153,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                     igcomrsRepositoryConnector,
                     relationships,
                     fromIgcObject,
+                    toIgcObject,
                     userId
             );
             mapSelectedClassifications_fromDataClass(
@@ -167,6 +167,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                     igcomrsRepositoryConnector,
                     relationships,
                     fromIgcObject,
+                    toIgcObject,
                     userId
             );
             mapSelectedClassifications_toDataClass(
@@ -183,86 +184,110 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * {@inheritDoc}
      */
     @Override
-    public IGCSearch getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
-                                                 String repositoryName,
-                                                 IGCRestClient igcRestClient,
-                                                 InstanceProperties matchProperties,
-                                                 MatchCriteria matchCriteria) throws FunctionNotSupportedException {
+    public List<IGCSearch> getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                                       String repositoryName,
+                                                       IGCRestClient igcRestClient,
+                                                       InstanceProperties matchProperties,
+                                                       MatchCriteria matchCriteria) throws FunctionNotSupportedException {
 
         // If no search properties were provided, we can short-circuit and just return all such assignments via the
         // simple search criteria
         if (matchProperties == null) {
             return getSimpleIGCSearchCriteria();
         }
-
-        IGCSearch igcSearch = new IGCSearch();
-        IGCSearchConditionSet conditions = new IGCSearchConditionSet();
         Map<String, InstancePropertyValue> mapOfValues = matchProperties.getInstanceProperties();
         if (mapOfValues == null) {
             return getSimpleIGCSearchCriteria();
         }
 
+        List<IGCSearch> searches = new ArrayList<>();
+        IGCSearch searchForDataClass = new IGCSearch("data_class");
+        searchForDataClass.addProperties(getProxyTwoMapping().getRealIgcRelationshipProperties());
+        IGCSearchConditionSet conditionsForDataClass = new IGCSearchConditionSet();
+
+        IGCSearch searchForClassification = new IGCSearch("classification");
+        searchForClassification.addProperties(igcRestClient.getAllPropertiesForType("classification"));
+        IGCSearchConditionSet conditionsForClassification = new IGCSearchConditionSet();
+
         // First see if we are searching by status, as this changes the other properties we can search
-        // - Proposed status in IGC will have no other properties
+        // - Proposed status in IGC will have no other properties (and we can search against data_class only as there is no classification object)
         // - Discovered status in IGC will be the link to a 'classification' object with other properties
+        boolean considerOtherProperties = true;
         InstancePropertyValue status = mapOfValues.getOrDefault("status", null);
-        String statusName = null;
+        String statusName;
         if (status != null && status.getInstancePropertyCategory().equals(InstancePropertyCategory.ENUM)) {
             EnumPropertyValue statusEnum = (EnumPropertyValue) status;
             statusName = statusEnum.getSymbolicName();
             if (statusName != null) {
                 if (statusName.equals("Discovered")) {
-                    IGCSearchCondition discovered = new IGCSearchCondition("classified_assets_detected", "isNull", true);
-                    conditions.addCondition(discovered);
+                    conditionsForDataClass.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
                 } else if (statusName.equals("Proposed")) {
                     IGCSearchCondition proposed = new IGCSearchCondition("classifications_selected", "isNull", true);
-                    conditions.addCondition(proposed);
+                    conditionsForDataClass.addCondition(proposed);
+                    considerOtherProperties = false;
                 } else {
                     // If the status is something else, there will be no results from IGC
-                    conditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                    conditionsForDataClass.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                    conditionsForClassification.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                    considerOtherProperties = false;
                 }
             }
         }
 
-        Set<String> searchProperties = mapOfValues.keySet();
-        Set<String> mappedOmrsProperties = getMappedOmrsPropertyNames();
-        if (!mappedOmrsProperties.containsAll(searchProperties)) {
-            // If any of the properties included in the search is one we do not map in IGC, return no results
-            conditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
-        } else if (statusName == null || statusName.equals("Discovered")) {
-            // Otherwise only add further conditions if we are searching across all statuses, or the Discovered status
-            String rootOfProperties = "classified_assets_detected.";
-            for (Map.Entry<String, InstancePropertyValue> entry : mapOfValues.entrySet()) {
-                String omrsPropertyName = entry.getKey();
-                InstancePropertyValue value = entry.getValue();
-                switch (omrsPropertyName) {
-                    case "confidence":
-                        IGCSearchCondition byConfidence = new IGCSearchCondition(rootOfProperties + "confidencePercent", "=", value.valueAsString());
-                        conditions.addCondition(byConfidence);
-                        break;
-                    case P_THRESHOLD:
-                        IGCSearchCondition byThreshold = new IGCSearchCondition(rootOfProperties + "threshold", "=", value.valueAsString());
-                        conditions.addCondition(byThreshold);
-                        break;
-                    case "partialMatch":
-                        IGCSearchCondition byPartialMatch = new IGCSearchCondition(rootOfProperties + "confidencePercent", "<", "100");
-                        conditions.addCondition(byPartialMatch);
-                        break;
-                    case "valueFrequency":
-                        IGCSearchCondition byValueFrequency = new IGCSearchCondition(rootOfProperties + "value_frequency", "=", value.valueAsString());
-                        conditions.addCondition(byValueFrequency);
-                        break;
+        // Only need to consider other properties if we are looking for a 'Discovered' status, or not restricting based
+        // on status at all...
+        if (considerOtherProperties) {
+            Set<String> searchProperties = mapOfValues.keySet();
+            Set<String> mappedOmrsProperties = getMappedOmrsPropertyNames();
+            if (!mappedOmrsProperties.containsAll(searchProperties)) {
+                // If any of the properties included in the search is one we do not map in IGC, return no results
+                conditionsForDataClass.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                conditionsForClassification.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+            } else {
+                // Otherwise we can only search against the 'classification' object, as it is the only one with any
+                // additional properties
+                // TODO: what about literal-mapped properties for Proposed classifications?
+                for (Map.Entry<String, InstancePropertyValue> entry : mapOfValues.entrySet()) {
+                    String omrsPropertyName = entry.getKey();
+                    InstancePropertyValue value = entry.getValue();
+                    switch (omrsPropertyName) {
+                        case "confidence":
+                            IGCSearchCondition byConfidence = new IGCSearchCondition("confidencePercent", "=", value.valueAsString());
+                            conditionsForClassification.addCondition(byConfidence);
+                            break;
+                        case P_THRESHOLD:
+                            IGCSearchCondition byThreshold = new IGCSearchCondition("threshold", "=", value.valueAsString());
+                            conditionsForClassification.addCondition(byThreshold);
+                            break;
+                        case "partialMatch":
+                            boolean isPartialMatch = Boolean.getBoolean(value.valueAsString());
+                            if (isPartialMatch) {
+                                IGCSearchCondition byPartialMatch = new IGCSearchCondition("confidencePercent", "<", "100");
+                                conditionsForClassification.addCondition(byPartialMatch);
+                            } else {
+                                IGCSearchCondition byPartialMatch = new IGCSearchCondition("confidencePercent", "=", "100");
+                                conditionsForClassification.addCondition(byPartialMatch);
+                            }
+                            break;
+                        case "valueFrequency":
+                            IGCSearchCondition byValueFrequency = new IGCSearchCondition("value_frequency", "=", value.valueAsString());
+                            conditionsForClassification.addCondition(byValueFrequency);
+                            break;
+                    }
                 }
             }
-        } else {
-            conditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
         }
 
-        IGCRepositoryHelper.setConditionsFromMatchCriteria(conditions, matchCriteria);
+        IGCRepositoryHelper.setConditionsFromMatchCriteria(conditionsForDataClass, matchCriteria);
+        IGCRepositoryHelper.setConditionsFromMatchCriteria(conditionsForClassification, matchCriteria);
 
-        igcSearch.addConditions(conditions);
+        searchForDataClass.addConditions(conditionsForDataClass);
+        searchForClassification.addConditions(conditionsForClassification);
 
-        return igcSearch;
+        searches.add(searchForDataClass);
+        searches.add(searchForClassification);
+
+        return searches;
 
     }
 
@@ -270,10 +295,10 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * {@inheritDoc}
      */
     @Override
-    public IGCSearch getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
-                                                 String repositoryName,
-                                                 IGCRestClient igcRestClient,
-                                                 String searchCriteria) throws FunctionNotSupportedException {
+    public List<IGCSearch> getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                                       String repositoryName,
+                                                       IGCRestClient igcRestClient,
+                                                       String searchCriteria) throws FunctionNotSupportedException {
 
         // If no search criteria was provided, we can short-circuit and just return all such assignments via the
         // simple search criteria
@@ -281,38 +306,34 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             return getSimpleIGCSearchCriteria();
         }
 
-        IGCSearch igcSearch = new IGCSearch();
-        igcSearch.addType("data_class");
+        List<IGCSearch> searches = new ArrayList<>();
 
-        IGCSearchConditionSet conditions = new IGCSearchConditionSet();
-        boolean matchesSomething = false;
+        IGCSearch searchForDataClass = new IGCSearch("data_class");
+        searchForDataClass.addProperties(getProxyTwoMapping().getRealIgcRelationshipProperties());
+        IGCSearchConditionSet conditionsForDataClass = new IGCSearchConditionSet();
+
+        IGCSearch searchForClassification = new IGCSearch("classification");
+        searchForClassification.addProperties(igcRestClient.getAllPropertiesForType("classification"));
+        IGCSearchConditionSet conditionsForClassification = new IGCSearchConditionSet();
 
         // The only string property we can attempt to match against is the status, and the only ones that are mapped
         // are Discovered and Proposed -- if anything else, we should ensure an empty list is returned
         Pattern pattern = Pattern.compile(searchCriteria);
-        Matcher discovered = pattern.matcher("Discovered");
         Matcher proposed = pattern.matcher("Proposed");
-        if (discovered.matches()) {
-            matchesSomething = true;
-            IGCSearchCondition nonNull = new IGCSearchCondition("classified_assets_detected", "isNull", true);
-            conditions.addCondition(nonNull);
-            igcSearch.addProperty("classified_assets_detected");
+        Matcher discovered = pattern.matcher("Discovered");
+        if (!proposed.matches()) {
+            conditionsForDataClass.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+            searchForDataClass.addConditions(conditionsForDataClass);
         }
-        if (proposed.matches()) {
-            matchesSomething = true;
-            IGCSearchCondition nonNull = new IGCSearchCondition("classifications_selected", "isNull", true);
-            conditions.addCondition(nonNull);
-            igcSearch.addProperty("classifications_selected");
+        if (!discovered.matches()) {
+            conditionsForClassification.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+            searchForClassification.addConditions(conditionsForClassification);
         }
 
-        // If we are trying to match to something that will give no results, create a spurious search that should
-        // give no results
-        if (!matchesSomething) {
-            conditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
-        }
-        igcSearch.addConditions(conditions);
+        searches.add(searchForDataClass);
+        searches.add(searchForClassification);
 
-        return igcSearch;
+        return searches;
 
     }
 
@@ -322,11 +343,13 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
      * @param fromIgcObject the data_class object
+     * @param toIgcObject the main_object that is classified (if known, null otherwise)
      * @param userId the user requesting the mapped relationships
      */
     private void mapDetectedClassifications_fromDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                           List<Relationship> relationships,
                                                           Reference fromIgcObject,
+                                                          Reference toIgcObject,
                                                           String userId) {
 
         final String methodName = "mapDetectedClassifications_fromDataClass";
@@ -335,14 +358,20 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
 
         // One of the few relationships in IGC that actually has properties of its own!
         // So we need to retrieve this relationship linking object (IGC type 'classification')
-        IGCSearchCondition igcSearchCondition = new IGCSearchCondition("data_class", "=", fromIgcObject.getId());
+        IGCSearchCondition byDataClass = new IGCSearchCondition("data_class", "=", fromIgcObject.getId());
+        IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(byDataClass);
+        if (toIgcObject instanceof MainObject) {
+            IGCSearchCondition byAsset = new IGCSearchCondition("classifies_asset", "=", toIgcObject.getId());
+            igcSearchConditionSet.addCondition(byAsset);
+            igcSearchConditionSet.setMatchAnyCondition(false);
+        }
         String[] classificationProperties = new String[]{
                 "classifies_asset",
                 "confidencePercent",
                 P_THRESHOLD
         };
 
-        ItemList<Classification> detectedClassifications = getDetectedClassifications(igcomrsRepositoryConnector, classificationProperties, igcSearchCondition);
+        ItemList<Classification> detectedClassifications = getDetectedClassifications(igcomrsRepositoryConnector, classificationProperties, igcSearchConditionSet);
 
         // For each of the detected classifications, create a new DataClassAssignment relationship
         for (Classification detectedClassification : detectedClassifications.getItems()) {
@@ -452,11 +481,13 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
      * @param fromIgcObject the main_object object
+     * @param toIgcObject the data_class object (if known, or null otherwise)
      * @param userId the user requesting the mapped relationships
      */
     private void mapDetectedClassifications_toDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                         List<Relationship> relationships,
                                                         Reference fromIgcObject,
+                                                        Reference toIgcObject,
                                                         String userId) {
 
         final String methodName = "mapDetectedClassifications_toDataClass";
@@ -467,14 +498,20 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
 
         // One of the few relationships in IGC that actually has properties of its own!
         // So we need to retrieve this relationship linking object (IGC type 'classification')
-        IGCSearchCondition igcSearchCondition = new IGCSearchCondition("classifies_asset", "=", fromIgcObject.getId());
+        IGCSearchCondition byAsset = new IGCSearchCondition("classifies_asset", "=", fromIgcObject.getId());
+        IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(byAsset);
+        if (toIgcObject instanceof DataClass) {
+            IGCSearchCondition byDataClass = new IGCSearchCondition("data_class", "=", toIgcObject.getId());
+            igcSearchConditionSet.addCondition(byDataClass);
+            igcSearchConditionSet.setMatchAnyCondition(false);
+        }
         String[] classificationProperties = new String[]{
                 "data_class",
                 "confidencePercent",
                 P_THRESHOLD
         };
 
-        ItemList<Classification> detectedClassifications = getDetectedClassifications(igcomrsRepositoryConnector, classificationProperties, igcSearchCondition);
+        ItemList<Classification> detectedClassifications = getDetectedClassifications(igcomrsRepositoryConnector, classificationProperties, igcSearchConditionSet);
 
         // For each of the detected classifications, create a new DataClassAssignment relationship
         for (Classification detectedClassification : detectedClassifications.getItems()) {
@@ -553,7 +590,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                                 igcomrsRepositoryConnector.getRepositoryName(),
                                 R_DATA_CLASS_ASSIGNMENT),
                         fromIgcObject,
-                        (Reference) igcRestClient.getPropertyByName(withSelectedClassification, "selected_classification"),
+                        selectedClassification,
                         "selected_classification",
                         userId
                 );
@@ -578,18 +615,14 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * Retrieve the listing of detected classifications.
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param classificationProperties the properties of the classification to retrieve
-     * @param igcSearchCondition the condition to use for searching for the classifications
+     * @param igcSearchConditionSet the conditions to use for searching for the classifications
      * @return {@code ItemList<Classification>}
      */
     private ItemList<Classification> getDetectedClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                                 String[] classificationProperties,
-                                                                IGCSearchCondition igcSearchCondition) {
+                                                                IGCSearchConditionSet igcSearchConditionSet) {
 
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
-
-        // One of the few relationships in IGC that actually has properties of its own!
-        // So we need to retrieve this relationship linking object (IGC type 'classification')
-        IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(igcSearchCondition);
 
         IGCSearch igcSearch = new IGCSearch("classification", classificationProperties, igcSearchConditionSet);
         IGCVersionEnum igcVersion = igcomrsRepositoryConnector.getIGCVersion();

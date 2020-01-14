@@ -46,12 +46,12 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
     private ProxyMapping one;
     private ProxyMapping two;
+    private RelationshipLevelProxyMapping relationshipLevelPM = null;
     private String omrsRelationshipType;
     private OptimalStart optimalStart;
     private ContainedType containedType;
 
     private List<RelationshipMapping> subtypes;
-    private String relationshipLevelIgcAsset;
     private String linkingAssetType;
 
     private ArrayList<InstanceStatus> omrsSupportedStatuses;
@@ -183,21 +183,29 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @param igcAssetType the name of the IGC asset that represents this relationship in IGC
      */
-    void setRelationshipLevelIgcAsset(String igcAssetType) { this.relationshipLevelIgcAsset = igcAssetType; }
+    void setRelationshipLevelIgcAsset(String igcAssetType, String igcPropertyToOne, String igcPropertyToTwo) {
+        this.relationshipLevelPM = new RelationshipLevelProxyMapping(igcAssetType, igcPropertyToOne, igcPropertyToTwo);
+    }
 
     /**
      * Indicates whether this mapping has an IGC asset that represents the relationship directly (true) or not (false).
      *
      * @return boolean
      */
-    public boolean hasRelationshipLevelAsset() { return this.relationshipLevelIgcAsset != null; }
+    public boolean hasRelationshipLevelAsset() { return this.relationshipLevelPM != null; }
 
     /**
      * Retrieve the name of the IGC asset type that represents the relationship itself.
      *
      * @return String
      */
-    public String getRelationshipLevelIgcAsset() { return this.relationshipLevelIgcAsset; }
+    public String getRelationshipLevelIgcAsset() {
+        if (hasRelationshipLevelAsset()) {
+            return relationshipLevelPM.getIgcAssetType();
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Define an IGC asset type as linking together the two endpoints of the relationship translated by this mapping.
@@ -380,14 +388,14 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcRestClient connectivity to an IGC environment
      * @param matchProperties the set of properties against which to match (or null if none)
      * @param matchCriteria the criteria against which to match (or null / ignored if matchProperties is null)
-     * @return IGCSearch - the search object by which to find these relationships
+     * @return {@code List<IGCSearch>} - the search objects by which to find these relationships
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
      */
-    public IGCSearch getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
-                                                 String repositoryName,
-                                                 IGCRestClient igcRestClient,
-                                                 InstanceProperties matchProperties,
-                                                 MatchCriteria matchCriteria) throws FunctionNotSupportedException {
+    public List<IGCSearch> getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                                       String repositoryName,
+                                                       IGCRestClient igcRestClient,
+                                                       InstanceProperties matchProperties,
+                                                       MatchCriteria matchCriteria) throws FunctionNotSupportedException {
         // Nothing to do -- no relationship-level properties by default -- so return the simple search
         return getSimpleIGCSearchCriteria();
     }
@@ -400,13 +408,13 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param repositoryName name of the repository
      * @param igcRestClient connectivity to an IGC environment
      * @param searchCriteria the regular expression to attempt to match against any string properties
-     * @return IGCSearch - the search object by which to find these relationships
+     * @return {@code List<IGCSearch>} - the search object by which to find these relationships
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
      */
-    public IGCSearch getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
-                                                 String repositoryName,
-                                                 IGCRestClient igcRestClient,
-                                                 String searchCriteria) throws FunctionNotSupportedException {
+    public List<IGCSearch> getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                                       String repositoryName,
+                                                       IGCRestClient igcRestClient,
+                                                       String searchCriteria) throws FunctionNotSupportedException {
         // Nothing to do -- no relationship-level properties by default -- so return the simple search
         return getSimpleIGCSearchCriteria();
     }
@@ -414,12 +422,13 @@ public abstract class RelationshipMapping extends InstanceMapping {
     /**
      * Implement this method to define how IGC relationships can be searched.
      *
-     * @return IGCSearch - the search object by which to find these relationships
+     * @return {@code List<IGCSearch>} - the search objects by which to find these relationships
      */
-    public IGCSearch getSimpleIGCSearchCriteria() {
+    public List<IGCSearch> getSimpleIGCSearchCriteria() {
 
         // Rather than looking for an optimal start, since ALL related objects are returned the result set size is
         // likely to be the same regardless -- instead always start from TWO and retrieve ONE
+        List<IGCSearch> searches = new ArrayList<>();
         ProxyMapping pm = getProxyTwoMapping();
         IGCSearch igcSearch = new IGCSearch(pm.getIgcAssetType());
 
@@ -438,7 +447,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
             igcSearch.addConditions(conditions);
         }
 
-        return igcSearch;
+        searches.add(igcSearch);
+
+        return searches;
 
     }
 
@@ -478,6 +489,13 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @return boolean
      */
     public boolean isSelfReferencing() { return (this.one.isSelfReferencing() || this.two.isSelfReferencing()); }
+
+    /**
+     * Retrieves the mapping details for the relationship-level asset (if any, otherwise null).
+     *
+     * @return RelationshipLevelProxyMapping
+     */
+    public RelationshipLevelProxyMapping getRelationshipLevelProxyMapping() { return this.relationshipLevelPM; }
 
     /**
      * Retrieves the mapping details for endpoint 1 (proxy 1) of the OMRS relationship.
@@ -755,6 +773,32 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     ", igcRelationshipProperties=" +
                     igcRelationshipProperties;
         }
+
+    }
+
+    /**
+     * Capture a relationship-level proxy mapping (rare, but where in IGC there is an actual object that represents
+     * the relationship)
+     */
+    public class RelationshipLevelProxyMapping {
+
+        private String igcAssetType;
+        private String igcRelationshipPropertyToEndOne;
+        private String igcRelationshipPropertyToEndTwo;
+
+        RelationshipLevelProxyMapping(String igcAssetType,
+                                      String igcRelationshipPropertyToEndOne,
+                                      String igcRelationshipPropertyToEndTwo) {
+
+            this.igcAssetType = igcAssetType;
+            this.igcRelationshipPropertyToEndOne = igcRelationshipPropertyToEndOne;
+            this.igcRelationshipPropertyToEndTwo = igcRelationshipPropertyToEndTwo;
+
+        }
+
+        public String getIgcAssetType() { return igcAssetType; }
+        public String getIgcRelationshipPropertyToEndOne() { return igcRelationshipPropertyToEndOne; }
+        public String getIgcRelationshipPropertyToEndTwo() { return igcRelationshipPropertyToEndTwo; }
 
     }
 

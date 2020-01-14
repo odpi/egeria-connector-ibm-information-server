@@ -65,6 +65,8 @@ public class ConnectorTest {
     private OMRSRepositoryContentManager contentManager;
     private OMRSRepositoryEventManager eventManager;
     private InMemoryOpenMetadataTopicConnector inMemoryEventConnector;
+    private OMRSRepositoryHelper repositoryHelper;
+    private String sourceName;
 
     private String metadataCollectionId;
     private String otherMetadataCollectionId;
@@ -158,6 +160,9 @@ public class ConnectorTest {
             log.error("Unexpected exception trying to start event mapper!", e);
             assertNull(e);
         }
+
+        repositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
+        sourceName = igcomrsRepositoryConnector.getRepositoryName();
 
     }
 
@@ -599,13 +604,15 @@ public class ConnectorTest {
     @Test
     public void testGlossaryTermFindByProperty_displayName() {
 
-        Map<String, String> matchProperties = new HashMap<>();
-        matchProperties.put("displayName", ".*\\QAddress\\E.*");
+        final String methodName = "testGlossaryTermFindByProperty_displayName";
+
+        InstanceProperties ip = new InstanceProperties();
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "displayName", ".*\\QAddress\\E.*", methodName);
 
         List<EntityDetail> results = testFindEntitiesByProperty(
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
-                matchProperties,
+                ip,
                 MatchCriteria.ALL,
                 6
         );
@@ -615,14 +622,16 @@ public class ConnectorTest {
     @Test
     public void testGlossaryTermFindByProperties_ANY() {
 
-        Map<String, String> matchProperties = new HashMap<>();
-        matchProperties.put("displayName", ".*\\QAddress\\E.*");
-        matchProperties.put("summary", ".*\\QNumber\\E.*");
+        final String methodName = "testGlossaryTermFindByProperties_ANY";
+
+        InstanceProperties ip = new InstanceProperties();
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "displayName", ".*\\QAddress\\E.*", methodName);
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "summary", ".*\\QNumber\\E.*", methodName);
 
         List<EntityDetail> results = testFindEntitiesByProperty(
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
-                matchProperties,
+                ip,
                 MatchCriteria.ANY,
                 7
         );
@@ -632,14 +641,16 @@ public class ConnectorTest {
     @Test
     public void testGlossaryTermFindByProperties_ALL() {
 
-        Map<String, String> matchProperties = new HashMap<>();
-        matchProperties.put("displayName", ".*\\QAddress\\E.*");
-        matchProperties.put("summary", ".*\\Qnumber\\E.*");
+        final String methodName = "testGlossaryTermFindByProperties_ALL";
+
+        InstanceProperties ip = new InstanceProperties();
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "displayName", ".*\\QAddress\\E.*", methodName);
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "summary", ".*\\Qnumber\\E.*", methodName);
 
         List<EntityDetail> results = testFindEntitiesByProperty(
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
-                matchProperties,
+                ip,
                 MatchCriteria.ALL,
                 1
         );
@@ -1561,16 +1572,18 @@ public class ConnectorTest {
     @Test
     public void testForeignKeyFindByPropertyValue() {
 
+        final String methodName = "testForeignKeyFindByPropertyValue";
+
         String relationshipType = "3cd4e0e7-fdbf-47a6-ae88-d4b3205e0c07";
         String typeName = "ForeignKey";
 
-        Map<String, String> properties = new HashMap<>();
-        properties.put("confidence", "100");
+        InstanceProperties ip = new InstanceProperties();
+        ip = repositoryHelper.addIntPropertyToInstance(sourceName, ip, "confidence", 100, methodName);
 
         List<Relationship> results = testFindRelationshipsByProperty(
                 relationshipType,
                 typeName,
-                properties,
+                ip,
                 MatchCriteria.ALL,
                 3);
 
@@ -1592,6 +1605,54 @@ public class ConnectorTest {
             assertEquals(qualifiedName, MockConstants.DATABASE_COLUMN_QN);
         }
 
+        // TODO: entity search by qualifiedName property using contains, endswith regexes (33)
+
+    }
+
+    @Test
+    public void testFindDataClassByProperty() {
+
+        final String methodName = "testFindDataClassByProperty";
+
+        InstanceProperties ip = new InstanceProperties();
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "dataType", "\\Qstring\\E", methodName);
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "specificationDetails", "\\Qcom.ibm.infosphere.classification.impl.EmailClassifier\\E", methodName);
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "specification", "\\QJava\\E", methodName);
+        ip = repositoryHelper.addBooleanPropertyToInstance(sourceName, ip, "userDefined", false, methodName);
+
+        List<EntityDetail> results = testFindEntitiesByProperty(
+                "6bc727dc-e855-4979-8736-78ac3cfcd32f",
+                "DataClass",
+                ip,
+                MatchCriteria.ALL,
+                1
+        );
+
+    }
+
+    @Test
+    public void testFindDataClassAssignmentByProperty() {
+
+        final String methodName = "testFindDataClassAssignmentByProperty";
+
+        InstanceProperties ip = new InstanceProperties();
+        ip = repositoryHelper.addEnumPropertyToInstance(sourceName, ip, "status", 0, "Discovered", "The data class assignment was discovered by an automated process.", methodName);
+        ip = repositoryHelper.addIntPropertyToInstance(sourceName, ip, "confidence", 100, methodName);
+        ip = repositoryHelper.addBooleanPropertyToInstance(sourceName, ip, "partialMatch", false, methodName);
+        ip = repositoryHelper.addIntPropertyToInstance(sourceName, ip, "valueFrequency", 34, methodName);
+
+        List<Relationship> results = testFindRelationshipsByProperty(
+                "4df37335-7f0c-4ced-82df-3b2fd07be1bd",
+                "DataClassAssignment",
+                ip,
+                MatchCriteria.ALL,
+                3);
+
+    }
+
+    @Test
+    public void testFindSchemaElementByAnchorGUID() {
+        // TODO: entity search for schema element based on anchorGUID property (exact match) (40)
     }
 
     @Test
@@ -1693,16 +1754,14 @@ public class ConnectorTest {
     }
 
     // TODO: additional tests for coverage (in approximate order of priority)
-    //  - relationship search for data class assignment based on relationship properties
-    //  - entity search for data class based on various complex properties
-    //  - entity search for file based on fileType property
-    //  - entity search for contact details based on contactMethodValue, contactMethodType properties
-    //  - entity search for governance definition based on domain property
-    //  - entity search by qualifiedName property using contains, endswith regexes
-    //  - entity search for schema element based on anchorGUID property (exact match)
-    //  - entity search for schema type based on namespace property
-    //  - entity search limited by PrimaryKey classification
-    //  - entity search limited by SubjectArea classification
+    //  - self-referencing entity update event (eg. database schema) (40ish?)
+    //  - IMAM share event (30ish?)
+    //  - entity search for governance definition based on domain property (29)
+    //  - entity search limited by PrimaryKey classification (28)
+    //  - entity search for file based on fileType property (27)
+    //  - entity search limited by SubjectArea classification (24)
+    //  - entity search for contact details based on contactMethodValue, contactMethodType properties (16)
+    //  - entity search for schema type based on namespace property (10)
 
     @AfterSuite
     public void stopConnector() {
@@ -1884,35 +1943,18 @@ public class ConnectorTest {
      *
      * @param typeGUID the entity type GUID to search
      * @param typeName the name of the type to search
-     * @param properties the properties to match against
+     * @param matchProperties the properties to match against
      * @param matchCriteria the criteria by which to match
      * @param totalNumberExpected the total number of expected results
      * @return {@code List<EntityDetail>} the results of the query
      */
     private List<EntityDetail> testFindEntitiesByProperty(String typeGUID,
                                                           String typeName,
-                                                          Map<String, String> properties,
+                                                          InstanceProperties matchProperties,
                                                           MatchCriteria matchCriteria,
                                                           int totalNumberExpected) {
 
-        final String methodName = "testFindEntitiesByProperty";
         List<EntityDetail> results = null;
-
-        OMRSRepositoryHelper helper = igcomrsRepositoryConnector.getRepositoryHelper();
-        String repoName = igcomrsRepositoryConnector.getRepositoryName();
-
-        InstanceProperties matchProperties = new InstanceProperties();
-        for (Map.Entry<String, String> entry : properties.entrySet()) {
-            String propertyName = entry.getKey();
-            String value = entry.getValue();
-            matchProperties = helper.addStringPropertyToInstance(
-                    repoName,
-                    matchProperties,
-                    propertyName,
-                    value,
-                    methodName
-            );
-        }
 
         try {
             results = igcomrsMetadataCollection.findEntitiesByProperty(
@@ -2050,35 +2092,18 @@ public class ConnectorTest {
      *
      * @param typeGUID the relationship type GUID to search
      * @param typeName the name of the type to search
-     * @param properties the properties to match against
+     * @param matchProperties the properties to match against
      * @param matchCriteria the criteria by which to match
      * @param totalNumberExpected the total number of expected results
      * @return {@code List<Relationship>} the results of the query
      */
     private List<Relationship> testFindRelationshipsByProperty(String typeGUID,
                                                                String typeName,
-                                                               Map<String, String> properties,
+                                                               InstanceProperties matchProperties,
                                                                MatchCriteria matchCriteria,
                                                                int totalNumberExpected) {
 
-        final String methodName = "testFindRelationshipsByProperty";
         List<Relationship> results = null;
-
-        OMRSRepositoryHelper helper = igcomrsRepositoryConnector.getRepositoryHelper();
-        String repoName = igcomrsRepositoryConnector.getRepositoryName();
-
-        InstanceProperties matchProperties = new InstanceProperties();
-        for (Map.Entry<String, String> entry : properties.entrySet()) {
-            String propertyName = entry.getKey();
-            String value = entry.getValue();
-            matchProperties = helper.addStringPropertyToInstance(
-                    repoName,
-                    matchProperties,
-                    propertyName,
-                    value,
-                    methodName
-            );
-        }
 
         try {
             results = igcomrsMetadataCollection.findRelationshipsByProperty(

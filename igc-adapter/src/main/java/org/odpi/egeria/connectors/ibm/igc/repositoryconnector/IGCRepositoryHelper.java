@@ -613,23 +613,47 @@ public class IGCRepositoryHelper {
         IGCOMRSMetadataCollection igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
 
         // Recall that our search should always be entities of proxy endpoint TWO
-        for (Reference endTwo : results.getItems()) {
-            /* Only proceed with retrieving the Relationship if the type from IGC is not explicitly
-             * a 'main_object' (as these are non-API-accessible asset types in IGC like column analysis master,
-             * etc and will simply result in 400-code Bad Request messages from the API) */
-            if (!endTwo.getType().equals(DEFAULT_IGC_TYPE)) {
-                Relationship relationship = null;
+        for (Reference candidateTwo : results.getItems()) {
+
+            String igcType = candidateTwo.getType();
+            String relationshipLevelType = mapper.getRelationshipLevelIgcAsset();
+
+            String relationshipLevelRid = null;
+            List<Reference> endOnes = new ArrayList<>();
+            List<Reference> endTwos = new ArrayList<>();
+
+            if (relationshipLevelType != null && relationshipLevelType.equals(igcType)) {
+
+                // If the type is a relationship-level type, then use a relationship-level ProxyMapping to determine
+                // the appropriate relationship ends
+                relationshipLevelRid = candidateTwo.getId();
+                if (log.isDebugEnabled()) { log.debug("processResults (relationship-level) with mapper: {}", mapper.getClass().getCanonicalName()); }
+                RelationshipMapping.RelationshipLevelProxyMapping pmRelationship = mapper.getRelationshipLevelProxyMapping();
+                String propertyToOne = pmRelationship.getIgcRelationshipPropertyToEndOne();
+                String propertyToTwo = pmRelationship.getIgcRelationshipPropertyToEndTwo();
+                Object endOne = igcRestClient.getPropertyByName(candidateTwo, propertyToOne);
+                // TODO: create helper method that encapsulates the below instanceof stuff...
+                IGCRepositoryHelper.addReferencesToList(igcRestClient, endOnes, endOne);
+                Object endTwo = igcRestClient.getPropertyByName(candidateTwo, propertyToTwo);
+                IGCRepositoryHelper.addReferencesToList(igcRestClient, endTwos, endTwo);
+
+            } else if (!igcType.equals(DEFAULT_IGC_TYPE)) {
+
+                // Otherwise, only proceed with retrieving the Relationship if the type from IGC is not explicitly
+                // a 'main_object' (as these are non-API-accessible asset types in IGC like column analysis master,
+                // etc and will simply result in 400-code Bad Request messages from the API)
+                endTwos.add(candidateTwo);
 
                 if (log.isDebugEnabled()) { log.debug("processResults with mapper: {}", mapper.getClass().getCanonicalName()); }
-                IGCRelationshipGuid idToLookup;
-                List<Reference> endOnes = new ArrayList<>();
                 RelationshipMapping.ProxyMapping pmTwo = mapper.getProxyTwoMapping();
                 List<String> relationshipProperties = pmTwo.getIgcRelationshipProperties();
                 for (String igcPropertyName : relationshipProperties) {
+                    log.warn("processResults -- using relationshipProperty: {}", igcPropertyName);
                     if (igcPropertyName.equals(RelationshipMapping.SELF_REFERENCE_SENTINEL)) {
-                        endOnes.add(endTwo);
+                        endOnes.add(candidateTwo);
                     } else {
-                        Object otherEnd = igcRestClient.getPropertyByName(endTwo, igcPropertyName);
+                        Object otherEnd = igcRestClient.getPropertyByName(candidateTwo, igcPropertyName);
+                        log.warn("processResults -- otherEnd found: {}", otherEnd);
                         if (otherEnd != null) {
                             if (otherEnd instanceof Reference) {
                                 Reference other = (Reference) otherEnd;
@@ -648,21 +672,16 @@ public class IGCRepositoryHelper {
                         }
                     }
                 }
-                for (Reference endOne : endOnes) {
-                    // We do not need a property name when the proxy order is known...
-                    String relationshipLevelRid = null;
-                    if (mapper.hasRelationshipLevelAsset()) {
-                        String relationshipLevelType = mapper.getRelationshipLevelIgcAsset();
-                        String endOneType = endOne.getType();
-                        String endTwoType = endTwo.getType();
-                        if (endOneType.equals(relationshipLevelType)) {
-                            relationshipLevelRid = endOne.getId();
-                        } else if (endTwoType.equals(relationshipLevelType)) {
-                            relationshipLevelRid = endTwo.getId();
-                        }
-                    }
-                    if (mapper.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, endOne, endTwo)) {
-                        idToLookup = RelationshipMapping.getRelationshipGUID(
+            }
+            for (Reference endOne : endOnes) {
+                for (Reference endTwo : endTwos) {
+                    String endOneType = endOne.getType();
+                    String endTwoType = endTwo.getType();
+                    if (endOneType != null && !endOneType.equals(DEFAULT_IGC_TYPE)
+                            && endTwoType != null && !endTwoType.equals(DEFAULT_IGC_TYPE)
+                            && mapper.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, endOne, endTwo)) {
+                        // We do not need a property name when the proxy order is known...
+                        IGCRelationshipGuid idToLookup = RelationshipMapping.getRelationshipGUID(
                                 this,
                                 mapper,
                                 endOne,
@@ -671,6 +690,7 @@ public class IGCRepositoryHelper {
                                 relationshipLevelRid,
                                 true
                         );
+                        Relationship relationship = null;
                         try {
                             relationship = igcomrsMetadataCollection.getRelationship(userId, idToLookup.asGuid());
                         } catch (InvalidParameterException | RelationshipNotKnownException e) {
@@ -1964,6 +1984,26 @@ public class IGCRepositoryHelper {
             }
         }
         return sort;
+    }
+
+    /**
+     * Check whether the provided candidate is one or multiple references, and if so add it into the provided list.
+     *
+     * @param igcRestClient connectivity to the IGC environment
+     * @param list the list to which to append
+     * @param candidate the candidate object to append into the list (if a reference or list of references)
+     */
+    public static void addReferencesToList(IGCRestClient igcRestClient, List<Reference> list, Object candidate) {
+        if (candidate instanceof Reference) {
+            Reference reference = (Reference) candidate;
+            if (reference.getType() != null) {
+                list.add(reference);
+            }
+        } else if (candidate instanceof ItemList) {
+            ItemList<?> references = (ItemList<?>) candidate;
+            references.getAllPages(igcRestClient);
+            list.addAll(references.getItems());
+        }
     }
 
     /**
