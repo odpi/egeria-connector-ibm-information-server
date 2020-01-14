@@ -1536,7 +1536,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         if (relationshipLevelRid != null) {
 
             // TODO: replace with singular retrieval?
-            Reference relationshipAsset = igcRestClient.getAssetRefById(relationshipLevelRid);
+            Reference relationshipAsset = igcRestClient.getAssetById(relationshipLevelRid);
             String relationshipAssetType = relationshipAsset.getType();
             relationshipMapping = igcRepositoryHelper.getRelationshipMappingByTypes(
                     omrsRelationshipName,
@@ -1668,7 +1668,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
                 // This will default to giving us the simple search criteria, if no complex criteria are defined
                 // for the mapping.
-                IGCSearch igcSearch = mapping.getComplexIGCSearchCriteria(
+                List<IGCSearch> searches = mapping.getComplexIGCSearchCriteria(
                         repositoryHelper,
                         repositoryName,
                         igcRestClient,
@@ -1676,49 +1676,53 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         matchCriteria
                 );
 
-                // TODO: handle sequencing -- here or as part of method above?
-                igcRepositoryHelper.setPagingForSearch(igcSearch, fromRelationshipElement, pageSize);
+                for (IGCSearch igcSearch : searches) {
 
-                // Ensure we handle NONE semantics and literal values, as we do for findEntitiesByProperty
-                boolean getNothing = false;
-                if (matchProperties != null) {
+                    // TODO: handle sequencing -- here or as part of method above?
+                    igcRepositoryHelper.setPagingForSearch(igcSearch, fromRelationshipElement, pageSize);
 
-                    Set<String> mappedOmrsProperties = mapping.getMappedOmrsPropertyNames();
-                    Map<String, InstancePropertyValue> propertiesToMatch = matchProperties.getInstanceProperties();
-                    if (propertiesToMatch == null) {
-                        propertiesToMatch = new HashMap<>();
-                    }
+                    // Ensure we handle NONE semantics and literal values, as we do for findEntitiesByProperty
+                    boolean getNothing = false;
+                    if (matchProperties != null) {
 
-                    if (!mappedOmrsProperties.containsAll(propertiesToMatch.keySet()) && matchCriteria.equals(MatchCriteria.ALL)) {
-                        // If there is some property we are being asked to search but it has no mapping,
-                        // ensure we will get no results
-                        getNothing = true;
-                    } else {
+                        Set<String> mappedOmrsProperties = mapping.getMappedOmrsPropertyNames();
+                        Map<String, InstancePropertyValue> propertiesToMatch = matchProperties.getInstanceProperties();
+                        if (propertiesToMatch == null) {
+                            propertiesToMatch = new HashMap<>();
+                        }
 
-                        if (matchCriteria.equals(MatchCriteria.ANY) || matchCriteria.equals(MatchCriteria.NONE)) {
-                            for (Map.Entry<String, InstancePropertyValue> entry : propertiesToMatch.entrySet()) {
-                                String omrsPropertyName = entry.getKey();
-                                if (mapping.isOmrsPropertyLiteralMapped(omrsPropertyName)) {
-                                    Object literalValue = mapping.getOmrsPropertyLiteralValue(omrsPropertyName);
-                                    boolean valuesAreEqual = IGCRepositoryHelper.equivalentValues(literalValue, entry.getValue());
-                                    getNothing = valuesAreEqual && matchCriteria.equals(MatchCriteria.NONE);
-                                    if (getNothing) {
-                                        break;
+                        if (!mappedOmrsProperties.containsAll(propertiesToMatch.keySet()) && matchCriteria.equals(MatchCriteria.ALL)) {
+                            // If there is some property we are being asked to search but it has no mapping,
+                            // ensure we will get no results
+                            getNothing = true;
+                        } else {
+
+                            if (matchCriteria.equals(MatchCriteria.ANY) || matchCriteria.equals(MatchCriteria.NONE)) {
+                                for (Map.Entry<String, InstancePropertyValue> entry : propertiesToMatch.entrySet()) {
+                                    String omrsPropertyName = entry.getKey();
+                                    if (mapping.isOmrsPropertyLiteralMapped(omrsPropertyName)) {
+                                        Object literalValue = mapping.getOmrsPropertyLiteralValue(omrsPropertyName);
+                                        boolean valuesAreEqual = IGCRepositoryHelper.equivalentValues(literalValue, entry.getValue());
+                                        getNothing = valuesAreEqual && matchCriteria.equals(MatchCriteria.NONE);
+                                        if (getNothing) {
+                                            break;
+                                        }
                                     }
                                 }
                             }
+
                         }
 
                     }
 
-                }
+                    if (!getNothing) {
+                        igcRepositoryHelper.processResults(mapping,
+                                igcRestClient.search(igcSearch),
+                                relationships,
+                                pageSize,
+                                userId);
+                    }
 
-                if (!getNothing) {
-                    igcRepositoryHelper.processResults(mapping,
-                            igcRestClient.search(igcSearch),
-                            relationships,
-                            pageSize,
-                            userId);
                 }
 
             }
@@ -1781,21 +1785,22 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
                 // This will default to giving us the simple search criteria, if no complex criteria are defined
                 // for the mapping.
-                IGCSearch igcSearch = mapping.getComplexIGCSearchCriteria(
+                List<IGCSearch> searches = mapping.getComplexIGCSearchCriteria(
                         repositoryHelper,
                         repositoryName,
                         igcRestClient,
                         searchCriteria
                 );
 
-                // TODO: handle sequencing -- here or as part of method above?
-                igcRepositoryHelper.setPagingForSearch(igcSearch, fromRelationshipElement, pageSize);
-
-                igcRepositoryHelper.processResults(mapping,
-                        igcRestClient.search(igcSearch),
-                        relationships,
-                        pageSize,
-                        userId);
+                for (IGCSearch igcSearch : searches) {
+                    // TODO: handle sequencing -- here or as part of method above?
+                    igcRepositoryHelper.setPagingForSearch(igcSearch, fromRelationshipElement, pageSize);
+                    igcRepositoryHelper.processResults(mapping,
+                            igcRestClient.search(igcSearch),
+                            relationships,
+                            pageSize,
+                            userId);
+                }
 
             }
 
@@ -1834,6 +1839,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 homeMetadataCollectionId,
                 homeParameterName,
                 methodName);
+
+        // TODO: verify that we even need to implement this method, and if so, how it is meant to operate
 
         /*
          * Validate that the entity GUID is ok
@@ -1895,6 +1902,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 homeMetadataCollectionId,
                 homeParameterName,
                 methodName);
+
+        // TODO: verify that we even need to implement this method, and if so, how it is meant to operate
 
         Relationship relationship = this.isRelationshipKnown(userId, relationshipGUID);
         if (relationship != null && metadataCollectionId.equals(relationship.getMetadataCollectionId())) {
