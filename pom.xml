@@ -104,7 +104,7 @@
         <testng.version>7.1.1</testng.version>
         <mock-server.version>5.8.1</mock-server.version>
         <sleepycat.version>18.3.12</sleepycat.version>
-        <rhino.version>1.7.11</rhino.version>
+        <rhino.version>1.7.12</rhino.version>
         <woodstox.version>6.0.3</woodstox.version>
         <maven-compiler.version>3.8.1</maven-compiler.version>
         <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
