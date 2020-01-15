@@ -889,15 +889,16 @@ public class IGCRepositoryHelper {
      * @param igcAssetType name of the IGC asset type for which to limit the search results
      * @param classificationName name of the classification by which to limit results
      * @return IGCSearchConditionSet
+     * @throws FunctionNotSupportedException when a regular expression is provided that is not supported
      */
     private IGCSearchConditionSet getSearchCriteriaForClassification(String igcAssetType,
-                                                                     String classificationName) {
+                                                                     String classificationName) throws FunctionNotSupportedException {
 
         IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
         ClassificationMapping classificationMapping = classificationMappingStore.getMappingByTypes(classificationName, igcAssetType);
         if (classificationMapping != null) {
-            igcSearchConditionSet = classificationMapping.getIGCSearchCriteria(null);
+            igcSearchConditionSet = classificationMapping.getIGCSearchCriteria(repositoryHelper, repositoryName, null);
         } else {
             if (log.isWarnEnabled()) { log.warn("Classification {} cannot be applied to IGC asset type {} - excluding from search limitations.", classificationName, igcAssetType); }
         }
@@ -912,9 +913,10 @@ public class IGCRepositoryHelper {
      * @param igcAssetType name of the IGC asset type for which to limit the search results
      * @param classificationNames list of classification names by which to limit results
      * @return IGCSearchConditionSet
+     * @throws FunctionNotSupportedException when a regular expression is provided that is not supported
      */
     IGCSearchConditionSet getSearchCriteriaForClassifications(String igcAssetType,
-                                                              List<String> classificationNames) {
+                                                              List<String> classificationNames) throws FunctionNotSupportedException {
 
         IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 

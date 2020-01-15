@@ -11,6 +11,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Classification;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,11 +90,15 @@ public class Spine_Mapper extends ClassificationMapping {
      * category. (There are no properties on the SpineObject/Attribute classification, so no need to even check the
      * provided matchClassificationProperties.)
      *
+     * @param repositoryHelper the repository helper
+     * @param repositoryName name of the repository
      * @param matchClassificationProperties the criteria to use when searching for the classification
      * @return IGCSearchConditionSet - the IGC search criteria to find entities based on this classification
      */
     @Override
-    public IGCSearchConditionSet getIGCSearchCriteria(InstanceProperties matchClassificationProperties) {
+    public IGCSearchConditionSet getIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                                      String repositoryName,
+                                                      InstanceProperties matchClassificationProperties) {
 
         IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
                 "referencing_categories.name",

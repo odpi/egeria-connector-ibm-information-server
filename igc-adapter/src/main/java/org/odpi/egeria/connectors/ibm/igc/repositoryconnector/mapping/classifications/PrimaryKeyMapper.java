@@ -11,9 +11,11 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.KeyPatternMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,11 +133,18 @@ public class PrimaryKeyMapper extends ClassificationMapping {
     /**
      * Search for PrimaryKey by looking for either a defined or selected primary key in IGC.
      *
+     * @param repositoryHelper the repository helper
+     * @param repositoryName name of the repository
      * @param matchClassificationProperties the criteria to use when searching for the classification
      * @return IGCSearchConditionSet - the IGC search criteria to find entities based on this classification
+     * @throws FunctionNotSupportedException when a regular expression is used for the search which is not supported
      */
     @Override
-    public IGCSearchConditionSet getIGCSearchCriteria(InstanceProperties matchClassificationProperties) {
+    public IGCSearchConditionSet getIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                                      String repositoryName,
+                                                      InstanceProperties matchClassificationProperties) throws FunctionNotSupportedException {
+
+        final String methodName = "getIGCSearchCriteria";
 
         IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
                 "selected_primary_key",
@@ -149,10 +158,12 @@ public class PrimaryKeyMapper extends ClassificationMapping {
             Map<String, InstancePropertyValue> properties = matchClassificationProperties.getInstanceProperties();
             if (properties.containsKey("name")) {
                 PrimitivePropertyValue name = (PrimitivePropertyValue) properties.get("name");
-                String keyName = (String) name.getPrimitiveValue();
-                IGCSearchCondition propertyCondition = new IGCSearchCondition(
+                String keyName = name.valueAsString();
+                IGCSearchCondition propertyCondition = IGCRepositoryHelper.getRegexSearchCondition(
+                        repositoryHelper,
+                        repositoryName,
+                        methodName,
                         "defined_primary_key.name",
-                        "=",
                         keyName
                 );
                 igcSearchConditionSet.addCondition(propertyCondition);

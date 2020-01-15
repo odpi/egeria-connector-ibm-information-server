@@ -18,6 +18,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefAttribute;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.OMRSErrorCode;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.TypeErrorException;
 import org.slf4j.Logger;
@@ -261,10 +262,15 @@ public abstract class ClassificationMapping extends InstanceMapping {
      * desires the classification to be represented within IGC.) By default, it will return an empty set of conditions
      * to find the classification.
      *
+     * @param repositoryHelper the repository helper
+     * @param repositoryName name of the repository
      * @param matchClassificationProperties the criteria to use when searching for the classification
      * @return IGCSearchConditionSet - the IGC search criteria to find entities based on this classification
+     * @throws FunctionNotSupportedException when a regular expression is used for the search which is not supported
      */
-    public IGCSearchConditionSet getIGCSearchCriteria(InstanceProperties matchClassificationProperties) {
+    public IGCSearchConditionSet getIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                                      String repositoryName,
+                                                      InstanceProperties matchClassificationProperties) throws FunctionNotSupportedException {
         return new IGCSearchConditionSet();
     }
 

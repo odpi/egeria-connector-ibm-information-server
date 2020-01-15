@@ -20,8 +20,8 @@ public class ContactMethodTypeMapper extends EnumMapping {
         super(
                 "ContactMethodType"
         );
-        addDefaultEnumMapping(99, "Other");
-        addEnumMapping("email", 0, "Email");
+        addDefaultEnumMapping(99, "Other", "Another usage.");
+        addEnumMapping("email", 0, "Email", "Contact through email.");
     }
 
 }

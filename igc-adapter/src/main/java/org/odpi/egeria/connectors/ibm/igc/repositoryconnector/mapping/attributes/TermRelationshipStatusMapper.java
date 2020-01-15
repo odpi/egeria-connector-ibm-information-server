@@ -20,11 +20,11 @@ public class TermRelationshipStatusMapper extends EnumMapping {
         super(
                 "TermRelationshipStatus"
         );
-        addDefaultEnumMapping(99, "Other");
-        addEnumMapping("Draft", 0, "Draft");
-        addEnumMapping("Active", 1, "Active");
-        addEnumMapping("Deprecated", 2, "Deprecated");
-        addEnumMapping("Obsolete", 3, "Obsolete");
+        addDefaultEnumMapping(99, "Other", "Another term relationship status.");
+        addEnumMapping("Draft", 0, "Draft", "The term relationship is in development.");
+        addEnumMapping("Active", 1, "Active", "The term relationship is approved and in use.");
+        addEnumMapping("Deprecated", 2, "Deprecated", "The term relationship should no longer be used.");
+        addEnumMapping("Obsolete", 3, "Obsolete", "The term relationship must no longer be used.");
     }
 
 }

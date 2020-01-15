@@ -15,6 +15,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryC
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.GovernanceClassificationStatusMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,11 +146,15 @@ public class ConfidentialityMapper extends ClassificationMapping {
      * 'level' classification property is used from matchClassificationProperties, as no other properties are
      * implemented in IGC.)
      *
+     * @param repositoryHelper the repository helper
+     * @param repositoryName name of the repository
      * @param matchClassificationProperties the criteria to use when searching for the classification
      * @return IGCSearchConditionSet - the IGC search criteria to find entities based on this classification
      */
     @Override
-    public IGCSearchConditionSet getIGCSearchCriteria(InstanceProperties matchClassificationProperties) {
+    public IGCSearchConditionSet getIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                                      String repositoryName,
+                                                      InstanceProperties matchClassificationProperties) {
 
         IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
                 "assigned_to_terms.parent_category.name",

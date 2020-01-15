@@ -107,7 +107,7 @@ classification.
 ### [SubjectArea](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/classifications/SubjectAreaMapper.java)
 
 The provided implementation assigns a `SubjectArea` classification to a `GlossaryCategory` based on the
-`assigned_to_term` relationship of the `category` in IGC. Specifically, when the `category` is has an `assigned_to_term`
+`assigned_to_term` relationship of the `category` in IGC. Specifically, when the `category` has an `assigned_to_term`
 relationship to the IGC `term` `Classifications/SubjectArea`, the `GlossaryCategory` will be assigned a `SubjectArea`
 classification whose `name` will match the name of the IGC `category`.
 
