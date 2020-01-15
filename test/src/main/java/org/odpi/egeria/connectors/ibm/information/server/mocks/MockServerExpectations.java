@@ -194,8 +194,11 @@ public class MockServerExpectations implements ExpectationInitializer {
         setTabularColumnRelationships(mockServerClient);
 
         // Complex search tests
+        setFindEntitiesByQualifiedName(mockServerClient);
         setFindDataClassByProperty(mockServerClient);
         setFindDataClassAssignmentByProperty(mockServerClient);
+        setFindSchemaElementByAnchorGUID(mockServerClient);
+        setFindGovernanceDefinitionByDomain(mockServerClient);
 
         // Event tests
         setChangeSetTest(mockServerClient);
@@ -228,19 +231,17 @@ public class MockServerExpectations implements ExpectationInitializer {
     }
 
     private void setMultipageSearch(MockServerClient mockServerClient) {
+        String caseName = "TermFindMultipage";
         List<String> properties = new ArrayList<>();
         properties.add("created_by");
         properties.add("created_on");
         properties.add("modified_by");
         properties.add("modified_on");
-        mockServerClient
-                .withSecure(true)
-                .when(searchRequest(
-                        json(
-                                "{\"types\":[\"term\"],\"pageSize\":2,\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"and\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        )))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "TermFindMultipage" + File.separator + "results_1.json")));
+        setSearchAndResponse(mockServerClient, caseName, "results_1.json",
+                json(
+                        "{\"types\":[\"term\"],\"pageSize\":2,\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
         mockServerClient
                 .withSecure(true)
                 .when(nextPageRequest("term", properties, "2", "2"))
@@ -252,12 +253,8 @@ public class MockServerExpectations implements ExpectationInitializer {
     }
 
     private void setSortedSearch(MockServerClient mockServerClient) {
-        mockServerClient
-                .withSecure(true)
-                .when(searchRequest(
-                        "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":2,\"where\":{\"conditions\":[{\"property\":\"short_description\",\"operator\":\"<>\",\"value\":\"\"},{\"property\":\"name\",\"operator\":\"in\",\"value\":[\"Address Line 2\"],\"negated\":false}],\"operator\":\"and\"},\"sorts\":[{\"property\":\"name\",\"ascending\":true}]}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + "TermFindSorting" + File.separator + "results_positive.json")));
+        setSearchAndResponse(mockServerClient, "TermFindSorting", "results_positive.json",
+                "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":2,\"where\":{\"conditions\":[{\"property\":\"short_description\",\"operator\":\"<>\",\"value\":\"\"},{\"property\":\"name\",\"operator\":\"in\",\"value\":[\"Address Line 2\"],\"negated\":false}],\"operator\":\"and\"},\"sorts\":[{\"property\":\"name\",\"ascending\":true}]}");
     }
 
     private void setBundlesQuery(MockServerClient mockServerClient) {
@@ -307,15 +304,11 @@ public class MockServerExpectations implements ExpectationInitializer {
     }
 
     private void setForeignKeyFindByPropertyValue(MockServerClient mockServerClient) {
-        String caseName = "ForeignKeyFindByPropertyValue";
-        mockServerClient
-                .withSecure(true)
-                .when(searchRequest(
-                        json(
-                                "{\"types\":[\"database_column\"],\"properties\":[\"defined_foreign_key_references\",\"selected_foreign_key_references\"],\"where\":{\"conditions\":[{\"property\":\"defined_foreign_key_references\",\"operator\":\"isNull\",\"negated\":true},{\"property\":\"selected_foreign_key_references\",\"operator\":\"isNull\",\"negated\":true}],\"operator\":\"or\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        )))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
+        setSearchAndResponse(mockServerClient, "ForeignKeyFindByPropertyValue", "results.json",
+                json(
+                        "{\"types\":[\"database_column\"],\"properties\":[\"defined_foreign_key_references\",\"selected_foreign_key_references\"],\"where\":{\"conditions\":[{\"property\":\"defined_foreign_key_references\",\"operator\":\"isNull\",\"negated\":true},{\"property\":\"selected_foreign_key_references\",\"operator\":\"isNull\",\"negated\":true}],\"operator\":\"or\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setIGCLogout(MockServerClient mockServerClient) {
@@ -528,407 +521,231 @@ public class MockServerExpectations implements ExpectationInitializer {
     }
 
     private void setGlossaryFindByPropertyValue(MockServerClient mockServerClient) {
-        String caseName = "GlossaryFindByPropertyValue";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        json(
-                                "{\"types\":[\"category\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"parent_category\",\"operator\":\"isNull\",\"negated\":false},{\"property\":\"name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"a\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"a\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"a\"},{\"property\":\"language\",\"operator\":\"like %{0}%\",\"value\":\"a\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        ))
-                )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
+        setSearchAndResponse(mockServerClient, "GlossaryFindByPropertyValue", "results.json",
+                json(
+                        "{\"types\":[\"category\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"parent_category\",\"operator\":\"isNull\",\"negated\":false},{\"property\":\"name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"a\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"a\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"a\"},{\"property\":\"language\",\"operator\":\"like %{0}%\",\"value\":\"a\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setGlossaryRelationships(MockServerClient mockServerClient) {
         String caseName = "GlossaryRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"category_path\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"}],\"operator\":\"and\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "categories.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"parent_category.category_path\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"},{\"property\":\"parent_category\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "terms.json")));
+        setSearchAndResponse(mockServerClient, caseName, "categories.json",
+                "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"category_path\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"}],\"operator\":\"and\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "terms.json",
+                "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"parent_category.category_path\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"},{\"property\":\"parent_category\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"}],\"operator\":\"or\"}}");
     }
 
     private void setGlossaryCategoryFindByPropertyValue(MockServerClient mockServerClient) {
-        String caseName = "GlossaryCategoryFindByPropertyValue";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        json(
-                                "{\"types\":[\"category\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"parent_category\",\"operator\":\"isNull\",\"negated\":true},{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"e\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"e\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        ))
-                )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
+        setSearchAndResponse(mockServerClient, "GlossaryCategoryFindByPropertyValue", "results.json",
+                json(
+                        "{\"types\":[\"category\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"parent_category\",\"operator\":\"isNull\",\"negated\":true},{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"e\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"e\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setGlossaryCategoryRelationships(MockServerClient mockServerClient) {
         String caseName = "GlossaryCategoryRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"subcategories\",\"operator\":\"=\",\"value\":\"" + CATEGORY_RID + "\"}],\"operator\":\"and\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "parent_category.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"parent_category\",\"operator\":\"=\",\"value\":\"" + CATEGORY_RID + "\"},{\"property\":\"referencing_categories\",\"operator\":\"=\",\"value\":\"" + CATEGORY_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "terms.json")));
+        setSearchAndResponse(mockServerClient, caseName, "parent_category.json",
+                "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"subcategories\",\"operator\":\"=\",\"value\":\"" + CATEGORY_RID + "\"}],\"operator\":\"and\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "terms.json",
+                "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"parent_category\",\"operator\":\"=\",\"value\":\"" + CATEGORY_RID + "\"},{\"property\":\"referencing_categories\",\"operator\":\"=\",\"value\":\"" + CATEGORY_RID + "\"}],\"operator\":\"or\"}}");
     }
 
     private void setGlossaryTermFindByPropertyValue(MockServerClient mockServerClient) {
-        String caseName = "GlossaryTermFindByPropertyValue";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        json(
-                                "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        ))
-                )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
+        setSearchAndResponse(mockServerClient, "GlossaryTermFindByPropertyValue", "results.json",
+                json(
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setGlossaryTermFindByProperty_displayName(MockServerClient mockServerClient) {
-        String caseName = "GlossaryTermFindByProperty_displayName";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        json(
-                                "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"and\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        ))
-                )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
+        setSearchAndResponse(mockServerClient, "GlossaryTermFindByProperty_displayName", "results.json",
+                json(
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setGlossaryTermFindByProperties_ANY(MockServerClient mockServerClient) {
-        String caseName = "GlossaryTermFindByProperties_ANY";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        json(
-                                "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Number\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        ))
-                )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
+        setSearchAndResponse(mockServerClient, "GlossaryTermFindByProperties_ANY", "results.json",
+                json(
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Number\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setGlossaryTermFindByProperties_ALL(MockServerClient mockServerClient) {
-        String caseName = "GlossaryTermFindByProperties_ALL";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        json(
-                                "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"number\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"and\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        ))
-                )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
+        setSearchAndResponse(mockServerClient, "GlossaryTermFindByProperties_ALL", "results.json",
+                json(
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"number\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setAssetFindByPropertyValue(MockServerClient mockServerClient) {
         String caseName = "AssetFindByPropertyValue";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        json(
-                                "{\"types\":[\"data_file\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        ))
-                )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results_data_file.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        json(
-                                "{\"types\":[\"database\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"dbms\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"dbms_server_instance\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"dbms_version\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"imported_from\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        ))
-                )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results_database.json")));
+        setSearchAndResponse(mockServerClient, caseName, "results_data_file.json",
+                json(
+                        "{\"types\":[\"data_file\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_database.json",
+                json(
+                        "{\"types\":[\"database\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"dbms\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"dbms_server_instance\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"dbms_version\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"imported_from\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setAllTypesFindByPropertyValue(MockServerClient mockServerClient) {
         String caseName = "AllTypesFindByPropertyValue";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        json(
-                                "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        ))
-                )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results_term.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        json(
-                                "{\"types\":[\"data_class\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"class_code\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"expression\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"provider\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"data_class_type_single\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"valid_value_strings\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"data_type_filter_elements_enum\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"validValueReferenceFile\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"java_class_name_single\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"regular_expression_single\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"script\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        ))
-                )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results_data_class.json")));
+        setSearchAndResponse(mockServerClient, caseName, "results_term.json",
+                json(
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_data_class.json",
+                json(
+                        "{\"types\":[\"data_class\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"class_code\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"expression\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"provider\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"data_class_type_single\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"valid_value_strings\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"data_type_filter_elements_enum\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"validValueReferenceFile\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"java_class_name_single\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"regular_expression_single\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"script\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setAllTypesFindByPropertyValue_limitToConfidentiality(MockServerClient mockServerClient) {
-        String caseName = "AllTypesFindByPropertyValue_limitToConfidentiality";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        json(
-                                "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"},{\"conditions\":[{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"}],\"operator\":\"and\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        ))
-                )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
+        setSearchAndResponse(mockServerClient, "AllTypesFindByPropertyValue_limitToConfidentiality", "results.json",
+                json(
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"},{\"conditions\":[{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"}],\"operator\":\"and\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setGlossaryTermFindByClassification(MockServerClient mockServerClient) {
-        String caseName = "GlossaryTermFindByClassification";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        json(
-                                "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"},{\"property\":\"assigned_to_terms.name\",\"operator\":\"like {0}%\",\"value\":\"3 \"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        ))
-                )
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
+        setSearchAndResponse(mockServerClient, "GlossaryTermFindByClassification", "results.json",
+                json(
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"},{\"property\":\"assigned_to_terms.name\",\"operator\":\"like {0}%\",\"value\":\"3 \"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setGlossaryTermRelationships(MockServerClient mockServerClient) {
         String caseName = "GlossaryTermRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"main_object\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"assigned_to_terms\",\"operator\":\"=\",\"value\":\"" + TERM_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "assigned_assets.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"terms\",\"operator\":\"=\",\"value\":\"" + TERM_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "parent_category.json")));
+        setSearchAndResponse(mockServerClient, caseName, "assigned_assets.json",
+                "{\"types\":[\"main_object\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"assigned_to_terms\",\"operator\":\"=\",\"value\":\"" + TERM_RID + "\"}],\"operator\":\"or\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "parent_category.json",
+                "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"terms\",\"operator\":\"=\",\"value\":\"" + TERM_RID + "\"}],\"operator\":\"or\"}}");
     }
 
     private void setDatabaseRelationships(MockServerClient mockServerClient) {
         String caseName = "DatabaseRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"database_schema\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database\",\"operator\":\"=\",\"value\":\"" + DATABASE_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database_schema.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"data_connection\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"imports_database\",\"operator\":\"=\",\"value\":\"" + DATABASE_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_connection.json")));
+        setSearchAndResponse(mockServerClient, caseName, "database_schema.json",
+                "{\"types\":[\"database_schema\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database\",\"operator\":\"=\",\"value\":\"" + DATABASE_RID + "\"}],\"operator\":\"or\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "data_connection.json",
+                "{\"types\":[\"data_connection\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"imports_database\",\"operator\":\"=\",\"value\":\"" + DATABASE_RID + "\"}],\"operator\":\"or\"}}");
     }
 
     private void setConnectionRelationships(MockServerClient mockServerClient) {
         String caseName = "ConnectionRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"database\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connections\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"connector\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connections\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "connector.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"connector\"],\"properties\":[\"host\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connections\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID + "\"}],\"operator\":\"and\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "host.json")));
+        setSearchAndResponse(mockServerClient, caseName, "database.json",
+                "{\"types\":[\"database\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connections\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID + "\"}],\"operator\":\"or\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "connector.json",
+                "{\"types\":[\"connector\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connections\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID + "\"}],\"operator\":\"or\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "host.json",
+                "{\"types\":[\"connector\"],\"properties\":[\"host\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connections\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID + "\"}],\"operator\":\"and\"}}");
     }
 
     private void setEndpointRelationships(MockServerClient mockServerClient) {
-        String caseName = "EndpointRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"data_connection\"],\"properties\":[\"name\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connectors.host\",\"operator\":\"=\",\"value\":\"" + HOST_RID + "\"}],\"operator\":\"and\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_connection.json")));
+        setSearchAndResponse(mockServerClient, "EndpointRelationships", "data_connection.json",
+                "{\"types\":[\"data_connection\"],\"properties\":[\"name\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connectors.host\",\"operator\":\"=\",\"value\":\"" + HOST_RID + "\"}],\"operator\":\"and\"}}");
     }
 
     private void setDeployedDatabaseSchemaRelationships(MockServerClient mockServerClient) {
-        String caseName = "DeployedDatabaseSchemaRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"database\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_schemas\",\"operator\":\"=\",\"value\":\"" + DATABASE_SCHEMA_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database.json")));
+        setSearchAndResponse(mockServerClient, "DeployedDatabaseSchemaRelationships", "database.json",
+                "{\"types\":[\"database\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_schemas\",\"operator\":\"=\",\"value\":\"" + DATABASE_SCHEMA_RID + "\"}],\"operator\":\"or\"}}");
     }
 
     private void setRelationalDBSchemaTypeRelationships(MockServerClient mockServerClient) {
-        String caseName = "RelationalDBSchemaTypeRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"database_table\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_schema\",\"operator\":\"=\",\"value\":\"" + DATABASE_SCHEMA_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database_table.json")));
+        setSearchAndResponse(mockServerClient, "RelationalDBSchemaTypeRelationships", "database_table.json",
+                "{\"types\":[\"database_table\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_schema\",\"operator\":\"=\",\"value\":\"" + DATABASE_SCHEMA_RID + "\"}],\"operator\":\"or\"}}");
     }
 
     private void setRelationalTableRelationships(MockServerClient mockServerClient) {
         String caseName = "RelationalTableRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"database_schema\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_tables\",\"operator\":\"=\",\"value\":\"" + DATABASE_TABLE_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database_schema.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"database_column\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_table_or_view\",\"operator\":\"=\",\"value\":\"" + DATABASE_TABLE_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database_column.json")));
+        setSearchAndResponse(mockServerClient, caseName, "database_schema.json",
+                "{\"types\":[\"database_schema\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_tables\",\"operator\":\"=\",\"value\":\"" + DATABASE_TABLE_RID + "\"}],\"operator\":\"or\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "database_column.json",
+                "{\"types\":[\"database_column\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_table_or_view\",\"operator\":\"=\",\"value\":\"" + DATABASE_TABLE_RID + "\"}],\"operator\":\"or\"}}");
     }
 
     private void setRelationalColumnRelationships(MockServerClient mockServerClient) {
         String caseName = "RelationalColumnRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"assigned_assets\",\"operator\":\"=\",\"value\":\"" + DATABASE_COLUMN_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "term.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"classification\"],\"properties\":[\"data_class\",\"confidencePercent\",\"threshold\",\"value_frequency\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"classifies_asset\",\"operator\":\"=\",\"value\":\"" + DATABASE_COLUMN_RID + "\"}],\"operator\":\"and\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "classification.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"database_table\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_columns\",\"operator\":\"=\",\"value\":\"" + DATABASE_COLUMN_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "database_table.json")));
+        setSearchAndResponse(mockServerClient, caseName, "term.json",
+                "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"assigned_assets\",\"operator\":\"=\",\"value\":\"" + DATABASE_COLUMN_RID + "\"}],\"operator\":\"or\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "classification.json",
+                "{\"types\":[\"classification\"],\"properties\":[\"data_class\",\"confidencePercent\",\"threshold\",\"value_frequency\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"classifies_asset\",\"operator\":\"=\",\"value\":\"" + DATABASE_COLUMN_RID + "\"}],\"operator\":\"and\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "database_table.json",
+                "{\"types\":[\"database_table\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_columns\",\"operator\":\"=\",\"value\":\"" + DATABASE_COLUMN_RID + "\"}],\"operator\":\"or\"}}");
     }
 
     private void setDataClassRelationships(MockServerClient mockServerClient) {
         String caseName = "DataClassRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"classification\"],\"properties\":[\"classifies_asset\",\"confidencePercent\",\"threshold\",\"value_frequency\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"" + DATA_CLASS_RID + "\"}],\"operator\":\"and\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "classification.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"amazon_s3_data_file_field\",\"data_file_field\",\"database_column\"],\"properties\":[\"selected_classification\",\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"selected_classification\",\"operator\":\"=\",\"value\":\"" + DATA_CLASS_RID + "\"}],\"operator\":\"and\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_item.json")));
+        setSearchAndResponse(mockServerClient, caseName, "classification.json",
+                "{\"types\":[\"classification\"],\"properties\":[\"classifies_asset\",\"confidencePercent\",\"threshold\",\"value_frequency\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"" + DATA_CLASS_RID + "\"}],\"operator\":\"and\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "data_item.json",
+                "{\"types\":[\"amazon_s3_data_file_field\",\"data_file_field\",\"database_column\"],\"properties\":[\"selected_classification\",\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"selected_classification\",\"operator\":\"=\",\"value\":\"" + DATA_CLASS_RID + "\"}],\"operator\":\"and\"}}");
     }
 
     private void setConnectionFSRelationships(MockServerClient mockServerClient) {
         String caseName = "ConnectionFSRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"data_file_folder\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connection\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID_FS + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_folder.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"connector\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connections\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID_FS + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "connector.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"connector\"],\"properties\":[\"host\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connections\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID_FS + "\"}],\"operator\":\"and\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "host.json")));
+        setSearchAndResponse(mockServerClient, caseName, "data_file_folder.json",
+                "{\"types\":[\"data_file_folder\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connection\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID_FS + "\"}],\"operator\":\"or\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "connector.json",
+                "{\"types\":[\"connector\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connections\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID_FS + "\"}],\"operator\":\"or\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "host.json",
+                "{\"types\":[\"connector\"],\"properties\":[\"host\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connections\",\"operator\":\"=\",\"value\":\"" + DATA_CONNECTION_RID_FS + "\"}],\"operator\":\"and\"}}");
     }
 
     private void setDataFileFolderRelationships(MockServerClient mockServerClient) {
         String caseName = "DataFileFolderRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"data_file_folder\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_folders\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FOLDER_RID + "\"}],\"operator\":\"and\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_folder.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"data_file\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"parent_folder\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FOLDER_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file.json")));
+        setSearchAndResponse(mockServerClient, caseName, "data_file_folder.json",
+                "{\"types\":[\"data_file_folder\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_folders\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FOLDER_RID + "\"}],\"operator\":\"and\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "data_file.json",
+                "{\"types\":[\"data_file\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"parent_folder\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FOLDER_RID + "\"}],\"operator\":\"or\"}}");
     }
 
     private void setDataFileRelationships(MockServerClient mockServerClient) {
         String caseName = "DataFileRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"data_file_record\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_record.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"data_file_folder\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_files\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_folder.json")));
+        setSearchAndResponse(mockServerClient, caseName, "data_file_record.json",
+                "{\"types\":[\"data_file_record\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_RID + "\"}],\"operator\":\"or\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "data_file_folder.json",
+                "{\"types\":[\"data_file_folder\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_files\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_RID + "\"}],\"operator\":\"or\"}}");
     }
 
     private void setTabularSchemaTypeRelationships(MockServerClient mockServerClient) {
         String caseName = "TabularSchemaTypeRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"data_file\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_records\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_RECORD_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"data_file_field\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_record\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_RECORD_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_field.json")));
+        setSearchAndResponse(mockServerClient, caseName, "data_file.json",
+                "{\"types\":[\"data_file\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_records\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_RECORD_RID + "\"}],\"operator\":\"or\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "data_file_field.json",
+                "{\"types\":[\"data_file_field\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_record\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_RECORD_RID + "\"}],\"operator\":\"or\"}}");
     }
 
     private void setTabularColumnRelationships(MockServerClient mockServerClient) {
         String caseName = "TabularColumnRelationships";
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"assigned_assets\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FIELD_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "term.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(MockConstants.searchRequest(
-                        "{\"types\":[\"data_file_record\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_fields\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FIELD_RID + "\"}],\"operator\":\"or\"}}"
-                ))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "data_file_record.json")));
+        setSearchAndResponse(mockServerClient, caseName, "term.json",
+                "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"assigned_assets\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FIELD_RID + "\"}],\"operator\":\"or\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "data_file_record.json",
+                "{\"types\":[\"data_file_record\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_fields\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FIELD_RID + "\"}],\"operator\":\"or\"}}");
+    }
+
+    private void setFindEntitiesByQualifiedName(MockServerClient mockServerClient) {
+        String caseName = "FindEntitiesByQualifiedName";
+        setSearchAndResponse(mockServerClient, caseName, "results_all.json",
+                "{\"types\":[\"database_column\"],\"properties\":[\"numberEmptyValues\",\"defined_foreign_key\",\"type\",\"occurs\",\"minimum_length\",\"nullabilityFlag\",\"uniqueFlag\",\"constantFlag\",\"numberCompleteValues\",\"inferredScale\",\"native_id\",\"level\",\"inferredFormat\",\"odbc_type\",\"isInferredPrimaryKey\",\"inferredPrecision\",\"created_by\",\"averageValue\",\"created_on\",\"unique\",\"name\",\"numberNullValues\",\"isInferredForeignKey\",\"position\",\"numberZeroValues\",\"defined_primary_key\",\"selected_natural_key\",\"short_description\",\"nbRecordsTested\",\"selected_primary_key\",\"domainType\",\"numberFormats\",\"numberValidValues\",\"synchronized_from\",\"start_end_columns\",\"qualityScore_bubble\",\"qualityScore\",\"modified_on\",\"allows_null_values\",\"inferredLength\",\"length\",\"default_value\",\"long_description\",\"fraction\",\"selected_foreign_key\",\"inferredDataType\",\"modified_by\",\"data_type\",\"numberDistinctValues\",\"quality_benchmark\"],\"pageSize\":100}");
+        setSearchAndResponse(mockServerClient, caseName, "results_one.json",
+                json(
+                        "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"database_table_or_view.name\",\"operator\":\"=\",\"value\":\"CONTACTEMAIL\"},{\"property\":\"database_table_or_view.database_schema.name\",\"operator\":\"=\",\"value\":\"DB2INST1\"},{\"property\":\"database_table_or_view.database_schema.database.name\",\"operator\":\"=\",\"value\":\"COMPDIR\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"EMAIL\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setFindDataClassByProperty(MockServerClient mockServerClient) {
@@ -945,29 +762,36 @@ public class MockServerExpectations implements ExpectationInitializer {
 
     private void setFindDataClassAssignmentByProperty(MockServerClient mockServerClient) {
         String caseName = "FindDataClassAssignmentByProperty";
-        mockServerClient
-                .withSecure(true)
-                .when(searchRequest(
-                        json("{\"types\":[\"classification\"],\"where\":{\"conditions\":[{\"property\":\"confidencePercent\",\"operator\":\"=\",\"value\":\"100\"},{\"property\":\"value_frequency\",\"operator\":\"=\",\"value\":\"34\"},{\"property\":\"confidencePercent\",\"operator\":\"=\",\"value\":\"100\"}],\"operator\":\"and\"}}",
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
+                json("{\"types\":[\"classification\"],\"where\":{\"conditions\":[{\"property\":\"confidencePercent\",\"operator\":\"=\",\"value\":\"100\"},{\"property\":\"value_frequency\",\"operator\":\"=\",\"value\":\"34\"},{\"property\":\"confidencePercent\",\"operator\":\"=\",\"value\":\"100\"}],\"operator\":\"and\"}}",
                                 MatchType.ONLY_MATCHING_FIELDS
-                        )))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(searchRequest(
-                        json(
-                                "{\"types\":[\"classification\"],\"where\":{\"conditions\":[{\"property\":\"classifies_asset\",\"operator\":\"=\",\"value\":\"b1c497ce.60641b50.001mv7qhr.03up14t.lob6gp.ktaasfbn0lqab0c6ee9rl\"},{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"f4951817.e469fa50.001mtr2gq.i03lpp2.ff6ti2.b6ol04ugdbtt6u6eojunp\"}],\"operator\":\"and\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        )))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "classifies_asset_b1c497ce.60641b50.001mv7qhr.03up14t.lob6gp.ktaasfbn0lqab0c6ee9rl.json")));
-        mockServerClient
-                .withSecure(true)
-                .when(searchRequest(
-                        json(
-                                "{\"types\":[\"classification\"],\"where\":{\"conditions\":[{\"property\":\"classifies_asset\",\"operator\":\"=\",\"value\":\"b1c497ce.60641b50.001mv7qhr.03u3le8.ttmqon.c22r98a4u4ptdi8cvbmtu\"},{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"f4951817.e469fa50.001mtr2gq.nsrej8a.75d8rp.ud414oj262acep64l8dpq\"}],\"operator\":\"and\"}}",
-                                MatchType.ONLY_MATCHING_FIELDS
-                        )))
-                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "classifies_asset_b1c497ce.60641b50.001mv7qhr.03u3le8.ttmqon.c22r98a4u4ptdi8cvbmtu.json")));
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "classifies_asset_b1c497ce.60641b50.001mv7qhr.03up14t.lob6gp.ktaasfbn0lqab0c6ee9rl.json",
+                json(
+                        "{\"types\":[\"classification\"],\"where\":{\"conditions\":[{\"property\":\"classifies_asset\",\"operator\":\"=\",\"value\":\"b1c497ce.60641b50.001mv7qhr.03up14t.lob6gp.ktaasfbn0lqab0c6ee9rl\"},{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"f4951817.e469fa50.001mtr2gq.i03lpp2.ff6ti2.b6ol04ugdbtt6u6eojunp\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "classifies_asset_b1c497ce.60641b50.001mv7qhr.03u3le8.ttmqon.c22r98a4u4ptdi8cvbmtu.json",
+                json(
+                        "{\"types\":[\"classification\"],\"where\":{\"conditions\":[{\"property\":\"classifies_asset\",\"operator\":\"=\",\"value\":\"b1c497ce.60641b50.001mv7qhr.03u3le8.ttmqon.c22r98a4u4ptdi8cvbmtu\"},{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"f4951817.e469fa50.001mtr2gq.nsrej8a.75d8rp.ud414oj262acep64l8dpq\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+    }
+
+    private void setFindSchemaElementByAnchorGUID(MockServerClient mockServerClient) {
+        setSearchAndResponse(mockServerClient, "FindSchemaElementByAnchorGUID", "results.json",
+                json(
+                        "{\"types\":[\"database_column\"],\"properties\":[\"numberEmptyValues\",\"defined_foreign_key\",\"type\",\"occurs\",\"minimum_length\",\"nullabilityFlag\",\"uniqueFlag\",\"constantFlag\",\"numberCompleteValues\",\"inferredScale\",\"native_id\",\"level\",\"inferredFormat\",\"odbc_type\",\"isInferredPrimaryKey\",\"inferredPrecision\",\"created_by\",\"averageValue\",\"created_on\",\"unique\",\"name\",\"numberNullValues\",\"isInferredForeignKey\",\"position\",\"numberZeroValues\",\"defined_primary_key\",\"selected_natural_key\",\"short_description\",\"nbRecordsTested\",\"selected_primary_key\",\"domainType\",\"numberFormats\",\"numberValidValues\",\"synchronized_from\",\"start_end_columns\",\"qualityScore_bubble\",\"qualityScore\",\"modified_on\",\"allows_null_values\",\"inferredLength\",\"length\",\"default_value\",\"long_description\",\"fraction\",\"selected_foreign_key\",\"inferredDataType\",\"data_type\",\"modified_by\",\"numberDistinctValues\",\"quality_benchmark\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"database_table_or_view\",\"operator\":\"=\",\"value\":\"b1c497ce.54bd3a08.001mts4qn.7mp1ug9.4m6ktd.rpguhg74d1vci4g1fnf52\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+    }
+
+    private void setFindGovernanceDefinitionByDomain(MockServerClient mockServerClient) {
+        setSearchAndResponse(mockServerClient, "FindGovernanceDefinitionByDomain", "results.json",
+                json(
+                        "{\"types\":[\"information_governance_policy\"],\"where\":{\"conditions\":[{\"property\":\"parent_policy.name\",\"operator\":\"like %{0}%\",\"value\":\"Data Access\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setTermAddEvent(MockServerClient mockServerClient) {
@@ -1195,6 +1019,20 @@ public class MockServerExpectations implements ExpectationInitializer {
                 .withSecure(true)
                 .when(iaLogoutRequest())
                 .respond(response().withStatusCode(200));
+    }
+
+    private void setSearchAndResponse(MockServerClient mockServerClient, String caseName, String filename, JsonBody jsonBody) {
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(jsonBody))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + filename)));
+    }
+
+    private void setSearchAndResponse(MockServerClient mockServerClient, String caseName, String filename, String body) {
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(body))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + filename)));
     }
 
     /**
