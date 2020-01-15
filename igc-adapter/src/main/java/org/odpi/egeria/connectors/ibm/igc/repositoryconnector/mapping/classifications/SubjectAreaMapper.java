@@ -146,23 +146,15 @@ public class SubjectAreaMapper extends ClassificationMapping {
             if (properties.containsKey("name")) {
                 PrimitivePropertyValue name = (PrimitivePropertyValue) properties.get("name");
                 String subjectAreaName = name.valueAsString();
-                IGCSearchCondition propertyCondition = IGCRepositoryHelper.getRegexSearchCondition(
+                IGCSearchCondition condition = IGCRepositoryHelper.getRegexSearchCondition(
                         repositoryHelper,
                         repositoryName,
                         methodName,
-                        "parent_category.name",
+                        "name",
                         subjectAreaName
                 );
-                byName.addCondition(propertyCondition);
-                IGCSearchCondition propertyCondition2 = IGCRepositoryHelper.getRegexSearchCondition(
-                        repositoryHelper,
-                        repositoryName,
-                        methodName,
-                        "parent_category.parent_category.name",
-                        subjectAreaName
-                );
-                byName.addCondition(propertyCondition2);
-                byName.setMatchAnyCondition(true);
+                byName.addCondition(condition);
+                byName.setMatchAnyCondition(false);
             }
         }
         if (byName.size() > 0) {
