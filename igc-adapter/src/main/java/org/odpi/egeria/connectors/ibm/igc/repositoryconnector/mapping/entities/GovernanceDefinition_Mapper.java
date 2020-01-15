@@ -9,6 +9,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyCategory;
@@ -124,31 +125,14 @@ public class GovernanceDefinition_Mapper extends ReferenceableMapper {
         // Only need to add a condition of we are after the 'fileType' and have been provided a String
         if (omrsPropertyName.equals("domain") && value.getInstancePropertyCategory().equals(InstancePropertyCategory.PRIMITIVE)) {
             String domain = value.valueAsString();
-            String searchableDomain = repositoryHelper.getUnqualifiedLiteralString(domain);
-            if (repositoryHelper.isExactMatchRegex(domain)) {
-                IGCSearchCondition exact = new IGCSearchCondition("parent_policy.name", "=", searchableDomain);
-                igcSearchConditionSet.addCondition(exact);
-            } else if (repositoryHelper.isEndsWithRegex(domain)) {
-                IGCSearchCondition endsWith = new IGCSearchCondition("parent_policy.name", "like %{0}", searchableDomain);
-                igcSearchConditionSet.addCondition(endsWith);
-            } else if (repositoryHelper.isStartsWithRegex(domain)) {
-                IGCSearchCondition startsWith = new IGCSearchCondition("parent_policy.name", "like {0}%", searchableDomain);
-                igcSearchConditionSet.addCondition(startsWith);
-            } else if (repositoryHelper.isContainsRegex(domain)) {
-                IGCSearchCondition contains = new IGCSearchCondition("parent_policy.name", "like %{0}%", searchableDomain);
-                igcSearchConditionSet.addCondition(contains);
-            } else {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        repositoryName,
-                        domain);
-                throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                        this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
-            }
+            IGCSearchCondition condition = IGCRepositoryHelper.getRegexSearchCondition(
+                    repositoryHelper,
+                    repositoryName,
+                    methodName,
+                    "parent_policy.name",
+                    domain
+            );
+            igcSearchConditionSet.addCondition(condition);
         }
 
     }
