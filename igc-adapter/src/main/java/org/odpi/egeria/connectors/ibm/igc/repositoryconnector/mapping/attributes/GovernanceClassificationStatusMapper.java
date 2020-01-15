@@ -18,13 +18,13 @@ public class GovernanceClassificationStatusMapper extends EnumMapping {
         super(
                 "GovernanceClassificationStatus"
         );
-        addDefaultEnumMapping(99, "Other");
-        addEnumMapping("Discovered", 0, "Discovered");
-        addEnumMapping("Proposed", 1, "Proposed");
-        addEnumMapping("Imported", 2, "Imported");
-        addEnumMapping("Validated", 3, "Validated");
-        addEnumMapping("Deprecated", 4, "Deprecated");
-        addEnumMapping("Obsolete", 5, "Obsolete");
+        addDefaultEnumMapping(99, "Other", "Another classification assignment status.");
+        addEnumMapping("Discovered", 0, "Discovered", "The classification assignment was discovered by an automated process.");
+        addEnumMapping("Proposed", 1, "Proposed", "The classification assignment was proposed by a subject matter expert.");
+        addEnumMapping("Imported", 2, "Imported", "The classification assignment was imported from another metadata system.");
+        addEnumMapping("Validated", 3, "Validated", "The classification assignment has been validated and approved by a subject matter expert.");
+        addEnumMapping("Deprecated", 4, "Deprecated", "The classification assignment should no longer be used.");
+        addEnumMapping("Obsolete", 5, "Obsolete", "The classification assignment must no longer be used.");
     }
 
 }

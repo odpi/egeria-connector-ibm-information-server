@@ -20,9 +20,9 @@ public class DataClassAssignmentStatusMapper extends EnumMapping {
         super(
                 "DataClassAssignmentStatus"
         );
-        addDefaultEnumMapping(99, "Other");
-        addEnumMapping("discovered", 0, "Discovered");
-        addEnumMapping("selected", 1, "Proposed");
+        addDefaultEnumMapping(99, "Other", "Another data class assignment status.");
+        addEnumMapping("discovered", 0, "Discovered", "The data class assignment was discovered by an automated process.");
+        addEnumMapping("selected", 1, "Proposed", "The data class assignment was proposed by a subject matter expert.");
     }
 
 }

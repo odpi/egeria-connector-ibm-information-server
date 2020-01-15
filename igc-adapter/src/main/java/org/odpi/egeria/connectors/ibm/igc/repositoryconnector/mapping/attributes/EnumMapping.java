@@ -24,23 +24,18 @@ public class EnumMapping extends AttributeMapping {
         enumDefByIgcValue = new HashMap<>();
     }
 
-    public EnumMapping(String omrsAttributeTypeDefName,
-                       String igcAssetType,
-                       String igcPropertyName) {
-        super(igcAssetType, igcPropertyName, IGCPropertyType.STRING, omrsAttributeTypeDefName);
-        enumDefByIgcValue = new HashMap<>();
-    }
-
-    public void addDefaultEnumMapping(int omrsOrdinal, String omrsSymbolicName) {
+    public void addDefaultEnumMapping(int omrsOrdinal, String omrsSymbolicName, String description) {
         defaultEnum = new EnumElementDef();
         defaultEnum.setOrdinal(omrsOrdinal);
         defaultEnum.setValue(omrsSymbolicName);
+        defaultEnum.setDescription(description);
     }
 
-    public void addEnumMapping(String igcValue, int omrsOrdinal, String omrsSymbolicName) {
+    public void addEnumMapping(String igcValue, int omrsOrdinal, String omrsSymbolicName, String description) {
         EnumElementDef enumElementDef = new EnumElementDef();
         enumElementDef.setOrdinal(omrsOrdinal);
         enumElementDef.setValue(omrsSymbolicName);
+        enumElementDef.setDescription(description);
         enumDefByIgcValue.put(igcValue, enumElementDef);
     }
 
@@ -50,6 +45,7 @@ public class EnumMapping extends AttributeMapping {
             EnumElementDef element = enumDefByIgcValue.get(igcValue);
             value.setOrdinal(element.getOrdinal());
             value.setSymbolicName(element.getValue());
+            value.setDescription(element.getDescription());
         } else {
             value = getDefaultEnumValue();
         }
@@ -61,24 +57,11 @@ public class EnumMapping extends AttributeMapping {
         if (defaultEnum != null) {
             value.setOrdinal(defaultEnum.getOrdinal());
             value.setSymbolicName(defaultEnum.getValue());
+            value.setDescription(defaultEnum.getDescription());
         } else {
             if (log.isErrorEnabled()) { log.error("Could not find default enum value for {}.", getOmrsAttributeTypeDefName()); }
         }
         return value;
-    }
-
-    public String getIgcValueForOrdinal(int omrsOrdinal) {
-
-        String igcValue = null;
-        for (String candidateValue : enumDefByIgcValue.keySet()) {
-            EnumElementDef element = enumDefByIgcValue.get(candidateValue);
-            if (element.getOrdinal() == omrsOrdinal) {
-                igcValue = candidateValue;
-                break;
-            }
-        }
-        return igcValue;
-
     }
 
 }
