@@ -11,7 +11,10 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,11 +117,18 @@ public class SubjectAreaMapper extends ClassificationMapping {
     /**
      * Search for SubjectArea by looking at ancestral categories of the term being under a "Subject Area" category.
      *
+     * @param repositoryHelper the repository helper
+     * @param repositoryName name of the repository
      * @param matchClassificationProperties the criteria to use when searching for the classification
      * @return IGCSearchConditionSet - the IGC search criteria to find entities based on this classification
+     * @throws FunctionNotSupportedException when a regular expression is used for the search which is not supported
      */
     @Override
-    public IGCSearchConditionSet getIGCSearchCriteria(InstanceProperties matchClassificationProperties) {
+    public IGCSearchConditionSet getIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                                      String repositoryName,
+                                                      InstanceProperties matchClassificationProperties) throws FunctionNotSupportedException {
+
+        final String methodName = "getIGCSearchCriteria";
 
         IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
@@ -135,16 +145,20 @@ public class SubjectAreaMapper extends ClassificationMapping {
             Map<String, InstancePropertyValue> properties = matchClassificationProperties.getInstanceProperties();
             if (properties.containsKey("name")) {
                 PrimitivePropertyValue name = (PrimitivePropertyValue) properties.get("name");
-                String subjectAreaName = (String) name.getPrimitiveValue();
-                IGCSearchCondition propertyCondition = new IGCSearchCondition(
+                String subjectAreaName = name.valueAsString();
+                IGCSearchCondition propertyCondition = IGCRepositoryHelper.getRegexSearchCondition(
+                        repositoryHelper,
+                        repositoryName,
+                        methodName,
                         "parent_category.name",
-                        "=",
                         subjectAreaName
                 );
                 byName.addCondition(propertyCondition);
-                IGCSearchCondition propertyCondition2 = new IGCSearchCondition(
+                IGCSearchCondition propertyCondition2 = IGCRepositoryHelper.getRegexSearchCondition(
+                        repositoryHelper,
+                        repositoryName,
+                        methodName,
                         "parent_category.parent_category.name",
-                        "=",
                         subjectAreaName
                 );
                 byName.addCondition(propertyCondition2);

@@ -1167,7 +1167,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
                     // Compose the search criteria for the classification as a set of nested conditions, so that
                     // matchCriteria does not change the meaning of what we're searching
-                    IGCSearchConditionSet baseCriteria = foundMapping.getIGCSearchCriteria(matchClassificationProperties);
+                    IGCSearchConditionSet baseCriteria = foundMapping.getIGCSearchCriteria(repositoryHelper, repositoryName, matchClassificationProperties);
                     igcSearchConditionSet.addNestedConditionSet(baseCriteria);
 
                     IGCSearchSorting igcSearchSorting = null;
