@@ -75,7 +75,7 @@ public class DataFileMapper extends DataStore_Mapper {
         String fileName = igcEntity.getName();
         String extension = "";
         if (fileName.contains(".")) {
-            extension = fileName.substring(fileName.lastIndexOf("."));
+            extension = fileName.substring(fileName.lastIndexOf(".") + 1).toUpperCase();
         }
 
         instanceProperties = repositoryHelper.addStringPropertyToInstance(
