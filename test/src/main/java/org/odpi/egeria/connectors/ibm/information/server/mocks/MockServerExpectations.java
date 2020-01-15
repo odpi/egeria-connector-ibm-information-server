@@ -199,6 +199,11 @@ public class MockServerExpectations implements ExpectationInitializer {
         setFindDataClassAssignmentByProperty(mockServerClient);
         setFindSchemaElementByAnchorGUID(mockServerClient);
         setFindGovernanceDefinitionByDomain(mockServerClient);
+        setFindColumnsByPrimaryKeyName(mockServerClient);
+        setFindFileByType(mockServerClient);
+        setFindCategoryBySubjectAreaName(mockServerClient);
+        setFindContactDetailsByProperty(mockServerClient);
+        setFindSchemaTypeByNamespace(mockServerClient);
 
         // Event tests
         setChangeSetTest(mockServerClient);
@@ -790,6 +795,69 @@ public class MockServerExpectations implements ExpectationInitializer {
         setSearchAndResponse(mockServerClient, "FindGovernanceDefinitionByDomain", "results.json",
                 json(
                         "{\"types\":[\"information_governance_policy\"],\"where\":{\"conditions\":[{\"property\":\"parent_policy.name\",\"operator\":\"like %{0}%\",\"value\":\"Data Access\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+    }
+
+    private void setFindColumnsByPrimaryKeyName(MockServerClient mockServerClient) {
+        setSearchAndResponse(mockServerClient, "FindColumnsByPrimaryKeyName", "results.json",
+                json(
+                        "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"selected_primary_key\",\"operator\":\"=\",\"value\":\"true\"},{\"property\":\"defined_primary_key.name\",\"operator\":\"like {0}%\",\"value\":\"SQL\"}],\"operator\":\"or\"}],\"operator\":\"or\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+    }
+
+    private void setFindFileByType(MockServerClient mockServerClient) {
+        String caseName = "FindFileByType";
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
+                json(
+                        "{\"types\":[\"data_file\"],\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}\",\"value\":\"CSV\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
+                json(
+                        "{\"types\":[\"data_file\"],\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"CS\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
+                json(
+                        "{\"types\":[\"data_file\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}\",\"value\":\"CSV\"},{\"property\":\"short_description\",\"operator\":\"like %{0}\",\"value\":\"CSV\"},{\"property\":\"name\",\"operator\":\"like %{0}\",\"value\":\"CSV\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+    }
+
+    private void setFindCategoryBySubjectAreaName(MockServerClient mockServerClient) {
+        setSearchAndResponse(mockServerClient, "FindCategoryBySubjectAreaName", "results.json",
+                json(
+                        "{\"types\":[\"category\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"parent_category\",\"operator\":\"isNull\",\"negated\":true},{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"conditions\":[{\"property\":\"assigned_to_terms.name\",\"operator\":\"=\",\"value\":\"SubjectArea\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like {0}%\",\"value\":\"Org\"}],\"operator\":\"and\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+    }
+
+    private void setFindContactDetailsByProperty(MockServerClient mockServerClient) {
+        String caseName = "FindContactDetailsByProperty";
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
+                json(
+                        "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"property\":\"email_address\",\"operator\":\"like %{0}\",\"value\":\"w@cocopharmaceutical.com\"},{\"property\":\"email_address\",\"operator\":\"isNull\",\"negated\":true}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
+                json(
+                        "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"email_address\",\"operator\":\"like %{0}\",\"value\":\"w@cocopharmaceutical.com\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+    }
+
+    private void setFindSchemaTypeByNamespace(MockServerClient mockServerClient) {
+        String caseName = "FindSchemaTypeByNamespace";
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
+                json(
+                        "{\"types\":[\"database_schema\"],\"where\":{\"conditions\":[{\"property\":\"database.name\",\"operator\":\"like {0}%\",\"value\":\"EMPL\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
+                json(
+                        "{\"types\":[\"database_schema\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like {0}%\",\"value\":\"EMPL\"},{\"property\":\"short_description\",\"operator\":\"like {0}%\",\"value\":\"EMPL\"},{\"property\":\"long_description\",\"operator\":\"like {0}%\",\"value\":\"EMPL\"},{\"property\":\"modified_by\",\"operator\":\"like {0}%\",\"value\":\"EMPL\"},{\"property\":\"database.name\",\"operator\":\"like {0}%\",\"value\":\"EMPL\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }

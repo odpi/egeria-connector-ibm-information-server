@@ -713,14 +713,16 @@ public class ConnectorTest {
     @Test
     public void testGlossaryTermFindByClassification() {
 
-        Map<String, Integer> properties = new HashMap<>();
-        properties.put("level", 3);
+        final String methodName = "testGlossaryTermFindByClassification";
+
+        InstanceProperties ip = new InstanceProperties();
+        ip = repositoryHelper.addIntPropertyToInstance(sourceName, ip, "level", 3, methodName);
 
         testFindEntitiesByClassification(
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
                 "Confidentiality",
-                properties,
+                ip,
                 MatchCriteria.ALL,
                 12);
 
@@ -1713,7 +1715,6 @@ public class ConnectorTest {
     @Test
     public void testFindGovernanceDefinitionByDomain() {
 
-        //  - entity search for governance definition based on domain property (29)
         final String methodName = "testFindGovernanceDefinitionByDomain";
 
         InstanceProperties ip = new InstanceProperties();
@@ -1724,6 +1725,136 @@ public class ConnectorTest {
                 "GovernancePolicy",
                 ip,
                 MatchCriteria.ALL,
+                2
+        );
+
+    }
+
+    @Test
+    public void testFindColumnsByPrimaryKeyName() {
+
+        final String methodName = "testFindColumnsByPrimaryKeyName";
+
+        InstanceProperties ip = new InstanceProperties();
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "name", repositoryHelper.getStartsWithRegex("SQL"), methodName);
+
+        testFindEntitiesByClassification(
+                "aa8d5470-6dbc-4648-9e2f-045e5df9d2f9",
+                "RelationalColumn",
+                "PrimaryKey",
+                ip,
+                MatchCriteria.ANY,
+                4);
+
+    }
+
+    @Test
+    public void testFindFileByType() {
+
+        final String methodName = "testFindFileByType";
+
+        String typeName = "DataFile";
+        String typeGUID = "10752b4a-4b5d-4519-9eae-fdd6d162122f";
+
+        InstanceProperties ip = new InstanceProperties();
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "fileType", repositoryHelper.getExactMatchRegex("CSV"), methodName);
+
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ip,
+                MatchCriteria.ALL,
+                8
+        );
+
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "fileType", repositoryHelper.getStartsWithRegex("CS"), methodName);
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ip,
+                MatchCriteria.ALL,
+                8
+        );
+
+        testFindEntitiesByPropertyValue(
+                typeGUID,
+                typeName,
+                repositoryHelper.getEndsWithRegex("CSV"),
+                8
+        );
+
+    }
+
+    @Test
+    public void testFindCategoryBySubjectAreaName() {
+
+        final String methodName = "testFindCategoryBySubjectAreaName";
+
+        InstanceProperties ip = new InstanceProperties();
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "name", repositoryHelper.getStartsWithRegex("Org"), methodName);
+
+        testFindEntitiesByClassification(
+                "e507485b-9b5a-44c9-8a28-6967f7ff3672",
+                "GlossaryCategory",
+                "SubjectArea",
+                ip,
+                MatchCriteria.ALL,
+                1);
+
+    }
+
+    @Test
+    public void testFindContactDetailsByProperty() {
+
+        final String methodName = "testFindContactDetailsByProperty";
+
+        String typeName = "ContactDetails";
+        String typeGUID = "79296df8-645a-4ef7-a011-912d1cdcf75a";
+
+        InstanceProperties ip = new InstanceProperties();
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "contactMethodValue", repositoryHelper.getEndsWithRegex("w@cocopharmaceutical.com"), methodName);
+        ip = repositoryHelper.addEnumPropertyToInstance(sourceName, ip, "contactMethodType", 0, "Email", "Contact through email.", methodName);
+
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ip,
+                MatchCriteria.ALL,
+                1
+        );
+
+        testFindEntitiesByPropertyValue(
+                typeGUID,
+                typeName,
+                repositoryHelper.getEndsWithRegex("w@cocopharmaceutical.com"),
+                1
+        );
+
+    }
+
+    @Test
+    public void testFindSchemaTypeByNamespace() {
+
+        final String methodName = "testFindSchemaTypeByNamespace";
+
+        String typeName = "RelationalDBSchemaType";
+        String typeGUID = "f20f5f45-1afb-41c1-9a09-34d8812626a4";
+
+        InstanceProperties ip = new InstanceProperties();
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "namespace", repositoryHelper.getStartsWithRegex("EMPL"), methodName);
+
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ip,
+                MatchCriteria.ALL,
+                2
+        );
+
+        testFindEntitiesByPropertyValue(
+                typeGUID,
+                typeName,
+                repositoryHelper.getStartsWithRegex("EMPL"),
                 2
         );
 
@@ -1830,11 +1961,6 @@ public class ConnectorTest {
     // TODO: additional tests for coverage (in approximate order of priority)
     //  - self-referencing entity update event (eg. database schema) (40ish?)
     //  - IMAM share event (30ish?)
-    //  - entity search limited by PrimaryKey classification (28)
-    //  - entity search for file based on fileType property (27)
-    //  - entity search limited by SubjectArea classification (24)
-    //  - entity search for contact details based on contactMethodValue, contactMethodType properties (16)
-    //  - entity search for schema type based on namespace property (10)
 
     @AfterSuite
     public void stopConnector() {
@@ -2091,7 +2217,7 @@ public class ConnectorTest {
      * @param typeGUID the entity type GUID to search
      * @param typeName the name of the type to search
      * @param classificationName the name of the classification by which to limit the results
-     * @param properties the properties of the classification to match against
+     * @param matchClassificationProperties the properties of the classification to match against
      * @param matchCriteria the criteria by which to match
      * @param totalNumberExpected the total number of expected results
      * @return {@code List<EntityDetail>} the results of the query
@@ -2099,28 +2225,11 @@ public class ConnectorTest {
     private List<EntityDetail> testFindEntitiesByClassification(String typeGUID,
                                                                 String typeName,
                                                                 String classificationName,
-                                                                Map<String, Integer> properties,
+                                                                InstanceProperties matchClassificationProperties,
                                                                 MatchCriteria matchCriteria,
                                                                 int totalNumberExpected) {
 
-        final String methodName = "testFindEntitiesByClassification";
         List<EntityDetail> results = null;
-
-        OMRSRepositoryHelper helper = igcomrsRepositoryConnector.getRepositoryHelper();
-        String repoName = igcomrsRepositoryConnector.getRepositoryName();
-
-        InstanceProperties matchClassificationProperties = new InstanceProperties();
-        for (Map.Entry<String, Integer> entry : properties.entrySet()) {
-            String propertyName = entry.getKey();
-            int value = entry.getValue();
-            matchClassificationProperties = helper.addIntPropertyToInstance(
-                    repoName,
-                    matchClassificationProperties,
-                    propertyName,
-                    value,
-                    methodName
-            );
-        }
 
         try {
             results = igcomrsMetadataCollection.findEntitiesByClassification(
