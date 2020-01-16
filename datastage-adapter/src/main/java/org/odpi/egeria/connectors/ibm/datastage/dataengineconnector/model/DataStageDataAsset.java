@@ -33,7 +33,7 @@ public class DataStageDataAsset {
 
         String storeRid = store.getId();
         String storeType = store.getType();
-        if (log.isDebugEnabled()) { log.debug("Retrieving data field details for {}: {}", storeType, storeRid); }
+        log.debug("Retrieving data field details for {}: {}", storeType, storeRid);
 
         IGCSearch igcSearch = new IGCSearch();
         IGCSearchCondition byParentId = null;
@@ -46,7 +46,7 @@ public class DataStageDataAsset {
             igcSearch.addProperties(DataStageConstants.getDataFieldSearchProperties());
             byParentId = new IGCSearchCondition("data_file_record", "=", storeRid);
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unknown source / target type -- skipping: {}", store); }
+            log.warn("Unknown source / target type -- skipping: {}", store);
         }
 
         List<Classificationenabledgroup> fields = null;

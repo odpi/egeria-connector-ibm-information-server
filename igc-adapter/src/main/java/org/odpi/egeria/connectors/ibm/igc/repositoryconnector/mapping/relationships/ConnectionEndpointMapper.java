@@ -73,7 +73,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                     new String[]{ "host", "data_connections" });
             asList.add((Reference) igcRestClient.getPropertyByName(withHost, "host"));
         } else {
-            if (log.isDebugEnabled()) { log.debug("Not a connector asset, just returning as-is: {} of type {}", connectorAsset.getName(), connectorAsset.getType()); }
+            log.debug("Not a connector asset, just returning as-is: {} of type {}", connectorAsset.getName(), connectorAsset.getType());
             asList.add(connectorAsset);
         }
         return asList;
@@ -98,12 +98,12 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
             return new ArrayList<>(dataConnections.getItems());
         } else {
             if (connectorAsset != null) {
-                if (log.isDebugEnabled()) { log.debug("Not a connector asset, just returning as-is: {} of type {}", connectorAsset.getName(), connectorAsset.getType()); }
+                log.debug("Not a connector asset, just returning as-is: {} of type {}", connectorAsset.getName(), connectorAsset.getType());
                 List<Reference> referenceAsList = new ArrayList<>();
                 referenceAsList.add(connectorAsset);
                 return referenceAsList;
             } else {
-                if (log.isWarnEnabled()) { log.warn("Received a null object, returning an empty list."); }
+                log.warn("Received a null object, returning an empty list.");
                 return Collections.emptyList();
             }
         }
@@ -154,7 +154,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                 );
             }
         } else {
-            if (log.isWarnEnabled()) { log.warn("Found unexpected asset type during relationship mapping: {}", fromIgcObject); }
+            log.warn("Found unexpected asset type during relationship mapping: {}", fromIgcObject);
         }
 
     }
@@ -190,7 +190,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
             if (dataConnection != null && !dataConnection.getType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
                 try {
 
-                    if (log.isDebugEnabled()) { log.debug("Retrieved connection: {} of type {}", dataConnection.getName(), dataConnection.getType()); }
+                    log.debug("Retrieved connection: {} of type {}", dataConnection.getName(), dataConnection.getType());
 
                     Relationship relationship = getMappedRelationship(
                             igcomrsRepositoryConnector,
@@ -248,11 +248,11 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
             if (dataConnector != null && !dataConnector.getType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
                 try {
 
-                    if (log.isDebugEnabled()) { log.debug("Retrieved connector: {} of type {}", dataConnector.getName(), dataConnector.getType()); }
+                    log.debug("Retrieved connector: {} of type {}", dataConnector.getName(), dataConnector.getType());
 
                     //Reference host = (Reference) connectorGetPropertyByName.invoke(dataConnector, "host");
                     Reference host = (Reference) igcRestClient.getPropertyByName(dataConnector, "host");
-                    if (log.isDebugEnabled()) { log.debug("Retrieved host: {} of type {}", host.getName(), host.getType()); }
+                    log.debug("Retrieved host: {} of type {}", host.getName(), host.getType());
 
                     Relationship relationship = getMappedRelationship(
                             igcomrsRepositoryConnector,

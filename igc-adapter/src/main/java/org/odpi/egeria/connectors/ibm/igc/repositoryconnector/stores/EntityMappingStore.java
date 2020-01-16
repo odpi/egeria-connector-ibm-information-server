@@ -124,7 +124,7 @@ public class EntityMappingStore {
         if (omrsGuidToMapping.containsKey(guid)) {
             return omrsGuidToMapping.get(guid);
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unable to find mapping for OMRS type: {}", guid); }
+            log.warn("Unable to find mapping for OMRS type: {}", guid);
             return null;
         }
     }
@@ -147,7 +147,7 @@ public class EntityMappingStore {
             }
             return mappings;
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unable to find mapping for IGC type: {}", simpleType); }
+            log.warn("Unable to find mapping for IGC type: {}", simpleType);
             return null;
         }
     }
@@ -163,7 +163,7 @@ public class EntityMappingStore {
             String guid = igcAssetDisplayNameToOmrsGuid.get(assetDisplayName);
             return getMappingByOmrsTypeGUID(guid);
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unable to find mapping for IGC asset display name: {}", assetDisplayName); }
+            log.warn("Unable to find mapping for IGC asset display name: {}", assetDisplayName);
             return null;
         }
     }
@@ -182,7 +182,7 @@ public class EntityMappingStore {
             String guid = igcAssetTypeAndPrefixToOmrsGuid.get(key);
             return getMappingByOmrsTypeGUID(guid);
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unable to find mapping for IGC asset type: {}", key); }
+            log.warn("Unable to find mapping for IGC asset type: {}", key);
             return null;
         }
     }
@@ -204,7 +204,7 @@ public class EntityMappingStore {
             }
             return mappings;
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unable to find mapping for IGC prefix: {}", prefix); }
+            log.warn("Unable to find mapping for IGC prefix: {}", prefix);
             return Collections.emptySet();
         }
     }
@@ -220,7 +220,7 @@ public class EntityMappingStore {
             String guid = omrsNameToGuid.get(name);
             return getMappingByOmrsTypeGUID(guid);
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unable to find mapping for OMRS type: {}", name); }
+            log.warn("Unable to find mapping for OMRS type: {}", name);
             return null;
         }
     }
@@ -245,7 +245,7 @@ public class EntityMappingStore {
             Class<?> mappingClass = Class.forName(IGCRepositoryHelper.MAPPING_PKG + "entities.ReferenceableMapper");
             referenceable = getEntityMapper(mappingClass);
         } catch (ClassNotFoundException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to find default ReferenceableMapper class: {}", IGCRepositoryHelper.MAPPING_PKG + "entities.ReferenceableMapper", e); }
+            log.error("Unable to find default ReferenceableMapper class: {}", IGCRepositoryHelper.MAPPING_PKG + "entities.ReferenceableMapper", e);
         }
         return referenceable;
     }
@@ -261,7 +261,7 @@ public class EntityMappingStore {
         try {
             entityMapper = (EntityMapping) mappingClass.getMethod("getInstance", IGCVersionEnum.class).invoke(null, igcomrsRepositoryConnector.getIGCVersion());
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to find or instantiate EntityMapping class: {}", mappingClass, e); }
+            log.error("Unable to find or instantiate EntityMapping class: {}", mappingClass, e);
         }
         return entityMapper;
     }

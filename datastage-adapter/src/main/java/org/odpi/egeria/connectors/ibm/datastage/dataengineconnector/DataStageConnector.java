@@ -74,7 +74,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
         super.start();
         final String methodName = "start";
 
-        if (log.isInfoEnabled()) { log.info("Initializing DataStageDataEngineConnector..."); }
+        log.info("Initializing DataStageDataEngineConnector...");
 
         EndpointProperties endpointProperties = connectionProperties.getEndpoint();
         if (endpointProperties == null) {
@@ -212,7 +212,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     @Override
     public List<DataEngineSchemaType> getChangedSchemaTypes(Date from, Date to) {
 
-        if (log.isDebugEnabled()) { log.debug("Looking for changed SchemaTypes..."); }
+        log.debug("Looking for changed SchemaTypes...");
         Map<String, DataEngineSchemaType> schemaTypeMap = new HashMap<>();
 
         initializeCache(from, to);
@@ -220,13 +220,13 @@ public class DataStageConnector extends DataEngineConnectorBase {
         // Iterate through each job looking for any virtual assets -- these must be created first
         for (DataStageJob job : dataStageCache.getAllJobs()) {
             for (String storeRid : job.getStoreRids()) {
-                if (log.isDebugEnabled()) { log.debug(" ... considering store: {}", storeRid); }
+                log.debug(" ... considering store: {}", storeRid);
                 if (DataStageDataAsset.isVirtualAsset(storeRid) && !schemaTypeMap.containsKey(storeRid)) {
-                    if (log.isDebugEnabled()) { log.debug(" ... VIRTUAL! Creating a SchemaType ..."); }
+                    log.debug(" ... VIRTUAL! Creating a SchemaType ...");
                     SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(job, job.getStoreIdentityFromRid(storeRid), job.getFieldsForStore(storeRid));
                     DataEngineSchemaType deSchemaType = new DataEngineSchemaType(schemaTypeMapping.getSchemaType(), defaultUserId);
                     try {
-                        if (log.isDebugEnabled()) { log.debug(" ... created: {}", objectMapper.writeValueAsString(deSchemaType.getSchemaType())); }
+                        log.debug(" ... created: {}", objectMapper.writeValueAsString(deSchemaType.getSchemaType()));
                     } catch (JsonProcessingException e) {
                         log.error("Unable to serialise to JSON: {}", deSchemaType.getSchemaType(), e);
                     }
@@ -340,13 +340,13 @@ public class DataStageConnector extends DataEngineConnectorBase {
      */
     private List<DataEngineProcess> getProcessesForEachStage(DataStageJob job) {
         List<DataEngineProcess> processes = new ArrayList<>();
-        if (log.isDebugEnabled()) { log.debug("Translating processes for each stage..."); }
+        log.debug("Translating processes for each stage...");
         for (Stage stage : job.getAllStages()) {
             ProcessMapping processMapping = new ProcessMapping(job, stage);
             DataEngineProcess process = processMapping.getProcess();
             if (process != null) {
                 try {
-                    if (log.isDebugEnabled()) { log.debug(" ... process: {}", objectMapper.writeValueAsString(process)); }
+                    log.debug(" ... process: {}", objectMapper.writeValueAsString(process));
                 } catch (JsonProcessingException e) {
                     log.error("Unable to serialise to JSON: {}", process, e);
                 }
@@ -365,7 +365,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private DataEngineProcess getProcessForJob(DataStageJob job) {
         DataEngineProcess process = null;
         if (!job.getType().equals(DataStageJob.JobType.SEQUENCE)) {
-            if (log.isDebugEnabled()) { log.debug("Load process for job..."); }
+            log.debug("Load process for job...");
             ProcessMapping processMapping = new ProcessMapping(job);
             process = processMapping.getProcess();
             if (process != null) {
@@ -389,7 +389,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private DataEngineProcess getProcessForSequence(DataStageJob job, Map<String, DataEngineProcess> jobProcessByRid) {
         DataEngineProcess process = null;
         if (job.getType().equals(DataStageJob.JobType.SEQUENCE)) {
-            if (log.isDebugEnabled()) { log.debug("Load process for sequence..."); }
+            log.debug("Load process for sequence...");
             ProcessMapping processMapping = new ProcessMapping(job, jobProcessByRid);
             process = processMapping.getProcess();
             if (process != null) {

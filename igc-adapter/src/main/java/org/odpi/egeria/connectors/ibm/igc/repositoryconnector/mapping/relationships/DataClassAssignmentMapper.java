@@ -89,7 +89,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             }
             asList.add(classifiedObj);
         } else {
-            if (log.isDebugEnabled()) { log.debug("Not a classification asset, just returning as-is: {} of type {}", relationshipAsset.getName(), relationshipAsset.getType()); }
+            log.debug("Not a classification asset, just returning as-is: {} of type {}", relationshipAsset.getName(), relationshipAsset.getType());
             asList.add(relationshipAsset);
         }
         return asList;
@@ -117,7 +117,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             }
             asList.add(dataClass);
         } else {
-            if (log.isDebugEnabled()) { log.debug("Not a classification asset, just returning as-is: {} of type {}", relationshipAsset.getName(), relationshipAsset.getType()); }
+            log.debug("Not a classification asset, just returning as-is: {} of type {}", relationshipAsset.getName(), relationshipAsset.getType());
             asList.add(relationshipAsset);
         }
         return asList;
@@ -354,7 +354,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                             methodName,
                             igcomrsRepositoryConnector.getIGCVersion());
 
-                    if (log.isDebugEnabled()) { log.debug("mapDetectedClassifications_fromDataClass - adding relationship: {}", relationship.getGUID()); }
+                    log.debug("mapDetectedClassifications_fromDataClass - adding relationship: {}", relationship.getGUID());
                     relationships.add(relationship);
 
                 } catch (RepositoryErrorException e) {
@@ -411,7 +411,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
 
                 setSelectedRelationshipProperties(relationship, igcomrsRepositoryConnector.getIGCVersion());
 
-                if (log.isDebugEnabled()) { log.debug("mapSelectedClassifications_fromDataClass - adding relationship: {}", relationship.getGUID()); }
+                log.debug("mapSelectedClassifications_fromDataClass - adding relationship: {}", relationship.getGUID());
                 relationships.add(relationship);
 
             } catch (RepositoryErrorException e) {
@@ -496,7 +496,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                             methodName,
                             igcomrsRepositoryConnector.getIGCVersion());
 
-                    if (log.isDebugEnabled()) { log.debug("mapDetectedClassifications_toDataClass - adding relationship: {}", relationship.getGUID()); }
+                    log.debug("mapDetectedClassifications_toDataClass - adding relationship: {}", relationship.getGUID());
                     relationships.add(relationship);
 
                 } catch (RepositoryErrorException e) {
@@ -548,16 +548,14 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
 
                 setSelectedRelationshipProperties(relationship, igcomrsRepositoryConnector.getIGCVersion());
 
-                if (log.isDebugEnabled()) { log.debug("mapSelectedClassifications_toDataClass - adding relationship: {}", relationship.getGUID()); }
+                log.debug("mapSelectedClassifications_toDataClass - adding relationship: {}", relationship.getGUID());
                 relationships.add(relationship);
 
             } catch (RepositoryErrorException e) {
                 log.error("Unable to map relationship.", e);
             }
         } else {
-            if (log.isDebugEnabled()) {
-                log.debug("No selected_classification set for asset -- skipping.");
-            }
+            log.debug("No selected_classification set for asset -- skipping.");
         }
 
     }

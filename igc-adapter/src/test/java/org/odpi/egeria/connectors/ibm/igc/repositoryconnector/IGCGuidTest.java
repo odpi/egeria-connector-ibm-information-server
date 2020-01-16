@@ -47,8 +47,8 @@ public class IGCGuidTest {
 
         // Test reversal of the GUID
         String guid = igcGuid.toString();
-        assertEquals(guid, igcGuid.asGuid());
-        String guidWithPrefix = igcGuidWithPrefix.asGuid();
+        assertEquals(guid, igcGuid.toString());
+        String guidWithPrefix = igcGuidWithPrefix.toString();
         assertEquals(guidWithPrefix, igcGuidWithPrefix.toString());
         IGCEntityGuid guidReversed = IGCEntityGuid.fromGuid(guid);
         assertEquals(guid, guidReversed.toString());
@@ -87,8 +87,8 @@ public class IGCGuidTest {
 
         // Test reversal of the GUID
         String guid = igcGuid.toString();
-        assertEquals(guid, igcGuid.asGuid());
-        String guidWithPrefix = igcGuidWithPrefix.asGuid();
+        assertEquals(guid, igcGuid.toString());
+        String guidWithPrefix = igcGuidWithPrefix.toString();
         assertEquals(guidWithPrefix, igcGuidWithPrefix.toString());
         IGCRelationshipGuid guidReversed = IGCRelationshipGuid.fromGuid(guid);
         assertEquals(guid, guidReversed.toString());

@@ -243,19 +243,19 @@ public abstract class AttributeMapping {
                                         methodName
                                 );
                             } else {
-                                if (log.isWarnEnabled()) { log.warn("Unable to parse date automatically -- must be first converted before passing in: {}", propertyValue); }
+                                log.warn("Unable to parse date automatically -- must be first converted before passing in: {}", propertyValue);
                             }
                             break;
                         default:
-                            if (log.isErrorEnabled()) { log.error("Unhandled primitive type {} for {}", primitiveDef.getPrimitiveDefCategory(), propertyName); }
+                            log.error("Unhandled primitive type {} for {}", primitiveDef.getPrimitiveDefCategory(), propertyName);
                     }
                 } catch (ClassCastException e) {
-                    if (log.isErrorEnabled()) { log.error("Unable to cast {} to {} for {}", propertyValue, property.getAttributeType(), propertyName); }
+                    log.error("Unable to cast {} to {} for {}", propertyValue, property.getAttributeType(), propertyName, e);
                 } catch (NumberFormatException e) {
-                    if (log.isWarnEnabled()) { log.warn("Unable to convert {} to {} for {}", propertyValue, property.getAttributeType(), propertyName); }
+                    log.warn("Unable to convert {} to {} for {}", propertyValue, property.getAttributeType(), propertyName, e);
                 }
             } else {
-                if (log.isErrorEnabled()) { log.error("Cannot translate non-primitive property {} this way.", propertyName); }
+                log.error("Cannot translate non-primitive property {} this way.", propertyName);
             }
         }
 

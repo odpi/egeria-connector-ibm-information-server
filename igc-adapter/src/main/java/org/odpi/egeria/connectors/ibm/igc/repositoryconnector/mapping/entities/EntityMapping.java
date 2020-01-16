@@ -709,7 +709,7 @@ public abstract class EntityMapping extends InstanceMapping {
                         methodName
                 );
             } else {
-                if (log.isWarnEnabled()) { log.warn("No OMRS attribute {} defined for asset type {} -- skipping mapping.", omrsAttribute, omrsTypeDefName); }
+                log.warn("No OMRS attribute {} defined for asset type {} -- skipping mapping.", omrsAttribute, omrsTypeDefName);
             }
         }
 
@@ -777,7 +777,7 @@ public abstract class EntityMapping extends InstanceMapping {
         if (igcEntity == null) {
             IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
             String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    igcGuid.asGuid(),
+                    igcGuid.toString(),
                     "null",
                     entityMap.getRepositoryConnector().getRepositoryName());
             throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),

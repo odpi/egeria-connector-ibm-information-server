@@ -281,7 +281,7 @@ public class EntityMappingInstance {
                         igcEntityType,
                         mapping.getIgcRidPrefix(),
                         igcEntityRid);
-                omrsSummary.setGUID(igcEntityGuid.asGuid());
+                omrsSummary.setGUID(igcEntityGuid.toString());
                 if (!alreadyRetrieved && (igcEntity == null || !igcEntity.isFullyRetrieved())) {
                     igcEntity = igcomrsRepositoryConnector.getIGCRestClient().getAssetWithSubsetOfProperties(
                             igcEntityRid,
@@ -314,7 +314,7 @@ public class EntityMappingInstance {
                         igcEntityType,
                         mapping.getIgcRidPrefix(),
                         igcEntityRid);
-                omrsDetail.setGUID(igcEntityGuid.asGuid());
+                omrsDetail.setGUID(igcEntityGuid.toString());
                 if (!alreadyRetrieved && (igcEntity == null || !igcEntity.isFullyRetrieved())) {
                     igcEntity = igcomrsRepositoryConnector.getIGCRestClient().getAssetWithSubsetOfProperties(
                             igcEntityRid,
@@ -342,7 +342,7 @@ public class EntityMappingInstance {
             ArrayList<String> allProperties = new ArrayList<>();
             List<RelationshipMapping> relationshipMappers = mapping.getRelationshipMappers();
             for (RelationshipMapping relationshipMapping : relationshipMappers) {
-                if (log.isDebugEnabled()) { log.debug("Adding properties from mapping: {}", relationshipMapping.getClass().getCanonicalName()); }
+                log.debug("Adding properties from mapping: {}", relationshipMapping.getClass().getCanonicalName());
                 allProperties.addAll(relationshipMapping.getIgcRelationshipPropertiesForType(igcEntityType));
             }
             allProperties.addAll(IGCRestConstants.getModificationProperties());

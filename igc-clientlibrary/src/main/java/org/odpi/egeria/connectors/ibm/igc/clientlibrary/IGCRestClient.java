@@ -189,7 +189,7 @@ public class IGCRestClient {
 
             if (response != null) {
 
-                if (log.isDebugEnabled()) { log.debug("Checking for workflow and registering version..."); }
+                log.debug("Checking for workflow and registering version...");
                 ObjectMapper tmpMapper = new ObjectMapper();
                 try {
                     this.workflowEnabled = tmpMapper.readValue(response, new TypeReference<ItemList<Reference>>(){}).getPaging().getNumTotal() > 0;
@@ -208,7 +208,7 @@ public class IGCRestClient {
                         this.igcVersion = aVersion;
                     }
                 }
-                if (log.isInfoEnabled()) { log.info("Detected IGC version: {}", this.igcVersion.getVersionString()); }
+                log.info("Detected IGC version: {}", this.igcVersion.getVersionString());
                 successfullyInitialised = true;
 
             } else {
@@ -493,7 +493,7 @@ public class IGCRestClient {
         }
         ResponseEntity<String> response;
         try {
-            if (log.isDebugEnabled()) { log.debug("{}ing to {} with: {}", method, url, payload); }
+            log.debug("{}ing to {} with: {}", method, url, payload);
             UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(url).build(true);
             response = restTemplate.exchange(
                     uriComponents.toUri(),
@@ -654,7 +654,7 @@ public class IGCRestClient {
         Reference reference = null;
         if (results.getPaging().getNumTotal() > 0) {
             if (results.getPaging().getNumTotal() > 1) {
-                if (log.isWarnEnabled()) { log.warn("Found multiple assets for RID {}, taking only the first.", rid); }
+                log.warn("Found multiple assets for RID {}, taking only the first.", rid);
             }
             reference = results.getItems().get(0);
         }
@@ -748,7 +748,7 @@ public class IGCRestClient {
                                                                   List<String> properties,
                                                                   int pageSize,
                                                                   IGCSearchSorting sorting) {
-        if (log.isDebugEnabled()) { log.debug("Retrieving asset {} with subset of details: {}", rid, properties); }
+        log.debug("Retrieving asset {} with subset of details: {}", rid, properties);
         T assetWithProperties = null;
         IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", rid);
         IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
@@ -1280,7 +1280,7 @@ public class IGCRestClient {
         if (typeName != null) {
             String typeId = typeName.value();
             this.mapper.registerSubtypes(clazz);
-            if (log.isInfoEnabled()) { log.info("Registered IGC type {} to be handled by POJO: {}", typeId, clazz.getCanonicalName()); }
+            log.info("Registered IGC type {} to be handled by POJO: {}", typeId, clazz.getCanonicalName());
         } else {
             throw new IGCIOException("Unable to find JsonTypeName annotation to identify type in POJO.", clazz.getCanonicalName(), null);
         }
@@ -1408,7 +1408,7 @@ public class IGCRestClient {
             if ( (!object.isIdentityPopulated() && (object.getContext() == null || object.getContext().isEmpty()))
                     || (bHasModificationDetails && !object.areModificationDetailsPopulated() && bPopulateModDetails)) {
 
-                if (log.isDebugEnabled()) { log.debug("Context and / or modification details are empty, populating..."); }
+                log.debug("Context and / or modification details are empty, populating...");
 
                 IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", object.getId());
                 IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);

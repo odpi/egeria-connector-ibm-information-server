@@ -93,7 +93,7 @@ public class AttributeMappingStore {
         if (omrsGuidToAttributeTypeDef.containsKey(guid)) {
             return omrsGuidToAttributeTypeDef.get(guid);
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unable to find OMRS AttributeTypeDef: {}", guid); }
+            log.warn("Unable to find OMRS AttributeTypeDef: {}", guid);
             return null;
         }
     }
@@ -109,7 +109,7 @@ public class AttributeMappingStore {
             String guid = omrsNameToGuid.get(name);
             return getAttributeTypeDefByGUID(guid);
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unable to find OMRS AttributeTypeDef: {}", name); }
+            log.warn("Unable to find OMRS AttributeTypeDef: {}", name);
             return null;
         }
     }
@@ -128,7 +128,7 @@ public class AttributeMappingStore {
                 results.add(getAttributeTypeDefByGUID(guid));
             }
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unable to find OMRS AttributeTypeDefCategory: {}", categoryName); }
+            log.warn("Unable to find OMRS AttributeTypeDefCategory: {}", categoryName);
         }
         return results;
     }
@@ -154,7 +154,7 @@ public class AttributeMappingStore {
             Method getInstance = mappingClass.getMethod("getInstance", IGCVersionEnum.class);
             attributeMapper = (AttributeMapping) getInstance.invoke(null, igcomrsRepositoryConnector.getIGCVersion());
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to find or instantiate AttributeMapping class: {}", mappingClass, e); }
+            log.error("Unable to find or instantiate AttributeMapping class: {}", mappingClass, e);
         }
         return attributeMapper;
     }

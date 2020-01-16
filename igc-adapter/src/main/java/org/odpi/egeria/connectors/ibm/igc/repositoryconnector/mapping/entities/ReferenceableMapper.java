@@ -217,14 +217,14 @@ public class ReferenceableMapper extends EntityMapping {
 
         if (omrsPropertyName.equals("qualifiedName")) {
 
-            if (log.isDebugEnabled()) { log.debug("Adding complex search criteria for: qualifiedName"); }
+            log.debug("Adding complex search criteria for: qualifiedName");
 
             String qualifiedName = ((PrimitivePropertyValue) value).getPrimitiveValue().toString();
             String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedName);
 
             // Check if the qualifiedName has a generated prefix -- need to remove prior to next steps, if so...
             unqualifiedName = IGCRepositoryHelper.getSearchableQualifiedName(unqualifiedName);
-            if (log.isDebugEnabled()) { log.debug("Looking up identity: {}", unqualifiedName); }
+            log.debug("Looking up identity: {}", unqualifiedName);
             Identity.StringType stringType = Identity.StringType.EXACT;
             if (repositoryHelper.isEndsWithRegex(qualifiedName)) {
                 stringType = Identity.StringType.ENDS_WITH;
@@ -239,35 +239,35 @@ public class ReferenceableMapper extends EntityMapping {
             if (repositoryHelper.isStartsWithRegex(qualifiedName)) {
                 // for a startsWith, we only know the upper portions of the context, so the best we can do is search
                 // for everything and trim the results after they've been returned
-                if (log.isDebugEnabled()) { log.debug(". . . running expensive startsWith query on: {}", qualifiedName); }
+                log.debug(". . . running expensive startsWith query on: {}", qualifiedName);
             } else if (repositoryHelper.isEndsWithRegex(qualifiedName)) {
                 if (identity != null) {
                     // for an endsWith, we only know the lower portions of the context, which we should be able to
                     // therefore search directly
-                    if (log.isDebugEnabled()) { log.debug(". . .found identity: {}", identity.toString()); }
+                    log.debug(". . .found identity: {}", identity);
                     IGCSearchConditionSet nested = identity.getSearchCriteria();
                     igcSearchConditionSet.addNestedConditionSet(nested);
                 } else {
-                    if (log.isDebugEnabled()) { log.debug(". . . running expensive endsWith query on: {}", qualifiedName); }
+                    log.debug(". . . running expensive endsWith query on: {}", qualifiedName);
                 }
             } else if (repositoryHelper.isContainsRegex(qualifiedName)) {
                 // for a contains, we only know some middle portion of the context, so the best we can do is search
                 // for everything and trim the results after they've been returned
-                if (log.isDebugEnabled()) { log.debug(". . . running expensive contains query on: {}", qualifiedName); }
+                log.debug(". . . running expensive contains query on: {}", qualifiedName);
             } else if (repositoryHelper.isExactMatchRegex(qualifiedName)) {
                 // Identity must be translate-able and match the type being searched, if it is to be an exact match
                 if (identity != null) {
-                    if (log.isDebugEnabled()) { log.debug(". . .found identity: {}", identity.toString()); }
+                    log.debug(". . .found identity: {}", identity);
                     String igcType = IGCRestConstants.getAssetTypeForSearch(identity.getAssetType());
                     if (igcType.equals(getIgcAssetType()) || getOtherIGCAssetTypes().contains(igcType)) {
                         IGCSearchConditionSet nested = identity.getSearchCriteria();
                         igcSearchConditionSet.addNestedConditionSet(nested);
                     } else {
-                        if (log.isInfoEnabled()) { log.info("Search type did not match identity type -- skipping."); }
+                        log.info("Search type did not match identity type -- skipping.");
                         skip = true;
                     }
                 } else {
-                    if (log.isInfoEnabled()) { log.info("Unable to find identity '{}' -- skipping.", qualifiedName); }
+                    log.info("Unable to find identity '{}' -- skipping.", qualifiedName);
                     skip = true;
                 }
             } else {
@@ -284,14 +284,14 @@ public class ReferenceableMapper extends EntityMapping {
             }
 
             if (skip) {
-                if (log.isDebugEnabled()) { log.debug("Adding search condition to ensure no results."); }
+                log.debug("Adding search condition to ensure no results.");
                 IGCSearchConditionSet byName = new IGCSearchConditionSet(IGCRestConstants.getConditionToForceNoSearchResults());
                 igcSearchConditionSet.addNestedConditionSet(byName);
             }
 
         } else if (omrsPropertyName.equals("additionalProperties")) {
 
-            if (log.isDebugEnabled()) { log.debug("Adding complex search criteria for: additionalProperties"); }
+            log.debug("Adding complex search criteria for: additionalProperties");
 
             Map<String, InstancePropertyValue> mapValues = ((MapPropertyValue) value).getMapValues().getInstanceProperties();
             for (Map.Entry<String, InstancePropertyValue> nextEntry : mapValues.entrySet()) {

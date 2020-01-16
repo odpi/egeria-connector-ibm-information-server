@@ -64,7 +64,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                      OMRSRepositoryValidator repositoryValidator,
                                      String metadataCollectionId) {
         super(parentConnector, repositoryName, repositoryHelper, repositoryValidator, metadataCollectionId);
-        if (log.isDebugEnabled()) { log.debug("Constructing IGCOMRSMetadataCollection with name: {}", repositoryName); }
+        log.debug("Constructing IGCOMRSMetadataCollection with name: {}", repositoryName);
         parentConnector.setRepositoryName(repositoryName);
         this.igcRestClient = parentConnector.getIGCRestClient();
         this.igcomrsRepositoryConnector = parentConnector;
@@ -94,11 +94,11 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         TypeDefGallery typeDefGallery = new TypeDefGallery();
         List<TypeDef> typeDefs = typeDefStore.getAllTypeDefs();
-        if (log.isDebugEnabled()) { log.debug("Retrieved {} implemented TypeDefs for this repository.", typeDefs.size()); }
+        log.debug("Retrieved {} implemented TypeDefs for this repository.", typeDefs.size());
         typeDefGallery.setTypeDefs(typeDefs);
 
         List<AttributeTypeDef> attributeTypeDefs = attributeMappingStore.getAllAttributeTypeDefs();
-        if (log.isDebugEnabled()) { log.debug("Retrieved {} implemented AttributeTypeDefs for this repository.", attributeTypeDefs.size()); }
+        log.debug("Retrieved {} implemented AttributeTypeDefs for this repository.", attributeTypeDefs.size());
         typeDefGallery.setAttributeTypeDefs(attributeTypeDefs);
 
         return typeDefGallery;
@@ -321,7 +321,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         TypeDefCategory typeDefCategory = newTypeDef.getCategory();
         String omrsTypeDefName = newTypeDef.getName();
-        if (log.isDebugEnabled()) { log.debug("Looking for mapping for {} of type {}", omrsTypeDefName, typeDefCategory.getName()); }
+        log.debug("Looking for mapping for {} of type {}", omrsTypeDefName, typeDefCategory.getName());
 
         // See if we have a Mapper defined for the class -- if so, it's implemented
         StringBuilder sbMapperClassname = new StringBuilder();
@@ -346,7 +346,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         try {
 
             Class<?> mappingClass = Class.forName(sbMapperClassname.toString());
-            if (log.isDebugEnabled()) { log.debug(" ... found mapping class: {}", mappingClass.getCanonicalName()); }
+            log.debug(" ... found mapping class: {}", mappingClass.getCanonicalName());
 
             boolean success = false;
 
@@ -402,7 +402,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         // in the verifyAttributeTypeDef method
         AttributeTypeDefCategory attributeTypeDefCategory = newAttributeTypeDef.getCategory();
         String omrsTypeDefName = newAttributeTypeDef.getName();
-        if (log.isDebugEnabled()) { log.debug("Looking for mapping for {} of type {}", omrsTypeDefName, attributeTypeDefCategory.getName()); }
+        log.debug("Looking for mapping for {} of type {}", omrsTypeDefName, attributeTypeDefCategory.getName());
 
         // See if we have a Mapper defined for the class -- if so, it's implemented
         StringBuilder sbMapperClassname = new StringBuilder();
@@ -413,7 +413,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         try {
             Class<?> mappingClass = Class.forName(sbMapperClassname.toString());
-            if (log.isDebugEnabled()) { log.debug(" ... found mapping class: {}", mappingClass.getCanonicalName()); }
+            log.debug(" ... found mapping class: {}", mappingClass.getCanonicalName());
             attributeMappingStore.addMapping(newAttributeTypeDef, mappingClass);
         } catch (ClassNotFoundException e) {
             raiseTypeDefNotSupportedException(IGCOMRSErrorCode.ATTRIBUTE_TYPEDEF_NOT_MAPPED, methodName, omrsTypeDefName, repositoryName);
@@ -507,7 +507,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
             // If we were unable to verify everything, throw exception indicating it is not a supported TypeDef
             if (!gaps.isEmpty()) {
-                if (log.isWarnEnabled()) { log.warn("Unable to verify type definition {} due to missing property mappings for: {}", typeDef.getName(), String.join(", ", gaps)); }
+                log.warn("Unable to verify type definition {} due to missing property mappings for: {}", typeDef.getName(), String.join(", ", gaps));
                 raiseTypeDefNotSupportedException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, methodName, typeDef.getName(), repositoryName);
                 return false;
             } else {
@@ -573,7 +573,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         try {
             detail = getEntityDetail(userId, guid);
         } catch (EntityNotKnownException e) {
-            if (log.isInfoEnabled()) { log.info("Entity {} not known to the repository.", guid, e); }
+            log.info("Entity {} not known to the repository.", guid, e);
         }
         return detail;
 
@@ -592,7 +592,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         final String methodName = "getEntitySummary";
         super.getInstanceParameterValidation(userId, guid, methodName);
 
-        if (log.isDebugEnabled()) { log.debug("getEntitySummary with guid = {}", guid); }
+        log.debug("getEntitySummary with guid = {}", guid);
 
         // Lookup the basic asset based on the RID (strip off prefix (indicating a generated type), if there)
         IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(guid);
@@ -880,9 +880,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         if (IGCRepositoryHelper.isQualifiedNameOfGeneratedEntity(unqualifiedName)) {
                             prefix = IGCRepositoryHelper.getPrefixFromGeneratedQualifiedName(unqualifiedName);
                             qualifiedName = IGCRepositoryHelper.getSearchableQualifiedName(unqualifiedName);
-                            if (log.isDebugEnabled()) {
-                                log.debug(" ... generated name with prefix {} and name: {}", prefix, qualifiedName);
-                            }
+                            log.debug(" ... generated name with prefix {} and name: {}", prefix, qualifiedName);
                         }
                         Identity.StringType stringType = Identity.StringType.EXACT;
                         if (repositoryHelper.isEndsWithRegex(qualifiedNameToFind)) {
@@ -892,7 +890,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         if (identity != null && !identity.isPartial()) {
                             // Resolve the asset type directly from the identity, if we can (only possible if it is not
                             // partial, because if it is partial it may actually need a prefix which is not there)
-                            if (log.isDebugEnabled()) { log.debug(" ... proceeding on basis of identity: {}", identity); }
+                            log.debug(" ... proceeding on basis of identity: {}", identity);
                             String igcType = identity.getAssetType();
                             mappers.add(igcRepositoryHelper.getEntityMappingByIgcType(igcType, prefix));
                         } else if (identity != null) {
@@ -1157,7 +1155,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     );
 
                 } else {
-                    if (log.isInfoEnabled()) { log.info("No classification mapping has been implemented for {} on entity {} -- skipping from search.", classificationName, mapping.getOmrsTypeDefName()); }
+                    log.info("No classification mapping has been implemented for {} on entity {} -- skipping from search.", classificationName, mapping.getOmrsTypeDefName());
                 }
 
             }
@@ -1250,7 +1248,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             // and search based on qualifiedName
             if (igcRepositoryHelper.isIdentityString(searchCriteria)) {
 
-                if (log.isDebugEnabled()) { log.debug("Treating {} as an identity-string (qualifiedName) search.", searchCriteria); }
+                log.debug("Treating {} as an identity-string (qualifiedName) search.", searchCriteria);
                 // Only proceed down this path if there is any kind of qualifiedName that was received
                 InstanceProperties matchProperties = repositoryHelper.addStringPropertyToInstance(
                         repositoryName,
@@ -1274,7 +1272,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 );
 
             } else {
-                if (log.isDebugEnabled()) { log.debug("Treating {} as a normal (non-identity-string / non-qualifiedName) search.", searchCriteria); }
+                log.debug("Treating {} as a normal (non-identity-string / non-qualifiedName) search.", searchCriteria);
             }
 
             // Otherwise, only bother searching if we are after ACTIVE (or "all") entities -- non-ACTIVE means we
@@ -1329,9 +1327,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         );
 
                         if (limitResultsByClassification != null && !limitResultsByClassification.isEmpty() && classificationLimiters == null) {
-                            if (log.isInfoEnabled()) {
-                                log.info("Classification limiters were specified, but none apply to the asset type {}, so excluding this asset type from search.", igcAssetType);
-                            }
+                            log.info("Classification limiters were specified, but none apply to the asset type {}, so excluding this asset type from search.", igcAssetType);
                         } else {
 
                             IGCSearchConditionSet outerConditions = new IGCSearchConditionSet();
@@ -1424,9 +1420,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         }
 
                     } else {
-                        if (log.isWarnEnabled()) {
-                            log.warn("Unable to find POJO to handle IGC asset type '{}' -- skipping search against this asset type.", igcAssetType);
-                        }
+                        log.warn("Unable to find POJO to handle IGC asset type '{}' -- skipping search against this asset type.", igcAssetType);
                     }
 
                 }
@@ -1453,7 +1447,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         try {
             relationship = getRelationship(userId, guid);
         } catch (RelationshipNotKnownException e) {
-            if (log.isInfoEnabled()) { log.info("Could not find relationship {} in repository.", guid, e); }
+            log.info("Could not find relationship {} in repository.", guid, e);
         }
         return relationship;
 
@@ -1471,7 +1465,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         final String methodName = "getRelationship";
         super.getInstanceParameterValidation(userId, guid, methodName);
 
-        if (log.isDebugEnabled()) { log.debug("Looking up relationship: {}", guid); }
+        log.debug("Looking up relationship: {}", guid);
 
         // Translate the key properties of the GUID into IGC-retrievables
         IGCRelationshipGuid igcRelationshipGuid = IGCRelationshipGuid.fromGuid(guid);
@@ -1986,7 +1980,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     private List<EntityMapping> findMappingsForInputs(String entityTypeGUID,
                                                       String prefix,
                                                       String userId) {
-        if (log.isDebugEnabled()) { log.debug("Looking for mappers for GUID {} and prefix: {}", entityTypeGUID, prefix); }
+        log.debug("Looking for mappers for GUID {} and prefix: {}", entityTypeGUID, prefix);
         List<EntityMapping> mappers = new ArrayList<>();
         if (entityTypeGUID != null) {
             // Prefer the specific mapping(s) requested as the first choice (if any were requested)

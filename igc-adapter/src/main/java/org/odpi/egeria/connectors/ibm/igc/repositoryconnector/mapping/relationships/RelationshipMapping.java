@@ -568,7 +568,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
         ProxyMapping same = null;
 
         if (igcAssetType == null) {
-            if (log.isErrorEnabled()) { log.error("No asset type provided."); }
+            log.error("No asset type provided.");
         } else {
             String simpleType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
             if (simpleType.equals(one.getIgcAssetType())) {
@@ -580,7 +580,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             } else if (two.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !two.excludeIgcAssetType.contains(simpleType)) {
                 same = this.two;
             } else {
-                if (log.isErrorEnabled()) { log.error("getProxyFromType - Provided asset type does not match either proxy type (or was explicitly excluded): {}", simpleType); }
+                log.error("getProxyFromType - Provided asset type does not match either proxy type (or was explicitly excluded): {}", simpleType);
             }
         }
 
@@ -599,7 +599,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
         ProxyMapping other = null;
 
         if (igcAssetType == null) {
-            if (log.isErrorEnabled()) { log.error("No asset type provided."); }
+            log.error("No asset type provided.");
         } else {
             String simpleType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
             if (simpleType.equals(one.getIgcAssetType())) {
@@ -611,7 +611,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             } else if (two.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !two.excludeIgcAssetType.contains(simpleType)) {
                 other = this.one;
             } else {
-                if (log.isErrorEnabled()) { log.error("getOtherProxyFromType - Provided asset type does not match either proxy type (or was explicitly excluded): {}", simpleType); }
+                log.error("getOtherProxyFromType - Provided asset type does not match either proxy type (or was explicitly excluded): {}", simpleType);
             }
         }
 
@@ -630,7 +630,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
         List<String> properties = new ArrayList<>();
 
         if (igcAssetType == null) {
-            if (log.isErrorEnabled()) { log.error("No asset type provided."); }
+            log.error("No asset type provided.");
         } else {
             String simpleType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
             if (sameTypeOnBothEnds() && simpleType.equals(one.getIgcAssetType())) {
@@ -645,7 +645,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             } else if (two.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !two.excludeIgcAssetType.contains(simpleType)) {
                 addRealPropertiesToList(two.getIgcRelationshipProperties(), properties);
             } else {
-                if (log.isWarnEnabled()) { log.warn("getIgcRelationshipPropertiesForType - Provided asset type does not match either proxy type (or was explicitly excluded): {}", simpleType); }
+                log.warn("getIgcRelationshipPropertiesForType - Provided asset type does not match either proxy type (or was explicitly excluded): {}", simpleType);
             }
         }
 
@@ -898,7 +898,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
         // If we are provided a relationship-level RID, short-circuit the entire rest of this process
         if (relationshipLevelRid != null) {
-            if (log.isDebugEnabled()) { log.debug("Calculating relationship GUID for relationship-level RID {} (with mapper: {})", relationshipLevelRid, relationshipMapping.getClass().getName()); }
+            log.debug("Calculating relationship GUID for relationship-level RID {} (with mapper: {})", relationshipLevelRid, relationshipMapping.getClass().getName());
             String relationshipLevelType = relationshipMapping.getRelationshipLevelIgcAsset();
             igcRelationshipGuid = igcRepositoryHelper.getRelationshipGuid(
                     relationshipLevelType,
@@ -914,9 +914,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             String endOneType = IGCRestConstants.getAssetTypeForSearch(endOne.getType());
             String endTwoType = IGCRestConstants.getAssetTypeForSearch(endTwo.getType());
 
-            if (log.isDebugEnabled()) {
-                log.debug("Calculating relationship GUID from {} to {} via {} for {} (with mapper: {})", endOneType, endTwoType, igcPropertyName, omrsRelationshipName, relationshipMapping.getClass().getName());
-            }
+            log.debug("Calculating relationship GUID from {} to {} via {} for {} (with mapper: {})", endOneType, endTwoType, igcPropertyName, omrsRelationshipName, relationshipMapping.getClass().getName());
 
             // If the relationship mapping includes a relationship-level asset, check if either provided endpoint is one
             // (and if so, setup the relationshipLevelRid based on its ID)
@@ -949,14 +947,10 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 proxyOneRid = endOne.getId();
                 proxyTwoRid = endTwo.getId();
                 if (pmOne.getIgcRidPrefix() == null && pmTwo.getIgcRidPrefix() == null) {
-                    if (log.isWarnEnabled()) {
-                        log.warn("Self-referencing relationship expected, but no prefix found for relationship {} from {} to {} via {}", omrsRelationshipName, proxyOneRid, proxyTwoRid, igcPropertyName);
-                    }
+                    log.warn("Self-referencing relationship expected, but no prefix found for relationship {} from {} to {} via {}", omrsRelationshipName, proxyOneRid, proxyTwoRid, igcPropertyName);
                 }
                 if (!proxyOneRid.equals(proxyTwoRid)) {
-                    if (log.isWarnEnabled()) {
-                        log.warn("Self-referencing relationship expected for {}, but RIDs of ends do not match: {} and {}", omrsRelationshipName, proxyOneRid, proxyTwoRid);
-                    }
+                    log.warn("Self-referencing relationship expected for {}, but RIDs of ends do not match: {} and {}", omrsRelationshipName, proxyOneRid, proxyTwoRid);
                 }
             } else if (relationshipMapping.sameTypeOnBothEnds()
                     && pmOne.matchesAssetType(endOneType)) {
@@ -965,9 +959,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     // translations on terms), then only option is to sort the RIDs themselves to give consistency
                     String endOneRid = endOne.getId();
                     String endTwoRid = endTwo.getId();
-                    if (log.isDebugEnabled()) {
-                        log.debug(" ... same types, same properties: alphabetically sorting RIDs.");
-                    }
+                    log.debug(" ... same types, same properties: alphabetically sorting RIDs.");
                     if (endOneRid.compareTo(endTwoRid) > 0) {
                         proxyOneRid = endOneRid;
                         proxyTwoRid = endTwoRid;
@@ -980,29 +972,21 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     // end is which, and also relies on the direction in which they were retrieved
                     if (relationshipMapping.getOptimalStart().equals(OptimalStart.OPPOSITE)) {
                         if (pmOneProperties.contains(igcPropertyName)) {
-                            if (log.isDebugEnabled()) {
-                                log.debug(" ... same types, opposite lookup, property matches one: reversing RIDs.");
-                            }
+                            log.debug(" ... same types, opposite lookup, property matches one: reversing RIDs.");
                             proxyOneRid = endTwo.getId();
                             proxyTwoRid = endOne.getId();
                         } else if (pmTwoProperties.contains(igcPropertyName)) {
-                            if (log.isDebugEnabled()) {
-                                log.debug(" ... same types, opposite lookup, property matches two: keeping RID direction.");
-                            }
+                            log.debug(" ... same types, opposite lookup, property matches two: keeping RID direction.");
                             proxyOneRid = endOne.getId();
                             proxyTwoRid = endTwo.getId();
                         }
                     } else {
                         if (pmOneProperties.contains(igcPropertyName)) {
-                            if (log.isDebugEnabled()) {
-                                log.debug(" ... same types, direct lookup, property matches one: keeping RID direction.");
-                            }
+                            log.debug(" ... same types, direct lookup, property matches one: keeping RID direction.");
                             proxyOneRid = endOne.getId();
                             proxyTwoRid = endTwo.getId();
                         } else if (pmTwoProperties.contains(igcPropertyName)) {
-                            if (log.isDebugEnabled()) {
-                                log.debug(" ... same types, direct lookup, property matches two: reversing RIDs.");
-                            }
+                            log.debug(" ... same types, direct lookup, property matches two: reversing RIDs.");
                             proxyOneRid = endTwo.getId();
                             proxyTwoRid = endOne.getId();
                         }
@@ -1013,18 +997,14 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     && pmTwo.matchesAssetType(endTwoType)) {
                 // Otherwise if one aligns with one and two aligns with two, and property appears somewhere, go with those
                 // (this should also apply when the relationship is self-referencing)
-                if (log.isDebugEnabled()) {
-                    log.debug(" ... one matches one, two matches two: keeping RID direction.");
-                }
+                log.debug(" ... one matches one, two matches two: keeping RID direction.");
                 proxyOneRid = endOne.getId();
                 proxyTwoRid = endTwo.getId();
             } else if (pmTwo.matchesAssetType(endOneType)
                     && (pmOneProperties.contains(igcPropertyName) || pmTwoProperties.contains(igcPropertyName))
                     && pmOne.matchesAssetType(endTwoType)) {
                 // Or if two aligns with one and one aligns with two, and property appears somewhere, reverse them
-                if (log.isDebugEnabled()) {
-                    log.debug(" ... two matches one, one matches two: reversing RIDs.");
-                }
+                log.debug(" ... two matches one, one matches two: reversing RIDs.");
                 proxyOneRid = endTwo.getId();
                 proxyTwoRid = endOne.getId();
                 // We also need to reverse the types
@@ -1033,9 +1013,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 endTwoType = tempType;
             } else if (relationshipLevelRid == null) {
                 // Otherwise indicate something appears to be wrong
-                if (log.isErrorEnabled()) {
-                    log.error("Unable to find matching ends for relationship {} from {} to {} via {}", omrsRelationshipName, endOne.getId(), endTwo.getId(), igcPropertyName);
-                }
+                log.error("Unable to find matching ends for relationship {} from {} to {} via {}", omrsRelationshipName, endOne.getId(), endTwo.getId(), igcPropertyName);
             }
 
             String proxyOnePrefix = pmOne.getIgcRidPrefix();
@@ -1144,7 +1122,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     } else {
                         igcEntityGuid = igcRepositoryHelper.getEntityGuid(igcObj.getType(), null, igcObj.getId());
                     }
-                    entityProxy.setGUID(igcEntityGuid.asGuid());
+                    entityProxy.setGUID(igcEntityGuid.toString());
 
                     if (igcRestClient.hasModificationDetails(igcObj.getType())) {
                         Reference withModDetails = igcRestClient.getModificationDetails(igcObj);
@@ -1162,11 +1140,11 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 }
 
             } else {
-                if (log.isErrorEnabled()) { log.error("Unable to find mapper for IGC object type '{}' with prefix '{}', cannot setup EntityProxy for {}", igcType, ridPrefix, igcObj.getId()); }
+                log.error("Unable to find mapper for IGC object type '{}' with prefix '{}', cannot setup EntityProxy for {}", igcType, ridPrefix, igcObj.getId());
             }
 
         } else {
-            if (log.isErrorEnabled()) { log.error("Unable to find type for provided IGC object: {}", igcObj); }
+            log.error("Unable to find type for provided IGC object: {}", igcObj);
         }
 
         return entityProxy;
@@ -1250,7 +1228,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                             || (optimalStart.equals(OptimalStart.ONE) && pmTwo.matchesAssetType(fromAssetType)) ) {
                         addInvertedRelationship(igcomrsRepositoryConnector, mapping, relationships, fromIgcObject, toIgcObject, userId);
                     } else {
-                        if (log.isWarnEnabled()) { log.warn("Ran out of options for finding the relationship: {}", omrsRelationshipDef.getName()); }
+                        log.warn("Ran out of options for finding the relationship: {}", omrsRelationshipDef.getName());
                     }
                 }
 
@@ -1291,10 +1269,10 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     RelationshipMapping.SELF_REFERENCE_SENTINEL,
                     userId
             );
-            if (log.isDebugEnabled()) { log.debug("addSelfReferencingRelationship - adding relationship: {}", relationship.getGUID()); }
+            log.debug("addSelfReferencingRelationship - adding relationship: {}", relationship.getGUID());
             relationships.add(relationship);
         } catch (RepositoryErrorException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to add self-referencing relationship for: {} of type {}", fromIgcObject.getName(), fromIgcObject.getType(), e); }
+            log.error("Unable to add self-referencing relationship for: {} of type {}", fromIgcObject.getName(), fromIgcObject.getType(), e);
         }
     }
 
@@ -1363,7 +1341,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     );
 
                 } else {
-                    if (log.isDebugEnabled()) { log.debug(" ... skipping relationship {}, either empty or neither reference or list {}", igcRelationshipName, directRelationships); }
+                    log.debug(" ... skipping relationship {}, either empty or neither reference or list {}", igcRelationshipName, directRelationships);
                 }
 
             }
@@ -1390,7 +1368,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
         String assetType = fromIgcObject.getType();
 
-        if (log.isDebugEnabled()) { log.debug("Adding inverted relationship for mapping: {}", mapping.getClass().getCanonicalName()); }
+        log.debug("Adding inverted relationship for mapping: {}", mapping.getClass().getCanonicalName());
 
         if (toIgcObject != null) {
             addSingleMappedRelationshipWithKnownOrder(
@@ -1427,9 +1405,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
                 // Otherwise, use the optimal retrieval for the relationship (a search that will batch-retrieve _context)
                 RelationshipMapping.ProxyMapping otherSide = mapping.getOtherProxyFromType(assetType);
-                if (log.isDebugEnabled()) { log.debug(" ... found other proxy: {} with prefix {}", otherSide == null ? "(null)" : otherSide.getIgcAssetType(), otherSide == null ? "(null)" : otherSide.getIgcRidPrefix()); }
+                log.debug(" ... found other proxy: {} with prefix {}", otherSide == null ? "(null)" : otherSide.getIgcAssetType(), otherSide == null ? "(null)" : otherSide.getIgcRidPrefix());
                 RelationshipMapping.ProxyMapping thisSide = mapping.getProxyFromType(assetType);
-                if (log.isDebugEnabled()) { log.debug(" ... found this proxy: {} with prefix {}", thisSide == null ? "(null)" : thisSide.getIgcAssetType(), thisSide == null ? "(null)" : thisSide.getIgcRidPrefix()); }
+                log.debug(" ... found this proxy: {} with prefix {}", thisSide == null ? "(null)" : thisSide.getIgcAssetType(), thisSide == null ? "(null)" : thisSide.getIgcRidPrefix());
 
                 String anIgcRelationshipProperty = null;
                 IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
@@ -1520,7 +1498,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                      String igcPropertyName,
                                                      String userId) {
 
-        if (log.isDebugEnabled()) { log.debug(" ... list of references: {}", mapping.getOmrsRelationshipType()); }
+        log.debug(" ... list of references: {}", mapping.getOmrsRelationshipType());
 
         // TODO: paginate rather than always retrieving the full set
         igcRelationships.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
@@ -1562,7 +1540,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                     String igcPropertyName,
                                                     String userId) {
 
-        if (log.isDebugEnabled()) { log.debug(" ... single reference: {} of type {}", igcRelationship.getName(), igcRelationship.getType()); }
+        log.debug(" ... single reference: {} of type {}", igcRelationship.getName(), igcRelationship.getType());
         if (igcRelationship != null
                 && igcRelationship.getType() != null
                 && !igcRelationship.getType().equals("null")) {
@@ -1576,10 +1554,10 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         igcPropertyName,
                         userId
                 );
-                if (log.isDebugEnabled()) { log.debug("addSingleMappedRelationship - adding relationship: {}", omrsRelationship.getGUID()); }
+                log.debug("addSingleMappedRelationship - adding relationship: {}", omrsRelationship.getGUID());
                 relationships.add(omrsRelationship);
             } catch (RepositoryErrorException e) {
-                if (log.isErrorEnabled()) { log.error("Unable to add relationship {} for object {}", mapping.getOmrsRelationshipType(), igcRelationship, e); }
+                log.error("Unable to add relationship {} for object {}", mapping.getOmrsRelationshipType(), igcRelationship, e);
             }
 
         }
@@ -1602,7 +1580,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                                   Reference proxyOne,
                                                                   Reference proxyTwo,
                                                                   String userId) {
-        if (log.isDebugEnabled()) { log.debug(" ... single reference: {} of type {}", proxyTwo.getName(), proxyTwo.getType()); }
+        log.debug(" ... single reference: {} of type {}", proxyTwo.getName(), proxyTwo.getType());
         if (proxyTwo != null
                 && proxyTwo.getType() != null
                 && !proxyTwo.getType().equals("null")) {
@@ -1623,10 +1601,10 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         null,
                         true
                 );
-                if (log.isDebugEnabled()) { log.debug("addSingleMappedRelationshipWithKnownOrder - adding relationship: {}", omrsRelationship.getGUID()); }
+                log.debug("addSingleMappedRelationshipWithKnownOrder - adding relationship: {}", omrsRelationship.getGUID());
                 relationships.add(omrsRelationship);
             } catch (RepositoryErrorException e) {
-                if (log.isErrorEnabled()) { log.error("Unable to add relationship {} for object {}", mapping.getOmrsRelationshipType(), proxyTwo, e); }
+                log.error("Unable to add relationship {} for object {}", mapping.getOmrsRelationshipType(), proxyTwo, e);
             }
 
         }
@@ -1782,7 +1760,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             );
             relationship.setType(instanceType);
         } catch (TypeErrorException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to construct and set InstanceType -- skipping relationship: {}", omrsRelationshipName); }
+            log.error("Unable to construct and set InstanceType -- skipping relationship: {}", omrsRelationshipName);
             raiseRepositoryErrorException(OMRSErrorCode.INVALID_INSTANCE, methodName, methodName, omrsRelationshipDef.getName());
         }
 
@@ -1798,9 +1776,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
         if (igcRelationshipGuid != null) {
 
-            if (log.isDebugEnabled()) { log.debug("Mapping relationship with GUID: {}", igcRelationshipGuid); }
+            log.debug("Mapping relationship with GUID: {}", igcRelationshipGuid);
 
-            relationship.setGUID(igcRelationshipGuid.asGuid());
+            relationship.setGUID(igcRelationshipGuid.toString());
             relationship.setMetadataCollectionId(igcomrsRepositoryConnector.getMetadataCollectionId());
             relationship.setStatus(InstanceStatus.ACTIVE);
             relationship.setInstanceProvenanceType(InstanceProvenanceType.LOCAL_COHORT);
@@ -1839,7 +1817,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         relationshipMapping.getProxyTwoMapping().getIgcRidPrefix()
                 );
             } else {
-                if (log.isErrorEnabled()) { log.error("Unable to determine both ends of the relationship {} from {} to {}", omrsRelationshipName, proxyOne.getId(), proxyTwo.getId()); }
+                log.error("Unable to determine both ends of the relationship {} from {} to {}", omrsRelationshipName, proxyOne.getId(), proxyTwo.getId());
                 String omrsEndOneProperty = omrsRelationshipDef.getEndDef1().getAttributeName();
                 String omrsEndTwoProperty = omrsRelationshipDef.getEndDef2().getAttributeName();
                 raiseRepositoryErrorException(OMRSErrorCode.INVALID_RELATIONSHIP_ENDS, methodName, methodName, repositoryName, omrsRelationshipName, omrsEndOneProperty, omrsEndTwoProperty);
@@ -1893,7 +1871,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             relationship.setProperties(relationshipProperties);
 
         } else {
-            if (log.isErrorEnabled()) { log.error("Unable to construct relationship GUID -- skipping relationship: {}", omrsRelationshipName); }
+            log.error("Unable to construct relationship GUID -- skipping relationship: {}", omrsRelationshipName);
             String omrsEndOneProperty = omrsRelationshipDef.getEndDef1().getAttributeName();
             String omrsEndTwoProperty = omrsRelationshipDef.getEndDef2().getAttributeName();
             raiseRepositoryErrorException(OMRSErrorCode.INVALID_RELATIONSHIP_ENDS, methodName, methodName, repositoryName, omrsRelationshipName, omrsEndOneProperty, omrsEndTwoProperty);
