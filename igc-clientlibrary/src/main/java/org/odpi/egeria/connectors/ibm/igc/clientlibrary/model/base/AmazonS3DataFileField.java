@@ -25,10 +25,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("amazon_s3_data_file_field")
-public class AmazonS3DataFileField extends InformationAsset {
-
-    @JsonProperty("allows_null_values")
-    protected Boolean allowsNullValues;
+public class AmazonS3DataFileField extends Classificationenabledgroup {
 
     /**
      * @deprecated No longer applicable from 11.5.0.2sp3 onwards.
@@ -46,47 +43,8 @@ public class AmazonS3DataFileField extends InformationAsset {
     @JsonProperty("data_file_record")
     protected DataFileRecord dataFileRecord;
 
-    /**
-     * Valid values are:
-     * <ul>
-     *   <li>INT8 (displayed in the UI as 'INT8')</li>
-     *   <li>INT16 (displayed in the UI as 'INT16')</li>
-     *   <li>INT32 (displayed in the UI as 'INT32')</li>
-     *   <li>INT64 (displayed in the UI as 'INT64')</li>
-     *   <li>SFLOAT (displayed in the UI as 'SFLOAT')</li>
-     *   <li>DFLOAT (displayed in the UI as 'DFLOAT')</li>
-     *   <li>QFLOAT (displayed in the UI as 'QFLOAT')</li>
-     *   <li>DECIMAL (displayed in the UI as 'DECIMAL')</li>
-     *   <li>STRING (displayed in the UI as 'STRING')</li>
-     *   <li>BINARY (displayed in the UI as 'BINARY')</li>
-     *   <li>BOOLEAN (displayed in the UI as 'BOOLEAN')</li>
-     *   <li>DATE (displayed in the UI as 'DATE')</li>
-     *   <li>TIME (displayed in the UI as 'TIME')</li>
-     *   <li>DATETIME (displayed in the UI as 'DATETIME')</li>
-     *   <li>DURATION (displayed in the UI as 'DURATION')</li>
-     *   <li>CHOICE (displayed in the UI as 'CHOICE')</li>
-     *   <li>ORDERED_GROUP (displayed in the UI as 'ORDERED_GROUP')</li>
-     *   <li>UNORDERED_GROUP (displayed in the UI as 'UNORDERED_GROUP')</li>
-     *   <li>GUID (displayed in the UI as 'GUID')</li>
-     *   <li>UNKNOWN (displayed in the UI as 'UNKNOWN')</li>
-     *   <li>JSON (displayed in the UI as 'JSON')</li>
-     *   <li>XML (displayed in the UI as 'XML')</li>
-     * </ul>
-     */
-    @JsonProperty("data_type")
-    protected String dataType;
-
-    @JsonProperty("detected_classifications")
-    protected ItemList<Classification> detectedClassifications;
-
     @JsonProperty("domainType")
     protected List<String> domaintype;
-
-    @JsonProperty("fraction")
-    protected Number fraction;
-
-    @JsonProperty("hasDataClassification")
-    protected ItemList<Classification> hasdataclassification;
 
     @JsonProperty("implements_design_columns")
     protected ItemList<DesignColumn> implementsDesignColumns;
@@ -142,15 +100,6 @@ public class AmazonS3DataFileField extends InformationAsset {
     @JsonProperty("isInferredPrimaryKey")
     protected Boolean isinferredprimarykey;
 
-    @JsonProperty("length")
-    protected Number length;
-
-    @JsonProperty("level")
-    protected Number level;
-
-    @JsonProperty("minimum_length")
-    protected Number minimumLength;
-
     @JsonProperty("nbRecordsTested")
     protected List<Number> nbrecordstested;
 
@@ -178,75 +127,14 @@ public class AmazonS3DataFileField extends InformationAsset {
     @JsonProperty("numberZeroValues")
     protected List<Number> numberzerovalues;
 
-    /**
-     * Valid values are:
-     * <ul>
-     *   <li>CHAR (displayed in the UI as 'CHAR')</li>
-     *   <li>VARCHAR (displayed in the UI as 'VARCHAR')</li>
-     *   <li>LONGVARCHAR (displayed in the UI as 'LONGVARCHAR')</li>
-     *   <li>WCHAR (displayed in the UI as 'WCHAR')</li>
-     *   <li>WVARCHAR (displayed in the UI as 'WVARCHAR')</li>
-     *   <li>WLONGVARCHAR (displayed in the UI as 'WLONGVARCHAR')</li>
-     *   <li>DECIMAL (displayed in the UI as 'DECIMAL')</li>
-     *   <li>NUMERIC (displayed in the UI as 'NUMERIC')</li>
-     *   <li>SMALLINT (displayed in the UI as 'SMALLINT')</li>
-     *   <li>INTEGER (displayed in the UI as 'INTEGER')</li>
-     *   <li>REAL (displayed in the UI as 'REAL')</li>
-     *   <li>FLOAT (displayed in the UI as 'FLOAT')</li>
-     *   <li>DOUBLE (displayed in the UI as 'DOUBLE')</li>
-     *   <li>BIT (displayed in the UI as 'BIT')</li>
-     *   <li>TINYINT (displayed in the UI as 'TINYINT')</li>
-     *   <li>BIGINT (displayed in the UI as 'BIGINT')</li>
-     *   <li>BINARY (displayed in the UI as 'BINARY')</li>
-     *   <li>VARBINARY (displayed in the UI as 'VARBINARY')</li>
-     *   <li>LONGVARBINARY (displayed in the UI as 'LONGVARBINARY')</li>
-     *   <li>DATE (displayed in the UI as 'DATE')</li>
-     *   <li>TIME (displayed in the UI as 'TIME')</li>
-     *   <li>TIMESTAMP (displayed in the UI as 'TIMESTAMP')</li>
-     *   <li>GUID (displayed in the UI as 'GUID')</li>
-     *   <li>UNKNOWN (displayed in the UI as 'UNKNOWN')</li>
-     * </ul>
-     */
-    @JsonProperty("odbc_type")
-    protected String odbcType;
-
-    @JsonProperty("position")
-    protected Number position;
-
     @JsonProperty("qualityScore")
     protected String qualityscore;
-
-    @JsonProperty("selected_classification")
-    protected DataClass selectedClassification;
 
     @JsonProperty("synchronized_from")
     protected String synchronizedFrom;
 
-    @JsonProperty("type")
-    protected String type;
-
-    @JsonProperty("unique")
-    protected Boolean unique;
-
     @JsonProperty("uniqueFlag")
     protected Boolean uniqueflag;
-
-    @JsonProperty("used_by_analytics_objects")
-    protected ItemList<AnalyticsObject> usedByAnalyticsObjects;
-
-    /**
-     * Retrieve the {@code allows_null_values} property (displayed as '{@literal Allow Null Values}') of the object.
-     * @return {@code Boolean}
-     */
-    @JsonProperty("allows_null_values")
-    public Boolean getAllowsNullValues() { return this.allowsNullValues; }
-
-    /**
-     * Set the {@code allows_null_values} property (displayed as {@code Allow Null Values}) of the object.
-     * @param allowsNullValues the value to set
-     */
-    @JsonProperty("allows_null_values")
-    public void setAllowsNullValues(Boolean allowsNullValues) { this.allowsNullValues = allowsNullValues; }
 
     /**
      * Retrieve the {@code analysis} property (displayed as '{@literal Analysis}') of the object.
@@ -309,34 +197,6 @@ public class AmazonS3DataFileField extends InformationAsset {
     public void setDataFileRecord(DataFileRecord dataFileRecord) { this.dataFileRecord = dataFileRecord; }
 
     /**
-     * Retrieve the {@code data_type} property (displayed as '{@literal Data Type}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("data_type")
-    public String getDataType() { return this.dataType; }
-
-    /**
-     * Set the {@code data_type} property (displayed as {@code Data Type}) of the object.
-     * @param dataType the value to set
-     */
-    @JsonProperty("data_type")
-    public void setDataType(String dataType) { this.dataType = dataType; }
-
-    /**
-     * Retrieve the {@code detected_classifications} property (displayed as '{@literal Detected Data Classifications}') of the object.
-     * @return {@code ItemList<Classification>}
-     */
-    @JsonProperty("detected_classifications")
-    public ItemList<Classification> getDetectedClassifications() { return this.detectedClassifications; }
-
-    /**
-     * Set the {@code detected_classifications} property (displayed as {@code Detected Data Classifications}) of the object.
-     * @param detectedClassifications the value to set
-     */
-    @JsonProperty("detected_classifications")
-    public void setDetectedClassifications(ItemList<Classification> detectedClassifications) { this.detectedClassifications = detectedClassifications; }
-
-    /**
      * Retrieve the {@code domainType} property (displayed as '{@literal Domain}') of the object.
      * @return {@code List<String>}
      */
@@ -349,34 +209,6 @@ public class AmazonS3DataFileField extends InformationAsset {
      */
     @JsonProperty("domainType")
     public void setDomaintype(List<String> domaintype) { this.domaintype = domaintype; }
-
-    /**
-     * Retrieve the {@code fraction} property (displayed as '{@literal Scale}') of the object.
-     * @return {@code Number}
-     */
-    @JsonProperty("fraction")
-    public Number getFraction() { return this.fraction; }
-
-    /**
-     * Set the {@code fraction} property (displayed as {@code Scale}) of the object.
-     * @param fraction the value to set
-     */
-    @JsonProperty("fraction")
-    public void setFraction(Number fraction) { this.fraction = fraction; }
-
-    /**
-     * Retrieve the {@code hasDataClassification} property (displayed as '{@literal Detected Data Classifications}') of the object.
-     * @return {@code ItemList<Classification>}
-     */
-    @JsonProperty("hasDataClassification")
-    public ItemList<Classification> getHasdataclassification() { return this.hasdataclassification; }
-
-    /**
-     * Set the {@code hasDataClassification} property (displayed as {@code Detected Data Classifications}) of the object.
-     * @param hasdataclassification the value to set
-     */
-    @JsonProperty("hasDataClassification")
-    public void setHasdataclassification(ItemList<Classification> hasdataclassification) { this.hasdataclassification = hasdataclassification; }
 
     /**
      * Retrieve the {@code implements_design_columns} property (displayed as '{@literal Implements Design Columns}') of the object.
@@ -505,48 +337,6 @@ public class AmazonS3DataFileField extends InformationAsset {
     public void setIsinferredprimarykey(Boolean isinferredprimarykey) { this.isinferredprimarykey = isinferredprimarykey; }
 
     /**
-     * Retrieve the {@code length} property (displayed as '{@literal Length}') of the object.
-     * @return {@code Number}
-     */
-    @JsonProperty("length")
-    public Number getLength() { return this.length; }
-
-    /**
-     * Set the {@code length} property (displayed as {@code Length}) of the object.
-     * @param length the value to set
-     */
-    @JsonProperty("length")
-    public void setLength(Number length) { this.length = length; }
-
-    /**
-     * Retrieve the {@code level} property (displayed as '{@literal Level Number}') of the object.
-     * @return {@code Number}
-     */
-    @JsonProperty("level")
-    public Number getLevel() { return this.level; }
-
-    /**
-     * Set the {@code level} property (displayed as {@code Level Number}) of the object.
-     * @param level the value to set
-     */
-    @JsonProperty("level")
-    public void setLevel(Number level) { this.level = level; }
-
-    /**
-     * Retrieve the {@code minimum_length} property (displayed as '{@literal Minimum Length}') of the object.
-     * @return {@code Number}
-     */
-    @JsonProperty("minimum_length")
-    public Number getMinimumLength() { return this.minimumLength; }
-
-    /**
-     * Set the {@code minimum_length} property (displayed as {@code Minimum Length}) of the object.
-     * @param minimumLength the value to set
-     */
-    @JsonProperty("minimum_length")
-    public void setMinimumLength(Number minimumLength) { this.minimumLength = minimumLength; }
-
-    /**
      * Retrieve the {@code nbRecordsTested} property (displayed as '{@literal Number of Records Tested}') of the object.
      * @return {@code List<Number>}
      */
@@ -673,34 +463,6 @@ public class AmazonS3DataFileField extends InformationAsset {
     public void setNumberzerovalues(List<Number> numberzerovalues) { this.numberzerovalues = numberzerovalues; }
 
     /**
-     * Retrieve the {@code odbc_type} property (displayed as '{@literal ODBC Type}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("odbc_type")
-    public String getOdbcType() { return this.odbcType; }
-
-    /**
-     * Set the {@code odbc_type} property (displayed as {@code ODBC Type}) of the object.
-     * @param odbcType the value to set
-     */
-    @JsonProperty("odbc_type")
-    public void setOdbcType(String odbcType) { this.odbcType = odbcType; }
-
-    /**
-     * Retrieve the {@code position} property (displayed as '{@literal Position}') of the object.
-     * @return {@code Number}
-     */
-    @JsonProperty("position")
-    public Number getPosition() { return this.position; }
-
-    /**
-     * Set the {@code position} property (displayed as {@code Position}) of the object.
-     * @param position the value to set
-     */
-    @JsonProperty("position")
-    public void setPosition(Number position) { this.position = position; }
-
-    /**
      * Retrieve the {@code qualityScore} property (displayed as '{@literal Quality Score}') of the object.
      * @return {@code String}
      */
@@ -713,20 +475,6 @@ public class AmazonS3DataFileField extends InformationAsset {
      */
     @JsonProperty("qualityScore")
     public void setQualityscore(String qualityscore) { this.qualityscore = qualityscore; }
-
-    /**
-     * Retrieve the {@code selected_classification} property (displayed as '{@literal Selected Data Classification}') of the object.
-     * @return {@code DataClass}
-     */
-    @JsonProperty("selected_classification")
-    public DataClass getSelectedClassification() { return this.selectedClassification; }
-
-    /**
-     * Set the {@code selected_classification} property (displayed as {@code Selected Data Classification}) of the object.
-     * @param selectedClassification the value to set
-     */
-    @JsonProperty("selected_classification")
-    public void setSelectedClassification(DataClass selectedClassification) { this.selectedClassification = selectedClassification; }
 
     /**
      * Retrieve the {@code synchronized_from} property (displayed as '{@literal Synchronized From}') of the object.
@@ -743,34 +491,6 @@ public class AmazonS3DataFileField extends InformationAsset {
     public void setSynchronizedFrom(String synchronizedFrom) { this.synchronizedFrom = synchronizedFrom; }
 
     /**
-     * Retrieve the {@code type} property (displayed as '{@literal Native Type}') of the object.
-     * @return {@code String}
-     */
-    @JsonProperty("type")
-    public String getTheType() { return this.type; }
-
-    /**
-     * Set the {@code type} property (displayed as {@code Native Type}) of the object.
-     * @param type the value to set
-     */
-    @JsonProperty("type")
-    public void setTheType(String type) { this.type = type; }
-
-    /**
-     * Retrieve the {@code unique} property (displayed as '{@literal Unique Constraint}') of the object.
-     * @return {@code Boolean}
-     */
-    @JsonProperty("unique")
-    public Boolean getUnique() { return this.unique; }
-
-    /**
-     * Set the {@code unique} property (displayed as {@code Unique Constraint}) of the object.
-     * @param unique the value to set
-     */
-    @JsonProperty("unique")
-    public void setUnique(Boolean unique) { this.unique = unique; }
-
-    /**
      * Retrieve the {@code uniqueFlag} property (displayed as '{@literal Require Unique Values}') of the object.
      * @return {@code Boolean}
      */
@@ -783,19 +503,5 @@ public class AmazonS3DataFileField extends InformationAsset {
      */
     @JsonProperty("uniqueFlag")
     public void setUniqueflag(Boolean uniqueflag) { this.uniqueflag = uniqueflag; }
-
-    /**
-     * Retrieve the {@code used_by_analytics_objects} property (displayed as '{@literal Used By Data Science}') of the object.
-     * @return {@code ItemList<AnalyticsObject>}
-     */
-    @JsonProperty("used_by_analytics_objects")
-    public ItemList<AnalyticsObject> getUsedByAnalyticsObjects() { return this.usedByAnalyticsObjects; }
-
-    /**
-     * Set the {@code used_by_analytics_objects} property (displayed as {@code Used By Data Science}) of the object.
-     * @param usedByAnalyticsObjects the value to set
-     */
-    @JsonProperty("used_by_analytics_objects")
-    public void setUsedByAnalyticsObjects(ItemList<AnalyticsObject> usedByAnalyticsObjects) { this.usedByAnalyticsObjects = usedByAnalyticsObjects; }
 
 }

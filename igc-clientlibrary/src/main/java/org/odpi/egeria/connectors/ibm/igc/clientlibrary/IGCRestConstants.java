@@ -39,7 +39,7 @@ public class IGCRestConstants {
     private static final String STAGE_COLUMN = "stage_column";
     private static final String REFERENCE = "reference";
     private static final String DATAGROUP = "datagroup";
-    private static final String CLASSIFICATIONENABLEDGROUP = "classificationenabledgroup";
+    public static final String CLASSIFICATIONENABLEDGROUP = "classificationenabledgroup";
 
     private static final List<String> MODIFICATION_DETAILS = createModificationDetails();
     private static List<String> createModificationDetails() {
@@ -213,6 +213,7 @@ public class IGCRestConstants {
         map.put("data_field", "data_item");
         map.put("database_column", CLASSIFICATIONENABLEDGROUP);
         map.put("data_file_field", CLASSIFICATIONENABLEDGROUP);
+        map.put("amazon_s3_data_file_field", CLASSIFICATIONENABLEDGROUP);
         map.put(CLASSIFICATIONENABLEDGROUP, "data_field");
         map.put("bi_report_query_item", "reportobject");
         map.put("reportobject", INFORMATION_ASSET);

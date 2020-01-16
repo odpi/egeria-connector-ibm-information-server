@@ -94,9 +94,6 @@ public class DatabaseColumn extends Classificationenabledgroup {
     @JsonProperty("defined_primary_key")
     protected ItemList<CandidateKey> definedPrimaryKey;
 
-    @JsonProperty("detected_classifications")
-    protected ItemList<Classification> detectedClassifications;
-
     @JsonProperty("domainType")
     protected List<String> domaintype;
 
@@ -224,9 +221,6 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     @JsonProperty("same_as_data_sources")
     protected ItemList<DataItem> sameAsDataSources;
-
-    @JsonProperty("selected_classification")
-    protected DataClass selectedClassification;
 
     @JsonProperty("selected_foreign_key")
     protected Boolean selectedForeignKey;
@@ -558,20 +552,6 @@ public class DatabaseColumn extends Classificationenabledgroup {
      */
     @JsonProperty("defined_primary_key")
     public void setDefinedPrimaryKey(ItemList<CandidateKey> definedPrimaryKey) { this.definedPrimaryKey = definedPrimaryKey; }
-
-    /**
-     * Retrieve the {@code detected_classifications} property (displayed as '{@literal Detected Data Classifications}') of the object.
-     * @return {@code ItemList<Classification>}
-     */
-    @JsonProperty("detected_classifications")
-    public ItemList<Classification> getDetectedClassifications() { return this.detectedClassifications; }
-
-    /**
-     * Set the {@code detected_classifications} property (displayed as {@code Detected Data Classifications}) of the object.
-     * @param detectedClassifications the value to set
-     */
-    @JsonProperty("detected_classifications")
-    public void setDetectedClassifications(ItemList<Classification> detectedClassifications) { this.detectedClassifications = detectedClassifications; }
 
     /**
      * Retrieve the {@code domainType} property (displayed as '{@literal Domain}') of the object.
@@ -1026,20 +1006,6 @@ public class DatabaseColumn extends Classificationenabledgroup {
      */
     @JsonProperty("same_as_data_sources")
     public void setSameAsDataSources(ItemList<DataItem> sameAsDataSources) { this.sameAsDataSources = sameAsDataSources; }
-
-    /**
-     * Retrieve the {@code selected_classification} property (displayed as '{@literal Selected Data Classification}') of the object.
-     * @return {@code DataClass}
-     */
-    @JsonProperty("selected_classification")
-    public DataClass getSelectedClassification() { return this.selectedClassification; }
-
-    /**
-     * Set the {@code selected_classification} property (displayed as {@code Selected Data Classification}) of the object.
-     * @param selectedClassification the value to set
-     */
-    @JsonProperty("selected_classification")
-    public void setSelectedClassification(DataClass selectedClassification) { this.selectedClassification = selectedClassification; }
 
     /**
      * Retrieve the {@code selected_foreign_key} property (displayed as '{@literal User Selected Foreign Key}') of the object.

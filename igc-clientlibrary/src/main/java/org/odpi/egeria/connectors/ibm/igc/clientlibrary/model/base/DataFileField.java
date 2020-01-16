@@ -49,14 +49,8 @@ public class DataFileField extends Classificationenabledgroup {
     @JsonProperty("datafile_data_rules")
     protected ItemList<DataRule> datafileDataRules;
 
-    @JsonProperty("detected_classifications")
-    protected ItemList<Classification> detectedClassifications;
-
     @JsonProperty("domainType")
     protected List<String> domaintype;
-
-    @JsonProperty("hasDataClassification")
-    protected ItemList<Classification> hasdataclassification;
 
     @JsonProperty("implements_design_columns")
     protected ItemList<DesignColumn> implementsDesignColumns;
@@ -153,9 +147,6 @@ public class DataFileField extends Classificationenabledgroup {
 
     @JsonProperty("same_as_data_sources")
     protected ItemList<DataItem> sameAsDataSources;
-
-    @JsonProperty("selected_classification")
-    protected DataClass selectedClassification;
 
     @JsonProperty("suggested_term_assignments")
     protected ItemList<TermAssignment> suggestedTermAssignments;
@@ -255,20 +246,6 @@ public class DataFileField extends Classificationenabledgroup {
     public void setDatafileDataRules(ItemList<DataRule> datafileDataRules) { this.datafileDataRules = datafileDataRules; }
 
     /**
-     * Retrieve the {@code detected_classifications} property (displayed as '{@literal Detected Data Classifications}') of the object.
-     * @return {@code ItemList<Classification>}
-     */
-    @JsonProperty("detected_classifications")
-    public ItemList<Classification> getDetectedClassifications() { return this.detectedClassifications; }
-
-    /**
-     * Set the {@code detected_classifications} property (displayed as {@code Detected Data Classifications}) of the object.
-     * @param detectedClassifications the value to set
-     */
-    @JsonProperty("detected_classifications")
-    public void setDetectedClassifications(ItemList<Classification> detectedClassifications) { this.detectedClassifications = detectedClassifications; }
-
-    /**
      * Retrieve the {@code domainType} property (displayed as '{@literal Domain}') of the object.
      * @return {@code List<String>}
      */
@@ -281,20 +258,6 @@ public class DataFileField extends Classificationenabledgroup {
      */
     @JsonProperty("domainType")
     public void setDomaintype(List<String> domaintype) { this.domaintype = domaintype; }
-
-    /**
-     * Retrieve the {@code hasDataClassification} property (displayed as '{@literal Detected Data Classifications}') of the object.
-     * @return {@code ItemList<Classification>}
-     */
-    @JsonProperty("hasDataClassification")
-    public ItemList<Classification> getHasdataclassification() { return this.hasdataclassification; }
-
-    /**
-     * Set the {@code hasDataClassification} property (displayed as {@code Detected Data Classifications}) of the object.
-     * @param hasdataclassification the value to set
-     */
-    @JsonProperty("hasDataClassification")
-    public void setHasdataclassification(ItemList<Classification> hasdataclassification) { this.hasdataclassification = hasdataclassification; }
 
     /**
      * Retrieve the {@code implements_design_columns} property (displayed as '{@literal Implements Design Columns}') of the object.
@@ -617,20 +580,6 @@ public class DataFileField extends Classificationenabledgroup {
      */
     @JsonProperty("same_as_data_sources")
     public void setSameAsDataSources(ItemList<DataItem> sameAsDataSources) { this.sameAsDataSources = sameAsDataSources; }
-
-    /**
-     * Retrieve the {@code selected_classification} property (displayed as '{@literal Selected Data Classification}') of the object.
-     * @return {@code DataClass}
-     */
-    @JsonProperty("selected_classification")
-    public DataClass getSelectedClassification() { return this.selectedClassification; }
-
-    /**
-     * Set the {@code selected_classification} property (displayed as {@code Selected Data Classification}) of the object.
-     * @param selectedClassification the value to set
-     */
-    @JsonProperty("selected_classification")
-    public void setSelectedClassification(DataClass selectedClassification) { this.selectedClassification = selectedClassification; }
 
     /**
      * Retrieve the {@code suggested_term_assignments} property (displayed as '{@literal Suggested Term Assignments}') of the object.
