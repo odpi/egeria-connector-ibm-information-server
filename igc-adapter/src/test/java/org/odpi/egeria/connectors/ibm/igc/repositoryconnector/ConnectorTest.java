@@ -340,6 +340,9 @@ public class ConnectorTest {
         final String relationalTableGUID = "ce7e72b8-396a-4013-8688-f9d973067425";
         final String relationalTableName = "RelationalTable";
 
+        final String unknownTypeGUID = "6b60a73e-47bc-4096-9073-f94cab975958";
+        final String unknownTypeName = "DesignPattern";
+
         try {
             TypeDef byGUID = igcomrsMetadataCollection.getTypeDefByGUID(MockConstants.EGERIA_USER, relationalTableGUID);
             TypeDef byName = igcomrsMetadataCollection.getTypeDefByName(MockConstants.EGERIA_USER, relationalTableName);
@@ -348,6 +351,8 @@ public class ConnectorTest {
             assertEquals(byGUID.getName(), relationalTableName);
             assertEquals(byName.getGUID(), relationalTableGUID);
             assertEquals(byGUID, byName);
+            assertThrows(TypeDefNotKnownException.class, () -> igcomrsMetadataCollection.getTypeDefByGUID(MockConstants.EGERIA_USER, unknownTypeGUID));
+            assertThrows(TypeDefNotKnownException.class, () -> igcomrsMetadataCollection.getTypeDefByName(MockConstants.EGERIA_USER, unknownTypeName));
         } catch (InvalidParameterException | RepositoryErrorException | TypeDefNotKnownException e) {
             log.error("Unable to retrieve type definition: {} / {}", relationalTableGUID, relationalTableName, e);
             assertNull(e);
@@ -359,10 +364,47 @@ public class ConnectorTest {
     }
 
     @Test
+    public void testAttributeTypeDefSearches() {
+
+        try {
+            List<AttributeTypeDef> enums = igcomrsMetadataCollection.findAttributeTypeDefsByCategory(MockConstants.EGERIA_USER, AttributeTypeDefCategory.ENUM_DEF);
+            assertNotNull(enums);
+            assertEquals(enums.size(), 6);
+        } catch (InvalidParameterException | RepositoryErrorException e) {
+            log.error("Unable to search for attribute type defs by ENUM category.", e);
+            assertNull(e);
+        } catch (Exception e) {
+            log.error("Unexpected exception trying to search for attribute type definitions.", e);
+            assertNull(e);
+        }
+
+    }
+
+    @Test
+    public void testFindTypeDefsByExternalID() {
+
+        try {
+            assertThrows(InvalidParameterException.class, () -> igcomrsMetadataCollection.findTypesByExternalID(MockConstants.EGERIA_USER, null, null, null));
+            List<TypeDef> noTypes = igcomrsMetadataCollection.findTypesByExternalID(MockConstants.EGERIA_USER, "some", "org", "id");
+            assertNull(noTypes);
+        } catch (InvalidParameterException | RepositoryErrorException e) {
+            log.error("Unable to search for type defs by external ID.", e);
+            assertNull(e);
+        } catch (Exception e) {
+            log.error("Unexpected exception trying to search for type defs by external ID.", e);
+            assertNull(e);
+        }
+
+    }
+
+    @Test
     public void testAttributeTypeDefRetrievals() {
 
         final String dataClassAssignmentGUID = "2611892f-0527-478f-8843-a3aa2b9abb47";
         final String dataClassAssignmentName = "DataClassAssignmentStatus";
+
+        final String unknownTypeGUID = "ecb48ca2-4d29-4de9-99a1-bc4db9816d68";
+        final String unknownTypeName = "DiscoveryRequestStatus";
 
         try {
             AttributeTypeDef byGUID = igcomrsMetadataCollection.getAttributeTypeDefByGUID(MockConstants.EGERIA_USER, dataClassAssignmentGUID);
@@ -372,6 +414,8 @@ public class ConnectorTest {
             assertEquals(byGUID.getName(), dataClassAssignmentName);
             assertEquals(byName.getGUID(), dataClassAssignmentGUID);
             assertEquals(byGUID, byName);
+            assertThrows(TypeDefNotKnownException.class, () -> igcomrsMetadataCollection.getAttributeTypeDefByGUID(MockConstants.EGERIA_USER, unknownTypeGUID));
+            assertThrows(TypeDefNotKnownException.class, () -> igcomrsMetadataCollection.getAttributeTypeDefByName(MockConstants.EGERIA_USER, unknownTypeName));
         } catch (InvalidParameterException | RepositoryErrorException | TypeDefNotKnownException e) {
             log.error("Unable to retrieve attribute type definition: {} / {}", dataClassAssignmentGUID, dataClassAssignmentName, e);
             assertNull(e);
@@ -1648,6 +1692,41 @@ public class ConnectorTest {
                 1
         );
 
+        testFindEntitiesByPropertyValue(
+                "ac406bf8-e53e-49f1-9088-2af28bbbd285",
+                "Person",
+                repositoryHelper.getExactMatchRegex("(steward_user)=Mr. Gary Geeke"),
+                1
+        );
+
+        testFindEntitiesByPropertyValue(
+                "ac406bf8-e53e-49f1-9088-2af28bbbd285",
+                "Person",
+                repositoryHelper.getExactMatchRegex("Gary Geeke"),
+                1
+        );
+
+        testFindEntitiesByPropertyValue(
+                "ac406bf8-e53e-49f1-9088-2af28bbbd285",
+                "Person",
+                repositoryHelper.getEndsWithRegex("_user)=Mr. Gary Geeke"),
+                1
+        );
+
+        testFindEntitiesByPropertyValue(
+                "ac406bf8-e53e-49f1-9088-2af28bbbd285",
+                "Person",
+                repositoryHelper.getEndsWithRegex("Gary Geeke"),
+                1
+        );
+
+        testFindEntitiesByPropertyValue(
+                "ac406bf8-e53e-49f1-9088-2af28bbbd285",
+                "Person",
+                repositoryHelper.getEndsWithRegex("Geeke"),
+                1
+        );
+
     }
 
     @Test
@@ -1676,6 +1755,9 @@ public class ConnectorTest {
 
         final String methodName = "testFindDataClassAssignmentByProperty";
 
+        String typeGUID = "4df37335-7f0c-4ced-82df-3b2fd07be1bd";
+        String typeName = "DataClassAssignment";
+
         InstanceProperties ip = new InstanceProperties();
         ip = repositoryHelper.addEnumPropertyToInstance(sourceName, ip, "status", 0, "Discovered", "The data class assignment was discovered by an automated process.", methodName);
         ip = repositoryHelper.addIntPropertyToInstance(sourceName, ip, "confidence", 100, methodName);
@@ -1683,11 +1765,20 @@ public class ConnectorTest {
         ip = repositoryHelper.addIntPropertyToInstance(sourceName, ip, "valueFrequency", 34, methodName);
 
         testFindRelationshipsByProperty(
-                "4df37335-7f0c-4ced-82df-3b2fd07be1bd",
-                "DataClassAssignment",
+                typeGUID,
+                typeName,
                 ip,
                 MatchCriteria.ALL,
                 3);
+
+        // Try searching by the symbolic name of an enumeration, should not return any results because it is not a
+        // string property
+        List<Relationship> results = testFindRelationshipsByPropertyValue(
+                typeGUID,
+                typeName,
+                repositoryHelper.getExactMatchRegex("Proposed"),
+                0
+        );
 
     }
 
@@ -2305,6 +2396,72 @@ public class ConnectorTest {
             assertNull(e);
         } catch (Exception e) {
             log.error("Unexpected exception trying to search for {} relationships by property: {}", typeName, matchProperties, e);
+            assertNull(e);
+        }
+
+        if (totalNumberExpected <= 0) {
+            assertTrue(results == null || results.isEmpty());
+        } else {
+            assertNotNull(results);
+            assertFalse(results.isEmpty());
+            assertEquals(results.size(), totalNumberExpected);
+            for (Relationship result : results) {
+                assertEquals(result.getType().getTypeDefName(), typeName);
+                assertTrue(result.getVersion() > 1);
+
+                try {
+                    Relationship foundAgain = igcomrsMetadataCollection.isRelationshipKnown(MockConstants.EGERIA_USER, result.getGUID());
+                    assertNotNull(foundAgain);
+                    assertEquals(foundAgain, result);
+                } catch (InvalidParameterException | RepositoryErrorException e) {
+                    log.error("Unable to find relationship again by GUID: {}", result.getGUID());
+                    assertNull(e);
+                } catch (Exception e) {
+                    log.error("Unexpected exception trying to find relationship again by GUID: {}", result.getGUID(), e);
+                    assertNull(e);
+                }
+
+            }
+        }
+
+        return results;
+
+    }
+
+    /**
+     * Executes a common set of tests against a list of Relationship objects after first searching for them by property
+     * value.
+     *
+     * @param typeGUID the relationship type GUID to search
+     * @param typeName the name of the type to search
+     * @param searchCriteria the string to use for the search
+     * @param totalNumberExpected the total number of expected results
+     * @return {@code List<Relationship>} the results of the query
+     */
+    private List<Relationship> testFindRelationshipsByPropertyValue(String typeGUID,
+                                                               String typeName,
+                                                               String searchCriteria,
+                                                               int totalNumberExpected) {
+
+        List<Relationship> results = null;
+
+        try {
+            results = igcomrsMetadataCollection.findRelationshipsByPropertyValue(
+                    MockConstants.EGERIA_USER,
+                    typeGUID,
+                    searchCriteria,
+                    0,
+                    null,
+                    null,
+                    null,
+                    null,
+                    MockConstants.EGERIA_PAGESIZE
+            );
+        } catch (InvalidParameterException | TypeErrorException | RepositoryErrorException | PropertyErrorException | PagingErrorException | FunctionNotSupportedException | UserNotAuthorizedException e) {
+            log.error("Unable to search for {} relationships by criteria: {}", typeName, searchCriteria, e);
+            assertNull(e);
+        } catch (Exception e) {
+            log.error("Unexpected exception trying to search for {} relationships by criteria: {}", typeName, searchCriteria, e);
             assertNull(e);
         }
 
