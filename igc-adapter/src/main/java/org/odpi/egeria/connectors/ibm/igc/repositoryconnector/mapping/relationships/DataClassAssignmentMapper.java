@@ -19,14 +19,11 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
-import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Singleton to map the OMRS "DataClassAssignment" relationship for IGC "data_class" assets, including both
@@ -158,19 +155,18 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                     (DataClass) fromIgcObject,
                     userId
             );
-        } else if (toIgcObject == null || toIgcObject instanceof DataClass) {
-            Classificationenabledgroup fromObject = fromIgcObject instanceof Classificationenabledgroup ? (Classificationenabledgroup) fromIgcObject : null;
+        } else if (fromIgcObject instanceof Classificationenabledgroup) {
             mapDetectedClassifications_toDataClass(
                     igcomrsRepositoryConnector,
                     relationships,
-                    fromObject,
-                    (DataClass) toIgcObject,
+                    (Classificationenabledgroup) fromIgcObject,
+                    toIgcObject instanceof DataClass ? (DataClass) toIgcObject : null,
                     userId
             );
             mapSelectedClassifications_toDataClass(
                     igcomrsRepositoryConnector,
                     relationships,
-                    fromObject,
+                    (Classificationenabledgroup) fromIgcObject,
                     userId
             );
         }
@@ -185,7 +181,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                                                        String repositoryName,
                                                        IGCRestClient igcRestClient,
                                                        InstanceProperties matchProperties,
-                                                       MatchCriteria matchCriteria) throws FunctionNotSupportedException {
+                                                       MatchCriteria matchCriteria) {
 
         // If no search properties were provided, we can short-circuit and just return all such assignments via the
         // simple search criteria
@@ -443,7 +439,6 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
 
         final String methodName = "mapDetectedClassifications_toDataClass";
 
-        IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         OMRSRepositoryHelper repositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
         String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
 
@@ -470,12 +465,12 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         // For each of the detected classifications, create a new DataClassAssignment relationship
         for (Classification detectedClassification : detectedClassifications.getItems()) {
 
-            Reference dataClassObj = (Reference) igcRestClient.getPropertyByName(detectedClassification, "data_class");
+            DataClass dataClassObj = detectedClassification.getDataClass();
 
             /* Only proceed with the classified object if it is not a 'main_object' asset
              * (in this scenario, 'main_object' represents ColumnAnalysisMaster objects that are not accessible
              *  and will throw bad request (400) REST API errors) */
-            if (dataClassObj != null && !dataClassObj.getType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
+            if (dataClassObj != null && dataClassObj.getType() != null && !dataClassObj.getType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
                 try {
 
                     // Use 'classification' object to put RID of classification on the 'detected classification' relationships
