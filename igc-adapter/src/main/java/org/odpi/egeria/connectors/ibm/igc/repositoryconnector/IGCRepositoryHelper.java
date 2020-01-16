@@ -331,7 +331,7 @@ public class IGCRepositoryHelper {
         );
 
         if (limitResultsByClassification != null && !limitResultsByClassification.isEmpty() && classificationLimiters == null) {
-            if (log.isInfoEnabled()) { log.info("Classification limiters were specified, but none apply to the asset type {}, so excluding this asset type from search.", igcAssetType); }
+            log.info("Classification limiters were specified, but none apply to the asset type {}, so excluding this asset type from search.", igcAssetType);
         } else {
 
             IGCSearch igcSearch = new IGCSearch();
@@ -436,9 +436,7 @@ public class IGCRepositoryHelper {
                             log.error("Unable to lookup type for inclusion comparison: {}", entityTypeGUID, e);
                         }
                     }
-                    if (log.isDebugEnabled()) {
-                        log.debug("Include result for name '{}' and prefix '{}'? {}", unqualifiedName, prefix, includeResult);
-                    }
+                    log.debug("Include result for name '{}' and prefix '{}'? {}", unqualifiedName, prefix, includeResult);
                 }
 
                 if (includeResult) {
@@ -529,19 +527,19 @@ public class IGCRepositoryHelper {
             if (!reference.getType().equals(DEFAULT_IGC_TYPE)) {
                 EntityDetail ed = null;
 
-                if (log.isDebugEnabled()) { log.debug("processResults with mapper: {}", mapper.getClass().getCanonicalName()); }
+                log.debug("processResults with mapper: {}", mapper.getClass().getCanonicalName());
                 IGCEntityGuid idToLookup;
                 if (mapper.igcRidNeedsPrefix()) {
-                    if (log.isDebugEnabled()) { log.debug(" ... prefix required, getEntityDetail with: {}", mapper.getIgcRidPrefix() + "!" + reference.getId()); }
+                    log.debug(" ... prefix required, getEntityDetail with: {}", mapper.getIgcRidPrefix() + "!" + reference.getId());
                     idToLookup = new IGCEntityGuid(metadataCollectionId, reference.getType(), mapper.getIgcRidPrefix(), reference.getId());
                 } else {
-                    if (log.isDebugEnabled()) { log.debug(" ... no prefix required, getEntityDetail with: {}", reference.getId()); }
+                    log.debug(" ... no prefix required, getEntityDetail with: {}", reference.getId());
                     idToLookup = new IGCEntityGuid(metadataCollectionId, reference.getType(), reference.getId());
                 }
                 try {
                     ed = getEntityDetailFromFullAsset(userId, idToLookup, reference);
                 } catch (EntityNotKnownException e) {
-                    if (log.isErrorEnabled()) { log.error("Unable to find entity: {}", idToLookup); }
+                    log.error("Unable to find entity: {}", idToLookup, e);
                 }
                 if (ed != null && includeResult(ed, matchProperties, matchCriteria, searchCriteria)) {
                     entityDetails.add(ed);
@@ -598,7 +596,7 @@ public class IGCRepositoryHelper {
                 // If the type is a relationship-level type, then use a relationship-level ProxyMapping to determine
                 // the appropriate relationship ends
                 relationshipLevelRid = candidateTwo.getId();
-                if (log.isDebugEnabled()) { log.debug("processResults (relationship-level) with mapper: {}", mapper.getClass().getCanonicalName()); }
+                log.debug("processResults (relationship-level) with mapper: {}", mapper.getClass().getCanonicalName());
                 RelationshipMapping.RelationshipLevelProxyMapping pmRelationship = mapper.getRelationshipLevelProxyMapping();
                 String propertyToOne = pmRelationship.getIgcRelationshipPropertyToEndOne();
                 String propertyToTwo = pmRelationship.getIgcRelationshipPropertyToEndTwo();
@@ -615,7 +613,7 @@ public class IGCRepositoryHelper {
                 // etc and will simply result in 400-code Bad Request messages from the API)
                 endTwos.add(candidateTwo);
 
-                if (log.isDebugEnabled()) { log.debug("processResults with mapper: {}", mapper.getClass().getCanonicalName()); }
+                log.debug("processResults with mapper: {}", mapper.getClass().getCanonicalName());
                 RelationshipMapping.ProxyMapping pmTwo = mapper.getProxyTwoMapping();
                 List<String> relationshipProperties = pmTwo.getIgcRelationshipProperties();
                 for (String igcPropertyName : relationshipProperties) {
@@ -661,7 +659,7 @@ public class IGCRepositoryHelper {
                         );
                         Relationship relationship = null;
                         try {
-                            relationship = igcomrsMetadataCollection.getRelationship(userId, idToLookup.asGuid());
+                            relationship = igcomrsMetadataCollection.getRelationship(userId, idToLookup.toString());
                         } catch (InvalidParameterException | RelationshipNotKnownException e) {
                             log.error("Unable to find relationship: {}", idToLookup);
                         }
@@ -869,7 +867,7 @@ public class IGCRepositoryHelper {
         if (classificationMapping != null) {
             igcSearchConditionSet = classificationMapping.getIGCSearchCriteria(repositoryHelper, repositoryName, null);
         } else {
-            if (log.isWarnEnabled()) { log.warn("Classification {} cannot be applied to IGC asset type {} - excluding from search limitations.", classificationName, igcAssetType); }
+            log.warn("Classification {} cannot be applied to IGC asset type {} - excluding from search limitations.", classificationName, igcAssetType);
         }
 
         return (igcSearchConditionSet.size() > 0 ? igcSearchConditionSet : null);
@@ -1039,7 +1037,7 @@ public class IGCRepositoryHelper {
     private void validateGuidAndType(IGCEntityGuid guid,
                                      String methodName) throws EntityNotKnownException, RepositoryErrorException {
 
-        if (log.isDebugEnabled()) { log.debug("{} with guid = {}", methodName, guid); }
+        log.debug("{} with guid = {}", methodName, guid);
 
         if (guid == null) {
             raiseEntityNotKnownException(methodName, "<null>", "<null>", repositoryName);
@@ -1051,7 +1049,7 @@ public class IGCRepositoryHelper {
                 /* If the asset type returned has an IGC-listed type of 'main_object', it isn't one that the REST API
                  * of IGC supports (eg. a data rule detail object, a column analysis master object, etc)...
                  * Trying to further process it will result in failed REST API requests; so we should skip these objects */
-                raiseRepositoryErrorException(IGCOMRSErrorCode.UNSUPPORTED_OBJECT_TYPE, methodName, guid.asGuid(), igcType, repositoryName);
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNSUPPORTED_OBJECT_TYPE, methodName, guid.toString(), igcType, repositoryName);
             }
         }
 
@@ -1123,12 +1121,12 @@ public class IGCRepositoryHelper {
     private EntityMappingInstance getMappingInstanceForParameters(IGCEntityGuid guid,
                                                                   Reference asset,
                                                                   String userId) {
-        if (log.isDebugEnabled()) { log.debug("Looking for mapper for retrieved asset with guid {}", guid.asGuid()); }
+        log.debug("Looking for mapper for retrieved asset with guid {}", guid);
 
         EntityMappingInstance entityMap = null;
         EntityMapping found = getEntityMappingByIgcType(guid.getAssetType(), guid.getGeneratedPrefix());
         if (found != null) {
-            if (log.isDebugEnabled()) { log.debug("Found mapper class: {} ({})", found.getClass().getCanonicalName(), found); }
+            log.debug("Found mapper class: {} ({})", found.getClass().getCanonicalName(), found);
             entityMap = new EntityMappingInstance(
                     found,
                     igcomrsRepositoryConnector,
@@ -1136,7 +1134,7 @@ public class IGCRepositoryHelper {
                     userId
             );
         } else {
-            if (log.isDebugEnabled()) { log.debug("No mapper class found!"); }
+            log.debug("No mapper class found!");
         }
 
         return entityMap;
@@ -1154,12 +1152,12 @@ public class IGCRepositoryHelper {
      */
     public EntityMappingInstance getMappingInstanceForParameters(String igcAssetType, String rid, String prefix, String userId) {
 
-        if (log.isDebugEnabled()) { log.debug("Looking for mapper for type {} with prefix {}", igcAssetType, prefix); }
+        log.debug("Looking for mapper for type {} with prefix {}", igcAssetType, prefix);
 
         EntityMappingInstance entityMap = null;
         EntityMapping found = getEntityMappingByIgcType(igcAssetType, prefix);
         if (found != null) {
-            if (log.isDebugEnabled()) { log.debug("Found mapper class: {} ({})", found.getClass().getCanonicalName(), found); }
+            log.debug("Found mapper class: {} ({})", found.getClass().getCanonicalName(), found);
             entityMap = new EntityMappingInstance(
                     found,
                     igcomrsRepositoryConnector,
@@ -1168,7 +1166,7 @@ public class IGCRepositoryHelper {
                     userId
             );
         } else {
-            if (log.isDebugEnabled()) { log.debug("No mapper class found!"); }
+            log.debug("No mapper class found!");
         }
 
         return entityMap;
@@ -1243,7 +1241,7 @@ public class IGCRepositoryHelper {
                     log.warn("Unhandled search condition for unknown IGC property from OMRS property: {}", omrsPropertyName);
                 } else if (igcPropertyName.equals(EntityMapping.COMPLEX_MAPPING_SENTINEL)) {
 
-                    if (log.isDebugEnabled()) { log.debug("Adding complex property search criteria for: {}", omrsPropertyName); }
+                    log.debug("Adding complex property search criteria for: {}", omrsPropertyName);
                     mapping.addComplexPropertySearchCriteria(
                             repositoryHelper,
                             repositoryName,
@@ -1255,7 +1253,7 @@ public class IGCRepositoryHelper {
 
                 } else if (!igcPropertyName.equals(EntityMapping.LITERAL_MAPPING_SENTINEL)) {
 
-                    if (log.isDebugEnabled()) { log.debug("Adding non-literal property search criteria for: {}", omrsPropertyName); }
+                    log.debug("Adding non-literal property search criteria for: {}", omrsPropertyName);
                     addIGCSearchConditionFromValue(
                             repositoryHelper,
                             repositoryName,
@@ -1378,7 +1376,7 @@ public class IGCRepositoryHelper {
                 break;
             default:
                 // Do nothing
-                if (log.isWarnEnabled()) { log.warn("Unable to handle search criteria for value type: {}", category); }
+                log.warn("Unable to handle search criteria for value type: {}", category);
                 break;
         }
 
@@ -1469,7 +1467,7 @@ public class IGCRepositoryHelper {
                 break;*/
             default:
                 // Do nothing
-                if (log.isWarnEnabled()) { log.warn("Unable to handle value equivalency for value type: {}", category); }
+                log.warn("Unable to handle value equivalency for value type: {}", category);
                 break;
         }
 
@@ -1611,11 +1609,11 @@ public class IGCRepositoryHelper {
         OMRSStub stub = null;
         if (results.getPaging().getNumTotal() > 0) {
             if (results.getPaging().getNumTotal() > 1) {
-                if (log.isWarnEnabled()) { log.warn("Found multiple stubs for asset, taking only the first: {}", stubName); }
+                log.warn("Found multiple stubs for asset, taking only the first: {}", stubName);
             }
             stub = results.getItems().get(0);
         } else {
-            if (log.isInfoEnabled()) { log.info("No stub found for asset: {}", stubName); }
+            log.info("No stub found for asset: {}", stubName);
         }
         return stub;
 
@@ -1683,11 +1681,11 @@ public class IGCRepositoryHelper {
             xmlStreamWriter.close();
 
         } catch (XMLStreamException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to write XML stream: {}", asset, e); }
+            log.error("Unable to write XML stream: {}", asset, e);
         }
 
         String stubXML = stringWriter.getBuffer().toString();
-        if (log.isDebugEnabled()) { log.debug("Constructed XML for stub: {}", stubName); }
+        log.debug("Constructed XML for stub: {}", stubName);
 
         // Upsert using the constructed asset XML
         String results = igcRestClient.upsertOpenIgcAsset(stubXML);
@@ -1761,7 +1759,7 @@ public class IGCRepositoryHelper {
         }
 
         String stubXML = stringWriter.getBuffer().toString();
-        if (log.isDebugEnabled()) { log.debug("Constructed XML for stub deletion: {}", stubName); }
+        log.debug("Constructed XML for stub deletion: {}", stubName);
 
         // Delete using the constructed asset XML
         return igcRestClient.deleteOpenIgcAsset(stubXML);
@@ -1806,7 +1804,7 @@ public class IGCRepositoryHelper {
         if (assetType != null) {
 
             if (assetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
-                if (log.isDebugEnabled()) { log.debug("Received 'main_object' as type, looking up basic ref to determine actual type."); }
+                log.debug("Received 'main_object' as type, looking up basic ref to determine actual type.");
                 fullAsset = igcRestClient.getAssetRefById(rid);
                 if (fullAsset != null) {
                     assetType = fullAsset.getType();
@@ -1844,19 +1842,19 @@ public class IGCRepositoryHelper {
 
                     }
                 } else {
-                    if (log.isInfoEnabled()) { log.info("No registered POJO for asset type {} -- returning basic reference.", assetType); }
+                    log.info("No registered POJO for asset type {} -- returning basic reference.", assetType);
                     fullAsset = igcRestClient.getAssetRefById(rid);
                 }
             } else {
-                if (log.isInfoEnabled()) { log.info("Object retrieved remained 'main_object' -- returning: {}", fullAsset); }
+                log.info("Object retrieved remained 'main_object' -- returning: {}", fullAsset);
             }
 
         } else {
             fullAsset = igcRestClient.getAssetRefById(rid);
             if (fullAsset == null) {
-                if (log.isInfoEnabled()) { log.info("Unable to retrieve any asset with RID {} -- assume it was deleted.", rid); }
+                log.info("Unable to retrieve any asset with RID {} -- assume it was deleted.", rid);
             } else {
-                if (log.isInfoEnabled()) { log.info("No asset type provided -- returning basic reference."); }
+                log.info("No asset type provided -- returning basic reference.");
             }
         }
 

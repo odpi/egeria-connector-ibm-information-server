@@ -19,11 +19,23 @@ public class EnumMapping extends AttributeMapping {
     private HashMap<String, EnumElementDef> enumDefByIgcValue;
     private EnumElementDef defaultEnum;
 
+    /**
+     * Create an enumeration mapping for the specified OMRS attribute type def.
+     *
+     * @param omrsAttributeTypeDefName the OMRS attribute type def for which to create the mapping
+     */
     public EnumMapping(String omrsAttributeTypeDefName) {
         super(IGCPropertyType.STRING, omrsAttributeTypeDefName);
         enumDefByIgcValue = new HashMap<>();
     }
 
+    /**
+     * Add a default enumeration mapping using the provided parameters.
+     *
+     * @param omrsOrdinal the default ordinal value
+     * @param omrsSymbolicName the default symbolic name
+     * @param description the default description
+     */
     public void addDefaultEnumMapping(int omrsOrdinal, String omrsSymbolicName, String description) {
         defaultEnum = new EnumElementDef();
         defaultEnum.setOrdinal(omrsOrdinal);
@@ -31,6 +43,14 @@ public class EnumMapping extends AttributeMapping {
         defaultEnum.setDescription(description);
     }
 
+    /**
+     * Add a enumeration mapping using the provided parameters.
+     *
+     * @param igcValue the IGC value for the enumeration
+     * @param omrsOrdinal the OMRS ordinal value
+     * @param omrsSymbolicName the OMRS symbolic name
+     * @param description the OMRS description
+     */
     public void addEnumMapping(String igcValue, int omrsOrdinal, String omrsSymbolicName, String description) {
         EnumElementDef enumElementDef = new EnumElementDef();
         enumElementDef.setOrdinal(omrsOrdinal);
@@ -39,6 +59,12 @@ public class EnumMapping extends AttributeMapping {
         enumDefByIgcValue.put(igcValue, enumElementDef);
     }
 
+    /**
+     * Retrieve the mapped OMRS enumeration from the provided IGC value.
+     *
+     * @param igcValue the IGC value for which to retrieve the OMRS mapped value
+     * @return EnumPropertyValue
+     */
     public EnumPropertyValue getEnumMappingByIgcValue(String igcValue) {
         EnumPropertyValue value = new EnumPropertyValue();
         if (enumDefByIgcValue.containsKey(igcValue)) {
@@ -52,6 +78,11 @@ public class EnumMapping extends AttributeMapping {
         return value;
     }
 
+    /**
+     * Retrieve the default enumeration value.
+     *
+     * @return EnumPropertyValue
+     */
     public EnumPropertyValue getDefaultEnumValue() {
         EnumPropertyValue value = new EnumPropertyValue();
         if (defaultEnum != null) {
@@ -59,7 +90,7 @@ public class EnumMapping extends AttributeMapping {
             value.setSymbolicName(defaultEnum.getValue());
             value.setDescription(defaultEnum.getDescription());
         } else {
-            if (log.isErrorEnabled()) { log.error("Could not find default enum value for {}.", getOmrsAttributeTypeDefName()); }
+            log.error("Could not find default enum value for {}.", getOmrsAttributeTypeDefName());
         }
         return value;
     }

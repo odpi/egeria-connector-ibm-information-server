@@ -119,7 +119,7 @@ public class DataStageCache {
             conditionSet.addCondition(cFrom);
             conditionSet.setMatchAnyCondition(false);
         }
-        if (log.isInfoEnabled()) { log.info(" ... searching for changed jobs > {} and <= {}", fromTime, toTime); }
+        log.info(" ... searching for changed jobs > {} and <= {}", fromTime, toTime);
         igcSearch.addConditions(conditionSet);
         cacheChangedJobs(igcRestClient.search(igcSearch));
 

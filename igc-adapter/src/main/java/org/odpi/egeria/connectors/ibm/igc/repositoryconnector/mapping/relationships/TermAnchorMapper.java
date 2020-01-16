@@ -72,10 +72,10 @@ public class TermAnchorMapper extends RelationshipMapping {
                 Reference root = new Reference(rootIdentity.getName(), rootIdentity.getAssetType(), rootIdentity.getRid());
                 asList.add(root);
             } else {
-                if (log.isErrorEnabled()) { log.error("Term has no identity: {}", term); }
+                log.error("Term has no identity: {}", term);
             }
         } else {
-            if (log.isWarnEnabled()) { log.warn("Not a term asset, just returning as-is: {}", term); }
+            log.warn("Not a term asset, just returning as-is: {}", term);
             asList.add(term);
         }
         return asList;
@@ -115,7 +115,7 @@ public class TermAnchorMapper extends RelationshipMapping {
             IGCSearchConditionSet conditionSet = new IGCSearchConditionSet();
             if (toIgcObject == null) {
                 // If we have a glossary-level category, create term anchors for all of its child terms
-                if (log.isDebugEnabled()) { log.debug("Looking for all offspring terms from: {} of type {}", fromIgcObject.getName(), fromIgcObject.getType()); }
+                log.debug("Looking for all offspring terms from: {} of type {}", fromIgcObject.getName(), fromIgcObject.getType());
                 // We are already at the glossary-level category, so we need to get all the children terms
                 IGCSearchCondition byCatPath = new IGCSearchCondition("parent_category.category_path", "=", fromIgcObject.getId());
                 IGCSearchCondition byParent = new IGCSearchCondition("parent_category", "=", fromIgcObject.getId());
@@ -125,7 +125,7 @@ public class TermAnchorMapper extends RelationshipMapping {
             } else {
                 // If we have a glossary-level category and a single other term object, create term anchors for just
                 // that single term
-                if (log.isDebugEnabled()) { log.debug("Looking for single terms for: {} of type {}", toIgcObject.getName(), toIgcObject.getType()); }
+                log.debug("Looking for single terms for: {} of type {}", toIgcObject.getName(), toIgcObject.getType());
                 IGCSearchCondition byCatPath = new IGCSearchCondition("parent_category.category_path", "=", fromIgcObject.getId());
                 IGCSearchCondition byParent = new IGCSearchCondition("parent_category", "=", fromIgcObject.getId());
                 IGCSearchCondition byTerm = new IGCSearchCondition("_id", "=", toIgcObject.getId());
@@ -144,7 +144,7 @@ public class TermAnchorMapper extends RelationshipMapping {
             ItemList<Term> terms = igcRestClient.search(igcSearch);
             if (terms != null) {
                 terms.getAllPages(igcRestClient);
-                if (log.isDebugEnabled()) { log.debug(" ... found a total of {} offspring terms.", terms.getItems().size()); }
+                log.debug(" ... found a total of {} offspring terms.", terms.getItems().size());
                 for (Term term : terms.getItems()) {
                     try {
                         Relationship relationship = getMappedRelationship(
@@ -176,7 +176,7 @@ public class TermAnchorMapper extends RelationshipMapping {
                     rootIdentity.getAssetType(),
                     IGCRestConstants.getModificationProperties());
             if (root != null) {
-                if (log.isDebugEnabled()) { log.debug("Mapping ultimate parent category from: {} of type {}", fromIgcObject.getName(), fromIgcObject.getType()); }
+                log.debug("Mapping ultimate parent category from: {} of type {}", fromIgcObject.getName(), fromIgcObject.getType());
                 try {
                     Relationship relationship = getMappedRelationship(
                             igcomrsRepositoryConnector,
@@ -198,7 +198,7 @@ public class TermAnchorMapper extends RelationshipMapping {
             }
 
         } else {
-            if (log.isWarnEnabled()) { log.warn("Found unexpected asset type during relationship mapping: {}", fromIgcObject); }
+            log.warn("Found unexpected asset type during relationship mapping: {}", fromIgcObject);
         }
 
     }
@@ -215,7 +215,7 @@ public class TermAnchorMapper extends RelationshipMapping {
     public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                     Reference oneObject,
                                                     Reference otherObject) {
-        if (log.isDebugEnabled()) { log.debug("Considering inclusion of objects: {} ({}) and {} ({})", oneObject.getName(), oneObject.getType(), otherObject.getName(), otherObject.getType()); }
+        log.debug("Considering inclusion of objects: {} ({}) and {} ({})", oneObject.getName(), oneObject.getType(), otherObject.getName(), otherObject.getType());
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         return (GlossaryMapper.isGlossary(igcRestClient, oneObject) && otherObject.getType().equals("term"))
                 || (oneObject.getType().equals("term") && GlossaryMapper.isGlossary(igcRestClient, otherObject));

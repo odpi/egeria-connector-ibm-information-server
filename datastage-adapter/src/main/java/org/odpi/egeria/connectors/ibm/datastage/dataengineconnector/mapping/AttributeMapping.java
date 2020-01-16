@@ -33,7 +33,7 @@ class AttributeMapping extends BaseMapping {
      */
     AttributeMapping(DataStageJob job, Link link, String stageNameSuffix) {
         super(job.getIgcRestClient());
-        if (log.isDebugEnabled()) { log.debug("Creating new AttributeMapping from job and link..."); }
+        log.debug("Creating new AttributeMapping from job and link...");
         attributes = new ArrayList<>();
         if (link != null) {
             ItemList<DataItem> stageColumns = link.getStageColumns();
@@ -62,7 +62,7 @@ class AttributeMapping extends BaseMapping {
      */
     AttributeMapping(DataStageJob job, List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
         super(job.getIgcRestClient());
-        if (log.isDebugEnabled()) { log.debug("Creating new AttributeMapping from job and fields..."); }
+        log.debug("Creating new AttributeMapping from job and fields...");
         attributes = new ArrayList<>();
         if (fields != null && !fields.isEmpty()) {
             for (Classificationenabledgroup field : fields) {

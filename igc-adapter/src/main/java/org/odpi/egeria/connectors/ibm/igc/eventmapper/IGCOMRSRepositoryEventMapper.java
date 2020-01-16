@@ -222,7 +222,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      */
     @Override
     public void processEvent(String event) {
-        if (log.isDebugEnabled()) { log.debug("Processing event: {}", event); }
+        log.debug("Processing event: {}", event);
         if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
             processEventV117(event);
         } else {
@@ -290,7 +290,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     break;
             }
         } catch (IOException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to translate event {} into object.", event, e); }
+            log.error("Unable to translate event {} into object.", event, e);
         }
 
     }
@@ -339,7 +339,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 processAsset(event.getMergedRID(), "data_connection");
                 break;
             default:
-                if (log.isWarnEnabled()) { log.warn("Found unhandled action type '{}' for data connection on event: {}", action, event); }
+                log.warn("Found unhandled action type '{}' for data connection on event: {}", action, event);
                 break;
         }
 
@@ -367,10 +367,10 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 }
                 break;
             case InfosphereEventsAssetEvent.ACTION_ASSIGNED_RELATIONSHIP:
-                if (log.isDebugEnabled()) { log.debug("Ignoring ASSIGNED_RELATIONSHIP event -- should be handled already by an earlier CREATE or MODIFY event: {}", event); }
+                log.debug("Ignoring ASSIGNED_RELATIONSHIP event -- should be handled already by an earlier CREATE or MODIFY event: {}", event);
                 break;
             default:
-                if (log.isWarnEnabled()) { log.warn("Action '{}' is not yet implemented: {}", action, event); }
+                log.warn("Action '{}' is not yet implemented: {}", action, event);
                 break;
         }
 
@@ -389,7 +389,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             case InfosphereEventsIAEvent.COL_ANALYZED:
             case InfosphereEventsIAEvent.COL_CLASSIFIED:
                 // TODO: could potentially retrieve more from these via IA REST API...
-                if (log.isInfoEnabled()) { log.info("Column / field analyzed or classified, but not yet published -- skipping: {}", action); }
+                log.info("Column / field analyzed or classified, but not yet published -- skipping: {}", action);
                 break;
             case InfosphereEventsIAEvent.TBL_PUBLISHED:
                 // This is the only event we can really do something with, as IGC API can only see
@@ -410,7 +410,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         searchAssetType = "data_file_field";
                         break;
                     default:
-                        if (log.isWarnEnabled()) { log.warn("Unimplemented asset type '{}' for IA publishing: {}", containerAsset.getType(), event); }
+                        log.warn("Unimplemented asset type '{}' for IA publishing: {}", containerAsset.getType(), event);
                         break;
                 }
                 // First process the containing asset itself
@@ -424,16 +424,16 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 ItemList<Reference> subAssets = igcRestClient.search(igcSearch);
                 if (subAssets != null) {
                     subAssets.getAllPages(igcRestClient);
-                    if (log.isDebugEnabled()) { log.debug("Processing {} child assets from IA publication: {}", subAssets.getPaging().getNumTotal(), containerRid); }
+                    log.debug("Processing {} child assets from IA publication: {}", subAssets.getPaging().getNumTotal(), containerRid);
                     for (Reference child : subAssets.getItems()) {
                         processAsset(child.getId(), child.getType());
                     }
                 } else {
-                    if (log.isWarnEnabled()) { log.warn("Unable to find any sub-assets for IA published container '{}': {}", containerRid, event); }
+                    log.warn("Unable to find any sub-assets for IA published container '{}': {}", containerRid, event);
                 }
                 break;
             default:
-                if (log.isInfoEnabled()) { log.info("Action '{}' is not yet implemented for IA: {}", action, event); }
+                log.info("Action '{}' is not yet implemented for IA: {}", action, event);
                 break;
         }
 
@@ -454,9 +454,9 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         try {
             detail = igcRepositoryHelper.getEntityDetailFromFullAsset(localServerUserId, guid, asset);
         } catch (EntityNotKnownException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to find EntityDetail for GUID: {}", guid, e); }
+            log.error("Unable to find EntityDetail for GUID: {}", guid, e);
         } catch (RepositoryErrorException e) {
-            if (log.isErrorEnabled()) { log.error("Unexpected error in retrieving EntityDetail for GUID: {}", guid, e); }
+            log.error("Unexpected error in retrieving EntityDetail for GUID: {}", guid, e);
         }
         return detail;
 
@@ -474,20 +474,20 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     private EntityDetail getEntityDetailForStubWithGUID(OMRSStub stub, IGCEntityGuid guid) {
 
         EntityDetail detail = null;
-        if (log.isDebugEnabled()) { log.debug("Retrieving EntityDetail for stub: {}", stub); }
+        log.debug("Retrieving EntityDetail for stub: {}", stub);
         Reference asset = getIgcAssetFromStubPayload(stub);
         if (asset != null) {
             // If no RID was provided, take it from the asset we retrieved
             if (guid == null) {
                 guid = igcRepositoryHelper.getEntityGuid(asset.getType(), null, asset.getId());
             }
-            if (log.isDebugEnabled()) { log.debug(" ... retrieved asset from stub: {}", asset); }
+            log.debug(" ... retrieved asset from stub: {}", asset);
             try {
                 detail = igcRepositoryHelper.getEntityDetailFromFullAsset(localServerUserId, guid, asset);
             } catch (EntityNotKnownException e) {
-                if (log.isErrorEnabled()) { log.error("Unable to find EntityDetail for stub with GUID: {}", guid, e); }
+                log.error("Unable to find EntityDetail for stub with GUID: {}", guid, e);
             } catch (RepositoryErrorException e) {
-                if (log.isErrorEnabled()) { log.error("Unexpected error in retrieving EntityDetail for stub: {}", stub.getId(), e); }
+                log.error("Unexpected error in retrieving EntityDetail for stub: {}", stub.getId(), e);
             }
         }
         return detail;
@@ -503,7 +503,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     private Reference getIgcAssetFromStubPayload(OMRSStub stub) {
         Reference asset = null;
         if (stub != null) {
-            if (log.isDebugEnabled()) { log.debug("Retrieving IGC Reference for stub payload: {}", stub.getPayload()); }
+            log.debug("Retrieving IGC Reference for stub payload: {}", stub.getPayload());
             asset = igcomrsRepositoryConnector.getIGCRestClient().readJSONIntoPOJO(stub.getPayload());
             asset.setFullyRetrieved();
         }
@@ -528,7 +528,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     String rid = assetTokens[1];
                     dict.put(rid, IGCRestConstants.getImamTypeToIgcType().getOrDefault(type, null));
                 } else {
-                    if (log.isWarnEnabled()) { log.warn("Unexpected number of tokens ({}) from event payload: {}", assetTokens.length, payload); }
+                    log.warn("Unexpected number of tokens ({}) from event payload: {}", assetTokens.length, payload);
                 }
             }
         }
@@ -567,7 +567,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         // TODO: make use of 'limitToPrefix' to limit processing to only generated entities
 
-        if (log.isDebugEnabled()) { log.debug("processAsset called with rid {} and type {}", rid, assetType); }
+        log.debug("processAsset called with rid {} and type {}", rid, assetType);
 
         Reference latestVersion = igcRepositoryHelper.getFullAssetDetails(rid, assetType);
 
@@ -578,7 +578,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 // this should also ensure that any generated entities are purged
                 sendPurgedEntity(assetType, rid);
             } else {
-                if (log.isWarnEnabled()) { log.warn("No asset type was provided for purged RID {} -- cannot generate purgeEntity event.", rid); }
+                log.warn("No asset type was provided for purged RID {} -- cannot generate purgeEntity event.", rid);
             }
         } else {
 
@@ -592,7 +592,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             // Output any entities first
             if (stub == null) {
                 // If there is no stub, we need to treat this as a new entity
-                if (log.isDebugEnabled()) { log.debug("Creating a new entity and stub for: {}", latestVersion.getId()); }
+                log.debug("Creating a new entity and stub for: {}", latestVersion.getId());
                 sendNewEntity(latestVersion);
             } else if (!changedProperties.isEmpty()) {
                 // Otherwise, it should be treated as an updated entity, but only if there was some change
@@ -608,7 +608,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 }
                 sendUpdatedEntity(latestVersion, stub);
             } else {
-                if (log.isInfoEnabled()) { log.info("Skipping asset - no changes detected: {}", latestVersion.getId()); }
+                log.info("Skipping asset - no changes detected: {}", latestVersion.getId());
             }
 
             // Retrieve the mapping from IGC property name to OMRS relationship type
@@ -616,7 +616,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     latestVersion.getType(),
                     localServerUserId
             );
-            if (log.isDebugEnabled()) { log.debug(" ... found mappings: {}", relationshipMap); }
+            log.debug(" ... found mappings: {}", relationshipMap);
 
             // Regardless of whether changedProperties is empty or not, we need to potentially process the
             // relationships for generated types (ie. where the igcProperty = self-reference sentinel), and this
@@ -633,10 +633,10 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             if (!changedProperties.isEmpty()) {
                 // Iterate through the properties that differ, looking for any that represent a mapped relationship
                 for (String igcProperty : changeSet.getChangedProperties()) {
-                    if (log.isDebugEnabled()) { log.debug(" ... checking for any relationship on: {}", igcProperty); }
+                    log.debug(" ... checking for any relationship on: {}", igcProperty);
                     if (relationshipMap.containsKey(igcProperty)) {
                         List<ChangeSet.Change> changesForProperty = changeSet.getChangesForProperty(igcProperty);
-                        if (log.isDebugEnabled()) { log.debug(" ...... found differences for property: {}", changesForProperty); }
+                        log.debug(" ...... found differences for property: {}", changesForProperty);
                         for (RelationshipMapping relationshipMapping : relationshipMap.get(igcProperty)) {
                             processRelationships(
                                     relationshipMapping,
@@ -669,7 +669,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                       List<ChangeSet.Change> changesForProperty,
                                       IGCRelationshipGuid relationshipTriggerGUID) {
 
-        if (log.isDebugEnabled()) { log.debug("processRelationships called with relationshipMapping {}, reference {} and changes {}", relationshipMapping, latestVersion, changesForProperty); }
+        log.debug("processRelationships called with relationshipMapping {}, reference {} and changes {}", relationshipMapping, latestVersion, changesForProperty);
 
         for (ChangeSet.Change change : changesForProperty) {
 
@@ -678,11 +678,11 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             if (referenceListProperties != null) {
 
                 Object relatedValue = change.getNewValue(referenceListProperties);
-                if (log.isDebugEnabled()) { log.debug(" ... found value: {}", relatedValue); }
+                log.debug(" ... found value: {}", relatedValue);
                 if (relatedValue != null) {
                     if (relatedValue instanceof ItemList) {
 
-                        if (log.isDebugEnabled()) { log.debug(" ... found ItemList, processing each item"); }
+                        log.debug(" ... found ItemList, processing each item");
                         ItemList<?> related = (ItemList<?>) relatedValue;
                         for (Reference relatedAsset : related.getItems()) {
                             processOneOrMoreRelationships(
@@ -696,7 +696,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         }
 
                     } else if (relatedValue instanceof Reference) {
-                        if (log.isDebugEnabled()) { log.debug(" ... found single Reference, processing it"); }
+                        log.debug(" ... found single Reference, processing it");
                         Reference relatedAsset = (Reference) relatedValue;
                         processOneOrMoreRelationships(
                                 relationshipMapping,
@@ -711,16 +711,16 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         // as needing replacement rather than the object as a whole -- this _should_ already be handled
                         // automatically by the change processing, so if we arrive here we missed something in the
                         // ChangeSet class's processing
-                        if (log.isErrorEnabled()) { log.error(" ... change consolidation in ChangeSet did not work: {}", change); }
+                        log.error(" ... change consolidation in ChangeSet did not work: {}", change);
                     } else if (!change.getIgcPropertyPath().endsWith("_name") && !change.getIgcPropertyPath().endsWith("_url")) {
                         // if the path ends with '_name' or '_url' then we should already be handling it by the '_id' clause above
-                        if (log.isWarnEnabled()) { log.warn("Expected relationship for path '{}' for guid {} but found neither Reference nor ItemList: {}", change.getIgcPropertyPath(), latestVersion.getId(), relatedValue); }
+                        log.warn("Expected relationship for path '{}' for guid {} but found neither Reference nor ItemList: {}", change.getIgcPropertyPath(), latestVersion.getId(), relatedValue);
                     }
                 } else {
-                    if (log.isWarnEnabled()) { log.warn("Expected relationship for path '{}' for guid {} but found nothing.", change.getIgcPropertyPath(), latestVersion.getId()); }
+                    log.warn("Expected relationship for path '{}' for guid {} but found nothing.", change.getIgcPropertyPath(), latestVersion.getId());
                 }
             } else {
-                if (log.isWarnEnabled()) { log.warn("No registered POJO to translate asset type '{}' for guid {} -- skipping its relationships.", assetType, latestVersion.getId()); }
+                log.warn("No registered POJO to translate asset type '{}' for guid {} -- skipping its relationships.", assetType, latestVersion.getId());
             }
 
         }
@@ -755,7 +755,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         // Only proceed if there is actually some related RID (ie. it wasn't just an empty list of relationships)
         if (relatedRID != null && !relatedRID.equals("null")) {
 
-            if (log.isDebugEnabled()) { log.debug("processOneOrMoreRelationships processing between {} and {} for type: {}", latestVersionRID, relatedRID, omrsRelationshipType); }
+            log.debug("processOneOrMoreRelationships processing between {} and {} for type: {}", latestVersionRID, relatedRID, omrsRelationshipType);
 
             RelationshipMapping.ProxyMapping pmOne = relationshipMapping.getProxyOneMapping();
             RelationshipMapping.ProxyMapping pmTwo = relationshipMapping.getProxyTwoMapping();
@@ -779,13 +779,13 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 }
             } else if (relationshipMapping.sameTypeOnBothEnds() && !relationshipMapping.samePropertiesOnBothEnds()) {
                 String igcPropertyName = change.getIgcPropertyName();
-                if (log.isDebugEnabled()) { log.debug(" ... relationship is the same on both ends, but property differs: {}", igcPropertyName); }
+                log.debug(" ... relationship is the same on both ends, but property differs: {}", igcPropertyName);
                 if (pmOne.getIgcRelationshipProperties().contains(igcPropertyName)) {
-                    if (log.isDebugEnabled()) { log.debug(" ... proxy mapping 1 contains the property, setting 1 from '{}' and 2 from '{}'", latestVersion.getName(), relatedAsset.getName()); }
+                    log.debug(" ... proxy mapping 1 contains the property, setting 1 from '{}' and 2 from '{}'", latestVersion.getName(), relatedAsset.getName());
                     proxyOnes = relationshipMapping.getProxyOneAssetFromAsset(latestVersion, igcRestClient);
                     proxyTwos = relationshipMapping.getProxyTwoAssetFromAsset(relatedAsset, igcRestClient);
                 } else if (pmTwo.getIgcRelationshipProperties().contains(igcPropertyName)) {
-                    if (log.isDebugEnabled()) { log.debug(" ... proxy mapping 2 contains the property, setting 1 from '{}' and 2 from '{}'", relatedAsset.getName(), latestVersion.getName()); }
+                    log.debug(" ... proxy mapping 2 contains the property, setting 1 from '{}' and 2 from '{}'", relatedAsset.getName(), latestVersion.getName());
                     proxyOnes = relationshipMapping.getProxyOneAssetFromAsset(relatedAsset, igcRestClient);
                     proxyTwos = relationshipMapping.getProxyTwoAssetFromAsset(latestVersion, igcRestClient);
                 }
@@ -807,10 +807,10 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     proxyOnes = relationshipMapping.getProxyOneAssetFromAsset(relatedAsset, igcRestClient);
                     proxyTwos = relationshipMapping.getProxyTwoAssetFromAsset(latestVersion, igcRestClient);
                 } else {
-                    if (log.isWarnEnabled()) { log.warn("Unable to match assets to proxies through linking asset '{}' for guids {} and {} through relationship type {} -- skipped, but this is likely indicative of a problem with the mapping.", linkingType, latestVersion.getId(), relatedAsset.getId(), omrsRelationshipType); }
+                    log.warn("Unable to match assets to proxies through linking asset '{}' for guids {} and {} through relationship type {} -- skipped, but this is likely indicative of a problem with the mapping.", linkingType, latestVersion.getId(), relatedAsset.getId(), omrsRelationshipType);
                 }
             } else {
-                if (log.isWarnEnabled()) { log.warn("Unable to match assets {} and {} to proxies for any asset translation for relationship type {} -- skipped, but this is likely indicative of a problem with the mapping.", latestVersion.getId(), relatedAsset.getId(), omrsRelationshipType); }
+                log.warn("Unable to match assets {} and {} to proxies for any asset translation for relationship type {} -- skipped, but this is likely indicative of a problem with the mapping.", latestVersion.getId(), relatedAsset.getId(), omrsRelationshipType);
                 proxyOnes.add(latestVersion);
                 proxyTwos.add(relatedAsset);
             }
@@ -830,7 +830,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             }
 
         } else {
-            if (log.isInfoEnabled()) { log.info("Related RID for guid {} and relationship {} was null -- skipped.", latestVersion.getId(), omrsRelationshipType); }
+            log.info("Related RID for guid {} and relationship {} was null -- skipped.", latestVersion.getId(), omrsRelationshipType);
         }
 
     }
@@ -868,7 +868,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 && !relatedRID.equals("null")
                 && relationshipMapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, proxyOne, proxyTwo)) {
 
-            if (log.isDebugEnabled()) { log.debug("processSingleRelationship processing between {} and {} for type: {}", latestVersionRID, relatedRID, omrsRelationshipType); }
+            log.debug("processSingleRelationship processing between {} and {} for type: {}", latestVersionRID, relatedRID, omrsRelationshipType);
 
             RelationshipMapping.ProxyMapping pmOne = relationshipMapping.getProxyOneMapping();
             RelationshipMapping.ProxyMapping pmTwo = relationshipMapping.getProxyTwoMapping();
@@ -883,12 +883,12 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     true
             );
 
-            if (log.isDebugEnabled()) { log.debug(" ... calculated relationship GUID: {}", igcRelationshipGuid); }
+            log.debug(" ... calculated relationship GUID: {}", igcRelationshipGuid);
 
             // Only continue if this relationship is different from the one that triggered the processing in the first place
             if (relationshipTriggerGUID == null || !relationshipTriggerGUID.equals(igcRelationshipGuid)) {
                 String changeType = change.getOp();
-                if (log.isDebugEnabled()) { log.debug(" ... change action: {}", changeType); }
+                log.debug(" ... change action: {}", changeType);
 
                 if (changeType.equals("remove")) {
                     try {
@@ -919,7 +919,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                     igcRelationshipGuid,
                                     igcEntityGuid2.getGeneratedPrefix());
                         } else {
-                            if (log.isDebugEnabled()) { log.debug(" ... proxy two was a relationship-level type, not processing it as an asset: {}", proxyTwoType); }
+                            log.debug(" ... proxy two was a relationship-level type, not processing it as an asset: {}", proxyTwoType);
                         }
                         if (!IGCRestConstants.getRelationshipLevelTypes().contains(proxyOneType)) {
                             IGCEntityGuid igcEntityGuid1 = RelationshipMapping.getProxyOneGuidFromRelationship(
@@ -930,16 +930,16 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                     igcRelationshipGuid,
                                     igcEntityGuid1.getGeneratedPrefix());
                         } else {
-                            if (log.isDebugEnabled()) { log.debug(" ... proxy one was a relationship-level type, not processing it as an asset: {}", proxyOneType); }
+                            log.debug(" ... proxy one was a relationship-level type, not processing it as an asset: {}", proxyOneType);
                         }
                     } catch (InvalidParameterException | RepositoryErrorException | TypeDefNotKnownException e) {
-                        if (log.isErrorEnabled()) { log.error("Unable to retrieve relationship type definition: {}", omrsRelationshipType, e); }
+                        log.error("Unable to retrieve relationship type definition: {}", omrsRelationshipType, e);
                     }
                 } else {
                     try {
 
-                        Relationship relationship = igcomrsMetadataCollection.getRelationship(localServerUserId, igcRelationshipGuid.asGuid());
-                        if (log.isDebugEnabled()) { log.debug(" ... retrieved relationship: {}", relationship); }
+                        Relationship relationship = igcomrsMetadataCollection.getRelationship(localServerUserId, igcRelationshipGuid.toString());
+                        log.debug(" ... retrieved relationship: {}", relationship);
 
                         // Recursively call processAsset(rid, null) on any non-deletion events
                         // (do this first: so relationship comes after on unwinding from recursion)
@@ -949,12 +949,12 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         if (!IGCRestConstants.getRelationshipLevelTypes().contains(proxyTwoType)) {
                             processAsset(relatedRID, proxyTwo.getType(), igcRelationshipGuid, igcRelationshipGuid.getGeneratedPrefix2());
                         } else {
-                            if (log.isDebugEnabled()) { log.debug(" ... proxy two was a relationship-level type, not processing it as an asset: {}", proxyTwoType); }
+                            log.debug(" ... proxy two was a relationship-level type, not processing it as an asset: {}", proxyTwoType);
                         }
                         if (!IGCRestConstants.getRelationshipLevelTypes().contains(proxyOneType)) {
                             processAsset(latestVersionRID, proxyOne.getType(), igcRelationshipGuid, igcRelationshipGuid.getGeneratedPrefix1());
                         } else {
-                            if (log.isDebugEnabled()) { log.debug(" ... proxy one was a relationship-level type, not processing it as an asset: {}", proxyOneType); }
+                            log.debug(" ... proxy one was a relationship-level type, not processing it as an asset: {}", proxyOneType);
                         }
 
                         // Send the appropriate patch-defined action
@@ -974,22 +974,22 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                 );
                                 break;
                             default:
-                                if (log.isWarnEnabled()) { log.warn("Unknown action '{}' for relationship {}", changeType, igcRelationshipGuid); }
+                                log.warn("Unknown action '{}' for relationship {}", changeType, igcRelationshipGuid);
                                 break;
                         }
 
                     } catch (RelationshipNotKnownException e) {
-                        if (log.isErrorEnabled()) { log.error("Unable to find relationship with GUID: {}", igcRelationshipGuid, e); }
+                        log.error("Unable to find relationship with GUID: {}", igcRelationshipGuid, e);
                     } catch (InvalidParameterException | RepositoryErrorException e) {
-                        if (log.isErrorEnabled()) { log.error("Unknown error occurred trying to retrieve relationship: {}", igcRelationshipGuid, e); }
+                        log.error("Unknown error occurred trying to retrieve relationship: {}", igcRelationshipGuid, e);
                     }
                 }
             } else {
-                if (log.isInfoEnabled()) { log.info("Relationship was same as one that triggered this processing -- skipping: {}", relationshipTriggerGUID); }
+                log.info("Relationship was same as one that triggered this processing -- skipping: {}", relationshipTriggerGUID);
             }
 
         } else {
-            if (log.isWarnEnabled()) { log.warn("Related RID for relationship type {} and guid {} was null, or explicitly excluded.", omrsRelationshipType, latestVersionRID); }
+            log.warn("Related RID for relationship type {} and guid {} was null, or explicitly excluded.", omrsRelationshipType, latestVersionRID);
         }
 
     }
@@ -1011,7 +1011,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         String omrsRelationshipType = relationshipMapping.getOmrsRelationshipType();
         String latestVersionRID = latestVersion.getId();
 
-        if (log.isDebugEnabled()) { log.debug("processSelfReferencingRelationship processing for {} and type: {}", latestVersionRID, omrsRelationshipType); }
+        log.debug("processSelfReferencingRelationship processing for {} and type: {}", latestVersionRID, omrsRelationshipType);
 
         IGCRelationshipGuid igcRelationshipGuid = RelationshipMapping.getRelationshipGUID(
                 igcRepositoryHelper,
@@ -1021,13 +1021,13 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 RelationshipMapping.SELF_REFERENCE_SENTINEL,
                 null
         );
-        if (log.isDebugEnabled()) { log.debug(" ... calculated relationship GUID: {}", igcRelationshipGuid); }
+        log.debug(" ... calculated relationship GUID: {}", igcRelationshipGuid);
 
         // Only continue if this relationship is different from the one that triggered the processing in the first place
         if (relationshipTriggerGUID == null || !relationshipTriggerGUID.equals(igcRelationshipGuid)) {
             try {
-                Relationship relationship = igcomrsMetadataCollection.getRelationship(localServerUserId, igcRelationshipGuid.asGuid());
-                if (log.isDebugEnabled()) { log.debug(" ... retrieved relationship: {}", relationship); }
+                Relationship relationship = igcomrsMetadataCollection.getRelationship(localServerUserId, igcRelationshipGuid.toString());
+                log.debug(" ... retrieved relationship: {}", relationship);
                 // If there was no stub, this is a new entity
                 if (stub == null) {
                     sendNewRelationship(relationship, null);
@@ -1037,12 +1037,12 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 // Note: no need to call back to processAsset with prefixed GUID as it will have been handled already
                 // by the base asset being processed
             } catch (RelationshipNotKnownException e) {
-                if (log.isErrorEnabled()) { log.error("Unable to find relationship with GUID: {}", igcRelationshipGuid, e); }
+                log.error("Unable to find relationship with GUID: {}", igcRelationshipGuid, e);
             } catch (InvalidParameterException | RepositoryErrorException e) {
-                if (log.isErrorEnabled()) { log.error("Unknown error occurred trying to retrieve relationship: {}", igcRelationshipGuid, e); }
+                log.error("Unknown error occurred trying to retrieve relationship: {}", igcRelationshipGuid, e);
             }
         } else {
-            if (log.isInfoEnabled()) { log.info("Relationship was same as the one that triggered this processing -- skipping: {}", relationshipTriggerGUID); }
+            log.info("Relationship was same as the one that triggered this processing -- skipping: {}", relationshipTriggerGUID);
         }
 
     }
@@ -1128,9 +1128,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             Reference oldRelatedAsset = (Reference) ora;
             if (oldRelatedAsset.getId() != null) {
                 Reference newRelatedAsset = (Reference) change.getNewValue(referenceListProperties);
-                if (log.isDebugEnabled()) {
-                    log.debug("Processing relationship replacement for: {}", oldRelatedAsset);
-                }
+                log.debug("Processing relationship replacement for: {}", oldRelatedAsset);
                 String newRelatedAssetRID = newRelatedAsset.getId();
                 try {
                     RelationshipDef relationshipDef = (RelationshipDef) igcomrsMetadataCollection.getTypeDefByName(localServerUserId,
@@ -1157,9 +1155,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                 null,
                                 true
                         );
-                        if (log.isDebugEnabled()) {
-                            log.debug(" ... calculated old relationship GUID: {}", oldRelationshipGUID);
-                        }
+                        log.debug(" ... calculated old relationship GUID: {}", oldRelationshipGUID);
                         sendPurgedRelationship(
                                 relationshipMapping,
                                 relationshipDef,
@@ -1169,20 +1165,16 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                 oldProxyTwo
                         );
                     } else {
-                        if (log.isWarnEnabled()) {
-                            log.warn("Unable to find previous version for relationship replacement -- sending only new: {}", newRelationshipGUID);
-                        }
+                        log.warn("Unable to find previous version for relationship replacement -- sending only new: {}", newRelationshipGUID);
                     }
                 } catch (InvalidParameterException | RepositoryErrorException | TypeDefNotKnownException e) {
-                    if (log.isErrorEnabled()) {
-                        log.error("Unable to find relationship type definition '{}' / not supported for guid: {}", relationshipMapping.getOmrsRelationshipType(), newRelationshipGUID, e);
-                    }
+                    log.error("Unable to find relationship type definition '{}' / not supported for guid: {}", relationshipMapping.getOmrsRelationshipType(), newRelationshipGUID, e);
                 }
             } else {
-                if (log.isWarnEnabled()) { log.warn("Unable to find any previous version for the relationship replacement (no ID) -- sending only new: {}", newRelationshipGUID); }
+                log.warn("Unable to find any previous version for the relationship replacement (no ID) -- sending only new: {}", newRelationshipGUID);
             }
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unable to find any previous version for the relationship replacement (null) -- sending only new: {}", newRelationshipGUID); }
+            log.warn("Unable to find any previous version for the relationship replacement (null) -- sending only new: {}", newRelationshipGUID);
         }
         sendNewRelationship(relationship, relationshipLevelRid);
 
@@ -1241,10 +1233,10 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         relationship
                 );
             } catch (RepositoryErrorException e) {
-                if (log.isErrorEnabled()) { log.error("Unable to retrieve relationship details for: {}", relationshipGUID, e); }
+                log.error("Unable to retrieve relationship details for: {}", relationshipGUID, e);
             }
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unable to produce DeletePurgedRelationshipEvent for relationship: {}", relationshipGUID); }
+            log.warn("Unable to produce DeletePurgedRelationshipEvent for relationship: {}", relationshipGUID);
         }
 
     }
@@ -1283,7 +1275,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     }
                 }
             } else {
-                if (log.isWarnEnabled()) { log.warn("Unable to retrieve new entity for asset type {} with prefix {} and RID: {}", asset.getType(), ridPrefix, asset.getId()); }
+                log.warn("Unable to retrieve new entity for asset type {} with prefix {} and RID: {}", asset.getType(), ridPrefix, asset.getId());
             }
         }
 
@@ -1326,7 +1318,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 );
                 processClassifications(detail, detail.getClassifications(), last == null ? new ArrayList<>() : last.getClassifications());
             } else {
-                if (log.isWarnEnabled()) { log.warn("Unable to generate updated entity for asset type {} with prefix {} and RID: {}", latestVersion.getType(), ridPrefix, latestVersion.getId()); }
+                log.warn("Unable to generate updated entity for asset type {} with prefix {} and RID: {}", latestVersion.getType(), ridPrefix, latestVersion.getId());
             }
         }
 
@@ -1392,7 +1384,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             for (Classification classification : classifications) {
                 String typeGUID = classification.getType().getTypeDefGUID();
                 if (map.containsKey(typeGUID)) {
-                    if (log.isWarnEnabled()) { log.warn("Found multiple classifications of type {} -- clobbering!", typeGUID); }
+                    log.warn("Found multiple classifications of type {} -- clobbering!", typeGUID);
                 }
                 map.put(typeGUID, classification);
             }
@@ -1461,9 +1453,9 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     private void sendPurgedEntity(String igcAssetType, String rid, Set<String> alreadyPurgedRids) {
 
         if (alreadyPurgedRids.contains(rid)) {
-            if (log.isDebugEnabled()) { log.debug("Received RID has already been purged -- skipping: {}", rid); }
+            log.debug("Received RID has already been purged -- skipping: {}", rid);
         } else {
-            if (log.isDebugEnabled()) { log.debug("Purging entity of type '{}' with RID: {}", igcAssetType, rid); }
+            log.debug("Purging entity of type '{}' with RID: {}", igcAssetType, rid);
 
             OMRSStub stub = igcRepositoryHelper.getOMRSStubForAsset(rid, igcAssetType);
             // If there is no stub, there should not be any information that was sent previously in an event for us
@@ -1477,7 +1469,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(igcAssetType, localServerUserId);
                 for (EntityMapping referenceableMapper : referenceableMappers) {
 
-                    if (log.isDebugEnabled()) { log.debug("Checking via: {}", referenceableMapper.getClass().getName()); }
+                    log.debug("Checking via: {}", referenceableMapper.getClass().getName());
                     if (referenceableMapper.isOmrsType(igcRestClient, fromObject)) {
 
                         List<PurgeMarker> purgeMarkers = new ArrayList<>();
@@ -1487,7 +1479,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         List<RelationshipMapping> relationshipMappers = referenceableMapper.getRelationshipMappers();
                         for (RelationshipMapping relationshipMapping : relationshipMappers) {
 
-                            if (log.isDebugEnabled()) { log.debug("Checking for relationships via: {}", relationshipMapping.getClass().getName()); }
+                            log.debug("Checking for relationships via: {}", relationshipMapping.getClass().getName());
                             RelationshipMapping.ProxyMapping pmOne = relationshipMapping.getProxyOneMapping();
                             RelationshipMapping.ProxyMapping pmTwo = relationshipMapping.getProxyTwoMapping();
                             try {
@@ -1501,7 +1493,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                         || (childEnd.equals(RelationshipMapping.ContainedType.TWO) && pmOne.matchesAssetType(igcAssetType))) {
                                     // If the child entities are at one end of the relationship, and we are starting from the
                                     // other, then recursively purge
-                                    if (log.isDebugEnabled()) { log.debug(" ... containment detected for type '{}' and relationship {}", igcAssetType, relationshipMapping.getClass().getName()); }
+                                    log.debug(" ... containment detected for type '{}' and relationship {}", igcAssetType, relationshipMapping.getClass().getName());
                                     // Need to ensure all relationships are purged BEFORE recursing on entities, otherwise
                                     // for recursed entities we will inevitably need to try to delete a parent-child relationship
                                     // where one end (eg. the child) has already been purged and therefore a stub for it cannot be
@@ -1515,12 +1507,12 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                 List<Reference> endTwo = new ArrayList<>();
                                 boolean iterateOnOne = false;
                                 if (pmOne.matchesAssetType(igcAssetType)) {
-                                    if (log.isDebugEnabled()) { log.debug(" ... setting 'from' to end1: {}", igcAssetType); }
+                                    log.debug(" ... setting 'from' to end1: {}", igcAssetType);
                                     propertyNames = pmOne.getIgcRelationshipProperties();
                                     endOne.addAll(relationshipMapping.getProxyOneAssetFromAsset(fromObject, igcRestClient));
                                     iterateOnOne = true;
                                 } else if (pmTwo.matchesAssetType(igcAssetType)) {
-                                    if (log.isDebugEnabled()) { log.debug(" ... setting 'from' to end2: {}", igcAssetType); }
+                                    log.debug(" ... setting 'from' to end2: {}", igcAssetType);
                                     propertyNames = pmTwo.getIgcRelationshipProperties();
                                     endTwo.addAll(relationshipMapping.getProxyTwoAssetFromAsset(fromObject, igcRestClient));
                                     iterateOnOne = false;
@@ -1529,7 +1521,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                 }
                                 if (propertyNames != null) {
                                     for (String property : propertyNames) {
-                                        if (log.isDebugEnabled()) { log.debug(" ... checking for relationship on property: {}", property); }
+                                        log.debug(" ... checking for relationship on property: {}", property);
                                         Object relatedResult = igcRestClient.getPropertyByName(fromObject, property);
                                         if (relatedResult != null) {
                                             // TODO: we should also cache up all of the relationship ends that are NOT purged,
@@ -1583,7 +1575,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         // Then remove the entity itself
                         EntityDetail detail = getEntityDetailForStubWithGUID(stub, igcEntityGuid);
                         if (detail != null) {
-                            if (log.isDebugEnabled()) { log.debug(" ... purging entity: {}", igcEntityGuid.asGuid()); }
+                            log.debug(" ... purging entity: {}", igcEntityGuid);
                             repositoryEventProcessor.processDeletePurgedEntityEvent(
                                     sourceName,
                                     metadataCollectionId,
@@ -1595,7 +1587,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                             // and mark it as purged, so that we don't attempt to purge again during the recursion
                             alreadyPurgedRids.add(igcEntityGuid.getRid());
                         } else {
-                            if (log.isWarnEnabled()) { log.warn("No stub information exists for purged GUID {} -- cannot generated purgeEntity event.", igcEntityGuid.asGuid()); }
+                            log.warn("No stub information exists for purged GUID {} -- cannot generated purgeEntity event.", igcEntityGuid);
                         }
 
                     } else {
@@ -1605,7 +1597,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
                 // Finally, remove the stub (so that if such an asset is created in the future it is recognised as new
                 // rather than an update)
-                if (log.isDebugEnabled()) { log.debug("Deleting stub: {}", rid); }
+                log.debug("Deleting stub: {}", rid);
                 igcRepositoryHelper.deleteOMRSStubForAsset(rid, igcAssetType);
             } else {
                 log.info("No stub information exists for RID {} of type {} -- cannot generated purgeEntity event.", rid, igcAssetType);
@@ -1627,34 +1619,34 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         RelationshipMapping.ContainedType childEnd = relationshipMapping.getContainedType();
         RelationshipMapping.ProxyMapping parent;
 
-        if (log.isDebugEnabled()) { log.debug("Recursing on mapping: {}", relationshipMapping.getClass().getName()); }
+        log.debug("Recursing on mapping: {}", relationshipMapping.getClass().getName());
 
         String parentRid = parentObject.getId();
 
         if (childEnd.equals(RelationshipMapping.ContainedType.TWO)) {
-            if (log.isDebugEnabled()) { log.debug(" ... setting parent as 1, child as 2"); }
+            log.debug(" ... setting parent as 1, child as 2");
             parent = relationshipMapping.getProxyOneMapping();
         } else {
-            if (log.isDebugEnabled()) { log.debug(" ... setting child as 1, parent as 2"); }
+            log.debug(" ... setting child as 1, parent as 2");
             parent = relationshipMapping.getProxyTwoMapping();
         }
         List<String> relationshipProperties = parent.getIgcRelationshipProperties();
-        if (log.isDebugEnabled()) { log.debug(" ... iterating through parent's properties: {}", relationshipProperties); }
+        log.debug(" ... iterating through parent's properties: {}", relationshipProperties);
         for (String property : relationshipProperties) {
-            if (log.isDebugEnabled()) { log.debug(" ... getting child entities from property: {}", property); }
+            log.debug(" ... getting child entities from property: {}", property);
             Object relatedResult = igcRestClient.getPropertyByName(parentObject, property);
             if (relatedResult != null) {
                 if (relatedResult instanceof Reference) {
                     Reference relationship = (Reference) relatedResult;
                     if (!relationship.getId().equals(parentRid)) {
-                        if (log.isDebugEnabled()) { log.debug(" ... purging child entity: {}", relationship.getId()); }
+                        log.debug(" ... purging child entity: {}", relationship.getId());
                         sendPurgedEntity(relationship.getType(), relationship.getId(), alreadyPurgedRids);
                     }
                 } else if (relatedResult instanceof ItemList) {
                     ItemList<?> relationships = (ItemList<?>) relatedResult;
                     for (Reference relationship : relationships.getItems()) {
                         if (!relationship.getId().equals(parentRid)) {
-                            if (log.isDebugEnabled()) { log.debug(" ... purging child entity: {}", relationship.getId()); }
+                            log.debug(" ... purging child entity: {}", relationship.getId());
                             sendPurgedEntity(relationship.getType(), relationship.getId(), alreadyPurgedRids);
                         }
                     }
@@ -1684,9 +1676,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         true
                 );
                 // Purge the relationship
-                if (log.isDebugEnabled()) {
-                    log.debug(" ... purging relationship for purged entity: {}", relGuid.asGuid());
-                }
+                log.debug(" ... purging relationship for purged entity: {}", relGuid);
                 sendPurgedRelationship(
                         relationshipMapping,
                         relationshipDef,
@@ -1708,9 +1698,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         true
                 );
                 // Purge the relationship
-                if (log.isDebugEnabled()) {
-                    log.debug(" ... purging relationship for purged entity: {}", relGuid.asGuid());
-                }
+                log.debug(" ... purging relationship for purged entity: {}", relGuid);
                 sendPurgedRelationship(
                         relationshipMapping,
                         relationshipDef,
@@ -1731,7 +1719,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      */
     private void processEventV117(String event) {
         // TODO: implement processEventV117
-        if (log.isDebugEnabled()) { log.debug("Not yet implemented as v11.7-specific -- backing to v11.5 processing: {}", event); }
+        log.debug("Not yet implemented as v11.7-specific -- backing to v11.5 processing: {}", event);
         processEventV115(event);
     }
 

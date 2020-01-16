@@ -109,7 +109,7 @@ public class SchemaElement_Mapper extends ReferenceableMapper {
                     repositoryName,
                     instanceProperties,
                     "anchorGUID",
-                    parentGuid.asGuid(),
+                    parentGuid.toString(),
                     methodName
             );
         }

@@ -87,11 +87,11 @@ public class EndpointMapper extends ReferenceableMapper {
                 // As long as there is at least one result, return the first
                 return hosts.getItems().get(0);
             } else {
-                if (log.isWarnEnabled()) { log.warn("Unable to translate host_(engine) to host, returning host_(engine)."); }
+                log.warn("Unable to translate host_(engine) to host, returning host_(engine).");
                 return super.getBaseIgcAssetFromAlternative(otherAssetType, otherAssetRid, igcomrsRepositoryConnector);
             }
         } else {
-            if (log.isDebugEnabled()) { log.debug("Not a host_(engine) asset, just returning as-is: {}", otherAssetType); }
+            log.debug("Not a host_(engine) asset, just returning as-is: {}", otherAssetType);
             return super.getBaseIgcAssetFromAlternative(otherAssetType, otherAssetRid, igcomrsRepositoryConnector);
         }
     }
@@ -153,7 +153,7 @@ public class EndpointMapper extends ReferenceableMapper {
         super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, value);
         final String methodName = "addComplexPropertySearchCriteria";
         if (omrsPropertyName.equals("networkAddress")) {
-            if (log.isDebugEnabled()) { log.debug("Adding complex search criteria for: networkAddress"); }
+            log.debug("Adding complex search criteria for: networkAddress");
             String networkAddress = ((PrimitivePropertyValue) value).getPrimitiveValue().toString();
             IGCSearchCondition condition = IGCRepositoryHelper.getRegexSearchCondition(
                     repositoryHelper,

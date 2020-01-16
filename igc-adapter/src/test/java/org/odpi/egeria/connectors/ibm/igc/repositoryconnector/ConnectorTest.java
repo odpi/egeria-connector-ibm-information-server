@@ -1791,7 +1791,7 @@ public class ConnectorTest {
         IGCEntityGuid guid = new IGCEntityGuid(metadataCollectionId, "database_table", ridForTable);
 
         InstanceProperties ip = new InstanceProperties();
-        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "anchorGUID", repositoryHelper.getExactMatchRegex(guid.asGuid()), methodName);
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "anchorGUID", repositoryHelper.getExactMatchRegex(guid.toString()), methodName);
 
         testFindEntitiesByProperty(
                 "aa8d5470-6dbc-4648-9e2f-045e5df9d2f9",
@@ -1975,8 +1975,8 @@ public class ConnectorTest {
         assertNull(newAssignedAssetInstance.getOldValue(referenceListProperties));
         Object assignedAssets = newAssignedAssetInstance.getNewValue(referenceListProperties);
         assertTrue(assignedAssets instanceof ItemList);
-        ItemList<Reference> actualAssets = (ItemList<Reference>) assignedAssets;
-        List<Reference> listOfAssets = actualAssets.getItems();
+        ItemList<?> actualAssets = (ItemList<?>) assignedAssets;
+        List<?> listOfAssets = actualAssets.getItems();
         assertNotNull(listOfAssets);
         assertEquals(listOfAssets.size(), 2);
 
@@ -2510,7 +2510,7 @@ public class ConnectorTest {
 
         try {
             IGCEntityGuid guid = new IGCEntityGuid(metadataCollectionId, igcType, prefix, rid);
-            detail = igcomrsMetadataCollection.isEntityKnown(MockConstants.EGERIA_USER, guid.asGuid());
+            detail = igcomrsMetadataCollection.isEntityKnown(MockConstants.EGERIA_USER, guid.toString());
         } catch (RepositoryErrorException | InvalidParameterException e) {
             log.error("Unable to retrieve entity detail for {}.", omrsType, e);
             assertNull(e);
@@ -2545,7 +2545,7 @@ public class ConnectorTest {
 
         try {
             IGCEntityGuid guid = new IGCEntityGuid(metadataCollectionId, igcType, prefix, rid);
-            summary = igcomrsMetadataCollection.getEntitySummary(MockConstants.EGERIA_USER, guid.asGuid());
+            summary = igcomrsMetadataCollection.getEntitySummary(MockConstants.EGERIA_USER, guid.toString());
         } catch (RepositoryErrorException | InvalidParameterException | EntityNotKnownException e) {
             log.error("Unable to retrieve entity detail for {}.", omrsType, e);
             assertNull(e);
@@ -2604,7 +2604,7 @@ public class ConnectorTest {
             IGCEntityGuid guid = new IGCEntityGuid(metadataCollectionId, igcType, prefix, rid);
             relationships = igcomrsMetadataCollection.getRelationshipsForEntity(
                     MockConstants.EGERIA_USER,
-                    guid.asGuid(),
+                    guid.toString(),
                     null,
                     0,
                     null,

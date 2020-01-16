@@ -134,7 +134,7 @@ public class IARestClient {
         converters.removeIf(httpMessageConverter -> httpMessageConverter instanceof StringHttpMessageConverter);
         converters.add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
 
-        if (log.isDebugEnabled()) { log.debug("Constructing IARestClient..."); }
+        log.debug("Constructing IARestClient...");
 
     }
 
@@ -191,7 +191,7 @@ public class IARestClient {
                                                              String payload,
                                                              boolean alreadyTriedNewSession) {
         if (alreadyTriedNewSession) {
-            if (log.isErrorEnabled()) { log.error("Opening a new session already attempted without success -- giving up on {} to {} with {}", method, url, payload); }
+            log.error("Opening a new session already attempted without success -- giving up on {} to {} with {}", method, url, payload);
             return null;
         } else {
             // By removing cookies, we'll force a login
@@ -217,7 +217,7 @@ public class IARestClient {
                 this.cookies = headers.get(HttpHeaders.SET_COOKIE);
             }
         } else {
-            if (log.isErrorEnabled()) { log.error("Unable to make request or unexpected status: {}", response.getStatusCode()); }
+            log.error("Unable to make request or unexpected status: {}", response.getStatusCode());
         }
 
     }
@@ -244,7 +244,7 @@ public class IARestClient {
         }
         ResponseEntity<String> response = null;
         try {
-            if (log.isDebugEnabled()) { log.debug("{}ing to {} with: {}", method, url, payload); }
+            log.debug("{}ing to {} with: {}", method, url, payload);
             response = restTemplate.exchange(
                     url,
                     method,
@@ -326,7 +326,7 @@ public class IARestClient {
         try {
             lProjects = mapper.readValue(response, new TypeReference<List<Project>>(){});
         } catch (IOException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to parse projects response: {}", response, e); }
+            log.error("Unable to parse projects response: {}", response, e);
         }
         return lProjects;
     }
@@ -343,7 +343,7 @@ public class IARestClient {
         try {
             project = mapper.readValue(response, Project.class);
         } catch (IOException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to parse project details for project '{}': {}", projectName, response, e); }
+            log.error("Unable to parse project details for project '{}': {}", projectName, response, e);
         }
         return project;
     }
@@ -644,7 +644,7 @@ public class IARestClient {
         try {
             taskExecutionSchedule = mapper.readValue(response, TaskExecutionSchedule.class);
         } catch (IOException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to parse execution status for '{}': {}", scheduleId, response, e); }
+            log.error("Unable to parse execution status for '{}': {}", scheduleId, response, e);
         }
         return taskExecutionSchedule;
     }
@@ -676,7 +676,7 @@ public class IARestClient {
     private boolean publishResults(String projectName,
                                    PublishResults details) {
         String xmlPayload = getTaskPayload(projectName, details);
-        if (log.isDebugEnabled()) { log.debug("Task request payload: " + xmlPayload); }
+        log.debug("Task request payload: " + xmlPayload);
         String response = makeRequest(EP_PUBLISH, HttpMethod.POST, xmlPayload);
         if (response != null) {
             throw new RuntimeException("Error publishing: " + response);
@@ -728,13 +728,13 @@ public class IARestClient {
                                                 Object details,
                                                 String methodName) {
         String xmlPayload = getTaskPayload(projectName, details);
-        if (log.isDebugEnabled()) { log.debug("Task request payload: " + xmlPayload); }
+        log.debug("Task request payload: " + xmlPayload);
         String response = makeRequest(EP_EXECUTE_TASK, HttpMethod.POST, xmlPayload);
         TaskExecutionReport taskExecutionReport = null;
         try {
             taskExecutionReport = mapper.readValue(response, TaskExecutionReport.class);
         } catch (IOException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to parse {} execution report for project '{}': {}", methodName, projectName, response, e); }
+            log.error("Unable to parse {} execution report for project '{}': {}", methodName, projectName, response, e);
         }
         return taskExecutionReport;
     }
@@ -761,12 +761,10 @@ public class IARestClient {
         try {
             project = mapper.readValue(response, Project.class);
         } catch (IOException e) {
-            if (log.isErrorEnabled()) {
-                if (columnName == null) {
-                    log.error("Unable to parse {} results for project '{}': {}", methodName, projectName, response, e);
-                } else {
-                    log.error("Unable to parse {} results for project '{}' and column '{}': {}", methodName, projectName, columnName, response, e);
-                }
+            if (columnName == null) {
+                log.error("Unable to parse {} results for project '{}': {}", methodName, projectName, response, e);
+            } else {
+                log.error("Unable to parse {} results for project '{}' and column '{}': {}", methodName, projectName, columnName, response, e);
             }
         }
         return project;
@@ -794,12 +792,10 @@ public class IARestClient {
         try {
             project = mapper.readValue(response, Project.class);
         } catch (IOException e) {
-            if (log.isErrorEnabled()) {
-                if (tableName == null) {
-                    log.error("Unable to parse {} results for project '{}': {}", methodName, projectName, response, e);
-                } else {
-                    log.error("Unable to parse {} results for project '{}' and table '{}': {}", methodName, projectName, tableName, response, e);
-                }
+            if (tableName == null) {
+                log.error("Unable to parse {} results for project '{}': {}", methodName, projectName, response, e);
+            } else {
+                log.error("Unable to parse {} results for project '{}' and table '{}': {}", methodName, projectName, tableName, response, e);
             }
         }
         return project;

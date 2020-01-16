@@ -66,7 +66,7 @@ public class CategoryHierarchyLinkMapper extends RelationshipMapping {
     public static boolean isCategoryRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                  Reference oneObject,
                                                  Reference otherObject) {
-        if (log.isDebugEnabled()) { log.debug("Considering inclusion of objects: {} ({}) and {} ({})", oneObject.getName(), oneObject.getType(), otherObject.getName(), otherObject.getType()); }
+        log.debug("Considering inclusion of objects: {} ({}) and {} ({})", oneObject.getName(), oneObject.getType(), otherObject.getName(), otherObject.getType());
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         boolean isGlossary = GlossaryMapper.isGlossary(igcRestClient, oneObject) || GlossaryMapper.isGlossary(igcRestClient, otherObject);
         if (isGlossary && log.isDebugEnabled()) { log.debug(" ... skipping, Glossary-level category."); }

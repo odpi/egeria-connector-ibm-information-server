@@ -26,7 +26,7 @@ public abstract class ObjectPrinter {
         try {
             return objectMapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {
-            if (log.isInfoEnabled()) { log.info("Unable to translate to JSON representation.", e); }
+            log.info("Unable to translate to JSON representation.", e);
             return super.toString();
         }
     }

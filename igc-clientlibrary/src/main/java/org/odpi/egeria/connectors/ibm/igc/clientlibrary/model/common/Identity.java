@@ -228,7 +228,7 @@ public class Identity {
             nameProperty = "group_name";
         }
         String searchFor = (propertyPath == null ? nameProperty : propertyPath + "." + nameProperty);
-        if (log.isDebugEnabled()) { log.debug(LOG_ADDING_SEARCH_CONDITION, searchFor, operator, ctxName); }
+        log.debug(LOG_ADDING_SEARCH_CONDITION, searchFor, operator, ctxName);
         IGCSearchCondition condition = new IGCSearchCondition(
                 searchFor,
                 operator,
@@ -285,13 +285,13 @@ public class Identity {
                     }
                 }
                 if (!parentName.equals("")) {
-                    if (log.isDebugEnabled()) { log.debug(LOG_ADDING_SEARCH_CONDITION, "parent_folder.name", "=", parentName); }
+                    log.debug(LOG_ADDING_SEARCH_CONDITION, "parent_folder.name", "=", parentName);
                     IGCSearchCondition cPath = new IGCSearchCondition("parent_folder.name", "=", parentName);
                     igcSearchConditionSet.addCondition(cPath);
                 }
                 // Add the 'host' element as 'host.name' (but only if we found one)
                 if (!dataFileHost.equals("")) {
-                    if (log.isDebugEnabled()) { log.debug(LOG_ADDING_SEARCH_CONDITION, "host.name", "=", dataFileHost); }
+                    log.debug(LOG_ADDING_SEARCH_CONDITION, "host.name", "=", dataFileHost);
                     IGCSearchCondition cHost = new IGCSearchCondition("host.name", "=", dataFileHost);
                     igcSearchConditionSet.addCondition(cHost);
                 }
@@ -299,13 +299,13 @@ public class Identity {
                 // Otherwise, we are looking for some file-related asset within a folder, so add these further conditions
                 // Concatenate the 'data_file_folder' elements into a string with '/' separators, and add as '...data_file.path'
                 if (!dataFilePath.equals("")) {
-                    if (log.isDebugEnabled()) { log.debug(LOG_ADDING_SEARCH_CONDITION, propertyPath + ".path", "=", dataFilePath); }
+                    log.debug(LOG_ADDING_SEARCH_CONDITION, propertyPath + ".path", "=", dataFilePath);
                     IGCSearchCondition cPath = new IGCSearchCondition(propertyPath + ".path", "=", dataFilePath);
                     igcSearchConditionSet.addCondition(cPath);
                 }
                 // Add the 'host' element as '...datafile.host.name'
                 if (!dataFileHost.equals("")) {
-                    if (log.isDebugEnabled()) { log.debug(LOG_ADDING_SEARCH_CONDITION, propertyPath + ".host.name", "=", dataFileHost); }
+                    log.debug(LOG_ADDING_SEARCH_CONDITION, propertyPath + ".host.name", "=", dataFileHost);
                     IGCSearchCondition cHost = new IGCSearchCondition(propertyPath + ".host.name", "=", dataFileHost);
                     igcSearchConditionSet.addCondition(cHost);
                 }
@@ -493,7 +493,7 @@ public class Identity {
                 }
             }
         } catch (Exception e) {
-            if (log.isWarnEnabled() && warnOnNotFound) { log.warn("Unable to find registered IGC type '{}' -- cannot construct an IGC identity.", assetType); }
+            if (warnOnNotFound) { log.warn("Unable to find registered IGC type '{}' -- cannot construct an IGC identity.", assetType); }
         }
         return ident;
 

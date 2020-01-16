@@ -59,12 +59,12 @@ public class ChangeSet {
         try {
             JsonNode stubPayload = objectMapper.readTree(stub.getPayload());
             if (bNoStub) {
-                if (log.isDebugEnabled()) { log.debug("No existing stub -- calculating differences."); }
+                log.debug("No existing stub -- calculating differences.");
                 calculateDelta(asset, stubPayload);
             } else {
                 Long stubModified = stubPayload.path("modified_on").asLong(0);
                 if (stubModified == 0) {
-                    if (log.isDebugEnabled()) { log.debug("No timestamp inside stub -- calculating differences."); }
+                    log.debug("No timestamp inside stub -- calculating differences.");
                     calculateDelta(asset, stubPayload);
                 } else {
                     // Short-circuit the delta calculation if the modification date inside the stub's payload is equal
@@ -72,27 +72,27 @@ public class ChangeSet {
                     // in one case we had the inner context of a relationship and in another case we did not
                     Date assetModified = (Date) this.igcRestClient.getPropertyByName(asset, "modified_on");
                     if (assetModified == null) {
-                        if (log.isDebugEnabled()) { log.debug("No timestamp inside asset -- calculating differences."); }
+                        log.debug("No timestamp inside asset -- calculating differences.");
                         calculateDelta(asset, stubPayload);
                     } else if (!stubModified.equals(assetModified.getTime())) {
-                        if (log.isDebugEnabled()) { log.debug("Modification timestamp of stub ({}) does not match asset ({}) -- calculating differences.", stubModified, assetModified.getTime()); }
+                        log.debug("Modification timestamp of stub ({}) does not match asset ({}) -- calculating differences.", stubModified, assetModified.getTime());
                         calculateDelta(asset, stubPayload);
                     } else {
                         if (this.igcRestClient.getPagedRelationshipPropertiesForType(asset.getType()).contains("detected_classifications")) {
                             // One exception we must handle where the timestamps will match but there could still be
                             // changes is when there is the potential for a classification: data class detection does NOT
                             // update the modification timestamp of the entity that was classified
-                            if (log.isDebugEnabled()) { log.debug("Modification timestamps matched, but may be classifications -- calculating differences."); }
+                            log.debug("Modification timestamps matched, but may be classifications -- calculating differences.");
                             calculateDelta(asset, stubPayload);
                         } else {
-                            if (log.isDebugEnabled()) { log.debug("Modification timestamps between stub and asset matched -- skipping change calculation."); }
+                            log.debug("Modification timestamps between stub and asset matched -- skipping change calculation.");
                         }
                     }
                 }
             }
 
         } catch (IOException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to parse JSON for diff operation: {}, {}", asset, stub, e); }
+            log.error("Unable to parse JSON for diff operation: {}, {}", asset, stub, e);
         }
 
     }
@@ -114,9 +114,7 @@ public class ChangeSet {
                 currentAsset,
                 flags
         );
-        if (log.isDebugEnabled()) {
-            log.debug("Found the following changes: {}", this.patch);
-        }
+        log.debug("Found the following changes: {}", this.patch);
         ArrayNode changes = (ArrayNode) this.patch;
         for (int i = 0; i < changes.size(); i++) {
             JsonNode change = changes.get(i);
@@ -138,13 +136,9 @@ public class ChangeSet {
                 // Skip any paging information changes
                 if (changePath.endsWith("/_id") && !changePath.equals("/_id")) {
                     // This is likely an exclusive relationship (eg. 'parent_category')
-                    if (log.isDebugEnabled()) {
-                        log.debug("Found an exclusive relationship change: {}", change);
-                    }
+                    log.debug("Found an exclusive relationship change: {}", change);
                     JsonNode consolidatedChange = consolidateChangedObject(change, changePath, currentAsset);
-                    if (log.isDebugEnabled()) {
-                        log.debug(" ... consolidated to: {}", consolidatedChange);
-                    }
+                    log.debug(" ... consolidated to: {}", consolidatedChange);
                     theChange = new Change(consolidatedChange, stubPayload);
                 } else {
                     // Otherwise add simple changes
@@ -185,7 +179,7 @@ public class ChangeSet {
      * @return JsonNode
      */
     private JsonNode getObjectFromIndex(String objectPath, JsonNode asset) {
-        if (log.isDebugEnabled()) { log.debug(" ... retrieving object from index at path: {}", objectPath); }
+        log.debug(" ... retrieving object from index at path: {}", objectPath);
         if (objectPath.contains("/items")) {
             // If we have an items array, determine the right index and retrieve the object
             String arrayIndex = objectPath.substring(objectPath.lastIndexOf('/') + 1);
@@ -197,7 +191,7 @@ public class ChangeSet {
             // Otherwise just return the object directly (there is only one)
             // We need to remove the leading '/' before doing so...
             String relationshipPath = objectPath.substring(1);
-            if (log.isDebugEnabled()) { log.debug(" ... returning object: {}", asset.path(relationshipPath)); }
+            log.debug(" ... returning object: {}", asset.path(relationshipPath));
             return asset.path(relationshipPath);
         }
     }
@@ -258,7 +252,7 @@ public class ChangeSet {
             if (aTokens.length > 1) {
                 return aTokens[1];
             } else {
-                if (log.isErrorEnabled()) { log.error("Unable to find any property in path: {}", this.path); }
+                log.error("Unable to find any property in path: {}", this.path);
                 return null;
             }
         }
@@ -352,7 +346,7 @@ public class ChangeSet {
                     propertyValue = node.asText();
                     break;
                 default:
-                    if (log.isWarnEnabled()) { log.warn("Unhandled value type '{}': {}", jsonType, node); }
+                    log.warn("Unhandled value type '{}': {}", jsonType, node);
                     break;
             }
 

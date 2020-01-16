@@ -74,7 +74,7 @@ public class ClassificationMappingStore {
         if (omrsGuidToMapping.containsKey(guid)) {
             return omrsGuidToMapping.get(guid);
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unable to find mapping for OMRS type: {}", guid); }
+            log.warn("Unable to find mapping for OMRS type: {}", guid);
             return null;
         }
     }
@@ -89,7 +89,7 @@ public class ClassificationMappingStore {
         if (omrsNameToGuid.containsKey(name)) {
             return getMappingByOmrsTypeGUID(omrsNameToGuid.get(name));
         } else {
-            if (log.isWarnEnabled()) { log.warn("Unable to find mapping for OMRS type: {}", name); }
+            log.warn("Unable to find mapping for OMRS type: {}", name);
             return null;
         }
     }
@@ -137,7 +137,7 @@ public class ClassificationMappingStore {
             Method getInstance = mappingClass.getMethod("getInstance", IGCVersionEnum.class);
             classificationMapper = (ClassificationMapping) getInstance.invoke(null, igcomrsRepositoryConnector.getIGCVersion());
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            if (log.isErrorEnabled()) { log.error("Unable to find or instantiate ClassificationMapping class: {}", mappingClass, e); }
+            log.error("Unable to find or instantiate ClassificationMapping class: {}", mappingClass, e);
         }
         return classificationMapper;
     }

@@ -60,7 +60,7 @@ public class DataStageJob {
         this.inputStageRIDs = new ArrayList<>();
         this.outputStageRIDs = new ArrayList<>();
 
-        if (log.isDebugEnabled()) { log.debug("Retrieving job details for: {}", job.getId()); }
+        log.debug("Retrieving job details for: {}", job.getId());
 
         getStageDetailsForJob();
         getLinkDetailsForJob();
@@ -176,7 +176,7 @@ public class DataStageJob {
      * @return Link
      */
     public Link getLinkByRid(String rid) {
-        if (log.isDebugEnabled()) { log.debug("Looking up cached link: {}", rid); }
+        log.debug("Looking up cached link: {}", rid);
         return linkMap.getOrDefault(rid, null);
     }
 
@@ -187,7 +187,7 @@ public class DataStageJob {
      * @return StageColumn
      */
     public StageColumn getStageColumnByRid(String rid) {
-        if (log.isDebugEnabled()) { log.debug("Looking up cached stage column: {}", rid); }
+        log.debug("Looking up cached stage column: {}", rid);
         return columnMap.getOrDefault(rid, null);
     }
 
@@ -198,7 +198,7 @@ public class DataStageJob {
      * @return Classificationenabledgroup
      */
     public Classificationenabledgroup getDataStoreFieldByRid(String rid) {
-        if (log.isDebugEnabled()) { log.debug("Looking up cached data store field: {}", rid); }
+        log.debug("Looking up cached data store field: {}", rid);
         return fieldMap.getOrDefault(rid, null);
     }
 
@@ -217,7 +217,7 @@ public class DataStageJob {
      */
     private void getStageDetailsForJob() {
         String jobRid = job.getId();
-        if (log.isDebugEnabled()) { log.debug("Retrieving stage details for job: {}", jobRid); }
+        log.debug("Retrieving stage details for job: {}", jobRid);
         IGCSearch igcSearch = new IGCSearch("stage");
         igcSearch.addProperties(DataStageConstants.getStageSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("job_or_container", "=", jobRid);
@@ -233,7 +233,7 @@ public class DataStageJob {
      */
     private void getLinkDetailsForJob() {
         String jobRid = job.getId();
-        if (log.isDebugEnabled()) { log.debug("Retrieving link details for job: {}", jobRid); }
+        log.debug("Retrieving link details for job: {}", jobRid);
         IGCSearch igcSearch = new IGCSearch("link");
         igcSearch.addProperties(DataStageConstants.getLinkSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("job_or_container", "=", jobRid);
@@ -249,10 +249,10 @@ public class DataStageJob {
      */
     private void getStageColumnDetailsForLinks() {
         String jobRid = job.getId();
-        if (log.isDebugEnabled()) { log.debug("Retrieving stage column details for job: {}", jobRid); }
+        log.debug("Retrieving stage column details for job: {}", jobRid);
         ItemList<StageColumn> stageCols = getStageColumnDetailsForLinks("stage_column", jobRid);
         if (stageCols == null) {
-            if (log.isInfoEnabled()) { log.info("Unable to identify stage columns for job by 'stage_column', reverting to 'ds_stage_column'."); }
+            log.info("Unable to identify stage columns for job by 'stage_column', reverting to 'ds_stage_column'.");
             stageCols = getStageColumnDetailsForLinks("ds_stage_column", jobRid);
         }
         if (stageCols != null) {
@@ -347,7 +347,7 @@ public class DataStageJob {
         List<T> listOfObjects = objects.getItems();
         for (T candidateObject : listOfObjects) {
             String rid = candidateObject.getId();
-            if (log.isDebugEnabled()) { log.debug("...... caching RID: {}", rid); }
+            log.debug("...... caching RID: {}", rid);
             map.put(rid, candidateObject);
         }
     }

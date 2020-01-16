@@ -328,7 +328,7 @@ public abstract class ClassificationMapping extends InstanceMapping {
                         methodName
                 );
             } else {
-                if (log.isWarnEnabled()) { log.warn("No OMRS attribute {} defined for classification type {} -- skipping mapping.", omrsAttribute, omrsClassificationType); }
+                log.warn("No OMRS attribute {} defined for classification type {} -- skipping mapping.", omrsAttribute, omrsClassificationType);
             }
         }
 

@@ -82,15 +82,6 @@ public class IGCRelationshipGuid extends IGCGuidHeader {
     /**
      * Turn this IGC GUID into a unique String representation of the GUID.
      *
-     * @return String
-     */
-    public String asGuid() {
-        return toString();
-    }
-
-    /**
-     * Turn this IGC GUID into a unique String representation of the GUID.
-     *
      * The string representation will be something like the following:
      * {@literal 5e74232d-92df-4b81-a401-b100dbfea73a:database_schema@6662c0f2.ee6a64fe.o1h6eveh1.gbvjvq0.ols3j6.0oadmdn8gknhjvmojr3pt<SchemaAssetType>database_schema@RDBST!6662c0f2.ee6a64fe.o1h6eveh1.gbvjvq0.ols3j6.0oadmdn8gknhjvmojr3pt}
      *

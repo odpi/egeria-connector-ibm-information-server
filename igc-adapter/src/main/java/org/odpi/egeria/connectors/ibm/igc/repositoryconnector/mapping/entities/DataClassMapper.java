@@ -280,7 +280,7 @@ public class DataClassMapper extends ReferenceableMapper {
 
         if (getComplexMappedOmrsProperties().contains(omrsPropertyName)) {
 
-            if (log.isDebugEnabled()) { log.debug("Adding complex search criteria for: {}", omrsPropertyName); }
+            log.debug("Adding complex search criteria for: {}", omrsPropertyName);
 
             IGCVersionEnum igcVersion = igcRestClient.getIgcVersion();
             String omrsValue = value.valueAsString();

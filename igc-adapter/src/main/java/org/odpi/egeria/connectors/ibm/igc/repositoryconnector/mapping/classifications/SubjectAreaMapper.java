@@ -73,7 +73,7 @@ public class SubjectAreaMapper extends ClassificationMapping {
             // Only need to continue if there are any terms
             if (assignedToTerms != null) {
                 assignedToTerms.getAllPages(igcRestClient);
-                if (log.isDebugEnabled()) { log.debug("Looking for SubjectArea mapping within {} candidate terms.", assignedToTerms.getItems().size()); }
+                log.debug("Looking for SubjectArea mapping within {} candidate terms.", assignedToTerms.getItems().size());
 
                 boolean isSubjectArea = false;
 
@@ -88,7 +88,7 @@ public class SubjectAreaMapper extends ClassificationMapping {
 
                 if (isSubjectArea) {
 
-                    if (log.isDebugEnabled()) { log.debug(" ... found SubjectArea classification."); }
+                    log.debug(" ... found SubjectArea classification.");
                     InstanceProperties classificationProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(
                             igcomrsRepositoryConnector.getRepositoryName(),
                             null,
