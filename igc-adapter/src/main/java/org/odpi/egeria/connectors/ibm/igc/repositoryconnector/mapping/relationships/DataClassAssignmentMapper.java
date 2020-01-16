@@ -5,10 +5,8 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relations
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classification;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataClass;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.MainObject;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -73,11 +71,11 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
     }
 
     /**
-     * Retrieve the main_object asset expected from a classification asset.
+     * Retrieve the classificationenabledgroup asset expected from a classification asset.
      *
      * @param relationshipAsset the classification asset to translate into a main_object asset
      * @param igcRestClient REST connectivity to the IGC environment
-     * @return Reference - the main_object asset
+     * @return Reference - the classificationenabledgroup asset
      */
     @Override
     public List<Reference> getProxyOneAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient) {
@@ -129,7 +127,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
     }
 
     /**
-     * Custom implementation of the relationship between an a DataClass (data_class) and a Referenceable (main_object).
+     * Custom implementation of the relationship between an a DataClass (data_class) and a Referenceable (classificationenabledgroup).
      * This is one of the few relationships in IGC that has relationship-specific properties handled by a separate
      * 'classification' object, so it must be handled using custom logic.
      *
@@ -146,34 +144,33 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                                            Reference toIgcObject,
                                            String userId) {
 
-        String assetType = IGCRestConstants.getAssetTypeForSearch(fromIgcObject.getType());
-
-        if (assetType.equals("data_class")) {
+        if (fromIgcObject instanceof DataClass) {
             mapDetectedClassifications_fromDataClass(
                     igcomrsRepositoryConnector,
                     relationships,
-                    fromIgcObject,
-                    toIgcObject,
+                    (DataClass) fromIgcObject,
+                    toIgcObject instanceof Classificationenabledgroup ? (Classificationenabledgroup) toIgcObject : null,
                     userId
             );
             mapSelectedClassifications_fromDataClass(
                     igcomrsRepositoryConnector,
                     relationships,
-                    fromIgcObject,
+                    (DataClass) fromIgcObject,
                     userId
             );
-        } else {
+        } else if (toIgcObject == null || toIgcObject instanceof DataClass) {
+            Classificationenabledgroup fromObject = fromIgcObject instanceof Classificationenabledgroup ? (Classificationenabledgroup) fromIgcObject : null;
             mapDetectedClassifications_toDataClass(
                     igcomrsRepositoryConnector,
                     relationships,
-                    fromIgcObject,
-                    toIgcObject,
+                    fromObject,
+                    (DataClass) toIgcObject,
                     userId
             );
             mapSelectedClassifications_toDataClass(
                     igcomrsRepositoryConnector,
                     relationships,
-                    fromIgcObject,
+                    fromObject,
                     userId
             );
         }
@@ -292,64 +289,18 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<IGCSearch> getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
-                                                       String repositoryName,
-                                                       IGCRestClient igcRestClient,
-                                                       String searchCriteria) throws FunctionNotSupportedException {
-
-        // If no search criteria was provided, we can short-circuit and just return all such assignments via the
-        // simple search criteria
-        if (searchCriteria == null || searchCriteria.equals("")) {
-            return getSimpleIGCSearchCriteria();
-        }
-
-        List<IGCSearch> searches = new ArrayList<>();
-
-        IGCSearch searchForDataClass = new IGCSearch("data_class");
-        searchForDataClass.addProperties(getProxyTwoMapping().getRealIgcRelationshipProperties());
-        IGCSearchConditionSet conditionsForDataClass = new IGCSearchConditionSet();
-
-        IGCSearch searchForClassification = new IGCSearch("classification");
-        searchForClassification.addProperties(igcRestClient.getAllPropertiesForType("classification"));
-        IGCSearchConditionSet conditionsForClassification = new IGCSearchConditionSet();
-
-        // The only string property we can attempt to match against is the status, and the only ones that are mapped
-        // are Discovered and Proposed -- if anything else, we should ensure an empty list is returned
-        Pattern pattern = Pattern.compile(searchCriteria);
-        Matcher proposed = pattern.matcher("Proposed");
-        Matcher discovered = pattern.matcher("Discovered");
-        if (!proposed.matches()) {
-            conditionsForDataClass.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
-            searchForDataClass.addConditions(conditionsForDataClass);
-        }
-        if (!discovered.matches()) {
-            conditionsForClassification.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
-            searchForClassification.addConditions(conditionsForClassification);
-        }
-
-        searches.add(searchForDataClass);
-        searches.add(searchForClassification);
-
-        return searches;
-
-    }
-
-    /**
      * Map the detected classifications for objects classified by the provided data_class object.
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
-     * @param fromIgcObject the data_class object
-     * @param toIgcObject the main_object that is classified (if known, null otherwise)
+     * @param dataClass the data_class object
+     * @param toIgcObject the classificationenabledgroup that is classified (if known, null otherwise)
      * @param userId the user requesting the mapped relationships
      */
     private void mapDetectedClassifications_fromDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                           List<Relationship> relationships,
-                                                          Reference fromIgcObject,
-                                                          Reference toIgcObject,
+                                                          DataClass dataClass,
+                                                          Classificationenabledgroup toIgcObject,
                                                           String userId) {
 
         final String methodName = "mapDetectedClassifications_fromDataClass";
@@ -358,9 +309,9 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
 
         // One of the few relationships in IGC that actually has properties of its own!
         // So we need to retrieve this relationship linking object (IGC type 'classification')
-        IGCSearchCondition byDataClass = new IGCSearchCondition("data_class", "=", fromIgcObject.getId());
+        IGCSearchCondition byDataClass = new IGCSearchCondition("data_class", "=", dataClass.getId());
         IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(byDataClass);
-        if (toIgcObject instanceof MainObject) {
+        if (toIgcObject != null) {
             IGCSearchCondition byAsset = new IGCSearchCondition("classifies_asset", "=", toIgcObject.getId());
             igcSearchConditionSet.addCondition(byAsset);
             igcSearchConditionSet.setMatchAnyCondition(false);
@@ -392,7 +343,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                                     igcomrsRepositoryConnector.getRepositoryName(),
                                     R_DATA_CLASS_ASSIGNMENT),
                             classifiedObj,
-                            fromIgcObject,
+                            dataClass,
                             "detected_classifications",
                             userId,
                             detectedClassification.getId()
@@ -423,18 +374,18 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
-     * @param fromIgcObject the data_class object
+     * @param dataClass the data_class object
      * @param userId the user requesting the mapped relationships
      */
     private void mapSelectedClassifications_fromDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                           List<Relationship> relationships,
-                                                          Reference fromIgcObject,
+                                                          DataClass dataClass,
                                                           String userId) {
 
         // (Note that in IGC these can only be retrieved by looking up all assets for which this data_class is selected,
         // they cannot be looked up as a relationship from the data_class object...  Therefore, start by searching
         // for any assets that list this data_class as their selected_classification
-        IGCSearchCondition igcSearchCondition = new IGCSearchCondition("selected_classification", "=", fromIgcObject.getId());
+        IGCSearchCondition igcSearchCondition = new IGCSearchCondition("selected_classification", "=", dataClass.getId());
         IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(igcSearchCondition);
         IGCSearch igcSearch = new IGCSearch("amazon_s3_data_file_field", igcSearchConditionSet);
         igcSearch.addType("data_file_field");
@@ -457,7 +408,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                                 igcomrsRepositoryConnector.getRepositoryName(),
                                 R_DATA_CLASS_ASSIGNMENT),
                         assetWithSelected,
-                        fromIgcObject,
+                        dataClass,
                         "selected_classification",
                         userId
                 );
@@ -481,13 +432,13 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
      * @param fromIgcObject the main_object object
-     * @param toIgcObject the data_class object (if known, or null otherwise)
+     * @param dataClass the data_class object (if known, or null otherwise)
      * @param userId the user requesting the mapped relationships
      */
     private void mapDetectedClassifications_toDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                         List<Relationship> relationships,
-                                                        Reference fromIgcObject,
-                                                        Reference toIgcObject,
+                                                        Classificationenabledgroup fromIgcObject,
+                                                        DataClass dataClass,
                                                         String userId) {
 
         final String methodName = "mapDetectedClassifications_toDataClass";
@@ -498,10 +449,13 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
 
         // One of the few relationships in IGC that actually has properties of its own!
         // So we need to retrieve this relationship linking object (IGC type 'classification')
-        IGCSearchCondition byAsset = new IGCSearchCondition("classifies_asset", "=", fromIgcObject.getId());
-        IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(byAsset);
-        if (toIgcObject instanceof DataClass) {
-            IGCSearchCondition byDataClass = new IGCSearchCondition("data_class", "=", toIgcObject.getId());
+        IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
+        if (fromIgcObject != null) {
+            IGCSearchCondition byAsset = new IGCSearchCondition("classifies_asset", "=", fromIgcObject.getId());
+            igcSearchConditionSet.addCondition(byAsset);
+        }
+        if (dataClass != null) {
+            IGCSearchCondition byDataClass = new IGCSearchCondition("data_class", "=", dataClass.getId());
             igcSearchConditionSet.addCondition(byDataClass);
             igcSearchConditionSet.setMatchAnyCondition(false);
         }
@@ -563,21 +517,23 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
-     * @param fromIgcObject the main_object object
+     * @param fromIgcObject the classificationenabledgroup object
      * @param userId the user requesting the mapped relationships
      */
     private void mapSelectedClassifications_toDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                         List<Relationship> relationships,
-                                                        Reference fromIgcObject,
+                                                        Classificationenabledgroup fromIgcObject,
                                                         String userId) {
 
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
-        Reference withSelectedClassification = igcRestClient.getAssetWithSubsetOfProperties(
-                fromIgcObject.getId(),
-                fromIgcObject.getType(),
-                new String[]{"selected_classification"});
-
-        Reference selectedClassification = (Reference) igcRestClient.getPropertyByName(withSelectedClassification, "selected_classification");
+        DataClass selectedClassification = fromIgcObject.getSelectedClassification();
+        if (selectedClassification == null) {
+            Classificationenabledgroup withSelectedClassification = igcRestClient.getAssetWithSubsetOfProperties(
+                    fromIgcObject.getId(),
+                    fromIgcObject.getType(),
+                    new String[]{"selected_classification"});
+            selectedClassification = withSelectedClassification.getSelectedClassification();
+        }
 
         // If the reference itself (or its type) are null the relationship does not exist
         if (selectedClassification != null && selectedClassification.getType() != null) {
@@ -624,13 +580,20 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
 
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
+        ItemList<Classification> detectedClassifications;
         IGCSearch igcSearch = new IGCSearch("classification", classificationProperties, igcSearchConditionSet);
         IGCVersionEnum igcVersion = igcomrsRepositoryConnector.getIGCVersion();
         if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
             igcSearch.addProperty("value_frequency");
         }
-        ItemList<Classification> detectedClassifications = igcRestClient.search(igcSearch);
-        detectedClassifications.getAllPages(igcRestClient);
+
+        if (igcSearchConditionSet.size() > 0) {
+            detectedClassifications = igcRestClient.search(igcSearch);
+            detectedClassifications.getAllPages(igcRestClient);
+        } else {
+            igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+            detectedClassifications = igcRestClient.search(igcSearch);
+        }
 
         return detectedClassifications;
 

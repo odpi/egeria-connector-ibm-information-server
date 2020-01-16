@@ -120,7 +120,7 @@ public class DataClassMapper extends ReferenceableMapper {
             return DataClassAssignmentMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()).getProxyTwoAssetFromAsset(
                     igcRestClient.getAssetById(igcRid), igcRestClient).get(0);
         } else {
-            return igcRestClient.getAssetRefById(igcRid);
+            return igcRestClient.getAssetWithSubsetOfProperties(igcRid, igcAssetType, igcRestClient.getAllPropertiesForType(igcAssetType));
         }
     }
 

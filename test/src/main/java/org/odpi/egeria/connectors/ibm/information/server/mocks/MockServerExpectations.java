@@ -746,9 +746,28 @@ public class MockServerExpectations implements ExpectationInitializer {
         String caseName = "FindEntitiesByQualifiedName";
         setSearchAndResponse(mockServerClient, caseName, "results_all.json",
                 "{\"types\":[\"database_column\"],\"properties\":[\"numberEmptyValues\",\"defined_foreign_key\",\"type\",\"occurs\",\"minimum_length\",\"nullabilityFlag\",\"uniqueFlag\",\"constantFlag\",\"numberCompleteValues\",\"inferredScale\",\"native_id\",\"level\",\"inferredFormat\",\"odbc_type\",\"isInferredPrimaryKey\",\"inferredPrecision\",\"created_by\",\"averageValue\",\"created_on\",\"unique\",\"name\",\"numberNullValues\",\"isInferredForeignKey\",\"position\",\"numberZeroValues\",\"defined_primary_key\",\"selected_natural_key\",\"short_description\",\"nbRecordsTested\",\"selected_primary_key\",\"domainType\",\"numberFormats\",\"numberValidValues\",\"synchronized_from\",\"start_end_columns\",\"qualityScore_bubble\",\"qualityScore\",\"modified_on\",\"allows_null_values\",\"inferredLength\",\"length\",\"default_value\",\"long_description\",\"fraction\",\"selected_foreign_key\",\"inferredDataType\",\"modified_by\",\"data_type\",\"numberDistinctValues\",\"quality_benchmark\"],\"pageSize\":100}");
+        setSearchAndResponse(mockServerClient, caseName, "results_all.json",
+                "{\"types\":[\"database_column\"],\"properties\":[\"numberEmptyValues\",\"defined_foreign_key\",\"type\",\"occurs\",\"minimum_length\",\"nullabilityFlag\",\"uniqueFlag\",\"constantFlag\",\"numberCompleteValues\",\"inferredScale\",\"native_id\",\"level\",\"inferredFormat\",\"odbc_type\",\"isInferredPrimaryKey\",\"inferredPrecision\",\"created_by\",\"averageValue\",\"created_on\",\"unique\",\"name\",\"numberNullValues\",\"isInferredForeignKey\",\"position\",\"numberZeroValues\",\"defined_primary_key\",\"selected_natural_key\",\"short_description\",\"nbRecordsTested\",\"selected_primary_key\",\"domainType\",\"numberFormats\",\"numberValidValues\",\"synchronized_from\",\"start_end_columns\",\"qualityScore_bubble\",\"qualityScore\",\"modified_on\",\"allows_null_values\",\"inferredLength\",\"length\",\"default_value\",\"long_description\",\"fraction\",\"selected_foreign_key\",\"inferredDataType\",\"data_type\",\"modified_by\",\"numberDistinctValues\",\"quality_benchmark\"],\"pageSize\":100}");
         setSearchAndResponse(mockServerClient, caseName, "results_one.json",
                 json(
                         "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"database_table_or_view.name\",\"operator\":\"=\",\"value\":\"CONTACTEMAIL\"},{\"property\":\"database_table_or_view.database_schema.name\",\"operator\":\"=\",\"value\":\"DB2INST1\"},{\"property\":\"database_table_or_view.database_schema.database.name\",\"operator\":\"=\",\"value\":\"COMPDIR\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"EMAIL\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_user.json",
+                json(
+                        "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"conditions\":[{\"conditions\":[{\"property\":\"courtesy_title\",\"operator\":\"like {0}%\",\"value\":\"Mr. Gary Geeke\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"full_name\",\"operator\":\"like {0}%\",\"value\":\"Mr. Gary Geeke\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"courtesy_title\",\"operator\":\"like {0}%\",\"value\":\"Mr.\"},{\"property\":\"full_name\",\"operator\":\"like {0}%\",\"value\":\"Gary Geeke\"}],\"operator\":\"and\"}],\"operator\":\"or\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_user.json",
+                json(
+                        "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"full_name\",\"operator\":\"=\",\"value\":\"Geeke\"},{\"property\":\"job_title\",\"operator\":\"=\",\"value\":\"Geeke\"},{\"property\":\"principal_id\",\"operator\":\"=\",\"value\":\"Geeke\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_user.json",
+                "{\"types\":[\"user\"],\"properties\":[\"office_phone_number\",\"modified_on\",\"instant_message_id\",\"business_address\",\"given_name\",\"fax_number\",\"principal_id\",\"created_by\",\"mobile_phone_number\",\"full_name\",\"email_address\",\"courtesy_title\",\"created_on\",\"surname\",\"organization\",\"home_phone_number\",\"modified_by\",\"location\",\"job_title\",\"pager_number\"],\"pageSize\":100}");
+        setSearchAndResponse(mockServerClient, caseName, "results_user.json",
+                json(
+                        "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"full_name\",\"operator\":\"like %{0}\",\"value\":\"Geeke\"},{\"property\":\"job_title\",\"operator\":\"like %{0}\",\"value\":\"Geeke\"},{\"property\":\"principal_id\",\"operator\":\"like %{0}\",\"value\":\"Geeke\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
