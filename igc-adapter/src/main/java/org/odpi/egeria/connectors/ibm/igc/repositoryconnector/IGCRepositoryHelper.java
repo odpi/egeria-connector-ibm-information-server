@@ -13,6 +13,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.InstanceMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping;
@@ -346,78 +347,48 @@ public class IGCRepositoryHelper {
                     igcSearchConditionSet);
 
             String qualifiedNameRegex = null;
-            boolean getAllOfType = false;
-            boolean getNothing = false;
-            if (matchProperties != null) {
 
-                Set<String> mappedOmrsProperties = mapping.getAllMappedOmrsProperties();
+            InstanceMapping.SearchFilter filter = InstanceMapping.getAllNoneOrSome(mapping, matchProperties, matchCriteria);
+
+            if (filter.equals(InstanceMapping.SearchFilter.NONE)) {
+                igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+            } else if (filter.equals(InstanceMapping.SearchFilter.SOME)) {
+                // Otherwise, cycle through the mappings and add them
                 Map<String, InstancePropertyValue> propertiesToMatch = matchProperties.getInstanceProperties();
-                if (propertiesToMatch == null) {
-                    propertiesToMatch = new HashMap<>();
-                }
-
-                if (!mappedOmrsProperties.containsAll(propertiesToMatch.keySet()) && matchCriteria.equals(MatchCriteria.ALL)) {
-                    // If there is some property we are being asked to search but it has no mapping,
-                    // ensure we will get no results
-                    getNothing = true;
-                } else {
-
-                    if (matchCriteria.equals(MatchCriteria.ANY) || matchCriteria.equals(MatchCriteria.NONE)) {
-                        for (Map.Entry<String, InstancePropertyValue> entry : propertiesToMatch.entrySet()) {
-                            String omrsPropertyName = entry.getKey();
-                            if (mapping.isOmrsPropertyLiteralMapped(omrsPropertyName)) {
-                                Object literalValue = mapping.getOmrsPropertyLiteralValue(omrsPropertyName);
-                                boolean valuesAreEqual = equivalentValues(literalValue, entry.getValue());
-                                getAllOfType = (valuesAreEqual && matchCriteria.equals(MatchCriteria.ANY))
-                                        || (!valuesAreEqual && matchCriteria.equals(MatchCriteria.NONE));
-                                getNothing = valuesAreEqual && matchCriteria.equals(MatchCriteria.NONE);
-                                if (getNothing) {
-                                    break;
-                                }
+                if (propertiesToMatch != null) {
+                    for (Map.Entry<String, InstancePropertyValue> entry : propertiesToMatch.entrySet()) {
+                        String omrsPropertyName = entry.getKey();
+                        InstancePropertyValue value = entry.getValue();
+                        // If one of the requested matching properties is literally mapped, and the values do not
+                        // match the literal mapping, AND this is a match-ALL request, then force no results
+                        if (mapping.isOmrsPropertyLiteralMapped(omrsPropertyName) && matchCriteria.equals(MatchCriteria.ALL)) {
+                            Object literalValue = mapping.getOmrsPropertyLiteralValue(omrsPropertyName);
+                            Object requestedValue = value.valueAsObject();
+                            if ((literalValue == null && requestedValue != null)
+                                    || (literalValue != null && !literalValue.equals(requestedValue))) {
+                                log.debug("Requested match property {} is literally-mapped, but values do not match ({} != {}) -- forcing no results.", omrsPropertyName, literalValue, requestedValue);
+                                igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                break;
                             }
                         }
-                    }
-
-                    if (getNothing) {
-                        igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
-                    } else if (!getAllOfType) {
-                        // Otherwise, cycle through the mappings and add them
-                        for (Map.Entry<String, InstancePropertyValue> entry : propertiesToMatch.entrySet()) {
-                            String omrsPropertyName = entry.getKey();
-                            InstancePropertyValue value = entry.getValue();
-                            // If one of the requested matching properties is literally mapped, and the values do not
-                            // match the literal mapping, AND this is a match-ALL request, then force no results
-                            if (mapping.isOmrsPropertyLiteralMapped(omrsPropertyName) && matchCriteria.equals(MatchCriteria.ALL)) {
-                                Object literalValue = mapping.getOmrsPropertyLiteralValue(omrsPropertyName);
-                                Object requestedValue = value.valueAsObject();
-                                if ( (literalValue == null && requestedValue != null)
-                                        || (literalValue != null && !literalValue.equals(requestedValue)) ) {
-                                    log.debug("Requested match property {} is literally-mapped, but values do not match ({} != {}) -- forcing no results.", omrsPropertyName, literalValue, requestedValue);
-                                    igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
-                                    break;
-                                }
-                            }
-                            if (omrsPropertyName.equals("qualifiedName")) {
-                                qualifiedNameRegex = (String) ((PrimitivePropertyValue) value).getPrimitiveValue();
-                            }
-                            addSearchConditionFromValue(
-                                    igcSearchConditionSet,
-                                    omrsPropertyName,
-                                    mapping,
-                                    value
-                            );
+                        if (omrsPropertyName.equals("qualifiedName")) {
+                            qualifiedNameRegex = (String) ((PrimitivePropertyValue) value).getPrimitiveValue();
                         }
-                    } else {
-                        log.debug("Skipping detailed matchProperties iteration, as we should return all types based on criteria and literal mappings.");
+                        addSearchConditionFromValue(
+                                igcSearchConditionSet,
+                                omrsPropertyName,
+                                mapping,
+                                value
+                        );
                     }
-
                 }
-
+            } else {
+                log.debug("Skipping detailed matchProperties iteration, as we should return all types based on criteria and literal mappings.");
             }
 
             // If we marked to get nothing, no point in proceeding with any further search setup as we should skip
             // searching entirely
-            if (!getNothing) {
+            if (!filter.equals(InstanceMapping.SearchFilter.NONE)) {
                 if (classificationLimiters != null) {
                     igcSearchConditionSet.addNestedConditionSet(classificationLimiters);
                 }
@@ -648,12 +619,10 @@ public class IGCRepositoryHelper {
                 RelationshipMapping.ProxyMapping pmTwo = mapper.getProxyTwoMapping();
                 List<String> relationshipProperties = pmTwo.getIgcRelationshipProperties();
                 for (String igcPropertyName : relationshipProperties) {
-                    log.warn("processResults -- using relationshipProperty: {}", igcPropertyName);
                     if (igcPropertyName.equals(RelationshipMapping.SELF_REFERENCE_SENTINEL)) {
                         endOnes.add(candidateTwo);
                     } else {
                         Object otherEnd = igcRestClient.getPropertyByName(candidateTwo, igcPropertyName);
-                        log.warn("processResults -- otherEnd found: {}", otherEnd);
                         if (otherEnd != null) {
                             if (otherEnd instanceof Reference) {
                                 Reference other = (Reference) otherEnd;
@@ -1030,64 +999,6 @@ public class IGCRepositoryHelper {
         } else {
             return null;
         }
-    }
-
-    /**
-     * Return the full set of relationships known about the specific entity, using the provided IGC asset.
-     *
-     * Note: this method assumes that the provided IGC object is already fully-populated, so will avoid any further
-     * retrieval of information.
-     *
-     * @param userId unique identifier for requesting user.
-     * @param guid unique IGC identifier for the entity.
-     * @param asset the IGC asset for which the list of Relationships should be constructed.
-     * @return {@code List<Relationship>}
-     * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
-     *                                  the metadata collection is stored.
-     * @throws EntityNotKnownException the entity cannot be found in IGC
-     */
-    public List<Relationship> getRelationshipsFromFullAsset(String userId, IGCEntityGuid guid, Reference asset)
-            throws RepositoryErrorException, EntityNotKnownException {
-
-        final String methodName = "getRelationshipsFromFullAsset";
-
-        if (log.isDebugEnabled()) { log.debug("getRelationshipsFromFullAsset with guid = {}", guid); }
-
-        List<Relationship> alRelationships = new ArrayList<>();
-        if (guid == null) {
-            raiseEntityNotKnownException(methodName, "<null>", "<null>", repositoryName);
-        } else {
-
-            String rid = guid.getRid();
-            String prefix = guid.getGeneratedPrefix();
-            String igcType = guid.getAssetType();
-
-            // Ensure the entity mapping actually exists (if not, throw error to that effect)
-            EntityMappingInstance entityMap = getMappingInstanceForParameters(
-                    igcType,
-                    rid,
-                    prefix,
-                    userId);
-
-            if (entityMap != null) {
-                // 2. Apply the mapping to the object, and retrieve the resulting relationships
-                alRelationships.addAll(
-                        EntityMapping.getMappedRelationships(
-                                guid,
-                                entityMap,
-                                null,
-                                0,
-                                null,
-                                100)
-                );
-            } else {
-                raiseRepositoryErrorException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, methodName, prefix + igcType, repositoryName);
-            }
-
-        }
-
-        return alRelationships;
-
     }
 
     /**

@@ -397,7 +397,11 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                        InstanceProperties matchProperties,
                                                        MatchCriteria matchCriteria) throws FunctionNotSupportedException {
         // Nothing to do -- no relationship-level properties by default -- so return the simple search
-        return getSimpleIGCSearchCriteria();
+        if (matchProperties == null || matchProperties.getInstanceProperties().size() == 0) {
+            return getSimpleIGCSearchCriteria();
+        } else {
+            return buildDefaultComplexSearch(matchProperties, matchCriteria);
+        }
     }
 
     /**
@@ -416,7 +420,29 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                        IGCRestClient igcRestClient,
                                                        String searchCriteria) throws FunctionNotSupportedException {
         // Nothing to do -- no relationship-level properties by default -- so return the simple search
-        return getSimpleIGCSearchCriteria();
+        if (searchCriteria == null || searchCriteria.equals("")) {
+            return getSimpleIGCSearchCriteria();
+        } else {
+            // No need to check for literal-mapped values, as currently no relationship has a string-based literal value
+            return buildDefaultComplexSearch(null, null);
+        }
+    }
+
+    private List<IGCSearch> buildDefaultComplexSearch(InstanceProperties matchProperties, MatchCriteria matchCriteria) {
+
+        List<IGCSearch> searches;
+        if ( (matchProperties == null && matchCriteria == null)
+                || InstanceMapping.getAllNoneOrSome(this, matchProperties, matchCriteria).equals(SearchFilter.NONE)) {
+            searches = new ArrayList<>();
+            ProxyMapping pm = getProxyTwoMapping();
+            IGCSearch igcSearch = new IGCSearch(pm.getIgcAssetType());
+            IGCSearchConditionSet conditions = new IGCSearchConditionSet(IGCRestConstants.getConditionToForceNoSearchResults());
+            igcSearch.addConditions(conditions);
+            searches.add(igcSearch);
+        } else {
+            searches = getSimpleIGCSearchCriteria();
+        }
+        return searches;
     }
 
     /**
