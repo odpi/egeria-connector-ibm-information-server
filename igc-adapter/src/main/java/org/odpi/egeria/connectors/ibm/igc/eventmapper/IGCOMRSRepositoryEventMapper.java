@@ -102,16 +102,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         // Setup IGC OMRS Repository connectivity
         if ( !(repositoryConnector instanceof IGCOMRSRepositoryConnector) ) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.EVENT_MAPPER_IMPROPERLY_INITIALIZED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(repositoryConnector.getServerName());
-            throw new ConnectorCheckedException(
-                    errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
+            raiseConnectorCheckedException(IGCOMRSErrorCode.EVENT_MAPPER_IMPROPERLY_INITIALIZED, methodName, null, repositoryConnector.getServerName());
         }
         this.igcomrsRepositoryConnector = (IGCOMRSRepositoryConnector) this.repositoryConnector;
         this.igcVersion = igcomrsRepositoryConnector.getIGCVersion();
@@ -137,15 +128,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             this.igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
             igcomrsMetadataCollection.setEventMapper(this);
         } catch (RepositoryErrorException e) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(igcomrsRepositoryConnector.getServerName());
-            throw new ConnectorCheckedException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction(),
-                    e);
+            raiseConnectorCheckedException(IGCOMRSErrorCode.REST_CLIENT_FAILURE, methodName, e, igcomrsRepositoryConnector.getServerName());
         }
         this.metadataCollectionId = igcomrsRepositoryConnector.getMetadataCollectionId();
         this.originatorServerName = igcomrsRepositoryConnector.getServerName();
@@ -1819,6 +1802,28 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 typeDefName,
                 relationshipGUID,
                 homeMetadataCollectionId);
+    }
+
+    /**
+     * Throws a ConnectorCheckedException based on the provided parameters.
+     *
+     * @param errorCode the error code for the exception
+     * @param methodName the method name throwing the exception
+     * @param cause the underlying cause of the exception (if any, otherwise null)
+     * @param params any additional parameters for formatting the error message
+     * @throws ConnectorCheckedException always
+     */
+    private void raiseConnectorCheckedException(IGCOMRSErrorCode errorCode, String methodName, Exception cause, String ...params) throws ConnectorCheckedException {
+        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
+        throw new ConnectorCheckedException(
+                errorCode.getHTTPErrorCode(),
+                this.getClass().getName(),
+                methodName,
+                errorMessage,
+                errorCode.getSystemAction(),
+                errorCode.getUserAction(),
+                cause
+        );
     }
 
 }

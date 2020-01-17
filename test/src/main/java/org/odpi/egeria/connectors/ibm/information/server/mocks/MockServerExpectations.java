@@ -209,6 +209,7 @@ public class MockServerExpectations implements ExpectationInitializer {
         setChangeSetTest(mockServerClient);
         setTermAddEvent(mockServerClient);
         setDataFileDeleteEvent(mockServerClient);
+        setIMAMShareEvent(mockServerClient);
 
     }
 
@@ -913,6 +914,18 @@ public class MockServerExpectations implements ExpectationInitializer {
         setStubLookupForRid(mockServerClient, caseName, "term", "6662c0f2.e1b1ec6c.00263phiu.ns4tojl.pbf2qr.91blj7n4rsg7ddf37590i");
         setStubLookupForRid(mockServerClient, caseName, "term", "6662c0f2.e1b1ec6c.00263sh0s.jh26jeo.qf1k24.ip1nbj5vhcv53hif03093");
         setStubLookupForRid(mockServerClient, caseName, "term", "6662c0f2.e1b1ec6c.00263sh0h.2dhc38v.3iblsu.ul800cuokr2uebhpbqurd");
+
+    }
+
+    private void setIMAMShareEvent(MockServerClient mockServerClient) {
+
+        String caseName = "IMAMShareEvent";
+
+        setStubLookupForRid(mockServerClient, caseName, "host_(engine)", "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh");
+        setStubLookupForRid(mockServerClient, caseName, "database_schema", "b1c497ce.c1fb060b.001mts4qn.7n9ghn6.59e1lg.oeu3169u6dtpesgou6cqh");
+        setStubLookupForRid(mockServerClient, caseName, "data_connection", DATA_CONNECTION_RID);
+        setStubLookupForRid(mockServerClient, caseName, "connector", "b1c497ce.54ec142d.001mtr38f.q8hjqk4.spumq8.k1bt587cologck6u9tf8q");
+        setStubLookupForRid(mockServerClient, caseName, "database_table", "b1c497ce.54bd3a08.001mts4qn.7n9a341.3l2hic.d867phul07pgt3478ctim");
 
     }
 

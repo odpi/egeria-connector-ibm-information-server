@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.RelationalDBSchemaTypeMapper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCRelationshipGuid;
 import org.testng.annotations.Test;
@@ -94,6 +95,10 @@ public class IGCGuidTest {
         assertEquals(guid, guidReversed.toString());
         IGCRelationshipGuid guidWithPrefixReversed = IGCRelationshipGuid.fromGuid(guidWithPrefix);
         assertEquals(guidWithPrefix, guidWithPrefixReversed.toString());
+
+        // Negative tests
+        assertNull(RelationshipMapping.getProxyOneGuidFromRelationship(null, null));
+        assertNull(RelationshipMapping.getProxyTwoGuidFromRelationship(null, null));
 
     }
 
