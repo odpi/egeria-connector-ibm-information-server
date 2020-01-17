@@ -11,8 +11,10 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.ContactDetailsMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.GlossaryMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.RelationalDBSchemaTypeMapper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mocks.MockConnection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCRelationshipGuid;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.OMRSStub;
 import org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants;
 import org.odpi.openmetadata.adapters.eventbus.topic.inmemory.InMemoryOpenMetadataTopicConnector;
@@ -62,6 +64,7 @@ public class ConnectorTest {
     private IGCOMRSRepositoryConnector igcomrsRepositoryConnector;
     private IGCOMRSMetadataCollection igcomrsMetadataCollection;
     private IGCOMRSRepositoryEventMapper igcomrsRepositoryEventMapper;
+    private IGCRepositoryHelper igcRepositoryHelper;
     private OMRSRepositoryContentManager contentManager;
     private OMRSRepositoryEventManager eventManager;
     private InMemoryOpenMetadataTopicConnector inMemoryEventConnector;
@@ -163,6 +166,7 @@ public class ConnectorTest {
 
         repositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
         sourceName = igcomrsRepositoryConnector.getRepositoryName();
+        igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
 
     }
 
@@ -1016,7 +1020,7 @@ public class ConnectorTest {
                         MockConstants.DATABASE_QN, MockConstants.DATABASE_SCHEMA_QN)
         );
 
-        testRelationshipsForEntity(
+        List<Relationship> results = testRelationshipsForEntity(
                 "database_schema",
                 "DeployedDatabaseSchema",
                 null,
@@ -1024,6 +1028,8 @@ public class ConnectorTest {
                 2,
                 relationshipExpectations
         );
+
+        testRelationshipsAreRetrievable(results.subList(0, 1), "AssetSchemaType");
 
     }
 
@@ -1954,13 +1960,12 @@ public class ConnectorTest {
     @Test
     public void testChangeSet() {
 
-        IGCRepositoryHelper helper = igcomrsMetadataCollection.getIgcRepositoryHelper();
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
         List<String> referenceListProperties = igcRestClient.getPagedRelationshipPropertiesForType("term");
 
         Reference testTerm = igcRestClient.getAssetById(MockConstants.TERM_RID);
-        OMRSStub testStub = helper.getOMRSStubForAsset(testTerm);
+        OMRSStub testStub = igcRepositoryHelper.getOMRSStubForAsset(testTerm);
 
         // Initial test will be against a non-existent stub
         ChangeSet test = new ChangeSet(igcRestClient, testTerm, testStub);
@@ -1981,7 +1986,7 @@ public class ConnectorTest {
         assertEquals(listOfAssets.size(), 2);
 
         // Next test will have a stub populated so changes will not all be adds
-        testStub = helper.getOMRSStubForAsset(testTerm);
+        testStub = igcRepositoryHelper.getOMRSStubForAsset(testTerm);
         test = new ChangeSet(igcRestClient, testTerm, testStub);
         changedProperties = test.getChangedProperties();
         assertNotNull(changedProperties);
@@ -2049,9 +2054,19 @@ public class ConnectorTest {
 
     }
 
-    // TODO: additional tests for coverage (in approximate order of priority)
-    //  - self-referencing entity update event (eg. database schema) (40ish?)
-    //  - IMAM share event (30ish?)
+    @Test
+    public void testIMAMShareEvent() {
+        // TODO: confirm that this generates all of the following:
+        //  - update entities for: 1x RelationalDBSchemaType / DeployedDatabaseSchema, 1x RelationalTable
+        //  - purge relationship for: 1x ??? (schema-to-table)
+        //  - add relationship for: 1x ??? (schema-to-table)
+        try {
+            igcomrsRepositoryEventMapper.processEvent("{\"discoverOperationId\":\"1578394441915\",\"createdRIDs\":\"\",\"deletedRIDs\":\"\",\"configFile\":\"\",\"eventType\":\"IMAM_SHARE_EVENT\",\"user\":\"isadmin\",\"importEventRid\":\"1a6c9.b98b35d5.001muvt3r.amdvtco.3657j2.1r4eivkibet0nhobp4sg1j00\",\"mergedRIDs\":\"Hidden_DataCollection_in_Database:b1c497ce.54bd3a08.001mts4qn.7n9a341.3l2hic.d867phul07pgt3478ctim, Hidden_DataSchema:b1c497ce.c1fb060b.001mts4qn.7n9ghn6.59e1lg.oeu3169u6dtpesgou6cqh, DataConnection:b1c497ce.8e4c0a48.001mts4qn.7mouq34.s1cncq.51abs5f71epl37jke7irc, HostSystem:b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh\"}");
+        } catch (Exception e) {
+            log.error("Hit unexpected exception during IMAM share event processing.", e);
+            assertNull(e);
+        }
+    }
 
     @AfterSuite
     public void stopConnector() {
@@ -2405,23 +2420,7 @@ public class ConnectorTest {
             assertNotNull(results);
             assertFalse(results.isEmpty());
             assertEquals(results.size(), totalNumberExpected);
-            for (Relationship result : results) {
-                assertEquals(result.getType().getTypeDefName(), typeName);
-                assertTrue(result.getVersion() > 1);
-
-                try {
-                    Relationship foundAgain = igcomrsMetadataCollection.isRelationshipKnown(MockConstants.EGERIA_USER, result.getGUID());
-                    assertNotNull(foundAgain);
-                    assertEquals(foundAgain, result);
-                } catch (InvalidParameterException | RepositoryErrorException e) {
-                    log.error("Unable to find relationship again by GUID: {}", result.getGUID());
-                    assertNull(e);
-                } catch (Exception e) {
-                    log.error("Unexpected exception trying to find relationship again by GUID: {}", result.getGUID(), e);
-                    assertNull(e);
-                }
-
-            }
+            testRelationshipsAreRetrievable(results, typeName);
         }
 
         return results;
@@ -2471,23 +2470,7 @@ public class ConnectorTest {
             assertNotNull(results);
             assertFalse(results.isEmpty());
             assertEquals(results.size(), totalNumberExpected);
-            for (Relationship result : results) {
-                assertEquals(result.getType().getTypeDefName(), typeName);
-                assertTrue(result.getVersion() > 1);
-
-                try {
-                    Relationship foundAgain = igcomrsMetadataCollection.isRelationshipKnown(MockConstants.EGERIA_USER, result.getGUID());
-                    assertNotNull(foundAgain);
-                    assertEquals(foundAgain, result);
-                } catch (InvalidParameterException | RepositoryErrorException e) {
-                    log.error("Unable to find relationship again by GUID: {}", result.getGUID());
-                    assertNull(e);
-                } catch (Exception e) {
-                    log.error("Unexpected exception trying to find relationship again by GUID: {}", result.getGUID(), e);
-                    assertNull(e);
-                }
-
-            }
+            testRelationshipsAreRetrievable(results, typeName);
         }
 
         return results;
@@ -2658,10 +2641,42 @@ public class ConnectorTest {
                     }*/
 
                 }
+
             }
         }
 
         return relationships;
+
+    }
+
+    /**
+     * Attempt to re-retrieve the provided relationships by their GUID.
+     *
+     * @param relationships list of relationships to test re-retrieval
+     * @param typeName the expected type of the relationship
+     */
+    private void testRelationshipsAreRetrievable(List<Relationship> relationships, String typeName) {
+
+        for (Relationship result : relationships) {
+            assertEquals(result.getType().getTypeDefName(), typeName);
+            assertTrue(result.getVersion() > 1);
+
+            try {
+                Relationship foundAgain = igcomrsMetadataCollection.isRelationshipKnown(MockConstants.EGERIA_USER, result.getGUID());
+                assertNotNull(foundAgain);
+                assertEquals(foundAgain, result);
+                IGCRelationshipGuid igcRelationshipGuid = IGCRelationshipGuid.fromGuid(result.getGUID());
+                assertNotNull(RelationshipMapping.getProxyOneGuidFromRelationship(igcRepositoryHelper, igcRelationshipGuid));
+                assertNotNull(RelationshipMapping.getProxyTwoGuidFromRelationship(igcRepositoryHelper, igcRelationshipGuid));
+            } catch (InvalidParameterException | RepositoryErrorException e) {
+                log.error("Unable to find relationship again by GUID: {}", result.getGUID());
+                assertNull(e);
+            } catch (Exception e) {
+                log.error("Unexpected exception trying to find relationship again by GUID: {}", result.getGUID(), e);
+                assertNull(e);
+            }
+
+        }
 
     }
 

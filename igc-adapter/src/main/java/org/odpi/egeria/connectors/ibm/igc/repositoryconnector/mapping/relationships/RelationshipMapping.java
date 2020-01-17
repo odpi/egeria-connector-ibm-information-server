@@ -10,7 +10,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
