@@ -218,6 +218,9 @@ public class MockServerExpectations implements ExpectationInitializer {
         setJobSyncRuleQueryEmpty(mockServerClient);
         setJobSyncRuleQueryFull(mockServerClient);
 
+        setJobSyncRuleCreate(mockServerClient);
+        setJobSyncRuleUpdate(mockServerClient);
+
         setJobChangeQuery(mockServerClient);
 
     }
@@ -357,7 +360,7 @@ public class MockServerExpectations implements ExpectationInitializer {
     private void setJobSyncRuleQueryEmpty(MockServerClient mockServerClient) {
         mockServerClient
                 .withSecure(true)
-                .when(jobSyncRuleRequest(), Times.exactly(1))
+                .when(jobSyncRuleRequest(), Times.exactly(2))
                 .respond(withResponse(getResourceFileContents("no_results.json")));
     }
 
@@ -366,6 +369,24 @@ public class MockServerExpectations implements ExpectationInitializer {
                 .withSecure(true)
                 .when(jobSyncRuleRequest())
                 .respond(withResponse(getResourceFileContents("job_sync_rule.json")));
+    }
+
+    private void setJobSyncRuleCreate(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(jobSyncRuleCreateRequest())
+                .respond(
+                        response()
+                                .withStatusCode(201)
+                                .withHeader("Location","https://infosvr:9446/ibm/iis/igc-rest/v1/assets/" + RID_FOR_SYNC_RULE)
+                );
+    }
+
+    private void setJobSyncRuleUpdate(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(jobSyncRuleUpdateRequest(RID_FOR_SYNC_RULE))
+                .respond(withResponse(getResourceFileContents("job_sync_rule_update.json")));
     }
 
     private void setJobChangeQuery(MockServerClient mockServerClient) {

@@ -12,6 +12,7 @@ import org.odpi.openmetadata.frameworks.connectors.ConnectorBroker;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectionCheckedException;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
 import org.odpi.openmetadata.frameworks.connectors.properties.beans.Connection;
+import org.odpi.openmetadata.frameworks.connectors.properties.beans.Endpoint;
 import org.odpi.openmetadata.http.HttpHelper;
 import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.model.*;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ public class ConnectorTest {
     }
 
     @BeforeSuite
-    void startConnector() {
+    public void startConnector() {
         Connection mockConnection = new MockConnection();
         ConnectorBroker connectorBroker = new ConnectorBroker();
         try {
@@ -54,7 +55,45 @@ public class ConnectorTest {
     }
 
     @Test
-    void testEngineDetails() {
+    public void testNegativeConnector() {
+
+        Connection emptyEndpoint = new MockConnection();
+        emptyEndpoint.setEndpoint(null);
+        confirmThrowsConnectorCheckedException(emptyEndpoint);
+
+        Connection noAddress = new MockConnection();
+        Endpoint endpoint = noAddress.getEndpoint();
+        endpoint.setAddress(null);
+        noAddress.setEndpoint(endpoint);
+        confirmThrowsConnectorCheckedException(noAddress);
+
+        endpoint.setAddress("");
+        noAddress.setEndpoint(endpoint);
+        confirmThrowsConnectorCheckedException(noAddress);
+
+    }
+
+    private void confirmThrowsConnectorCheckedException(Connection connection) {
+
+        ConnectorBroker connectorBroker = new ConnectorBroker();
+        DataStageConnector dsConnector = null;
+        try {
+            Object connector = connectorBroker.getConnector(connection);
+            assertTrue(connector instanceof DataStageConnector);
+            dsConnector = (DataStageConnector) connector;
+        } catch (ConnectionCheckedException | ConnectorCheckedException e) {
+            log.error("Unable to retrieve connection through the broker.", e);
+            assertNull(e);
+        }
+        assertNotNull(dsConnector);
+        DataStageConnector finalDsConnector = dsConnector;
+        assertNotNull(finalDsConnector);
+        assertThrows(ConnectorCheckedException.class, () -> finalDsConnector.start());
+
+    }
+
+    @Test
+    public void testEngineDetails() {
         DataEngineSoftwareServerCapability dataEngine = dataStageConnector.getDataEngineDetails();
         assertNotNull(dataEngine);
         SoftwareServerCapability capability = dataEngine.getSoftwareServerCapability();
@@ -64,32 +103,39 @@ public class ConnectorTest {
     }
 
     @Test
-    void testLastSync() {
+    public void testLastSync() {
+        // First query is empty result
         Date changesLastSynced = dataStageConnector.getChangesLastSynced();
         assertNull(changesLastSynced);
+        // This should result in a create
+        dataStageConnector.setChangesLastSynced(now);
+        changesLastSynced = dataStageConnector.getChangesLastSynced();
+        assertNotNull(changesLastSynced);
+        // This should result in an update
+        dataStageConnector.setChangesLastSynced(now);
     }
 
     @Test
-    void testChangedSchemas() {
+    public void testChangedSchemas() {
         // TODO: these should not be empty once we add virtual asset handling
         List<DataEngineSchemaType> schemaTypes = dataStageConnector.getChangedSchemaTypes(null, now);
         assertTrue(schemaTypes.isEmpty());
     }
 
     @Test
-    void testPortImplementations() {
+    public void testPortImplementations() {
         List<DataEnginePortImplementation> portImplementations = dataStageConnector.getChangedPortImplementations(null, now);
         assertTrue(portImplementations.isEmpty());
     }
 
     @Test
-    void testPortAliases() {
+    public void testPortAliases() {
         List<DataEnginePortAlias> portAliases = dataStageConnector.getChangedPortAliases(null, now);
         assertTrue(portAliases.isEmpty());
     }
 
     @Test
-    void testProcesses() {
+    public void testProcesses() {
         List<DataEngineProcess> processes = dataStageConnector.getChangedProcesses(null, now);
         assertFalse(processes.isEmpty());
         for (DataEngineProcess deProcess : processes) {
@@ -104,13 +150,13 @@ public class ConnectorTest {
     }
 
     @Test
-    void testLineageMappings() {
+    public void testLineageMappings() {
         List<DataEngineLineageMappings> lineageMappings = dataStageConnector.getChangedLineageMappings(null, now);
         assertTrue(lineageMappings.isEmpty());
     }
 
     @AfterSuite
-    void stopConnector() {
+    public void stopConnector() {
         dataStageConnector.disconnect();
     }
 

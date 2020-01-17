@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.information.server.mocks;
 
+import org.mockserver.matchers.MatchType;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.mockserver.model.JsonBody;
@@ -10,6 +11,7 @@ import java.util.List;
 
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
+import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.Parameter.param;
 
 /**
@@ -73,6 +75,7 @@ public class MockConstants {
     public static final String RID_FOR_CREATE_AND_UPDATE = "6662c0f2.e1b1ec6c.001muv34k.s0rtkp1.c38mtf.60ltvrgr67q6l6pq5t3qi";
     public static final String TERM_RID_FOR_EVENT = "6662c0f2.e1b1ec6c.00263sgva.eo5q0s7.o5rf5s.q22k66bdjh8h341n1hi1e";
     public static final String DATA_FILE_RID_FOR_DELETE_EVENT = "b1c497ce.6e76d866.001mts4ph.b7m9lbt.m84k14.b8dvbq9op20klkftn4ro7";
+    public static final String RID_FOR_SYNC_RULE = "6662c0f2.e1b13efc.001mvd18e.pmv1p1q.spnlen.53o4qgs7i7donmg7f1ias";
 
     // Examples used for specific scenarios to test IA client
     public static final String IA_PROJECT_NAME = "CocoPharma";
@@ -220,6 +223,29 @@ public class MockConstants {
      */
     public static HttpRequest jobSyncRuleRequest() {
         return searchRequest("{\"types\":[\"information_governance_rule\"],\"properties\":[\"short_description\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"=\",\"value\":\"Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS\"}],\"operator\":\"and\"}}");
+    }
+
+    /**
+     * Create a mock IGC request to create the job synchronization rule.
+     * @return HttpRequest
+     */
+    public static HttpRequest jobSyncRuleCreateRequest() {
+        return request().withMethod("POST").withPath(IGC_REST_EP + "assets")
+                .withBody(
+                        json(
+                                "{\"_type\":\"information_governance_rule\",\"name\":\"Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS\"}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        )
+                );
+    }
+
+    /**
+     * Create a mock IGC request to update the job synchronization rule.
+     * @param rid the RID of the rule to update
+     * @return HttpRequest
+     */
+    public static HttpRequest jobSyncRuleUpdateRequest(String rid) {
+        return request().withMethod("PUT").withPath(IGC_REST_EP + "assets/" + rid);
     }
 
     /**

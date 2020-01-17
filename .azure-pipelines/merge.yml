@@ -22,6 +22,14 @@ stages:
           - script: |
               mkdir -p $(Agent.HomeDirectory)/.m2/
               mv $(mavenSettings.secureFilePath) $(Agent.HomeDirectory)/.m2/settings.xml
+          - task: Bash@3
+            displayName: 'Delete plexus-classworlds.license'
+            inputs:
+              targetType: 'inline'
+              script: |
+                cd $M2_HOME/boot
+                ls -la
+                rm ./plexus-classworlds.license
           - task: ArtifactoryMaven@1
             inputs:
               mavenPomFile: 'pom.xml'
