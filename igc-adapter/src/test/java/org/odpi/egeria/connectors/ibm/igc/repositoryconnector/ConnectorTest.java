@@ -506,6 +506,14 @@ public class ConnectorTest {
     }
 
     @Test
+    public void testNegativeRetrievals() {
+
+        assertThrows(EntityNotKnownException.class, () -> igcomrsMetadataCollection.getEntityDetail(MockConstants.EGERIA_USER, "123"));
+        assertThrows(RelationshipNotKnownException.class, () -> igcomrsMetadataCollection.getRelationship(MockConstants.EGERIA_USER, "123"));
+
+    }
+
+    @Test
     public void testGlossaryFindByPropertyValue() {
 
         List<EntityDetail> results = testFindEntitiesByPropertyValue(
