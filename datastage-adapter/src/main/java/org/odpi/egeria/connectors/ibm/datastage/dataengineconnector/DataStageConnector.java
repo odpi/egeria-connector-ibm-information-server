@@ -37,7 +37,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private static final String SYNC_RULE_NAME = "Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS";
     private static final String SYNC_RULE_DESC = "GENERATED -- DO NOT UPDATE: last synced at ";
 
-    private final SimpleDateFormat SYNC_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    private final SimpleDateFormat syncDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     private IGCRestClient igcRestClient;
     private ObjectMapper objectMapper;
@@ -78,11 +78,11 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
         EndpointProperties endpointProperties = connectionProperties.getEndpoint();
         if (endpointProperties == null) {
-            raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, null, "<null>");
+            raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, "<null>");
         } else {
             String address = endpointProperties.getAddress();
             if (address == null || address.equals("")) {
-                raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, null, address);
+                raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, address);
             } else {
 
                 String igcUser = connectionProperties.getUserId();
@@ -119,7 +119,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                     dataEngine = new DataEngineSoftwareServerCapability(sscDataEngine, defaultUserId);
 
                 } else {
-                    raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, null, address);
+                    raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, address);
                 }
 
             }
@@ -157,9 +157,9 @@ public class DataStageConnector extends DataEngineConnectorBase {
             String description = jobSyncRule.getShortDescription();
             String dateString = description.substring(SYNC_RULE_DESC.length());
             try {
-                lastSync = SYNC_DATE_FORMAT.parse(dateString);
+                lastSync = syncDateFormat.parse(dateString);
             } catch (ParseException e) {
-                log.error("Unable to parse date and time of last sync from rule: {} ({})", description, dateString);
+                log.error("Unable to parse date and time of last sync from rule '{}' ({}) using format: {}", description, dateString, syncDateFormat.toPattern(), e);
             }
         }
         return lastSync;
@@ -174,7 +174,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     public void setChangesLastSynced(Date time) {
         final String methodName = "setChangesLastSynced";
         InformationGovernanceRule exists = getJobSyncRule();
-        String newDescription = SYNC_RULE_DESC + SYNC_DATE_FORMAT.format(time);
+        String newDescription = SYNC_RULE_DESC + syncDateFormat.format(time);
         boolean success;
         if (exists == null) {
             // Create the entry
@@ -422,11 +422,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * Throws a ConnectorCheckedException using the provided parameters.
      * @param errorCode the error code for the exception
      * @param methodName the name of the method throwing the exception
-     * @param cause the underlying cause of the exception (or null if none)
      * @param params any parameters for formatting the error message
      * @throws ConnectorCheckedException always
      */
-    private void raiseConnectorCheckedException(DataStageErrorCode errorCode, String methodName, Throwable cause, String ...params) throws ConnectorCheckedException {
+    private void raiseConnectorCheckedException(DataStageErrorCode errorCode, String methodName, String ...params) throws ConnectorCheckedException {
         String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
         throw new ConnectorCheckedException(
                 errorCode.getHTTPErrorCode(),
@@ -434,8 +433,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 methodName,
                 errorMessage,
                 errorCode.getSystemAction(),
-                errorCode.getUserAction(),
-                cause
+                errorCode.getUserAction()
         );
     }
 
