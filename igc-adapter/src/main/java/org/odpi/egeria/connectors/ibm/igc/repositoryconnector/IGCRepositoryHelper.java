@@ -601,7 +601,6 @@ public class IGCRepositoryHelper {
                 String propertyToOne = pmRelationship.getIgcRelationshipPropertyToEndOne();
                 String propertyToTwo = pmRelationship.getIgcRelationshipPropertyToEndTwo();
                 Object endOne = igcRestClient.getPropertyByName(candidateTwo, propertyToOne);
-                // TODO: create helper method that encapsulates the below instanceof stuff...
                 IGCRepositoryHelper.addReferencesToList(igcRestClient, endOnes, endOne);
                 Object endTwo = igcRestClient.getPropertyByName(candidateTwo, propertyToTwo);
                 IGCRepositoryHelper.addReferencesToList(igcRestClient, endTwos, endTwo);

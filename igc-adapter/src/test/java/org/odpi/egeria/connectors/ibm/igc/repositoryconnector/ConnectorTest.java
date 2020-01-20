@@ -520,6 +520,7 @@ public class ConnectorTest {
                 "36f66863-9726-4b41-97ee-714fd0dc6fe4",
                 "Glossary",
                 repositoryHelper.getContainsRegex("a"),
+                MockConstants.EGERIA_PAGESIZE,
                 2
         );
 
@@ -582,6 +583,7 @@ public class ConnectorTest {
                 "e507485b-9b5a-44c9-8a28-6967f7ff3672",
                 "GlossaryCategory",
                 repositoryHelper.getContainsRegex("e"),
+                MockConstants.EGERIA_PAGESIZE,
                 12
         );
 
@@ -652,6 +654,7 @@ public class ConnectorTest {
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
                 repositoryHelper.getContainsRegex("Address"),
+                MockConstants.EGERIA_PAGESIZE,
                 6
         );
 
@@ -670,6 +673,7 @@ public class ConnectorTest {
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
                 ip,
                 MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
                 6
         );
 
@@ -689,6 +693,7 @@ public class ConnectorTest {
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
                 ip,
                 MatchCriteria.ANY,
+                MockConstants.EGERIA_PAGESIZE,
                 7
         );
 
@@ -708,6 +713,7 @@ public class ConnectorTest {
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
                 ip,
                 MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
                 1
         );
 
@@ -728,6 +734,7 @@ public class ConnectorTest {
                 possibleTypes,
                 null,
                 repositoryHelper.getContainsRegex("COMPDIR"),
+                MockConstants.EGERIA_PAGESIZE,
                 1
         );
 
@@ -743,7 +750,15 @@ public class ConnectorTest {
         testFindEntitiesByPropertyValue(
                 possibleTypes,
                 repositoryHelper.getContainsRegex("Address"),
+                MockConstants.EGERIA_PAGESIZE,
                 13
+        );
+
+        testFindEntitiesByPropertyValue(
+                possibleTypes,
+                repositoryHelper.getContainsRegex("Address"),
+                4,
+                4
         );
 
     }
@@ -761,6 +776,7 @@ public class ConnectorTest {
                 possibleTypes,
                 classifications,
                 repositoryHelper.getContainsRegex("Address"),
+                MockConstants.EGERIA_PAGESIZE,
                 6
         );
 
@@ -1644,7 +1660,16 @@ public class ConnectorTest {
                 typeName,
                 ip,
                 MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
                 3);
+
+        testFindRelationshipsByProperty(
+                relationshipType,
+                typeName,
+                ip,
+                MatchCriteria.ALL,
+                2,
+                2);
 
     }
 
@@ -1662,6 +1687,7 @@ public class ConnectorTest {
         List<EntityDetail> results = testFindEntitiesByPropertyValue(
                 possibleTypes,
                 repositoryHelper.getExactMatchRegex(MockConstants.DATABASE_COLUMN_QN),
+                MockConstants.EGERIA_PAGESIZE,
                 1);
 
         for (EntityDetail result : results) {
@@ -1677,6 +1703,7 @@ public class ConnectorTest {
                 typeName,
                 ip,
                 MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
                 12
         );
 
@@ -1685,7 +1712,17 @@ public class ConnectorTest {
                 typeName,
                 ip,
                 MatchCriteria.NONE,
+                MockConstants.EGERIA_PAGESIZE,
                 66
+        );
+
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ip,
+                MatchCriteria.NONE,
+                10,
+                10
         );
 
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "qualifiedName", repositoryHelper.getStartsWithRegex(MockConstants.DATABASE_COLUMN_QN.substring(0, 20)), methodName);
@@ -1694,7 +1731,17 @@ public class ConnectorTest {
                 typeName,
                 ip,
                 MatchCriteria.ANY,
+                MockConstants.EGERIA_PAGESIZE,
                 78
+        );
+
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ip,
+                MatchCriteria.ANY,
+                10,
+                10
         );
 
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "qualifiedName", repositoryHelper.getEndsWithRegex(MockConstants.DATABASE_COLUMN_QN.substring(20)), methodName);
@@ -1703,6 +1750,7 @@ public class ConnectorTest {
                 typeName,
                 ip,
                 MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
                 1
         );
 
@@ -1710,6 +1758,7 @@ public class ConnectorTest {
                 "ac406bf8-e53e-49f1-9088-2af28bbbd285",
                 "Person",
                 repositoryHelper.getExactMatchRegex("(steward_user)=Mr. Gary Geeke"),
+                MockConstants.EGERIA_PAGESIZE,
                 1
         );
 
@@ -1717,6 +1766,7 @@ public class ConnectorTest {
                 "ac406bf8-e53e-49f1-9088-2af28bbbd285",
                 "Person",
                 repositoryHelper.getExactMatchRegex("Gary Geeke"),
+                MockConstants.EGERIA_PAGESIZE,
                 1
         );
 
@@ -1724,6 +1774,7 @@ public class ConnectorTest {
                 "ac406bf8-e53e-49f1-9088-2af28bbbd285",
                 "Person",
                 repositoryHelper.getEndsWithRegex("_user)=Mr. Gary Geeke"),
+                MockConstants.EGERIA_PAGESIZE,
                 1
         );
 
@@ -1731,6 +1782,7 @@ public class ConnectorTest {
                 "ac406bf8-e53e-49f1-9088-2af28bbbd285",
                 "Person",
                 repositoryHelper.getEndsWithRegex("Gary Geeke"),
+                MockConstants.EGERIA_PAGESIZE,
                 1
         );
 
@@ -1738,6 +1790,7 @@ public class ConnectorTest {
                 "ac406bf8-e53e-49f1-9088-2af28bbbd285",
                 "Person",
                 repositoryHelper.getEndsWithRegex("Geeke"),
+                MockConstants.EGERIA_PAGESIZE,
                 1
         );
 
@@ -1759,6 +1812,7 @@ public class ConnectorTest {
                 "DataClass",
                 ip,
                 MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
                 1
         );
 
@@ -1783,7 +1837,16 @@ public class ConnectorTest {
                 typeName,
                 ip,
                 MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
                 3);
+
+        testFindRelationshipsByProperty(
+                typeGUID,
+                typeName,
+                ip,
+                MatchCriteria.ALL,
+                1,
+                1);
 
         // Try searching by the symbolic name of an enumeration, should not return any results because it is not a
         // string property
@@ -1812,6 +1875,7 @@ public class ConnectorTest {
                 "RelationalColumn",
                 ip,
                 MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
                 7
         );
 
@@ -1830,6 +1894,7 @@ public class ConnectorTest {
                 "GovernancePolicy",
                 ip,
                 MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
                 2
         );
 
@@ -1869,7 +1934,17 @@ public class ConnectorTest {
                 typeName,
                 ip,
                 MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
                 8
+        );
+
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ip,
+                MatchCriteria.ALL,
+                5,
+                5
         );
 
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "fileType", repositoryHelper.getStartsWithRegex("CS"), methodName);
@@ -1878,6 +1953,7 @@ public class ConnectorTest {
                 typeName,
                 ip,
                 MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
                 8
         );
 
@@ -1885,6 +1961,7 @@ public class ConnectorTest {
                 typeGUID,
                 typeName,
                 repositoryHelper.getEndsWithRegex("CSV"),
+                MockConstants.EGERIA_PAGESIZE,
                 8
         );
 
@@ -1925,6 +2002,7 @@ public class ConnectorTest {
                 typeName,
                 ip,
                 MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
                 1
         );
 
@@ -1932,6 +2010,7 @@ public class ConnectorTest {
                 typeGUID,
                 typeName,
                 repositoryHelper.getEndsWithRegex("w@cocopharmaceutical.com"),
+                MockConstants.EGERIA_PAGESIZE,
                 1
         );
 
@@ -1953,6 +2032,7 @@ public class ConnectorTest {
                 typeName,
                 ip,
                 MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
                 2
         );
 
@@ -1960,6 +2040,7 @@ public class ConnectorTest {
                 typeGUID,
                 typeName,
                 repositoryHelper.getStartsWithRegex("EMPL"),
+                MockConstants.EGERIA_PAGESIZE,
                 2
         );
 
@@ -2145,18 +2226,20 @@ public class ConnectorTest {
      * @param typeGUID the entity type GUID to search
      * @param typeName the name of the type to search
      * @param queryString the string criteria by which to search
+     * @param pageSize limit the number of results
      * @param totalNumberExpected the total number of expected results
      * @return {@code List<EntityDetail>} the results of the query
      */
     private List<EntityDetail> testFindEntitiesByPropertyValue(String typeGUID,
                                                                String typeName,
                                                                String queryString,
+                                                               int pageSize,
                                                                int totalNumberExpected) {
         Set<String> types = new HashSet<>();
         if (typeName != null) {
             types.add(typeName);
         }
-        return testFindEntitiesByPropertyValue(typeGUID, types, null, queryString, totalNumberExpected);
+        return testFindEntitiesByPropertyValue(typeGUID, types, null, queryString, pageSize, totalNumberExpected);
     }
 
     /**
@@ -2165,13 +2248,15 @@ public class ConnectorTest {
      *
      * @param possibleTypes the names of the types that could be returned by the search
      * @param queryString the string criteria by which to search
+     * @param pageSize limit the number of results
      * @param totalNumberExpected the total number of expected results
      * @return {@code List<EntityDetail>} the results of the query
      */
     private List<EntityDetail> testFindEntitiesByPropertyValue(Set<String> possibleTypes,
                                                                String queryString,
+                                                               int pageSize,
                                                                int totalNumberExpected) {
-        return testFindEntitiesByPropertyValue(null, possibleTypes, null, queryString, totalNumberExpected);
+        return testFindEntitiesByPropertyValue(null, possibleTypes, null, queryString, pageSize, totalNumberExpected);
     }
 
     /**
@@ -2181,14 +2266,16 @@ public class ConnectorTest {
      * @param possibleTypes the names of the types that could be returned by the search
      * @param classificationLimiters the names of classifications by which to limit the results (or null if not to limit)
      * @param queryString the string criteria by which to search
+     * @param pageSize limit the number of results
      * @param totalNumberExpected the total number of expected results
      * @return {@code List<EntityDetail>} the results of the query
      */
     private List<EntityDetail> testFindEntitiesByPropertyValue(Set<String> possibleTypes,
                                                                Set<String> classificationLimiters,
                                                                String queryString,
+                                                               int pageSize,
                                                                int totalNumberExpected) {
-        return testFindEntitiesByPropertyValue(null, possibleTypes, classificationLimiters, queryString, totalNumberExpected);
+        return testFindEntitiesByPropertyValue(null, possibleTypes, classificationLimiters, queryString, pageSize, totalNumberExpected);
     }
 
     /**
@@ -2199,6 +2286,7 @@ public class ConnectorTest {
      * @param possibleTypes the names of the types that could be returned by the search
      * @param classificationLimiters the names of classifications by which to limit the results (or null if not to limit)
      * @param queryString the string criteria by which to search
+     * @param pageSize limit the number of results
      * @param totalNumberExpected the total number of expected results
      * @return {@code List<EntityDetail>} the results of the query
      */
@@ -2206,6 +2294,7 @@ public class ConnectorTest {
                                                                Set<String> possibleTypes,
                                                                Set<String> classificationLimiters,
                                                                String queryString,
+                                                               int pageSize,
                                                                int totalNumberExpected) {
 
         List<EntityDetail> results = null;
@@ -2225,7 +2314,7 @@ public class ConnectorTest {
                     null,
                     null,
                     null,
-                    MockConstants.EGERIA_PAGESIZE
+                    pageSize
             );
         } catch (InvalidParameterException | TypeErrorException | RepositoryErrorException | PropertyErrorException | PagingErrorException | FunctionNotSupportedException | UserNotAuthorizedException e) {
             log.error("Unable to search for entities of type '{}' by property value.", typeGUID, e);
@@ -2258,6 +2347,7 @@ public class ConnectorTest {
      * @param typeName the name of the type to search
      * @param matchProperties the properties to match against
      * @param matchCriteria the criteria by which to match
+     * @param pageSize the number of results to limit
      * @param totalNumberExpected the total number of expected results
      * @return {@code List<EntityDetail>} the results of the query
      */
@@ -2265,6 +2355,7 @@ public class ConnectorTest {
                                                           String typeName,
                                                           InstanceProperties matchProperties,
                                                           MatchCriteria matchCriteria,
+                                                          int pageSize,
                                                           int totalNumberExpected) {
 
         List<EntityDetail> results = null;
@@ -2281,7 +2372,7 @@ public class ConnectorTest {
                     null,
                     null,
                     null,
-                    MockConstants.EGERIA_PAGESIZE
+                    pageSize
             );
         } catch (InvalidParameterException | TypeErrorException | RepositoryErrorException | PropertyErrorException | PagingErrorException | FunctionNotSupportedException | UserNotAuthorizedException e) {
             log.error("Unable to search for {} entities by property: {}", typeName, matchProperties, e);
@@ -2390,6 +2481,7 @@ public class ConnectorTest {
      * @param typeName the name of the type to search
      * @param matchProperties the properties to match against
      * @param matchCriteria the criteria by which to match
+     * @param pageSize the number of results to limit
      * @param totalNumberExpected the total number of expected results
      * @return {@code List<Relationship>} the results of the query
      */
@@ -2397,6 +2489,7 @@ public class ConnectorTest {
                                                                String typeName,
                                                                InstanceProperties matchProperties,
                                                                MatchCriteria matchCriteria,
+                                                               int pageSize,
                                                                int totalNumberExpected) {
 
         List<Relationship> results = null;
@@ -2412,7 +2505,7 @@ public class ConnectorTest {
                     null,
                     null,
                     null,
-                    MockConstants.EGERIA_PAGESIZE
+                    pageSize
             );
         } catch (InvalidParameterException | TypeErrorException | RepositoryErrorException | PropertyErrorException | PagingErrorException | FunctionNotSupportedException | UserNotAuthorizedException e) {
             log.error("Unable to search for {} relationships by property: {}", typeName, matchProperties, e);
