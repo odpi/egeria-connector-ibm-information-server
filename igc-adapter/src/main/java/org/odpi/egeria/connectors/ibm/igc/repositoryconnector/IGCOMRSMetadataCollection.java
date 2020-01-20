@@ -177,6 +177,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     }
                 }
             }
+        } else {
+            results = typeDefs;
         }
 
         return results;
