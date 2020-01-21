@@ -359,18 +359,6 @@ public class IGCRepositoryHelper {
                     for (Map.Entry<String, InstancePropertyValue> entry : propertiesToMatch.entrySet()) {
                         String omrsPropertyName = entry.getKey();
                         InstancePropertyValue value = entry.getValue();
-                        // If one of the requested matching properties is literally mapped, and the values do not
-                        // match the literal mapping, AND this is a match-ALL request, then force no results
-                        if (mapping.isOmrsPropertyLiteralMapped(omrsPropertyName) && matchCriteria.equals(MatchCriteria.ALL)) {
-                            Object literalValue = mapping.getOmrsPropertyLiteralValue(omrsPropertyName);
-                            Object requestedValue = value.valueAsObject();
-                            if ((literalValue == null && requestedValue != null)
-                                    || (literalValue != null && !literalValue.equals(requestedValue))) {
-                                log.debug("Requested match property {} is literally-mapped, but values do not match ({} != {}) -- forcing no results.", omrsPropertyName, literalValue, requestedValue);
-                                igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
-                                break;
-                            }
-                        }
                         if (omrsPropertyName.equals("qualifiedName")) {
                             qualifiedNameRegex = (String) ((PrimitivePropertyValue) value).getPrimitiveValue();
                         }
