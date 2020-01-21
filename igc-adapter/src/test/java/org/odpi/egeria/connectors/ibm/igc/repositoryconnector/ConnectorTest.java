@@ -371,6 +371,12 @@ public class ConnectorTest {
     public void testAttributeTypeDefSearches() {
 
         try {
+            List<AttributeTypeDef> primitives = igcomrsMetadataCollection.findAttributeTypeDefsByCategory(MockConstants.EGERIA_USER, AttributeTypeDefCategory.PRIMITIVE);
+            assertNotNull(primitives);
+            assertEquals(primitives.size(), 13);
+            List<AttributeTypeDef> collections = igcomrsMetadataCollection.findAttributeTypeDefsByCategory(MockConstants.EGERIA_USER, AttributeTypeDefCategory.COLLECTION);
+            assertNotNull(collections);
+            assertEquals(collections.size(), 7);
             List<AttributeTypeDef> enums = igcomrsMetadataCollection.findAttributeTypeDefsByCategory(MockConstants.EGERIA_USER, AttributeTypeDefCategory.ENUM_DEF);
             assertNotNull(enums);
             assertEquals(enums.size(), 6);
