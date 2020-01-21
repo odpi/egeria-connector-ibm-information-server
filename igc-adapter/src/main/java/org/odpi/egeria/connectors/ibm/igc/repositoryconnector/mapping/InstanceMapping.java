@@ -102,30 +102,34 @@ public abstract class InstanceMapping {
                 filter = SearchFilter.NONE;
             } else {
 
-                if (matchCriteria.equals(MatchCriteria.ANY) || matchCriteria.equals(MatchCriteria.NONE)) {
-                    boolean allValuesAreUnequal = true;
-                    for (Map.Entry<String, InstancePropertyValue> entry : propertiesToMatch.entrySet()) {
-                        String omrsPropertyName = entry.getKey();
-                        if (mapping.isOmrsPropertyLiteralMapped(omrsPropertyName)) {
-                            Object literalValue = mapping.getOmrsPropertyLiteralValue(omrsPropertyName);
-                            boolean valuesAreEqual = IGCRepositoryHelper.equivalentValues(literalValue, entry.getValue());
-                            if (valuesAreEqual) {
-                                // If the values are equal, we can immediately short-circuit: when we should match
-                                // none this means we should have no results, and when we should match any this means
-                                // all results will match
-                                if (matchCriteria.equals(MatchCriteria.NONE)) {
-                                    filter = SearchFilter.NONE;
-                                } else {
-                                    filter = SearchFilter.ALL;
-                                }
-                                allValuesAreUnequal = false;
-                                break;
+                // Otherwise go through the properties themselves and figure out what results we should filter
+                boolean allValuesAreUnequal = true;
+                for (Map.Entry<String, InstancePropertyValue> entry : propertiesToMatch.entrySet()) {
+                    String omrsPropertyName = entry.getKey();
+                    if (mapping.isOmrsPropertyLiteralMapped(omrsPropertyName)) {
+                        Object literalValue = mapping.getOmrsPropertyLiteralValue(omrsPropertyName);
+                        boolean valuesAreEqual = IGCRepositoryHelper.equivalentValues(literalValue, entry.getValue());
+                        if (valuesAreEqual && !matchCriteria.equals(MatchCriteria.ALL)) {
+                            // If the values are equal, we can immediately short-circuit: when we should match
+                            // none this means we should have no results, and when we should match any this means
+                            // all results will match
+                            if (matchCriteria.equals(MatchCriteria.NONE)) {
+                                filter = SearchFilter.NONE;
+                            } else {
+                                filter = SearchFilter.ALL;
                             }
+                            allValuesAreUnequal = false;
+                            break;
+                        } else if (!valuesAreEqual && matchCriteria.equals(MatchCriteria.ALL)) {
+                            // We can also immediately short-circuit if we have been asked that all values match and
+                            // we have found one that does not
+                            filter = SearchFilter.NONE;
+                            break;
                         }
                     }
-                    if (allValuesAreUnequal && matchCriteria.equals(MatchCriteria.NONE)) {
-                        filter = SearchFilter.ALL;
-                    }
+                }
+                if (allValuesAreUnequal && matchCriteria.equals(MatchCriteria.NONE)) {
+                    filter = SearchFilter.ALL;
                 }
 
             }
