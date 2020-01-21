@@ -79,6 +79,7 @@ public class MockServerExpectations implements ExpectationInitializer {
 
         setQualifiedNameSearch(mockServerClient);
         setForeignKeyFindByPropertyValue(mockServerClient);
+        setSemanticAssignmentFindByProperty(mockServerClient);
 
         setIGCLogout(mockServerClient);
 
@@ -317,6 +318,14 @@ public class MockServerExpectations implements ExpectationInitializer {
         setSearchAndResponse(mockServerClient, "ForeignKeyFindByPropertyValue", "results.json",
                 json(
                         "{\"types\":[\"database_column\"],\"properties\":[\"defined_foreign_key_references\",\"selected_foreign_key_references\"],\"where\":{\"conditions\":[{\"property\":\"defined_foreign_key_references\",\"operator\":\"isNull\",\"negated\":true},{\"property\":\"selected_foreign_key_references\",\"operator\":\"isNull\",\"negated\":true}],\"operator\":\"or\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+    }
+
+    private void setSemanticAssignmentFindByProperty(MockServerClient mockServerClient) {
+        setSearchAndResponse(mockServerClient, "SemanticAssignmentFindByProperty", "results.json",
+                json(
+                        "{\"types\":[\"term\"],\"properties\":[\"assigned_assets\"],\"where\":{\"conditions\":[{\"property\":\"assigned_assets\",\"operator\":\"isNull\",\"negated\":true}],\"operator\":\"or\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }

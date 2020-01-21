@@ -1674,6 +1674,36 @@ public class ConnectorTest {
     }
 
     @Test
+    public void testSemanticAssignmentFindByProperty() {
+
+        final String methodName = "testSemanticAssignmentFindByProperty";
+
+        String relationshipType = "e6670973-645f-441a-bec7-6f5570345b92";
+        String typeName = "SemanticAssignment";
+
+        InstanceProperties ip = new InstanceProperties();
+        ip = repositoryHelper.addIntPropertyToInstance(sourceName, ip, "confidence", 100, methodName);
+
+        testFindRelationshipsByProperty(
+                relationshipType,
+                typeName,
+                ip,
+                MatchCriteria.ALL,
+                2,
+                2);
+
+        ip = repositoryHelper.addIntPropertyToInstance(sourceName, ip, "confidence", 10, methodName);
+        testFindRelationshipsByProperty(
+                relationshipType,
+                typeName,
+                ip,
+                MatchCriteria.ALL,
+                2,
+                0);
+
+    }
+
+    @Test
     public void testFindEntitiesByQualifiedName() {
 
         final String methodName = "testFindEntitiesByQualifiedName";
