@@ -177,6 +177,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     }
                 }
             }
+        } else {
+            results = typeDefs;
         }
 
         return results;
@@ -404,19 +406,25 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         String omrsTypeDefName = newAttributeTypeDef.getName();
         log.debug("Looking for mapping for {} of type {}", omrsTypeDefName, attributeTypeDefCategory.getName());
 
-        // See if we have a Mapper defined for the class -- if so, it's implemented
-        StringBuilder sbMapperClassname = new StringBuilder();
-        sbMapperClassname.append(IGCRepositoryHelper.MAPPING_PKG);
-        sbMapperClassname.append("attributes.");
-        sbMapperClassname.append(omrsTypeDefName);
-        sbMapperClassname.append("Mapper");
+        if (attributeTypeDefCategory.equals(AttributeTypeDefCategory.COLLECTION) || attributeTypeDefCategory.equals(AttributeTypeDefCategory.PRIMITIVE)) {
+            attributeMappingStore.addMapping(newAttributeTypeDef);
+        } else {
 
-        try {
-            Class<?> mappingClass = Class.forName(sbMapperClassname.toString());
-            log.debug(" ... found mapping class: {}", mappingClass.getCanonicalName());
-            attributeMappingStore.addMapping(newAttributeTypeDef, mappingClass);
-        } catch (ClassNotFoundException e) {
-            raiseTypeDefNotSupportedException(IGCOMRSErrorCode.ATTRIBUTE_TYPEDEF_NOT_MAPPED, methodName, omrsTypeDefName, repositoryName);
+            // See if we have a Mapper defined for the class -- if so, it's implemented
+            StringBuilder sbMapperClassname = new StringBuilder();
+            sbMapperClassname.append(IGCRepositoryHelper.MAPPING_PKG);
+            sbMapperClassname.append("attributes.");
+            sbMapperClassname.append(omrsTypeDefName);
+            sbMapperClassname.append("Mapper");
+
+            try {
+                Class<?> mappingClass = Class.forName(sbMapperClassname.toString());
+                log.debug(" ... found mapping class: {}", mappingClass.getCanonicalName());
+                attributeMappingStore.addMapping(newAttributeTypeDef, mappingClass);
+            } catch (ClassNotFoundException e) {
+                raiseTypeDefNotSupportedException(IGCOMRSErrorCode.ATTRIBUTE_TYPEDEF_NOT_MAPPED, methodName, omrsTypeDefName, repositoryName);
+            }
+
         }
 
         checkEventMapperIsConfigured(methodName);
@@ -540,8 +548,6 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         switch (attributeTypeDef.getCategory()) {
             case PRIMITIVE:
             case COLLECTION:
-                bImplemented = true;
-                break;
             case ENUM_DEF:
                 bImplemented = (attributeMappingStore.getAttributeTypeDefByGUID(attributeTypeDef.getGUID()) != null);
                 break;

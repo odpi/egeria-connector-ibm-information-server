@@ -396,7 +396,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                        InstanceProperties matchProperties,
                                                        MatchCriteria matchCriteria) throws FunctionNotSupportedException {
         // Nothing to do -- no relationship-level properties by default -- so return the simple search
-        if (matchProperties == null || matchProperties.getInstanceProperties().size() == 0) {
+        if (matchProperties == null || matchProperties.getInstanceProperties() == null || matchProperties.getInstanceProperties().size() == 0) {
             return getSimpleIGCSearchCriteria();
         } else {
             return buildDefaultComplexSearch(matchProperties, matchCriteria);

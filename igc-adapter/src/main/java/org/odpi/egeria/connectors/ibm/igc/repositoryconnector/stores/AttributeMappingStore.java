@@ -37,6 +37,28 @@ public class AttributeMappingStore {
     }
 
     /**
+     * Adds an attribute mapping for the provided AttributeTypeDef, when it is a simple-mapped type (ie. either a
+     * collection or a primitive).
+     *
+     * @param omrsTypeDef the OMRS AttributeTypeDef
+     * @return boolean false when unable to add the mapping (ie. it is not a collection or primitive AttributeTypeDef)
+     */
+    public boolean addMapping(AttributeTypeDef omrsTypeDef) {
+
+        AttributeTypeDefCategory category = omrsTypeDef.getCategory();
+        if (category.equals(AttributeTypeDefCategory.COLLECTION) || category.equals(AttributeTypeDefCategory.PRIMITIVE)) {
+            String guid = omrsTypeDef.getGUID();
+            omrsGuidToAttributeTypeDef.put(guid, omrsTypeDef);
+            omrsNameToGuid.put(omrsTypeDef.getName(), guid);
+            addGuidToCategory(category.getName(), guid);
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    /**
      * Adds an attribute mapping for the provided AttributeTypeDef, using the provided Java class for the mapping.
      *
      * @param omrsTypeDef the OMRS AttributeTypeDef

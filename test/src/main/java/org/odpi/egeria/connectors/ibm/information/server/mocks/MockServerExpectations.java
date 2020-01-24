@@ -36,6 +36,7 @@ public class MockServerExpectations implements ExpectationInitializer {
      * Setup the expectations we will need to respond to various tests.
      * @param mockServerClient the client against which to set the expectations
      */
+    @Override
     public void initializeExpectations(MockServerClient mockServerClient) {
 
         initializeTypeDetails(mockServerClient);
@@ -78,6 +79,7 @@ public class MockServerExpectations implements ExpectationInitializer {
 
         setQualifiedNameSearch(mockServerClient);
         setForeignKeyFindByPropertyValue(mockServerClient);
+        setSemanticAssignmentFindByProperty(mockServerClient);
 
         setIGCLogout(mockServerClient);
 
@@ -316,6 +318,14 @@ public class MockServerExpectations implements ExpectationInitializer {
         setSearchAndResponse(mockServerClient, "ForeignKeyFindByPropertyValue", "results.json",
                 json(
                         "{\"types\":[\"database_column\"],\"properties\":[\"defined_foreign_key_references\",\"selected_foreign_key_references\"],\"where\":{\"conditions\":[{\"property\":\"defined_foreign_key_references\",\"operator\":\"isNull\",\"negated\":true},{\"property\":\"selected_foreign_key_references\",\"operator\":\"isNull\",\"negated\":true}],\"operator\":\"or\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+    }
+
+    private void setSemanticAssignmentFindByProperty(MockServerClient mockServerClient) {
+        setSearchAndResponse(mockServerClient, "SemanticAssignmentFindByProperty", "results.json",
+                json(
+                        "{\"types\":[\"term\"],\"properties\":[\"assigned_assets\"],\"where\":{\"conditions\":[{\"property\":\"assigned_assets\",\"operator\":\"isNull\",\"negated\":true}],\"operator\":\"or\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
@@ -770,6 +780,10 @@ public class MockServerExpectations implements ExpectationInitializer {
                 "{\"types\":[\"database_column\"],\"properties\":[\"numberEmptyValues\",\"defined_foreign_key\",\"type\",\"occurs\",\"minimum_length\",\"nullabilityFlag\",\"uniqueFlag\",\"constantFlag\",\"numberCompleteValues\",\"inferredScale\",\"native_id\",\"level\",\"inferredFormat\",\"odbc_type\",\"isInferredPrimaryKey\",\"inferredPrecision\",\"created_by\",\"averageValue\",\"created_on\",\"unique\",\"name\",\"numberNullValues\",\"isInferredForeignKey\",\"position\",\"numberZeroValues\",\"defined_primary_key\",\"selected_natural_key\",\"short_description\",\"nbRecordsTested\",\"selected_primary_key\",\"domainType\",\"numberFormats\",\"numberValidValues\",\"synchronized_from\",\"start_end_columns\",\"qualityScore_bubble\",\"qualityScore\",\"modified_on\",\"allows_null_values\",\"inferredLength\",\"length\",\"default_value\",\"long_description\",\"fraction\",\"selected_foreign_key\",\"inferredDataType\",\"modified_by\",\"data_type\",\"numberDistinctValues\",\"quality_benchmark\"],\"pageSize\":100}");
         setSearchAndResponse(mockServerClient, caseName, "results_all.json",
                 "{\"types\":[\"database_column\"],\"properties\":[\"numberEmptyValues\",\"defined_foreign_key\",\"type\",\"occurs\",\"minimum_length\",\"nullabilityFlag\",\"uniqueFlag\",\"constantFlag\",\"numberCompleteValues\",\"inferredScale\",\"native_id\",\"level\",\"inferredFormat\",\"odbc_type\",\"isInferredPrimaryKey\",\"inferredPrecision\",\"created_by\",\"averageValue\",\"created_on\",\"unique\",\"name\",\"numberNullValues\",\"isInferredForeignKey\",\"position\",\"numberZeroValues\",\"defined_primary_key\",\"selected_natural_key\",\"short_description\",\"nbRecordsTested\",\"selected_primary_key\",\"domainType\",\"numberFormats\",\"numberValidValues\",\"synchronized_from\",\"start_end_columns\",\"qualityScore_bubble\",\"qualityScore\",\"modified_on\",\"allows_null_values\",\"inferredLength\",\"length\",\"default_value\",\"long_description\",\"fraction\",\"selected_foreign_key\",\"inferredDataType\",\"data_type\",\"modified_by\",\"numberDistinctValues\",\"quality_benchmark\"],\"pageSize\":100}");
+        setSearchAndResponse(mockServerClient, caseName, "results_all.json",
+                "{\"types\":[\"database_column\"],\"properties\":[\"numberEmptyValues\",\"defined_foreign_key\",\"type\",\"occurs\",\"minimum_length\",\"nullabilityFlag\",\"uniqueFlag\",\"constantFlag\",\"numberCompleteValues\",\"inferredScale\",\"native_id\",\"level\",\"inferredFormat\",\"odbc_type\",\"isInferredPrimaryKey\",\"inferredPrecision\",\"created_by\",\"averageValue\",\"created_on\",\"unique\",\"name\",\"numberNullValues\",\"isInferredForeignKey\",\"position\",\"numberZeroValues\",\"defined_primary_key\",\"selected_natural_key\",\"short_description\",\"nbRecordsTested\",\"selected_primary_key\",\"domainType\",\"numberFormats\",\"numberValidValues\",\"synchronized_from\",\"start_end_columns\",\"qualityScore_bubble\",\"qualityScore\",\"modified_on\",\"allows_null_values\",\"inferredLength\",\"length\",\"default_value\",\"long_description\",\"fraction\",\"selected_foreign_key\",\"inferredDataType\",\"modified_by\",\"data_type\",\"numberDistinctValues\",\"quality_benchmark\"],\"pageSize\":10}");
+        setSearchAndResponse(mockServerClient, caseName, "results_all.json",
+                "{\"types\":[\"database_column\"],\"properties\":[\"numberEmptyValues\",\"defined_foreign_key\",\"type\",\"occurs\",\"minimum_length\",\"nullabilityFlag\",\"uniqueFlag\",\"constantFlag\",\"numberCompleteValues\",\"inferredScale\",\"native_id\",\"level\",\"inferredFormat\",\"odbc_type\",\"isInferredPrimaryKey\",\"inferredPrecision\",\"created_by\",\"averageValue\",\"created_on\",\"unique\",\"name\",\"numberNullValues\",\"isInferredForeignKey\",\"position\",\"numberZeroValues\",\"defined_primary_key\",\"selected_natural_key\",\"short_description\",\"nbRecordsTested\",\"selected_primary_key\",\"domainType\",\"numberFormats\",\"numberValidValues\",\"synchronized_from\",\"start_end_columns\",\"qualityScore_bubble\",\"qualityScore\",\"modified_on\",\"allows_null_values\",\"inferredLength\",\"length\",\"default_value\",\"long_description\",\"fraction\",\"selected_foreign_key\",\"inferredDataType\",\"data_type\",\"modified_by\",\"numberDistinctValues\",\"quality_benchmark\"],\"pageSize\":10}");
         setSearchAndResponse(mockServerClient, caseName, "results_one.json",
                 json(
                         "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"database_table_or_view.name\",\"operator\":\"=\",\"value\":\"CONTACTEMAIL\"},{\"property\":\"database_table_or_view.database_schema.name\",\"operator\":\"=\",\"value\":\"DB2INST1\"},{\"property\":\"database_table_or_view.database_schema.database.name\",\"operator\":\"=\",\"value\":\"COMPDIR\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"EMAIL\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
