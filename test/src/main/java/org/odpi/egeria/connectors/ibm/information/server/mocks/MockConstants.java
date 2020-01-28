@@ -170,6 +170,14 @@ public class MockConstants {
     }
 
     /**
+     * Create a mock IGC bundle creation request.
+     * @return HttpRequest
+     */
+    public static HttpRequest createBundleRequest() {
+        return request().withMethod("POST").withPath(IGC_REST_EP + "bundles");
+    }
+
+    /**
      * Create a mock IGC bundle upsert request.
      * @return HttpRequest
      */

@@ -17,8 +17,13 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants;
 import org.odpi.openmetadata.http.HttpHelper;
+import org.springframework.core.io.AbstractResource;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.testng.annotations.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +60,7 @@ public class ClientTest {
     @Test
     public void testInvalidURL() {
         IGCRestClient invalid = new IGCRestClient("127.0.0.1", "80", "admin", "admin");
-        assertThrows(IGCConnectivityException.class, () -> invalid.start());
+        assertThrows(IGCConnectivityException.class, invalid::start);
     }
 
     @Test
@@ -65,7 +70,8 @@ public class ClientTest {
 
     @Test
     public void testInvalidClient() {
-        assertThrows(RuntimeException.class, () -> new IGCRestClient("http://localhost:1080", "isadmin", "isadmin"));
+        assertThrows(IGCConnectivityException.class, () -> new IGCRestClient("http://localhost:1080", MockConstants.IGC_USER, MockConstants.IGC_PASS));
+        assertThrows(IGCConnectivityException.class, () -> new IGCRestClient(null, MockConstants.IGC_USER, MockConstants.IGC_PASS));
     }
 
     @Test
@@ -255,6 +261,19 @@ public class ClientTest {
         igcUpdate.addExclusiveRelationship("parent_category", MockConstants.CATEGORY_RID);
         boolean result = igcRestClient.update(igcUpdate);
         assertTrue(result);
+    }
+
+    @Test
+    public void testOpenIGCBundle() {
+
+        ClassPathResource directory = new ClassPathResource("pretendBundle");
+        try {
+            File bundle = igcRestClient.createOpenIgcBundleFile(directory.getFile());
+            igcRestClient.upsertOpenIgcBundle("TestBundle", new FileSystemResource(bundle));
+        } catch (IOException e) {
+            assertNull(e, e.getMessage());
+        }
+
     }
 
     @AfterSuite
