@@ -422,6 +422,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 log.debug(" ... found mapping class: {}", mappingClass.getCanonicalName());
                 attributeMappingStore.addMapping(newAttributeTypeDef, mappingClass);
             } catch (ClassNotFoundException e) {
+                attributeMappingStore.addUnimplementedAttributeTypeDef(newAttributeTypeDef);
                 raiseTypeDefNotSupportedException(IGCOMRSErrorCode.ATTRIBUTE_TYPEDEF_NOT_MAPPED, methodName, omrsTypeDefName, repositoryName);
             }
 
@@ -544,23 +545,15 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         final String typeDefParameterName = "attributeTypeDef";
         super.attributeTypeDefParameterValidation(userId, attributeTypeDef, typeDefParameterName, methodName);
 
-        boolean bImplemented;
-        switch (attributeTypeDef.getCategory()) {
-            case PRIMITIVE:
-            case COLLECTION:
-            case ENUM_DEF:
-                bImplemented = (attributeMappingStore.getAttributeTypeDefByGUID(attributeTypeDef.getGUID()) != null);
-                break;
-            default:
-                bImplemented = false;
-                break;
-        }
+        String guid = attributeTypeDef.getGUID();
 
-        if (!bImplemented) {
+        if (attributeMappingStore.getUnimplementedAttributeTypeDefByGUID(guid, false) != null) {
+            // If we know it is not supported, raise an exception straight away
             raiseTypeDefNotSupportedException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, methodName, attributeTypeDef.getName(), repositoryName);
         }
 
-        return bImplemented;
+        // Otherwise return based on whether we already have it in our store or not
+        return attributeMappingStore.getAttributeTypeDefByGUID(guid, false) != null;
 
     }
 
