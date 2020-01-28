@@ -174,49 +174,38 @@ public class IGCRestClient {
      */
     public boolean start() {
 
-        boolean successfullyInitialised = false;
-
         // Run a simple initial query to obtain a session and setup the cookies
-        if (this.authorization != null) {
+        IGCSearch igcSearch = new IGCSearch("category");
+        igcSearch.addType("term");
+        igcSearch.addType("information_governance_policy");
+        igcSearch.addType("information_governance_rule");
+        igcSearch.setPageSize(1);
+        igcSearch.setDevGlossary(true);
+        String response = searchJson(igcSearch);
 
-            IGCSearch igcSearch = new IGCSearch("category");
-            igcSearch.addType("term");
-            igcSearch.addType("information_governance_policy");
-            igcSearch.addType("information_governance_rule");
-            igcSearch.setPageSize(1);
-            igcSearch.setDevGlossary(true);
-            String response = searchJson(igcSearch);
-
-            if (response != null) {
-
-                log.debug("Checking for workflow and registering version...");
-                ObjectMapper tmpMapper = new ObjectMapper();
-                try {
-                    this.workflowEnabled = tmpMapper.readValue(response, new TypeReference<ItemList<Reference>>(){}).getPaging().getNumTotal() > 0;
-                } catch (IOException e) {
-                    throw new IGCConnectivityException("Unable to determine if workflow is enabled.", e);
-                }
-
-                // Start with lowest version supported
-                this.igcVersion = IGCVersionEnum.values()[0];
-                List<TypeHeader> igcTypes = getTypes(tmpMapper);
-                Set<String> typeNames = igcTypes.stream().map(TypeHeader::getId).collect(Collectors.toSet());
-                for (IGCVersionEnum aVersion : IGCVersionEnum.values()) {
-                    if (aVersion.isHigherThan(this.igcVersion)
-                            && typeNames.contains(aVersion.getTypeNameFirstAvailableInThisVersion())
-                            && !typeNames.contains(aVersion.getTypeNameNotAvailableInThisVersion())) {
-                        this.igcVersion = aVersion;
-                    }
-                }
-                log.info("Detected IGC version: {}", this.igcVersion.getVersionString());
-                successfullyInitialised = true;
-
-            } else {
-                throw new IGCConnectivityException("Unable to start IGCRestClient..", "no authorization provided");
-            }
-
+        log.debug("Checking for workflow and registering version...");
+        ObjectMapper tmpMapper = new ObjectMapper();
+        try {
+            this.workflowEnabled = tmpMapper.readValue(response, new TypeReference<ItemList<Reference>>(){}).getPaging().getNumTotal() > 0;
+        } catch (IOException e) {
+            throw new IGCConnectivityException("Unable to determine if workflow is enabled.", e);
         }
-        return successfullyInitialised;
+
+        // Start with lowest version supported
+        this.igcVersion = IGCVersionEnum.values()[0];
+        List<TypeHeader> igcTypes = getTypes(tmpMapper);
+        Set<String> typeNames = igcTypes.stream().map(TypeHeader::getId).collect(Collectors.toSet());
+        for (IGCVersionEnum aVersion : IGCVersionEnum.values()) {
+            if (aVersion.isHigherThan(this.igcVersion)
+                    && typeNames.contains(aVersion.getTypeNameFirstAvailableInThisVersion())
+                    && !typeNames.contains(aVersion.getTypeNameNotAvailableInThisVersion())) {
+                this.igcVersion = aVersion;
+            }
+        }
+        log.info("Detected IGC version: {}", this.igcVersion.getVersionString());
+
+        // So long as no runtime exception was thrown by the steps above, we have successfully started
+        return true;
 
     }
 
@@ -1209,7 +1198,7 @@ public class IGCRestClient {
         if (typeName != null) {
             return typeToAllProperties.getOrDefault(typeName, null);
         } else {
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -1225,7 +1214,7 @@ public class IGCRestClient {
         if (typeName != null) {
             return typeToNonRelationshipProperties.getOrDefault(typeName, null);
         } else {
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -1240,7 +1229,7 @@ public class IGCRestClient {
         if (typeName != null) {
             return typeToStringProperties.getOrDefault(typeName, null);
         } else {
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -1256,7 +1245,7 @@ public class IGCRestClient {
         if (typeName != null) {
             return typeToPagedRelationshipProperties.getOrDefault(typeName, null);
         } else {
-            return null;
+            return Collections.emptyList();
         }
     }
 

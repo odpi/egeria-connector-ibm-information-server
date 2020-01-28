@@ -4,7 +4,6 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCIOException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -89,7 +88,7 @@ public class Identity {
      */
     public Identity(List<Reference> context, String assetType, String assetName, String rid, boolean partial) {
         this(partial);
-        this.context = context;
+        this.context = (context == null ? new ArrayList<>() : context);
         this.assetType = assetType;
         this.assetName = assetName;
         this.rid = rid;
@@ -475,25 +474,20 @@ public class Identity {
         }
 
         Identity ident = null;
-        try {
-            if (igcRestClient != null) {
-                String displayName = igcRestClient.getDisplayNameForType(assetType);
-                if (displayName != null) {
-                    if (stringType.equals(StringType.EXACT)) {
-                        ident = new Identity(context, assetType, assetName);
-                    } else {
-                        ident = new Identity(context, assetType, assetName, assetId, true);
-                    }
-                }
-            } else {
-                if (stringType.equals(StringType.EXACT)) {
-                    ident = new Identity(context, assetType, assetName);
-                } else {
-                    ident = new Identity(context, assetType, assetName, assetId, true);
-                }
+        String displayName = null;
+        if (warnOnNotFound) {
+            try {
+                displayName = igcRestClient.getDisplayNameForType(assetType);
+            } catch (Exception e) {
+                log.warn("Unable to find registered IGC type '{}' -- cannot construct an IGC identity.", assetType, e);
             }
-        } catch (Exception e) {
-            if (warnOnNotFound) { log.warn("Unable to find registered IGC type '{}' -- cannot construct an IGC identity.", assetType); }
+        }
+        if (displayName != null) {
+            if (stringType.equals(StringType.EXACT)) {
+                ident = new Identity(context, assetType, assetName);
+            } else {
+                ident = new Identity(context, assetType, assetName, assetId, true);
+            }
         }
         return ident;
 

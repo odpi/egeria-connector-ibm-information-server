@@ -539,6 +539,4 @@ public class Reference extends ObjectPrinter {
         return identity;
     }
 
-    // TODO: eventually handle the '_expand' that exists for data classifications
-
 }

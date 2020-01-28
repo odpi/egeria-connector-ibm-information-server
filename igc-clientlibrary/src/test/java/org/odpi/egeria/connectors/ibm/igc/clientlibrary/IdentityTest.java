@@ -16,6 +16,16 @@ public class IdentityTest {
 
     private IGCRestClient igcRestClient;
     private String FULL_IDENTITY_STRING = "(host_(engine))=INFOSVR::(database)=SOMETHING::(database_schema)=ELSE::(database_table)=TABLE::(database_column)=COLUMN";
+    private String PART_IDENTITY_STRING = "gine))=INFOSVR::(database)=SOME";
+    private String HOST_PART_IDT_STRING = "(engine))=I";
+    private String DATA_FILE_EXAMPLE = "(host_(engine))=INFOSVR::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=somewhere::(data_file)=FileName.csv::(data_file_record)=FileName";
+    private String USER_EXAMPLE = "(steward_user)=Ms. Firstname Surname";
+    private String USER_EXAMPLE_PART1 = "(non_steward_user)=Firstname";
+    private String USER_EXAMPLE_PART2 = "(steward_user)=Ms. Firstna";
+    private String DATA_FILE_FOLDER_EXAMPLE = "(host_(engine))=INFOSVR::(data_file_folder)=/::(data_file_folder)=data";
+    private String TERM_EXAMPLE = "(category)=Some Category::(term)=Some Term";
+    private String NON_IDENTITY = "JustAString";
+    private String TYPE_ONLY = "(category)";
 
     public IdentityTest() {
         HttpHelper.noStrictSSL();
@@ -31,13 +41,23 @@ public class IdentityTest {
     public void testConfidenceInStringAsIdentity() {
 
         assertEquals(Identity.isIdentityString(FULL_IDENTITY_STRING), 6);
+        assertEquals(Identity.isIdentityString(PART_IDENTITY_STRING), 6);
+        assertEquals(Identity.isIdentityString(HOST_PART_IDT_STRING), 4);
+        assertEquals(Identity.isIdentityString(DATA_FILE_EXAMPLE), 6);
+        assertEquals(Identity.isIdentityString(USER_EXAMPLE), 4);
+        assertEquals(Identity.isIdentityString(USER_EXAMPLE_PART1), 4);
+        assertEquals(Identity.isIdentityString(USER_EXAMPLE_PART2), 4);
+        assertEquals(Identity.isIdentityString(DATA_FILE_FOLDER_EXAMPLE), 6);
+        assertEquals(Identity.isIdentityString(TERM_EXAMPLE), 6);
+        assertEquals(Identity.isIdentityString(NON_IDENTITY), 0);
+        assertEquals(Identity.isIdentityString(TYPE_ONLY), 2);
 
     }
 
     @Test
     public void testFromStringFull() {
 
-        Identity full = Identity.getFromString(FULL_IDENTITY_STRING, igcRestClient, Identity.StringType.EXACT, false);
+        Identity full = Identity.getFromString(FULL_IDENTITY_STRING, igcRestClient, Identity.StringType.EXACT);
         assertNotNull(full);
         assertFalse(full.isPartial());
         assertEquals(full.getAssetType(), "database_column");
@@ -58,13 +78,16 @@ public class IdentityTest {
         Identity ultimateFromParent = parent.getUltimateParentIdentity();
         assertEquals(ultimateFromBottom, ultimateFromParent);
 
+        assertEquals(ultimateFromBottom.getUltimateParentIdentity(), ultimateFromBottom);
+        assertNull(ultimateFromBottom.getParentIdentity());
+        assertNull(ultimateFromBottom.getRid());
+
     }
 
     @Test
     public void testFromStringPart() {
 
-        String partIdentityString = "gine))=INFOSVR::(database)=SOME";
-        Identity part = Identity.getFromString(partIdentityString, igcRestClient, Identity.StringType.CONTAINS, false);
+        Identity part = Identity.getFromString(PART_IDENTITY_STRING, igcRestClient, Identity.StringType.CONTAINS);
         assertNotNull(part);
         assertTrue(part.isPartial());
         assertEquals(part.getAssetType(), "database");
@@ -75,29 +98,32 @@ public class IdentityTest {
     @Test
     public void testFromStringEdge() {
 
-        String hostEnginePartString = "(engine))=I";
-        Identity edge = Identity.getFromString(hostEnginePartString, igcRestClient, Identity.StringType.CONTAINS, false);
+        Identity edge = Identity.getFromString(HOST_PART_IDT_STRING, igcRestClient, Identity.StringType.CONTAINS);
         assertNull(edge);
+
+        edge = Identity.getFromString(NON_IDENTITY, igcRestClient, Identity.StringType.ENDS_WITH);
+        assertNull(edge);
+
+        edge = Identity.getFromString(TYPE_ONLY, igcRestClient, Identity.StringType.STARTS_WITH);
+        assertNotNull(edge);
+        assertEquals(edge.getAssetType(), "category");
 
     }
 
     @Test
     public void testSearchCriteriaBuild() {
 
-        String dataFileExample = "(host_(engine))=INFOSVR::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=somewhere::(data_file)=FileName.csv::(data_file_record)=FileName";
-        String userExample = "(steward_user)=Ms. Firstname Surname";
-
-        Identity full = Identity.getFromString(FULL_IDENTITY_STRING, igcRestClient, Identity.StringType.EXACT, false);
+        Identity full = Identity.getFromString(FULL_IDENTITY_STRING, igcRestClient, Identity.StringType.EXACT);
         IGCSearchConditionSet conditions = full.getSearchCriteria();
         assertNotNull(conditions);
         assertEquals(conditions.size(), 5);
 
-        Identity fileRecord = Identity.getFromString(dataFileExample, igcRestClient, Identity.StringType.EXACT, false);
+        Identity fileRecord = Identity.getFromString(DATA_FILE_EXAMPLE, igcRestClient, Identity.StringType.EXACT);
         conditions = fileRecord.getSearchCriteria();
         assertNotNull(conditions);
         assertEquals(conditions.size(), 4);
 
-        Identity user = Identity.getFromString(userExample, igcRestClient, Identity.StringType.EXACT, false);
+        Identity user = Identity.getFromString(USER_EXAMPLE, igcRestClient, Identity.StringType.EXACT);
         conditions = user.getSearchCriteria();
         assertNotNull(conditions);
         assertEquals(conditions.size(), 1);
@@ -107,32 +133,27 @@ public class IdentityTest {
     @Test
     public void testSearchCriteriaEdges() {
 
-        String userExamplePart1 = "(non_steward_user)=Firstname";
-        String userExamplePart2 = "(steward_user)=Ms. Firstna";
-        String dataFileFolder = "(host_(engine))=INFOSVR::(data_file_folder)=/::(data_file_folder)=data";
-        String term = "(category)=Some Category::(term)=Some Term";
-
-        Identity part = Identity.getFromString(userExamplePart1, igcRestClient, Identity.StringType.STARTS_WITH, false);
+        Identity part = Identity.getFromString(USER_EXAMPLE_PART1, igcRestClient, Identity.StringType.STARTS_WITH);
         assertNotNull(part);
         IGCSearchConditionSet conditions = part.getSearchCriteria();
         assertNotNull(conditions);
         assertEquals(conditions.size(), 1);
         assertTrue(conditions.getConditionSetObject().toString().contains("courtesy_title"));
 
-        part = Identity.getFromString(userExamplePart2, igcRestClient, Identity.StringType.STARTS_WITH, false);
+        part = Identity.getFromString(USER_EXAMPLE_PART2, igcRestClient, Identity.StringType.STARTS_WITH);
         assertNotNull(part);
         conditions = part.getSearchCriteria();
         assertNotNull(conditions);
         assertEquals(conditions.size(), 1);
         assertTrue(conditions.getConditionSetObject().toString().contains("surname"));
 
-        Identity full = Identity.getFromString(dataFileFolder, igcRestClient, Identity.StringType.EXACT, false);
+        Identity full = Identity.getFromString(DATA_FILE_FOLDER_EXAMPLE, igcRestClient, Identity.StringType.EXACT);
         assertNotNull(full);
         conditions = full.getSearchCriteria();
         assertNotNull(conditions);
         assertEquals(conditions.size(), 3);
 
-        full = Identity.getFromString(term, igcRestClient, Identity.StringType.EXACT, false);
+        full = Identity.getFromString(TERM_EXAMPLE, igcRestClient, Identity.StringType.EXACT);
         assertNotNull(full);
         conditions = full.getSearchCriteria();
         assertNotNull(conditions);
