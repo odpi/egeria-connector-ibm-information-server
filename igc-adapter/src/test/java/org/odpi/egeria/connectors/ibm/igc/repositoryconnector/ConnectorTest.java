@@ -1909,6 +1909,20 @@ public class ConnectorTest {
                 0
         );
 
+        // Try searching based on a partialMatch of true
+        ip = new InstanceProperties();
+        ip = repositoryHelper.addEnumPropertyToInstance(sourceName, ip, "status", 0, "Discovered", "The data class assignment was discovered by an automated process.", methodName);
+        ip = repositoryHelper.addBooleanPropertyToInstance(sourceName, ip, "partialMatch", true, methodName);
+        ip = repositoryHelper.addIntPropertyToInstance(sourceName, ip, "valueFrequency", 28, methodName);
+        testFindRelationshipsByProperty(
+                typeGUID,
+                typeName,
+                ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
     }
 
     @Test

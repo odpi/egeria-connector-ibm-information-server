@@ -253,7 +253,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                             conditionsForClassification.addCondition(byThreshold);
                             break;
                         case "partialMatch":
-                            boolean isPartialMatch = Boolean.getBoolean(value.valueAsString());
+                            boolean isPartialMatch = Boolean.parseBoolean(value.valueAsString());
                             if (isPartialMatch) {
                                 IGCSearchCondition byPartialMatch = new IGCSearchCondition("confidencePercent", "<", "100");
                                 conditionsForClassification.addCondition(byPartialMatch);
