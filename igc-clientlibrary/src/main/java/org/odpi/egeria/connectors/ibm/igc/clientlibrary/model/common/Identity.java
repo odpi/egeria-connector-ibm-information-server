@@ -279,7 +279,7 @@ public class Identity {
                 if (!dataFilePath.equals("")) {
                     parentName = dataFilePath;
                     int index = dataFilePath.lastIndexOf("/");
-                    if (index > 0) {
+                    if (index >= 0) {
                         parentName = dataFilePath.substring(index + 1);
                     }
                 }
@@ -298,8 +298,8 @@ public class Identity {
                 // Otherwise, we are looking for some file-related asset within a folder, so add these further conditions
                 // Concatenate the 'data_file_folder' elements into a string with '/' separators, and add as '...data_file.path'
                 if (!dataFilePath.equals("")) {
-                    log.debug(LOG_ADDING_SEARCH_CONDITION, propertyPath + ".path", "=", dataFilePath);
-                    IGCSearchCondition cPath = new IGCSearchCondition(propertyPath + ".path", "=", dataFilePath);
+                    log.debug(LOG_ADDING_SEARCH_CONDITION, propertyPath + ".path", "like %{0}", dataFilePath);
+                    IGCSearchCondition cPath = new IGCSearchCondition(propertyPath + ".path", "like %{0}", dataFilePath);
                     igcSearchConditionSet.addCondition(cPath);
                 }
                 // Add the 'host' element as '...datafile.host.name'

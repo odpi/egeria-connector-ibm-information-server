@@ -151,7 +151,7 @@ public class IdentityTest {
         assertNotNull(full);
         conditions = full.getSearchCriteria();
         assertNotNull(conditions);
-        assertEquals(conditions.size(), 3);
+        assertEquals(conditions.size(), 2);
 
         full = Identity.getFromString(TERM_EXAMPLE, igcRestClient, Identity.StringType.EXACT);
         assertNotNull(full);

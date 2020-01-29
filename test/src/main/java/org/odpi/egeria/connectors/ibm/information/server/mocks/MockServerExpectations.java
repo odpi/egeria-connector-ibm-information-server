@@ -816,6 +816,16 @@ public class MockServerExpectations implements ExpectationInitializer {
                         "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"full_name\",\"operator\":\"like %{0}\",\"value\":\"Geeke\"},{\"property\":\"job_title\",\"operator\":\"like %{0}\",\"value\":\"Geeke\"},{\"property\":\"principal_id\",\"operator\":\"like %{0}\",\"value\":\"Geeke\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
+        setSearchAndResponse(mockServerClient, caseName, "results_folder.json",
+                json(
+                        "{\"types\":[\"data_file_folder\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"parent_folder.name\",\"operator\":\"=\",\"value\":\"data\"},{\"property\":\"host.name\",\"operator\":\"=\",\"value\":\"INFOSVR\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"files\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_record.json",
+                json(
+                        "{\"types\":[\"data_file_record\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"data_file.name\",\"operator\":\"=\",\"value\":\"Employee-Dept.csv\"},{\"property\":\"data_file.path\",\"operator\":\"like %{0}\",\"value\":\"CocoPharma\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"Employee-Dept\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setFindDataClassByProperty(MockServerClient mockServerClient) {
@@ -844,6 +854,16 @@ public class MockServerExpectations implements ExpectationInitializer {
         setSearchAndResponse(mockServerClient, caseName, "classifies_asset_b1c497ce.60641b50.001mv7qhr.03u3le8.ttmqon.c22r98a4u4ptdi8cvbmtu.json",
                 json(
                         "{\"types\":[\"classification\"],\"where\":{\"conditions\":[{\"property\":\"classifies_asset\",\"operator\":\"=\",\"value\":\"b1c497ce.60641b50.001mv7qhr.03u3le8.ttmqon.c22r98a4u4ptdi8cvbmtu\"},{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"f4951817.e469fa50.001mtr2gq.nsrej8a.75d8rp.ud414oj262acep64l8dpq\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_partialMatch.json",
+                json(
+                        "{\"types\":[\"classification\"],\"where\":{\"conditions\":[{\"property\":\"confidencePercent\",\"operator\":\"<\",\"value\":\"100\"},{\"property\":\"value_frequency\",\"operator\":\"=\",\"value\":\"28\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "classifies_asset_b1c497ce.60641b50.001mts4re.732derp.7g9t50.2rjqcak0137pg2hevl7ne.json",
+                json(
+                        "{\"types\":[\"classification\"]\"where\":{\"conditions\":[{\"property\":\"classifies_asset\",\"operator\":\"=\",\"value\":\"b1c497ce.60641b50.001mts4re.732derp.7g9t50.2rjqcak0137pg2hevl7ne\"},{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"f4951817.e469fa50.001mtr2gq.nsrej8a.75d8rp.ud414oj262acep64l8dpq\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
