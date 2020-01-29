@@ -148,6 +148,7 @@ public class AttributeMappingStore {
      * Retrieves an implemented AttributeTypeDef by its GUID.
      *
      * @param guid of the attribute type definition
+     * @param logOnNotFound whether to log or not if not found
      * @return TypeDef
      */
     public AttributeTypeDef getAttributeTypeDefByGUID(String guid, boolean logOnNotFound) {

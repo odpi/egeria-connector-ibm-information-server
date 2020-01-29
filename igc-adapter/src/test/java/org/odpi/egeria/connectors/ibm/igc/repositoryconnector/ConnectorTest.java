@@ -1830,6 +1830,22 @@ public class ConnectorTest {
                 1
         );
 
+        testFindEntitiesByPropertyValue(
+                "229ed5cc-de31-45fc-beb4-9919fd247398",
+                "FileFolder",
+                repositoryHelper.getExactMatchRegex("(host_(engine))=INFOSVR::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files"),
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        testFindEntitiesByPropertyValue(
+                "248975ec-8019-4b8a-9caf-084c8b724233",
+                "TabularSchemaType",
+                repositoryHelper.getEndsWithRegex("::(data_file_folder)=CocoPharma::(data_file)=Employee-Dept.csv::(data_file_record)=Employee-Dept"),
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
     }
 
     @Test

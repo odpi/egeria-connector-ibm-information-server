@@ -816,6 +816,16 @@ public class MockServerExpectations implements ExpectationInitializer {
                         "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"full_name\",\"operator\":\"like %{0}\",\"value\":\"Geeke\"},{\"property\":\"job_title\",\"operator\":\"like %{0}\",\"value\":\"Geeke\"},{\"property\":\"principal_id\",\"operator\":\"like %{0}\",\"value\":\"Geeke\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
+        setSearchAndResponse(mockServerClient, caseName, "results_folder.json",
+                json(
+                        "{\"types\":[\"data_file_folder\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"parent_folder.name\",\"operator\":\"=\",\"value\":\"data\"},{\"property\":\"host.name\",\"operator\":\"=\",\"value\":\"INFOSVR\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"files\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_record.json",
+                json(
+                        "{\"types\":[\"data_file_record\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"data_file.name\",\"operator\":\"=\",\"value\":\"Employee-Dept.csv\"},{\"property\":\"data_file.path\",\"operator\":\"like %{0}\",\"value\":\"CocoPharma\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"Employee-Dept\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setFindDataClassByProperty(MockServerClient mockServerClient) {
