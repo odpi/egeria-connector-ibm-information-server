@@ -659,6 +659,10 @@ public class IGCRepositoryHelper {
                         }
                     }
                 }
+                // Stop adding relationships if we have hit the page size
+                if (pageSize > 0 && relationships.size() == pageSize) {
+                    break;
+                }
             }
             // Stop adding relationships if we have hit the page size
             if (pageSize > 0 && relationships.size() == pageSize) {
