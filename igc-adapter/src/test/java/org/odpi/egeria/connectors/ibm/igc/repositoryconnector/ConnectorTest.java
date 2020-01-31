@@ -1930,8 +1930,8 @@ public class ConnectorTest {
 
         final String methodName = "testFindSchemaElementByAnchorGUID";
 
-        String ridForTable = "b1c497ce.54bd3a08.001mts4qn.7mp1ug9.4m6ktd.rpguhg74d1vci4g1fnf52";
-        IGCEntityGuid guid = new IGCEntityGuid(metadataCollectionId, "database_table", ridForTable);
+        String ridForSchema = "b1c497ce.c1fb060b.001mts4re.7331jdi.nnod24.3aci569ca741v10qq7pbb";
+        IGCEntityGuid guid = new IGCEntityGuid(metadataCollectionId, "database_schema", ridForSchema);
 
         InstanceProperties ip = new InstanceProperties();
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "anchorGUID", repositoryHelper.getExactMatchRegex(guid.toString()), methodName);
@@ -1942,7 +1942,7 @@ public class ConnectorTest {
                 ip,
                 MatchCriteria.ALL,
                 MockConstants.EGERIA_PAGESIZE,
-                7
+                8
         );
 
     }

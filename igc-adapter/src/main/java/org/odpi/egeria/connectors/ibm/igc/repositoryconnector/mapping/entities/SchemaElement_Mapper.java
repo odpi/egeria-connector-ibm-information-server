@@ -100,19 +100,12 @@ public class SchemaElement_Mapper extends ReferenceableMapper {
         String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
 
         // setup the OMRS 'anchorGUID' property
-        Identity identity = igcEntity.getIdentity(igcRestClient);
-        Identity parent = identity.getParentIdentity();
-        if (parent != null) {
-            // TODO: are none of the parents ever generated?
-            IGCEntityGuid parentGuid = igcRepositoryHelper.getEntityGuid(parent.getAssetType(), null, parent.getRid());
-            instanceProperties = repositoryHelper.addStringPropertyToInstance(
-                    repositoryName,
-                    instanceProperties,
-                    "anchorGUID",
-                    parentGuid.toString(),
-                    methodName
-            );
-        }
+        instanceProperties = addAnchorGUIDProperty(repositoryHelper,
+                repositoryName,
+                igcRepositoryHelper,
+                igcEntity,
+                igcRestClient,
+                instanceProperties);
 
         return instanceProperties;
 
@@ -147,30 +140,9 @@ public class SchemaElement_Mapper extends ReferenceableMapper {
         // exact match that was requested
         if (omrsPropertyName.equals("anchorGUID") && value.getInstancePropertyCategory().equals(InstancePropertyCategory.PRIMITIVE)) {
             String guidString = value.valueAsString();
-            String searchableGuid = repositoryHelper.getUnqualifiedLiteralString(guidString);
-            String parentPropertyName = getParentPropertyName();
-            if (parentPropertyName != null) {
-                // Only support exact matches for GUIDs
-                IGCEntityGuid guid = IGCEntityGuid.fromGuid(searchableGuid);
-                if (guid != null) {
-                    if (repositoryHelper.isExactMatchRegex(guidString)) {
-                        IGCSearchCondition exact = new IGCSearchCondition(parentPropertyName, "=", guid.getRid());
-                        igcSearchConditionSet.addCondition(exact);
-                    } else {
-                        IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
-                        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                                repositoryName,
-                                guidString);
-                        throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
-                                this.getClass().getName(),
-                                methodName,
-                                errorMessage,
-                                errorCode.getSystemAction(),
-                                errorCode.getUserAction());
-                    }
-                }
-            } else {
-                log.warn("Unable to add criteria for anchorGUID, type not known: {}", getIgcAssetType());
+            IGCSearchConditionSet toAdd = getParentAssetSearchCriteria(repositoryHelper, repositoryName, methodName, guidString, true);
+            if (toAdd.size() > 0) {
+                igcSearchConditionSet.addNestedConditionSet(toAdd);
             }
         }
 
@@ -187,17 +159,13 @@ public class SchemaElement_Mapper extends ReferenceableMapper {
                                                String searchCriteria) throws FunctionNotSupportedException {
 
         // Note that we will not call the superclass as we do not want the default behavior
+        final String methodName = "addComplexStringSearchCriteria";
 
         // Only attempt to extend with criterion for anchorGUID if we have an exact match against something we can
         // reverse into a GUID, otherwise skip the criteria
-        String searchableAnchor = repositoryHelper.getUnqualifiedLiteralString(searchCriteria);
-        if (repositoryHelper.isExactMatchRegex(searchCriteria)) {
-            IGCEntityGuid guid = IGCEntityGuid.fromGuid(searchableAnchor);
-            String parentPropertyName = getParentPropertyName();
-            if (guid != null && parentPropertyName != null) {
-                IGCSearchCondition byGuid = new IGCSearchCondition(parentPropertyName, "=", guid.getRid());
-                igcSearchConditionSet.addCondition(byGuid);
-            }
+        IGCSearchConditionSet toAdd = getParentAssetSearchCriteria(repositoryHelper, repositoryName, methodName, searchCriteria, false);
+        if (toAdd.size() > 0) {
+            igcSearchConditionSet.addNestedConditionSet(toAdd);
         }
 
     }
@@ -226,6 +194,133 @@ public class SchemaElement_Mapper extends ReferenceableMapper {
                 break;
         }
         return parentPropertyName;
+    }
+
+    /**
+     * Retrieve the search criteria for the 'anchorGUID' of this IGC object.
+     *
+     * @param repositoryHelper the repository helper
+     * @param repositoryName the name of the repository
+     * @param methodName the name of the method retrieving the search criteria
+     * @param regex the regular expression to use in looking up the anchorGUID
+     * @param failOnInexactRegex if true, throws the FunctionNotSupportedException if the regex provided is not an exact match regex
+     * @return IGCSearchConditionSet
+     * @throws FunctionNotSupportedException if the provided regex is not an exact match and failOnInexactRegex is true
+     */
+    protected IGCSearchConditionSet getParentAssetSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                                                 String repositoryName,
+                                                                 String methodName,
+                                                                 String regex,
+                                                                 boolean failOnInexactRegex) throws FunctionNotSupportedException {
+
+        IGCSearchConditionSet conditions = new IGCSearchConditionSet();
+        if (repositoryHelper.isExactMatchRegex(regex)) {
+            IGCEntityGuid guid = IGCEntityGuid.fromGuid(repositoryHelper.getUnqualifiedLiteralString(regex));
+            if (guid != null) {
+                IGCSearchCondition condition;
+                switch (getIgcAssetType()) {
+                    case "database_column":
+                        IGCSearchConditionSet nested = new IGCSearchConditionSet();
+                        IGCSearchCondition view = new IGCSearchCondition("view.database_schema", "=", guid.getRid());
+                        IGCSearchCondition table = new IGCSearchCondition("database_table.database_schema", "=", guid.getRid());
+                        nested.addCondition(view);
+                        nested.addCondition(table);
+                        nested.setMatchAnyCondition(true);
+                        conditions.addNestedConditionSet(nested);
+                        break;
+                    case "database_table":
+                        condition = new IGCSearchCondition("database_schema", "=", guid.getRid());
+                        conditions.addCondition(condition);
+                        break;
+                    case "data_file_field":
+                        condition = new IGCSearchCondition("data_file_record.data_file", "=", guid.getRid());
+                        conditions.addCondition(condition);
+                        break;
+                    case "data_file_record":
+                        condition = new IGCSearchCondition("data_file", "=", guid.getRid());
+                        conditions.addCondition(condition);
+                        break;
+                    default:
+                        log.warn("Unable to add criteria for anchorGUID, type not known: {}", getIgcAssetType());
+                        break;
+                }
+            }
+        } else if (failOnInexactRegex) {
+            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
+            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
+                    repositoryName,
+                    regex);
+            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
+                    this.getClass().getName(),
+                    methodName,
+                    errorMessage,
+                    errorCode.getSystemAction(),
+                    errorCode.getUserAction());
+        }
+
+        return conditions;
+
+    }
+
+    /**
+     * Populate the 'anchorGUID' property on the instance properties of the SchemaElement.
+     *
+     * @param repositoryHelper the OMRS repository helper
+     * @param repositoryName the repository name
+     * @param igcRepositoryHelper the IGC repository helper
+     * @param igcEntity the IGC object from which to determine the anchorGUID
+     * @param igcRestClient connectivity to the IGC environment
+     * @param instanceProperties the instance properties into which to populate the anchorGUID
+     * @return InstanceProperties
+     */
+    protected InstanceProperties addAnchorGUIDProperty(OMRSRepositoryHelper repositoryHelper,
+                                                       String repositoryName,
+                                                       IGCRepositoryHelper igcRepositoryHelper,
+                                                       Reference igcEntity,
+                                                       IGCRestClient igcRestClient,
+                                                       InstanceProperties instanceProperties) {
+
+        final String methodName = "addAnchorGUIDProperty";
+
+        Identity identity = igcEntity.getIdentity(igcRestClient);
+        Identity asset = getParentAssetIdentity(identity);
+        if (asset != null) {
+            // We should be safe with no prefix here as the assets DeployedDatabaseSchema and DataFile have no prefix
+            IGCEntityGuid assetGuid = igcRepositoryHelper.getEntityGuid(asset.getAssetType(), null, asset.getRid());
+            instanceProperties = repositoryHelper.addStringPropertyToInstance(
+                    repositoryName,
+                    instanceProperties,
+                    "anchorGUID",
+                    assetGuid.toString(),
+                    methodName
+            );
+        }
+
+        return instanceProperties;
+
+    }
+
+    /**
+     * Retrieve the Asset-level object's identity from the provided identity.
+     *
+     * @param identity the identity from which to retrieve the asset level identity
+     * @return Identity or null, if there is no asset-level identity
+     */
+    private Identity getParentAssetIdentity(Identity identity) {
+        Identity parent = identity.getParentIdentity();
+        if (parent != null) {
+            String type = parent.getAssetType();
+            // Once we reach database_schema or data_file level we have the asset, so return this identity
+            if (type.equals("database_schema") || type.equals("data_file")) {
+                return parent;
+            } else {
+                // Otherwise continue to recurse
+                return getParentAssetIdentity(parent);
+            }
+        } else {
+            // If we get to a point where there is no parent, there is no asset, so return null
+            return null;
+        }
     }
 
 }
