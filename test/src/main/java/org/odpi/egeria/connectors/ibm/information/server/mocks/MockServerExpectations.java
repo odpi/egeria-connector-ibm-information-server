@@ -3,7 +3,7 @@
 package org.odpi.egeria.connectors.ibm.information.server.mocks;
 
 import org.mockserver.client.MockServerClient;
-import org.mockserver.client.initialize.ExpectationInitializer;
+import org.mockserver.client.initialize.PluginExpectationInitializer;
 import org.mockserver.matchers.MatchType;
 import org.mockserver.matchers.Times;
 import org.mockserver.model.JsonBody;
@@ -28,7 +28,7 @@ import static org.odpi.egeria.connectors.ibm.information.server.mocks.MockConsta
 /**
  * Setup a mock server to act as an IGC REST API endpoint against which we can do some thorough testing.
  */
-public class MockServerExpectations implements ExpectationInitializer {
+public class MockServerExpectations implements PluginExpectationInitializer {
 
     private static final Logger log = LoggerFactory.getLogger(MockServerExpectations.class);
 
