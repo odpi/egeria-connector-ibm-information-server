@@ -102,7 +102,7 @@
         <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
         <mockito.version>3.2.4</mockito.version>
         <testng.version>7.1.1</testng.version>
-        <mock-server.version>5.8.1</mock-server.version>
+        <mock-server.version>5.9.0</mock-server.version>
         <sleepycat.version>18.3.12</sleepycat.version>
         <rhino.version>1.7.12</rhino.version>
         <woodstox.version>6.0.3</woodstox.version>
