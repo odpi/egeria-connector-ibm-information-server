@@ -16,7 +16,7 @@
 
     <groupId>org.odpi.egeria</groupId>
     <artifactId>egeria-connector-ibm-information-server</artifactId>
-    <version>1.4-SNAPSHOT</version>
+    <version>1.5-SNAPSHOT</version>
 
     <url>https://odpi.github.io/Egeria</url>
 
@@ -85,7 +85,7 @@
     </modules>
 
     <properties>
-        <open-metadata.version>1.4-SNAPSHOT</open-metadata.version>
+        <open-metadata.version>1.5-SNAPSHOT</open-metadata.version>
         <!-- Level of Java  -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -102,7 +102,7 @@
         <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
         <mockito.version>3.2.4</mockito.version>
         <testng.version>7.1.1</testng.version>
-        <mock-server.version>5.8.1</mock-server.version>
+        <mock-server.version>5.9.0</mock-server.version>
         <sleepycat.version>18.3.12</sleepycat.version>
         <rhino.version>1.7.12</rhino.version>
         <woodstox.version>6.0.3</woodstox.version>
