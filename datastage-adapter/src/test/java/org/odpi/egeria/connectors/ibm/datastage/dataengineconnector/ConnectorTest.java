@@ -4,17 +4,14 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector;
 
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mocks.MockConnection;
 import org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants;
-import org.odpi.openmetadata.accessservices.dataengine.model.PortAlias;
-import org.odpi.openmetadata.accessservices.dataengine.model.PortImplementation;
+import org.odpi.openmetadata.accessservices.dataengine.model.*;
 import org.odpi.openmetadata.accessservices.dataengine.model.Process;
-import org.odpi.openmetadata.accessservices.dataengine.model.SoftwareServerCapability;
 import org.odpi.openmetadata.frameworks.connectors.ConnectorBroker;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectionCheckedException;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
 import org.odpi.openmetadata.frameworks.connectors.properties.beans.Connection;
 import org.odpi.openmetadata.frameworks.connectors.properties.beans.Endpoint;
 import org.odpi.openmetadata.http.HttpHelper;
-import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.*;
@@ -94,12 +91,10 @@ public class ConnectorTest {
 
     @Test
     public void testEngineDetails() {
-        DataEngineSoftwareServerCapability dataEngine = dataStageConnector.getDataEngineDetails();
+        SoftwareServerCapability dataEngine = dataStageConnector.getDataEngineDetails();
         assertNotNull(dataEngine);
-        SoftwareServerCapability capability = dataEngine.getSoftwareServerCapability();
-        assertNotNull(capability);
-        assertEquals(capability.getEngineType(), "IBM InfoSphere DataStage");
-        assertEquals(capability.getQualifiedName(), "ibm-datastage@" + MockConstants.IGC_ENDPOINT);
+        assertEquals(dataEngine.getEngineType(), "IBM InfoSphere DataStage");
+        assertEquals(dataEngine.getQualifiedName(), "ibm-datastage@" + MockConstants.IGC_ENDPOINT);
     }
 
     @Test
@@ -118,40 +113,39 @@ public class ConnectorTest {
     @Test
     public void testChangedSchemas() {
         // TODO: these should not be empty once we add virtual asset handling
-        List<DataEngineSchemaType> schemaTypes = dataStageConnector.getChangedSchemaTypes(null, now);
+        List<SchemaType> schemaTypes = dataStageConnector.getChangedSchemaTypes(null, now);
         assertTrue(schemaTypes.isEmpty());
     }
 
     @Test
     public void testPortImplementations() {
-        List<DataEnginePortImplementation> portImplementations = dataStageConnector.getChangedPortImplementations(null, now);
+        List<PortImplementation> portImplementations = dataStageConnector.getChangedPortImplementations(null, now);
         assertTrue(portImplementations.isEmpty());
     }
 
     @Test
     public void testPortAliases() {
-        List<DataEnginePortAlias> portAliases = dataStageConnector.getChangedPortAliases(null, now);
+        List<PortAlias> portAliases = dataStageConnector.getChangedPortAliases(null, now);
         assertTrue(portAliases.isEmpty());
     }
 
     @Test
     public void testProcesses() {
-        List<DataEngineProcess> processes = dataStageConnector.getChangedProcesses(null, now);
+        List<Process> processes = dataStageConnector.getChangedProcesses(null, now);
         assertFalse(processes.isEmpty());
-        for (DataEngineProcess deProcess : processes) {
-            Process process = deProcess.getProcess();
+        for (Process process : processes) {
             assertNotNull(process.getQualifiedName());
             List<PortImplementation> portImplementations = process.getPortImplementations();
             List<PortAlias> portAliases = process.getPortAliases();
-            boolean hasOneOrTheOther = ( (portImplementations == null || portImplementations.isEmpty()) && (portAliases != null && !portAliases.isEmpty()) )
-                    || ( (portImplementations != null && !portImplementations.isEmpty()) && (portAliases == null || portAliases.isEmpty()) );
+            boolean hasOneOrTheOther = ((portImplementations == null || portImplementations.isEmpty()) && (portAliases != null && !portAliases.isEmpty()))
+                    || ((portImplementations != null && !portImplementations.isEmpty()) && (portAliases == null || portAliases.isEmpty()));
             assertTrue(hasOneOrTheOther);
         }
     }
 
     @Test
     public void testLineageMappings() {
-        List<DataEngineLineageMappings> lineageMappings = dataStageConnector.getChangedLineageMappings(null, now);
+        List<LineageMapping> lineageMappings = dataStageConnector.getChangedLineageMappings(null, now);
         assertTrue(lineageMappings.isEmpty());
     }
 

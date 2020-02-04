@@ -17,12 +17,12 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
-import org.odpi.openmetadata.accessservices.dataengine.model.SoftwareServerCapability;
+import org.odpi.openmetadata.accessservices.dataengine.model.*;
+import org.odpi.openmetadata.accessservices.dataengine.model.Process;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.*;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
 import org.odpi.openmetadata.frameworks.connectors.properties.EndpointProperties;
-import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.DataEngineConnectorBase;
-import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.model.*;
+import org.odpi.openmetadata.governanceservers.dataengineproxy.connectors.DataEngineConnectorBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,11 +41,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
     private IGCRestClient igcRestClient;
     private ObjectMapper objectMapper;
-    private DataEngineSoftwareServerCapability dataEngine;
-
-    private String defaultUserId;
+    private SoftwareServerCapability dataEngine;
 
     private DataStageCache dataStageCache;
+
+    private boolean includeVirtualAssets = false;
+    private boolean createDataStoreSchemas = false;
 
     /**
      * Default constructor used by the OCF Connector Provider.
@@ -91,10 +92,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 Map<String, Object> proxyProperties = this.connectionBean.getConfigurationProperties();
                 Integer igcPage = null;
                 if (proxyProperties != null) {
-                    igcPage = (Integer) proxyProperties.get("pageSize");
+                    igcPage = (Integer) proxyProperties.get(DataStageConnectorProvider.PAGE_SIZE);
+                    includeVirtualAssets = (Boolean) proxyProperties.getOrDefault(DataStageConnectorProvider.INCLUDE_VIRTUAL_ASSETS, true);
+                    createDataStoreSchemas = (Boolean) proxyProperties.getOrDefault(DataStageConnectorProvider.CREATE_DATA_STORE_SCHEMAS, false);
                 }
-
-                this.defaultUserId = igcUser;
 
                 IGCVersionEnum igcVersion;
                 // Create new REST API client (opens a new session)
@@ -111,12 +112,11 @@ public class DataStageConnector extends DataEngineConnectorBase {
                     }
 
                     // Create a new SoftwareServerCapability representing this Data Engine
-                    SoftwareServerCapability sscDataEngine = new SoftwareServerCapability();
-                    sscDataEngine.setEngineType("IBM InfoSphere DataStage");
-                    sscDataEngine.setEngineVersion(igcVersion.getVersionString());
-                    sscDataEngine.setQualifiedName("ibm-datastage@" + address);
-                    sscDataEngine.setDisplayName(address);
-                    dataEngine = new DataEngineSoftwareServerCapability(sscDataEngine, defaultUserId);
+                    dataEngine = new SoftwareServerCapability();
+                    dataEngine.setEngineType("IBM InfoSphere DataStage");
+                    dataEngine.setEngineVersion(igcVersion.getVersionString());
+                    dataEngine.setQualifiedName("ibm-datastage@" + address);
+                    dataEngine.setDisplayName(address);
 
                 } else {
                     raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, address);
@@ -128,7 +128,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     }
 
     /**
-     * Free up any resources held since the connector is no longer needed.
+     * {@inheritDoc}
      */
     @Override
     public void disconnect() {
@@ -137,17 +137,13 @@ public class DataStageConnector extends DataEngineConnectorBase {
     }
 
     /**
-     * Retrieve the details about the data engine to which we are connected.
-     *
-     * @return DataEngineSoftwareServerCapability
+     * {@inheritDoc}
      */
     @Override
-    public DataEngineSoftwareServerCapability getDataEngineDetails() { return dataEngine; }
+    public SoftwareServerCapability getDataEngineDetails() { return dataEngine; }
 
     /**
-     * Retrieve the date and time at which changes were last synchronized.
-     *
-     * @return Date
+     * {@inheritDoc}
      */
     @Override
     public Date getChangesLastSynced() {
@@ -166,9 +162,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     }
 
     /**
-     * Persist the date and time at which changes were last successfully synchronized.
-     *
-     * @param time the date and time at which changes were last successfully synchronized
+     * {@inheritDoc}
      */
     @Override
     public void setChangesLastSynced(Date time) {
@@ -203,17 +197,13 @@ public class DataStageConnector extends DataEngineConnectorBase {
     }
 
     /**
-     * Retrieve a list of the changed schema types between the dates and times provided.
-     *
-     * @param from the date and time from which to look for changes (exclusive)
-     * @param to the date and time up to which to look for changes (inclusive)
-     * @return {@code List<DataEngineSchemaType>}
+     * {@inheritDoc}
      */
     @Override
-    public List<DataEngineSchemaType> getChangedSchemaTypes(Date from, Date to) {
+    public List<SchemaType> getChangedSchemaTypes(Date from, Date to) {
 
         log.debug("Looking for changed SchemaTypes...");
-        Map<String, DataEngineSchemaType> schemaTypeMap = new HashMap<>();
+        Map<String, SchemaType> schemaTypeMap = new HashMap<>();
 
         initializeCache(from, to);
 
@@ -221,16 +211,21 @@ public class DataStageConnector extends DataEngineConnectorBase {
         for (DataStageJob job : dataStageCache.getAllJobs()) {
             for (String storeRid : job.getStoreRids()) {
                 log.debug(" ... considering store: {}", storeRid);
-                if (DataStageDataAsset.isVirtualAsset(storeRid) && !schemaTypeMap.containsKey(storeRid)) {
-                    log.debug(" ... VIRTUAL! Creating a SchemaType ...");
-                    SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(job, job.getStoreIdentityFromRid(storeRid), job.getFieldsForStore(storeRid));
-                    DataEngineSchemaType deSchemaType = new DataEngineSchemaType(schemaTypeMapping.getSchemaType(), defaultUserId);
-                    try {
-                        log.debug(" ... created: {}", objectMapper.writeValueAsString(deSchemaType.getSchemaType()));
-                    } catch (JsonProcessingException e) {
-                        log.error("Unable to serialise to JSON: {}", deSchemaType.getSchemaType(), e);
+                if (!schemaTypeMap.containsKey(storeRid)) {
+                    if ( (IGCRestClient.isVirtualAssetRid(storeRid) && includeVirtualAssets)
+                            || (!IGCRestClient.isVirtualAssetRid(storeRid) && createDataStoreSchemas) ) {
+                        log.debug(" ... Creating a SchemaType ...");
+                        SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(job, job.getStoreIdentityFromRid(storeRid), job.getFieldsForStore(storeRid));
+                        SchemaType deSchemaType = schemaTypeMapping.getSchemaType();
+                        if (log.isDebugEnabled()) {
+                            try {
+                                log.debug(" ... created: {}", objectMapper.writeValueAsString(deSchemaType));
+                            } catch (JsonProcessingException e) {
+                                log.error("Unable to serialise to JSON: {}", deSchemaType, e);
+                            }
+                        }
+                        schemaTypeMap.put(storeRid, deSchemaType);
                     }
-                    schemaTypeMap.put(storeRid, deSchemaType);
                 }
             }
         }
@@ -240,54 +235,42 @@ public class DataStageConnector extends DataEngineConnectorBase {
     }
 
     /**
-     * Retrieve a list of the changed port implementations between the dates and times provided.
-     *
-     * @param from the date and time from which to look for changes (exclusive)
-     * @param to the date and time up to which to look for changes (inclusive)
-     * @return {@code List<DataEnginePortImplementation>}
+     * {@inheritDoc}
      */
     @Override
-    public List<DataEnginePortImplementation> getChangedPortImplementations(Date from, Date to) {
+    public List<PortImplementation> getChangedPortImplementations(Date from, Date to) {
         // do nothing -- port implementations will always be handled by other methods
         return Collections.emptyList();
     }
 
     /**
-     * Retrieve a list of the changed port aliases between the dates and times provided.
-     *
-     * @param from the date and time from which to look for changes (exclusive)
-     * @param to the date and time up to which to look for changes (inclusive)
-     * @return {@code List<DataEnginePortAlias>}
+     * {@inheritDoc}
      */
     @Override
-    public List<DataEnginePortAlias> getChangedPortAliases(Date from, Date to) {
+    public List<PortAlias> getChangedPortAliases(Date from, Date to) {
         // do nothing -- port aliases will always be handled by other methods
         return Collections.emptyList();
     }
 
     /**
-     * Retrieve a list of the changed processes between the dates and times provided.
-     *
-     * @param from the date and time from which to look for changes (exclusive)
-     * @param to the date and time up to which to look for changes (inclusive)
-     * @return {@code List<DataEngineProcess>}
+     * {@inheritDoc}
      */
     @Override
-    public List<DataEngineProcess> getChangedProcesses(Date from, Date to) {
+    public List<Process> getChangedProcesses(Date from, Date to) {
 
         initializeCache(from, to);
 
-        List<DataEngineProcess> processes = new ArrayList<>();
+        List<Process> processes = new ArrayList<>();
 
         List<DataStageJob> seqList = new ArrayList<>();
-        Map<String, DataEngineProcess> jobProcessByRid = new HashMap<>();
+        Map<String, Process> jobProcessByRid = new HashMap<>();
         // Translate changed jobs first, to build up appropriate PortAliases list
         for (DataStageJob detailedJob : dataStageCache.getAllJobs()) {
             if (detailedJob.getType().equals(DataStageJob.JobType.SEQUENCE)) {
                 seqList.add(detailedJob);
             } else {
                 processes.addAll(getProcessesForEachStage(detailedJob));
-                DataEngineProcess jobProcess = getProcessForJob(detailedJob);
+                Process jobProcess = getProcessForJob(detailedJob);
                 if (jobProcess != null) {
                     jobProcessByRid.put(detailedJob.getJobObject().getId(), jobProcess);
                     processes.add(jobProcess);
@@ -305,14 +288,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
     }
 
     /**
-     * Retrieve a list of the changed lineage mappings between the dates and times provided.
-     *
-     * @param from the date and time from which to look for changes (exclusive)
-     * @param to the date and time up to which to look for changes (inclusive)
-     * @return {@code List<DataEngineLineageMappings>}
+     * {@inheritDoc}
      */
     @Override
-    public List<DataEngineLineageMappings> getChangedLineageMappings(Date from, Date to) {
+    public List<LineageMapping> getChangedLineageMappings(Date from, Date to) {
         // do nothing -- lineage mappings will always be handled by other methods
         return Collections.emptyList();
     }
@@ -336,14 +315,14 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * Translate the detailed stages of the provided DataStage job into Processes.
      *
      * @param job the job for which to translate detailed stages
-     * @return {@code List<DataEngineProcess>}
+     * @return {@code List<Process>}
      */
-    private List<DataEngineProcess> getProcessesForEachStage(DataStageJob job) {
-        List<DataEngineProcess> processes = new ArrayList<>();
+    private List<Process> getProcessesForEachStage(DataStageJob job) {
+        List<Process> processes = new ArrayList<>();
         log.debug("Translating processes for each stage...");
         for (Stage stage : job.getAllStages()) {
             ProcessMapping processMapping = new ProcessMapping(job, stage);
-            DataEngineProcess process = processMapping.getProcess();
+            Process process = processMapping.getProcess();
             if (process != null) {
                 try {
                     log.debug(" ... process: {}", objectMapper.writeValueAsString(process));
@@ -360,10 +339,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * Translate a single Process to represent the DataStage job itself.
      *
      * @param job the job object for which to load a process
-     * @return DataEngineProcess
+     * @return Process
      */
-    private DataEngineProcess getProcessForJob(DataStageJob job) {
-        DataEngineProcess process = null;
+    private Process getProcessForJob(DataStageJob job) {
+        Process process = null;
         if (!job.getType().equals(DataStageJob.JobType.SEQUENCE)) {
             log.debug("Load process for job...");
             ProcessMapping processMapping = new ProcessMapping(job);
@@ -384,10 +363,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
      *
      * @param job the job object for which to load a process
      * @param jobProcessByRid a map from job RID to its detailed process definition
-     * @return DataEngineProcess
+     * @return Process
      */
-    private DataEngineProcess getProcessForSequence(DataStageJob job, Map<String, DataEngineProcess> jobProcessByRid) {
-        DataEngineProcess process = null;
+    private Process getProcessForSequence(DataStageJob job, Map<String, Process> jobProcessByRid) {
+        Process process = null;
         if (job.getType().equals(DataStageJob.JobType.SEQUENCE)) {
             log.debug("Load process for sequence...");
             ProcessMapping processMapping = new ProcessMapping(job, jobProcessByRid);

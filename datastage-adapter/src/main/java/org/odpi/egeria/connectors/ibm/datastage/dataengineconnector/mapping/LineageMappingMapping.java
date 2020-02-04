@@ -6,7 +6,6 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataSt
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.openmetadata.accessservices.dataengine.model.LineageMapping;
-import org.odpi.openmetadata.openconnectors.governancedaemonconnectors.dataengineproxy.model.DataEngineLineageMappings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +20,7 @@ class LineageMappingMapping extends BaseMapping {
 
     private static final Logger log = LoggerFactory.getLogger(LineageMappingMapping.class);
 
-    private DataEngineLineageMappings lineageMappings;
+    private Set<LineageMapping> lineageMappings;
 
     /**
      * Creates LineageMappings for stages that have links as input and output.
@@ -35,8 +34,7 @@ class LineageMappingMapping extends BaseMapping {
      */
     LineageMappingMapping(DataStageJob job, Link link, String stageNameSuffix, boolean bSource) {
         super(job.getIgcRestClient());
-        Set<LineageMapping> lineageMappingsSet = new HashSet<>();
-        String userId = link.getModifiedBy();
+        lineageMappings = new HashSet<>();
         ItemList<DataItem> stageColumns = link.getStageColumns();
         stageColumns.getAllPages(igcRestClient);
         // For each stage column defined on the link...
@@ -51,7 +49,7 @@ class LineageMappingMapping extends BaseMapping {
                 for (DataItem previousColumnRef : previousColumns.getItems()) {
                     StageColumn previousColumnFull = job.getStageColumnByRid(previousColumnRef.getId());
                     LineageMapping lineageMapping = getLineageMapping(getFullyQualifiedName(previousColumnFull) + stageNameSuffix, thisColumnName);
-                    lineageMappingsSet.add(lineageMapping);
+                    lineageMappings.add(lineageMapping);
                 }
             } else {
                 // Create a LineageMapping from this stage column to each next stage column
@@ -60,11 +58,10 @@ class LineageMappingMapping extends BaseMapping {
                 for (DataItem nextColumnRef : nextColumns.getItems()) {
                     StageColumn nextColumnFull = job.getStageColumnByRid(nextColumnRef.getId());
                     LineageMapping lineageMapping = getLineageMapping(thisColumnName, getFullyQualifiedName(nextColumnFull) + stageNameSuffix);
-                    lineageMappingsSet.add(lineageMapping);
+                    lineageMappings.add(lineageMapping);
                 }
             }
         }
-        lineageMappings = new DataEngineLineageMappings(lineageMappingsSet, userId);
     }
 
     /**
@@ -79,22 +76,20 @@ class LineageMappingMapping extends BaseMapping {
      */
     LineageMappingMapping(DataStageJob job, Link link) {
         super(job.getIgcRestClient());
-        Set<LineageMapping> lineageMappingsSet = new HashSet<>();
+        lineageMappings = new HashSet<>();
         // Despite the plural name, a link can only have one input and one output stage so these are singular
         Stage inputStage = link.getInputStages();
         Stage outputStage = link.getOutputStages();
         ItemList<DataItem> stageColumns = link.getStageColumns();
         stageColumns.getAllPages(igcRestClient);
-        String userId = link.getModifiedBy();
         // For each stage column defined on the link...
         for (DataItem stageColRef : stageColumns.getItems()) {
             StageColumn stageColFull = job.getStageColumnByRid(stageColRef.getId());
             String stageColName = getFullyQualifiedName(stageColFull);
             // Create a single mapping between the input stage and the output stage that use this link
             LineageMapping lineageMapping = getLineageMapping(stageColName + "_" + inputStage.getName(), stageColName + "_" + outputStage.getName());
-            lineageMappingsSet.add(lineageMapping);
+            lineageMappings.add(lineageMapping);
         }
-        lineageMappings = new DataEngineLineageMappings(lineageMappingsSet, userId);
     }
 
     /**
@@ -114,8 +109,7 @@ class LineageMappingMapping extends BaseMapping {
      */
     LineageMappingMapping(DataStageJob job, List<Classificationenabledgroup> fields, boolean bSource, String fullyQualifiedStageName, String stageNameSuffix) {
         super(job.getIgcRestClient());
-        Set<LineageMapping> lineageMappingsSet = new HashSet<>();
-        String userId = job.getJobObject().getModifiedBy();
+        lineageMappings = new HashSet<>();
         // For each field in the data store...
         for (Classificationenabledgroup fieldObj : fields) {
             String field1QN = getFullyQualifiedName(fieldObj);
@@ -125,41 +119,44 @@ class LineageMappingMapping extends BaseMapping {
             } else {
                 relatedStageCols = fieldObj.getWrittenByDesign();
             }
-            relatedStageCols.getAllPages(igcRestClient);
-            // For each object that reads / writes to that field...
-            for (InformationAsset stageColRef : relatedStageCols.getItems()) {
-                StageColumn stageColFull = job.getStageColumnByRid(stageColRef.getId());
-                if (stageColFull != null) {
-                    String field2QN = getFullyQualifiedName(stageColFull);
-                    if (bSource) {
-                        // StoreX to StoreX_STAGEA (reads_from_(design) to INPUT_PORT)
-                        LineageMapping oneToOne = getLineageMapping(field1QN, field1QN + fullyQualifiedStageName);
-                        lineageMappingsSet.add(oneToOne);
-                        // StoreX_STAGEA to DSLink1_STAGEA (INPUT_PORT to OUTPUT_PORT)
-                        LineageMapping portToPort = getLineageMapping(field1QN + fullyQualifiedStageName, field2QN + stageNameSuffix);
-                        lineageMappingsSet.add(portToPort);
+            if (relatedStageCols != null) {
+                relatedStageCols.getAllPages(igcRestClient);
+                // For each object that reads / writes to that field...
+                for (InformationAsset stageColRef : relatedStageCols.getItems()) {
+                    StageColumn stageColFull = job.getStageColumnByRid(stageColRef.getId());
+                    if (stageColFull != null) {
+                        String field2QN = getFullyQualifiedName(stageColFull);
+                        if (bSource) {
+                            // StoreX to StoreX_STAGEA (reads_from_(design) to INPUT_PORT)
+                            LineageMapping oneToOne = getLineageMapping(field1QN, field1QN + fullyQualifiedStageName);
+                            lineageMappings.add(oneToOne);
+                            // StoreX_STAGEA to DSLink1_STAGEA (INPUT_PORT to OUTPUT_PORT)
+                            LineageMapping portToPort = getLineageMapping(field1QN + fullyQualifiedStageName, field2QN + stageNameSuffix);
+                            lineageMappings.add(portToPort);
+                        } else {
+                            // DSLink2_STAGEC to StoreY_STAGEC (INPUT_PORT to OUTPUT_PORT)
+                            LineageMapping portToPort = getLineageMapping(field1QN + fullyQualifiedStageName, field1QN);
+                            lineageMappings.add(portToPort);
+                            // StoreY_STAGEC to StoreY (OUTPUT_PORT to written_by_(design))
+                            LineageMapping oneToOne = getLineageMapping(field2QN + stageNameSuffix, field1QN + fullyQualifiedStageName);
+                            lineageMappings.add(oneToOne);
+                        }
                     } else {
-                        // DSLink2_STAGEC to StoreY_STAGEC (INPUT_PORT to OUTPUT_PORT)
-                        LineageMapping portToPort = getLineageMapping(field1QN + fullyQualifiedStageName, field1QN);
-                        lineageMappingsSet.add(portToPort);
-                        // StoreY_STAGEC to StoreY (OUTPUT_PORT to written_by_(design))
-                        LineageMapping oneToOne = getLineageMapping(field2QN + stageNameSuffix, field1QN + fullyQualifiedStageName);
-                        lineageMappingsSet.add(oneToOne);
+                        log.error("Unable to find referenced stage column: {}", stageColRef);
                     }
-                } else {
-                    log.error("Unable to find referenced stage column: {}", stageColRef);
                 }
+            } else {
+                log.error("No fields were found for lineage mapping of: {}", fieldObj);
             }
         }
-        lineageMappings = new DataEngineLineageMappings(lineageMappingsSet, userId);
     }
 
     /**
      * Retrieve the LineageMappings that were setup.
      *
-     * @return DataEngineLineageMappings
+     * @return {@code Set<LineageMapping>}
      */
-    DataEngineLineageMappings getLineageMappings() { return lineageMappings; }
+    Set<LineageMapping> getLineageMappings() { return lineageMappings; }
 
     /**
      * Create a simple LineageMapping from source to target.
