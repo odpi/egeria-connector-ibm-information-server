@@ -510,6 +510,16 @@ public class Reference extends ObjectPrinter {
     }
 
     /**
+     * Indicates whether this item is a virtual asset (true) or not (false).
+     *
+     * @return boolean
+     */
+    @JsonIgnore
+    public boolean isVirtualAsset() {
+        return IGCRestClient.isVirtualAssetRid(_id);
+    }
+
+    /**
      * Retrieves the semantic identity of the asset.
      *
      * @param igcrest a REST API connection to use in confirming the identity of the asset
