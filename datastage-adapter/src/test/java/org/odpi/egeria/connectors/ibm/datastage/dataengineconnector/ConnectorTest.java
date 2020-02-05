@@ -112,9 +112,11 @@ public class ConnectorTest {
 
     @Test
     public void testChangedSchemas() {
-        // TODO: these should not be empty once we add virtual asset handling
         List<SchemaType> schemaTypes = dataStageConnector.getChangedSchemaTypes(null, now);
-        assertTrue(schemaTypes.isEmpty());
+        assertFalse(schemaTypes.isEmpty());
+        assertEquals(schemaTypes.size(), 1);
+        SchemaType only = schemaTypes.get(0);
+        assertEquals(only.getAttributeList().size(), 8);
     }
 
     @Test
