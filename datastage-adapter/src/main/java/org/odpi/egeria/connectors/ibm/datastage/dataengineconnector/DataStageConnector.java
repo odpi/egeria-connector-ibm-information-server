@@ -45,7 +45,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
     private DataStageCache dataStageCache;
 
-    private boolean includeVirtualAssets = false;
+    private boolean includeVirtualAssets = true;
     private boolean createDataStoreSchemas = false;
 
     /**
