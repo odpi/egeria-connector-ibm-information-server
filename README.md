@@ -321,7 +321,11 @@ For example payloads and endpoints, see the [Postman samples](samples).
                 "protocol": "https"
             },
             "userId": "{{igc_user}}",
-            "clearPassword": "{{igc_password}}"
+            "clearPassword": "{{igc_password}}",
+            "configurationProperties": {
+                "createDataStoreSchemas": false,
+                "includeVirtualAssets": true
+            }
         },
         "pollIntervalInSeconds": 60
     }
@@ -335,6 +339,19 @@ For example payloads and endpoints, see the [Postman samples](samples).
 
     Note that you need to provide the `connectorProvider` parameter, set to the name of the DataStage
     connectorProvider class (value as given above).
+
+    We have also provided some configuration options, set to their default values, that control how the DataStage proxy
+    works:
+
+    - `createDataStoreSchemas` is a boolean that indicates whether to include the creation of data store-level schemas
+        (when true) or not (when false). When the DataStage connector is used alone in a cohort, without an IGC proxy
+        also running in the cohort, this should be set to `true` to ensure that the data stores used as sources or
+        targets by DataStage exist in lineage. If an IGC proxy is also being used in the cohort, this should be left at
+        the default value (`false`) to ensure that the IGC proxy remains the home metadata collection of data store
+        entities and is responsible for notifications of their changes, etc.
+    - `includeVirtualAssets` is a boolean that indicates whether to include the creation of schemas for virtual assets
+        (when true) or not (when false). By default this will be enabled (true) to ensure that virtual assets that might
+        exist in lineage are still included (as IGC alone does not communicate any information about virtual assets).
 
     Finally, note that we specify the connector should poll for changes at a particular interval. This is because
     changes to DataStage routines within DataStage do not trigger events into IGC's embedded Kafka topic (at least for
