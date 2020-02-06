@@ -399,6 +399,16 @@ public class IGCRestClient {
     }
 
     /**
+     * Indicates whether the provided Repository ID (RID) represents a virtual asset (true) or not (false).
+     *
+     * @param rid the Repository ID (RID) to check
+     * @return boolean
+     */
+    public static boolean isVirtualAssetRid(String rid) {
+        return rid == null || rid.startsWith("extern:");
+    }
+
+    /**
      * Internal utility for making potentially repeat requests (if session expires and needs to be re-opened),
      * to upload a file to a given endpoint.
      *
@@ -865,8 +875,9 @@ public class IGCRestClient {
         String result = deleteJson(rid);
         if (result != null) {
             throw new IGCConnectivityException("Unable to delete asset.", rid);
+        } else {
+            return true;
         }
-        return (result == null);
     }
 
     /**
@@ -1386,6 +1397,7 @@ public class IGCRestClient {
      * @param <T> the type of IGC object (minimally a Reference)
      * @return T - the IGC object with its _context and modification details populated
      */
+    @SuppressWarnings("unchecked")
     private <T extends Reference> T getAssetContext(T object, boolean bPopulateModDetails) {
 
         T populated = object;
@@ -1399,16 +1411,20 @@ public class IGCRestClient {
 
                 log.debug("Context and / or modification details are empty, populating...");
 
-                IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", object.getId());
-                IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
-                IGCSearch igcSearch = new IGCSearch(object.getType(), idOnlySet);
-                if (bHasModificationDetails) {
-                    igcSearch.addProperties(IGCRestConstants.getModificationProperties());
-                }
-                igcSearch.setPageSize(2);
-                ItemList<T> assetsWithCtx = search(igcSearch);
-                if (!assetsWithCtx.getItems().isEmpty()) {
-                    populated = assetsWithCtx.getItems().get(0);
+                if (!object.isVirtualAsset()) {
+                    IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", object.getId());
+                    IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
+                    IGCSearch igcSearch = new IGCSearch(object.getType(), idOnlySet);
+                    if (bHasModificationDetails) {
+                        igcSearch.addProperties(IGCRestConstants.getModificationProperties());
+                    }
+                    igcSearch.setPageSize(2);
+                    ItemList<T> assetsWithCtx = search(igcSearch);
+                    if (!assetsWithCtx.getItems().isEmpty()) {
+                        populated = assetsWithCtx.getItems().get(0);
+                    }
+                } else {
+                    populated = (T) getAssetById(object.getId());
                 }
 
             }

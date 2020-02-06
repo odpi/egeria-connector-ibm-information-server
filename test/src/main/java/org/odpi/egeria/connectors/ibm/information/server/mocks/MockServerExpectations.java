@@ -149,6 +149,13 @@ public class MockServerExpectations implements PluginExpectationInitializer {
             }
         }
 
+        Resource[] virtualExamples = getFilesMatchingPattern("virtual_by_rid/*.json");
+        if (virtualExamples != null) {
+            for (Resource virtualExample : virtualExamples) {
+                setVirtualByRidQuery(mockServerClient, virtualExample);
+            }
+        }
+
     }
 
     private void initializeIGCConnectorExpectations(MockServerClient mockServerClient) {
@@ -548,6 +555,23 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                     .withSecure(true)
                     .when(assetByRidRequest(rid))
                     .respond(withResponse(getResourceFileContents("full_by_rid" + File.separator + rid + ".json")));
+        }
+    }
+
+    private void setVirtualByRidQuery(MockServerClient mockServerClient, Resource resource) {
+        URL url = null;
+        try {
+            url = resource.getURL();
+        } catch (IOException e) {
+            log.error("Unable to retrieve virtual asset details file from: {}", resource, e);
+        }
+        if (url != null) {
+            String filename = url.getFile();
+            String rid = getRidFromFilename(filename);
+            mockServerClient
+                    .withSecure(true)
+                    .when(assetByRidRequest("extern:fr:" + rid))
+                    .respond(withResponse(getResourceFileContents("virtual_by_rid" + File.separator + rid + ".json")));
         }
     }
 

@@ -257,8 +257,9 @@ public class DataStageJob {
         }
         if (stageCols != null) {
             buildMap(columnMap, stageCols);
-        } else {
-            log.error("Unable to identify any stage columns for job: {}", jobRid);
+        } else if (type.equals(JobType.JOB)) {
+            // Only warn about finding no columns if this is a Job (Sequences in general will not have stage columns)
+            log.warn("Unable to identify any stage columns for job: {}", jobRid);
         }
     }
 

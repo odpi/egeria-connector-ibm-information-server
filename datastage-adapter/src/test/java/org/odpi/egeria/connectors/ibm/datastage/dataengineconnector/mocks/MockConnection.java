@@ -7,6 +7,9 @@ import org.odpi.openmetadata.frameworks.connectors.properties.beans.Connection;
 import org.odpi.openmetadata.frameworks.connectors.properties.beans.ConnectorType;
 import org.odpi.openmetadata.frameworks.connectors.properties.beans.Endpoint;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Mocked connection for the DataStageConnector.
  */
@@ -30,6 +33,13 @@ public class MockConnection extends Connection {
 
         setUserId(MockConstants.IGC_USER);
         setClearPassword(MockConstants.IGC_PASS);
+
+        // Override these if we want something other than the default behavior
+        /*Map<String, Object> configProperties = new HashMap<>();
+        configProperties.put("createDataStoreSchemas", false);
+        configProperties.put("includeVirtualAssets", true);
+
+        setConfigurationProperties(configProperties);*/
 
     }
 
