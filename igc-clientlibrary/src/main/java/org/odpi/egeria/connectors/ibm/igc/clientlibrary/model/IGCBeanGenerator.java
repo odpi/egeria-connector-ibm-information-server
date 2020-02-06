@@ -24,10 +24,24 @@ import java.util.*;
 /**
  * Utility class to generate the IGC bean (POJO) classes that can be used for (de-)serialising the IGC REST API
  * JSON payloads.
+ *
+ * This class is not part of the server itself, and is instead only used as a mechanism to generate other Java classes,
+ * and even then only on a fairly rare basis (every few months at most, as releases of IGC emerge that make any changes
+ * to the properties or types that it handles).
+ *
+ * In light of this, and various code analysis tools indicating potential exposures from allowing a main() method that
+ * receives parameters like file-system locations, this has been modified to embed any parameters directly into the
+ * code itself.
  */
 public class IGCBeanGenerator {
 
     private static final Logger log = LoggerFactory.getLogger(IGCBeanGenerator.class);
+
+    private static final String HOSTNAME = "infosvr";
+    private static final String PORT = "9446";
+    private static final String USERNAME = "isadmin";
+    private static final String PASSWORD = "isadmin";
+    private static final boolean SKIP_FIXED_ASSET_GENERATION = true;
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -49,7 +63,7 @@ public class IGCBeanGenerator {
 
     public static void main(String[] args) {
 
-        if (args.length < 4) {
+        if (HOSTNAME.equals("") || PORT.equals("") || USERNAME.equals("") || PASSWORD.equals("")) {
             System.out.println("Inadequate parameters provided.");
             printUsage();
             System.exit(1);
@@ -57,14 +71,9 @@ public class IGCBeanGenerator {
 
         HttpHelper.noStrictSSL();
 
-        IGCBeanGenerator generator = new IGCBeanGenerator(args[0], args[1], args[2], args[3]);
-        boolean skipFixedAssetGeneration = true;
-        if (args.length > 4) {
-            String upperCased = args[4].toUpperCase();
-            skipFixedAssetGeneration = !(upperCased.equals("NO") || upperCased.equals("FALSE"));
-        }
-        generator.generateSuperTypes(skipFixedAssetGeneration);
-        generator.generateForAllIgcTypesInEnvironment(skipFixedAssetGeneration);
+        IGCBeanGenerator generator = new IGCBeanGenerator();
+        generator.generateSuperTypes(SKIP_FIXED_ASSET_GENERATION);
+        generator.generateForAllIgcTypesInEnvironment(SKIP_FIXED_ASSET_GENERATION);
 
     }
 
@@ -78,8 +87,8 @@ public class IGCBeanGenerator {
 
     private Map<String, Set<String>> superTypeToProperties;
 
-    private IGCBeanGenerator(String hostname, String port, String username, String password) {
-        igcRestClient = new IGCRestClient(hostname, port, username, password);
+    private IGCBeanGenerator() {
+        igcRestClient = new IGCRestClient(HOSTNAME, PORT, USERNAME, PASSWORD);
         superTypeToSubTypeToClassName = new TreeMap<>();
         superTypeToProperties = new HashMap<>();
     }

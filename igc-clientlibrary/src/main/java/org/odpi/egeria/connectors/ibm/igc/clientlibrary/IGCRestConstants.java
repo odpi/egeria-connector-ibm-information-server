@@ -20,7 +20,7 @@ public class IGCRestConstants {
     public static final String MOD_MODIFIED_BY = "modified_by";
     public static final String MOD_MODIFIED_ON = "modified_on";
 
-    public static final Pattern INVALID_NAMING_CHARS = Pattern.compile("[()/&$\\- ]");
+    public static final Pattern INVALID_NAMING_CHARS = Pattern.compile("[.()/&$\\- ]");
 
     public static final String IGC_REST_COMMON_MODEL_PKG = "org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common";
     public static final String IGC_REST_BASE_MODEL_PKG = "org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base";
