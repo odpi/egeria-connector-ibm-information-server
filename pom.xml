@@ -106,6 +106,7 @@
         <sleepycat.version>18.3.12</sleepycat.version>
         <rhino.version>1.7.12</rhino.version>
         <woodstox.version>6.0.3</woodstox.version>
+        <stax.version>1.0.1</stax.version>
         <maven-compiler.version>3.8.1</maven-compiler.version>
         <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
         <maven-shade.version>3.2.1</maven-shade.version>
@@ -219,6 +220,12 @@
                 <artifactId>mockserver-core</artifactId>
                 <scope>test</scope>
                 <version>${mock-server.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>stax</groupId>
+                <artifactId>stax-api</artifactId>
+                <version>${stax.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.flipkart.zjsonpatch</groupId>
