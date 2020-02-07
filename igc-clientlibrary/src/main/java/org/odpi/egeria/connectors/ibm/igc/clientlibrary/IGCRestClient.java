@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -225,8 +226,23 @@ public class IGCRestClient {
         // If we have cookies already, and haven't been asked to force the login,
         // re-use these (to maintain the same session)
         if (cookies != null && !forceLogin) {
-            // TODO: identified as High issue on page 1122
-            headers.addAll(HttpHeaders.COOKIE, cookies);
+            // Validate each cookie against our whitelist of valid cookies, to avoid any potential security exposure
+            for (String candidate : cookies) {
+                String[] tokens = candidate.split("=");
+                if (tokens.length < 2) {
+                    throw new IGCConnectivityException("An invalid cookie was found, which could present a security problem.", candidate);
+                }
+                String cookieName = tokens[0];
+                if (!IGCRestConstants.getValidCookieNames().contains(cookieName)) {
+                    throw new IGCConnectivityException("An invalid cookie was found, which could present a security problem.", candidate);
+                }
+                Matcher m = IGCRestConstants.COOKIE_WHITELIST.matcher(candidate);
+                if (m.matches()) {
+                    headers.add(HttpHeaders.COOKIE, candidate);
+                } else {
+                    throw new IGCConnectivityException("A cookie was found that has invalid characters and could therefore present a security problem.", candidate);
+                }
+            }
         } else { // otherwise re-authenticate by Basic authentication
             String auth = "Basic " + this.authorization;
             headers.add(HttpHeaders.AUTHORIZATION, auth);

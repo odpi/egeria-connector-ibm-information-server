@@ -50,8 +50,8 @@ public class IGCCreate {
     public JsonNode getCreate() {
         ObjectNode create = nf.objectNode();
         create.put("_type", type);
-        for (String propertyName : properties.keySet()) {
-            create.set(propertyName, nf.textNode(properties.get(propertyName)));
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+            create.set(entry.getKey(), nf.textNode(entry.getValue()));
         }
         return create;
     }
