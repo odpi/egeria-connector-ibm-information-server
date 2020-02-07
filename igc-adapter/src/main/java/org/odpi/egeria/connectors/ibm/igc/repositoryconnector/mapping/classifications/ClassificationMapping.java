@@ -315,8 +315,9 @@ public abstract class ClassificationMapping extends InstanceMapping {
         Map<String, TypeDefAttribute> omrsAttributeMap = igcomrsMetadataCollection.getTypeDefAttributesForType(omrsClassificationType);
 
         // Then we'll iterate through the provided mappings to set an OMRS instance property for each one
-        for (String igcPropertyName : mappingByIgcProperty.keySet()) {
-            String omrsAttribute = mappingByIgcProperty.get(igcPropertyName).getOmrsPropertyName();
+        for (Map.Entry<String, EntityMapping.PropertyMapping> entry : mappingByIgcProperty.entrySet()) {
+            String igcPropertyName = entry.getKey();
+            String omrsAttribute = entry.getValue().getOmrsPropertyName();
             if (omrsAttributeMap.containsKey(omrsAttribute)) {
                 TypeDefAttribute typeDefAttribute = omrsAttributeMap.get(omrsAttribute);
                 classificationProperties = AttributeMapping.addPrimitivePropertyToInstance(

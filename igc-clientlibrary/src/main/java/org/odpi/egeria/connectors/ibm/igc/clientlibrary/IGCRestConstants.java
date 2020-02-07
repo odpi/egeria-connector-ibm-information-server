@@ -20,7 +20,8 @@ public class IGCRestConstants {
     public static final String MOD_MODIFIED_BY = "modified_by";
     public static final String MOD_MODIFIED_ON = "modified_on";
 
-    public static final Pattern INVALID_NAMING_CHARS = Pattern.compile("[.()/&$\\- ]");
+    public static final Pattern NAMING_CHAR_WHITELIST = Pattern.compile("[^a-zA-Z0-9_]");
+    public static final Pattern COOKIE_WHITELIST = Pattern.compile("^[{}.+/=:; a-zA-Z0-9_%\\-]+$");
 
     public static final String IGC_REST_COMMON_MODEL_PKG = "org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common";
     public static final String IGC_REST_BASE_MODEL_PKG = "org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base";
@@ -40,6 +41,16 @@ public class IGCRestConstants {
     private static final String REFERENCE = "reference";
     private static final String DATAGROUP = "datagroup";
     public static final String CLASSIFICATIONENABLEDGROUP = "classificationenabledgroup";
+
+    private static final Set<String> VALID_COOKIE_NAMES = createValidCookieNames();
+    private static Set<String> createValidCookieNames() {
+        Set<String> set = new HashSet<>();
+        set.add("LtpaToken2");
+        set.add("JSESSIONID");
+        set.add("X-IBM-IISSessionId");
+        set.add("X-IBM-IISSessionToken");
+        return set;
+    }
 
     private static final List<String> MODIFICATION_DETAILS = createModificationDetails();
     private static List<String> createModificationDetails() {
@@ -255,6 +266,13 @@ public class IGCRestConstants {
     }
 
     /**
+     * Retrieve the set of valid cookie names for the IGC REST API.
+     *
+     * @return {@code Set<String>}
+     */
+    public static Set<String> getValidCookieNames() { return VALID_COOKIE_NAMES; }
+
+    /**
      * Retrieve a list of the modification detail properties used by the IGC REST API.
      *
      * @return {@code List<String>}
@@ -391,7 +409,7 @@ public class IGCRestConstants {
      * @return String
      */
     public static String getCamelCase(String input) {
-        Matcher m = INVALID_NAMING_CHARS.matcher(input);
+        Matcher m = NAMING_CHAR_WHITELIST.matcher(input);
         String invalidsRemoved = m.replaceAll("_");
         StringBuilder sb = new StringBuilder(invalidsRemoved.length());
         for (String token : invalidsRemoved.split("_")) {

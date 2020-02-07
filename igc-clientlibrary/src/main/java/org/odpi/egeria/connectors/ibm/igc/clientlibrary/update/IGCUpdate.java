@@ -97,13 +97,14 @@ public class IGCUpdate {
     public JsonNode getUpdate() {
         ObjectNode update = nf.objectNode();
         if (!properties.isEmpty()) {
-            for (String propertyName : properties.keySet()) {
-                update.set(propertyName, nf.textNode(properties.get(propertyName)));
+            for (Map.Entry<String, String> entry : properties.entrySet()) {
+                update.set(entry.getKey(), nf.textNode(entry.getValue()));
             }
         }
         if (!relationships.isEmpty()) {
-            for (String propertyName : relationships.keySet()) {
-                List<String> rids = relationships.get(propertyName);
+            for (Map.Entry<String, List<String>> entry : relationships.entrySet()) {
+                String propertyName = entry.getKey();
+                List<String> rids = entry.getValue();
                 ArrayNode ridArray = nf.arrayNode(rids.size());
                 for (String rid : rids) {
                     ridArray.add(rid);
@@ -123,8 +124,8 @@ public class IGCUpdate {
             }
         }
         if (!exclusiveRelationships.isEmpty()) {
-            for (String propertyName : exclusiveRelationships.keySet()) {
-                update.set(propertyName, nf.textNode(exclusiveRelationships.get(propertyName)));
+            for (Map.Entry<String, String> entry : exclusiveRelationships.entrySet()) {
+                update.set(entry.getKey(), nf.textNode(entry.getValue()));
             }
         }
         return update;

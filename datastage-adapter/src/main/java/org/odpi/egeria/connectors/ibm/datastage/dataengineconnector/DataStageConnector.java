@@ -146,7 +146,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public Date getChangesLastSynced() {
+    public synchronized Date getChangesLastSynced() {
         InformationGovernanceRule jobSyncRule = getJobSyncRule();
         Date lastSync = null;
         if (jobSyncRule != null) {
@@ -165,7 +165,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public void setChangesLastSynced(Date time) {
+    public synchronized void setChangesLastSynced(Date time) {
         final String methodName = "setChangesLastSynced";
         InformationGovernanceRule exists = getJobSyncRule();
         String newDescription = SYNC_RULE_DESC + syncDateFormat.format(time);

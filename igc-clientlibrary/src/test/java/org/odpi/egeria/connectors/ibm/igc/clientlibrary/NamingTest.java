@@ -8,8 +8,6 @@ import static org.testng.Assert.*;
 
 public class NamingTest {
 
-    private String COMPOUND_TYPE_NAME = "database_column";
-
     public NamingTest() {
         // Do nothing...
     }
@@ -17,10 +15,16 @@ public class NamingTest {
     @Test
     public void testCamelCases() {
 
-        assertEquals(IGCRestConstants.getCamelCase(COMPOUND_TYPE_NAME), "DatabaseColumn");
-        assertEquals(IGCRestConstants.getLowerCamelCase(COMPOUND_TYPE_NAME), "databaseColumn");
-        assertEquals(IGCRestConstants.getGetterNameForProperty(COMPOUND_TYPE_NAME), "getDatabaseColumn");
-        assertEquals(IGCRestConstants.getSetterNameForProperty(COMPOUND_TYPE_NAME), "setDatabaseColumn");
+        String compoundTypeName = "database_column";
+
+        assertEquals(IGCRestConstants.getCamelCase(compoundTypeName), "DatabaseColumn");
+        assertEquals(IGCRestConstants.getLowerCamelCase(compoundTypeName), "databaseColumn");
+        assertEquals(IGCRestConstants.getGetterNameForProperty(compoundTypeName), "getDatabaseColumn");
+        assertEquals(IGCRestConstants.getSetterNameForProperty(compoundTypeName), "setDatabaseColumn");
+
+        String problemCharactersTypeName = "does\nnot actually[exist";
+
+        assertEquals(IGCRestConstants.getCamelCase(problemCharactersTypeName), "DoesNotActuallyExist");
 
     }
 

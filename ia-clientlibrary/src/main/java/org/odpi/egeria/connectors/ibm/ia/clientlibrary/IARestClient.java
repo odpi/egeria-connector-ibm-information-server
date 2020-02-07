@@ -9,6 +9,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import org.odpi.egeria.connectors.ibm.ia.clientlibrary.errors.IAConnectivityException;
+import org.odpi.egeria.connectors.ibm.ia.clientlibrary.errors.IAParsingException;
 import org.odpi.egeria.connectors.ibm.ia.clientlibrary.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +48,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.regex.Matcher;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -121,11 +124,13 @@ public class IARestClient {
             this.xmlParser = documentBuilderFactory.newDocumentBuilder();
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
             this.xmlTransformer = transformerFactory.newTransformer();
         } catch (ParserConfigurationException e) {
-            log.error("Unable to instantiate an XML parser.", e);
+            throw new IAParsingException("Unable to instantiate an XML parser.", e);
         } catch (TransformerConfigurationException e) {
-            log.error("Unable to instantiate an XML transformer.", e);
+            throw new IAParsingException("Unable to instantiate an XML transformer.", e);
         }
         this.restTemplate = new RestTemplate();
 
@@ -133,8 +138,6 @@ public class IARestClient {
         List<HttpMessageConverter<?>> converters = restTemplate.getMessageConverters();
         converters.removeIf(httpMessageConverter -> httpMessageConverter instanceof StringHttpMessageConverter);
         converters.add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-
-        log.debug("Constructing IARestClient...");
 
     }
 
@@ -165,7 +168,23 @@ public class IARestClient {
         // If we have cookies already, and haven't been asked to force the login,
         // re-use these (to maintain the same session)
         if (cookies != null && !forceLogin) {
-            headers.addAll(HttpHeaders.COOKIE, cookies);
+            // Validate each cookie against our whitelist of valid cookies, to avoid any potential security exposure
+            for (String candidate : cookies) {
+                String[] tokens = candidate.split("=");
+                if (tokens.length < 2) {
+                    throw new IAConnectivityException("An invalid cookie was found, which could present a security problem.", candidate);
+                }
+                String cookieName = tokens[0];
+                if (!IARestConstants.getValidCookieNames().contains(cookieName)) {
+                    throw new IAConnectivityException("An invalid cookie was found, which could present a security problem.", candidate);
+                }
+                Matcher m = IARestConstants.COOKIE_WHITELIST.matcher(candidate);
+                if (m.matches()) {
+                    headers.add(HttpHeaders.COOKIE, candidate);
+                } else {
+                    throw new IAConnectivityException("A cookie was found that has invalid characters and could therefore present a security problem.", candidate);
+                }
+            }
         } else { // otherwise re-authenticate by Basic authentication
             String auth = "Basic " + this.authorization;
             headers.add(HttpHeaders.AUTHORIZATION, auth);
@@ -191,8 +210,8 @@ public class IARestClient {
                                                              String payload,
                                                              boolean alreadyTriedNewSession) {
         if (alreadyTriedNewSession) {
-            log.error("Opening a new session already attempted without success -- giving up on {} to {} with {}", method, url, payload);
-            return null;
+            String formattedMessage = method + " to " + url + " with: " + payload;
+            throw new IAConnectivityException("Opening a new session already attempted without success -- giving up.", formattedMessage);
         } else {
             // By removing cookies, we'll force a login
             this.cookies = null;
@@ -217,7 +236,7 @@ public class IARestClient {
                 this.cookies = headers.get(HttpHeaders.SET_COOKIE);
             }
         } else {
-            log.error("Unable to make request or unexpected status: {}", response.getStatusCode());
+            throw new IAConnectivityException("Unable to make request or unexpected status.", response.getStatusCode().toString());
         }
 
     }
@@ -242,7 +261,7 @@ public class IARestClient {
         } else {
             toSend = new HttpEntity<>(headers);
         }
-        ResponseEntity<String> response = null;
+        ResponseEntity<String> response;
         try {
             log.debug("{}ing to {} with: {}", method, url, payload);
             response = restTemplate.exchange(
@@ -261,7 +280,7 @@ public class IARestClient {
                     forceLogin
             );
         } catch (RestClientException e) {
-            log.error("Request failed -- check IA environment connectivity and authentication details.", e);
+            throw new IAConnectivityException("Request failed -- check IA environment connectivity and authentication details.", e);
         }
         return response;
     }
@@ -283,8 +302,8 @@ public class IARestClient {
         );
         String body = null;
         if (response == null) {
-            log.error("Unable to complete request -- check IA environment connectivity and authentication details.");
-            throw new RuntimeException("Unable to complete request -- check IA environment connectivity and authentication details.");
+            String formattedMessage = method + " to " + endpoint + " with: " + payload;
+            throw new IAConnectivityException("Unable to complete request -- check IA environment connectivity and authentication details.", formattedMessage);
         } else if (response.hasBody()) {
             // We MUST minimize the XML response in order for it to be properly de-serialized by Jackson
             // (otherwise an <A></A> with a newline in-between is interpreted has having a long '      ' value rather
@@ -299,9 +318,9 @@ public class IARestClient {
                     xmlTransformer.transform(new DOMSource(xmlDoc), result);
                     body = writer.toString();
                 } catch (TransformerException e) {
-                    log.error("Unable to transform parsed response body back to String: {}", body, e);
+                    throw new IAParsingException("Unable to transform parsed response body back to String.", body, e);
                 } catch (SAXException | IOException e) {
-                    log.error("Unable to parse the response body as XML: {}", body, e);
+                    throw new IAParsingException("Unable to parse the response body as XML.", body, e);
                 }
             }
         }
@@ -322,11 +341,11 @@ public class IARestClient {
      */
     public List<Project> getProjectList() {
         String response = makeRequest(EP_PROJECTS, HttpMethod.GET, null);
-        List<Project> lProjects = new ArrayList<>();
+        List<Project> lProjects;
         try {
             lProjects = mapper.readValue(response, new TypeReference<List<Project>>(){});
         } catch (IOException e) {
-            log.error("Unable to parse projects response: {}", response, e);
+            throw new IAParsingException("Unable to parse projects response.", response, e);
         }
         return lProjects;
     }
@@ -339,11 +358,11 @@ public class IARestClient {
      */
     public Project getProjectDetails(String projectName) {
         String response = makeRequest(EP_PROJECT + "?projectName=" + encodeParameterForURL(projectName), HttpMethod.GET, null);
-        Project project = null;
+        Project project;
         try {
             project = mapper.readValue(response, Project.class);
         } catch (IOException e) {
-            log.error("Unable to parse project details for project '{}': {}", projectName, response, e);
+            throw new IAParsingException("Unable to parse project details for project '" + projectName + "'.", response, e);
         }
         return project;
     }
@@ -640,11 +659,11 @@ public class IARestClient {
      */
     public TaskExecutionSchedule getTaskStatus(String scheduleId) {
         String response = makeRequest(EP_TASK_STATUS + "?scheduleID=" + scheduleId, HttpMethod.GET, null);
-        TaskExecutionSchedule taskExecutionSchedule = null;
+        TaskExecutionSchedule taskExecutionSchedule;
         try {
             taskExecutionSchedule = mapper.readValue(response, TaskExecutionSchedule.class);
         } catch (IOException e) {
-            log.error("Unable to parse execution status for '{}': {}", scheduleId, response, e);
+            throw new IAParsingException("Unable to parse execution status for '" + scheduleId + "'.", response, e);
         }
         return taskExecutionSchedule;
     }
@@ -679,7 +698,7 @@ public class IARestClient {
         log.debug("Task request payload: " + xmlPayload);
         String response = makeRequest(EP_PUBLISH, HttpMethod.POST, xmlPayload);
         if (response != null) {
-            throw new RuntimeException("Error publishing: " + response);
+            throw new IAConnectivityException("Error publishing.", response);
         }
         return true;
     }
@@ -707,11 +726,11 @@ public class IARestClient {
             xmlWriter.flush();
             xmlWriter.close();
         } catch (JsonProcessingException e) {
-            log.error("Unable to translate provided {} object to XML: {}", value.getClass().getName(), value, e);
+            throw new IAParsingException("Unable to translate provided '" + value.getClass().getName() + "' object to XML.", value.toString(), e);
         } catch (XMLStreamException e) {
-            log.error("Unable to write to XML stream: {}", value, e);
+            throw new IAParsingException("Unable to write to XML stream.", value.toString(), e);
         } catch (IOException e) {
-            log.error("Unable to translate provided {} object to XML stream: {}", value.getClass().getName(), value, e);
+            throw new IAParsingException("Unable to translate provided '" + value.getClass().getName() + "' object to XML stream.", value.toString(), e);
         }
         return out.toString();
     }
@@ -730,11 +749,11 @@ public class IARestClient {
         String xmlPayload = getTaskPayload(projectName, details);
         log.debug("Task request payload: " + xmlPayload);
         String response = makeRequest(EP_EXECUTE_TASK, HttpMethod.POST, xmlPayload);
-        TaskExecutionReport taskExecutionReport = null;
+        TaskExecutionReport taskExecutionReport;
         try {
             taskExecutionReport = mapper.readValue(response, TaskExecutionReport.class);
         } catch (IOException e) {
-            log.error("Unable to parse {} execution report for project '{}': {}", methodName, projectName, response, e);
+            throw new IAParsingException("Unable to parse '" + methodName + "' execution report for project '" + projectName + "'.", response, e);
         }
         return taskExecutionReport;
     }
@@ -757,14 +776,14 @@ public class IARestClient {
             url += "&columnName=" + encodeParameterForURL(columnName);
         }
         String response = makeRequest(url, HttpMethod.GET, null);
-        Project project = null;
+        Project project;
         try {
             project = mapper.readValue(response, Project.class);
         } catch (IOException e) {
             if (columnName == null) {
-                log.error("Unable to parse {} results for project '{}': {}", methodName, projectName, response, e);
+                throw new IAParsingException("Unable to parse '" + methodName + "' results for project '" + projectName + "'.", response, e);
             } else {
-                log.error("Unable to parse {} results for project '{}' and column '{}': {}", methodName, projectName, columnName, response, e);
+                throw new IAParsingException("Unable to parse '" + methodName + "' results for project '" + projectName + "' and column '" + columnName + "'.", response, e);
             }
         }
         return project;
@@ -788,14 +807,14 @@ public class IARestClient {
             url += "&tableName=" + encodeParameterForURL(tableName);
         }
         String response = makeRequest(url, HttpMethod.GET, null);
-        Project project = null;
+        Project project;
         try {
             project = mapper.readValue(response, Project.class);
         } catch (IOException e) {
             if (tableName == null) {
-                log.error("Unable to parse {} results for project '{}': {}", methodName, projectName, response, e);
+                throw new IAParsingException("Unable to parse '" + methodName + "' results for project '" + projectName + "'.", response, e);
             } else {
-                log.error("Unable to parse {} results for project '{}' and table '{}': {}", methodName, projectName, tableName, response, e);
+                throw new IAParsingException("Unable to parse '" + methodName + "' results for project '" + projectName + "' and table '" + tableName + "'.", response, e);
             }
         }
         return project;
@@ -808,11 +827,11 @@ public class IARestClient {
      * @return String - the encoded value
      */
     private String encodeParameterForURL(String value) {
-        String encoded = value;
+        String encoded;
         try {
             encoded = URLEncoder.encode(value, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            log.error("Unable to encode parameter value for a URL: {}", value, e);
+            throw new IAParsingException("Unable to encode parameter value for a URL.", value, e);
         }
         return encoded;
     }

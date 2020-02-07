@@ -304,11 +304,15 @@ public abstract class AttributeMapping {
                 igcValue = ((EnumPropertyValue) value).getSymbolicName();
                 break;
             case ARRAY:
-                igcValue = "[ ";
+                StringBuilder sb = new StringBuilder();
+                sb.append("[ ");
                 Map<String, InstancePropertyValue> arrayValues = ((ArrayPropertyValue) value).getArrayValues().getInstanceProperties();
                 for (Map.Entry<String, InstancePropertyValue> nextEntry : arrayValues.entrySet()) {
-                    igcValue += "\"" + getIgcValueFromPropertyValue(nextEntry.getValue()) + "\",";
+                    sb.append("\"");
+                    sb.append(getIgcValueFromPropertyValue(nextEntry.getValue()));
+                    sb.append("\",");
                 }
+                igcValue = sb.toString();
                 if (igcValue.endsWith(",")) {
                     igcValue = igcValue.substring(0, igcValue.length() - 1);
                 }

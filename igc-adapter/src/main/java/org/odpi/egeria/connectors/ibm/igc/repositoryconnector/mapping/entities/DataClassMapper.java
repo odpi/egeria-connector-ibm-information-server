@@ -398,7 +398,7 @@ public class DataClassMapper extends ReferenceableMapper {
                     break;
                 case "userDefined":
                     if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
-                        boolean isUserDefined = Boolean.getBoolean(omrsValue);
+                        boolean isUserDefined = Boolean.parseBoolean(omrsValue);
                         IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
                                 "provider",
                                 isUserDefined ? "<>" : "=",
