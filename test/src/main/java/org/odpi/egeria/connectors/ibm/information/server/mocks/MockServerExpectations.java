@@ -6,6 +6,7 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.client.initialize.PluginExpectationInitializer;
 import org.mockserver.matchers.MatchType;
 import org.mockserver.matchers.Times;
+import org.mockserver.model.Header;
 import org.mockserver.model.JsonBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,8 @@ public class MockServerExpectations implements PluginExpectationInitializer {
         initializeExampleInstances(mockServerClient);
         initializeIGCConnectorExpectations(mockServerClient);
         initializeDataStageConnectorExpectations(mockServerClient);
+
+        initializeSecurityTestExpectations(mockServerClient);
 
         setDefaultSearchResponseToNoResults(mockServerClient);
 
@@ -237,11 +240,85 @@ public class MockServerExpectations implements PluginExpectationInitializer {
 
     }
 
+    private void initializeSecurityTestExpectations(MockServerClient mockServerClient) {
+        // IGC
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(json("{\"types\":[\"security_test\"],\"pageSize\":1}", MatchType.ONLY_MATCHING_FIELDS)))
+                .respond(
+                        withResponse(getResourceFileContents("no_results.json"))
+                                .withHeaders(
+                                        Header.header("Set-Cookie", "InvalidCookie")
+                                )
+                );
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(json("{\"types\":[\"security_test\"],\"pageSize\":2}", MatchType.ONLY_MATCHING_FIELDS)))
+                .respond(
+                        withResponse(getResourceFileContents("no_results.json"))
+                                .withHeaders(
+                                        Header.header("Set-Cookie", "NotInWhitelist=abc123; Path=/; Secure; HttpOnly")
+                                )
+                );
+        // Would be ideal to test with a newline below, but even Mock Server validates this and does not allow it...
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(json("{\"types\":[\"security_test\"],\"pageSize\":3}", MatchType.ONLY_MATCHING_FIELDS)))
+                .respond(
+                        withResponse(getResourceFileContents("no_results.json"))
+                                .withHeaders(
+                                        Header.header("Set-Cookie", "JSESSIONID=abc123\t&JSESSIONID=somehackattempt; Path=/; Secure; HttpOnly")
+                                )
+                );
+        // IA
+        mockServerClient
+                .withSecure(true)
+                .when(getProjectDetailsRequest("SecurityTest1"))
+                .respond(
+                        withResponse(getResourceFileContents("ia" + File.separator + "project_CocoPharma.xml"))
+                                .withHeaders(
+                                        Header.header("Set-Cookie", "InvalidCookie")
+                                )
+                );
+        mockServerClient
+                .withSecure(true)
+                .when(getProjectDetailsRequest("SecurityTest1"))
+                .respond(
+                        withResponse(getResourceFileContents("ia" + File.separator + "project_CocoPharma.xml"))
+                                .withHeaders(
+                                        Header.header("Set-Cookie", "NotInWhitelist=abc123; Path=/; Secure; HttpOnly")
+                                )
+                );
+        mockServerClient
+                .withSecure(true)
+                .when(getProjectDetailsRequest("SecurityTest1"))
+                .respond(
+                        withResponse(getResourceFileContents("ia" + File.separator + "project_CocoPharma.xml"))
+                                .withHeaders(
+                                        Header.header("Set-Cookie", "JSESSIONID=abc123\t&JSESSIONID=somehackattempt; Path=/; Secure; HttpOnly")
+                                )
+                );
+    }
+
     private void setStartupQuery(MockServerClient mockServerClient) {
+        // First time respond with an invalid session
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest("{\"types\":[\"category\",\"term\",\"information_governance_policy\",\"information_governance_rule\"],\"pageSize\":1,\"workflowMode\":\"draft\"}"),
+                        Times.exactly(1))
+                .respond(withResponse(getResourceFileContents("no_results.json")).withStatusCode(401));
         mockServerClient
                 .withSecure(true)
                 .when(searchRequest("{\"types\":[\"category\",\"term\",\"information_governance_policy\",\"information_governance_rule\"],\"pageSize\":1,\"workflowMode\":\"draft\"}"))
-                .respond(withResponse(getResourceFileContents("no_results.json")));
+                .respond(
+                        withResponse(getResourceFileContents("no_results.json"))
+                                .withHeaders(
+                                        Header.header("Set-Cookie", "LtpaToken2=CEElCeZLmydlWRiPOMGlL+arDhgYVqXNMaoH5Cif5wTy+MQAAJR/jcV5amcyQGF1LpKbukQbXwMO+oeGTzUjRGCN0JZyomB8zn7C8R31LMJpyhIpILbJym7WoiN/pOp1mBIY7ZPbkBahKKIa8JSSYvbeJUlPvS9aNKYn4+qgYzBmQf1lIbewy/UBH0cK1kYkjHKW4dsKOzZWEdixD/LE7VDHki/rEdYyprZAgqDjNb9NDRWCxy25hmlaMQ7/PBkXu/2QJuCUqaoLautLARe9gVHfTP3Zg0/KzzaEkdV0z5GQ7OO7NapLM00ahBKnszD8G7YfuSJQKeUSWrhljlrLgxzpFAyiIGtPfXGrsYKI7nKDn8OQ/+3/2OBCb9PE6uUFHCeNceKqNYj7wBa2Q2P+6w==; Path=/; Secure; HttpOnly"),
+                                        Header.header("Set-Cookie", "JSESSIONID=0000_tevtrBb61tdc2_JqGF4bPn:a746286c-69ed-4c45-bab5-21ed1a232fe2; Path=/; Secure; HttpOnly"),
+                                        Header.header("Set-Cookie", "X-IBM-IISSessionId={issvr2048:isf}MfvbYdnWcOxwLPR7aD8OrSlEaSv_7dZCWXX1L-X1OuxK3-pA9aRN-xQJxZKJcL0WX4l-eqj8NQw8qxJ3K_sZ8bpPZz7mJjmaUJ_og24MotbeiyNV1GqiTM6c5M8DU3-GvZroFgJCZ_f_2h9R8FyBhCxi5ppV4oA96--v5BBVMC75Nsd-Rwe0nbGsRmJTTFEnTi26Gz5GEWmDvcXwWWrMJkZSd2TXlKM6HHkaXu5QkA_I5U5LpFfzqcOVPgHOPuh_h5a80LJ8ojBSTOrGchSIpT3LamusmsiPd6xHb_CoqDiCvxmRUdGJCGPIhqU0MNv5q62GiqqWXUgVd9SMF1LE0w..; Path=/; Secure; HttpOnly"),
+                                        Header.header("Set-Cookie", "X-IBM-IISSessionToken=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJpc2FkbWluIiwiYXVkIjoiSUlTIiwidWlkIjoiaXNhZG1pbiIsInJvbGVzIjpbIlNvcmNlcmVyVXNlciIsIlJ1bGVzQWRtaW5pc3RyYXRvciIsIkRhdGFTdGFnZUFkbWluIiwiUnVsZXNBdXRob3IiLCJSdWxlc01hbmFnZXIiLCJNRFdBZG1pbmlzdHJhdG9yIiwiQ01BZG1pbiIsIlJ1bGVzVXNlciIsIlNvcmNlcmVyQWRtaW4iLCJHbG9zc2FyeUFkbWluIiwiU3VpdGVVc2VyIiwiU3VpdGVBZG1pbiIsIlNvcmNlcmVyRGF0YUFkbWluIiwiRGF0YVN0YWdlVXNlciJdLCJkaXNwbGF5X25hbWUiOiJBZG1pbmlzdHJhdG9yLCBJSVMiLCJleHAiOjE1ODEzOTYxNzMsImlhdCI6MTU4MTM1MDU3MywidXNlcm5hbWUiOiJpc2FkbWluIn0.hoPaX-qz9AglzsQIyBg9YLEZOGzUb9xjT_SBTD4iMIFexZ2Zon2xlwA6rcWYl0SIw3wO3PBNZmWzpJcoDYCcuADVXy1q3hJT_WRGo5ELrvT_mWcPfNeQk_AXVsZlS-1dR4OXGOZ2VPYkl9ybBxdvE8Qgo17MgYxu8KV7qqnjFCeTINjzyoV9r0Q3uG2pPBk1moEtiUvrBBtma2D2TJttBP1zhCiBbqa2xb1meEI44rG8aeDC9K7xupaWeyxqEkuu0ywZO8O7DUC6LJEn2oMb9Bp5Pw7g7X6qY4qLW3Loq-zmGr0EaQ6aq1v-SgeIZ-AhC36iivQWsdQ9rvBuvccANg; Path=/; Secure; HttpOnly")
+                                )
+                );
     }
 
     private void setTypesQuery(MockServerClient mockServerClient) {
@@ -1108,10 +1185,23 @@ public class MockServerExpectations implements PluginExpectationInitializer {
     }
 
     private void setProjectsQuery(MockServerClient mockServerClient) {
+        // First time respond with an invalid session
+        mockServerClient
+                .withSecure(true)
+                .when(MockConstants.getProjectsRequest(), Times.exactly(1))
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "projects.xml")).withStatusCode(401));
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.getProjectsRequest())
-                .respond(withResponse(getResourceFileContents("ia" + File.separator + "projects.xml")));
+                .respond(
+                        withResponse(getResourceFileContents("ia" + File.separator + "projects.xml"))
+                                .withHeaders(
+                                        Header.header("Set-Cookie", "LtpaToken2=CEElCeZLmydlWRiPOMGlL+arDhgYVqXNMaoH5Cif5wTy+MQAAJR/jcV5amcyQGF1LpKbukQbXwMO+oeGTzUjRGCN0JZyomB8zn7C8R31LMJpyhIpILbJym7WoiN/pOp1mBIY7ZPbkBahKKIa8JSSYvbeJUlPvS9aNKYn4+qgYzBmQf1lIbewy/UBH0cK1kYkjHKW4dsKOzZWEdixD/LE7VDHki/rEdYyprZAgqDjNb9NDRWCxy25hmlaMQ7/PBkXu/2QJuCUqaoLautLARe9gVHfTP3Zg0/KzzaEkdV0z5GQ7OO7NapLM00ahBKnszD8G7YfuSJQKeUSWrhljlrLgxzpFAyiIGtPfXGrsYKI7nKDn8OQ/+3/2OBCb9PE6uUFHCeNceKqNYj7wBa2Q2P+6w==; Path=/; Secure; HttpOnly"),
+                                        Header.header("Set-Cookie", "JSESSIONID=0000_tevtrBb61tdc2_JqGF4bPn:a746286c-69ed-4c45-bab5-21ed1a232fe2; Path=/; Secure; HttpOnly"),
+                                        Header.header("Set-Cookie", "X-IBM-IISSessionId={issvr2048:isf}MfvbYdnWcOxwLPR7aD8OrSlEaSv_7dZCWXX1L-X1OuxK3-pA9aRN-xQJxZKJcL0WX4l-eqj8NQw8qxJ3K_sZ8bpPZz7mJjmaUJ_og24MotbeiyNV1GqiTM6c5M8DU3-GvZroFgJCZ_f_2h9R8FyBhCxi5ppV4oA96--v5BBVMC75Nsd-Rwe0nbGsRmJTTFEnTi26Gz5GEWmDvcXwWWrMJkZSd2TXlKM6HHkaXu5QkA_I5U5LpFfzqcOVPgHOPuh_h5a80LJ8ojBSTOrGchSIpT3LamusmsiPd6xHb_CoqDiCvxmRUdGJCGPIhqU0MNv5q62GiqqWXUgVd9SMF1LE0w..; Path=/; Secure; HttpOnly"),
+                                        Header.header("Set-Cookie", "X-IBM-IISSessionToken=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJpc2FkbWluIiwiYXVkIjoiSUlTIiwidWlkIjoiaXNhZG1pbiIsInJvbGVzIjpbIlNvcmNlcmVyVXNlciIsIlJ1bGVzQWRtaW5pc3RyYXRvciIsIkRhdGFTdGFnZUFkbWluIiwiUnVsZXNBdXRob3IiLCJSdWxlc01hbmFnZXIiLCJNRFdBZG1pbmlzdHJhdG9yIiwiQ01BZG1pbiIsIlJ1bGVzVXNlciIsIlNvcmNlcmVyQWRtaW4iLCJHbG9zc2FyeUFkbWluIiwiU3VpdGVVc2VyIiwiU3VpdGVBZG1pbiIsIlNvcmNlcmVyRGF0YUFkbWluIiwiRGF0YVN0YWdlVXNlciJdLCJkaXNwbGF5X25hbWUiOiJBZG1pbmlzdHJhdG9yLCBJSVMiLCJleHAiOjE1ODEzOTYxNzMsImlhdCI6MTU4MTM1MDU3MywidXNlcm5hbWUiOiJpc2FkbWluIn0.hoPaX-qz9AglzsQIyBg9YLEZOGzUb9xjT_SBTD4iMIFexZ2Zon2xlwA6rcWYl0SIw3wO3PBNZmWzpJcoDYCcuADVXy1q3hJT_WRGo5ELrvT_mWcPfNeQk_AXVsZlS-1dR4OXGOZ2VPYkl9ybBxdvE8Qgo17MgYxu8KV7qqnjFCeTINjzyoV9r0Q3uG2pPBk1moEtiUvrBBtma2D2TJttBP1zhCiBbqa2xb1meEI44rG8aeDC9K7xupaWeyxqEkuu0ywZO8O7DUC6LJEn2oMb9Bp5Pw7g7X6qY4qLW3Loq-zmGr0EaQ6aq1v-SgeIZ-AhC36iivQWsdQ9rvBuvccANg; Path=/; Secure; HttpOnly")
+                                )
+                );
     }
 
     private void setProjectDetailQuery(MockServerClient mockServerClient, String projectName) {

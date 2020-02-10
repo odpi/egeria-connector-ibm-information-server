@@ -64,6 +64,30 @@ public class ClientTest {
     }
 
     @Test
+    public void testInvalidCookies() {
+        IGCRestClient invalidClient = new IGCRestClient(MockConstants.IGC_HOST, MockConstants.IGC_PORT, MockConstants.IGC_USER, MockConstants.IGC_PASS);
+        IGCSearch igcSearch = new IGCSearch("security_test");
+        igcSearch.setPageSize(1);
+        assertThrows(IGCConnectivityException.class, () -> invalidClient.search(igcSearch));
+    }
+
+    @Test
+    public void testUnknownCookies() {
+        IGCRestClient invalidClient = new IGCRestClient(MockConstants.IGC_HOST, MockConstants.IGC_PORT, MockConstants.IGC_USER, MockConstants.IGC_PASS);
+        IGCSearch igcSearch = new IGCSearch("security_test");
+        igcSearch.setPageSize(2);
+        assertThrows(IGCConnectivityException.class, () -> invalidClient.search(igcSearch));
+    }
+
+    @Test
+    public void testInsecureCookies() {
+        IGCRestClient invalidClient = new IGCRestClient(MockConstants.IGC_HOST, MockConstants.IGC_PORT, MockConstants.IGC_USER, MockConstants.IGC_PASS);
+        IGCSearch igcSearch = new IGCSearch("security_test");
+        igcSearch.setPageSize(3);
+        assertThrows(IGCConnectivityException.class, () -> invalidClient.search(igcSearch));
+    }
+
+    @Test
     public void testDefaultPageSizeRetrieval() {
         assertEquals(igcRestClient.getDefaultPageSize(), 100);
     }

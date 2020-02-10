@@ -30,4 +30,6 @@ public class IARestConstants {
      */
     public static Set<String> getValidCookieNames() { return VALID_COOKIE_NAMES; }
 
+    private IARestConstants() { }
+
 }

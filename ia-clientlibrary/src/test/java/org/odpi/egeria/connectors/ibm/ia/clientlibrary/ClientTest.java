@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.ia.clientlibrary;
 
+import org.odpi.egeria.connectors.ibm.ia.clientlibrary.errors.IAConnectivityException;
 import org.odpi.egeria.connectors.ibm.ia.clientlibrary.model.*;
 import org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants;
 import org.odpi.openmetadata.http.HttpHelper;
@@ -29,6 +30,8 @@ public class ClientTest {
     public void testSimplifyName() {
         String simpleName = IARestClient.getUnqualifiedNameFromQualifiedName(MockConstants.IA_TABLE_NAME);
         assertEquals(simpleName, "CONTACTEMAIL");
+        assertNull(IARestClient.getUnqualifiedNameFromQualifiedName(null));
+        assertEquals(IARestClient.getUnqualifiedNameFromQualifiedName("NoDot"), "NoDot");
     }
 
     @Test
@@ -39,6 +42,24 @@ public class ClientTest {
         for (Project project : projects) {
             assertNotNull(project.getName());
         }
+    }
+
+    @Test
+    public void testInvalidCookies() {
+        IARestClient invalidClient = new IARestClient(MockConstants.IGC_HOST, MockConstants.IGC_PORT, MockConstants.IGC_USER, MockConstants.IGC_PASS);
+        assertThrows(IAConnectivityException.class, () -> invalidClient.getProjectDetails("SecurityTest1"));
+    }
+
+    @Test
+    public void testUnknownCookies() {
+        IARestClient invalidClient = new IARestClient(MockConstants.IGC_HOST, MockConstants.IGC_PORT, MockConstants.IGC_USER, MockConstants.IGC_PASS);
+        assertThrows(IAConnectivityException.class, () -> invalidClient.getProjectDetails("SecurityTest2"));
+    }
+
+    @Test
+    public void testInsecureCookies() {
+        IARestClient invalidClient = new IARestClient(MockConstants.IGC_HOST, MockConstants.IGC_PORT, MockConstants.IGC_USER, MockConstants.IGC_PASS);
+        assertThrows(IAConnectivityException.class, () -> invalidClient.getProjectDetails("SecurityTest3"));
     }
 
     @Test
