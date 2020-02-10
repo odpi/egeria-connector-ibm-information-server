@@ -12,6 +12,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.C
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.GlossaryMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.RelationalDBSchemaTypeMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SynonymMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mocks.MockConnection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCRelationshipGuid;
@@ -516,6 +517,35 @@ public class ConnectorTest {
 
         assertThrows(EntityNotKnownException.class, () -> igcomrsMetadataCollection.getEntityDetail(MockConstants.EGERIA_USER, "123"));
         assertThrows(RelationshipNotKnownException.class, () -> igcomrsMetadataCollection.getRelationship(MockConstants.EGERIA_USER, "123"));
+
+    }
+
+    @Test
+    public void testRelationshipGuids() {
+
+        Reference endOne = new Reference("test", "term", "abc");
+        Reference endTwo = new Reference("test", "term", "def");
+
+        // Ensure that for mappings where there is no order, the guid is calculated consistently (eg. alphabetically)
+        IGCRelationshipGuid guid = RelationshipMapping.getRelationshipGUID(igcRepositoryHelper,
+                SynonymMapper.getInstance(null),
+                endOne,
+                endTwo,
+                "synonyms",
+                null);
+
+        assertNotNull(guid);
+        assertTrue(guid.toString().endsWith(":term@def<Synonym>term@abc"));
+
+        guid = RelationshipMapping.getRelationshipGUID(igcRepositoryHelper,
+                SynonymMapper.getInstance(null),
+                endTwo,
+                endOne,
+                "synonyms",
+                null);
+
+        assertNotNull(guid);
+        assertTrue(guid.toString().endsWith(":term@def<Synonym>term@abc"));
 
     }
 

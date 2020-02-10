@@ -168,23 +168,8 @@ public class IARestClient {
         // If we have cookies already, and haven't been asked to force the login,
         // re-use these (to maintain the same session)
         if (cookies != null && !forceLogin) {
-            // Validate each cookie against our whitelist of valid cookies, to avoid any potential security exposure
-            for (String candidate : cookies) {
-                String[] tokens = candidate.split("=");
-                if (tokens.length < 2) {
-                    throw new IAConnectivityException("An invalid cookie was found, which could present a security problem.", candidate);
-                }
-                String cookieName = tokens[0];
-                if (!IARestConstants.getValidCookieNames().contains(cookieName)) {
-                    throw new IAConnectivityException("An invalid cookie was found, which could present a security problem.", candidate);
-                }
-                Matcher m = IARestConstants.COOKIE_WHITELIST.matcher(candidate);
-                if (m.matches()) {
-                    headers.add(HttpHeaders.COOKIE, candidate);
-                } else {
-                    throw new IAConnectivityException("A cookie was found that has invalid characters and could therefore present a security problem.", candidate);
-                }
-            }
+            // The validation of the cookies is done when storing them, and all access is private to this class
+            headers.addAll(HttpHeaders.COOKIE, cookies);
         } else { // otherwise re-authenticate by Basic authentication
             String auth = "Basic " + this.authorization;
             headers.add(HttpHeaders.AUTHORIZATION, auth);
@@ -233,7 +218,27 @@ public class IARestClient {
                 || response.getStatusCode() == HttpStatus.NO_CONTENT) {
             HttpHeaders headers = response.getHeaders();
             if (headers.get(HttpHeaders.SET_COOKIE) != null) {
-                this.cookies = headers.get(HttpHeaders.SET_COOKIE);
+                // Validate each cookie against our whitelist of valid cookies, to avoid any potential security exposure
+                List<String> candidateCookies = headers.get(HttpHeaders.SET_COOKIE);
+                if (candidateCookies != null) {
+                    cookies = new ArrayList<>();
+                    for (String candidate : candidateCookies) {
+                        String[] tokens = candidate.split("=");
+                        if (tokens.length < 2) {
+                            throw new IAConnectivityException("An invalid cookie was found, which could present a security problem.", candidate);
+                        }
+                        String cookieName = tokens[0];
+                        if (!IARestConstants.getValidCookieNames().contains(cookieName)) {
+                            throw new IAConnectivityException("An invalid cookie was found, which could present a security problem.", candidate);
+                        }
+                        Matcher m = IARestConstants.COOKIE_WHITELIST.matcher(candidate);
+                        if (m.matches()) {
+                            cookies.add(candidate);
+                        } else {
+                            throw new IAConnectivityException("A cookie was found that has invalid characters and could therefore present a security problem.", candidate);
+                        }
+                    }
+                }
             }
         } else {
             throw new IAConnectivityException("Unable to make request or unexpected status.", response.getStatusCode().toString());
@@ -485,7 +490,7 @@ public class IARestClient {
     public Map<String, List<Format>> getFormatDistribution(String projectName,
                                                            String columnName) {
         if (columnName == null) {
-            throw new RuntimeException("The 'columnName' parameter is required for 'getFormatDistribution'.");
+            throw new IAParsingException("The 'columnName' parameter is required for 'getFormatDistribution'.", null);
         }
         Project response = makeColumnBasedRequest(projectName, columnName, EP_FORMAT_DISTRIBUTION, "getFormatDistribution");
         Map<String, List<Format>> map = new HashMap<>();
@@ -521,7 +526,7 @@ public class IARestClient {
     public Map<String, List<Value>> getFrequencyDistribution(String projectName,
                                                              String columnName) {
         if (columnName == null) {
-            throw new RuntimeException("The 'columnName' parameter is required for 'getFrequencyDistribution'.");
+            throw new IAParsingException("The 'columnName' parameter is required for 'getFrequencyDistribution'.", null);
         }
         Project response = makeColumnBasedRequest(projectName, columnName, EP_FREQ_DISTRIBUTION, "getFrequencyDistribution");
         Map<String, List<Value>> map = new HashMap<>();
@@ -695,7 +700,7 @@ public class IARestClient {
     private boolean publishResults(String projectName,
                                    PublishResults details) {
         String xmlPayload = getTaskPayload(projectName, details);
-        log.debug("Task request payload: " + xmlPayload);
+        log.debug("Task request payload: {}", xmlPayload);
         String response = makeRequest(EP_PUBLISH, HttpMethod.POST, xmlPayload);
         if (response != null) {
             throw new IAConnectivityException("Error publishing.", response);
@@ -747,7 +752,7 @@ public class IARestClient {
                                                 Object details,
                                                 String methodName) {
         String xmlPayload = getTaskPayload(projectName, details);
-        log.debug("Task request payload: " + xmlPayload);
+        log.debug("Task request payload: {}", xmlPayload);
         String response = makeRequest(EP_EXECUTE_TASK, HttpMethod.POST, xmlPayload);
         TaskExecutionReport taskExecutionReport;
         try {

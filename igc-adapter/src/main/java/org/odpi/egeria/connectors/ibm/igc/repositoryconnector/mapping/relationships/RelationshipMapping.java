@@ -53,7 +53,6 @@ public abstract class RelationshipMapping extends InstanceMapping {
     private List<RelationshipMapping> subtypes;
     private String linkingAssetType;
 
-    private ArrayList<InstanceStatus> omrsSupportedStatuses;
     private Set<String> mappedOmrsPropertyNames;
 
     /**
@@ -130,25 +129,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
         this.optimalStart = OptimalStart.OPPOSITE;
         this.containedType = ContainedType.NONE;
         this.subtypes = new ArrayList<>();
-        this.omrsSupportedStatuses = new ArrayList<>();
         this.mappedOmrsPropertyNames = new HashSet<>();
-        addSupportedStatus(InstanceStatus.ACTIVE);
-        addSupportedStatus(InstanceStatus.DELETED);
     }
-
-    /**
-     * Add the provided status as one supported by this relationship mapping.
-     *
-     * @param status a status that is supported by the mapping
-     */
-    private void addSupportedStatus(InstanceStatus status) { this.omrsSupportedStatuses.add(status); }
-
-    /**
-     * Retrieve the list of statuses that are supported by the relationship mapping.
-     *
-     * @return {@code List<InstanceStatus>}
-     */
-    public List<InstanceStatus> getSupportedStatuses() { return this.omrsSupportedStatuses; }
 
     /**
      * Add the provided property name as one supported by this relationship mapping.

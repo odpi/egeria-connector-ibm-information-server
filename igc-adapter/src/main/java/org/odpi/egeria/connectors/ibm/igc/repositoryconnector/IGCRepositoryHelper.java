@@ -1563,11 +1563,12 @@ public class IGCRepositoryHelper {
                                                  MatchCriteria matchCriteria,
                                                  InstanceProperties matchProperties,
                                                  IGCSearchConditionSet igcSearchConditionSet) {
-        // Only include type-specific criteria if the matchCriteria is 'ALL'
+        // Only include type-specific criteria if the matchCriteria is (effectively) 'ALL'
         // - if it is 'ANY' and there are any properties this will include far too many results
         // - if it is 'NONE' then it will exclude all of the types we are actually searching for
-        if (matchCriteria.equals(MatchCriteria.ALL) ||
-                (matchCriteria.equals(MatchCriteria.ANY) && (matchProperties == null || matchProperties.getPropertyCount() == 0))) {
+        if ( matchCriteria == null
+                || matchCriteria.equals(MatchCriteria.ALL)
+                || (matchCriteria.equals(MatchCriteria.ANY) && (matchProperties == null || matchProperties.getPropertyCount() == 0))) {
             IGCSearchConditionSet typeSpecificConditions = mapping.getIGCSearchCriteria();
             if (typeSpecificConditions.size() > 0) {
                 igcSearchConditionSet.addNestedConditionSet(typeSpecificConditions);

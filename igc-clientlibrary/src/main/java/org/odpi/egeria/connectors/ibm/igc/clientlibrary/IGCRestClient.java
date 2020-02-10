@@ -226,23 +226,8 @@ public class IGCRestClient {
         // If we have cookies already, and haven't been asked to force the login,
         // re-use these (to maintain the same session)
         if (cookies != null && !forceLogin) {
-            // Validate each cookie against our whitelist of valid cookies, to avoid any potential security exposure
-            for (String candidate : cookies) {
-                String[] tokens = candidate.split("=");
-                if (tokens.length < 2) {
-                    throw new IGCConnectivityException("An invalid cookie was found, which could present a security problem.", candidate);
-                }
-                String cookieName = tokens[0];
-                if (!IGCRestConstants.getValidCookieNames().contains(cookieName)) {
-                    throw new IGCConnectivityException("An invalid cookie was found, which could present a security problem.", candidate);
-                }
-                Matcher m = IGCRestConstants.COOKIE_WHITELIST.matcher(candidate);
-                if (m.matches()) {
-                    headers.add(HttpHeaders.COOKIE, candidate);
-                } else {
-                    throw new IGCConnectivityException("A cookie was found that has invalid characters and could therefore present a security problem.", candidate);
-                }
-            }
+            // Note that validation of the cookies is done when we store them, and all access is private to this class
+            headers.addAll(HttpHeaders.COOKIE, cookies);
         } else { // otherwise re-authenticate by Basic authentication
             String auth = "Basic " + this.authorization;
             headers.add(HttpHeaders.AUTHORIZATION, auth);
@@ -317,7 +302,27 @@ public class IGCRestClient {
         if (response.getStatusCode() == HttpStatus.OK || response.getStatusCode() == HttpStatus.CREATED) {
             HttpHeaders headers = response.getHeaders();
             if (headers.get(HttpHeaders.SET_COOKIE) != null) {
-                this.cookies = headers.get(HttpHeaders.SET_COOKIE);
+                // Validate each cookie against our whitelist of valid cookies, to avoid any potential security exposure
+                List<String> candidateCookies = headers.get(HttpHeaders.SET_COOKIE);
+                if (candidateCookies != null) {
+                    cookies = new ArrayList<>();
+                    for (String candidate : candidateCookies) {
+                        String[] tokens = candidate.split("=");
+                        if (tokens.length < 2) {
+                            throw new IGCConnectivityException("An invalid cookie was found, which could present a security problem.", candidate);
+                        }
+                        String cookieName = tokens[0];
+                        if (!IGCRestConstants.getValidCookieNames().contains(cookieName)) {
+                            throw new IGCConnectivityException("An invalid cookie was found, which could present a security problem.", candidate);
+                        }
+                        Matcher m = IGCRestConstants.COOKIE_WHITELIST.matcher(candidate);
+                        if (m.matches()) {
+                            cookies.add(candidate);
+                        } else {
+                            throw new IGCConnectivityException("A cookie was found that has invalid characters and could therefore present a security problem.", candidate);
+                        }
+                    }
+                }
             }
         } else {
             throw new IGCConnectivityException("Unable to make request or unexpected status.", response.getStatusCode().toString());
