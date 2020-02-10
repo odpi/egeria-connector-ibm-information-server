@@ -16,10 +16,16 @@ import java.util.function.Function;
  * Based on simple example at:
  * https://github.com/ge0ffrey/ge0ffrey-presentations/blob/master/code/fasterreflection/fasterreflection-framework/src/main/java/be/ge0ffrey/presentations/fasterreflection/framework/LambdaMetafactoryBeanPropertyReader.java
  */
-public class DynamicPropertyReader implements DynamicPropertyGetter {
+public class DynamicPropertyReader {
 
     private final Function getterFunction;
 
+    /**
+     * Construct a new dynamic property reader.
+     *
+     * @param pojoClass the class against which the dynamic reader should operate
+     * @param propertyName the name of the property for this dynamic reader
+     */
     public DynamicPropertyReader(Class<?> pojoClass, String propertyName) {
 
         String getterName = IGCRestConstants.getGetterNameForProperty(propertyName);
@@ -50,6 +56,13 @@ public class DynamicPropertyReader implements DynamicPropertyGetter {
         }
     }
 
+    /**
+     * Retrieve the value of the property defined by this dynamic reader.
+     *
+     * @param pojo the instance of the object from which to retrieve the property.
+     * @return Object
+     */
+    @SuppressWarnings("unchecked")
     public Object getProperty(Object pojo) {
         return getterFunction.apply(pojo);
     }
