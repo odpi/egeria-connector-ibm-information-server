@@ -208,6 +208,13 @@
                 <artifactId>testng</artifactId>
                 <scope>test</scope>
                 <version>${testng.version}</version>
+                <exclusions>
+                <!-- Exclude snakeyaml, which has open CVEs and is unused -->
+                    <exclusion>
+                        <groupId>org.yaml</groupId>
+                        <artifactId>snakeyaml</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.mock-server</groupId>
@@ -307,6 +314,13 @@
                 <artifactId>connector-configuration-factory</artifactId>
                 <version>${open-metadata.version}</version>
                 <scope>test</scope>
+                <exclusions>
+                    <!-- Exclude the graph repository, as unused and will extend to many other dependencies -->
+                    <exclusion>
+                        <groupId>org.odpi.egeria</groupId>
+                        <artifactId>graph-repository-connector</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.odpi.egeria</groupId>
