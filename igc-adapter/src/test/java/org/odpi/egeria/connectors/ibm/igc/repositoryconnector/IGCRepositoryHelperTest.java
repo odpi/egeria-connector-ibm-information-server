@@ -2,10 +2,13 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.PrimitivePropertyValue;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.PrimitiveDefCategory;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
@@ -81,6 +84,89 @@ public class IGCRepositoryHelperTest {
         Boolean ascending = sorting.getAscending();
         assertEquals(propertyName, expectedProperty);
         assertEquals(ascending, expectedAscending);
+    }
+
+    @Test
+    public void testSearchConditionsFromValues() {
+
+        IGCSearchConditionSet set = new IGCSearchConditionSet();
+        PrimitivePropertyValue value = new PrimitivePropertyValue();
+        value.setPrimitiveDefCategory(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_INT);
+        value.setPrimitiveValue(10);
+        try {
+            IGCRepositoryHelper.addIGCSearchConditionFromValue(null,
+                    "TestRepo",
+                    set,
+                    "testProperty",
+                    value);
+        } catch (FunctionNotSupportedException e) {
+            assertNull(e);
+        }
+        assertEquals(set.size(), 1);
+        assertEquals(set.getConditionSetObject().toString(), "{\"conditions\":[{\"property\":\"testProperty\",\"operator\":\"=\",\"value\":\"10\"}],\"operator\":\"and\"}");
+
+        set = new IGCSearchConditionSet();
+        MapPropertyValue map = new MapPropertyValue();
+        map.setMapValue("testProperty", value);
+        try {
+            IGCRepositoryHelper.addIGCSearchConditionFromValue(null,
+                    "TestRepo",
+                    set,
+                    "testProperty",
+                    map);
+        } catch (FunctionNotSupportedException e) {
+            assertNull(e);
+        }
+        assertEquals(set.size(), 1);
+        assertEquals(set.getConditionSetObject().toString(), "{\"conditions\":[{\"property\":\"testProperty\",\"operator\":\"=\",\"value\":\"10\"}],\"operator\":\"and\"}");
+
+        set = new IGCSearchConditionSet();
+        ArrayPropertyValue array = new ArrayPropertyValue();
+        array.setArrayCount(1);
+        array.setArrayValue(0, value);
+        try {
+            IGCRepositoryHelper.addIGCSearchConditionFromValue(null,
+                    "TestRepo",
+                    set,
+                    "testProperty",
+                    array);
+        } catch (FunctionNotSupportedException e) {
+            assertNull(e);
+        }
+        assertEquals(set.size(), 1);
+        assertEquals(set.getConditionSetObject().toString(), "{\"conditions\":[{\"property\":\"testProperty\",\"operator\":\"=\",\"value\":\"10\"}],\"operator\":\"and\"}");
+
+        set = new IGCSearchConditionSet();
+        value = new PrimitivePropertyValue();
+        value.setPrimitiveDefCategory(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_DATE);
+        value.setPrimitiveValue(10L);
+        try {
+            IGCRepositoryHelper.addIGCSearchConditionFromValue(null,
+                    "TestRepo",
+                    set,
+                    "testProperty",
+                    value);
+        } catch (FunctionNotSupportedException e) {
+            assertNull(e);
+        }
+        assertEquals(set.size(), 1);
+        assertEquals(set.getConditionSetObject().toString(), "{\"conditions\":[{\"property\":\"testProperty\",\"operator\":\"between\",\"min\":10,\"max\":1009}],\"operator\":\"and\"}");
+
+        set = new IGCSearchConditionSet();
+        EnumPropertyValue ev = new EnumPropertyValue();
+        ev.setSymbolicName("TestSymbolicName");
+        try {
+            IGCRepositoryHelper.addIGCSearchConditionFromValue(null,
+                    "TestRepo",
+                    set,
+                    "testProperty",
+                    ev);
+        } catch (FunctionNotSupportedException e) {
+            assertNull(e);
+        }
+        assertEquals(set.size(), 1);
+        assertEquals(set.getConditionSetObject().toString(), "{\"conditions\":[{\"property\":\"testProperty\",\"operator\":\"=\",\"value\":\"TestSymbolicName\"}],\"operator\":\"and\"}");
+
     }
 
 }
