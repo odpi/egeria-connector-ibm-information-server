@@ -22,24 +22,6 @@ import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSuppor
  */
 public class GovernanceDefinition_Mapper extends ReferenceableMapper {
 
-    private static class Singleton {
-        private static final GovernanceDefinition_Mapper INSTANCE = new GovernanceDefinition_Mapper();
-    }
-    public static GovernanceDefinition_Mapper getInstance(IGCVersionEnum version) {
-        return Singleton.INSTANCE;
-    }
-
-    private GovernanceDefinition_Mapper() {
-
-        // Start by calling the superclass's constructor to initialise the Mapper
-        super(
-                "",
-                "",
-                "GovernanceDefinition"
-        );
-
-    }
-
     protected GovernanceDefinition_Mapper(String igcAssetTypeName,
                                           String igcAssetTypeDisplayName,
                                           String omrsEntityTypeName) {

@@ -3,7 +3,6 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -30,24 +29,6 @@ import org.slf4j.LoggerFactory;
 public class SchemaElement_Mapper extends ReferenceableMapper {
 
     private static final Logger log = LoggerFactory.getLogger(SchemaElement_Mapper.class);
-
-    private static class Singleton {
-        private static final SchemaElement_Mapper INSTANCE = new SchemaElement_Mapper();
-    }
-    public static SchemaElement_Mapper getInstance(IGCVersionEnum version) {
-        return Singleton.INSTANCE;
-    }
-
-    private SchemaElement_Mapper() {
-
-        // Start by calling the superclass's constructor to initialise the Mapper
-        super(
-                "",
-                "",
-                "SchemaElement"
-        );
-
-    }
 
     protected SchemaElement_Mapper(String igcAssetTypeName,
                                    String igcAssetTypeDisplayName,

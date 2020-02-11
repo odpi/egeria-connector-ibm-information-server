@@ -3,7 +3,6 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -21,25 +20,6 @@ import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSuppor
  * Defines the mapping to the OMRS "SchemaType" entity.
  */
 public class SchemaType_Mapper extends SchemaElement_Mapper {
-
-    private static class Singleton {
-        private static final SchemaType_Mapper INSTANCE = new SchemaType_Mapper();
-    }
-    public static SchemaType_Mapper getInstance(IGCVersionEnum version) {
-        return Singleton.INSTANCE;
-    }
-
-    private SchemaType_Mapper() {
-
-        // Start by calling the superclass's constructor to initialise the Mapper
-        super(
-                "",
-                "",
-                "SchemaType",
-                null
-        );
-
-    }
 
     protected SchemaType_Mapper(String igcAssetTypeName,
                                 String igcAssetTypeDisplayName,
