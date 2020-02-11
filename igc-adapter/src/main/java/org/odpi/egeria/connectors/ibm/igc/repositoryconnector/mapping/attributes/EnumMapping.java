@@ -25,7 +25,7 @@ public class EnumMapping extends AttributeMapping {
      * @param omrsAttributeTypeDefName the OMRS attribute type def for which to create the mapping
      */
     public EnumMapping(String omrsAttributeTypeDefName) {
-        super(IGCPropertyType.STRING, omrsAttributeTypeDefName);
+        super(omrsAttributeTypeDefName);
         enumDefByIgcValue = new HashMap<>();
     }
 

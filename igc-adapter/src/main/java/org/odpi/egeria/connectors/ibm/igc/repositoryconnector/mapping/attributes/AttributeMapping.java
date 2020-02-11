@@ -21,52 +21,24 @@ public abstract class AttributeMapping {
 
     private static final Logger log = LoggerFactory.getLogger(AttributeMapping.class);
 
-    private IGCPropertyType igcPropertyType;
     private String omrsAttributeTypeDefName;
     private String igcAssetType;
-    private String igcPropertyName;
 
-    public enum IGCPropertyType {
-        STRING, BOOLEAN, DATETIME, NUMBER, ENUM,
-        STRING_ARRAY, NUMBER_ARRAY, DATETIME_ARRAY,
-        REFERENCE, REFERENCE_LIST
-    }
-
-    public AttributeMapping(IGCPropertyType igcPropertyType,
-                            String omrsAttributeTypeDefName) {
-        this(null, null, igcPropertyType, omrsAttributeTypeDefName);
+    public AttributeMapping(String omrsAttributeTypeDefName) {
+        this(null, omrsAttributeTypeDefName);
     }
 
     public AttributeMapping(String igcAssetType,
-                            String igcPropertyName,
-                            IGCPropertyType igcPropertyType,
                             String omrsAttributeTypeDefName) {
         this.igcAssetType = igcAssetType;
-        this.igcPropertyName = igcPropertyName;
-        this.igcPropertyType = igcPropertyType;
         this.omrsAttributeTypeDefName = omrsAttributeTypeDefName;
     }
-
-    /**
-     * Indicates whether this mapping is for a general attribute (true) or a specific attribute (false).
-     *
-     * @return boolean
-     */
-    public boolean isForGeneralAttribute() { return this.igcAssetType == null; }
-
-    /**
-     * Indicates whether this mapping is for a specific attribute (true) or a general attribute (false).
-     *
-     * @return boolean
-     */
-    public boolean isForSpecificAttribute() { return !isForGeneralAttribute(); }
 
     /**
      * Retrieve the IGC asset type to which this attribute mapping applies. Note that this will only return a non-null
      * value when the attribute mapping is for a specific attribute.
      *
      * @return String
-     * @see #isForSpecificAttribute()
      */
     public String getIgcAssetType() { return this.igcAssetType; }
 
@@ -76,26 +48,6 @@ public abstract class AttributeMapping {
      * @return String
      */
     public String getOmrsAttributeTypeDefName() { return this.omrsAttributeTypeDefName; }
-
-    /**
-     * Retrieve the IGC property type for this attribute mapping.
-     *
-     * @return IGCPropertyType
-     */
-    public IGCPropertyType getIgcPropertyType() { return this.igcPropertyType; }
-
-    /**
-     * Indicates whether this attribute mapping can be applied to the provided IGC property (for the provided IGC asset
-     * type) (true) or not (false).
-     *
-     * @param igcAssetType name of the IGC asset type
-     * @param igcPropertyName name of the IGC property on that asset type
-     * @return boolean
-     */
-    public boolean matchesProperty(String igcAssetType, String igcPropertyName) {
-        // TODO...
-        return false;
-    }
 
     /**
      * Add the supplied property to an instance properties object.  If the instance property object
@@ -273,7 +225,7 @@ public abstract class AttributeMapping {
     public static String getIgcValueFromPropertyValue(InstancePropertyValue value) throws PropertyErrorException {
 
         final String methodName = "getIgcValueFromPropertyValue";
-        String igcValue = null;
+        String igcValue;
         InstancePropertyCategory category = value.getInstancePropertyCategory();
         switch (category) {
             case PRIMITIVE:

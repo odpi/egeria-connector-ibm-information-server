@@ -3,7 +3,6 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -16,31 +15,10 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 
-import java.util.List;
-
 /**
  * Defines the common mappings to the OMRS "SchemaAttribute" entity.
  */
 public class SchemaAttribute_Mapper extends SchemaElement_Mapper {
-
-    private static class Singleton {
-        private static final SchemaAttribute_Mapper INSTANCE = new SchemaAttribute_Mapper();
-    }
-    public static SchemaAttribute_Mapper getInstance(IGCVersionEnum version) {
-        return Singleton.INSTANCE;
-    }
-
-    private SchemaAttribute_Mapper() {
-
-        // Start by calling the superclass's constructor to initialise the Mapper
-        super(
-                "",
-                "",
-                "SchemaAttribute",
-                null
-        );
-
-    }
 
     protected SchemaAttribute_Mapper(String igcAssetTypeName,
                                      String igcAssetTypeDisplayName,
