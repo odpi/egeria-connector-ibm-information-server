@@ -22,25 +22,15 @@ public abstract class AttributeMapping {
     private static final Logger log = LoggerFactory.getLogger(AttributeMapping.class);
 
     private String omrsAttributeTypeDefName;
-    private String igcAssetType;
-
-    public AttributeMapping(String omrsAttributeTypeDefName) {
-        this(null, omrsAttributeTypeDefName);
-    }
-
-    public AttributeMapping(String igcAssetType,
-                            String omrsAttributeTypeDefName) {
-        this.igcAssetType = igcAssetType;
-        this.omrsAttributeTypeDefName = omrsAttributeTypeDefName;
-    }
 
     /**
-     * Retrieve the IGC asset type to which this attribute mapping applies. Note that this will only return a non-null
-     * value when the attribute mapping is for a specific attribute.
+     * Construct a new attribute mapping.
      *
-     * @return String
+     * @param omrsAttributeTypeDefName the name of the open metadata attribute type
      */
-    public String getIgcAssetType() { return this.igcAssetType; }
+    public AttributeMapping(String omrsAttributeTypeDefName) {
+        this.omrsAttributeTypeDefName = omrsAttributeTypeDefName;
+    }
 
     /**
      * Retrieve the OMRS AttributeTypeDef name for this attribute mapping applies.

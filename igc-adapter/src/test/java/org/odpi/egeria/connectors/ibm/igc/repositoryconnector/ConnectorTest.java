@@ -550,6 +550,74 @@ public class ConnectorTest {
     }
 
     @Test
+    public void testAttributeValues() {
+
+        final String methodName = "testAttributeValues";
+        InstanceProperties ip = new InstanceProperties();
+
+        PrimitiveDef primitiveDef = new PrimitiveDef();
+        primitiveDef.setPrimitiveDefCategory(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_LONG);
+        TypeDefAttribute property = new TypeDefAttribute();
+        property.setAttributeName("testAttribute");
+        property.setAttributeType(primitiveDef);
+        ip = AttributeMapping.addPrimitivePropertyToInstance(repositoryHelper,
+                sourceName,
+                ip,
+                property,
+                10L,
+                methodName);
+        assertEquals(ip.getPropertyCount(), 1);
+        assertEquals(ip.getPropertyValue("testAttribute").valueAsObject(), 10L);
+
+        primitiveDef = new PrimitiveDef();
+        primitiveDef.setPrimitiveDefCategory(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_FLOAT);
+        property.setAttributeType(primitiveDef);
+        ip = AttributeMapping.addPrimitivePropertyToInstance(repositoryHelper,
+                sourceName,
+                ip,
+                property,
+                10.1,
+                methodName);
+        assertEquals(ip.getPropertyCount(), 1);
+        assertEquals(ip.getPropertyValue("testAttribute").valueAsString(), "10.1");
+
+        PrimitivePropertyValue ppv = new PrimitivePropertyValue();
+        ppv.setPrimitiveDefCategory(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_DATE);
+        ppv.setPrimitiveValue(10L);
+        try {
+            String igcValue = AttributeMapping.getIgcValueFromPropertyValue(ppv);
+            assertEquals(igcValue, "10");
+        } catch (PropertyErrorException e) {
+            assertNull(e);
+        }
+
+        EnumPropertyValue epv = new EnumPropertyValue();
+        epv.setSymbolicName("TestName");
+        try {
+            String igcValue = AttributeMapping.getIgcValueFromPropertyValue(epv);
+            assertEquals(igcValue, "TestName");
+        } catch (PropertyErrorException e) {
+            assertNull(e);
+        }
+
+        ArrayPropertyValue apv = new ArrayPropertyValue();
+        apv.setArrayCount(2);
+        apv.setArrayValue(0, ppv);
+        apv.setArrayValue(1, epv);
+        try {
+            String igcValue = AttributeMapping.getIgcValueFromPropertyValue(apv);
+            assertEquals(igcValue, "[ \"10\",\"TestName\" ]");
+        } catch (PropertyErrorException e) {
+            assertNull(e);
+        }
+
+        MapPropertyValue mpv = new MapPropertyValue();
+        mpv.setMapValue("testPropertyName", ppv);
+        assertThrows(PropertyErrorException.class, () -> AttributeMapping.getIgcValueFromPropertyValue(mpv));
+
+    }
+
+    @Test
     public void testGlossaryFindByPropertyValue() {
 
         List<EntityDetail> results = testFindEntitiesByPropertyValue(
