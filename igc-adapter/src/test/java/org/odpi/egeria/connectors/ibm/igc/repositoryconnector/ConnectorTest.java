@@ -11,6 +11,8 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.ContactDetailsMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.GlossaryMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.RelationalDBSchemaTypeMapper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.CategoryAnchorMapper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.ConnectionEndpointMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SynonymMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mocks.MockConnection;
@@ -678,6 +680,28 @@ public class ConnectorTest {
                 relationshipExpectations
         );
 
+        Reference category = new Reference("TestCategory", "category", "123");
+        Reference glossary = new Reference("TestGlossary", "category", "abc");
+        Reference term = new Reference("TestTerm", "term", "def");
+        List<Reference> ctx = new ArrayList<>();
+        ctx.add(glossary);
+        category.setContext(ctx);
+        CategoryAnchorMapper mapper = CategoryAnchorMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion());
+        List<Reference> proxyOnes = mapper.getProxyOneAssetFromAsset(category, igcomrsRepositoryConnector.getIGCRestClient());
+        assertEquals(proxyOnes.size(), 1);
+        assertEquals(proxyOnes.get(0).getName(), "TestGlossary");
+        assertTrue(mapper.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, category, proxyOnes.get(0)));
+
+        proxyOnes = mapper.getProxyOneAssetFromAsset(glossary, igcomrsRepositoryConnector.getIGCRestClient());
+        assertEquals(proxyOnes.size(), 1);
+        assertEquals(proxyOnes.get(0).getName(), "TestGlossary");
+        assertTrue(mapper.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, proxyOnes.get(0), category));
+
+        proxyOnes = mapper.getProxyOneAssetFromAsset(term, igcomrsRepositoryConnector.getIGCRestClient());
+        assertEquals(proxyOnes.size(), 1);
+        assertEquals(proxyOnes.get(0).getName(), "TestTerm");
+        assertFalse(mapper.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, proxyOnes.get(0), glossary));
+
     }
 
     @Test
@@ -1112,6 +1136,24 @@ public class ConnectorTest {
                 7,
                 relationshipExpectations
         );
+
+        Reference connector = new Reference("DB2Connector", "connector", "b1c497ce.54ec142d.001mtr38f.q8hjqk4.spumq8.k1bt587cologck6u9tf8q");
+        Reference dataConnection = new Reference("IADB", "data_connection", "b1c497ce.8e4c0a48.001mtr3so.6k54588.marlmn.hvquoercv3ji5gdi2rslf");
+        ConnectionEndpointMapper mapper = ConnectionEndpointMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion());
+        List<Reference> proxyOnes = mapper.getProxyOneAssetFromAsset(connector, igcomrsRepositoryConnector.getIGCRestClient());
+        assertEquals(proxyOnes.size(), 1);
+        assertEquals(proxyOnes.get(0).getName(), "INFOSVR");
+
+        proxyOnes = mapper.getProxyOneAssetFromAsset(dataConnection, igcomrsRepositoryConnector.getIGCRestClient());
+        assertEquals(proxyOnes.size(), 1);
+        assertEquals(proxyOnes.get(0).getName(), "IADB");
+
+        List<Reference> proxyTwos = mapper.getProxyTwoAssetFromAsset(connector, igcomrsRepositoryConnector.getIGCRestClient());
+        assertEquals(proxyTwos.size(), 6);
+
+        proxyTwos = mapper.getProxyTwoAssetFromAsset(dataConnection, igcomrsRepositoryConnector.getIGCRestClient());
+        assertEquals(proxyTwos.size(), 1);
+        assertEquals(proxyTwos.get(0).getName(), "IADB");
 
     }
 

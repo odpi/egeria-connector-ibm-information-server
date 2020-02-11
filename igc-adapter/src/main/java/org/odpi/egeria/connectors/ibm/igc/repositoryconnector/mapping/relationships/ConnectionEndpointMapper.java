@@ -88,7 +88,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      */
     @Override
     public List<Reference> getProxyTwoAssetFromAsset(Reference connectorAsset, IGCRestClient igcRestClient) {
-        if (connectorAsset instanceof Connector) {
+        if (connectorAsset != null && connectorAsset.getType().equals("connector")) {
             Connector withDataConnections = igcRestClient.getAssetWithSubsetOfProperties(
                     connectorAsset.getId(),
                     connectorAsset.getType(),
@@ -96,16 +96,14 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
             ItemList<DataConnection> dataConnections = withDataConnections.getDataConnections();
             dataConnections.getAllPages(igcRestClient);
             return new ArrayList<>(dataConnections.getItems());
+        } else if (connectorAsset != null) {
+            log.debug("Not a connector asset, just returning as-is: {} of type {}", connectorAsset.getName(), connectorAsset.getType());
+            List<Reference> referenceAsList = new ArrayList<>();
+            referenceAsList.add(connectorAsset);
+            return referenceAsList;
         } else {
-            if (connectorAsset != null) {
-                log.debug("Not a connector asset, just returning as-is: {} of type {}", connectorAsset.getName(), connectorAsset.getType());
-                List<Reference> referenceAsList = new ArrayList<>();
-                referenceAsList.add(connectorAsset);
-                return referenceAsList;
-            } else {
-                log.warn("Received a null object, returning an empty list.");
-                return Collections.emptyList();
-            }
+            log.warn("Received a null object, returning an empty list.");
+            return Collections.emptyList();
         }
     }
 
