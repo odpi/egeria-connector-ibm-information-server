@@ -23,6 +23,12 @@ public class IGCGuidTest {
     }
 
     @Test
+    public void testNullGuids() {
+        assertNull(IGCEntityGuid.fromGuid(null));
+        assertNull(IGCRelationshipGuid.fromGuid(null));
+    }
+
+    @Test
     public void testValidEntityGuidFormats() {
 
         IGCEntityGuid igcGuid = new IGCEntityGuid(METADATA_COL_ID, SAMPLE_ASSET_TYPE, SAMPLE_RID);
@@ -52,9 +58,11 @@ public class IGCGuidTest {
         String guidWithPrefix = igcGuidWithPrefix.toString();
         assertEquals(guidWithPrefix, igcGuidWithPrefix.toString());
         IGCEntityGuid guidReversed = IGCEntityGuid.fromGuid(guid);
+        assertTrue(guidReversed.equals(igcGuid));
         assertEquals(guid, guidReversed.toString());
         IGCEntityGuid guidWithPrefixReversed = IGCEntityGuid.fromGuid(guidWithPrefix);
         assertEquals(guidWithPrefix, guidWithPrefixReversed.toString());
+        assertTrue(guidWithPrefixReversed.equals(igcGuidWithPrefix));
 
     }
 

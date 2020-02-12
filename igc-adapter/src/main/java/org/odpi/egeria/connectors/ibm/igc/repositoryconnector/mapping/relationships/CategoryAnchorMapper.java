@@ -12,8 +12,11 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.GlossaryMapper;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Relationship;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
@@ -94,6 +97,12 @@ public class CategoryAnchorMapper extends RelationshipMapping {
      * @param relationships the relationships to which to add
      * @param fromIgcObject the category from which to traverse upwards / downwards
      * @param toIgcObject the category from which to traverse downwards / upwards (or null if not known)
+     * @param fromRelationshipElement the starting element number of the relationships to return.
+     *                                This is used when retrieving elements
+     *                                beyond the first page of results. Zero means start from the first element.
+     * @param sequencingOrder Enum defining how the results should be ordered.
+     * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
+     *                 unrestricted return results size.
      * @param userId the user requesting the relationships
      */
     @Override
@@ -101,6 +110,9 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                                            List<Relationship> relationships,
                                            Reference fromIgcObject,
                                            Reference toIgcObject,
+                                           int fromRelationshipElement,
+                                           SequencingOrder sequencingOrder,
+                                           int pageSize,
                                            String userId) {
 
         String assetType = IGCRestConstants.getAssetTypeForSearch(fromIgcObject.getType());
@@ -134,9 +146,18 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                 IGCSearch igcSearch = new IGCSearch("category",
                         IGCRestConstants.getModificationProperties(),
                         conditionSet);
+                IGCSearchSorting sorting = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
+                if (sorting != null) {
+                    igcSearch.addSortingCriteria(sorting);
+                }
+                if (pageSize > 0) {
+                    igcSearch.setPageSize(fromRelationshipElement + pageSize);
+                }
                 ItemList<Category> children = igcRestClient.search(igcSearch);
                 if (children != null) {
-                    children.getAllPages(igcRestClient);
+                    if (pageSize == 0) {
+                        children.getAllPages(igcRestClient);
+                    }
                     log.debug(" ... found a total of {} offspring categories.", children.getItems().size());
                     for (Category child : children.getItems()) {
                         try {

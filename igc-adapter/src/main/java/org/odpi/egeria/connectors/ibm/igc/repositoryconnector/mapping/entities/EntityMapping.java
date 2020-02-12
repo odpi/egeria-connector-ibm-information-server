@@ -753,25 +753,25 @@ public abstract class EntityMapping extends InstanceMapping {
      *                                This is used when retrieving elements
      *                                beyond the first page of results. Zero means start from the first element.
      * @param sequencingOrder Enum defining how the results should be ordered.
+     * @param sequencingProperty String name of the property that is to be used to sequence the results.
+     *                           Null means do not sequence on a property name (see SequencingOrder).
      * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
      *                 unrestricted return results size.
      * @return {@code List<Relationship>}
      * @throws EntityNotKnownException if the entity for which we are looking for relationships is not known to IGC
      */
-    public static final List<Relationship> getMappedRelationships(IGCEntityGuid igcGuid,
-                                                                  EntityMappingInstance entityMap,
-                                                                  String relationshipTypeGUID,
-                                                                  int fromRelationshipElement,
-                                                                  SequencingOrder sequencingOrder,
-                                                                  int pageSize) throws EntityNotKnownException {
+    public static List<Relationship> getMappedRelationships(IGCEntityGuid igcGuid,
+                                                            EntityMappingInstance entityMap,
+                                                            String relationshipTypeGUID,
+                                                            int fromRelationshipElement,
+                                                            SequencingOrder sequencingOrder,
+                                                            String sequencingProperty,
+                                                            int pageSize) throws EntityNotKnownException {
 
         final String methodName = "getMappedRelationships";
 
-        // TODO: handle multi-page results with different starting points (ie. fromRelationshipElement != 0)
-
-        // Initialize our mapping instance with the full details we'll require for the relationships
-        entityMap.initializeWithRelationships(sequencingOrder, pageSize);
-
+        // Initialize our mapping instance with the basic details we'll require for the relationships
+        entityMap.initializeIGCReference();
         Reference igcEntity = entityMap.getIgcEntity();
 
         if (igcEntity == null) {
@@ -794,15 +794,99 @@ public abstract class EntityMapping extends InstanceMapping {
 
             List<RelationshipMapping> relationshipMappers = entityMapping.getRelationshipMappers();
 
+            // If the sequencing requested is by property, just remove sequencing as all properties are literally-
+            // mapped or empty on IGC relationships
+            // TODO: one exception to this is where there is a relationship-level object, which needs to be handled
+            //  (ie. data class assignments, where even literal-mapped properties like status can vary)
+            SequencingOrder soForSearching = sequencingOrder;
+            if (sequencingOrder != null && (sequencingOrder.equals(SequencingOrder.PROPERTY_DESCENDING) || sequencingOrder.equals(SequencingOrder.PROPERTY_ASCENDING))) {
+                soForSearching = null;
+            }
+
             RelationshipMapping.getMappedRelationships(
                     igcomrsRepositoryConnector,
                     omrsRelationships,
                     relationshipMappers,
                     relationshipTypeGUID,
                     igcEntity,
+                    fromRelationshipElement,
+                    soForSearching,
+                    pageSize,
                     userId
             );
-            return omrsRelationships;
+
+            // First sort the results (if any sorting was requested)
+            Comparator<Relationship> comparator = null;
+            if (sequencingOrder != null) {
+                switch (sequencingOrder) {
+                    case GUID:
+                        comparator = Comparator.comparing(Relationship::getGUID);
+                        break;
+                    case LAST_UPDATE_RECENT:
+                        comparator = Comparator.comparing(Relationship::getUpdateTime).reversed();
+                        break;
+                    case LAST_UPDATE_OLDEST:
+                        comparator = Comparator.comparing(Relationship::getUpdateTime);
+                        break;
+                    case CREATION_DATE_RECENT:
+                        comparator = Comparator.comparing(Relationship::getCreateTime).reversed();
+                        break;
+                    case CREATION_DATE_OLDEST:
+                        comparator = Comparator.comparing(Relationship::getCreateTime);
+                        break;
+                    case PROPERTY_ASCENDING:
+                        if (sequencingProperty != null) {
+                            comparator = (a, b) -> {
+                                InstanceProperties p1 = a.getProperties();
+                                InstanceProperties p2 = b.getProperties();
+                                InstancePropertyValue v1 = null;
+                                InstancePropertyValue v2 = null;
+                                if (p1 != null) {
+                                    v1 = p1.getPropertyValue(sequencingProperty);
+                                }
+                                if (p2 != null) {
+                                    v2 = p2.getPropertyValue(sequencingProperty);
+                                }
+                                return AttributeMapping.compareInstanceProperty(v1, v2);
+                            };
+                        }
+                        break;
+                    case PROPERTY_DESCENDING:
+                        if (sequencingProperty != null) {
+                            comparator = (b, a) -> {
+                                InstanceProperties p1 = a.getProperties();
+                                InstanceProperties p2 = b.getProperties();
+                                InstancePropertyValue v1 = null;
+                                InstancePropertyValue v2 = null;
+                                if (p1 != null) {
+                                    v1 = p1.getPropertyValue(sequencingProperty);
+                                }
+                                if (p2 != null) {
+                                    v2 = p2.getPropertyValue(sequencingProperty);
+                                }
+                                return AttributeMapping.compareInstanceProperty(v1, v2);
+                            };
+                        }
+                        break;
+                    default:
+                        log.debug("No sorting requested, skipping.");
+                        break;
+                }
+            }
+            if (comparator != null) {
+                omrsRelationships.sort(comparator);
+            }
+
+            // Then trim the results to the total size requested
+            List<Relationship> limited;
+            if (pageSize > 0) {
+                limited = omrsRelationships.subList(fromRelationshipElement, Math.min(fromRelationshipElement + pageSize, omrsRelationships.size()));
+            } else {
+                limited = omrsRelationships.subList(fromRelationshipElement, omrsRelationships.size());
+            }
+
+            return limited;
+
         }
 
     }

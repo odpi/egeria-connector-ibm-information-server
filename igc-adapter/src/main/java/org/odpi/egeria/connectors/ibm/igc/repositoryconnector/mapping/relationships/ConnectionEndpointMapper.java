@@ -12,8 +12,10 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Relationship;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
@@ -88,7 +90,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      */
     @Override
     public List<Reference> getProxyTwoAssetFromAsset(Reference connectorAsset, IGCRestClient igcRestClient) {
-        if (connectorAsset instanceof Connector) {
+        if (connectorAsset != null && connectorAsset.getType().equals("connector")) {
             Connector withDataConnections = igcRestClient.getAssetWithSubsetOfProperties(
                     connectorAsset.getId(),
                     connectorAsset.getType(),
@@ -96,16 +98,14 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
             ItemList<DataConnection> dataConnections = withDataConnections.getDataConnections();
             dataConnections.getAllPages(igcRestClient);
             return new ArrayList<>(dataConnections.getItems());
+        } else if (connectorAsset != null) {
+            log.debug("Not a connector asset, just returning as-is: {} of type {}", connectorAsset.getName(), connectorAsset.getType());
+            List<Reference> referenceAsList = new ArrayList<>();
+            referenceAsList.add(connectorAsset);
+            return referenceAsList;
         } else {
-            if (connectorAsset != null) {
-                log.debug("Not a connector asset, just returning as-is: {} of type {}", connectorAsset.getName(), connectorAsset.getType());
-                List<Reference> referenceAsList = new ArrayList<>();
-                referenceAsList.add(connectorAsset);
-                return referenceAsList;
-            } else {
-                log.warn("Received a null object, returning an empty list.");
-                return Collections.emptyList();
-            }
+            log.warn("Received a null object, returning an empty list.");
+            return Collections.emptyList();
         }
     }
 
@@ -118,6 +118,12 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      * @param relationships the list of relationships to which to add
      * @param fromIgcObject the host asset for which to create the relationship
      * @param toIgcObject the other entity endpoint for the relationship (or null if unknown)
+     * @param fromRelationshipElement the starting element number of the relationships to return.
+     *                                This is used when retrieving elements
+     *                                beyond the first page of results. Zero means start from the first element.
+     * @param sequencingOrder Enum defining how the results should be ordered.
+     * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
+     *                 unrestricted return results size.
      * @param userId the user ID requesting the mapped relationships
      */
     @Override
@@ -125,6 +131,9 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                                            List<Relationship> relationships,
                                            Reference fromIgcObject,
                                            Reference toIgcObject,
+                                           int fromRelationshipElement,
+                                           SequencingOrder sequencingOrder,
+                                           int pageSize,
                                            String userId) {
 
         String assetType = IGCRestConstants.getAssetTypeForSearch(fromIgcObject.getType());
@@ -134,6 +143,9 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                     igcomrsRepositoryConnector,
                     relationships,
                     fromIgcObject,
+                    fromRelationshipElement,
+                    sequencingOrder,
+                    pageSize,
                     userId
             );
         } else if (assetType.equals("data_connection")) {
@@ -141,6 +153,9 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                     igcomrsRepositoryConnector,
                     relationships,
                     fromIgcObject,
+                    fromRelationshipElement,
+                    sequencingOrder,
+                    pageSize,
                     userId
             );
         } else if (assetType.equals("connector")) {
@@ -150,6 +165,9 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                         igcomrsRepositoryConnector,
                         relationships,
                         connection,
+                        fromRelationshipElement,
+                        sequencingOrder,
+                        pageSize,
                         userId
                 );
             }
@@ -167,11 +185,20 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
      * @param fromIgcObject the host asset for which to create the relationship
+     * @param fromRelationshipElement the starting element number of the relationships to return.
+     *                                This is used when retrieving elements
+     *                                beyond the first page of results. Zero means start from the first element.
+     * @param sequencingOrder Enum defining how the results should be ordered.
+     * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
+     *                 unrestricted return results size.
      * @param userId the user requesting mapped relationships
      */
     private void addMappedOMRSRelationships_host(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                  List<Relationship> relationships,
                                                  Reference fromIgcObject,
+                                                 int fromRelationshipElement,
+                                                 SequencingOrder sequencingOrder,
+                                                 int pageSize,
                                                  String userId) {
 
         IGCSearchCondition igcSearchCondition = new IGCSearchCondition("data_connectors.host", "=", fromIgcObject.getId());
@@ -179,8 +206,17 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
         String[] properties = new String[]{ "name" };
         IGCSearch igcSearch = new IGCSearch("data_connection", properties, igcSearchConditionSet);
 
+        IGCSearchSorting sorting = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
+        if (sorting != null) {
+            igcSearch.addSortingCriteria(sorting);
+        }
+        if (pageSize > 0) {
+            igcSearch.setPageSize(fromRelationshipElement + pageSize);
+        }
         ItemList<DataConnection> dataConnections = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
-        dataConnections.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
+        if (pageSize == 0) {
+            dataConnections.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
+        }
 
         for (Reference dataConnection : dataConnections.getItems()) {
 
@@ -224,11 +260,20 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
      * @param fromIgcObject the data_connection object for which to create the relationship
+     * @param fromRelationshipElement the starting element number of the relationships to return.
+     *                                This is used when retrieving elements
+     *                                beyond the first page of results. Zero means start from the first element.
+     * @param sequencingOrder Enum defining how the results should be ordered.
+     * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
+     *                 unrestricted return results size.
      * @param userId the user requesting the mapped relationships
      */
     private void addMappedOMRSRelationships_connection(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                        List<Relationship> relationships,
                                                        Reference fromIgcObject,
+                                                       int fromRelationshipElement,
+                                                       SequencingOrder sequencingOrder,
+                                                       int pageSize,
                                                        String userId) {
 
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
@@ -237,8 +282,17 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
         String[] properties = new String[]{ "host" };
         IGCSearch igcSearch = new IGCSearch("connector", properties, igcSearchConditionSet);
 
+        IGCSearchSorting sorting = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
+        if (sorting != null) {
+            igcSearch.addSortingCriteria(sorting);
+        }
+        if (pageSize > 0) {
+            igcSearch.setPageSize(fromRelationshipElement + pageSize);
+        }
         ItemList<Connector> dataConnectors = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
-        dataConnectors.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
+        if (pageSize == 0) {
+            dataConnectors.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
+        }
 
         for (Reference dataConnector : dataConnectors.getItems()) {
 

@@ -10,6 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
@@ -19,6 +20,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCRelationshipGuid;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
@@ -314,12 +316,21 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param relationships list of relationships to which to append
      * @param fromIgcObject the entity starting point for the relationship
      * @param toIgcObject the other entity endpoint for the relationship (or null if unknown)
+     * @param fromRelationshipElement the starting element number of the relationships to return.
+     *                                This is used when retrieving elements
+     *                                beyond the first page of results. Zero means start from the first element.
+     * @param sequencingOrder Enum defining how the results should be ordered.
+     * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
+     *                 unrestricted return results size.
      * @param userId the userId doing the mapping
      */
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                            List<Relationship> relationships,
                                            Reference fromIgcObject,
                                            Reference toIgcObject,
+                                           int fromRelationshipElement,
+                                           SequencingOrder sequencingOrder,
+                                           int pageSize,
                                            String userId) {
         // By default there are no complex / custom mappings
     }
@@ -630,6 +641,31 @@ public abstract class RelationshipMapping extends InstanceMapping {
             }
         }
 
+        return properties;
+
+    }
+
+    /**
+     * Retrieve the IGC relationship properties that are directly looked up from the asset (without a search), based
+     * on the optimal starting point of navigating a relationship. Note that for any custom or "opposite" optimal
+     * starting point of a relationship, this method will return an empty list.
+     *
+     * @param igcAssetType IGC asset type for which to retrieve the relationship properties
+     * @return {@code List<String>}
+     */
+    public List<String> getDirectRelationshipPropertiesForType(String igcAssetType) {
+
+        List<String> properties = new ArrayList<>();
+        if (igcAssetType == null) {
+            log.error("No asset type provided.");
+        } else {
+            String simpleType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
+            if (getOptimalStart().equals(OptimalStart.ONE) && simpleType.equals(one.getIgcAssetType())) {
+                addRealPropertiesToList(one.getIgcRelationshipProperties(), properties);
+            } else if (getOptimalStart().equals(OptimalStart.TWO) && simpleType.equals(two.getIgcAssetType())) {
+                addRealPropertiesToList(two.getIgcRelationshipProperties(), properties);
+            }
+        }
         return properties;
 
     }
@@ -1140,6 +1176,12 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param mappings the mappings to use for retrieving the relationships
      * @param relationshipTypeGUID String GUID of the the type of relationship required (null for all).
      * @param fromIgcObject the IGC object that is the source of the relationships
+     * @param fromRelationshipElement the starting element number of the relationships to return.
+     *                                This is used when retrieving elements
+     *                                beyond the first page of results. Zero means start from the first element.
+     * @param sequencingOrder Enum defining how the results should be ordered.
+     * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
+     *                 unrestricted return results size.
      * @param userId the user retrieving the mapped relationships
      */
     public static void getMappedRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
@@ -1147,6 +1189,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                               List<RelationshipMapping> mappings,
                                               String relationshipTypeGUID,
                                               Reference fromIgcObject,
+                                              int fromRelationshipElement,
+                                              SequencingOrder sequencingOrder,
+                                              int pageSize,
                                               String userId) {
         getMappedRelationships(
                 igcomrsRepositoryConnector,
@@ -1155,6 +1200,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 relationshipTypeGUID,
                 fromIgcObject,
                 null,
+                fromRelationshipElement,
+                sequencingOrder,
+                pageSize,
                 userId
         );
     }
@@ -1176,6 +1224,45 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                               String relationshipTypeGUID,
                                               Reference fromIgcObject,
                                               Reference toIgcObject,
+                                              String userId) {
+        getMappedRelationships(igcomrsRepositoryConnector,
+                relationships,
+                mappings,
+                relationshipTypeGUID,
+                fromIgcObject,
+                toIgcObject,
+                0,
+                null,
+                100,
+                userId);
+    }
+
+    /**
+     * Utility function that actually does the Relationship object setup and addition to 'relationships' member.
+     *
+     * @param igcomrsRepositoryConnector connectivity to an IGC environment
+     * @param relationships the list of relationships to append to
+     * @param mappings the mappings to use for retrieving the relationships
+     * @param relationshipTypeGUID String GUID of the the type of relationship required (null for all).
+     * @param fromIgcObject the IGC object that is the source of the relationships
+     * @param toIgcObject the IGC object that is the target of the relationship (or null if not known).
+     * @param fromRelationshipElement the starting element number of the relationships to return.
+     *                                This is used when retrieving elements
+     *                                beyond the first page of results. Zero means start from the first element.
+     * @param sequencingOrder Enum defining how the results should be ordered.
+     * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
+     *                 unrestricted return results size.
+     * @param userId the user retrieving the mapped relationships
+     */
+    public static void getMappedRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                              List<Relationship> relationships,
+                                              List<RelationshipMapping> mappings,
+                                              String relationshipTypeGUID,
+                                              Reference fromIgcObject,
+                                              Reference toIgcObject,
+                                              int fromRelationshipElement,
+                                              SequencingOrder sequencingOrder,
+                                              int pageSize,
                                               String userId) {
 
         // Iterate through the provided mappings to create a number of OMRS relationships
@@ -1203,11 +1290,27 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     if (fromIgcObject.isFullyRetrieved()
                             || (optimalStart.equals(OptimalStart.ONE) && pmOne.matchesAssetType(fromAssetType) )
                             || (optimalStart.equals(OptimalStart.TWO) && pmTwo.matchesAssetType(fromAssetType)) ) {
-                        addDirectRelationship(igcomrsRepositoryConnector, mapping, relationships, fromIgcObject, toIgcObject, userId);
+                        addDirectRelationship(igcomrsRepositoryConnector,
+                                mapping,
+                                relationships,
+                                fromIgcObject,
+                                toIgcObject,
+                                fromRelationshipElement,
+                                sequencingOrder,
+                                pageSize,
+                                userId);
                     } else if (optimalStart.equals(OptimalStart.OPPOSITE)
                             || (optimalStart.equals(OptimalStart.TWO) && pmOne.matchesAssetType(fromAssetType))
                             || (optimalStart.equals(OptimalStart.ONE) && pmTwo.matchesAssetType(fromAssetType)) ) {
-                        addInvertedRelationship(igcomrsRepositoryConnector, mapping, relationships, fromIgcObject, toIgcObject, userId);
+                        addInvertedRelationship(igcomrsRepositoryConnector,
+                                mapping,
+                                relationships,
+                                fromIgcObject,
+                                toIgcObject,
+                                fromRelationshipElement,
+                                sequencingOrder,
+                                pageSize,
+                                userId);
                     } else {
                         log.warn("Ran out of options for finding the relationship: {}", omrsRelationshipDef.getName());
                     }
@@ -1219,6 +1322,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         relationships,
                         fromIgcObject,
                         toIgcObject,
+                        fromRelationshipElement,
+                        sequencingOrder,
+                        pageSize,
                         userId
                 );
 
@@ -1265,6 +1371,12 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param relationships the list of relationships to append to
      * @param fromIgcObject the IGC object that is the source of the direct relationship
      * @param toIgcObject the IGC object that is the target of the direct relationship (if known, otherwise null)
+     * @param fromRelationshipElement the starting element number of the relationships to return.
+     *                                This is used when retrieving elements
+     *                                beyond the first page of results. Zero means start from the first element.
+     * @param sequencingOrder Enum defining how the results should be ordered.
+     * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
+     *                 unrestricted return results size.
      * @param userId the user retrieving the mapped relationship
      */
     private static void addDirectRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
@@ -1272,6 +1384,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                               List<Relationship> relationships,
                                               Reference fromIgcObject,
                                               Reference toIgcObject,
+                                              int fromRelationshipElement,
+                                              SequencingOrder sequencingOrder,
+                                              int pageSize,
                                               String userId) {
 
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
@@ -1311,18 +1426,46 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
                 } else if (directRelationships instanceof ItemList) { // and list of relationships another
 
+                    // In this scenario we must retrieve all pages, as we cannot sort the results any other way
+                    ItemList<?> allRelationships = (ItemList<?>) directRelationships;
+                    allRelationships.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
+                    if (sequencingOrder != null) {
+                        // Sort the results before passing along to the next operation
+                        switch (sequencingOrder) {
+                            case GUID:
+                                allRelationships.getItems().sort(Comparator.comparing(Reference::getId));
+                                break;
+                            case CREATION_DATE_OLDEST:
+                                allRelationships.getItems().sort(Comparator.comparing(Reference::getCreatedOn));
+                                break;
+                            case CREATION_DATE_RECENT:
+                                allRelationships.getItems().sort(Comparator.comparing(Reference::getCreatedOn).reversed());
+                                break;
+                            case LAST_UPDATE_OLDEST:
+                                allRelationships.getItems().sort(Comparator.comparing(Reference::getModifiedOn));
+                                break;
+                            case LAST_UPDATE_RECENT:
+                                allRelationships.getItems().sort(Comparator.comparing(Reference::getModifiedOn).reversed());
+                                break;
+                            default:
+                                log.warn("Sorting not implemented for the requested ordering: {}", sequencingOrder);
+                                break;
+                        }
+                    }
                     addListOfMappedRelationships(
                             igcomrsRepositoryConnector,
                             mapping,
                             relationships,
                             fromIgcObject,
-                            (ItemList<?>) directRelationships,
+                            allRelationships,
                             igcRelationshipName,
+                            fromRelationshipElement,
+                            pageSize,
                             userId
                     );
 
                 } else {
-                    log.debug(" ... skipping relationship {}, either empty or neither reference or list {}", igcRelationshipName, directRelationships);
+                    log.debug(" ... skipping relationship {}, either empty or neither reference or list: {}", igcRelationshipName, directRelationships);
                 }
 
             }
@@ -1338,6 +1481,12 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param relationships the list of relationships to append to
      * @param fromIgcObject the IGC object that is the source of the inverted relationship (or really the target)
      * @param toIgcObject the IGC object that is the target of the inverted relationship (if known, otherwise null)
+     * @param fromRelationshipElement the starting element number of the relationships to return.
+     *                                This is used when retrieving elements
+     *                                beyond the first page of results. Zero means start from the first element.
+     * @param sequencingOrder Enum defining how the results should be ordered.
+     * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
+     *                 unrestricted return results size.
      * @param userId the user retrieving the mapped relationship
      */
     private static void addInvertedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
@@ -1345,6 +1494,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                 List<Relationship> relationships,
                                                 Reference fromIgcObject,
                                                 Reference toIgcObject,
+                                                int fromRelationshipElement,
+                                                SequencingOrder sequencingOrder,
+                                                int pageSize,
                                                 String userId) {
 
         String assetType = fromIgcObject.getType();
@@ -1378,6 +1530,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                             igcSearchConditionSet,
                             assetType,
                             igcRelationshipName,
+                            fromRelationshipElement,
+                            sequencingOrder,
+                            pageSize,
                             userId
                     );
                 }
@@ -1408,6 +1563,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                             igcSearchConditionSet,
                             sourceAssetType,
                             anIgcRelationshipProperty,
+                            fromRelationshipElement,
+                            sequencingOrder,
+                            pageSize,
                             userId
                     );
                 } else {
@@ -1430,6 +1588,12 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcSearchConditionSet the search criteria to use for the search
      * @param assetType the type of IGC asset for which to search
      * @param igcPropertyName the name of the IGC property to search against
+     * @param fromRelationshipElement the starting element number of the relationships to return.
+     *                                This is used when retrieving elements
+     *                                beyond the first page of results. Zero means start from the first element.
+     * @param sequencingOrder Enum defining how the results should be ordered.
+     * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
+     *                 unrestricted return results size.
      * @param userId the user retrieving the mapped relationship
      */
     private static void addSearchResultsToRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
@@ -1439,6 +1603,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                         IGCSearchConditionSet igcSearchConditionSet,
                                                         String assetType,
                                                         String igcPropertyName,
+                                                        int fromRelationshipElement,
+                                                        SequencingOrder sequencingOrder,
+                                                        int pageSize,
                                                         String userId) {
 
         IGCSearch igcSearch = new IGCSearch(assetType, igcSearchConditionSet);
@@ -1446,6 +1613,10 @@ public abstract class RelationshipMapping extends InstanceMapping {
             if (igcomrsRepositoryConnector.getIGCRestClient().hasModificationDetails(assetType)) {
                 igcSearch.addProperties(IGCRestConstants.getModificationProperties());
             }
+        }
+        IGCSearchSorting sorting = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
+        if (sorting != null) {
+            igcSearch.addSortingCriteria(sorting);
         }
         ItemList<Reference> foundRelationships = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
         addListOfMappedRelationships(
@@ -1455,13 +1626,16 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 fromIgcObject,
                 foundRelationships,
                 igcPropertyName,
+                fromRelationshipElement,
+                pageSize,
                 userId
         );
 
     }
 
     /**
-     * Add the provided list of relationships as OMRS relationships.
+     * Add the provided list of relationships as OMRS relationships. Note that this method assumes that the provided
+     * list of IGC relationships is already sorted by whatever means was requested.
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC repository
      * @param mapping the mapping to use in translating each relationship
@@ -1469,6 +1643,11 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param fromIgcObject the asset that is the source of the IGC relationship
      * @param igcRelationships the list of IGC relationships
      * @param igcPropertyName the name of the IGC relationship property
+     * @param fromRelationshipElement the starting element number of the relationships to return.
+     *                                This is used when retrieving elements
+     *                                beyond the first page of results. Zero means start from the first element.
+     * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
+     *                 unrestricted return results size.
      * @param userId the user retrieving the mapped relationship
      */
     private static void addListOfMappedRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
@@ -1477,27 +1656,52 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                      Reference fromIgcObject,
                                                      ItemList<?> igcRelationships,
                                                      String igcPropertyName,
+                                                     int fromRelationshipElement,
+                                                     int pageSize,
                                                      String userId) {
 
         log.debug(" ... list of references: {}", mapping.getOmrsRelationshipType());
 
-        // TODO: paginate rather than always retrieving the full set
-        igcRelationships.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
+        List<Relationship> localPage = new ArrayList<>();
 
-        // Iterate through all of the existing IGC relationships of that type to create an OMRS relationship
-        // for each one
+        int totalPotentialResults = fromRelationshipElement + pageSize;
+        if (pageSize == 0) {
+            // If the pageSize is 0, we should retrieve all results, so set the total to the total number of results...
+            totalPotentialResults = igcRelationships.getPaging().getNumTotal();
+        }
+
+        // Always fill a full page of results here, but no more, as once final sorting is applied all results may
+        // come from this set of relationships
         for (Reference relation : igcRelationships.getItems()) {
-            if (mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, fromIgcObject, relation)) {
+            if (localPage.size() < totalPotentialResults
+                    && mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, fromIgcObject, relation)) {
                 addSingleMappedRelationship(
                         igcomrsRepositoryConnector,
                         mapping,
-                        relationships,
+                        localPage,
                         fromIgcObject,
                         relation,
                         igcPropertyName,
                         userId
                 );
             }
+        }
+
+        relationships.addAll(localPage);
+
+        // If we haven't filled a page of results (because we needed to skip some above), recurse...
+        if (igcRelationships.hasMorePages() && localPage.size() < totalPotentialResults) {
+            igcRelationships.getNextPage(igcomrsRepositoryConnector.getIGCRestClient());
+            addListOfMappedRelationships(igcomrsRepositoryConnector,
+                    mapping,
+                    relationships,
+                    fromIgcObject,
+                    igcRelationships,
+                    igcPropertyName,
+                    fromRelationshipElement,
+                    pageSize,
+                    userId
+            );
         }
 
     }

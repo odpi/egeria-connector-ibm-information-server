@@ -306,7 +306,7 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 .withSecure(true)
                 .when(searchRequest("{\"types\":[\"category\",\"term\",\"information_governance_policy\",\"information_governance_rule\"],\"pageSize\":1,\"workflowMode\":\"draft\"}"),
                         Times.exactly(1))
-                .respond(withResponse(getResourceFileContents("no_results.json")).withStatusCode(401));
+                .respond(withResponse(getResourceFileContents("no_results.json")).withStatusCode(403));
         mockServerClient
                 .withSecure(true)
                 .when(searchRequest("{\"types\":[\"category\",\"term\",\"information_governance_policy\",\"information_governance_rule\"],\"pageSize\":1,\"workflowMode\":\"draft\"}"))
@@ -682,6 +682,10 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"category_path\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"}],\"operator\":\"and\"}}");
         setSearchAndResponse(mockServerClient, caseName, "terms.json",
                 "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"parent_category.category_path\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"},{\"property\":\"parent_category\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"}],\"operator\":\"or\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "sorted_limited_categories.json",
+                "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":10,\"where\":{\"conditions\":[{\"property\":\"category_path\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"}],\"operator\":\"and\"},\"sorts\":[{\"property\":\"_id\",\"ascending\":true}]}");
+        setSearchAndResponse(mockServerClient, caseName, "sorted_limited_terms.json",
+                "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":10,\"where\":{\"conditions\":[{\"property\":\"parent_category.category_path\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"},{\"property\":\"parent_category\",\"operator\":\"=\",\"value\":\"" + GLOSSARY_RID + "\"}],\"operator\":\"or\"},\"sorts\":[{\"property\":\"_id\",\"ascending\":true}]}");
     }
 
     private void setGlossaryCategoryFindByPropertyValue(MockServerClient mockServerClient) {
@@ -803,8 +807,11 @@ public class MockServerExpectations implements PluginExpectationInitializer {
     }
 
     private void setEndpointRelationships(MockServerClient mockServerClient) {
-        setSearchAndResponse(mockServerClient, "EndpointRelationships", "data_connection.json",
+        String caseName = "EndpointRelationships";
+        setSearchAndResponse(mockServerClient, caseName, "data_connection.json",
                 "{\"types\":[\"data_connection\"],\"properties\":[\"name\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_connectors.host\",\"operator\":\"=\",\"value\":\"" + HOST_RID + "\"}],\"operator\":\"and\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "sorted_and_limited.json",
+                "{\"types\":[\"data_connection\"],\"properties\":[\"name\"],\"pageSize\":5,\"where\":{\"conditions\":[{\"property\":\"data_connectors.host\",\"operator\":\"=\",\"value\":\"" + HOST_RID + "\"}],\"operator\":\"and\"},\"sorts\":[{\"property\":\"_id\",\"ascending\":true}]}");
     }
 
     private void setDeployedDatabaseSchemaRelationships(MockServerClient mockServerClient) {
@@ -841,6 +848,8 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 "{\"types\":[\"classification\"],\"properties\":[\"classifies_asset\",\"confidencePercent\",\"threshold\",\"value_frequency\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"" + DATA_CLASS_RID + "\"}],\"operator\":\"and\"}}");
         setSearchAndResponse(mockServerClient, caseName, "data_item.json",
                 "{\"types\":[\"amazon_s3_data_file_field\",\"data_file_field\",\"database_column\"],\"properties\":[\"selected_classification\",\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"selected_classification\",\"operator\":\"=\",\"value\":\"" + DATA_CLASS_RID + "\"}],\"operator\":\"and\"}}");
+        setSearchAndResponse(mockServerClient, caseName, "classification_by_guid.json",
+                "{\"types\":[\"classification\"],\"properties\":[\"classifies_asset\",\"confidencePercent\",\"threshold\",\"value_frequency\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"" + DATA_CLASS_RID + "\"}],\"operator\":\"and\"},\"sorts\":[{\"property\":\"_id\",\"ascending\":true}]}");
     }
 
     private void setConnectionFSRelationships(MockServerClient mockServerClient) {
@@ -1189,7 +1198,7 @@ public class MockServerExpectations implements PluginExpectationInitializer {
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.getProjectsRequest(), Times.exactly(1))
-                .respond(withResponse(getResourceFileContents("ia" + File.separator + "projects.xml")).withStatusCode(401));
+                .respond(withResponse(getResourceFileContents("ia" + File.separator + "projects.xml")).withStatusCode(403));
         mockServerClient
                 .withSecure(true)
                 .when(MockConstants.getProjectsRequest())
