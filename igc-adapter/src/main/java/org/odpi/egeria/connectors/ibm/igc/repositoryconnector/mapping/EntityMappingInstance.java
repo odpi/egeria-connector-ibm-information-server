@@ -3,16 +3,14 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping;
 
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.OMRSRuntimeException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
@@ -330,29 +328,24 @@ public class EntityMappingInstance {
     }
 
     /**
-     * Utility function to initialize the IGC entity for this mapping with necessary information to handle relationship
-     * mappings.
-     *
-     * @param sequencingOrder any sequencing order for the relationship properties
-     * @param pageSize any page size limitation for the relationship properties
+     * Utility function to initialize the IGC entity for this mapping with the bare minimum of information needed for
+     * any further processing (ie. for relationship lookups).
      */
-    public final void initializeWithRelationships(SequencingOrder sequencingOrder,
-                                                  int pageSize) {
+    public final void initializeIGCReference() {
         if (igcEntity == null || !igcEntity.isFullyRetrieved()) {
-            ArrayList<String> allProperties = new ArrayList<>();
+            IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
+            ArrayList<String> directProperties = new ArrayList<>();
             List<RelationshipMapping> relationshipMappers = mapping.getRelationshipMappers();
             for (RelationshipMapping relationshipMapping : relationshipMappers) {
-                log.debug("Adding properties from mapping: {}", relationshipMapping.getClass().getCanonicalName());
-                allProperties.addAll(relationshipMapping.getIgcRelationshipPropertiesForType(igcEntityType));
+                directProperties.addAll(relationshipMapping.getDirectRelationshipPropertiesForType(igcEntityType));
             }
-            allProperties.addAll(IGCRestConstants.getModificationProperties());
-            IGCSearchSorting sort = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
+            if (igcRestClient.hasModificationDetails(igcEntityType)) {
+                directProperties.addAll(IGCRestConstants.getModificationProperties());
+            }
             igcEntity = igcomrsRepositoryConnector.getIGCRestClient().getAssetWithSubsetOfProperties(
-                    igcEntityRid,
-                    igcEntityType,
-                    allProperties,
-                    pageSize,
-                    sort
+                    getIgcEntityRid(),
+                    getIgcEntityType(),
+                    directProperties
             );
         }
     }

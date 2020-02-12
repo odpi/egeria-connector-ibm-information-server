@@ -664,7 +664,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
      *                                beyond the first page of results. Zero means start from the first element.
      * @param limitResultsByStatus Not implemented for IGC -- will only retrieve ACTIVE entities.
      * @param asOfTime Must be null (history not implemented for IGC).
-     * @param sequencingProperty Must be null (there are no properties on IGC relationships).
+     * @param sequencingProperty String name of the property that is to be used to sequence the results.
+     *                           Null means do not sequence on a property name (see SequencingOrder).
      * @param sequencingOrder Enum defining how the results should be ordered.
      * @param pageSize -- the maximum number of result classifications that can be returned on this request.  Zero means
      *                 unrestricted return results size.
@@ -675,7 +676,6 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
      * @throws RepositoryErrorException there is a problem communicating with the metadata repository where
      *                                  the metadata collection is stored.
      * @throws EntityNotKnownException the requested entity instance is not known in the metadata collection.
-     * @throws PropertyErrorException the sequencing property is not valid for the attached classifications.
      * @throws PagingErrorException the paging/sequencing parameters are set up incorrectly.
      * @throws FunctionNotSupportedException the repository does not support the asOfTime parameter.
      * @throws UserNotAuthorizedException the userId is not permitted to perform this operation.
@@ -694,7 +694,6 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             TypeErrorException,
             RepositoryErrorException,
             EntityNotKnownException,
-            PropertyErrorException,
             PagingErrorException,
             FunctionNotSupportedException,
             UserNotAuthorizedException {
@@ -714,23 +713,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         ArrayList<Relationship> alRelationships = new ArrayList<>();
 
-        // Immediately throw unimplemented exception if trying to retrieve historical view or sequence by property
+        // Immediately throw unimplemented exception if trying to retrieve historical view
         if (asOfTime != null) {
             raiseFunctionNotSupportedException(IGCOMRSErrorCode.NO_HISTORY, methodName);
-        } else if (sequencingProperty != null
-                || (sequencingOrder != null
-                &&
-                (sequencingOrder.equals(SequencingOrder.PROPERTY_ASCENDING)
-                        || sequencingOrder.equals(SequencingOrder.PROPERTY_DESCENDING)))
-        ) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.NO_RELATIONSHIP_PROPERTIES;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(repositoryName);
-            throw new PropertyErrorException(errorCode.getHTTPErrorCode(),
-                    this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
         } else if (limitResultsByStatus == null
                 || (limitResultsByStatus.size() == 1 && limitResultsByStatus.contains(InstanceStatus.ACTIVE))) {
 
@@ -762,6 +747,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                 relationshipTypeGUID,
                                 fromRelationshipElement,
                                 sequencingOrder,
+                                sequencingProperty,
                                 pageSize)
                 );
             } else {

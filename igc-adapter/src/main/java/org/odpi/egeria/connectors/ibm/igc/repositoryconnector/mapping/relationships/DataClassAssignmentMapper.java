@@ -12,10 +12,12 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.DataClassAssignmentStatusMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
@@ -132,6 +134,15 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * @param relationships the list of relationships to which to add
      * @param fromIgcObject the IGC entity from which the relationship exists
      * @param toIgcObject the other entity endpoint for the relationship (or null if unknown)
+     * @param fromRelationshipElement the starting element number of the relationships to return.
+     *                                This is used when retrieving elements
+     *                                beyond the first page of results. Zero means start from the first element.
+     *                                (This will be ignored for this relationship as there is no way to effectively use
+     *                                it due to IGC search limitations.)
+     * @param sequencingOrder Enum defining how the results should be ordered.
+     * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
+     *                 unrestricted return results size. (This will be ignored for this relationship as there is no way
+     *                 to effectively use it due to IGC search limitations.)
      * @param userId the user ID requesting the mapped relationships
      */
     @Override
@@ -139,6 +150,9 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                                            List<Relationship> relationships,
                                            Reference fromIgcObject,
                                            Reference toIgcObject,
+                                           int fromRelationshipElement,
+                                           SequencingOrder sequencingOrder,
+                                           int pageSize,
                                            String userId) {
 
         if (fromIgcObject instanceof DataClass) {
@@ -147,6 +161,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                     relationships,
                     (DataClass) fromIgcObject,
                     toIgcObject instanceof Classificationenabledgroup ? (Classificationenabledgroup) toIgcObject : null,
+                    sequencingOrder,
                     userId
             );
             mapSelectedClassifications_fromDataClass(
@@ -161,6 +176,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                     relationships,
                     (Classificationenabledgroup) fromIgcObject,
                     toIgcObject instanceof DataClass ? (DataClass) toIgcObject : null,
+                    sequencingOrder,
                     userId
             );
             mapSelectedClassifications_toDataClass(
@@ -291,12 +307,14 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * @param relationships the list of relationships to which to add
      * @param dataClass the data_class object
      * @param toIgcObject the classificationenabledgroup that is classified (if known, null otherwise)
+     * @param sequencingOrder Enum defining how the results should be ordered.
      * @param userId the user requesting the mapped relationships
      */
     private void mapDetectedClassifications_fromDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                           List<Relationship> relationships,
                                                           DataClass dataClass,
                                                           Classificationenabledgroup toIgcObject,
+                                                          SequencingOrder sequencingOrder,
                                                           String userId) {
 
         final String methodName = "mapDetectedClassifications_fromDataClass";
@@ -318,7 +336,10 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                 P_THRESHOLD
         };
 
-        ItemList<Classification> detectedClassifications = getDetectedClassifications(igcomrsRepositoryConnector, classificationProperties, igcSearchConditionSet);
+        ItemList<Classification> detectedClassifications = getDetectedClassifications(igcomrsRepositoryConnector,
+                classificationProperties,
+                igcSearchConditionSet,
+                sequencingOrder);
 
         // For each of the detected classifications, create a new DataClassAssignment relationship
         for (Classification detectedClassification : detectedClassifications.getItems()) {
@@ -429,12 +450,14 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * @param relationships the list of relationships to which to add
      * @param fromIgcObject the main_object object
      * @param dataClass the data_class object (if known, or null otherwise)
+     * @param sequencingOrder Enum defining how the results should be ordered.
      * @param userId the user requesting the mapped relationships
      */
     private void mapDetectedClassifications_toDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                         List<Relationship> relationships,
                                                         Classificationenabledgroup fromIgcObject,
                                                         DataClass dataClass,
+                                                        SequencingOrder sequencingOrder,
                                                         String userId) {
 
         final String methodName = "mapDetectedClassifications_toDataClass";
@@ -460,7 +483,10 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                 P_THRESHOLD
         };
 
-        ItemList<Classification> detectedClassifications = getDetectedClassifications(igcomrsRepositoryConnector, classificationProperties, igcSearchConditionSet);
+        ItemList<Classification> detectedClassifications = getDetectedClassifications(igcomrsRepositoryConnector,
+                classificationProperties,
+                igcSearchConditionSet,
+                sequencingOrder);
 
         // For each of the detected classifications, create a new DataClassAssignment relationship
         for (Classification detectedClassification : detectedClassifications.getItems()) {
@@ -565,11 +591,13 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param classificationProperties the properties of the classification to retrieve
      * @param igcSearchConditionSet the conditions to use for searching for the classifications
+     * @param sequencingOrder Enum defining how the results should be ordered.
      * @return {@code ItemList<Classification>}
      */
     private ItemList<Classification> getDetectedClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                                 String[] classificationProperties,
-                                                                IGCSearchConditionSet igcSearchConditionSet) {
+                                                                IGCSearchConditionSet igcSearchConditionSet,
+                                                                SequencingOrder sequencingOrder) {
 
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
@@ -580,8 +608,20 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             igcSearch.addProperty("value_frequency");
         }
 
+        IGCSearchSorting sorting = null;
+        if (sequencingOrder != null && sequencingOrder.equals(SequencingOrder.GUID)) {
+            // TODO: for now only allowing sorting on the ID, since there is no modification detail on the relationship
+            //  (in future we may want to allow sorting on property as well?)
+            sorting = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
+        }
+        if (sorting != null) {
+            igcSearch.addSortingCriteria(sorting);
+        }
+
         if (igcSearchConditionSet.size() > 0) {
             detectedClassifications = igcRestClient.search(igcSearch);
+            // Unfortunately there is no way to avoid the inclusion of column analysis master objects in the results, so
+            // the only way we can ensure we are sorting across all valid results is to retrieve all of them
             detectedClassifications.getAllPages(igcRestClient);
         } else {
             igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());

@@ -38,6 +38,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.archivestore.p
 import org.odpi.openmetadata.repositoryservices.connectors.stores.archivestore.properties.OpenMetadataArchiveTypeStore;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.OMRSMetadataCollection;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
@@ -52,6 +53,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.*;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -583,6 +586,12 @@ public class ConnectorTest {
         assertEquals(ip.getPropertyCount(), 1);
         assertEquals(ip.getPropertyValue("testAttribute").valueAsString(), "10.1");
 
+        try {
+            assertNull(AttributeMapping.getIgcValueFromPropertyValue(null));
+        } catch (PropertyErrorException e) {
+            assertNull(e);
+        }
+
         PrimitivePropertyValue ppv = new PrimitivePropertyValue();
         ppv.setPrimitiveDefCategory(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_DATE);
         ppv.setPrimitiveValue(10L);
@@ -617,6 +626,49 @@ public class ConnectorTest {
         mpv.setMapValue("testPropertyName", ppv);
         assertThrows(PropertyErrorException.class, () -> AttributeMapping.getIgcValueFromPropertyValue(mpv));
 
+    }
+
+    @Test
+    public void testSortingOfValues() {
+
+        testComparator(false, true, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_BOOLEAN);
+        testComparator((byte)1, (byte)2, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_BYTE);
+        testComparator('a', 'b', PrimitiveDefCategory.OM_PRIMITIVE_TYPE_CHAR);
+        testComparator((short)1, (short)2, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_SHORT);
+        testComparator(3, 4, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_INT);
+        testComparator(5L, 6L, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_LONG);
+        testComparator((float)7.0, (float)7.1, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_FLOAT);
+        testComparator(8.0, 8.1, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_DOUBLE);
+        testComparator(BigInteger.valueOf(9), BigInteger.valueOf(10), PrimitiveDefCategory.OM_PRIMITIVE_TYPE_BIGINTEGER);
+        testComparator(BigDecimal.valueOf(11.0), BigDecimal.valueOf(11.1), PrimitiveDefCategory.OM_PRIMITIVE_TYPE_BIGDECIMAL);
+        long now = new Date().getTime();
+        testComparator(now, now + 1, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_DATE);
+        testComparator("String1", "String2", PrimitiveDefCategory.OM_PRIMITIVE_TYPE_STRING);
+
+        EnumPropertyValue ev1 = new EnumPropertyValue();
+        ev1.setOrdinal(0);
+        ev1.setSymbolicName("Test0");
+        ev1.setDescription("Test0");
+        EnumPropertyValue ev2 = new EnumPropertyValue();
+        ev2.setOrdinal(1);
+        ev2.setSymbolicName("Test1");
+        ev2.setDescription("Test1");
+        assertTrue(AttributeMapping.compareInstanceProperty(ev1, ev2) < 0);
+        assertTrue(AttributeMapping.compareInstanceProperty(ev2, ev1) > 0);
+        assertEquals(AttributeMapping.compareInstanceProperty(ev1, ev1), 0);
+        
+    }
+
+    private void testComparator(Object first, Object second, PrimitiveDefCategory category) {
+        PrimitivePropertyValue one = new PrimitivePropertyValue();
+        one.setPrimitiveDefCategory(category);
+        one.setPrimitiveValue(first);
+        PrimitivePropertyValue two = new PrimitivePropertyValue();
+        two.setPrimitiveDefCategory(category);
+        two.setPrimitiveValue(second);
+        assertTrue(AttributeMapping.compareInstanceProperty(one, two) < 0);
+        assertTrue(AttributeMapping.compareInstanceProperty(two, one) > 0);
+        assertEquals(AttributeMapping.compareInstanceProperty(one, one), 0);
     }
 
     @Test
@@ -676,8 +728,27 @@ public class ConnectorTest {
                 "Glossary",
                 GlossaryMapper.IGC_RID_PREFIX,
                 MockConstants.GLOSSARY_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 65,
                 relationshipExpectations
+        );
+
+        relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 10,
+                        "CategoryAnchor", "Glossary", "GlossaryCategory",
+                        expectedProxyOneQN, null)
+        );
+        testRelationshipsForEntity(
+                "category",
+                "Glossary",
+                GlossaryMapper.IGC_RID_PREFIX,
+                MockConstants.GLOSSARY_RID,
+                10,
+                10,
+                relationshipExpectations,
+                SequencingOrder.GUID,
+                null
         );
 
         Reference category = new Reference("TestCategory", "category", "123");
@@ -769,6 +840,7 @@ public class ConnectorTest {
                 "GlossaryCategory",
                 null,
                 MockConstants.CATEGORY_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 12,
                 relationshipExpectations
         );
@@ -1002,6 +1074,7 @@ public class ConnectorTest {
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
                 null,
                 MockConstants.TERM_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 3,
                 relationshipExpectations
         );
@@ -1046,6 +1119,7 @@ public class ConnectorTest {
                 "Database",
                 null,
                 MockConstants.DATABASE_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 2,
                 relationshipExpectations
         );
@@ -1096,6 +1170,7 @@ public class ConnectorTest {
                 "Connection",
                 null,
                 MockConstants.DATA_CONNECTION_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 3,
                 relationshipExpectations
         );
@@ -1133,8 +1208,27 @@ public class ConnectorTest {
                 "Endpoint",
                 null,
                 MockConstants.HOST_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 7,
                 relationshipExpectations
+        );
+
+        relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 5,
+                        "ConnectionEndpoint", "Endpoint", "Connection",
+                        MockConstants.HOST_QN, null)
+        );
+        testRelationshipsForEntity(
+                "host",
+                "Endpoint",
+                null,
+                MockConstants.HOST_RID,
+                5,
+                5,
+                relationshipExpectations,
+                SequencingOrder.GUID,
+                null
         );
 
         Reference connector = new Reference("DB2Connector", "connector", "b1c497ce.54ec142d.001mtr38f.q8hjqk4.spumq8.k1bt587cologck6u9tf8q");
@@ -1195,6 +1289,7 @@ public class ConnectorTest {
                 "DeployedDatabaseSchema",
                 null,
                 MockConstants.DATABASE_SCHEMA_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 2,
                 relationshipExpectations
         );
@@ -1241,6 +1336,7 @@ public class ConnectorTest {
                 "DeployedDatabaseSchema",
                 RelationalDBSchemaTypeMapper.IGC_RID_PREFIX,
                 MockConstants.DATABASE_SCHEMA_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 4,
                 relationshipExpectations
         );
@@ -1285,6 +1381,7 @@ public class ConnectorTest {
                 "RelationalTable",
                 null,
                 MockConstants.DATABASE_TABLE_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 4,
                 relationshipExpectations
         );
@@ -1349,6 +1446,7 @@ public class ConnectorTest {
                 "RelationalColumn",
                 null,
                 MockConstants.DATABASE_COLUMN_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 6,
                 relationshipExpectations
         );
@@ -1362,11 +1460,11 @@ public class ConnectorTest {
         for (int i = startIndex; i < finishIndex; i++) {
             Relationship assignment = relationships.get(i);
             InstanceProperties properties = assignment.getProperties();
-            int confidence = getIntegerValue(properties, "confidence");
-            assertEquals(confidence, 100);
             EnumPropertyValue status = getEnumValue(properties, "status");
             assertEquals(status.getOrdinal(), 0);
             assertEquals(status.getSymbolicName(), "Discovered");
+            int confidence = getIntegerValue(properties, "confidence");
+            assertEquals(confidence, 100);
         }
     }
 
@@ -1378,7 +1476,6 @@ public class ConnectorTest {
             assertEquals(status.getSymbolicName(), "Proposed");
         }
     }
-
 
     @Test
     public void testGetRelationalColumnSummary() {
@@ -1425,12 +1522,151 @@ public class ConnectorTest {
                 "DataClass",
                 null,
                 MockConstants.DATA_CLASS_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 3,
                 relationshipExpectations
         );
-
         testDiscoveredDataClasses(relationships, 0, 2);
         testProposedDataClasses(relationships, 2, 3);
+
+        relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 2,
+                        "DataClassAssignment", "RelationalColumn", "DataClass",
+                        MockConstants.DATABASE_COLUMN_QN, MockConstants.DATA_CLASS_QN)
+        );
+        relationships = testRelationshipsForEntity(
+                "data_class",
+                "DataClass",
+                null,
+                MockConstants.DATA_CLASS_RID,
+                2,
+                2,
+                relationshipExpectations,
+                SequencingOrder.GUID,
+                null
+        );
+        testDiscoveredDataClasses(relationships, 0, 2);
+
+        relationships = testRelationshipsForEntity(
+                "data_class",
+                "DataClass",
+                null,
+                MockConstants.DATA_CLASS_RID,
+                2,
+                2,
+                relationshipExpectations,
+                SequencingOrder.LAST_UPDATE_RECENT,
+                null
+        );
+        testDiscoveredDataClasses(relationships, 0, 2);
+
+        relationships = testRelationshipsForEntity(
+                "data_class",
+                "DataClass",
+                null,
+                MockConstants.DATA_CLASS_RID,
+                2,
+                2,
+                relationshipExpectations,
+                SequencingOrder.LAST_UPDATE_OLDEST,
+                null
+        );
+        testDiscoveredDataClasses(relationships, 0, 2);
+
+        relationships = testRelationshipsForEntity(
+                "data_class",
+                "DataClass",
+                null,
+                MockConstants.DATA_CLASS_RID,
+                2,
+                2,
+                relationshipExpectations,
+                SequencingOrder.CREATION_DATE_RECENT,
+                null
+        );
+        testDiscoveredDataClasses(relationships, 0, 2);
+
+        relationships = testRelationshipsForEntity(
+                "data_class",
+                "DataClass",
+                null,
+                MockConstants.DATA_CLASS_RID,
+                2,
+                2,
+                relationshipExpectations,
+                SequencingOrder.CREATION_DATE_OLDEST,
+                null
+        );
+        testDiscoveredDataClasses(relationships, 0, 2);
+
+        relationships = testRelationshipsForEntity(
+                "data_class",
+                "DataClass",
+                null,
+                MockConstants.DATA_CLASS_RID,
+                2,
+                2,
+                relationshipExpectations,
+                SequencingOrder.PROPERTY_ASCENDING,
+                "confidence"
+        );
+        testProposedDataClasses(relationships, 0, 1);
+        testDiscoveredDataClasses(relationships, 1, 2);
+
+        relationships = testRelationshipsForEntity(
+                "data_class",
+                "DataClass",
+                null,
+                MockConstants.DATA_CLASS_RID,
+                2,
+                2,
+                relationshipExpectations,
+                SequencingOrder.PROPERTY_DESCENDING,
+                "confidence"
+        );
+        testDiscoveredDataClasses(relationships, 0, 2);
+
+        relationships = testRelationshipsForEntity(
+                "data_class",
+                "DataClass",
+                null,
+                MockConstants.DATA_CLASS_RID,
+                2,
+                2,
+                relationshipExpectations,
+                SequencingOrder.PROPERTY_ASCENDING,
+                "partialMatch"
+        );
+        testProposedDataClasses(relationships, 0, 1);
+        testDiscoveredDataClasses(relationships, 1, 2);
+
+        relationships = testRelationshipsForEntity(
+                "data_class",
+                "DataClass",
+                null,
+                MockConstants.DATA_CLASS_RID,
+                2,
+                2,
+                relationshipExpectations,
+                SequencingOrder.PROPERTY_ASCENDING,
+                "status"
+        );
+        testDiscoveredDataClasses(relationships, 0, 2);
+
+        relationships = testRelationshipsForEntity(
+                "data_class",
+                "DataClass",
+                null,
+                MockConstants.DATA_CLASS_RID,
+                2,
+                2,
+                relationshipExpectations,
+                SequencingOrder.PROPERTY_DESCENDING,
+                "status"
+        );
+        testProposedDataClasses(relationships, 0, 1);
+        testDiscoveredDataClasses(relationships, 1, 2);
 
     }
 
@@ -1479,6 +1715,7 @@ public class ConnectorTest {
                 "Connection",
                 null,
                 MockConstants.DATA_CONNECTION_RID_FS,
+                MockConstants.EGERIA_PAGESIZE,
                 3,
                 relationshipExpectations
         );
@@ -1507,6 +1744,7 @@ public class ConnectorTest {
                 "FileFolder",
                 null,
                 MockConstants.DATA_FILE_FOLDER_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 9,
                 relationshipExpectations
         );
@@ -1549,6 +1787,7 @@ public class ConnectorTest {
                 "DataFile",
                 null,
                 MockConstants.DATA_FILE_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 2,
                 relationshipExpectations
         );
@@ -1592,6 +1831,7 @@ public class ConnectorTest {
                 "TabularSchemaType",
                 null,
                 MockConstants.DATA_FILE_RECORD_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 4,
                 relationshipExpectations
         );
@@ -1638,6 +1878,7 @@ public class ConnectorTest {
                 "TabularColumn",
                 null,
                 MockConstants.DATA_FILE_FIELD_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 2,
                 relationshipExpectations
         );
@@ -1747,6 +1988,7 @@ public class ConnectorTest {
                 "Person",
                 null,
                 MockConstants.USER_RID,
+                MockConstants.EGERIA_PAGESIZE,
                 1,
                 relationshipExpectations
         );
@@ -2042,7 +2284,7 @@ public class ConnectorTest {
 
         // Try searching by the symbolic name of an enumeration, should not return any results because it is not a
         // string property
-        List<Relationship> results = testFindRelationshipsByPropertyValue(
+        testFindRelationshipsByPropertyValue(
                 typeGUID,
                 typeName,
                 repositoryHelper.getExactMatchRegex("Proposed"),
@@ -2502,6 +2744,40 @@ public class ConnectorTest {
                                                                String queryString,
                                                                int pageSize,
                                                                int totalNumberExpected) {
+        return testFindEntitiesByPropertyValue(
+                typeGUID,
+                possibleTypes,
+                classificationLimiters,
+                queryString,
+                pageSize,
+                totalNumberExpected,
+                null,
+                null
+        );
+    }
+
+    /**
+     * Executes a common set of tests against a list of EntityDetail objects after first searching for them by property
+     * value.
+     *
+     * @param typeGUID the entity type GUID to search
+     * @param possibleTypes the names of the types that could be returned by the search
+     * @param classificationLimiters the names of classifications by which to limit the results (or null if not to limit)
+     * @param queryString the string criteria by which to search
+     * @param pageSize limit the number of results
+     * @param totalNumberExpected the total number of expected results
+     * @param sequencingOrder the ordering to use for the results
+     * @param sequencingProperty the property by which to sort (if sequencing order is based on a property)
+     * @return {@code List<EntityDetail>} the results of the query
+     */
+    private List<EntityDetail> testFindEntitiesByPropertyValue(String typeGUID,
+                                                               Set<String> possibleTypes,
+                                                               Set<String> classificationLimiters,
+                                                               String queryString,
+                                                               int pageSize,
+                                                               int totalNumberExpected,
+                                                               SequencingOrder sequencingOrder,
+                                                               String sequencingProperty) {
 
         List<EntityDetail> results = null;
         List<String> classifications = null;
@@ -2518,8 +2794,8 @@ public class ConnectorTest {
                     null,
                     classifications,
                     null,
-                    null,
-                    null,
+                    sequencingProperty,
+                    sequencingOrder,
                     pageSize
             );
         } catch (InvalidParameterException | TypeErrorException | RepositoryErrorException | PropertyErrorException | PagingErrorException | FunctionNotSupportedException | UserNotAuthorizedException e) {
@@ -2563,6 +2839,39 @@ public class ConnectorTest {
                                                           MatchCriteria matchCriteria,
                                                           int pageSize,
                                                           int totalNumberExpected) {
+        return testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                matchProperties,
+                matchCriteria,
+                pageSize,
+                totalNumberExpected,
+                null,
+                null
+        );
+    }
+
+    /**
+     * Executes a common set of tests against a list of EntityDetail objects after first searching for them by property.
+     *
+     * @param typeGUID the entity type GUID to search
+     * @param typeName the name of the type to search
+     * @param matchProperties the properties to match against
+     * @param matchCriteria the criteria by which to match
+     * @param pageSize the number of results to limit
+     * @param totalNumberExpected the total number of expected results
+     * @param sequencingOrder the ordering to use for the results
+     * @param sequencingProperty the property by which to sort (if sequencing order is based on a property)
+     * @return {@code List<EntityDetail>} the results of the query
+     */
+    private List<EntityDetail> testFindEntitiesByProperty(String typeGUID,
+                                                          String typeName,
+                                                          InstanceProperties matchProperties,
+                                                          MatchCriteria matchCriteria,
+                                                          int pageSize,
+                                                          int totalNumberExpected,
+                                                          SequencingOrder sequencingOrder,
+                                                          String sequencingProperty) {
 
         List<EntityDetail> results = null;
 
@@ -2576,8 +2885,8 @@ public class ConnectorTest {
                     null,
                     null,
                     null,
-                    null,
-                    null,
+                    sequencingProperty,
+                    sequencingOrder,
                     pageSize
             );
         } catch (InvalidParameterException | TypeErrorException | RepositoryErrorException | PropertyErrorException | PagingErrorException | FunctionNotSupportedException | UserNotAuthorizedException e) {
@@ -2697,6 +3006,39 @@ public class ConnectorTest {
                                                                MatchCriteria matchCriteria,
                                                                int pageSize,
                                                                int totalNumberExpected) {
+        return testFindRelationshipsByProperty(
+                typeGUID,
+                typeName,
+                matchProperties,
+                matchCriteria,
+                pageSize,
+                totalNumberExpected,
+                null,
+                null
+        );
+    }
+
+    /**
+     * Executes a common set of tests against a list of Relationship objects after first searching for them by property.
+     *
+     * @param typeGUID the relationship type GUID to search
+     * @param typeName the name of the type to search
+     * @param matchProperties the properties to match against
+     * @param matchCriteria the criteria by which to match
+     * @param pageSize the number of results to limit
+     * @param totalNumberExpected the total number of expected results
+     * @param sequencingOrder the ordering to use for the results
+     * @param sequencingProperty the property by which to sort (if sequencing order is based on a property)
+     * @return {@code List<Relationship>} the results of the query
+     */
+    private List<Relationship> testFindRelationshipsByProperty(String typeGUID,
+                                                               String typeName,
+                                                               InstanceProperties matchProperties,
+                                                               MatchCriteria matchCriteria,
+                                                               int pageSize,
+                                                               int totalNumberExpected,
+                                                               SequencingOrder sequencingOrder,
+                                                               String sequencingProperty) {
 
         List<Relationship> results = null;
 
@@ -2709,8 +3051,8 @@ public class ConnectorTest {
                     0,
                     null,
                     null,
-                    null,
-                    null,
+                    sequencingProperty,
+                    sequencingOrder,
                     pageSize
             );
         } catch (InvalidParameterException | TypeErrorException | RepositoryErrorException | PropertyErrorException | PagingErrorException | FunctionNotSupportedException | UserNotAuthorizedException e) {
@@ -2877,6 +3219,7 @@ public class ConnectorTest {
      * @param omrsType the type of OMRS object
      * @param prefix the prefix for a generated entity (or null if none)
      * @param rid the RID of the IGC object
+     * @param pageSize limit the results
      * @param totalNumberExpected the total number of relationships expected
      * @param relationshipExpectations a list of relationship expectations
      * @return {@code List<Relationship>} the list of relationships retrieved
@@ -2885,8 +3228,45 @@ public class ConnectorTest {
                                                           String omrsType,
                                                           String prefix,
                                                           String rid,
+                                                          int pageSize,
                                                           int totalNumberExpected,
                                                           List<RelationshipExpectation> relationshipExpectations) {
+        return testRelationshipsForEntity(
+                igcType,
+                omrsType,
+                prefix,
+                rid,
+                pageSize,
+                totalNumberExpected,
+                relationshipExpectations,
+                null,
+                null
+        );
+    }
+
+    /**
+     * Executes a common set of tests against a list of Relationship objects after first directly retrieving them.
+     *
+     * @param igcType the type of IGC object
+     * @param omrsType the type of OMRS object
+     * @param prefix the prefix for a generated entity (or null if none)
+     * @param rid the RID of the IGC object
+     * @param pageSize limit the results
+     * @param totalNumberExpected the total number of relationships expected
+     * @param relationshipExpectations a list of relationship expectations
+     * @param sequencingOrder the ordering to use for the results
+     * @param sequencingProperty the property by which to sort (if sequencing order is based on a property)
+     * @return {@code List<Relationship>} the list of relationships retrieved
+     */
+    private List<Relationship> testRelationshipsForEntity(String igcType,
+                                                          String omrsType,
+                                                          String prefix,
+                                                          String rid,
+                                                          int pageSize,
+                                                          int totalNumberExpected,
+                                                          List<RelationshipExpectation> relationshipExpectations,
+                                                          SequencingOrder sequencingOrder,
+                                                          String sequencingProperty) {
 
         List<Relationship> relationships = null;
 
@@ -2899,11 +3279,11 @@ public class ConnectorTest {
                     0,
                     null,
                     null,
-                    null,
-                    null,
-                    MockConstants.EGERIA_PAGESIZE
+                    sequencingProperty,
+                    sequencingOrder,
+                    pageSize
             );
-        } catch (InvalidParameterException | TypeErrorException | RepositoryErrorException | EntityNotKnownException | PropertyErrorException | PagingErrorException | FunctionNotSupportedException | UserNotAuthorizedException e) {
+        } catch (InvalidParameterException | TypeErrorException | RepositoryErrorException | EntityNotKnownException | PagingErrorException | FunctionNotSupportedException | UserNotAuthorizedException e) {
             log.error("Unable to retrieve relationships for {}.", omrsType, e);
             assertNull(e);
         } catch (Exception e) {

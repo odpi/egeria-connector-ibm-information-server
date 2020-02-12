@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
@@ -173,6 +174,12 @@ public class ClientTest {
         assertEquals(category.getShortDescription(), MockConstants.GLOSSARY_DESC);
         assertEquals(igcRestClient.getPropertyByName(category, "short_description"), MockConstants.GLOSSARY_DESC);
         assertNotNull(category.toString());
+        Reference testAgain = igcRestClient.getAssetWithSubsetOfProperties(MockConstants.GLOSSARY_RID, "category", properties.stream().toArray(String[]::new));
+        assertEquals(testPart.toString(), testAgain.toString());
+        testAgain = igcRestClient.getAssetWithSubsetOfProperties(MockConstants.GLOSSARY_RID, "category", properties, 100);
+        assertEquals(testPart.toString(), testAgain.toString());
+        testAgain = igcRestClient.getAssetWithSubsetOfProperties(MockConstants.GLOSSARY_RID, "category", properties.stream().toArray(String[]::new), 100);
+        assertEquals(testPart.toString(), testAgain.toString());
     }
 
     @Test
@@ -297,6 +304,26 @@ public class ClientTest {
         } catch (IOException e) {
             assertNull(e, e.getMessage());
         }
+
+    }
+
+    @Test
+    public void testInvalidJSON() {
+
+        String brokenAssetJSON = "{\"_type\":\"term\",\"_id\":\"123\",\"_name\":\"BrokenTestTerm\"";
+        assertThrows(IGCParsingException.class, () -> igcRestClient.readJSONIntoPOJO(brokenAssetJSON));
+        assertThrows(IGCParsingException.class, () -> igcRestClient.readJSONIntoItemList(brokenAssetJSON));
+
+    }
+
+    @Test
+    public void testVirtualAssets() {
+
+        String virtualAssetRid = "extern:fr:123";
+        String realAssetRid = "abc123.def456";
+        assertTrue(IGCRestClient.isVirtualAssetRid(virtualAssetRid));
+        assertTrue(IGCRestClient.isVirtualAssetRid(null));
+        assertFalse(IGCRestClient.isVirtualAssetRid(realAssetRid));
 
     }
 
