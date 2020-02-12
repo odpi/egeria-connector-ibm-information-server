@@ -164,8 +164,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         List<TypeDef> typeDefs = typeDefStore.getAllTypeDefs();
         List<TypeDef> results = new ArrayList<>();
-        if (matchCriteria != null) {
-            Map<String, Object> properties = matchCriteria.getTypeDefProperties();
+        Map<String, Object> properties = matchCriteria.getTypeDefProperties();
+        if (properties != null && !properties.isEmpty()) {
             for (TypeDef candidate : typeDefs) {
                 List<TypeDefAttribute> candidateProperties = candidate.getPropertiesDefinition();
                 if (candidateProperties != null) {

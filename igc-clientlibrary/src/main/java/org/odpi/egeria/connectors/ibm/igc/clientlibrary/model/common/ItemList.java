@@ -90,8 +90,10 @@ public class ItemList<T extends Reference> extends ObjectPrinter {
      * @param igcrest the IGCRestClient connection to use to retrieve the relationships
      */
     public void getAllPages(IGCRestClient igcrest) {
-        this.items = igcrest.getAllPages(this.items, this.paging);
-        this.paging = new Paging(this.items.size());
+        if (this.items.size() < this.paging.getNumTotal()) {
+            this.items = igcrest.getAllPages(this.items, this.paging);
+            this.paging = new Paging(this.items.size());
+        }
     }
 
     /**

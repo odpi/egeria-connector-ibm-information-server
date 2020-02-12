@@ -2,6 +2,9 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Paging;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
@@ -13,7 +16,9 @@ import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static org.testng.Assert.*;
 
@@ -55,6 +60,10 @@ public class IGCRepositoryHelperTest {
         long now = new Date().getTime();
         testEquivalence(now, now + 1, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_DATE);
         testEquivalence("TestString", "OtherString", PrimitiveDefCategory.OM_PRIMITIVE_TYPE_STRING);
+
+        assertTrue(IGCRepositoryHelper.equivalentValues(null, null));
+        assertFalse(IGCRepositoryHelper.equivalentValues(null, new PrimitivePropertyValue()));
+        assertFalse(IGCRepositoryHelper.equivalentValues("a", null));
 
     }
 
@@ -166,6 +175,27 @@ public class IGCRepositoryHelperTest {
         }
         assertEquals(set.size(), 1);
         assertEquals(set.getConditionSetObject().toString(), "{\"conditions\":[{\"property\":\"testProperty\",\"operator\":\"=\",\"value\":\"TestSymbolicName\"}],\"operator\":\"and\"}");
+
+    }
+
+    @Test
+    public void testReferenceHandling() {
+
+        List<Reference> list = new ArrayList<>();
+        IGCRepositoryHelper.addReferencesToList(null, list, null);
+        assertTrue(list.isEmpty());
+        ItemList<Reference> itemList = new ItemList<>();
+        List<Reference> items = new ArrayList<>();
+        items.add(new Reference("TestName1", "term", "123"));
+        items.add(new Reference("TestName2", "term", "456"));
+        itemList.setItems(items);
+        Paging paging = new Paging();
+        paging.setNumTotal(2);
+        paging.setPageSize(10);
+        itemList.setPaging(paging);
+        IGCRepositoryHelper.addReferencesToList(null, list, itemList);
+        assertFalse(list.isEmpty());
+        assertEquals(list.size(), 2);
 
     }
 

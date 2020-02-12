@@ -223,54 +223,56 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         try {
             InfosphereEvents eventObj = this.mapper.readValue(event, InfosphereEvents.class);
-            switch(eventObj.getEventType()) {
-                case "IMAM_SHARE_EVENT":
-                    processIMAMShareEventV115((InfosphereEventsIMAMEvent)eventObj);
-                    break;
-                case "DC_CREATE_EVENT":
-                case "DC_MERGED_EVENT":
-                    processDataConnectionEventV115((InfosphereEventsDCEvent)eventObj);
-                    break;
-                case "IA_COLUMN_CLASSIFIED_EVENT":
-                case "IA_COLUMN_ANALYZED_EVENT":
-                case "IA_TABLE_RESULTS_PUBLISHED":
-                case "IA_COLUMN_FAILED_EVENT":
-                    processIAEventV115((InfosphereEventsIAEvent)eventObj);
-                    break;
-                case "IA_PROJECT_CREATED_EVENT":
-                case "IA_TABLE_ADDED_TO_PROJECT":
-                case "IA_TABLES_ADDED_TO_PROJECT":
-                case "IA_TABLE_REMOVED_FROM_PROJECT":
-                case "IA_TABLES_REMOVED_FROM_PROJECT":
-                case "IA_DATARULE_CREATED_EVENT":
-                case "IA_DATARULE_DELETED_EVENT":
-                case "IA_DATARULESET_CREATED_EVENT":
-                case "IA_DATARULESET_DELETED_EVENT":
-                case "IA_DATARULE_DEFINITION_CREATED_EVENT":
-                case "IA_DATARULE_DEFINITION_DELETED_EVENT":
-                case "IA_DATARULESET_DEFINITION_CREATED_EVENT":
-                case "IA_DATARULESET_DEFINITION_DELETED_EVENT":
-                case "IA_COLUMN_ANALYSIS_SUBMITTED_EVENT":
-                case "IA_COLUMN_ANALYSES_SUBMITTED_EVENT":
-                case "IA_COLUMN_ANALYSIS_STARTED_EVENT":
-                case "IA_COLUMN_ANALYSIS_FINISHED_EVENT":
-                case "IA_COLUMN_ANALYSIS_FAILED_EVENT":
-                case "IA_PROFILE_BATCH_COMPLETED_EVENT":
-                case "IA_DATAQUALITY_ANALYSIS_SUBMITTED":
-                case "IA_DATAQUALITY_ANALYSIS_SUBMITTED_EVENT":
-                case "IA_DATAQUALITY_ANALYSES_SUBMITTED_EVENT":
-                case "IA_DATAQUALITY_ANALYSIS_STARTED_EVENT":
-                case "IA_DATAQUALITY_ANALYSIS_FINISHED_EVENT":
-                case "IA_DATAQUALITY_ANALYSIS_FAILED_EVENT":
-                case "DISCOVER_IMPORT_COMPLETE":
-                    log.info("Found Information Analyzer event that cannot be processed via APIs, skipping.");
-                    break;
-                case "IGC_ETLGROUP_EVENT":
-                    log.info("Found DataStage event that should be processed via data engine proxy, skipping.");
-                    break;
-                default:
-                    processAssetEventV115((InfosphereEventsAssetEvent)eventObj);
-                    break;
+            if (eventObj != null) {
+                switch (eventObj.getEventType()) {
+                    case "IMAM_SHARE_EVENT":
+                        processIMAMShareEventV115((InfosphereEventsIMAMEvent) eventObj);
+                        break;
+                    case "DC_CREATE_EVENT":
+                    case "DC_MERGED_EVENT":
+                        processDataConnectionEventV115((InfosphereEventsDCEvent) eventObj);
+                        break;
+                    case "IA_COLUMN_CLASSIFIED_EVENT":
+                    case "IA_COLUMN_ANALYZED_EVENT":
+                    case "IA_TABLE_RESULTS_PUBLISHED":
+                    case "IA_COLUMN_FAILED_EVENT":
+                        processIAEventV115((InfosphereEventsIAEvent) eventObj);
+                        break;
+                    case "IA_PROJECT_CREATED_EVENT":
+                    case "IA_TABLE_ADDED_TO_PROJECT":
+                    case "IA_TABLES_ADDED_TO_PROJECT":
+                    case "IA_TABLE_REMOVED_FROM_PROJECT":
+                    case "IA_TABLES_REMOVED_FROM_PROJECT":
+                    case "IA_DATARULE_CREATED_EVENT":
+                    case "IA_DATARULE_DELETED_EVENT":
+                    case "IA_DATARULESET_CREATED_EVENT":
+                    case "IA_DATARULESET_DELETED_EVENT":
+                    case "IA_DATARULE_DEFINITION_CREATED_EVENT":
+                    case "IA_DATARULE_DEFINITION_DELETED_EVENT":
+                    case "IA_DATARULESET_DEFINITION_CREATED_EVENT":
+                    case "IA_DATARULESET_DEFINITION_DELETED_EVENT":
+                    case "IA_COLUMN_ANALYSIS_SUBMITTED_EVENT":
+                    case "IA_COLUMN_ANALYSES_SUBMITTED_EVENT":
+                    case "IA_COLUMN_ANALYSIS_STARTED_EVENT":
+                    case "IA_COLUMN_ANALYSIS_FINISHED_EVENT":
+                    case "IA_COLUMN_ANALYSIS_FAILED_EVENT":
+                    case "IA_PROFILE_BATCH_COMPLETED_EVENT":
+                    case "IA_DATAQUALITY_ANALYSIS_SUBMITTED":
+                    case "IA_DATAQUALITY_ANALYSIS_SUBMITTED_EVENT":
+                    case "IA_DATAQUALITY_ANALYSES_SUBMITTED_EVENT":
+                    case "IA_DATAQUALITY_ANALYSIS_STARTED_EVENT":
+                    case "IA_DATAQUALITY_ANALYSIS_FINISHED_EVENT":
+                    case "IA_DATAQUALITY_ANALYSIS_FAILED_EVENT":
+                    case "DISCOVER_IMPORT_COMPLETE":
+                        log.info("Found Information Analyzer event that cannot be processed via APIs, skipping.");
+                        break;
+                    case "IGC_ETLGROUP_EVENT":
+                        log.info("Found DataStage event that should be processed via data engine proxy, skipping.");
+                        break;
+                    default:
+                        processAssetEventV115((InfosphereEventsAssetEvent) eventObj);
+                        break;
+                }
             }
         } catch (IOException e) {
             log.error("Unable to translate event {} into object.", event, e);
@@ -314,16 +316,10 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         String action = event.getEventType();
 
-        switch(action) {
-            case InfosphereEventsDCEvent.ACTION_CREATE:
-                processAsset(event.getCreatedRID(), "data_connection");
-                break;
-            case InfosphereEventsDCEvent.ACTION_MODIFY:
-                processAsset(event.getMergedRID(), "data_connection");
-                break;
-            default:
-                log.warn("Found unhandled action type '{}' for data connection on event: {}", action, event);
-                break;
+        if (action.equals(InfosphereEventsDCEvent.ACTION_CREATE)) {
+            processAsset(event.getCreatedRID(), "data_connection");
+        } else if (action.equals(InfosphereEventsDCEvent.ACTION_MODIFY)) {
+            processAsset(event.getMergedRID(), "data_connection");
         }
 
     }
