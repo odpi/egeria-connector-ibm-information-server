@@ -979,9 +979,25 @@ public class MockServerExpectations implements PluginExpectationInitializer {
     }
 
     private void setFindSchemaElementByAnchorGUID(MockServerClient mockServerClient) {
-        setSearchAndResponse(mockServerClient, "FindSchemaElementByAnchorGUID", "results.json",
+        String caseName = "FindSchemaElementByAnchorGUID";
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
                 json(
                         "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"conditions\":[{\"property\":\"view.database_schema\",\"operator\":\"=\",\"value\":\"b1c497ce.c1fb060b.001mts4re.7331jdi.nnod24.3aci569ca741v10qq7pbb\"},{\"property\":\"database_table.database_schema\",\"operator\":\"=\",\"value\":\"b1c497ce.c1fb060b.001mts4re.7331jdi.nnod24.3aci569ca741v10qq7pbb\"}],\"operator\":\"or\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_table.json",
+                json(
+                        "{\"types\":[\"database_table\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"database_schema\",\"operator\":\"=\",\"value\":\"b1c497ce.c1fb060b.001mts4re.7331jdi.nnod24.3aci569ca741v10qq7pbb\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_fields.json",
+                json(
+                        "{\"types\":[\"data_file_field\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"data_file_record.data_file\",\"operator\":\"=\",\"value\":\"b1c497ce.6e76d866.001mts4ph.b7m5306.9nrsit.7gtv16ok5bkl9ulo5rq8b\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_records.json",
+                json(
+                        "{\"types\":[\"data_file_record\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"data_file\",\"operator\":\"=\",\"value\":\"b1c497ce.6e76d866.001mts4ph.b7m5306.9nrsit.7gtv16ok5bkl9ulo5rq8b\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }

@@ -2360,6 +2360,53 @@ public class ConnectorTest {
                 8
         );
 
+        testFindEntitiesByProperty(
+                "ce7e72b8-396a-4013-8688-f9d973067425",
+                "RelationalTable",
+                ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        guid = new IGCEntityGuid(metadataCollectionId, "data_file", MockConstants.DATA_FILE_RID);
+        ip = new InstanceProperties();
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "anchorGUID", repositoryHelper.getExactMatchRegex(guid.toString()), methodName);
+        testFindEntitiesByProperty(
+                "d81a0425-4e9b-4f31-bc1c-e18c3566da10",
+                "TabularColumn",
+                ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                3
+        );
+
+        testFindEntitiesByProperty(
+                "248975ec-8019-4b8a-9caf-084c8b724233",
+                "TabularSchemaType",
+                ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        ip = new InstanceProperties();
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "anchorGUID", repositoryHelper.getContainsRegex(guid.toString()), methodName);
+        InstanceProperties finalIpNonExact = ip;
+        assertThrows(FunctionNotSupportedException.class, () -> igcomrsMetadataCollection.findEntitiesByProperty(
+                MockConstants.EGERIA_USER,
+                "d81a0425-4e9b-4f31-bc1c-e18c3566da10",
+                finalIpNonExact,
+                MatchCriteria.ALL,
+                0,
+                null,
+                null,
+                null,
+                null,
+                null,
+                MockConstants.EGERIA_PAGESIZE
+        ));
+
     }
 
     @Test
