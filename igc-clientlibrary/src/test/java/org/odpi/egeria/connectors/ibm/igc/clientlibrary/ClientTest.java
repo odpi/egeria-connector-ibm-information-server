@@ -119,6 +119,14 @@ public class ClientTest {
     }
 
     @Test
+    public void testEmptyTypeDetails() {
+        assertTrue(igcRestClient.getAllPropertiesForType(null).isEmpty());
+        assertTrue(igcRestClient.getNonRelationshipPropertiesForType(null).isEmpty());
+        assertTrue(igcRestClient.getAllStringPropertiesForType(null).isEmpty());
+        assertTrue(igcRestClient.getPagedRelationshipPropertiesForType(null).isEmpty());
+    }
+
+    @Test
     public void testFullAssetRetrievalAndSerDe() {
 
         Reference testFull = igcRestClient.getAssetById(MockConstants.GLOSSARY_RID);
