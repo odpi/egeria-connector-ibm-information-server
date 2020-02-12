@@ -8,7 +8,9 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapper;
 import org.odpi.egeria.connectors.ibm.igc.eventmapper.model.ChangeSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.ContactDetailsMapper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.GlossaryMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.RelationalDBSchemaTypeMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.CategoryAnchorMapper;
@@ -312,6 +314,9 @@ public class ConnectorTest {
             assertNotNull(typeDefsByProperty);
             names = typeDefsByProperty.stream().map(TypeDef::getName).collect(Collectors.toList());
             assertTrue(names.contains("Referenceable"));
+            typeDefsByProperty = igcomrsMetadataCollection.findTypeDefsByProperty(MockConstants.EGERIA_USER, new TypeDefProperties());
+            assertNotNull(typeDefsByProperty);
+            assertTrue(names.contains("Referenceable"));
         } catch (InvalidParameterException | RepositoryErrorException e) {
             log.error("Unable to search for TypeDefs with contains string.", e);
             assertNull(e);
@@ -551,6 +556,34 @@ public class ConnectorTest {
 
         assertNotNull(guid);
         assertTrue(guid.toString().endsWith(":term@def<Synonym>term@abc"));
+
+        // TODO: test other scenarios for calculating relationship GUIDs
+
+        assertNull(RelationshipMapping.getProxyOneGuidFromRelationship(null, null));
+        assertNull(RelationshipMapping.getProxyOneGuidFromRelationship(igcRepositoryHelper, null));
+        assertNull(RelationshipMapping.getProxyTwoGuidFromRelationship(null, null));
+        assertNull(RelationshipMapping.getProxyTwoGuidFromRelationship(igcRepositoryHelper, null));
+
+    }
+
+    @Test
+    public void testIgcRepositoryHelper() {
+
+        List<RelationshipMapping> relationshipMappings = igcRepositoryHelper.getAllRelationshipMappings();
+        assertNotNull(relationshipMappings);
+        assertFalse(relationshipMappings.isEmpty());
+        Set<EntityMapping> entityMappings = igcRepositoryHelper.getEntityMappingsByPrefix(RelationalDBSchemaTypeMapper.IGC_RID_PREFIX);
+        assertNotNull(entityMappings);
+        assertFalse(entityMappings.isEmpty());
+        ClassificationMapping classificationMapping = igcRepositoryHelper.getClassificationMappingByTypes("PrimaryKey", "database_column");
+        assertNotNull(classificationMapping);
+        assertEquals(classificationMapping.getOmrsClassificationType(), "PrimaryKey");
+        assertEquals(classificationMapping.getIgcAssetType(), "database_column");
+        List<EntityMapping> defaultMappings = igcRepositoryHelper.getMappers("unmapped_type", null);
+        assertNotNull(defaultMappings);
+        assertEquals(defaultMappings.size(), 1);
+        assertEquals(defaultMappings.get(0).getOmrsTypeDefName(), "Referenceable");
+        assertEquals(defaultMappings.get(0).getIgcAssetType(), "main_object");
 
     }
 
@@ -2557,6 +2590,37 @@ public class ConnectorTest {
         assertNotNull(change);
         assertEquals(change.size(), 1);
         return change.get(0);
+    }
+
+    @Test
+    public void testUnsupportedEvents() {
+
+        try {
+
+            igcomrsRepositoryEventMapper.processEvent("{\"INVALID\":\"\"");
+            igcomrsRepositoryEventMapper.processEvent("{\"eventType\":\"IA_PROJECT_CREATED_EVENT\"}");
+            igcomrsRepositoryEventMapper.processEvent("{\"eventType\":\"IGC_ETLGROUP_EVENT\"}");
+            igcomrsRepositoryEventMapper.processEvent("{\"eventType\":\"IGC_BUSINESSTERM_EVENT\",\"ACTION\":\"ASSIGNED_RELATIONSHIP\"}");
+            igcomrsRepositoryEventMapper.processEvent("{\"eventType\":\"IGC_BUSINESSTERM_EVENT\",\"ACTION\":\"INVALID\"}");
+            igcomrsRepositoryEventMapper.processEvent("{\"eventType\":\"IA_COLUMN_CLASSIFIED_EVENT\"}");
+
+        } catch (Exception e) {
+            log.error("Hit unexpected exception during unsupported event processing.", e);
+            assertNull(e);
+        }
+
+    }
+
+    @Test
+    public void testDataConnectionEvent() {
+
+        try {
+            igcomrsRepositoryEventMapper.processEvent("{\"createdRID\":\"" + MockConstants.DATA_CONNECTION_RID + "\",\"eventType\":\"DC_CREATE_EVENT\"}");
+        } catch (Exception e) {
+            log.error("Hit unexpected exception during data connection event processing.", e);
+            assertNull(e);
+        }
+
     }
 
     @Test
