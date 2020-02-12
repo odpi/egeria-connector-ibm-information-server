@@ -17,7 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.*;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.testng.Assert.*;
 
@@ -86,6 +88,30 @@ public class ConnectorTest {
         DataStageConnector finalDsConnector = dsConnector;
         assertNotNull(finalDsConnector);
         assertThrows(ConnectorCheckedException.class, () -> finalDsConnector.start());
+
+    }
+
+    @Test
+    public void testExtraConfig() {
+
+        Connection extraConfigConnection = new MockConnection();
+
+        Map<String, Object> configProperties = new HashMap<>();
+        configProperties.put(DataStageConnectorProvider.CREATE_DATA_STORE_SCHEMAS, true);
+        configProperties.put(DataStageConnectorProvider.INCLUDE_VIRTUAL_ASSETS, false);
+        configProperties.put(DataStageConnectorProvider.PAGE_SIZE, 1000);
+        extraConfigConnection.setConfigurationProperties(configProperties);
+
+        ConnectorBroker connectorBroker = new ConnectorBroker();
+        try {
+            Object connector = connectorBroker.getConnector(extraConfigConnection);
+            assertTrue(connector instanceof DataStageConnector);
+            DataStageConnector dsConnector = (DataStageConnector) connector;
+            dsConnector.start();
+        } catch (ConnectionCheckedException | ConnectorCheckedException e) {
+            log.error("Unable to retrieve connection through the broker.", e);
+            assertNull(e);
+        }
 
     }
 
