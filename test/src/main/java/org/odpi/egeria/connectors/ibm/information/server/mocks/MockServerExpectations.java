@@ -282,7 +282,7 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 );
         mockServerClient
                 .withSecure(true)
-                .when(getProjectDetailsRequest("SecurityTest1"))
+                .when(getProjectDetailsRequest("SecurityTest2"))
                 .respond(
                         withResponse(getResourceFileContents("ia" + File.separator + "project_CocoPharma.xml"))
                                 .withHeaders(
@@ -291,7 +291,7 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 );
         mockServerClient
                 .withSecure(true)
-                .when(getProjectDetailsRequest("SecurityTest1"))
+                .when(getProjectDetailsRequest("SecurityTest3"))
                 .respond(
                         withResponse(getResourceFileContents("ia" + File.separator + "project_CocoPharma.xml"))
                                 .withHeaders(
