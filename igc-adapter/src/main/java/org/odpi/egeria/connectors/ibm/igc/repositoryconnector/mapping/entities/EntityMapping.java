@@ -570,7 +570,7 @@ public abstract class EntityMapping extends InstanceMapping {
      */
     public final List<String> getAllPropertiesForEntitySummary(IGCRestClient igcRestClient,
                                                                String igcAssetType) {
-        Set<String> allProperties = new HashSet<>();
+        Set<String> allProperties = new TreeSet<>();
         for (ClassificationMapping classificationMapping : getClassificationMappers()) {
             Set<String> classificationProperties = classificationMapping.getMappedIgcPropertyNames();
             if (classificationProperties != null) {
@@ -618,7 +618,7 @@ public abstract class EntityMapping extends InstanceMapping {
      */
     public final List<String> getAllPropertiesForEntityDetail(IGCRestClient igcRestClient,
                                                               String igcAssetType) {
-        Set<String> allProperties = new HashSet<>(getAllMappedIgcProperties());
+        Set<String> allProperties = new TreeSet<>(getAllMappedIgcProperties());
         for (ClassificationMapping classificationMapping : getClassificationMappers()) {
             Set<String> classificationProperties = classificationMapping.getMappedIgcPropertyNames();
             if (classificationProperties != null) {

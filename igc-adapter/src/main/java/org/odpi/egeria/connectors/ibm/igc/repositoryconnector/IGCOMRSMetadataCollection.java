@@ -1613,7 +1613,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     igcRepositoryHelper.setPagingForSearch(igcSearch, fromRelationshipElement, pageSize);
 
                     // Ensure we handle NONE semantics and literal values, as we do for findEntitiesByProperty
-                    InstanceMapping.SearchFilter filter = InstanceMapping.getAllNoneOrSome(mapping, matchProperties, matchCriteria);
+                    InstanceMapping.SearchFilter filter = mapping.getAllNoneOrSome(matchProperties, matchCriteria);
 
                     if (!filter.equals(InstanceMapping.SearchFilter.NONE)) {
                         igcRepositoryHelper.processResults(mapping,

@@ -424,7 +424,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
         List<IGCSearch> searches;
         if ( (matchProperties == null && matchCriteria == null)
-                || InstanceMapping.getAllNoneOrSome(this, matchProperties, matchCriteria).equals(SearchFilter.NONE)) {
+                || getAllNoneOrSome(matchProperties, matchCriteria).equals(SearchFilter.NONE)) {
             searches = new ArrayList<>();
             ProxyMapping pm = getProxyTwoMapping();
             IGCSearch igcSearch = new IGCSearch(pm.getIgcAssetType());
@@ -619,29 +619,29 @@ public abstract class RelationshipMapping extends InstanceMapping {
      */
     public List<String> getIgcRelationshipPropertiesForType(String igcAssetType) {
 
-        List<String> properties = new ArrayList<>();
+        Set<String> properties = new TreeSet<>();
 
         if (igcAssetType == null) {
             log.error("No asset type provided.");
         } else {
             String simpleType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
             if (sameTypeOnBothEnds() && simpleType.equals(one.getIgcAssetType())) {
-                addRealPropertiesToList(one.getIgcRelationshipProperties(), properties);
-                addRealPropertiesToList(two.getIgcRelationshipProperties(), properties);
+                addRealPropertiesToSet(one.getIgcRelationshipProperties(), properties);
+                addRealPropertiesToSet(two.getIgcRelationshipProperties(), properties);
             } else if (simpleType.equals(one.getIgcAssetType())) {
-                addRealPropertiesToList(one.getIgcRelationshipProperties(), properties);
+                addRealPropertiesToSet(one.getIgcRelationshipProperties(), properties);
             } else if (simpleType.equals(two.getIgcAssetType())) {
-                addRealPropertiesToList(two.getIgcRelationshipProperties(), properties);
+                addRealPropertiesToSet(two.getIgcRelationshipProperties(), properties);
             } else if (one.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !one.excludeIgcAssetType.contains(simpleType)) {
-                addRealPropertiesToList(one.getIgcRelationshipProperties(), properties);
+                addRealPropertiesToSet(one.getIgcRelationshipProperties(), properties);
             } else if (two.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !two.excludeIgcAssetType.contains(simpleType)) {
-                addRealPropertiesToList(two.getIgcRelationshipProperties(), properties);
+                addRealPropertiesToSet(two.getIgcRelationshipProperties(), properties);
             } else {
                 log.warn("getIgcRelationshipPropertiesForType - Provided asset type does not match either proxy type (or was explicitly excluded): {}", simpleType);
             }
         }
 
-        return properties;
+        return new ArrayList<>(properties);
 
     }
 
@@ -655,30 +655,30 @@ public abstract class RelationshipMapping extends InstanceMapping {
      */
     public List<String> getDirectRelationshipPropertiesForType(String igcAssetType) {
 
-        List<String> properties = new ArrayList<>();
+        Set<String> properties = new TreeSet<>();
         if (igcAssetType == null) {
             log.error("No asset type provided.");
         } else {
             String simpleType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
             if (getOptimalStart().equals(OptimalStart.ONE) && simpleType.equals(one.getIgcAssetType())) {
-                addRealPropertiesToList(one.getIgcRelationshipProperties(), properties);
+                addRealPropertiesToSet(one.getIgcRelationshipProperties(), properties);
             } else if (getOptimalStart().equals(OptimalStart.TWO) && simpleType.equals(two.getIgcAssetType())) {
-                addRealPropertiesToList(two.getIgcRelationshipProperties(), properties);
+                addRealPropertiesToSet(two.getIgcRelationshipProperties(), properties);
             }
         }
-        return properties;
+        return new ArrayList<>(properties);
 
     }
 
     /**
      * Keep unique properties in the list, and avoid the SELF_REFERENCE_SENTINEL value.
      *
-     * @param candidates the candidate list to add to the list of unique, real properties
-     * @param realProperties the list of unique, real properties
+     * @param candidates the candidate set to add to the list of unique, real properties
+     * @param realProperties the set of unique, real properties
      */
-    private void addRealPropertiesToList(List<String> candidates, List<String> realProperties) {
+    private void addRealPropertiesToSet(List<String> candidates, Set<String> realProperties) {
         for (String propertyName : candidates) {
-            if (!propertyName.equals(SELF_REFERENCE_SENTINEL) && !propertyName.equals("") && !realProperties.contains(propertyName)) {
+            if (!propertyName.equals(SELF_REFERENCE_SENTINEL) && !propertyName.equals("")) {
                 realProperties.add(propertyName);
             }
         }
@@ -690,7 +690,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     public class ProxyMapping {
 
         private String igcAssetType;
-        private ArrayList<String> igcRelationshipProperties;
+        private Set<String> igcRelationshipProperties;
         private String omrsRelationshipProperty;
         private String igcRidPrefix;
         private Set<String> excludeIgcAssetType;
@@ -701,7 +701,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                      String igcRidPrefix) {
 
             this.igcAssetType = igcAssetType;
-            this.igcRelationshipProperties = new ArrayList<>();
+            this.igcRelationshipProperties = new TreeSet<>();
             if (igcRelationshipProperty != null) {
                 this.igcRelationshipProperties.add(igcRelationshipProperty);
             }
@@ -725,7 +725,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
          *
          * @return {@code List<String>}
          */
-        public List<String> getIgcRelationshipProperties() { return this.igcRelationshipProperties; }
+        public List<String> getIgcRelationshipProperties() { return new ArrayList<>(this.igcRelationshipProperties); }
 
         /**
          * Retrieve the list of IGC relationship properties that can be used from this side of the relationship

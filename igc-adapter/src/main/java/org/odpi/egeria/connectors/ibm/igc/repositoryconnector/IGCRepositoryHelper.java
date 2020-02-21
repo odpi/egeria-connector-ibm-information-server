@@ -348,7 +348,7 @@ public class IGCRepositoryHelper {
 
             String qualifiedNameRegex = null;
 
-            InstanceMapping.SearchFilter filter = InstanceMapping.getAllNoneOrSome(mapping, matchProperties, matchCriteria);
+            InstanceMapping.SearchFilter filter = mapping.getAllNoneOrSome(matchProperties, matchCriteria);
 
             if (filter.equals(InstanceMapping.SearchFilter.NONE)) {
                 igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());

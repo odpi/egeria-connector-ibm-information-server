@@ -287,7 +287,6 @@ public class EntityMappingInstance {
                             igcPropertiesToRetrieve
                     );
                 }
-                omrsSummary.setInstanceURL(igcEntity.getUrl());
             } catch (TypeErrorException e) {
                 log.error("Unable to get skeleton summary entity, defaulting to basic summary.", e);
             }
@@ -320,7 +319,6 @@ public class EntityMappingInstance {
                             igcPropertiesToRetrieve
                     );
                 }
-                omrsDetail.setInstanceURL(igcEntity.getUrl());
             } catch (TypeErrorException e) {
                 log.error("Unable to get skeleton detail entity, defaulting to basic summary.", e);
             }
