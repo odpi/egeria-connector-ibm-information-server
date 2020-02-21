@@ -6,10 +6,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityEx
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Paging;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -116,6 +113,35 @@ public class ClientTest {
         assertTrue(igcRestClient.hasModificationDetails("term"));
         assertTrue(igcRestClient.isCreatable("term"));
         assertEquals(igcRestClient.getDisplayNameForType("term"), "Term");
+    }
+
+    @Test
+    public void testNotes() {
+
+        Reference testNote = igcRestClient.getAssetById(MockConstants.NOTE_RID);
+        assertNotNull(testNote);
+        assertTrue(testNote instanceof Note);
+        Note note = (Note) testNote;
+        assertEquals(note.getNoteType(), "Informational");
+        assertEquals(note.getType(), "note");
+        assertTrue(note.getNote().startsWith("Just an"));
+        assertEquals(note.getSubject(), "This is the subject");
+        assertEquals(note.getStatus(), "Open");
+        Reference related = note.getBelongsTo();
+        assertNotNull(related);
+        assertEquals(related.getType(), "term");
+        assertEquals(related.getName(), "TestTerm");
+
+        Reference testTerm = igcRestClient.getAssetById(MockConstants.TERM_WITH_NOTES_RID);
+        assertNotNull(testTerm);
+        assertTrue(testTerm instanceof Term);
+        Term term = (Term) testTerm;
+        ItemList<Note> notes = term.getNotes();
+        assertNotNull(notes);
+        List<Note> list = notes.getItems();
+        assertEquals(list.size(), 2);
+        assertEquals(list.get(1).getSubject(), "This is the subject");
+
     }
 
     @Test

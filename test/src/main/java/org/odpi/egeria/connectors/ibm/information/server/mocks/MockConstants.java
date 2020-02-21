@@ -37,6 +37,8 @@ public class MockConstants {
     public static final String GLOSSARY_QN = "gen!GL@(category)=Coco Pharmaceuticals";
 
     // RIDs used for specific scenarios to test IGC mappers
+    public static final String NOTE_RID = "b1c497ce.1a21c74f.00270nau6.74dr5d1.dg30je.1sa0foiromdmt9c4ga8v2";
+    public static final String TERM_WITH_NOTES_RID = "6662c0f2.e1b1ec6c.00270n9bc.9a0o5ur.hsbem7.o7tuf0mn7hgv85dv4s707";
     public static final String CATEGORY_RID = "6662c0f2.ee6a64fe.o1h6evehs.j0f25pn.ihsrb3.m7984f1jgfencf15nopk0";
     public static final String TERM_RID = "6662c0f2.e1b1ec6c.00263shl8.8c6cjg1.thoiqd.g2jiimda7gvarsup8a3bb";
     public static final String HOST_RID = "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh";

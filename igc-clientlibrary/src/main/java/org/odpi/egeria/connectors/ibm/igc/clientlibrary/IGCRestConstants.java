@@ -28,6 +28,8 @@ public class IGCRestConstants {
 
     private static final IGCSearchCondition NO_RESULTS_CONDITION = new IGCSearchCondition("_id", "=", "NONEXISTENT");
 
+    public static final String NOTE = "note";
+
     public static final String INFORMATION_ASSET = "information_asset";
     private static final String NON_STEWARD_USER = "non_steward_user";
     private static final String STEWARD_USER = "steward_user";
@@ -145,7 +147,6 @@ public class IGCRestConstants {
         Set<String> set = new HashSet<>();
         set.add(null);
         set.add("null");
-        set.add("notes");
         set.add("assigned_external_assets");
         set.add("implemented_by_external_assets");
         set.add("governs_external_assets");
@@ -254,6 +255,7 @@ public class IGCRestConstants {
         set.add("impacts_on");
         set.add("in_collections");
         set.add("native_id");
+        set.add("notes");
         set.add("read_by_(design)");
         set.add("read_by_(operational)");
         set.add("read_by_(static)");

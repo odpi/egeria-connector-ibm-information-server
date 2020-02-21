@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.AssetZoneMembershipMapper_FileFolder;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedNoteLogMapper_DataFileFolder;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.FolderHierarchyMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.ConnectionToAssetMapper_FileFolder;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.NestedFileMapper;
@@ -33,6 +34,7 @@ public class FileFolderMapper extends DataStore_Mapper {
         addRelationshipMapper(FolderHierarchyMapper.getInstance(null));
         addRelationshipMapper(NestedFileMapper.getInstance(null));
         addRelationshipMapper(ConnectionToAssetMapper_FileFolder.getInstance(null));
+        addRelationshipMapper(AttachedNoteLogMapper_DataFileFolder.getInstance(null));
 
         // The list of classifications that should be mapped
         addClassificationMapper(AssetZoneMembershipMapper_FileFolder.getInstance(null));

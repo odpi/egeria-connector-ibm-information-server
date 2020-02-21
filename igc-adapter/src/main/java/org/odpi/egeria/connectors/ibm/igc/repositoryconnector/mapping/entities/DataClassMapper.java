@@ -14,6 +14,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedNoteLogMapper_DataClass;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataClassAssignmentMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataClassHierarchyMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
@@ -97,6 +98,7 @@ public class DataClassMapper extends ReferenceableMapper {
         // The list of relationships that should be mapped
         addRelationshipMapper(DataClassHierarchyMapper.getInstance(version));
         addRelationshipMapper(DataClassAssignmentMapper.getInstance(version));
+        addRelationshipMapper(AttachedNoteLogMapper_DataClass.getInstance(version));
 
     }
 

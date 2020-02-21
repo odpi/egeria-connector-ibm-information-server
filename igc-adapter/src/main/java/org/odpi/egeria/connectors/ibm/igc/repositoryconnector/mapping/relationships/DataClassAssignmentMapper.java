@@ -407,8 +407,8 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         IGCSearch igcSearch = new IGCSearch("amazon_s3_data_file_field", igcSearchConditionSet);
         igcSearch.addType("data_file_field");
         igcSearch.addType("database_column");
-        igcSearch.addProperty("selected_classification");
         igcSearch.addProperties(IGCRestConstants.getModificationProperties());
+        igcSearch.addProperty("selected_classification");
         ItemList<InformationAsset> assetsWithSelected = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
 
         assetsWithSelected.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
@@ -478,8 +478,8 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             igcSearchConditionSet.setMatchAnyCondition(false);
         }
         String[] classificationProperties = new String[]{
-                "data_class",
                 "confidencePercent",
+                "data_class",
                 P_THRESHOLD
         };
 

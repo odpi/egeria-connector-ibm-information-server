@@ -167,6 +167,14 @@ public class IGCRestClient {
         this.typeToAllProperties = new HashMap<>();
         this.typeToPagedRelationshipProperties = new HashMap<>();
 
+        // Setup these values up-front for the 'note' type, which is not formally a type otherwise
+        this.typesThatIncludeModificationDetails.add(IGCRestConstants.NOTE);
+        this.typeToDisplayName.put(IGCRestConstants.NOTE, "Note");
+        this.typeToNonRelationshipProperties.put(IGCRestConstants.NOTE, Arrays.asList("note", "status", "subject", "type"));
+        this.typeToStringProperties.put(IGCRestConstants.NOTE, Arrays.asList("note", "status", "subject", "type"));
+        this.typeToAllProperties.put(IGCRestConstants.NOTE, Arrays.asList("belonging_to", "note", "status", "subject", "type"));
+        this.typeToPagedRelationshipProperties.put(IGCRestConstants.NOTE, Arrays.asList("note", "status", "subject", "type"));
+
     }
 
     /**
@@ -1089,39 +1097,48 @@ public class IGCRestClient {
                 // Cache property details
                 List<TypeProperty> view = typeDetails.getViewInfo().getProperties();
                 if (view != null) {
-                    List<String> allProperties = new ArrayList<>();
-                    List<String> nonRelationship = new ArrayList<>();
-                    List<String> stringProperties = new ArrayList<>();
-                    List<String> pagedRelationship = new ArrayList<>();
+                    Set<String> allProperties = new TreeSet<>();
+                    Set<String> nonRelationship = new TreeSet<>();
+                    Set<String> stringProperties = new TreeSet<>();
+                    Set<String> pagedRelationship = new TreeSet<>();
                     for (TypeProperty property : view) {
-                        String propertyName = property.getName();
-                        if (!IGCRestConstants.getPropertiesToIgnore().contains(propertyName)) {
-                            if (propertyName.equals("created_on")) {
-                                typesThatIncludeModificationDetails.add(typeName);
-                            }
-                            org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeReference type = property.getType();
-                            String propertyType = type.getName();
-                            if (propertyType.equals("string") || propertyType.equals("enum")) {
-                                // TODO: confirm whether enums should be treated the same as all other string properties?
-                                stringProperties.add(propertyName);
-                                nonRelationship.add(propertyName);
-                            } else if (type.getUrl() != null) {
-                                if (property.getMaxCardinality() < 0) {
-                                    pagedRelationship.add(propertyName);
-                                }
-                            } else {
-                                nonRelationship.add(propertyName);
-                            }
-                            allProperties.add(propertyName);
 
-                            // Instantiate and cache generic property retrieval mechanisms
-                            cacheAccessor(typeName, propertyName);
+                        String propertyName = property.getName();
+
+                        // Attempt to instantiate and cache generic property retrieval mechanism
+                        // Note that this will return null if the bean / POJO supporting that type does not actually
+                        // contain the property, in which case we should not cache the property as one that we can
+                        // handle
+                        DynamicPropertyReader reader = getAccessor(typeName, propertyName);
+                        if (reader != null) {
+
+                            if (!IGCRestConstants.getPropertiesToIgnore().contains(propertyName)) {
+                                if (propertyName.equals("created_on")) {
+                                    typesThatIncludeModificationDetails.add(typeName);
+                                }
+                                org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeReference type = property.getType();
+                                String propertyType = type.getName();
+                                if (propertyType.equals("string") || propertyType.equals("enum")) {
+                                    // TODO: confirm whether enums should be treated the same as all other string properties?
+                                    stringProperties.add(propertyName);
+                                    nonRelationship.add(propertyName);
+                                } else if (type.getUrl() != null || propertyType.equals("note")) {
+                                    if (property.getMaxCardinality() < 0) {
+                                        pagedRelationship.add(propertyName);
+                                    }
+                                } else {
+                                    nonRelationship.add(propertyName);
+                                }
+                                allProperties.add(propertyName);
+
+                            }
                         }
+
                     }
-                    typeToAllProperties.put(typeName, allProperties);
-                    typeToNonRelationshipProperties.put(typeName, nonRelationship);
-                    typeToStringProperties.put(typeName, stringProperties);
-                    typeToPagedRelationshipProperties.put(typeName, pagedRelationship);
+                    typeToAllProperties.put(typeName, new ArrayList<>(allProperties));
+                    typeToNonRelationshipProperties.put(typeName, new ArrayList<>(nonRelationship));
+                    typeToStringProperties.put(typeName, new ArrayList<>(stringProperties));
+                    typeToPagedRelationshipProperties.put(typeName, new ArrayList<>(pagedRelationship));
 
                 }
                 typeToDisplayName.put(typeName, typeDetails.getName());
@@ -1185,7 +1202,7 @@ public class IGCRestClient {
     public List<String> getAllPropertiesForType(String typeName) {
         cacheTypeDetails(typeName);
         if (typeName != null) {
-            return typeToAllProperties.getOrDefault(typeName, null);
+            return typeToAllProperties.getOrDefault(typeName, Collections.emptyList());
         } else {
             return Collections.emptyList();
         }
@@ -1201,7 +1218,7 @@ public class IGCRestClient {
     public List<String> getNonRelationshipPropertiesForType(String typeName) {
         cacheTypeDetails(typeName);
         if (typeName != null) {
-            return typeToNonRelationshipProperties.getOrDefault(typeName, null);
+            return typeToNonRelationshipProperties.getOrDefault(typeName, Collections.emptyList());
         } else {
             return Collections.emptyList();
         }
@@ -1216,7 +1233,7 @@ public class IGCRestClient {
     public List<String> getAllStringPropertiesForType(String typeName) {
         cacheTypeDetails(typeName);
         if (typeName != null) {
-            return typeToStringProperties.getOrDefault(typeName, null);
+            return typeToStringProperties.getOrDefault(typeName, Collections.emptyList());
         } else {
             return Collections.emptyList();
         }
@@ -1232,7 +1249,7 @@ public class IGCRestClient {
     public List<String> getPagedRelationshipPropertiesForType(String typeName) {
         cacheTypeDetails(typeName);
         if (typeName != null) {
-            return typeToPagedRelationshipProperties.getOrDefault(typeName, null);
+            return typeToPagedRelationshipProperties.getOrDefault(typeName, Collections.emptyList());
         } else {
             return Collections.emptyList();
         }
@@ -1305,20 +1322,6 @@ public class IGCRestClient {
     }
 
     /**
-     * Cache a dynamic property reader to access the specified property for the specified IGC object type.
-     *
-     * @param type the name of the IGC object type
-     * @param property the name of the property within the IGC object type
-     */
-    private void cacheAccessor(String type, String property) {
-        String key = getDynamicPropertyKey(type, property);
-        if (!typeAndPropertyToAccessor.containsKey(key)) {
-            DynamicPropertyReader reader = new DynamicPropertyReader(getPOJOForType(type), property);
-            typeAndPropertyToAccessor.put(key, reader);
-        }
-    }
-
-    /**
      * Retrieve a dynamic property reader to access properties of the provided asset type, and create one if it does
      * not already exist.
      *
@@ -1327,8 +1330,17 @@ public class IGCRestClient {
      * @return DynamicPropertyReader
      */
     private DynamicPropertyReader getAccessor(String type, String property) {
-        cacheAccessor(type, property);
-        return typeAndPropertyToAccessor.getOrDefault(getDynamicPropertyKey(type, property), null);
+        String key = getDynamicPropertyKey(type, property);
+        if (!typeAndPropertyToAccessor.containsKey(key)) {
+            try {
+                DynamicPropertyReader reader = new DynamicPropertyReader(getPOJOForType(type), property);
+                typeAndPropertyToAccessor.put(key, reader);
+            } catch (IllegalArgumentException e) {
+                log.warn("Unable to setup an accessor for property '{}' on type '{}' - this property will be entirely ignored. If this is a custom property, see https://github.com/odpi/egeria-connector-ibm-information-server/tree/master/igc-clientlibrary#using-your-own-asset-types for how to add your own properties.", property, type, e);
+                typeAndPropertyToAccessor.put(key, null); // add a null accessor to avoid trying to build one again
+            }
+        }
+        return typeAndPropertyToAccessor.getOrDefault(key, null);
     }
 
     /**

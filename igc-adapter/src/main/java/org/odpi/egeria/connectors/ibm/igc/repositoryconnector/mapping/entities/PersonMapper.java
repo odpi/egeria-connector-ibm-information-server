@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedNoteLogMapper_User;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.ContactThroughMapper_Person;
 
 /**
@@ -36,6 +37,7 @@ public class PersonMapper extends ActorProfile_Mapper {
 
         // The classes to use for mapping any relationships
         addRelationshipMapper(ContactThroughMapper_Person.getInstance(null));
+        addRelationshipMapper(AttachedNoteLogMapper_User.getInstance(null));
 
     }
 

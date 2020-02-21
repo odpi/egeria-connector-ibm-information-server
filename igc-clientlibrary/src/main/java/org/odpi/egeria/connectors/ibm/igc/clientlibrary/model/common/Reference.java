@@ -29,9 +29,14 @@ import java.util.List;
  *     <li>_url</li>
  *     <li><i>_context</i> -- present for <i>almost</i> all assets</li>
  * </ul><br>
- *  POJOs to represent user-defined objects (OpenIGC) should not extend this class directly, but the MainObject class.
+ * POJOs to represent user-defined objects (OpenIGC) should not extend this class directly, but the MainObject class.
+ * <br><br>
+ * Note that the default implementation has now changed to the Note class, as this is the ONLY type in IGC that does
+ * not contain a '_type' property.  This means that any OpenIGC assets that have NOT been registered into the type
+ * system will default to a Note instance as well.
+ * @see IGCRestClient#registerPOJO(Class)
  */
-@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=Reference.class)
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=Note.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Acl.class, name = "acl"),
@@ -159,6 +164,7 @@ import java.util.List;
         @JsonSubTypes.Type(value = ModelLabel.class, name = "model_label"),
         @JsonSubTypes.Type(value = MwbDatabaseAlias.class, name = "mwb_database_alias"),
         @JsonSubTypes.Type(value = Navigationdescriptor.class, name = "navigationdescriptor"),
+        @JsonSubTypes.Type(value = Note.class, name = "note"),
         @JsonSubTypes.Type(value = NodeOperation.class, name = "node_operation"),
         @JsonSubTypes.Type(value = OlapJoin.class, name = "olap_join"),
         @JsonSubTypes.Type(value = OlapMemberSource.class, name = "olap_member_source"),
@@ -273,6 +279,9 @@ public class Reference extends ObjectPrinter {
 
     @JsonProperty("modified_on")
     protected Date modifiedOn;
+
+    @JsonProperty("notes")
+    protected ItemList<Note> notes;
 
     /**
      * Default constructor
@@ -463,6 +472,20 @@ public class Reference extends ObjectPrinter {
      */
     @JsonProperty("modified_on")
     public void setModifiedOn(Date modifiedOn) { this.modifiedOn = modifiedOn; }
+
+    /**
+     * Retrieve the {@code notes} property (displayed as '{@literal Notes}') of the object.
+     * @return {@code ItemList<Note>}
+     */
+    @JsonProperty("notes")
+    public ItemList<Note> getNotes() { return notes; }
+
+    /**
+     * Set the {@code notes} property (displayed as {@code Notes}) of the object.
+     * @param notes the value to set
+     */
+    @JsonProperty("notes")
+    public void setNotes(ItemList<Note> notes) { this.notes = notes; }
 
     /**
      * Determine whether this object instance is fully retrieved (true) or only partially (false).

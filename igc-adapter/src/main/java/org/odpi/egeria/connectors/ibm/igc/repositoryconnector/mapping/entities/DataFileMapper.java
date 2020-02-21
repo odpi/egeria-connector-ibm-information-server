@@ -12,6 +12,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryC
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.AssetZoneMembershipMapper_DataFile;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AssetSchemaTypeMapper_FileRecord;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedNoteLogMapper_DataFile;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.NestedFileMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyCategory;
@@ -46,6 +47,7 @@ public class DataFileMapper extends DataStore_Mapper {
         // The list of relationships that should be mapped
         addRelationshipMapper(AssetSchemaTypeMapper_FileRecord.getInstance(null));
         addRelationshipMapper(NestedFileMapper.getInstance(null));
+        addRelationshipMapper(AttachedNoteLogMapper_DataFile.getInstance(null));
 
         // The list of classifications that should be mapped
         addClassificationMapper(AssetZoneMembershipMapper_DataFile.getInstance(null));

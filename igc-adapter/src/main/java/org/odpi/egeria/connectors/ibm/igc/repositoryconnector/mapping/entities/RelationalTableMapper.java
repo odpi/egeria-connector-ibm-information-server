@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.TypeEmbeddedAttributeMapper_RelationalTable;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedNoteLogMapper_DatabaseTable;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttributeForSchemaMapper_TableSchema;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.NestedSchemaAttributeMapper;
 
@@ -46,6 +47,7 @@ public class RelationalTableMapper extends SchemaElement_Mapper {
         // The list of relationships that should be mapped
         addRelationshipMapper(AttributeForSchemaMapper_TableSchema.getInstance(null));
         addRelationshipMapper(NestedSchemaAttributeMapper.getInstance(null));
+        addRelationshipMapper(AttachedNoteLogMapper_DatabaseTable.getInstance(null));
 
         // The list of classifications that should be mapped
         addClassificationMapper(TypeEmbeddedAttributeMapper_RelationalTable.getInstance(null));

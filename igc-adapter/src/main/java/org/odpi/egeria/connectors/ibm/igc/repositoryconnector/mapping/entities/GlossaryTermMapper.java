@@ -52,6 +52,7 @@ public class GlossaryTermMapper extends ReferenceableMapper {
         addRelationshipMapper(TranslationMapper.getInstance(null));
         addRelationshipMapper(TermHASARelationshipMapper.getInstance(null));
         addRelationshipMapper(TermISATypeOFRelationshipMapper.getInstance(null));
+        addRelationshipMapper(AttachedNoteLogMapper_Term.getInstance(null));
 
         // The classes to use for mapping any classifications
         addClassificationMapper(ConfidentialityMapper.getInstance(null));

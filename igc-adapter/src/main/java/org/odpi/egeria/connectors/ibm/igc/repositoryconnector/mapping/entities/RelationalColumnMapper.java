@@ -43,6 +43,7 @@ public class RelationalColumnMapper extends SchemaAttribute_Mapper {
         // The list of relationships that should be mapped
         addRelationshipMapper(NestedSchemaAttributeMapper.getInstance(null));
         addRelationshipMapper(ForeignKeyMapper.getInstance(null));
+        addRelationshipMapper(AttachedNoteLogMapper_DatabaseColumn.getInstance(null));
 
         // The list of classifications that should be mapped
         addClassificationMapper(PrimaryKeyMapper.getInstance(null));
