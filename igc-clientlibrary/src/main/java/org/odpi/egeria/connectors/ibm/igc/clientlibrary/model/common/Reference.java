@@ -12,7 +12,6 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 
 import java.util.Date;
@@ -551,23 +550,17 @@ public class Reference extends ObjectPrinter {
     @JsonIgnore
     public Identity getIdentity(IGCRestClient igcrest) {
         if (!isIdentityPopulated()) {
-            boolean hasModificationDetails = igcrest.hasModificationDetails(IGCRestConstants.getAssetTypeForSearch(getType()));
-            if (_context != null && _context.size() > 0
-                    && (!hasModificationDetails
-                        || (igcrest.hasModificationDetails(IGCRestConstants.getAssetTypeForSearch(getType()))
-                            && createdBy != null && createdOn != null && modifiedBy != null && modifiedOn != null))) {
-                // If we have all of the necessary information to populate the identity, do so directly
-                identity = new Identity(getContext(), getType(), getName(), getId());
-            } else {
-                // Only if we do not, go ahead with another search to retrieve the necessary details
+            // If the _context is null, it is not populated, while if it is empty it has been populated but there
+            // simply is no context for this object
+            if (getContext() == null) {
                 Reference assetWithCtx = igcrest.getModificationDetails(this);
                 setContext(assetWithCtx.getContext());
                 setCreatedOn(assetWithCtx.getCreatedOn());
                 setCreatedBy(assetWithCtx.getCreatedBy());
                 setModifiedOn(assetWithCtx.getModifiedOn());
                 setModifiedBy(assetWithCtx.getModifiedBy());
-                identity = new Identity(getContext(), getType(), getName(), getId());
             }
+            identity = new Identity(getContext(), getType(), getName(), getId());
         }
         return identity;
     }

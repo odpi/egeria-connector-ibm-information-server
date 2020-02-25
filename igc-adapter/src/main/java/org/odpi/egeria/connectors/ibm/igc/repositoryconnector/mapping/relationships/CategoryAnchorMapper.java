@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -73,6 +74,7 @@ public class CategoryAnchorMapper extends RelationshipMapping {
             if (catIdentity != null) {
                 Identity rootIdentity = catIdentity.getUltimateParentIdentity();
                 Reference root = new Reference(rootIdentity.getName(), rootIdentity.getAssetType(), rootIdentity.getRid());
+                root.setContext(Collections.emptyList());
                 asList.add(root);
             } else {
                 log.debug("Already at a root-level category, returning as-is: {} of type {}", category.getName(), category.getType());

@@ -13,6 +13,7 @@ import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedNoteLogMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SemanticAssignmentMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
@@ -89,6 +90,10 @@ public class ReferenceableMapper extends EntityMapping {
             // common set of relationships that could apply to all IGC objects (and all OMRS Referenceables)
             addRelationshipMapper(SemanticAssignmentMapper.getInstance(null));
             addRelationshipMapper(AttachedTagMapper.getInstance(null));
+            if (igcRidPrefix == null) {
+                // Only include NoteLogs for non-generated entities
+                addRelationshipMapper(AttachedNoteLogMapper.getInstance(null));
+            }
         }
 
         // common set of properties that apply to all Referenceable objects

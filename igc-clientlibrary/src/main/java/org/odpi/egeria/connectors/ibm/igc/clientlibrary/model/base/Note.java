@@ -1,8 +1,9 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 /* Copyright Contributors to the ODPi Egeria project. */
-package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common;
+package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base;
 
 import com.fasterxml.jackson.annotation.*;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
@@ -71,7 +72,7 @@ public class Note extends Reference {
      * @see #belonging_to
      */
     @JsonProperty("belonging_to")
-    public Reference getBelongsTo() { return belonging_to; }
+    public Reference getBelongingTo() { return belonging_to; }
 
     /**
      * Set the asset to which this IGC note belongs.
@@ -80,7 +81,7 @@ public class Note extends Reference {
      * @see #belonging_to
      */
     @JsonProperty("belonging_to")
-    public void setBelongsTo(Reference belonging_to) { this.belonging_to = belonging_to; }
+    public void setBelongingTo(Reference belonging_to) { this.belonging_to = belonging_to; }
 
     /**
      * Retrieve the subject of the note.
@@ -107,7 +108,7 @@ public class Note extends Reference {
      * @see #type
      */
     @JsonProperty("type")
-    public String getNoteType() { return type; }
+    public String getTheType() { return type; }
 
     /**
      * Set the type of the IGC note.
@@ -116,7 +117,7 @@ public class Note extends Reference {
      * @see #type
      */
     @JsonProperty("type")
-    public void setNoteType(String type) { this.type = type; }
+    public void setTheType(String type) { this.type = type; }
 
     /**
      * Retrieve the status of the note.
@@ -137,17 +138,18 @@ public class Note extends Reference {
     public void setStatus(String status) { this.status = status; }
 
     /**
-     * {@inheritDoc}
+     * Hard-codes the type of a Note to {@literal note}, as there is no '_type' property on a an IGC note object.
+     *
+     * @return String
      */
     @Override
     public String getType() { return "note"; }
 
     /**
-     * {@inheritDoc}
+     * Sets the name of the note to its RID, as Note objects do not have any name.
+     *
+     * @return String
      */
-    @Override
-    public void setType(String _type) {
-        this._type = "note";
-    }
+    public String getName() { return getId(); }
 
 }

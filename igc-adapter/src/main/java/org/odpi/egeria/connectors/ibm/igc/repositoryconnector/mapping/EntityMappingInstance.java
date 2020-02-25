@@ -332,7 +332,7 @@ public class EntityMappingInstance {
     public final void initializeIGCReference() {
         if (igcEntity == null || !igcEntity.isFullyRetrieved()) {
             IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
-            ArrayList<String> directProperties = new ArrayList<>();
+            Set<String> directProperties = new TreeSet<>();
             List<RelationshipMapping> relationshipMappers = mapping.getRelationshipMappers();
             for (RelationshipMapping relationshipMapping : relationshipMappers) {
                 directProperties.addAll(relationshipMapping.getDirectRelationshipPropertiesForType(igcEntityType));
@@ -343,7 +343,7 @@ public class EntityMappingInstance {
             igcEntity = igcomrsRepositoryConnector.getIGCRestClient().getAssetWithSubsetOfProperties(
                     getIgcEntityRid(),
                     getIgcEntityType(),
-                    directProperties
+                    new ArrayList<>(directProperties)
             );
         }
     }

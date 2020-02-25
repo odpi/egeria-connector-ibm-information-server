@@ -4,7 +4,6 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AssetSchemaTypeMapper_FileRecord;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedNoteLogMapper_DataFileRecord;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttributeForSchemaMapper_RecordField;
 
 /**
@@ -32,7 +31,6 @@ public class TabularSchemaTypeMapper extends ComplexSchemaType_Mapper {
         // The list of relationships that should be mapped
         addRelationshipMapper(AssetSchemaTypeMapper_FileRecord.getInstance(null));
         addRelationshipMapper(AttributeForSchemaMapper_RecordField.getInstance(null));
-        addRelationshipMapper(AttachedNoteLogMapper_DataFileRecord.getInstance(null));
 
     }
 

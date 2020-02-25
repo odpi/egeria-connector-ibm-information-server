@@ -6,8 +6,9 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedNoteLogEntryMapper;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedNoteLogMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
@@ -15,53 +16,68 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 
 /**
- * Defines the mapping to the OMRS "NoteLog" entity.  These are entirely generated as one-to-one instances to the
- * instances of IGC assets that are capable of possessing notes.  They are not searchable, and can only be retrieved
- * from the entity instances that have notes themselves.
+ * Defines the mapping to the OMRS "NoteEntry" entity.
  */
-public class NoteLogMapper extends ReferenceableMapper {
-
-    public static final String IGC_RID_PREFIX = "NL";
+public class NoteEntryMapper extends ReferenceableMapper {
 
     private static class Singleton {
-        private static final NoteLogMapper INSTANCE = new NoteLogMapper();
+        private static final NoteEntryMapper INSTANCE = new NoteEntryMapper();
     }
-    public static NoteLogMapper getInstance(IGCVersionEnum version) {
+    public static NoteEntryMapper getInstance(IGCVersionEnum version) {
         return Singleton.INSTANCE;
     }
 
-    private NoteLogMapper() {
+    private NoteEntryMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(
-                "category",
-                "Category",
-                "NoteLog",
-                IGC_RID_PREFIX,
+                "note",
+                "Note",
+                "NoteEntry",
+                null,
                 false
         );
-        addOtherIGCAssetType("data_class");
-        addOtherIGCAssetType("data_file");
-        addOtherIGCAssetType("data_file_field");
-        addOtherIGCAssetType("data_file_folder");
-        addOtherIGCAssetType("data_file_record");
-        addOtherIGCAssetType("database");
-        addOtherIGCAssetType("database_column");
-        addOtherIGCAssetType("database_schema");
-        addOtherIGCAssetType("database_table");
-        addOtherIGCAssetType("host");
-        addOtherIGCAssetType("information_governance_policy");
-        addOtherIGCAssetType("term");
-        addOtherIGCAssetType("user");
 
         // The list of properties that should be mapped
-        addLiteralPropertyMapping("name", null);
-        addLiteralPropertyMapping("description", null);
+        addSimplePropertyMapping("subject", "title");
+        addSimplePropertyMapping("note", "text");
         addLiteralPropertyMapping("isPublic", true);
 
         // The list of relationships that should be mapped
-        addRelationshipMapper(AttachedNoteLogMapper.getInstance(null));
         addRelationshipMapper(AttachedNoteLogEntryMapper.getInstance(null));
+
+    }
+
+    /**
+     * Defines the mapping of qualifiedName to ensure uniqueness for a given note.
+     *
+     * @param entityMap the instantiation of a mapping to carry out
+     * @param instanceProperties the instance properties to which to add the complex-mapped properties
+     * @return InstanceProperties
+     */
+    @Override
+    protected InstanceProperties complexPropertyMappings(EntityMappingInstance entityMap,
+                                                         InstanceProperties instanceProperties) {
+
+        instanceProperties = super.complexPropertyMappings(entityMap, instanceProperties);
+
+        // Above call will already setup additionalProperties for us, we just need to override qualifiedName
+        // And qualifiedName itself actually cannot be completely unique without the RID of the note, so we will
+        // just use the RID of the note as the qualifiedName
+
+        final String methodName = "complexPropertyMappings";
+
+        IGCOMRSRepositoryConnector igcomrsRepositoryConnector = entityMap.getRepositoryConnector();
+        String qualifiedName = entityMap.getIgcEntityRid();
+        instanceProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(
+                igcomrsRepositoryConnector.getRepositoryName(),
+                instanceProperties,
+                "qualifiedName",
+                qualifiedName,
+                methodName
+        );
+
+        return instanceProperties;
 
     }
 
@@ -76,7 +92,7 @@ public class NoteLogMapper extends ReferenceableMapper {
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
                                                  InstancePropertyValue value) {
-        // We have no real way of supporting a search against NoteLogs, so we will simply always ensure that no results
+        // We have no real way of supporting a search against NoteEntry, so we will simply always ensure that no results
         // are returned
         igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
     }
@@ -90,7 +106,7 @@ public class NoteLogMapper extends ReferenceableMapper {
                                                IGCRestClient igcRestClient,
                                                IGCSearchConditionSet igcSearchConditionSet,
                                                String searchCriteria) throws FunctionNotSupportedException {
-        // We have no real way of supporting a search against NoteLogs, so we will simply always ensure that no results
+        // We have no real way of supporting a search against NoteEntry, so we will simply always ensure that no results
         // are returned
         igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
     }
@@ -100,7 +116,7 @@ public class NoteLogMapper extends ReferenceableMapper {
      */
     @Override
     public SearchFilter getAllNoneOrSome(InstanceProperties matchProperties, MatchCriteria matchCriteria) {
-        // We have no real way of supporting a search against NoteLogs, so we will simply always ensure that no results
+        // We have no real way of supporting a search against NoteEntry, so we will simply always ensure that no results
         // are returned
         return SearchFilter.NONE;
     }

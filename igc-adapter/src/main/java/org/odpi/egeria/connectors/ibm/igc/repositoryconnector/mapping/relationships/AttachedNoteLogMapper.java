@@ -27,30 +27,10 @@ public class AttachedNoteLogMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    /**
-     * Create a new sub-type of the AttachedNoteLog for the provided IGC asset type.
-     *
-     * @param igcAssetType the IGC asset type for which to create an AttachedNoteLog relationship
-     */
-    protected AttachedNoteLogMapper(String igcAssetType) {
-        super(
-                igcAssetType,
-                igcAssetType,
-                SELF_REFERENCE_SENTINEL,
-                SELF_REFERENCE_SENTINEL,
-                "AttachedNoteLog",
-                "describes",
-                "noteLogs",
-                null,
-                NoteLogMapper.IGC_RID_PREFIX
-        );
-        setCommonCharacteristics();
-    }
-
     private AttachedNoteLogMapper() {
         super(
-                "",
-                "",
+                IGCRepositoryHelper.DEFAULT_IGC_TYPE,
+                IGCRepositoryHelper.DEFAULT_IGC_TYPE,
                 SELF_REFERENCE_SENTINEL,
                 SELF_REFERENCE_SENTINEL,
                 "AttachedNoteLog",
@@ -59,26 +39,23 @@ public class AttachedNoteLogMapper extends RelationshipMapping {
                 null,
                 NoteLogMapper.IGC_RID_PREFIX
         );
-        setCommonCharacteristics();
-        addSubType(AttachedNoteLogMapper_Category.getInstance(null));
-        addSubType(AttachedNoteLogMapper_Database.getInstance(null));
-        addSubType(AttachedNoteLogMapper_DatabaseColumn.getInstance(null));
-        addSubType(AttachedNoteLogMapper_DatabaseSchema.getInstance(null));
-        addSubType(AttachedNoteLogMapper_DatabaseTable.getInstance(null));
-        addSubType(AttachedNoteLogMapper_DataClass.getInstance(null));
-        addSubType(AttachedNoteLogMapper_DataFile.getInstance(null));
-        addSubType(AttachedNoteLogMapper_DataFileField.getInstance(null));
-        addSubType(AttachedNoteLogMapper_DataFileFolder.getInstance(null));
-        addSubType(AttachedNoteLogMapper_DataFileRecord.getInstance(null));
-        addSubType(AttachedNoteLogMapper_Host.getInstance(null));
-        addSubType(AttachedNoteLogMapper_InformationGovernancePolicy.getInstance(null));
-        addSubType(AttachedNoteLogMapper_Term.getInstance(null));
-        addSubType(AttachedNoteLogMapper_User.getInstance(null));
-    }
 
-    private void setCommonCharacteristics() {
-        setOptimalStart(OptimalStart.ONE);
         addLiteralPropertyMapping("isPublic", true);
+
+        // We will explicitly exclude the following types from possessing notes, as they are not able to hold notes
+        // in IGC
+        ProxyMapping pmOne = getProxyOneMapping();
+        pmOne.addExcludedIgcAssetType("connector");
+        pmOne.addExcludedIgcAssetType("data_connection");
+        pmOne.addExcludedIgcAssetType("group");
+        pmOne.addExcludedIgcAssetType("label");
+
+        ProxyMapping pmTwo = getProxyTwoMapping();
+        pmTwo.addExcludedIgcAssetType("connector");
+        pmTwo.addExcludedIgcAssetType("data_connection");
+        pmTwo.addExcludedIgcAssetType("group");
+        pmTwo.addExcludedIgcAssetType("label");
+
     }
 
     /**

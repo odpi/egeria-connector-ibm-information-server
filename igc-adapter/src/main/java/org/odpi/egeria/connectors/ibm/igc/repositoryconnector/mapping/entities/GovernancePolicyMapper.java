@@ -3,7 +3,6 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedNoteLogMapper_InformationGovernancePolicy;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.GovernancePolicyLinkMapper;
 
 /**
@@ -29,7 +28,6 @@ public class GovernancePolicyMapper extends GovernanceDefinition_Mapper {
 
         // The list of relationships that should be mapped
         addRelationshipMapper(GovernancePolicyLinkMapper.getInstance(null));
-        addRelationshipMapper(AttachedNoteLogMapper_InformationGovernancePolicy.getInstance(null));
 
     }
 

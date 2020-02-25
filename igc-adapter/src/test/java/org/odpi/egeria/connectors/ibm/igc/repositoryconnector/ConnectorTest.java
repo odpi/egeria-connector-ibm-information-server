@@ -9,10 +9,7 @@ import org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapp
 import org.odpi.egeria.connectors.ibm.igc.eventmapper.model.ChangeSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.ContactDetailsMapper;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.GlossaryMapper;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.RelationalDBSchemaTypeMapper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.*;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.CategoryAnchorMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.ConnectionEndpointMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping;
@@ -789,21 +786,27 @@ public class ConnectorTest {
         List<Reference> ctx = new ArrayList<>();
         ctx.add(glossary);
         category.setContext(ctx);
-        CategoryAnchorMapper mapper = CategoryAnchorMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion());
-        List<Reference> proxyOnes = mapper.getProxyOneAssetFromAsset(category, igcomrsRepositoryConnector.getIGCRestClient());
-        assertEquals(proxyOnes.size(), 1);
-        assertEquals(proxyOnes.get(0).getName(), "TestGlossary");
-        assertTrue(mapper.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, category, proxyOnes.get(0)));
+        glossary.setContext(Collections.emptyList());
+        try {
+            CategoryAnchorMapper mapper = CategoryAnchorMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion());
+            List<Reference> proxyOnes = mapper.getProxyOneAssetFromAsset(category, igcomrsRepositoryConnector.getIGCRestClient());
+            assertEquals(proxyOnes.size(), 1);
+            assertEquals(proxyOnes.get(0).getName(), "TestGlossary");
+            assertTrue(mapper.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, category, proxyOnes.get(0)));
 
-        proxyOnes = mapper.getProxyOneAssetFromAsset(glossary, igcomrsRepositoryConnector.getIGCRestClient());
-        assertEquals(proxyOnes.size(), 1);
-        assertEquals(proxyOnes.get(0).getName(), "TestGlossary");
-        assertTrue(mapper.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, proxyOnes.get(0), category));
+            proxyOnes = mapper.getProxyOneAssetFromAsset(glossary, igcomrsRepositoryConnector.getIGCRestClient());
+            assertEquals(proxyOnes.size(), 1);
+            assertEquals(proxyOnes.get(0).getName(), "TestGlossary");
+            assertTrue(mapper.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, proxyOnes.get(0), category));
 
-        proxyOnes = mapper.getProxyOneAssetFromAsset(term, igcomrsRepositoryConnector.getIGCRestClient());
-        assertEquals(proxyOnes.size(), 1);
-        assertEquals(proxyOnes.get(0).getName(), "TestTerm");
-        assertFalse(mapper.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, proxyOnes.get(0), glossary));
+            proxyOnes = mapper.getProxyOneAssetFromAsset(term, igcomrsRepositoryConnector.getIGCRestClient());
+            assertEquals(proxyOnes.size(), 1);
+            assertEquals(proxyOnes.get(0).getName(), "TestTerm");
+            assertFalse(mapper.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, proxyOnes.get(0), glossary));
+        } catch (Exception e) {
+            log.error("Hit unexpected exception.", e);
+            assertNull(e);
+        }
 
     }
 
@@ -850,26 +853,26 @@ public class ConnectorTest {
         List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
                 new RelationshipExpectation(0, 1,
+                        "AttachedNoteLog", "GlossaryCategory", "NoteLog",
+                        expectedProxyTwoQN, "gen!NL@" + expectedProxyTwoQN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 2,
                         "CategoryAnchor", "Glossary", "GlossaryCategory",
                         "gen!GL@(category)=Coco Pharmaceuticals",
                         expectedProxyTwoQN)
         );
         relationshipExpectations.add(
-                new RelationshipExpectation(1, 2,
+                new RelationshipExpectation(2, 3,
                         "CategoryHierarchyLink", "GlossaryCategory", "GlossaryCategory",
                         "(category)=Coco Pharmaceuticals::(category)=Person",
                         expectedProxyTwoQN)
         );
         relationshipExpectations.add(
-                new RelationshipExpectation(2, 12,
+                new RelationshipExpectation(3, 13,
                         "TermCategorization", "GlossaryCategory", "GlossaryTerm",
                         expectedProxyTwoQN,
                         null)
-        );
-        relationshipExpectations.add(
-                new RelationshipExpectation(12, 13,
-                        "AttachedNoteLog", "GlossaryCategory", "NoteLog",
-                        expectedProxyTwoQN, "gen!NL@" + expectedProxyTwoQN)
         );
 
         testRelationshipsForEntity(
@@ -1063,13 +1066,13 @@ public class ConnectorTest {
         List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
                 new RelationshipExpectation(0, 1,
-                        "TermAnchor", "Glossary", MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
-                        expectedProxyOneQN, expectedProxyTwoQN)
+                        "AttachedNoteLog", MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME, "NoteLog",
+                        expectedProxyTwoQN, "gen!NL@" + expectedProxyTwoQN)
         );
         relationshipExpectations.add(
                 new RelationshipExpectation(1, 2,
-                        "AttachedNoteLog", MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME, "NoteLog",
-                        expectedProxyTwoQN, "gen!NL@" + expectedProxyTwoQN)
+                        "TermAnchor", "Glossary", MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                        expectedProxyOneQN, expectedProxyTwoQN)
         );
 
         testRelationshipsForEntity(
@@ -1144,9 +1147,94 @@ public class ConnectorTest {
 
     }
 
-    // TODO: Add test for relationships between NoteLog and NoteLogEntry
+    @Test
+    public void testGetGlossaryTermNoteLog() {
 
-    // TODO: Add test for retrieving NoteLogEntry instances (and relationships from NoteLogEntry instances)
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("name", null);
+        expectedValues.put("description", null);
+
+        testEntityDetail(
+                "term",
+                "NoteLog",
+                NoteLogMapper.IGC_RID_PREFIX,
+                MockConstants.TERM_WITH_NOTES_RID,
+                expectedValues
+        );
+
+    }
+
+    @Test
+    public void testGetGlossaryTermNoteLogRelationships() {
+
+        String expectedProxyForNoteLog = "gen!NL@(category)=Default Glossary::(term)=TestTerm";
+        String expectedProxyForAsset = "(category)=Default Glossary::(term)=TestTerm";
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 1,
+                        "AttachedNoteLog", "GlossaryTerm", "NoteLog",
+                        expectedProxyForAsset, expectedProxyForNoteLog)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 3,
+                        "AttachedNoteLogEntry", "NoteLog", "NoteEntry",
+                        expectedProxyForNoteLog, null)
+        );
+
+        testRelationshipsForEntity(
+                "term",
+                "NoteLog",
+                NoteLogMapper.IGC_RID_PREFIX,
+                MockConstants.TERM_WITH_NOTES_RID,
+                MockConstants.EGERIA_PAGESIZE,
+                3,
+                relationshipExpectations
+        );
+
+    }
+
+    @Test
+    public void testGetNoteEntry() {
+
+        Map<String, String> expectedValues = new HashMap<>();
+        expectedValues.put("title", "This is the subject");
+        expectedValues.put("text", "Just an information note here.");
+
+        testEntityDetail(
+                "note",
+                "NoteEntry",
+                null,
+                MockConstants.NOTE_RID,
+                expectedValues
+        );
+
+    }
+
+    @Test
+    public void testGetNoteEntryRelationships() {
+
+        String expectedProxyForNoteLog = "gen!NL@(category)=Default Glossary::(term)=TestTerm";
+        String expectedProxyForEntry = "(note)=" + MockConstants.NOTE_RID;
+
+        List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
+        relationshipExpectations.add(
+                new RelationshipExpectation(0, 1,
+                        "AttachedNoteLogEntry", "NoteLog", "NoteEntry",
+                        expectedProxyForNoteLog, expectedProxyForEntry)
+        );
+
+        testRelationshipsForEntity(
+                "note",
+                "NoteEntry",
+                null,
+                MockConstants.NOTE_RID,
+                MockConstants.EGERIA_PAGESIZE,
+                1,
+                relationshipExpectations
+        );
+
+    }
 
     @Test
     public void testGetGlossaryTermDetail() {
@@ -1213,13 +1301,13 @@ public class ConnectorTest {
         );
         relationshipExpectations.add(
                 new RelationshipExpectation(2, 3,
-                        "TermAnchor", "Glossary", MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
-                        expectedProxyOneQN, expectedProxyTwoQN)
+                        "AttachedNoteLog", "GlossaryTerm", "NoteLog",
+                        expectedProxyTwoQN, "gen!NL@" + expectedProxyTwoQN)
         );
         relationshipExpectations.add(
                 new RelationshipExpectation(3, 4,
-                        "AttachedNoteLog", "GlossaryTerm", "NoteLog",
-                        expectedProxyTwoQN, "gen!NL@" + expectedProxyTwoQN)
+                        "TermAnchor", "Glossary", MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                        expectedProxyOneQN, expectedProxyTwoQN)
         );
 
         testRelationshipsForEntity(
@@ -1258,18 +1346,18 @@ public class ConnectorTest {
         List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
                 new RelationshipExpectation(0, 1,
+                        "AttachedNoteLog", "Database", "NoteLog",
+                        MockConstants.DATABASE_QN, "gen!NL@" + MockConstants.DATABASE_QN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 2,
                         "DataContentForDataSet", "Database", "DeployedDatabaseSchema",
                         MockConstants.DATABASE_QN, MockConstants.DATABASE_SCHEMA_QN)
         );
         relationshipExpectations.add(
-                new RelationshipExpectation(1, 2,
+                new RelationshipExpectation(2, 3,
                         "ConnectionToAsset", "Connection", "Database",
                         MockConstants.DATA_CONNECTION_QN, MockConstants.DATABASE_QN)
-        );
-        relationshipExpectations.add(
-                new RelationshipExpectation(2, 3,
-                        "AttachedNoteLog", "Database", "NoteLog",
-                        MockConstants.DATABASE_QN, "gen!NL@" + MockConstants.DATABASE_QN)
         );
 
         testRelationshipsForEntity(
@@ -1356,14 +1444,14 @@ public class ConnectorTest {
 
         List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
-                new RelationshipExpectation(0, 7,
-                        "ConnectionEndpoint", "Endpoint", "Connection",
-                        MockConstants.HOST_QN, null)
-        );
-        relationshipExpectations.add(
-                new RelationshipExpectation(7, 8,
+                new RelationshipExpectation(0, 1,
                         "AttachedNoteLog", "Endpoint", "NoteLog",
                         MockConstants.HOST_QN, "gen!NL@" + MockConstants.HOST_QN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 8,
+                        "ConnectionEndpoint", "Endpoint", "Connection",
+                        MockConstants.HOST_QN, null)
         );
 
         testRelationshipsForEntity(
@@ -1443,18 +1531,18 @@ public class ConnectorTest {
         List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
                 new RelationshipExpectation(0, 1,
+                        "AttachedNoteLog", "DeployedDatabaseSchema", "NoteLog",
+                        MockConstants.DATABASE_SCHEMA_QN, "gen!NL@" + MockConstants.DATABASE_SCHEMA_QN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 2,
                         "AssetSchemaType", "DeployedDatabaseSchema", "RelationalDBSchemaType",
                         MockConstants.DATABASE_SCHEMA_QN, expectedSchemaTypeQN)
         );
         relationshipExpectations.add(
-                new RelationshipExpectation(1, 2,
+                new RelationshipExpectation(2, 3,
                         "DataContentForDataSet", "Database", "DeployedDatabaseSchema",
                         MockConstants.DATABASE_QN, MockConstants.DATABASE_SCHEMA_QN)
-        );
-        relationshipExpectations.add(
-                new RelationshipExpectation(2, 3,
-                        "AttachedNoteLog", "DeployedDatabaseSchema", "NoteLog",
-                        MockConstants.DATABASE_SCHEMA_QN, "gen!NL@" + MockConstants.DATABASE_SCHEMA_QN)
         );
 
         List<Relationship> results = testRelationshipsForEntity(
@@ -1467,7 +1555,7 @@ public class ConnectorTest {
                 relationshipExpectations
         );
 
-        testRelationshipsAreRetrievable(results.subList(0, 1), "AssetSchemaType");
+        testRelationshipsAreRetrievable(results.subList(1, 2), "AssetSchemaType");
 
     }
 
@@ -1540,18 +1628,18 @@ public class ConnectorTest {
         List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
                 new RelationshipExpectation(0, 1,
+                        "AttachedNoteLog", "RelationalTable", "NoteLog",
+                        MockConstants.DATABASE_TABLE_QN, "gen!NL@" + MockConstants.DATABASE_TABLE_QN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 2,
                         "AttributeForSchema", "RelationalDBSchemaType", "RelationalTable",
                         expectedSchemaTypeQN, MockConstants.DATABASE_TABLE_QN)
         );
         relationshipExpectations.add(
-                new RelationshipExpectation(1, 4,
+                new RelationshipExpectation(2, 5,
                         "NestedSchemaAttribute", "RelationalTable", "RelationalColumn",
                         MockConstants.DATABASE_TABLE_QN, null)
-        );
-        relationshipExpectations.add(
-                new RelationshipExpectation(4, 5,
-                        "AttachedNoteLog", "RelationalTable", "NoteLog",
-                        MockConstants.DATABASE_TABLE_QN, "gen!NL@" + MockConstants.DATABASE_TABLE_QN)
         );
 
         testRelationshipsForEntity(
@@ -1609,19 +1697,19 @@ public class ConnectorTest {
                         MockConstants.DATABASE_COLUMN_QN, expectedTermQN)
         );
         relationshipExpectations.add(
-                new RelationshipExpectation(1, 5,
+                new RelationshipExpectation(1, 2,
+                        "AttachedNoteLog", "RelationalColumn", "NoteLog",
+                        MockConstants.DATABASE_COLUMN_QN, "gen!NL@" + MockConstants.DATABASE_COLUMN_QN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(2, 6,
                         "DataClassAssignment", "RelationalColumn", "DataClass",
                         MockConstants.DATABASE_COLUMN_QN, null)
         );
         relationshipExpectations.add(
-                new RelationshipExpectation(5, 6,
+                new RelationshipExpectation(6, 7,
                         "NestedSchemaAttribute", "RelationalTable", "RelationalColumn",
                         MockConstants.DATABASE_TABLE_QN, MockConstants.DATABASE_COLUMN_QN)
-        );
-        relationshipExpectations.add(
-                new RelationshipExpectation(6, 7,
-                        "AttachedNoteLog", "RelationalColumn", "NoteLog",
-                        MockConstants.DATABASE_COLUMN_QN, "gen!NL@" + MockConstants.DATABASE_COLUMN_QN)
         );
 
         List<Relationship> relationships = testRelationshipsForEntity(
@@ -1634,8 +1722,8 @@ public class ConnectorTest {
                 relationshipExpectations
         );
 
-        testDiscoveredDataClasses(relationships, 1, 4);
-        testProposedDataClasses(relationships, 4, 5);
+        testDiscoveredDataClasses(relationships, 2, 5);
+        testProposedDataClasses(relationships, 5, 6);
 
     }
 
@@ -1695,14 +1783,14 @@ public class ConnectorTest {
 
         List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
-                new RelationshipExpectation(0, 3,
-                        "DataClassAssignment", "RelationalColumn", "DataClass",
-                        MockConstants.DATABASE_COLUMN_QN, MockConstants.DATA_CLASS_QN)
-        );
-        relationshipExpectations.add(
-                new RelationshipExpectation(3, 4,
+                new RelationshipExpectation(0, 1,
                         "AttachedNoteLog", "DataClass", "NoteLog",
                         MockConstants.DATA_CLASS_QN, "gen!NL@" + MockConstants.DATA_CLASS_QN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 4,
+                        "DataClassAssignment", "RelationalColumn", "DataClass",
+                        MockConstants.DATABASE_COLUMN_QN, MockConstants.DATA_CLASS_QN)
         );
 
         List<Relationship> relationships = testRelationshipsForEntity(
@@ -1714,8 +1802,8 @@ public class ConnectorTest {
                 4,
                 relationshipExpectations
         );
-        testDiscoveredDataClasses(relationships, 0, 2);
-        testProposedDataClasses(relationships, 2, 3);
+        testDiscoveredDataClasses(relationships, 1, 3);
+        testProposedDataClasses(relationships, 3, 4);
 
         relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
@@ -1842,13 +1930,13 @@ public class ConnectorTest {
         relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
                 new RelationshipExpectation(0, 1,
-                        "DataClassAssignment", "RelationalColumn", "DataClass",
-                        MockConstants.DATABASE_COLUMN_QN, MockConstants.DATA_CLASS_QN)
+                        "AttachedNoteLog", "DataClass", "NoteLog",
+                        MockConstants.DATA_CLASS_QN, "gen!NL@" + MockConstants.DATA_CLASS_QN)
         );
         relationshipExpectations.add(
                 new RelationshipExpectation(1, 2,
-                        "AttachedNoteLog", "DataClass", "NoteLog",
-                        MockConstants.DATA_CLASS_QN, "gen!NL@" + MockConstants.DATA_CLASS_QN)
+                        "DataClassAssignment", "RelationalColumn", "DataClass",
+                        MockConstants.DATABASE_COLUMN_QN, MockConstants.DATA_CLASS_QN)
         );
 
         relationships = testRelationshipsForEntity(
@@ -1862,7 +1950,7 @@ public class ConnectorTest {
                 SequencingOrder.PROPERTY_ASCENDING,
                 "confidence"
         );
-        testProposedDataClasses(relationships, 0, 1);
+        testProposedDataClasses(relationships, 1, 2);
 
         relationships = testRelationshipsForEntity(
                 "data_class",
@@ -1875,7 +1963,7 @@ public class ConnectorTest {
                 SequencingOrder.PROPERTY_ASCENDING,
                 "partialMatch"
         );
-        testProposedDataClasses(relationships, 0, 1);
+        testProposedDataClasses(relationships, 1, 2);
 
     }
 
@@ -1939,18 +2027,18 @@ public class ConnectorTest {
         List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
                 new RelationshipExpectation(0, 1,
+                        "AttachedNoteLog", "FileFolder", "NoteLog",
+                        MockConstants.DATA_FILE_FOLDER_QN, "gen!NL@" + MockConstants.DATA_FILE_FOLDER_QN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 2,
                         "FolderHierarchy", "FileFolder", "FileFolder",
                         expectedParentFolderQN, MockConstants.DATA_FILE_FOLDER_QN)
         );
         relationshipExpectations.add(
-                new RelationshipExpectation(1, 9,
+                new RelationshipExpectation(2, 10,
                         "NestedFile", "FileFolder", "DataFile",
                         MockConstants.DATA_FILE_FOLDER_QN, null)
-        );
-        relationshipExpectations.add(
-                new RelationshipExpectation(9, 10,
-                        "AttachedNoteLog", "FileFolder", "NoteLog",
-                        MockConstants.DATA_FILE_FOLDER_QN, "gen!NL@" + MockConstants.DATA_FILE_FOLDER_QN)
         );
 
         testRelationshipsForEntity(
@@ -1987,18 +2075,18 @@ public class ConnectorTest {
         List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
                 new RelationshipExpectation(0, 1,
+                        "AttachedNoteLog", "DataFile", "NoteLog",
+                        MockConstants.DATA_FILE_QN, "gen!NL@" + MockConstants.DATA_FILE_QN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 2,
                         "AssetSchemaType", "DataFile", "TabularSchemaType",
                         MockConstants.DATA_FILE_QN, MockConstants.DATA_FILE_RECORD_QN)
         );
         relationshipExpectations.add(
-                new RelationshipExpectation(1, 2,
+                new RelationshipExpectation(2, 3,
                         "NestedFile", "FileFolder", "DataFile",
                         MockConstants.DATA_FILE_FOLDER_QN, MockConstants.DATA_FILE_QN)
-        );
-        relationshipExpectations.add(
-                new RelationshipExpectation(2, 3,
-                        "AttachedNoteLog", "DataFile", "NoteLog",
-                        MockConstants.DATA_FILE_QN, "gen!NL@" + MockConstants.DATA_FILE_QN)
         );
 
         testRelationshipsForEntity(
@@ -2036,18 +2124,18 @@ public class ConnectorTest {
         List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
                 new RelationshipExpectation(0, 1,
+                        "AttachedNoteLog", "TabularSchemaType", "NoteLog",
+                        MockConstants.DATA_FILE_RECORD_QN, "gen!NL@" + MockConstants.DATA_FILE_RECORD_QN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 2,
                         "AssetSchemaType", "DataFile", "TabularSchemaType",
                         MockConstants.DATA_FILE_QN, MockConstants.DATA_FILE_RECORD_QN)
         );
         relationshipExpectations.add(
-                new RelationshipExpectation(1, 4,
+                new RelationshipExpectation(2, 5,
                         "AttributeForSchema", "TabularSchemaType", "TabularColumn",
                         MockConstants.DATA_FILE_RECORD_QN, null)
-        );
-        relationshipExpectations.add(
-                new RelationshipExpectation(4, 5,
-                        "AttachedNoteLog", "TabularSchemaType", "NoteLog",
-                        MockConstants.DATA_FILE_RECORD_QN, "gen!NL@" + MockConstants.DATA_FILE_RECORD_QN)
         );
 
         testRelationshipsForEntity(
@@ -2093,13 +2181,13 @@ public class ConnectorTest {
         );
         relationshipExpectations.add(
                 new RelationshipExpectation(1, 2,
-                        "AttributeForSchema", "TabularSchemaType", "TabularColumn",
-                        MockConstants.DATA_FILE_RECORD_QN, MockConstants.DATA_FILE_FIELD_QN)
+                        "AttachedNoteLog", "TabularColumn", "NoteLog",
+                        MockConstants.DATA_FILE_FIELD_QN, "gen!NL@" + MockConstants.DATA_FILE_FIELD_QN)
         );
         relationshipExpectations.add(
                 new RelationshipExpectation(2, 3,
-                        "AttachedNoteLog", "TabularColumn", "NoteLog",
-                        MockConstants.DATA_FILE_FIELD_QN, "gen!NL@" + MockConstants.DATA_FILE_FIELD_QN)
+                        "AttributeForSchema", "TabularSchemaType", "TabularColumn",
+                        MockConstants.DATA_FILE_RECORD_QN, MockConstants.DATA_FILE_FIELD_QN)
         );
 
         testRelationshipsForEntity(
@@ -2208,13 +2296,13 @@ public class ConnectorTest {
         List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
                 new RelationshipExpectation(0, 1,
-                        "ContactThrough", "Person", "ContactDetails",
-                        MockConstants.USER_QN, expectedContactDetailsQN)
+                        "AttachedNoteLog", "Person", "NoteLog",
+                        MockConstants.USER_QN, "gen!NL@" + MockConstants.USER_QN)
         );
         relationshipExpectations.add(
                 new RelationshipExpectation(1, 2,
-                        "AttachedNoteLog", "Person", "NoteLog",
-                        MockConstants.USER_QN, "gen!NL@" + MockConstants.USER_QN)
+                        "ContactThrough", "Person", "ContactDetails",
+                        MockConstants.USER_QN, expectedContactDetailsQN)
         );
 
         testRelationshipsForEntity(

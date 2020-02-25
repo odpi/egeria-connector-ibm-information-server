@@ -752,23 +752,30 @@ public class IGCRestClient {
      * @param <T> the type of Reference to return
      * @return Reference - the object including only the subset of properties specified
      */
+    @SuppressWarnings("unchecked")
     public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
                                                                   String assetType,
                                                                   List<String> properties,
                                                                   int pageSize) {
-        log.debug("Retrieving asset {} with subset of details: {}", rid, properties);
-        T assetWithProperties = null;
-        IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", rid);
-        IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
-        IGCSearch igcSearch = new IGCSearch(IGCRestConstants.getAssetTypeForSearch(assetType), properties, idOnlySet);
-        if (pageSize > 0) {
-            igcSearch.setPageSize(pageSize);
+        if (IGCRestConstants.getTypesThatCannotBeSearched().contains(assetType)) {
+            log.debug("Retrieving full asset {}, as it cannot be searched to retrieve only a subset of properties.", rid);
+            Reference full = getAssetById(rid);
+            return (T) full;
+        } else {
+            log.debug("Retrieving asset {} with subset of details: {}", rid, properties);
+            T assetWithProperties = null;
+            IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", rid);
+            IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
+            IGCSearch igcSearch = new IGCSearch(IGCRestConstants.getAssetTypeForSearch(assetType), properties, idOnlySet);
+            if (pageSize > 0) {
+                igcSearch.setPageSize(pageSize);
+            }
+            ItemList<T> assetsWithProperties = search(igcSearch);
+            if (!assetsWithProperties.getItems().isEmpty()) {
+                assetWithProperties = assetsWithProperties.getItems().get(0);
+            }
+            return assetWithProperties;
         }
-        ItemList<T> assetsWithProperties = search(igcSearch);
-        if (!assetsWithProperties.getItems().isEmpty()) {
-            assetWithProperties = assetsWithProperties.getItems().get(0);
-        }
-        return assetWithProperties;
     }
 
     /**
@@ -1401,20 +1408,16 @@ public class IGCRestClient {
 
                 log.debug("Context and / or modification details are empty, populating...");
 
-                if (!object.isVirtualAsset()) {
-                    IGCSearchCondition idOnly = new IGCSearchCondition("_id", "=", object.getId());
-                    IGCSearchConditionSet idOnlySet = new IGCSearchConditionSet(idOnly);
-                    IGCSearch igcSearch = new IGCSearch(object.getType(), idOnlySet);
-                    if (bHasModificationDetails) {
-                        igcSearch.addProperties(IGCRestConstants.getModificationProperties());
-                    }
-                    igcSearch.setPageSize(2);
-                    ItemList<T> assetsWithCtx = search(igcSearch);
-                    if (!assetsWithCtx.getItems().isEmpty()) {
-                        populated = assetsWithCtx.getItems().get(0);
-                    }
+                String rid = object.getId();
+                String assetType = object.getType();
+                if (object.isVirtualAsset() || IGCRestConstants.getTypesThatCannotBeSearched().contains(assetType)) {
+                    populated = (T) getAssetById(rid);
                 } else {
-                    populated = (T) getAssetById(object.getId());
+                    List<String> properties = new ArrayList<>();
+                    if (bHasModificationDetails) {
+                        properties.addAll(IGCRestConstants.getModificationProperties());
+                    }
+                    populated = getAssetWithSubsetOfProperties(rid, assetType, properties, 2);
                 }
 
             }

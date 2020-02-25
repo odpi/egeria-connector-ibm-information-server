@@ -12,7 +12,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedNoteLogMapper_Host;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.ConnectionEndpointMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
@@ -60,7 +59,6 @@ public class EndpointMapper extends ReferenceableMapper {
         // This relationship can only be retrieved inverted
         // (relationship in IGC is cannot be traversed in other direction)
         addRelationshipMapper(ConnectionEndpointMapper.getInstance(null));
-        addRelationshipMapper(AttachedNoteLogMapper_Host.getInstance(null));
 
         addComplexIgcProperty("name");
         addComplexOmrsProperty("networkAddress");

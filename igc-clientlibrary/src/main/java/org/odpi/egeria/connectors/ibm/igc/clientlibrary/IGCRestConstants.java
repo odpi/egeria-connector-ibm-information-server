@@ -51,7 +51,14 @@ public class IGCRestConstants {
         set.add("JSESSIONID");
         set.add("X-IBM-IISSessionId");
         set.add("X-IBM-IISSessionToken");
-        return set;
+        return Collections.unmodifiableSet(set);
+    }
+
+    private static final Set<String> TYPES_THAT_CANNOT_BE_SEARCHED = createTypesThatCannotBeSearched();
+    private static Set<String> createTypesThatCannotBeSearched() {
+        Set<String> set = new HashSet<>();
+        set.add("note");
+        return Collections.unmodifiableSet(set);
     }
 
     private static final List<String> MODIFICATION_DETAILS = createModificationDetails();
@@ -128,7 +135,7 @@ public class IGCRestConstants {
         set.add("url");
         set.add("id");
         set.add("context");
-        return set;
+        return Collections.unmodifiableSet(set);
     }
 
     private static final Map<String, String> BASIC_TYPE_TO_JAVA_TYPE = createBasicTypeToJavaType();
@@ -139,7 +146,7 @@ public class IGCRestConstants {
         map.put("datetime", "Date");
         map.put("number", "Number");
         map.put("enum", "String");
-        return map;
+        return Collections.unmodifiableMap(map);
     }
 
     private static final Set<String> IGNORE_PROPERTIES = createIgnoreProperties();
@@ -150,7 +157,7 @@ public class IGCRestConstants {
         set.add("assigned_external_assets");
         set.add("implemented_by_external_assets");
         set.add("governs_external_assets");
-        return set;
+        return Collections.unmodifiableSet(set);
     }
 
     private static final Set<String> IGNORE_TYPES = createIgnoreTypes();
@@ -180,7 +187,7 @@ public class IGCRestConstants {
         list.add(DATA_RULE_DEFINITION);
         list.add(DATA_RULE_SET_DEFINITION);
         list.add(STAGE_COLUMN);
-        return list;
+        return Collections.unmodifiableList(list);
     }
 
     private static final Map<String, String> SUB_TYPE_TO_SUPER_TYPE = createSubTypeToSuperType();
@@ -244,7 +251,7 @@ public class IGCRestConstants {
         map.put("non_published_data_rule_definition", DATA_RULE_DEFINITION);
         map.put("published_data_rule_set", DATA_RULE_SET_DEFINITION);
         map.put("non_published_data_rule_set", DATA_RULE_SET_DEFINITION);
-        return map;
+        return Collections.unmodifiableMap(map);
     }
 
     private static final Set<String> FIXED_INFORMATION_ASSET_PROPERTIES = createFixedInformationAssetProperties();
@@ -264,7 +271,7 @@ public class IGCRestConstants {
         set.add("written_by_(operational)");
         set.add("written_by_(static)");
         set.add("written_by_(user_defined)");
-        return set;
+        return Collections.unmodifiableSet(set);
     }
 
     /**
@@ -273,6 +280,13 @@ public class IGCRestConstants {
      * @return {@code Set<String>}
      */
     public static Set<String> getValidCookieNames() { return VALID_COOKIE_NAMES; }
+
+    /**
+     * Retrieve the set of IGC object types that cannot be searched for via the IGC REST API.
+     *
+     * @return {@code Set<String>}
+     */
+    public static Set<String> getTypesThatCannotBeSearched() { return TYPES_THAT_CANNOT_BE_SEARCHED; }
 
     /**
      * Retrieve a list of the modification detail properties used by the IGC REST API.
