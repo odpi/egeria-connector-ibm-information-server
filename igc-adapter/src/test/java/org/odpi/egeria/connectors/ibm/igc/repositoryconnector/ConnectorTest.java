@@ -3,6 +3,8 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Note;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapper;
@@ -10,10 +12,7 @@ import org.odpi.egeria.connectors.ibm.igc.eventmapper.model.ChangeSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.*;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.CategoryAnchorMapper;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.ConnectionEndpointMapper;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SynonymMapper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.*;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mocks.MockConnection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCRelationshipGuid;
@@ -1191,6 +1190,55 @@ public class ConnectorTest {
                 3,
                 relationshipExpectations
         );
+
+        IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
+        Term term = igcRestClient.getAssetWithSubsetOfProperties("6662c0f2.e1b1ec6c.00270n9bc.9a0o5ur.hsbem7.o7tuf0mn7hgv85dv4s707", "term", new String[]{"name"});
+        Note note = igcRestClient.getAssetWithSubsetOfProperties("b1c497ce.1a21c74f.00270nb2s.3iaovvr.rbf470.568fcokgdnlg70p0q4cu7", "note", new String[]{"subject"});
+
+        List<Relationship> relationships = new ArrayList<>();
+        AttachedNoteLogEntryMapper mapper = AttachedNoteLogEntryMapper.getInstance(null);
+        mapper.addMappedOMRSRelationships(igcomrsRepositoryConnector,
+                relationships,
+                term,
+                null,
+                0,
+                null,
+                MockConstants.EGERIA_PAGESIZE,
+                MockConstants.EGERIA_USER);
+        assertEquals(relationships.size(), 2);
+
+        relationships = new ArrayList<>();
+        mapper.addMappedOMRSRelationships(igcomrsRepositoryConnector,
+                relationships,
+                term,
+                note,
+                0,
+                null,
+                MockConstants.EGERIA_PAGESIZE,
+                MockConstants.EGERIA_USER);
+        assertEquals(relationships.size(), 1);
+
+        relationships = new ArrayList<>();
+        mapper.addMappedOMRSRelationships(igcomrsRepositoryConnector,
+                relationships,
+                note,
+                null,
+                0,
+                null,
+                MockConstants.EGERIA_PAGESIZE,
+                MockConstants.EGERIA_USER);
+        assertEquals(relationships.size(), 1);
+
+        relationships = new ArrayList<>();
+        mapper.addMappedOMRSRelationships(igcomrsRepositoryConnector,
+                relationships,
+                note,
+                term,
+                0,
+                null,
+                MockConstants.EGERIA_PAGESIZE,
+                MockConstants.EGERIA_USER);
+        assertEquals(relationships.size(), 1);
 
     }
 
