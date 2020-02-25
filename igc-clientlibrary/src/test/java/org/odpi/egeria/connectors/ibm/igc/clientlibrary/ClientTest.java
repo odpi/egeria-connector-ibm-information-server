@@ -5,11 +5,9 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Note;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Paging;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -18,7 +16,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants;
 import org.odpi.openmetadata.http.HttpHelper;
-import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.testng.annotations.*;
@@ -119,6 +116,35 @@ public class ClientTest {
     }
 
     @Test
+    public void testNotes() {
+
+        Reference testNote = igcRestClient.getAssetById(MockConstants.NOTE_RID);
+        assertNotNull(testNote);
+        assertTrue(testNote instanceof Note);
+        Note note = (Note) testNote;
+        assertEquals(note.getTheType(), "Informational");
+        assertEquals(note.getType(), "note");
+        assertTrue(note.getNote().startsWith("Just an"));
+        assertEquals(note.getSubject(), "This is the subject");
+        assertEquals(note.getStatus(), "Open");
+        Reference related = note.getBelongingTo();
+        assertNotNull(related);
+        assertEquals(related.getType(), "term");
+        assertEquals(related.getName(), "TestTerm");
+
+        Reference testTerm = igcRestClient.getAssetById(MockConstants.TERM_WITH_NOTES_RID);
+        assertNotNull(testTerm);
+        assertTrue(testTerm instanceof Term);
+        Term term = (Term) testTerm;
+        ItemList<Note> notes = term.getNotes();
+        assertNotNull(notes);
+        List<Note> list = notes.getItems();
+        assertEquals(list.size(), 2);
+        assertEquals(list.get(1).getSubject(), "This is the subject");
+
+    }
+
+    @Test
     public void testEmptyTypeDetails() {
         assertTrue(igcRestClient.getAllPropertiesForType(null).isEmpty());
         assertTrue(igcRestClient.getNonRelationshipPropertiesForType(null).isEmpty());
@@ -197,6 +223,26 @@ public class ClientTest {
         assertTrue(testPart instanceof Category);
         assertEquals(testPart.getName(), MockConstants.GLOSSARY_NAME);
         assertNotNull(testPart.toString());
+    }
+
+    @Test
+    public void testContextAndIdentity() {
+
+        // Test that we can identify the difference between an unpopulated context (null) and an empty context ([])
+        String plainRef = "{\"_name\":\"TestTerm\",\"_type\":\"term\",\"_id\":\"6662c0f2.e1b1ec6c.00270n9bc.9a0o5ur.hsbem7.o7tuf0mn7hgv85dv4s707\",\"_url\":\"https://infosvr:9446/ibm/iis/igc-rest/v1/assets/6662c0f2.e1b1ec6c.00270n9bc.9a0o5ur.hsbem7.o7tuf0mn7hgv85dv4s707\"}";
+        String refWithEmptyCtx = "{\"_name\":\"TestTerm\",\"_type\":\"term\",\"_id\":\"6662c0f2.e1b1ec6c.00270n9bc.9a0o5ur.hsbem7.o7tuf0mn7hgv85dv4s707\",\"_url\":\"https://infosvr:9446/ibm/iis/igc-rest/v1/assets/6662c0f2.e1b1ec6c.00270n9bc.9a0o5ur.hsbem7.o7tuf0mn7hgv85dv4s707\",\"_context\":[]}";
+
+        Reference testPlain = igcRestClient.readJSONIntoPOJO(plainRef);
+        assertTrue(testPlain instanceof Term);
+        assertNull(testPlain.getContext());
+        Term plain = (Term) testPlain;
+        assertNull(plain.getContext());
+        Reference testWithEmptyCtx = igcRestClient.readJSONIntoPOJO(refWithEmptyCtx);
+        assertTrue(testWithEmptyCtx instanceof Term);
+        assertNotNull(testWithEmptyCtx.getContext());
+        Term empty = (Term) testWithEmptyCtx;
+        assertNotNull(empty.getContext());
+
     }
 
     @Test

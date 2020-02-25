@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -73,6 +74,7 @@ public class TermAnchorMapper extends RelationshipMapping {
             if (termIdentity != null) {
                 Identity rootIdentity = termIdentity.getUltimateParentIdentity();
                 Reference root = new Reference(rootIdentity.getName(), rootIdentity.getAssetType(), rootIdentity.getRid());
+                root.setContext(Collections.emptyList());
                 asList.add(root);
             } else {
                 log.error("Term has no identity: {}", term);

@@ -22,14 +22,12 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 public class ItemList<T extends Reference> extends ObjectPrinter {
 
     /**
-     * The 'items' property of a ReferenceList gives the actual items that are part of this particular page.
-     * <br><br>
-     * Will be a ArrayList of {@link Reference} objects.
+     * The 'paging' property of an ItemList gives the paging details of this particular page.
      */
     protected Paging paging = new Paging();
 
     /**
-     * The 'items' property of a ReferenceList gives the actual items that are part of this particular page.
+     * The 'items' property of an ItemList gives the actual items that are part of this particular page.
      * <br><br>
      * Will be a ArrayList of {@link Reference} objects.
      */

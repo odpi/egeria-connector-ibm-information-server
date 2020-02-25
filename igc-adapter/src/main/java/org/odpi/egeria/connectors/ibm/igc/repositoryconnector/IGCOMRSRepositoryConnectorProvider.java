@@ -17,6 +17,12 @@ import java.util.List;
  * The IGCOMRSRepositoryConnectorProvider must initialize ConnectorProviderBase with the Java class
  * name of the OMRS Connector implementation (by calling super.setConnectorClassName(className)).
  * Then the connector provider will work.
+ * <br><br>
+ * The permitted configuration options include:
+ * <ul>
+ *     <li>defaultZones - a list of strings defining the default zones that should be applied to all assets homed
+ *          in this repository proxy's metadata collection.</li>
+ * </ul>
  */
 public class IGCOMRSRepositoryConnectorProvider extends OMRSRepositoryConnectorProviderBase {
 

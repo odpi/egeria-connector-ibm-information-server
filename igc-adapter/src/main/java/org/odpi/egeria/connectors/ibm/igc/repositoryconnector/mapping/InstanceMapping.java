@@ -79,18 +79,17 @@ public abstract class InstanceMapping {
      * Determine whether to retrieve all instances, no instances, or some other combination based on the provided
      * search options.
      *
-     * @param mapping the mapping to use for the instances
      * @param matchProperties the properties requested for matching
      * @param matchCriteria the criteria requested for matching
      * @return SearchFilter indicating whether to retrieve all, none or some of the instances via the search
      */
-    public static SearchFilter getAllNoneOrSome(InstanceMapping mapping, InstanceProperties matchProperties, MatchCriteria matchCriteria) {
+    public SearchFilter getAllNoneOrSome(InstanceProperties matchProperties, MatchCriteria matchCriteria) {
 
         SearchFilter filter = SearchFilter.SOME;
 
         if (matchProperties != null) {
 
-            Set<String> mappedOmrsProperties = mapping.getMappedOmrsPropertyNames();
+            Set<String> mappedOmrsProperties = getMappedOmrsPropertyNames();
             Map<String, InstancePropertyValue> propertiesToMatch = matchProperties.getInstanceProperties();
             if (propertiesToMatch == null) {
                 propertiesToMatch = new HashMap<>();
@@ -106,8 +105,8 @@ public abstract class InstanceMapping {
                 boolean allValuesAreUnequal = true;
                 for (Map.Entry<String, InstancePropertyValue> entry : propertiesToMatch.entrySet()) {
                     String omrsPropertyName = entry.getKey();
-                    if (mapping.isOmrsPropertyLiteralMapped(omrsPropertyName)) {
-                        Object literalValue = mapping.getOmrsPropertyLiteralValue(omrsPropertyName);
+                    if (isOmrsPropertyLiteralMapped(omrsPropertyName)) {
+                        Object literalValue = getOmrsPropertyLiteralValue(omrsPropertyName);
                         boolean valuesAreEqual = IGCRepositoryHelper.equivalentValues(literalValue, entry.getValue());
                         if (valuesAreEqual && !matchCriteria.equals(MatchCriteria.ALL)) {
                             // If the values are equal, we can immediately short-circuit: when we should match

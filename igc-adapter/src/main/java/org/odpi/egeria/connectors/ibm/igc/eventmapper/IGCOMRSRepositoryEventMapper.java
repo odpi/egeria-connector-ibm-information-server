@@ -346,6 +346,10 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 }
                 break;
             case InfosphereEventsAssetEvent.ACTION_ASSIGNED_RELATIONSHIP:
+                // TODO: one exception to this is the ADDition of a note, which generates ONLY this type of event (with
+                //  the RID of the asset indicated being the RID of the asset to which the note was added, not the RID
+                //  of the note itself).  The removal of a note is still listed as a MODIFY against the asset the note
+                //  was attached to.
                 log.debug("Ignoring ASSIGNED_RELATIONSHIP event -- should be handled already by an earlier CREATE or MODIFY event: {}", event);
                 break;
             default:
@@ -1495,48 +1499,53 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                     propertyNames = pmTwo.getIgcRelationshipProperties();
                                     endTwo.addAll(relationshipMapping.getProxyTwoAssetFromAsset(fromObject, igcRestClient));
                                     iterateOnOne = false;
-                                } else {
+                                } else if (!relationshipMapping.isSelfReferencing()) {
                                     log.warn("Unable to match the purged entity '{}' to either end of relationship: {}", igcAssetType, relationshipDef.getName());
                                 }
                                 if (propertyNames != null) {
                                     for (String property : propertyNames) {
-                                        log.debug(" ... checking for relationship on property: {}", property);
-                                        Object relatedResult = igcRestClient.getPropertyByName(fromObject, property);
-                                        if (relatedResult != null) {
-                                            // TODO: we should also cache up all of the relationship ends that are NOT purged,
-                                            //  as these entities should have their stubs updated (to no longer refer to a
-                                            //  non-existent relationship) -- in fact, that might take care of sending the
-                                            //  correct relationship purges for us?
-                                            if (relatedResult instanceof Reference) {
-                                                Reference relationship = (Reference) relatedResult;
-                                                if (relationship.getType() != null) {
-                                                    // In cases of an exclusive relationship, there could be an empty
-                                                    // object rather than null, but this semantically still means there
-                                                    // is no relationship so treat it as a null relationship (skip it)
-                                                    cascadeRelationshipPurge(
-                                                            relationshipMapping,
-                                                            relationshipDef,
-                                                            endOne,
-                                                            endTwo,
-                                                            relationship,
-                                                            property,
-                                                            iterateOnOne
-                                                    );
-                                                }
-                                            } else if (relatedResult instanceof ItemList) {
-                                                ItemList<?> relationships = (ItemList<?>) relatedResult;
-                                                for (Reference relationship : relationships.getItems()) {
-                                                    cascadeRelationshipPurge(
-                                                            relationshipMapping,
-                                                            relationshipDef,
-                                                            endOne,
-                                                            endTwo,
-                                                            relationship,
-                                                            property,
-                                                            iterateOnOne
-                                                    );
+                                        if (!property.equals(RelationshipMapping.SELF_REFERENCE_SENTINEL)) {
+                                            log.debug(" ... checking for relationship on property: {}", property);
+                                            Object relatedResult = igcRestClient.getPropertyByName(fromObject, property);
+                                            if (relatedResult != null) {
+                                                // TODO: we should also cache up all of the relationship ends that are NOT purged,
+                                                //  as these entities should have their stubs updated (to no longer refer to a
+                                                //  non-existent relationship) -- in fact, that might take care of sending the
+                                                //  correct relationship purges for us?
+                                                if (relatedResult instanceof Reference) {
+                                                    Reference relationship = (Reference) relatedResult;
+                                                    if (relationship.getType() != null) {
+                                                        // In cases of an exclusive relationship, there could be an empty
+                                                        // object rather than null, but this semantically still means there
+                                                        // is no relationship so treat it as a null relationship (skip it)
+                                                        cascadeRelationshipPurge(
+                                                                relationshipMapping,
+                                                                relationshipDef,
+                                                                endOne,
+                                                                endTwo,
+                                                                relationship,
+                                                                property,
+                                                                iterateOnOne
+                                                        );
+                                                    }
+                                                } else if (relatedResult instanceof ItemList) {
+                                                    ItemList<?> relationships = (ItemList<?>) relatedResult;
+                                                    for (Reference relationship : relationships.getItems()) {
+                                                        cascadeRelationshipPurge(
+                                                                relationshipMapping,
+                                                                relationshipDef,
+                                                                endOne,
+                                                                endTwo,
+                                                                relationship,
+                                                                property,
+                                                                iterateOnOne
+                                                        );
+                                                    }
                                                 }
                                             }
+                                        } else {
+                                            // TODO: probably also need to purge any generated entity and relationship?
+                                            log.warn(" ... should also be purging a generated relationship.");
                                         }
                                     }
                                 }
@@ -1612,21 +1621,23 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         List<String> relationshipProperties = parent.getIgcRelationshipProperties();
         log.debug(" ... iterating through parent's properties: {}", relationshipProperties);
         for (String property : relationshipProperties) {
-            log.debug(" ... getting child entities from property: {}", property);
-            Object relatedResult = igcRestClient.getPropertyByName(parentObject, property);
-            if (relatedResult != null) {
-                if (relatedResult instanceof Reference) {
-                    Reference relationship = (Reference) relatedResult;
-                    if (!relationship.getId().equals(parentRid)) {
-                        log.debug(" ... purging child entity: {}", relationship.getId());
-                        sendPurgedEntity(relationship.getType(), relationship.getId(), alreadyPurgedRids);
-                    }
-                } else if (relatedResult instanceof ItemList) {
-                    ItemList<?> relationships = (ItemList<?>) relatedResult;
-                    for (Reference relationship : relationships.getItems()) {
+            if (!property.equals(RelationshipMapping.SELF_REFERENCE_SENTINEL)) {
+                log.debug(" ... getting child entities from property: {}", property);
+                Object relatedResult = igcRestClient.getPropertyByName(parentObject, property);
+                if (relatedResult != null) {
+                    if (relatedResult instanceof Reference) {
+                        Reference relationship = (Reference) relatedResult;
                         if (!relationship.getId().equals(parentRid)) {
                             log.debug(" ... purging child entity: {}", relationship.getId());
                             sendPurgedEntity(relationship.getType(), relationship.getId(), alreadyPurgedRids);
+                        }
+                    } else if (relatedResult instanceof ItemList) {
+                        ItemList<?> relationships = (ItemList<?>) relatedResult;
+                        for (Reference relationship : relationships.getItems()) {
+                            if (!relationship.getId().equals(parentRid)) {
+                                log.debug(" ... purging child entity: {}", relationship.getId());
+                                sendPurgedEntity(relationship.getType(), relationship.getId(), alreadyPurgedRids);
+                            }
                         }
                     }
                 }
