@@ -194,6 +194,12 @@ public abstract class ClassificationMapping extends InstanceMapping {
     public final void addSimplePropertyMapping(String igcPropertyName, String omrsPropertyName) {
         if (omrsPropertyName != null && igcPropertyName != null) {
             EntityMapping.PropertyMapping pm = new EntityMapping.PropertyMapping(igcPropertyName, omrsPropertyName);
+            if (mappingByOmrsProperty.containsKey(omrsPropertyName)) {
+                // If we are overriding an existing mapping, remove that mapping before applying the new one
+                // (to release the previously-mapped values into eg. additionalProperties map)
+                EntityMapping.PropertyMapping existing = mappingByOmrsProperty.remove(omrsPropertyName);
+                mappingByIgcProperty.remove(existing.getIgcPropertyName());
+            }
             mappingByOmrsProperty.put(omrsPropertyName, pm);
             mappingByIgcProperty.put(igcPropertyName, pm);
         } else {
