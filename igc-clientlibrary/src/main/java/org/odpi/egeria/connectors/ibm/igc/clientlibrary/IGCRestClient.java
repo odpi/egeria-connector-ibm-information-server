@@ -88,6 +88,8 @@ public class IGCRestClient {
     private Map<String, List<String>> typeToAllProperties;
     private Map<String, List<String>> typeToPagedRelationshipProperties;
 
+    private Map<String, Class<?>> registeredTypes;
+
     private int defaultPageSize = 100;
 
     private ObjectMapper mapper;
@@ -166,6 +168,8 @@ public class IGCRestClient {
         this.typeToStringProperties = new HashMap<>();
         this.typeToAllProperties = new HashMap<>();
         this.typeToPagedRelationshipProperties = new HashMap<>();
+
+        this.registeredTypes = new HashMap<>();
 
         // Setup these values up-front for the 'note' type, which is not formally a type otherwise
         this.typesThatIncludeModificationDetails.add(IGCRestConstants.NOTE);
@@ -1282,6 +1286,7 @@ public class IGCRestClient {
         if (typeName != null) {
             String typeId = typeName.value();
             this.mapper.registerSubtypes(clazz);
+            this.registeredTypes.put(typeId, clazz);
             log.info("Registered IGC type {} to be handled by POJO: {}", typeId, clazz.getCanonicalName());
         } else {
             throw new IGCIOException("Unable to find JsonTypeName annotation to identify type in POJO.", clazz.getCanonicalName(), null);
@@ -1289,21 +1294,25 @@ public class IGCRestClient {
     }
 
     /**
-     * Returns the out-of-the-box POJO that is registered to serde the provided IGC asset type.
+     * Returns the POJO that is registered to serde the provided IGC asset type, preferring any that have been
+     * registered or defaulting to the out-of-the-box ones if there are no overrides.
      *
      * @param assetType name of the IGC asset
      * @return Class
+     * @see #registerPOJO(Class)
      */
     public Class<?> getPOJOForType(String assetType) {
-        Class<?> igcPOJO = null;
-        StringBuilder sbPojoName = new StringBuilder();
-        sbPojoName.append(IGCRestConstants.IGC_REST_BASE_MODEL_PKG);
-        sbPojoName.append(".");
-        sbPojoName.append(IGCRestConstants.getClassNameForAssetType(assetType));
-        try {
-            igcPOJO = Class.forName(sbPojoName.toString());
-        } catch (ClassNotFoundException e) {
-            throw new IGCIOException("Unable to find POJO class.", sbPojoName.toString(), e);
+        Class<?> igcPOJO = registeredTypes.getOrDefault(assetType, null);
+        if (igcPOJO == null) {
+            StringBuilder sbPojoName = new StringBuilder();
+            sbPojoName.append(IGCRestConstants.IGC_REST_BASE_MODEL_PKG);
+            sbPojoName.append(".");
+            sbPojoName.append(IGCRestConstants.getClassNameForAssetType(assetType));
+            try {
+                igcPOJO = Class.forName(sbPojoName.toString());
+            } catch (ClassNotFoundException e) {
+                throw new IGCIOException("Unable to find POJO class.", sbPojoName.toString(), e);
+            }
         }
         return igcPOJO;
     }

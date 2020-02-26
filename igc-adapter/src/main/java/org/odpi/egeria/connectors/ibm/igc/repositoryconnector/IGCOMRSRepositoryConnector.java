@@ -20,10 +20,10 @@ import java.util.Map;
 
 public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
 
-    private IGCRestClient igcRestClient;
-    private IGCVersionEnum igcVersion;
+    protected IGCRestClient igcRestClient;
+    protected IGCVersionEnum igcVersion;
 
-    private List<String> defaultZones;
+    protected List<String> defaultZones;
 
     /**
      * Default constructor used by the OCF Connector Provider.
@@ -131,8 +131,9 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      * Connect to the IBM Information Governance Catalog host.
      *
      * @param methodName the name of the method connecting to IGC
+     * @throws ConnectorCheckedException on any error connecting to IGC
      */
-    private void connectToIGC(String methodName) throws ConnectorCheckedException {
+    protected void connectToIGC(String methodName) throws ConnectorCheckedException {
 
         EndpointProperties endpointProperties = connectionProperties.getEndpoint();
         if (endpointProperties == null) {
@@ -214,8 +215,9 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      * Generates a zip file for the OMRS OpenIGC bundle, needed to enable change tracking for the event mapper.
      *
      * @return boolean true on success, or if the bundle already exists and false otherwise
+     * @throws RepositoryErrorException on any error upserting the bundle to IGC
      */
-    private boolean upsertOMRSBundleZip() throws RepositoryErrorException {
+    protected boolean upsertOMRSBundleZip() throws RepositoryErrorException {
 
         final String methodName = "upsertOMRSBundleZip";
 
@@ -237,7 +239,7 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      * @param params any parameters for formatting the error message
      * @throws ConnectorCheckedException always
      */
-    private void raiseConnectorCheckedException(IGCOMRSErrorCode errorCode, String methodName, Throwable cause, String ...params) throws ConnectorCheckedException {
+    protected void raiseConnectorCheckedException(IGCOMRSErrorCode errorCode, String methodName, Throwable cause, String ...params) throws ConnectorCheckedException {
         String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
         throw new ConnectorCheckedException(
                 errorCode.getHTTPErrorCode(),
@@ -258,7 +260,7 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      * @param params any parameters for formatting the error message
      * @throws RepositoryErrorException always
      */
-    private void raiseRepositoryErrorException(IGCOMRSErrorCode errorCode, String methodName, Throwable cause, String ...params) throws RepositoryErrorException {
+    protected void raiseRepositoryErrorException(IGCOMRSErrorCode errorCode, String methodName, Throwable cause, String ...params) throws RepositoryErrorException {
         String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
         throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
                 this.getClass().getName(),
