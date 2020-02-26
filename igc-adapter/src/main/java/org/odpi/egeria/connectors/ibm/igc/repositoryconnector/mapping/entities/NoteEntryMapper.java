@@ -27,7 +27,7 @@ public class NoteEntryMapper extends ReferenceableMapper {
         return Singleton.INSTANCE;
     }
 
-    private NoteEntryMapper() {
+    protected NoteEntryMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

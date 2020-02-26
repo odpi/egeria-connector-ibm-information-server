@@ -21,7 +21,7 @@ public class ConnectionMapper extends ReferenceableMapper {
         return Singleton.INSTANCE;
     }
 
-    private ConnectionMapper() {
+    protected ConnectionMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

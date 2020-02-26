@@ -16,7 +16,7 @@ public class DataClassAssignmentStatusMapper extends EnumMapping {
         return Singleton.INSTANCE;
     }
 
-    private DataClassAssignmentStatusMapper() {
+    protected DataClassAssignmentStatusMapper() {
         super(
                 "DataClassAssignmentStatus"
         );

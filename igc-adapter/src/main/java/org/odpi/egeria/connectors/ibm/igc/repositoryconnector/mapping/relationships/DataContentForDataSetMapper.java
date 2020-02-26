@@ -16,7 +16,7 @@ public class DataContentForDataSetMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private DataContentForDataSetMapper() {
+    protected DataContentForDataSetMapper() {
         super(
                 "database",
                 "database_schema",

@@ -16,7 +16,7 @@ public class ConnectionToAssetMapper_Database extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private ConnectionToAssetMapper_Database() {
+    protected ConnectionToAssetMapper_Database() {
         super(
                 "data_connection",
                 "database",

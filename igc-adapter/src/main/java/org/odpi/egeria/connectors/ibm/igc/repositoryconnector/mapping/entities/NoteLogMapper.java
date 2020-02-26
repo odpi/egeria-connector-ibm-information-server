@@ -30,7 +30,7 @@ public class NoteLogMapper extends ReferenceableMapper {
         return Singleton.INSTANCE;
     }
 
-    private NoteLogMapper() {
+    protected NoteLogMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

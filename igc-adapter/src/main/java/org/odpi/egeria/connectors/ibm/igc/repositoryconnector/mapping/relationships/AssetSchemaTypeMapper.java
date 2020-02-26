@@ -18,7 +18,7 @@ public class AssetSchemaTypeMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private AssetSchemaTypeMapper() {
+    protected AssetSchemaTypeMapper() {
         super(
                 "",
                 "",

@@ -16,7 +16,7 @@ public class GovernancePolicyLinkMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private GovernancePolicyLinkMapper() {
+    protected GovernancePolicyLinkMapper() {
         super(
                 "information_governance_policy",
                 "information_governance_policy",

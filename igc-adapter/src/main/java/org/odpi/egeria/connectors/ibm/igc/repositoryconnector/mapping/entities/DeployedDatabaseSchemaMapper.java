@@ -19,7 +19,7 @@ public class DeployedDatabaseSchemaMapper extends DataSet_Mapper {
         return Singleton.INSTANCE;
     }
 
-    private DeployedDatabaseSchemaMapper() {
+    protected DeployedDatabaseSchemaMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

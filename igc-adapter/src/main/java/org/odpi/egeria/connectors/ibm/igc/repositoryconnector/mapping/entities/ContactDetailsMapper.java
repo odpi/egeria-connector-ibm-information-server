@@ -35,7 +35,7 @@ public class ContactDetailsMapper extends ReferenceableMapper {
         return Singleton.INSTANCE;
     }
 
-    private ContactDetailsMapper() {
+    protected ContactDetailsMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

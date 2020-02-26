@@ -36,7 +36,7 @@ public class ConfidentialityMapper extends ClassificationMapping {
         return Singleton.INSTANCE;
     }
 
-    private ConfidentialityMapper() {
+    protected ConfidentialityMapper() {
         super(
                 IGCRepositoryHelper.DEFAULT_IGC_TYPE,
                 "assigned_to_terms",

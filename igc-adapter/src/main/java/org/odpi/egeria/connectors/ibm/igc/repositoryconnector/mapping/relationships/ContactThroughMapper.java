@@ -18,7 +18,7 @@ public class ContactThroughMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private ContactThroughMapper() {
+    protected ContactThroughMapper() {
         super(
                 "",
                 "",

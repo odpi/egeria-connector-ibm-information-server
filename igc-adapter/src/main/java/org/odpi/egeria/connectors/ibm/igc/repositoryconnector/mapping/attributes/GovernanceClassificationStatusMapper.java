@@ -14,7 +14,7 @@ public class GovernanceClassificationStatusMapper extends EnumMapping {
     }
     public static GovernanceClassificationStatusMapper getInstance(IGCVersionEnum version) { return Singleton.INSTANCE; }
 
-    private GovernanceClassificationStatusMapper() {
+    protected GovernanceClassificationStatusMapper() {
         super(
                 "GovernanceClassificationStatus"
         );

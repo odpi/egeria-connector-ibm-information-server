@@ -36,7 +36,7 @@ public class EndpointMapper extends ReferenceableMapper {
         return Singleton.INSTANCE;
     }
 
-    private EndpointMapper() {
+    protected EndpointMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

@@ -16,7 +16,7 @@ public class AssetZoneMembershipMapper_Database extends AssetZoneMembershipMappe
         return Singleton.INSTANCE;
     }
 
-    private AssetZoneMembershipMapper_Database() {
+    protected AssetZoneMembershipMapper_Database() {
         super(
                 "database",
                 null,

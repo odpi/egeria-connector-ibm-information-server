@@ -20,7 +20,7 @@ public class SpineObjectMapper extends Spine_Mapper {
         return SpineObjectMapper.Singleton.INSTANCE;
     }
 
-    private SpineObjectMapper() {
+    protected SpineObjectMapper() {
         super("SpineObject");
     }
 

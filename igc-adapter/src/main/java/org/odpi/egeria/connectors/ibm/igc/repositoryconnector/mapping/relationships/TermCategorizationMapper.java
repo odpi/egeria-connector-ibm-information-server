@@ -26,7 +26,7 @@ public class TermCategorizationMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private TermCategorizationMapper() {
+    protected TermCategorizationMapper() {
         super(
                 "category",
                 "term",

@@ -16,7 +16,7 @@ public class ForeignKeyMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private ForeignKeyMapper() {
+    protected ForeignKeyMapper() {
         super(
                 "database_column",
                 "database_column",

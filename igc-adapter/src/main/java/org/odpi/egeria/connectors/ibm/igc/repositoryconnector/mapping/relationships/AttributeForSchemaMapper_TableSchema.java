@@ -17,7 +17,7 @@ public class AttributeForSchemaMapper_TableSchema extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private AttributeForSchemaMapper_TableSchema() {
+    protected AttributeForSchemaMapper_TableSchema() {
         super(
                 "database_schema",
                 "database_table",

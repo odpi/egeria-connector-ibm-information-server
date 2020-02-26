@@ -16,7 +16,7 @@ public class TypeEmbeddedAttributeMapper_TabularColumn extends TypeEmbeddedAttri
         return Singleton.INSTANCE;
     }
 
-    private TypeEmbeddedAttributeMapper_TabularColumn() {
+    protected TypeEmbeddedAttributeMapper_TabularColumn() {
         super(
                 "data_file_field",
                 null,

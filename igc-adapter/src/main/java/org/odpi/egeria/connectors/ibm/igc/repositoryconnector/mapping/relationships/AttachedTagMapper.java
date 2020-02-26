@@ -17,7 +17,7 @@ public class AttachedTagMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private AttachedTagMapper() {
+    protected AttachedTagMapper() {
         super(
                 IGCRepositoryHelper.DEFAULT_IGC_TYPE,
                 "label",

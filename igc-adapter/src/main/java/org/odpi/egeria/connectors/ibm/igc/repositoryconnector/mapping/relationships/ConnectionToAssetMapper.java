@@ -18,7 +18,7 @@ public class ConnectionToAssetMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private ConnectionToAssetMapper() {
+    protected ConnectionToAssetMapper() {
         super(
                 "",
                 "",

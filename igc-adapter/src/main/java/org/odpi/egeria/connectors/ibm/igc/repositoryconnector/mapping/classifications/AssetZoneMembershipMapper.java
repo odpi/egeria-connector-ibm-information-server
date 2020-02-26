@@ -32,7 +32,7 @@ public class AssetZoneMembershipMapper extends ClassificationMapping {
         return Singleton.INSTANCE;
     }
 
-    private AssetZoneMembershipMapper() {
+    protected AssetZoneMembershipMapper() {
         super(
                 "",
                 "",

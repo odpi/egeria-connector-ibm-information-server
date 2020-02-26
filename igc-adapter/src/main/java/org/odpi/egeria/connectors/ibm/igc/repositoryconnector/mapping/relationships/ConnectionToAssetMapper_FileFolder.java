@@ -16,7 +16,7 @@ public class ConnectionToAssetMapper_FileFolder extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private ConnectionToAssetMapper_FileFolder() {
+    protected ConnectionToAssetMapper_FileFolder() {
         super(
                 "data_connection",
                 "data_file_folder",

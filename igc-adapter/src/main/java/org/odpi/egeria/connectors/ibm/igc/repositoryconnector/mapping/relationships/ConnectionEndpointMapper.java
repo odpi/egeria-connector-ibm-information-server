@@ -43,7 +43,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
 
     // Note that we need to use the 'data_connectors' link because the 'host' attribute on data_connection assets
     // is always empty (it is through the 'data_connectors' relationship that we'll determine the host)
-    private ConnectionEndpointMapper() {
+    protected ConnectionEndpointMapper() {
         super(
                 "host",
                 "data_connection",

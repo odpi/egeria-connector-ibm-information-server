@@ -17,7 +17,7 @@ public class AssetSchemaTypeMapper_DatabaseSchema extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private AssetSchemaTypeMapper_DatabaseSchema() {
+    protected AssetSchemaTypeMapper_DatabaseSchema() {
         super(
                 "database_schema",
                 "database_schema",

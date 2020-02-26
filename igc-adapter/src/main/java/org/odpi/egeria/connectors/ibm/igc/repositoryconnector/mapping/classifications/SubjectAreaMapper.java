@@ -36,7 +36,7 @@ public class SubjectAreaMapper extends ClassificationMapping {
         return SubjectAreaMapper.Singleton.INSTANCE;
     }
 
-    private SubjectAreaMapper() {
+    protected SubjectAreaMapper() {
         super(
                 "category",
                 "assigned_to_terms",

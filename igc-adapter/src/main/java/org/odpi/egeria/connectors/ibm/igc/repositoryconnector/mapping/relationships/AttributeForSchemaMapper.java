@@ -18,7 +18,7 @@ public class AttributeForSchemaMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private AttributeForSchemaMapper() {
+    protected AttributeForSchemaMapper() {
         super(
                 "",
                 "",

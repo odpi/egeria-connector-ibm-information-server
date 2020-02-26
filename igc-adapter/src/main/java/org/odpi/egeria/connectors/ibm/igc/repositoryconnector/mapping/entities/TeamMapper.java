@@ -17,7 +17,7 @@ public class TeamMapper extends ActorProfile_Mapper {
         return Singleton.INSTANCE;
     }
 
-    private TeamMapper() {
+    protected TeamMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

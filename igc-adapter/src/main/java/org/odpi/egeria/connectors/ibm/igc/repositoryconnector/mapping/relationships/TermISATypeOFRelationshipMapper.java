@@ -17,7 +17,7 @@ public class TermISATypeOFRelationshipMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private TermISATypeOFRelationshipMapper() {
+    protected TermISATypeOFRelationshipMapper() {
         super(
                 "term",
                 "term",

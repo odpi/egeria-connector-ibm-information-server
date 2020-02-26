@@ -14,7 +14,7 @@ public class AssetZoneMembershipMapper_DeployedDatabaseSchema extends AssetZoneM
     }
     public static AssetZoneMembershipMapper_DeployedDatabaseSchema getInstance(IGCVersionEnum version) { return Singleton.INSTANCE; }
 
-    private AssetZoneMembershipMapper_DeployedDatabaseSchema() {
+    protected AssetZoneMembershipMapper_DeployedDatabaseSchema() {
         super(
                 "database_schema",
                 null,

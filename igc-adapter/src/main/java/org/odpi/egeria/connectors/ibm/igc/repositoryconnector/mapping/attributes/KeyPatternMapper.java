@@ -16,7 +16,7 @@ public class KeyPatternMapper extends EnumMapping {
         return Singleton.INSTANCE;
     }
 
-    private KeyPatternMapper() {
+    protected KeyPatternMapper() {
         super(
                 "KeyPattern"
         );
