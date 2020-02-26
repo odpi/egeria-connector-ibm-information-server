@@ -117,14 +117,14 @@ asset types, you will likely want to make use of your own asset types.
 
 The recommended way to do this is to create your own POJOs:
 
-- For OpenIGC assets, create a new class that extends from `MainObject` for each class in your
+- For OpenIGC assets, create a new class that extends from `InformationAsset` for each class in your
     OpenIGC bundle, and add each of your classes' properties as members to each of those POJOs.
     Also add a `@JsonTypeName("...")` annotation set to the precise type string that IGC uses to
     refer to assets of this type. (See the
     [OMRSStub](../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/model/OMRSStub.java)
-    POJO for an example, and note that you should extend from `InformationAsset`.)
+    POJO for an example.)
 - For native asset types against which you've defined custom attributes, you'll need to either
-    update or replace the existing (base) POJO by adding the custom attribute properties to it.
+    extend or replace the existing (base) POJO by adding the custom attribute properties to it.
     For any custom attributes of IGC type `relationship` use a Java type of `ItemList<>`, for any
     multi-valued custom attributes use a Java type of `List<String>`, and for any singular values
     simply use the appropriate type (eg. `String`, `Number`, `Date`, or `Boolean`).
@@ -163,6 +163,8 @@ Once the type is registered, metadata assets of that type can then be retrieved 
 generally return `Reference` objects; and these `Reference` objects can be explicitly cast to their
 more descriptive type (eg. `(MyCustomObject)` in our example), as needed.
 
+For more information on the recommended approach to applying these extensions in the broader context of the Egeria
+connector, see [Extending the connector](../docs/extending/README.md).
 
 ----
 License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/),
