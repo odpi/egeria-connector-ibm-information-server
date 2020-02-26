@@ -17,7 +17,7 @@ public class InformalTagMapper extends ReferenceableMapper {
         return Singleton.INSTANCE;
     }
 
-    private InformalTagMapper() {
+    protected InformalTagMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

@@ -17,7 +17,7 @@ public class NestedSchemaAttributeMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private NestedSchemaAttributeMapper() {
+    protected NestedSchemaAttributeMapper() {
         super(
                 "database_table",
                 "database_column",

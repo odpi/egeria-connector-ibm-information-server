@@ -16,7 +16,7 @@ public class ConnectionConnectorTypeMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private ConnectionConnectorTypeMapper() {
+    protected ConnectionConnectorTypeMapper() {
         super(
                 "data_connection",
                 "connector",

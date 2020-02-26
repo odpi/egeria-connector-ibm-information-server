@@ -26,7 +26,7 @@ public class SemanticAssignmentMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private SemanticAssignmentMapper() {
+    protected SemanticAssignmentMapper() {
         super(
                 IGCRepositoryHelper.DEFAULT_IGC_TYPE,
                 "term",

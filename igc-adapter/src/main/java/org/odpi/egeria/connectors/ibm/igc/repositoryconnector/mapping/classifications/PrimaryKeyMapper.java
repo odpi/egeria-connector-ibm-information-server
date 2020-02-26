@@ -37,7 +37,7 @@ public class PrimaryKeyMapper extends ClassificationMapping {
         return PrimaryKeyMapper.Singleton.INSTANCE;
     }
 
-    private PrimaryKeyMapper() {
+    protected PrimaryKeyMapper() {
         super(
                 "database_column",
                 "defined_primary_key",

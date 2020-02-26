@@ -17,7 +17,7 @@ public class RelatedTermMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private RelatedTermMapper() {
+    protected RelatedTermMapper() {
         super(
                 "term",
                 "term",

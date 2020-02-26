@@ -45,7 +45,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private DataClassAssignmentMapper() {
+    protected DataClassAssignmentMapper() {
         super(
                 IGCRepositoryHelper.DEFAULT_IGC_TYPE,
                 "data_class",

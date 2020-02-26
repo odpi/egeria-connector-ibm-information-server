@@ -14,7 +14,7 @@ public class AssetZoneMembershipMapper_FileFolder extends AssetZoneMembershipMap
     }
     public static AssetZoneMembershipMapper_FileFolder getInstance(IGCVersionEnum version) { return Singleton.INSTANCE; }
 
-    private AssetZoneMembershipMapper_FileFolder() {
+    protected AssetZoneMembershipMapper_FileFolder() {
         super(
                 "data_file_folder",
                 null,

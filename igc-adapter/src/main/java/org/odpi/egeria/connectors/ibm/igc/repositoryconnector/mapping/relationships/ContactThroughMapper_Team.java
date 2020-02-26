@@ -17,7 +17,7 @@ public class ContactThroughMapper_Team extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private ContactThroughMapper_Team() {
+    protected ContactThroughMapper_Team() {
         super(
                 "group",
                 "group",

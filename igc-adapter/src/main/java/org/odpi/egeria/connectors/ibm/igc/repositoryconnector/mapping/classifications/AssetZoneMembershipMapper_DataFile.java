@@ -14,7 +14,7 @@ public class AssetZoneMembershipMapper_DataFile extends AssetZoneMembershipMappe
     }
     public static AssetZoneMembershipMapper_DataFile getInstance(IGCVersionEnum version) { return Singleton.INSTANCE; }
 
-    private AssetZoneMembershipMapper_DataFile() {
+    protected AssetZoneMembershipMapper_DataFile() {
         super(
                 "data_file",
                 null,

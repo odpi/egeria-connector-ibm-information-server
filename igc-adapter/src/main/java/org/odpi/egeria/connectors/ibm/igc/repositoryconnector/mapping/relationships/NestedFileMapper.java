@@ -16,7 +16,7 @@ public class NestedFileMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private NestedFileMapper() {
+    protected NestedFileMapper() {
         super(
                 "data_file_folder",
                 "data_file",

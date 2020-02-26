@@ -349,7 +349,7 @@ You then simply need to:
     `connectorType` is set to the canonical class name of your extended ConnectorProvider class rather than the base
     IGC connector's ConnectorProvider class name
 
-## Extending the mappings with your extensions
+## Extending the mappings with your own logic
 
 The walkthrough above simply covers extending the model. With the changes above, the values of non-relationship custom
 attributes should automatically start appearing in the `additionalProperties` map of any Egeria (Referenceable-derived)
@@ -358,7 +358,68 @@ entity.
 Of course, if you want to use this custom information to drive some other mapping to the Egeria types, then you will
 also need to extend the mapping logic of the base connector (not only the model).
 
-More details on this to come...
+To do this, begin by creating a new package in your extended adapter module with the following constraints:
+
+- It should be a unique structure under which all mapping classes can be contained (eg. `whatever.structure.you.desire.mappings`).
+- Create sub-packages for each type of mapping, whose names must be:
+    - `attributes` for AttributeMappings
+    - `entities` for EntityMappings
+    - `classifications` for ClassificationMappings
+    - `relationships` for RelationshipMappings
+
+### Extending the existing mappings
+
+To extend an existing mapping, simply define a new class in your mapping package with a name identical to the base
+connectors' mapping class. Ensure this class is in the sub-package relevant to the type it is mapping. For example, to
+extend the mapping for `GlossaryTerm`s (which is an EntityMapping), define:
+
+```java
+package whatever.structure.you.desire.mappings.entities;
+
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+
+public class GlossaryTermMapper extends org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.GlossaryTermMapper {
+
+    private static class Singleton {
+        private static final GlossaryTermMapper INSTANCE = new GlossaryTermMapper();
+    }
+    public static GlossaryTermMapper getInstance(IGCVersionEnum version) {
+        return Singleton.INSTANCE;
+    }
+
+    private GlossaryTermMapper() {
+        super();
+        addSimplePropertyMapping("custom_Test Attribute", "usage");
+    }
+
+}
+```
+
+Note the following:
+
+- This mapping class is defined under the `.entities` sub-package of the overall mappings package.
+- Define a `private static class Singleton` that captures a `static final INSTANCE` of your class.
+- Define a `public static getInstance()` method that returns this `Singleton.INSTANCE`, and is passed an
+    `IGCVersionEnum`. While typically unused, if you want to have different logic depending on the version of IGC being
+    used, this enum allows you to do so (for an example, see the base connectors' [DataClassMapper](../../igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/DataClassMapper.java))
+- Define a `private` (or `protected`) no-args constructor that first calls the no-args constructor of the parent class.
+- Add your extra logic or mappings (in the example above, the `addSimplePropertyMapping()` maps our custom attribute
+    to the `usage` OMRS property).
+
+### Implementing your own mappings
+
+To implement your own mappings, follow the same basic guidance as above, but naturally do not extend a base connectors'
+mapping class. Instead, directly extend one of the following:
+
+- `org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.EnumMapping` for an AttributeMapping
+    (primitive types are already mapped, so this is assuming the only attributes you would need to map are enumerations)
+- `org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.ReferenceableMapper` for an EntityMapping
+    (this ensures automatic mapping for complex properties like `qualifiedName` and `additionalProperties`)
+- `org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping` for a ClassificationMapping
+- `org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.RelationshipMapping` for a RelationshipMapping
+
+Note that in these cases there are various methods you may also want or need to override to influence the behavior of
+your mapping. See any of the base connectors' mapping classes for examples.
 
 
 ----

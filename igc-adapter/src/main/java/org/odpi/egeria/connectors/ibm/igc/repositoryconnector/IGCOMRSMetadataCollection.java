@@ -49,6 +49,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     private TypeDefStore typeDefStore;
     private AttributeMappingStore attributeMappingStore;
 
+    private String mappingPackage;
+
     /**
      * @param parentConnector      connector that this metadata collection supports.
      *                             The connector has the information to call the metadata repository.
@@ -71,6 +73,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         this.igcRepositoryHelper = new IGCRepositoryHelper(igcomrsRepositoryConnector, repositoryHelper, igcRestClient);
         this.typeDefStore = new TypeDefStore();
         this.attributeMappingStore = new AttributeMappingStore(parentConnector);
+        this.mappingPackage = IGCRepositoryHelper.MAPPING_PKG;
     }
 
     /**
@@ -80,6 +83,24 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
      * @return IGCRepositoryHelper
      */
     public IGCRepositoryHelper getIgcRepositoryHelper() { return this.igcRepositoryHelper; }
+
+    /**
+     * Set the Java package path to use for picking up mapping classes.
+     *
+     * @param mappingPackage path to use for picking up mapping classes.
+     */
+    public void setMappingPackage(String mappingPackage) {
+        this.mappingPackage = mappingPackage;
+    }
+
+    /**
+     * Retrieve the Java package path to use for picking up mapping classes.
+     *
+     * @return String
+     */
+    public String getMappingPackage() {
+        return this.mappingPackage;
+    }
 
     /**
      * {@inheritDoc}
@@ -326,33 +347,55 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         log.debug("Looking for mapping for {} of type {}", omrsTypeDefName, typeDefCategory.getName());
 
         // See if we have a Mapper defined for the class -- if so, it's implemented
-        StringBuilder sbMapperClassname = new StringBuilder();
-        sbMapperClassname.append(IGCRepositoryHelper.MAPPING_PKG);
+        StringBuilder sbMapperClassnamePreferred = new StringBuilder();
+        StringBuilder sbMapperClassnameFallback = new StringBuilder();
+        sbMapperClassnamePreferred.append(getMappingPackage());
+        sbMapperClassnameFallback.append(IGCRepositoryHelper.MAPPING_PKG);
         switch(typeDefCategory) {
             case RELATIONSHIP_DEF:
-                sbMapperClassname.append("relationships.");
+                sbMapperClassnamePreferred.append("relationships.");
+                sbMapperClassnameFallback.append("relationships.");
                 break;
             case CLASSIFICATION_DEF:
-                sbMapperClassname.append("classifications.");
+                sbMapperClassnamePreferred.append("classifications.");
+                sbMapperClassnameFallback.append("classifications.");
                 break;
             case ENTITY_DEF:
-                sbMapperClassname.append("entities.");
+                sbMapperClassnamePreferred.append("entities.");
+                sbMapperClassnameFallback.append("entities.");
                 break;
             default:
                 log.info("Unknown TypeDef category '{}', no mapping available.", typeDefCategory.getName());
                 break;
         }
-        sbMapperClassname.append(omrsTypeDefName);
-        sbMapperClassname.append("Mapper");
+        sbMapperClassnamePreferred.append(omrsTypeDefName);
+        sbMapperClassnameFallback.append(omrsTypeDefName);
+        sbMapperClassnamePreferred.append("Mapper");
+        sbMapperClassnameFallback.append("Mapper");
 
+        Class<?> mappingClass = null;
         try {
+            mappingClass = Class.forName(sbMapperClassnamePreferred.toString());
+            log.debug(" ... found preferred mapping class: {}", mappingClass.getCanonicalName());
+        } catch (ClassNotFoundException e) {
+            // Only bother checking the fallback if it is not identical to the preferred
+            if (!getMappingPackage().equals(IGCRepositoryHelper.MAPPING_PKG)) {
+                try {
+                    mappingClass = Class.forName(sbMapperClassnameFallback.toString());
+                    log.debug(" ... found fallback mapping class: {}", mappingClass.getCanonicalName());
+                } catch (ClassNotFoundException e1) {
+                    // Fall-through to null check below
+                }
+            }
+        }
 
-            Class<?> mappingClass = Class.forName(sbMapperClassname.toString());
-            log.debug(" ... found mapping class: {}", mappingClass.getCanonicalName());
-
+        if (mappingClass == null) {
+            // If still not found, mark as unimplemented
+            typeDefStore.addUnimplementedTypeDef(newTypeDef);
+            raiseTypeDefNotSupportedException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, methodName, omrsTypeDefName, repositoryName);
+        } else {
             boolean success = false;
-
-            switch(typeDefCategory) {
+            switch (typeDefCategory) {
                 case RELATIONSHIP_DEF:
                     success = igcRepositoryHelper.addRelationshipMapping(newTypeDef, mappingClass);
                     break;
@@ -366,17 +409,12 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     log.info("Unknown TypeDef category '{}', no mapping available.", typeDefCategory.getName());
                     break;
             }
-
             if (!success) {
                 typeDefStore.addUnimplementedTypeDef(newTypeDef);
                 raiseTypeDefNotSupportedException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, methodName, omrsTypeDefName, repositoryName);
             } else {
                 typeDefStore.addTypeDef(newTypeDef);
             }
-
-        } catch (ClassNotFoundException e) {
-            typeDefStore.addUnimplementedTypeDef(newTypeDef);
-            raiseTypeDefNotSupportedException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, methodName, omrsTypeDefName, repositoryName);
         }
 
         checkEventMapperIsConfigured(methodName);
@@ -411,19 +449,38 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         } else {
 
             // See if we have a Mapper defined for the class -- if so, it's implemented
-            StringBuilder sbMapperClassname = new StringBuilder();
-            sbMapperClassname.append(IGCRepositoryHelper.MAPPING_PKG);
-            sbMapperClassname.append("attributes.");
-            sbMapperClassname.append(omrsTypeDefName);
-            sbMapperClassname.append("Mapper");
+            StringBuilder sbMapperClassnamePreferred = new StringBuilder();
+            StringBuilder sbMapperClassnameFallback = new StringBuilder();
+            sbMapperClassnamePreferred.append(getMappingPackage());
+            sbMapperClassnameFallback.append(IGCRepositoryHelper.MAPPING_PKG);
+            sbMapperClassnamePreferred.append("attributes.");
+            sbMapperClassnameFallback.append("attributes.");
+            sbMapperClassnamePreferred.append(omrsTypeDefName);
+            sbMapperClassnameFallback.append(omrsTypeDefName);
+            sbMapperClassnamePreferred.append("Mapper");
+            sbMapperClassnameFallback.append("Mapper");
 
+            Class<?> mappingClass = null;
             try {
-                Class<?> mappingClass = Class.forName(sbMapperClassname.toString());
-                log.debug(" ... found mapping class: {}", mappingClass.getCanonicalName());
-                attributeMappingStore.addMapping(newAttributeTypeDef, mappingClass);
+                mappingClass = Class.forName(sbMapperClassnamePreferred.toString());
+                log.debug(" ... found preferred mapping class: {}", mappingClass.getCanonicalName());
             } catch (ClassNotFoundException e) {
+                // Only bother checking the fallback if it is not identical to the preferred
+                if (!getMappingPackage().equals(IGCRepositoryHelper.MAPPING_PKG)) {
+                    try {
+                        mappingClass = Class.forName(sbMapperClassnameFallback.toString());
+                        log.debug(" ... found fallback mapping class: {}", mappingClass.getCanonicalName());
+                    } catch (ClassNotFoundException e1) {
+                        // Fall-through to null check below
+                    }
+                }
+            }
+            if (mappingClass == null) {
+                // If still not found, mark as unimplemented
                 attributeMappingStore.addUnimplementedAttributeTypeDef(newAttributeTypeDef);
                 raiseTypeDefNotSupportedException(IGCOMRSErrorCode.ATTRIBUTE_TYPEDEF_NOT_MAPPED, methodName, omrsTypeDefName, repositoryName);
+            } else {
+                attributeMappingStore.addMapping(newAttributeTypeDef, mappingClass);
             }
 
         }

@@ -19,7 +19,7 @@ public class RelationalTableMapper extends SchemaElement_Mapper {
         return Singleton.INSTANCE;
     }
 
-    private RelationalTableMapper() {
+    protected RelationalTableMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

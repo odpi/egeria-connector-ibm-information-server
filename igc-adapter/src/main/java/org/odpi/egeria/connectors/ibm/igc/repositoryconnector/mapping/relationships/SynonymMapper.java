@@ -19,7 +19,7 @@ public class SynonymMapper extends RelationshipMapping {
 
     private static final String P_SYNONYMS = "synonyms";
 
-    private SynonymMapper() {
+    protected SynonymMapper() {
         super(
                 "term",
                 "term",

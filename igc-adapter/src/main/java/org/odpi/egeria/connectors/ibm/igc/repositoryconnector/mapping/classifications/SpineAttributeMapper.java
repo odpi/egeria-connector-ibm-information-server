@@ -16,7 +16,7 @@ public class SpineAttributeMapper extends Spine_Mapper {
     private static class Singleton { private static final SpineAttributeMapper INSTANCE = new SpineAttributeMapper(); }
     public static SpineAttributeMapper getInstance(IGCVersionEnum version) { return SpineAttributeMapper.Singleton.INSTANCE; }
 
-    private SpineAttributeMapper() {
+    protected SpineAttributeMapper() {
         super("SpineAttribute");
     }
 

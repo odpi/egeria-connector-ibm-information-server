@@ -20,7 +20,7 @@ public class RelationalDBSchemaTypeMapper extends ComplexSchemaType_Mapper {
         return Singleton.INSTANCE;
     }
 
-    private RelationalDBSchemaTypeMapper() {
+    protected RelationalDBSchemaTypeMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

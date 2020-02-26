@@ -21,7 +21,7 @@ public class TermHASARelationshipMapper extends RelationshipMapping {
     //  (only possible via has_a, which is not searchable)
     //  - if we need inherited locations this will likely need to become a custom mapping
 
-    private TermHASARelationshipMapper() {
+    protected TermHASARelationshipMapper() {
         super(
                 "term",
                 "term",

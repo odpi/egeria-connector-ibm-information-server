@@ -26,7 +26,7 @@ public class GlossaryTermMapper extends ReferenceableMapper {
         return Singleton.INSTANCE;
     }
 
-    private GlossaryTermMapper() {
+    protected GlossaryTermMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

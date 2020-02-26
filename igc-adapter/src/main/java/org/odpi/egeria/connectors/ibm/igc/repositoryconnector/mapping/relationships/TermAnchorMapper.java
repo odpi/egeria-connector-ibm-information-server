@@ -42,7 +42,7 @@ public class TermAnchorMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private TermAnchorMapper() {
+    protected TermAnchorMapper() {
         super(
                 "category",
                 "term",

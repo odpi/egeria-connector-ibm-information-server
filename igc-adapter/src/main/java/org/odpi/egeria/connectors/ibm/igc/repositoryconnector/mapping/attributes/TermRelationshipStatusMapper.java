@@ -16,7 +16,7 @@ public class TermRelationshipStatusMapper extends EnumMapping {
         return Singleton.INSTANCE;
     }
 
-    private TermRelationshipStatusMapper() {
+    protected TermRelationshipStatusMapper() {
         super(
                 "TermRelationshipStatus"
         );

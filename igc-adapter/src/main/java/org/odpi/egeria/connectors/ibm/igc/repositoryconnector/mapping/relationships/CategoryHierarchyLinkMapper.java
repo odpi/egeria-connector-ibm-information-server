@@ -25,7 +25,7 @@ public class CategoryHierarchyLinkMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private CategoryHierarchyLinkMapper() {
+    protected CategoryHierarchyLinkMapper() {
         super(
                 "category",
                 "category",

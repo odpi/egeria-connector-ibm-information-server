@@ -20,7 +20,7 @@ public class FileFolderMapper extends DataStore_Mapper {
         return Singleton.INSTANCE;
     }
 
-    private FileFolderMapper() {
+    protected FileFolderMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

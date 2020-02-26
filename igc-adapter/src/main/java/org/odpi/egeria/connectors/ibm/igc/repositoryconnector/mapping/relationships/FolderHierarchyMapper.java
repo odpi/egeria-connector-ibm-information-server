@@ -16,7 +16,7 @@ public class FolderHierarchyMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private FolderHierarchyMapper() {
+    protected FolderHierarchyMapper() {
         super(
                 "data_file_folder",
                 "data_file_folder",

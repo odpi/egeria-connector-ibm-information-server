@@ -16,7 +16,7 @@ public class AssetSchemaTypeMapper_FileRecord extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private AssetSchemaTypeMapper_FileRecord() {
+    protected AssetSchemaTypeMapper_FileRecord() {
         super(
                 "data_file",
                 "data_file_record",

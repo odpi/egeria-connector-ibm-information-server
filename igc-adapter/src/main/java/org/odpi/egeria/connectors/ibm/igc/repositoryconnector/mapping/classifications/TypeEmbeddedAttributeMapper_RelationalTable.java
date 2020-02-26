@@ -16,7 +16,7 @@ public class TypeEmbeddedAttributeMapper_RelationalTable extends TypeEmbeddedAtt
         return Singleton.INSTANCE;
     }
 
-    private TypeEmbeddedAttributeMapper_RelationalTable() {
+    protected TypeEmbeddedAttributeMapper_RelationalTable() {
         super(
                 "database_table",
                 null,

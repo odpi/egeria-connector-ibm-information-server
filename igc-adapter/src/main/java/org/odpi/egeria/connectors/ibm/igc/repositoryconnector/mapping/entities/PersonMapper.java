@@ -18,7 +18,7 @@ public class PersonMapper extends ActorProfile_Mapper {
         return Singleton.INSTANCE;
     }
 
-    private PersonMapper() {
+    protected PersonMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

@@ -16,7 +16,7 @@ public class AttributeForSchemaMapper_RecordField extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private AttributeForSchemaMapper_RecordField() {
+    protected AttributeForSchemaMapper_RecordField() {
         super(
                 "data_file_record",
                 "data_file_field",

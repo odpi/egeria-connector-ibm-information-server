@@ -16,7 +16,7 @@ public class DataClassHierarchyMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private DataClassHierarchyMapper() {
+    protected DataClassHierarchyMapper() {
         super(
                 "data_class",
                 "data_class",

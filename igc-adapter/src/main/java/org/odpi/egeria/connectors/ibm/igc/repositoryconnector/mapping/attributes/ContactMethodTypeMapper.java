@@ -16,7 +16,7 @@ public class ContactMethodTypeMapper extends EnumMapping {
         return Singleton.INSTANCE;
     }
 
-    private ContactMethodTypeMapper() {
+    protected ContactMethodTypeMapper() {
         super(
                 "ContactMethodType"
         );

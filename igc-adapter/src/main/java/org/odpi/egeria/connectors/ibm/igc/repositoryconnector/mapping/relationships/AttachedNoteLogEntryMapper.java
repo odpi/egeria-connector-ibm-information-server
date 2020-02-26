@@ -39,7 +39,7 @@ public class AttachedNoteLogEntryMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private AttachedNoteLogEntryMapper() {
+    protected AttachedNoteLogEntryMapper() {
         super(
                 IGCRepositoryHelper.DEFAULT_IGC_TYPE,
                 "note",

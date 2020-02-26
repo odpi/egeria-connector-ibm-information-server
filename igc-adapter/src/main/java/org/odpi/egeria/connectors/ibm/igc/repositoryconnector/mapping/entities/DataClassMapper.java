@@ -50,7 +50,7 @@ public class DataClassMapper extends ReferenceableMapper {
         }
     }
 
-    private DataClassMapper(IGCVersionEnum version) {
+    protected DataClassMapper(IGCVersionEnum version) {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

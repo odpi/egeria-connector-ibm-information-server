@@ -17,7 +17,7 @@ public class ContactThroughMapper_Person extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private ContactThroughMapper_Person() {
+    protected ContactThroughMapper_Person() {
         super(
                 "user",
                 "user",

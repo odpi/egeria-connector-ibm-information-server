@@ -19,7 +19,7 @@ public class DatabaseMapper extends DataStore_Mapper {
         return Singleton.INSTANCE;
     }
 
-    private DatabaseMapper() {
+    protected DatabaseMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

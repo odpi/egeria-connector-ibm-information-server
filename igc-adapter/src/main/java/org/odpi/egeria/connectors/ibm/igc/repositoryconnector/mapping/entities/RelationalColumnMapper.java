@@ -19,7 +19,7 @@ public class RelationalColumnMapper extends SchemaAttribute_Mapper {
         return Singleton.INSTANCE;
     }
 
-    private RelationalColumnMapper() {
+    protected RelationalColumnMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

@@ -18,7 +18,7 @@ public class TabularColumnMapper extends SchemaAttribute_Mapper {
         return Singleton.INSTANCE;
     }
 
-    private TabularColumnMapper() {
+    protected TabularColumnMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

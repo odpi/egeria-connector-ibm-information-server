@@ -17,7 +17,7 @@ public class GovernancePolicyMapper extends GovernanceDefinition_Mapper {
         return Singleton.INSTANCE;
     }
 
-    private GovernancePolicyMapper() {
+    protected GovernancePolicyMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

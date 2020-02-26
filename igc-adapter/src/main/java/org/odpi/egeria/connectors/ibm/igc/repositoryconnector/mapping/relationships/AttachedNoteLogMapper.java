@@ -27,7 +27,7 @@ public class AttachedNoteLogMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private AttachedNoteLogMapper() {
+    protected AttachedNoteLogMapper() {
         super(
                 IGCRepositoryHelper.DEFAULT_IGC_TYPE,
                 IGCRepositoryHelper.DEFAULT_IGC_TYPE,

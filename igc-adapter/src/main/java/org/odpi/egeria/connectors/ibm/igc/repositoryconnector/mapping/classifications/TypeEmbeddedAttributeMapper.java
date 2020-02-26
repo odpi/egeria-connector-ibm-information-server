@@ -23,7 +23,7 @@ public class TypeEmbeddedAttributeMapper extends ClassificationMapping {
         return Singleton.INSTANCE;
     }
 
-    private TypeEmbeddedAttributeMapper() {
+    protected TypeEmbeddedAttributeMapper() {
         super(
                 "",
                 "",

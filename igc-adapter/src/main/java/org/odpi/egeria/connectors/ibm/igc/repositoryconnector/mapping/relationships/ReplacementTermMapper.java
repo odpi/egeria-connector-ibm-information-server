@@ -17,7 +17,7 @@ public class ReplacementTermMapper extends RelationshipMapping {
         return Singleton.INSTANCE;
     }
 
-    private ReplacementTermMapper() {
+    protected ReplacementTermMapper() {
         super(
                 "term",
                 "term",

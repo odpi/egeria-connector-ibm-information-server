@@ -31,7 +31,7 @@ public class DataFileMapper extends DataStore_Mapper {
         return Singleton.INSTANCE;
     }
 
-    private DataFileMapper() {
+    protected DataFileMapper() {
 
         // Start by calling the superclass's constructor to initialise the Mapper
         super(

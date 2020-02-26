@@ -19,7 +19,7 @@ public class TranslationMapper extends RelationshipMapping {
 
     private static final String P_TRANSLATIONS = "translations";
 
-    private TranslationMapper() {
+    protected TranslationMapper() {
         super(
                 "term",
                 "term",
