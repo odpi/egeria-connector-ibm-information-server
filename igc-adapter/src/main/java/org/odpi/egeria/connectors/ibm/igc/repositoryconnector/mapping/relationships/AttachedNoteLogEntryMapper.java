@@ -76,15 +76,13 @@ public class AttachedNoteLogEntryMapper extends RelationshipMapping {
     private List<Note> getNotesFromAsset(Reference asset, IGCRestClient igcRestClient) {
         ItemList<Note> notes = asset.getNotes();
         if (notes != null) {
-            notes.getAllPages(igcRestClient);
-            return notes.getItems();
+            return igcRestClient.getAllPages("notes", notes);
         } else {
             String type = asset.getType();
             if (igcRestClient.getPagedRelationshipPropertiesForType(type).contains("notes")) {
                 Reference withNotes = igcRestClient.getAssetWithSubsetOfProperties(asset.getId(), asset.getType(), new String[]{"notes"});
                 notes = withNotes.getNotes();
-                notes.getAllPages(igcRestClient);
-                return notes.getItems();
+                return igcRestClient.getAllPages("notes", notes);
             }
         }
         return Collections.emptyList();

@@ -406,9 +406,9 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 IGCSearch igcSearch = new IGCSearch(searchAssetType, new String[]{ searchProperty }, igcSearchConditionSet);
                 ItemList<Reference> subAssets = igcRestClient.search(igcSearch);
                 if (subAssets != null) {
-                    subAssets.getAllPages(igcRestClient);
+                    List<Reference> allSubAssets = igcRestClient.getAllPages(null, subAssets);
                     log.debug("Processing {} child assets from IA publication: {}", subAssets.getPaging().getNumTotal(), containerRid);
-                    for (Reference child : subAssets.getItems()) {
+                    for (Reference child : allSubAssets) {
                         processAsset(child.getId(), child.getType());
                     }
                 } else {

@@ -166,7 +166,7 @@ public class Paging extends ObjectPrinter {
      * @return Boolean
      */
     public Boolean hasMore() {
-        return (this.numTotal > this.end);
+        return (this.numTotal > (this.end + 1));
     }
 
 }

@@ -158,7 +158,8 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                 ItemList<Category> children = igcRestClient.search(igcSearch);
                 if (children != null) {
                     if (pageSize == 0) {
-                        children.getAllPages(igcRestClient);
+                        List<Category> allPages = igcRestClient.getAllPages(null, children);
+                        children.setAllPages(allPages);
                     }
                     log.debug(" ... found a total of {} offspring categories.", children.getItems().size());
                     for (Category child : children.getItems()) {

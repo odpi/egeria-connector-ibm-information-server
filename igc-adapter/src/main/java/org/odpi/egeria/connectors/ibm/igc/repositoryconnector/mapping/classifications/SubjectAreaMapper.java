@@ -72,13 +72,13 @@ public class SubjectAreaMapper extends ClassificationMapping {
 
             // Only need to continue if there are any terms
             if (assignedToTerms != null) {
-                assignedToTerms.getAllPages(igcRestClient);
-                log.debug("Looking for SubjectArea mapping within {} candidate terms.", assignedToTerms.getItems().size());
+                List<Term> allAssignedToTerms = igcRestClient.getAllPages("assigned_to_terms", assignedToTerms);
+                log.debug("Looking for SubjectArea mapping within {} candidate terms.", allAssignedToTerms.size());
 
                 boolean isSubjectArea = false;
 
                 // For each such relationship:
-                for (Term termCandidate : assignedToTerms.getItems()) {
+                for (Term termCandidate : allAssignedToTerms) {
                     // As soon as we find one that starts with Subject Area we can short-circuit out
                     if (termCandidate.getName().equals(getOmrsClassificationType())) {
                         isSubjectArea = true;

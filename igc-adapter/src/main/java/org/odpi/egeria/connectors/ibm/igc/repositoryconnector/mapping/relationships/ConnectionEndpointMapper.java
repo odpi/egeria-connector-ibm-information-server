@@ -96,8 +96,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                     connectorAsset.getType(),
                     new String[]{ "host", "data_connections" });
             ItemList<DataConnection> dataConnections = withDataConnections.getDataConnections();
-            dataConnections.getAllPages(igcRestClient);
-            return new ArrayList<>(dataConnections.getItems());
+            return new ArrayList<>(igcRestClient.getAllPages("data_connections", dataConnections));
         } else if (connectorAsset != null) {
             log.debug("Not a connector asset, just returning as-is: {} of type {}", connectorAsset.getName(), connectorAsset.getType());
             List<Reference> referenceAsList = new ArrayList<>();
@@ -215,7 +214,8 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
         }
         ItemList<DataConnection> dataConnections = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
         if (pageSize == 0) {
-            dataConnections.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
+            List<DataConnection> allPages = igcomrsRepositoryConnector.getIGCRestClient().getAllPages(null, dataConnections);
+            dataConnections.setAllPages(allPages);
         }
 
         for (Reference dataConnection : dataConnections.getItems()) {
@@ -291,7 +291,8 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
         }
         ItemList<Connector> dataConnectors = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
         if (pageSize == 0) {
-            dataConnectors.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
+            List<Connector> allPages = igcomrsRepositoryConnector.getIGCRestClient().getAllPages(null, dataConnectors);
+            dataConnectors.setAllPages(allPages);
         }
 
         for (Reference dataConnector : dataConnectors.getItems()) {

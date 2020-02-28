@@ -102,10 +102,10 @@ public class ProcessMapping extends BaseMapping {
         if (process != null) {
             Set<PortImplementation> portImplementations = new HashSet<>();
             Set<LineageMapping> lineageMappings = new HashSet<>();
-            addImplementationDetails(job, stage, stage.getInputLinks(), PortType.INPUT_PORT, portImplementations, lineageMappings);
-            addDataStoreDetails(job, stage, stage.getReadsFromDesign(), PortType.INPUT_PORT, portImplementations, lineageMappings);
-            addImplementationDetails(job, stage, stage.getOutputLinks(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
-            addDataStoreDetails(job, stage, stage.getWritesToDesign(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
+            addImplementationDetails(job, stage, "input_links", stage.getInputLinks(), PortType.INPUT_PORT, portImplementations, lineageMappings);
+            addDataStoreDetails(job, stage, "reads_from_(design)", stage.getReadsFromDesign(), PortType.INPUT_PORT, portImplementations, lineageMappings);
+            addImplementationDetails(job, stage, "output_links", stage.getOutputLinks(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
+            addDataStoreDetails(job, stage, "writes_to_(design)", stage.getWritesToDesign(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
             process.setPortImplementations(new ArrayList<>(portImplementations));
             process.setLineageMappings(new ArrayList<>(lineageMappings));
         }
@@ -143,6 +143,7 @@ public class ProcessMapping extends BaseMapping {
      *
      * @param job the job within which the stage exists
      * @param stage the stage for which to add implementation details
+     * @param propertyName the name of the property from which links were retrieved
      * @param links the links of the stage from which to draw implementation details
      * @param portType the type of port
      * @param portImplementations the list of PortImplementations to append to with implementation details
@@ -150,14 +151,15 @@ public class ProcessMapping extends BaseMapping {
      */
     private void addImplementationDetails(DataStageJob job,
                                           Stage stage,
+                                          String propertyName,
                                           ItemList<Link> links,
                                           PortType portType,
                                           Set<PortImplementation> portImplementations,
                                           Set<LineageMapping> lineageMappings) {
         String stageNameSuffix = "_" + stage.getName();
         // Setup an x_PORT for each x_link into / out of the stage
-        links.getAllPages(igcRestClient);
-        for (Link linkRef : links.getItems()) {
+        List<Link> allLinks = igcRestClient.getAllPages(propertyName, links);
+        for (Link linkRef : allLinks) {
             Link linkObjFull = job.getLinkByRid(linkRef.getId());
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, linkObjFull, portType, stageNameSuffix);
             portImplementations.add(portImplementationMapping.getPortImplementation());
@@ -172,6 +174,7 @@ public class ProcessMapping extends BaseMapping {
      *
      * @param job the job within which the stage exists
      * @param stage the stage for which to add implementation details
+     * @param propertyName the name of the property from which stores were retrieved
      * @param stores the stores for which to create the implementation details
      * @param portType the type of port
      * @param portImplementations the list of PortImplementations to append to with implementation details
@@ -179,6 +182,7 @@ public class ProcessMapping extends BaseMapping {
      */
     private void addDataStoreDetails(DataStageJob job,
                                      Stage stage,
+                                     String propertyName,
                                      ItemList<InformationAsset> stores,
                                      PortType portType,
                                      Set<PortImplementation> portImplementations,
@@ -186,8 +190,8 @@ public class ProcessMapping extends BaseMapping {
         String stageNameSuffix = "_" + stage.getName();
         // Setup an x_PORT for any data stores that are used by design as sources / targets
         String fullyQualifiedStageName = getFullyQualifiedName(stage);
-        stores.getAllPages(igcRestClient);
-        for (InformationAsset storeRef : stores.getItems()) {
+        List<InformationAsset> allStores = igcRestClient.getAllPages(propertyName, stores);
+        for (InformationAsset storeRef : allStores) {
             List<Classificationenabledgroup> fieldsForStore = job.getFieldsForStore(storeRef.getId());
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, stage, portType, fieldsForStore, fullyQualifiedStageName);
             portImplementations.add(portImplementationMapping.getPortImplementation());

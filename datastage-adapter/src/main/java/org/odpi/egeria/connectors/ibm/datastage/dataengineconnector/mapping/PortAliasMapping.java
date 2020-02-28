@@ -54,16 +54,16 @@ class PortAliasMapping extends BaseMapping {
     List<PortAlias> getPortAliases() { return portAliases; }
 
     private void addInputPortAliases(DataStageJob job, Stage stage) {
-        addPortAliases(job, stage, stage.getReadsFromDesign(), PortType.INPUT_PORT);
+        addPortAliases(job, stage, "reads_from_(design)", stage.getReadsFromDesign(), PortType.INPUT_PORT);
     }
 
     private void addOutputPortAliases(DataStageJob job, Stage stage) {
-        addPortAliases(job, stage, stage.getWritesToDesign(), PortType.OUTPUT_PORT);
+        addPortAliases(job, stage, "writes_to_(design)", stage.getWritesToDesign(), PortType.OUTPUT_PORT);
     }
 
-    private void addPortAliases(DataStageJob job, Stage stage, ItemList<InformationAsset> relations, PortType portType) {
-        relations.getAllPages(igcRestClient);
-        for (InformationAsset relation : relations.getItems()) {
+    private void addPortAliases(DataStageJob job, Stage stage, String propertyName, ItemList<InformationAsset> relations, PortType portType) {
+        List<InformationAsset> allRelations = igcRestClient.getAllPages(propertyName, relations);
+        for (InformationAsset relation : allRelations) {
             String fullyQualifiedStoreName = job.getQualifiedNameFromStoreRid(relation.getId());
             String fullyQualifiedStageName = getFullyQualifiedName(stage);
             PortAlias portAlias = new PortAlias();

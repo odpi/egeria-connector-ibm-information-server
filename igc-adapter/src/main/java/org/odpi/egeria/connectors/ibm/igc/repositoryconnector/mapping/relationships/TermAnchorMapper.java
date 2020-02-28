@@ -165,7 +165,8 @@ public class TermAnchorMapper extends RelationshipMapping {
             ItemList<Term> terms = igcRestClient.search(igcSearch);
             if (terms != null) {
                 if (pageSize == 0) {
-                    terms.getAllPages(igcRestClient);
+                    List<Term> allPages = igcRestClient.getAllPages(null, terms);
+                    terms.setAllPages(allPages);
                 }
                 log.debug(" ... found a total of {} offspring terms.", terms.getItems().size());
                 for (Term term : terms.getItems()) {

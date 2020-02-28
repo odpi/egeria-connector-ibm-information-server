@@ -58,8 +58,7 @@ public class DataStageDataAsset {
                 IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(byParentId);
                 igcSearch.addConditions(conditionSet);
                 ItemList<Classificationenabledgroup> ilFields = igcRestClient.search(igcSearch);
-                ilFields.getAllPages(igcRestClient);
-                fields = ilFields.getItems();
+                fields = igcRestClient.getAllPages(null, ilFields);
             }
         } else {
             // For virtual assets, we must retrieve the full object and page through its fields (search by RID is not possible)
@@ -67,13 +66,13 @@ public class DataStageDataAsset {
             Reference virtualStore = igcRestClient.getAssetById(storeRid);
             if (virtualStore instanceof DatabaseTable) {
                 DatabaseTable virtualTable = (DatabaseTable) virtualStore;
-                fields.addAll(getDataFieldsFromVirtualList(igcRestClient, virtualTable.getDatabaseColumns()));
+                fields.addAll(getDataFieldsFromVirtualList(igcRestClient, "database_columns", virtualTable.getDatabaseColumns()));
             } else if (virtualStore instanceof View) {
                 View virtualView = (View) virtualStore;
-                fields.addAll(getDataFieldsFromVirtualList(igcRestClient, virtualView.getDatabaseColumns()));
+                fields.addAll(getDataFieldsFromVirtualList(igcRestClient, "database_columns", virtualView.getDatabaseColumns()));
             } else if (virtualStore instanceof DataFileRecord) {
                 DataFileRecord virtualRecord = (DataFileRecord) virtualStore;
-                fields.addAll(getDataFieldsFromVirtualList(igcRestClient, virtualRecord.getDataFileFields()));
+                fields.addAll(getDataFieldsFromVirtualList(igcRestClient, "data_file_fields", virtualRecord.getDataFileFields()));
             } else {
                 log.warn("Unhandled case for type: {}", virtualStore.getType());
             }
@@ -88,18 +87,20 @@ public class DataStageDataAsset {
      * should ONLY be used for virtual assets, as it is a very expensive operation.
      *
      * @param igcRestClient connectivity to the IGC environment
+     * @param propertyName name of the property from which the virtual fields are retrieved
      * @param virtualFields the paged list of virtual fields that has been retrieved
      * @param <T> the type of field
      * @return {@code List<Classificationenabledgroup>} containing the full list of fully-detailed virtual fields
      */
     static <T extends Classificationenabledgroup> List<Classificationenabledgroup> getDataFieldsFromVirtualList(
             IGCRestClient igcRestClient,
+            String propertyName,
             ItemList<T> virtualFields) {
         List<Classificationenabledgroup> fullFields = null;
         if (virtualFields != null) {
             fullFields = new ArrayList<>();
-            virtualFields.getAllPages(igcRestClient);
-            for (Classificationenabledgroup virtualField : virtualFields.getItems()) {
+            List<T> allVirtualFields = igcRestClient.getAllPages(propertyName, virtualFields);
+            for (Classificationenabledgroup virtualField : allVirtualFields) {
                 Classificationenabledgroup fullField = (Classificationenabledgroup) igcRestClient.getAssetById(virtualField.getId());
                 fullFields.add(fullField);
             }

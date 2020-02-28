@@ -141,8 +141,8 @@ public class DataStageCache {
             }
         }
         if (jobs.hasMorePages()) {
-            jobs.getNextPage(igcRestClient);
-            cacheChangedJobs(jobs);
+            ItemList<Dsjob> nextPage = igcRestClient.getNextPage(null, jobs);
+            cacheChangedJobs(nextPage);
         }
 
     }

@@ -86,6 +86,8 @@ public class MockServerExpectations implements PluginExpectationInitializer {
 
         setCreateBundle(mockServerClient);
 
+        setVirtualAssets(mockServerClient);
+
         setIGCLogout(mockServerClient);
 
     }
@@ -429,6 +431,19 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 .withSecure(true)
                 .when(createBundleRequest())
                 .respond(response().withStatusCode(200));
+    }
+
+    private void setVirtualAssets(MockServerClient mockServerClient) {
+        String caseName = "VirtualAssets";
+        String rid = MockConstants.VIRTUAL_ASSET_TABLE_RID;
+        mockServerClient
+                .withSecure(true)
+                .when(assetByRidRequest(rid))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "initial.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(assetPropertyByRidRequest(rid, "database_columns"))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "next_page.json")));
     }
 
     private void setUploadBundle(MockServerClient mockServerClient) {

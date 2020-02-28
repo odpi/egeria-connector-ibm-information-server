@@ -37,9 +37,9 @@ class AttributeMapping extends BaseMapping {
         attributes = new ArrayList<>();
         if (link != null) {
             ItemList<DataItem> stageColumns = link.getStageColumns();
-            stageColumns.getAllPages(igcRestClient);
+            List<DataItem> allStageColumns = igcRestClient.getAllPages("stage_columns", stageColumns);
             int index = 0;
-            for (DataItem stageColumn : stageColumns.getItems()) {
+            for (DataItem stageColumn : allStageColumns) {
                 String colId = stageColumn.getId();
                 StageColumn stageColumnObj = job.getStageColumnByRid(colId);
                 Attribute attribute = new Attribute();

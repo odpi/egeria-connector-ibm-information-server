@@ -212,9 +212,9 @@ public class DataClassMapper extends ReferenceableMapper {
                 case "UnstructuredFilter":
                     ItemList<Filter> filters = dataClass.getFilters();
                     if (!filters.getItems().isEmpty()) {
-                        filters.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
+                        List<Filter> allFilters = igcomrsRepositoryConnector.getIGCRestClient().getAllPages("filters", filters);
                         ArrayList<String> filterNames = new ArrayList<>();
-                        for (Filter filter : filters.getItems()) {
+                        for (Filter filter : allFilters) {
                             filterNames.add(filter.getName());
                         }
                         dataClassDetails = String.join(VALUE_DELIMITER, filterNames);

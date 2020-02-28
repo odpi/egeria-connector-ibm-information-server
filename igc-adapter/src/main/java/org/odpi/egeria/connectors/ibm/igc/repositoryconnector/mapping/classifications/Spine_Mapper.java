@@ -57,9 +57,9 @@ public class Spine_Mapper extends ClassificationMapping {
 
                 // This is likely to be a NOOP in most circumstances, otherwise it may be faster to do an explicit search
                 // with a full set of criteria (referencing category name, and its parent category under Classifications)
-                candidates.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
+                List<Category> allCandidates = igcomrsRepositoryConnector.getIGCRestClient().getAllPages("referencing_categories", candidates);
                 boolean foundSpine = false;
-                for (Category candidate : candidates.getItems()) {
+                for (Category candidate : allCandidates) {
                     if (candidate.getName().equals(getOmrsClassificationType())) {
                         foundSpine = true;
                         break;

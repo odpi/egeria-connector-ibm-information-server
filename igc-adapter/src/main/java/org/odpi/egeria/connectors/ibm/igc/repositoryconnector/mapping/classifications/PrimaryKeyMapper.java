@@ -101,8 +101,8 @@ public class PrimaryKeyMapper extends ClassificationMapping {
             } else {
 
                 // Otherwise setup primary key classifications for each defined candidate key
-                definedPK.getAllPages(igcRestClient);
-                for (CandidateKey candidateKey : definedPK.getItems()) {
+                List<CandidateKey> allCandidateKeys = igcRestClient.getAllPages("defined_primary_key", definedPK);
+                for (CandidateKey candidateKey : allCandidateKeys) {
 
                     try {
                         InstanceProperties classificationProperties = repositoryHelper.addStringPropertyToInstance(

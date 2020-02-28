@@ -7,6 +7,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Paging;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -505,7 +506,8 @@ public class IGCRepositoryHelper {
 
         if (pageSize == 0) {
             // If the provided pageSize was 0, we need to retrieve ALL pages of results...
-            results.getAllPages(this.igcRestClient);
+            List<Reference> allPages = igcRestClient.getAllPages(null, results);
+            results.setAllPages(allPages);
         }
 
         for (Reference reference : results.getItems()) {
@@ -541,8 +543,8 @@ public class IGCRepositoryHelper {
 
         // If we haven't filled a page of results (because we needed to skip some above), recurse...
         if (results.hasMorePages() && entityDetails.size() < pageSize) {
-            results.getNextPage(this.igcRestClient);
-            processResults(mapper, results, entityDetails, matchProperties, matchCriteria, searchCriteria, pageSize, userId);
+            ItemList<Reference> nextPage = igcRestClient.getNextPage(null, results);
+            processResults(mapper, nextPage, entityDetails, matchProperties, matchCriteria, searchCriteria, pageSize, userId);
         }
 
     }
@@ -556,6 +558,7 @@ public class IGCRepositoryHelper {
      * @param pageSize the number of results per page (0 for all results)
      * @param userId the user making the request
      */
+    @SuppressWarnings("unchecked")
     void processResults(RelationshipMapping mapper,
                         ItemList<Reference> results,
                         List<Relationship> relationships,
@@ -564,7 +567,8 @@ public class IGCRepositoryHelper {
 
         if (pageSize == 0) {
             // If the provided pageSize was 0, we need to retrieve ALL pages of results...
-            results.getAllPages(this.igcRestClient);
+            List<Reference> allPages = igcRestClient.getAllPages(null, results);
+            results.setAllPages(allPages);
         }
 
         IGCOMRSMetadataCollection igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
@@ -615,9 +619,9 @@ public class IGCRepositoryHelper {
                                     endOnes.addAll(mapper.getProxyOneAssetFromAsset(other, igcRestClient));
                                 }
                             } else if (otherEnd instanceof ItemList) {
-                                ItemList<?> otherEnds = (ItemList<?>) otherEnd;
-                                otherEnds.getAllPages(igcRestClient);
-                                for (Reference other : otherEnds.getItems()) {
+                                ItemList<Reference> otherEnds = (ItemList<Reference>) otherEnd;
+                                List<Reference> allOtherEnds = igcRestClient.getAllPages(igcPropertyName, otherEnds);
+                                for (Reference other : allOtherEnds) {
                                     endOnes.addAll(mapper.getProxyOneAssetFromAsset(other, igcRestClient));
                                 }
                             } else {
@@ -672,8 +676,8 @@ public class IGCRepositoryHelper {
 
         // If we haven't filled a page of results (because we needed to skip some above), recurse...
         if (results.hasMorePages() && relationships.size() < pageSize) {
-            results.getNextPage(this.igcRestClient);
-            processResults(mapper, results, relationships, pageSize, userId);
+            ItemList<Reference> nextPage = igcRestClient.getNextPage(null, results);
+            processResults(mapper, nextPage, relationships, pageSize, userId);
         }
 
     }
@@ -1789,6 +1793,7 @@ public class IGCRepositoryHelper {
      * @param assetType the type of IGC asset
      * @return Reference - the object including all of its details and relationships
      */
+    @SuppressWarnings("unchecked")
     public Reference getFullAssetDetails(String rid, String assetType) {
 
         Reference fullAsset = null;
@@ -1824,8 +1829,9 @@ public class IGCRepositoryHelper {
                         for (String pagedProperty : allPaged) {
                             Object shouldBeItemList = igcRestClient.getPropertyByName(fullAsset, pagedProperty);
                             if (shouldBeItemList instanceof ItemList) {
-                                ItemList<?> pagedValue = (ItemList<?>) shouldBeItemList;
-                                pagedValue.getAllPages(igcRestClient);
+                                ItemList<Reference> pagedValue = (ItemList<Reference>) shouldBeItemList;
+                                List<Reference> allPages = igcRestClient.getAllPages(pagedProperty, pagedValue);
+                                pagedValue.setAllPages(allPages);
                             }
                         }
 
@@ -1904,8 +1910,13 @@ public class IGCRepositoryHelper {
             }
         } else if (candidate instanceof ItemList) {
             ItemList<?> references = (ItemList<?>) candidate;
-            references.getAllPages(igcRestClient);
-            list.addAll(references.getItems());
+            if (references.hasMorePages()) {
+                // Note: this assumes that this method is only ever called as the result of a search (not with property-
+                // level paged results)
+                list.addAll(igcRestClient.getAllPages(null, references));
+            } else {
+                list.addAll(references.getItems());
+            }
         }
     }
 
