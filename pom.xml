@@ -105,7 +105,7 @@
         <mock-server.version>5.9.0</mock-server.version>
         <sleepycat.version>18.3.12</sleepycat.version>
         <rhino.version>1.7.12</rhino.version>
-        <woodstox.version>6.1.0</woodstox.version>
+        <woodstox.version>6.1.1</woodstox.version>
         <stax.version>1.0.1</stax.version>
         <maven-compiler.version>3.8.1</maven-compiler.version>
         <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
