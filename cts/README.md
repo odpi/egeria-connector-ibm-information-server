@@ -29,6 +29,24 @@ connector. For each release, you will find the following details:
     - `cohort.coco.cts.local` - the local CTS Workbench cohort registration
     - `cohort.coco.cts.remote` - the cohort members considered remote from the CTS Workbench's perspective
 
+## Egeria 1.4 (connector 1.3)
+
+Note that there is no 1.4 release of the connector, so these results are based on testing release 1.3 of the connector
+against release 1.4 of Egeria.
+
+| IGC version | Conformant profile(s) | Notes |
+| :--- | :--- | :--- |
+| [v11.5.0.2 SP3](results/1.4/11.5.0.2sp3) | Metadata sharing, Relationship search |
+| [v11.5.0.2 SP5](results/1.4/11.5.0.2sp5) | Metadata sharing, Relationship search |
+| [v11.5.0.2 SP6](results/1.4/11.5.0.2sp6) | None | (see known issues) |
+| [v11.7.0.0](results/1.4/11.7.0.0) | None | (see known issues) |
+| [v11.7.0.1](results/1.4/11.7.0.1) | Metadata sharing, Relationship search |
+| [v11.7.0.1 SP1](results/1.4/11.7.0.1sp1) | Metadata sharing, Relationship search |
+| [v11.7.0.2](results/1.4/11.7.0.2) | Metadata sharing (limited), Relationship search | (see known issues) |
+| [v11.7.1.0](results/1.4/11.7.1.0) | Metadata sharing (limited), Relationship search | (see known issues) |
+| [v11.7.1.0 SP1](results/1.4/11.7.1.0sp1) | Metadata sharing (limited), Relationship search | (see known issues) |
+| [v11.7.1.0 SP2](results/1.4/11.7.1.0sp2) | Metadata sharing (limited), Relationship search | (see known issues) |
+
 ## Egeria 1.3
 
 | IGC version | Conformant profile(s) | Notes |
@@ -70,6 +88,7 @@ make use of the IGC connector you are strongly encouraged to upgrade to the near
 - v11.5.0.2 - it is not possible to import _term_ to _data_file_field_ relationships
 - v11.5.0.2 SP6 - there appears to be a bug in this release on pagination of complex search criteria, causing some of the `find...` methods to fail
 - v11.7.0.0 - this release models a database column's length as an array of strings, causing deserialization to fail (a workaround may be implemented under issue [#229](https://github.com/odpi/egeria-connector-ibm-information-server/issues/229))
+- v11.7.0.2+ - these releases no longer support searching against the `long_description` property of IGC in combination with other search criteria, and therefore they cannot fully support all of the `find...` methods (tracked under issue [#215](https://github.com/odpi/egeria-connector-ibm-information-server/issues/215))
 
 ----
 License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/),

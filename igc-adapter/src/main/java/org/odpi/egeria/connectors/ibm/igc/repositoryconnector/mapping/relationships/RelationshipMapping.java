@@ -1379,6 +1379,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *                 unrestricted return results size.
      * @param userId the user retrieving the mapped relationship
      */
+    @SuppressWarnings("unchecked")
     private static void addDirectRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                               RelationshipMapping mapping,
                                               List<Relationship> relationships,
@@ -1427,8 +1428,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 } else if (directRelationships instanceof ItemList) { // and list of relationships another
 
                     // In this scenario we must retrieve all pages, as we cannot sort the results any other way
-                    ItemList<?> allRelationships = (ItemList<?>) directRelationships;
-                    allRelationships.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
+                    ItemList<Reference> allRelationships = (ItemList<Reference>) directRelationships;
+                    List<Reference> allPages = igcomrsRepositoryConnector.getIGCRestClient().getAllPages(igcRelationshipName, allRelationships);
+                    allRelationships.setAllPages(allPages);
                     if (sequencingOrder != null) {
                         // Sort the results before passing along to the next operation
                         switch (sequencingOrder) {
@@ -1654,7 +1656,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                      RelationshipMapping mapping,
                                                      List<Relationship> relationships,
                                                      Reference fromIgcObject,
-                                                     ItemList<?> igcRelationships,
+                                                     ItemList<Reference> igcRelationships,
                                                      String igcPropertyName,
                                                      int fromRelationshipElement,
                                                      int pageSize,
@@ -1691,12 +1693,13 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
         // If we haven't filled a page of results (because we needed to skip some above), recurse...
         if (igcRelationships.hasMorePages() && localPage.size() < totalPotentialResults) {
-            igcRelationships.getNextPage(igcomrsRepositoryConnector.getIGCRestClient());
+            // TODO: will we always have the property name here, or could it be null where ordering is known?
+            ItemList<Reference> nextPage = igcomrsRepositoryConnector.getIGCRestClient().getNextPage(igcPropertyName, igcRelationships);
             addListOfMappedRelationships(igcomrsRepositoryConnector,
                     mapping,
                     relationships,
                     fromIgcObject,
-                    igcRelationships,
+                    nextPage,
                     igcPropertyName,
                     fromRelationshipElement,
                     pageSize,

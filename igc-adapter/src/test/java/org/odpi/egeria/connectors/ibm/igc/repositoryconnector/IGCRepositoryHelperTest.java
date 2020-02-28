@@ -191,6 +191,7 @@ public class IGCRepositoryHelperTest {
         itemList.setItems(items);
         Paging paging = new Paging();
         paging.setNumTotal(2);
+        paging.setEndIndex(2);
         paging.setPageSize(10);
         itemList.setPaging(paging);
         IGCRepositoryHelper.addReferencesToList(null, list, itemList);

@@ -411,9 +411,9 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         igcSearch.addProperty("selected_classification");
         ItemList<InformationAsset> assetsWithSelected = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
 
-        assetsWithSelected.getAllPages(igcomrsRepositoryConnector.getIGCRestClient());
+        List<InformationAsset> allAssetsWithSelected = igcomrsRepositoryConnector.getIGCRestClient().getAllPages(null, assetsWithSelected);
 
-        for (Reference assetWithSelected : assetsWithSelected.getItems()) {
+        for (InformationAsset assetWithSelected : allAssetsWithSelected) {
 
             try {
 
@@ -622,7 +622,8 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             detectedClassifications = igcRestClient.search(igcSearch);
             // Unfortunately there is no way to avoid the inclusion of column analysis master objects in the results, so
             // the only way we can ensure we are sorting across all valid results is to retrieve all of them
-            detectedClassifications.getAllPages(igcRestClient);
+            List<Classification> allPages = igcRestClient.getAllPages(null, detectedClassifications);
+            detectedClassifications.setAllPages(allPages);
         } else {
             igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
             detectedClassifications = igcRestClient.search(igcSearch);

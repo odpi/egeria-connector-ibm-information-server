@@ -4,9 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Note;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -261,7 +259,8 @@ public class ClientTest {
         assertTrue(results.hasMorePages());
         assertNotNull(results.getItems());
         assertEquals(results.getItems().size(), 2);
-        results.getAllPages(igcRestClient);
+        List<Term> allPages = igcRestClient.getAllPages(null, results);
+        results.setAllPages(allPages);
         assertNotNull(results);
         assertNotNull(results.getItems());
         assertEquals(results.getItems().size(), 6);
@@ -274,11 +273,11 @@ public class ClientTest {
         assertTrue(results.hasMorePages());
         assertNotNull(results.getItems());
         assertEquals(results.getItems().size(), 2);
-        results.getNextPage(igcRestClient);
-        assertNotNull(results);
-        assertNotNull(results.getItems());
-        assertEquals(results.getItems().size(), 2);
-        paging = results.getPaging();
+        ItemList<Term> nextPage = igcRestClient.getNextPage(null, results);
+        assertNotNull(nextPage);
+        assertNotNull(nextPage.getItems());
+        assertEquals(nextPage.getItems().size(), 2);
+        paging = nextPage.getPaging();
         assertNotNull(paging.getPreviousPageURL());
         assertEquals(paging.getPageSize().intValue(), 2);
         assertEquals(paging.getBeginIndex().intValue(), 2);
@@ -378,6 +377,16 @@ public class ClientTest {
         assertTrue(IGCRestClient.isVirtualAssetRid(virtualAssetRid));
         assertTrue(IGCRestClient.isVirtualAssetRid(null));
         assertFalse(IGCRestClient.isVirtualAssetRid(realAssetRid));
+
+        Reference reference = igcRestClient.getAssetById(MockConstants.VIRTUAL_ASSET_TABLE_RID);
+        assertTrue(reference instanceof DatabaseTable);
+        DatabaseTable table = (DatabaseTable) reference;
+        ItemList<DatabaseColumn> columns = table.getDatabaseColumns();
+        assertEquals(columns.getItems().size(), 5);
+        assertTrue(columns.hasMorePages());
+        ItemList<DatabaseColumn> nextPage = igcRestClient.getNextPage("database_columns", columns);
+        assertEquals(nextPage.getItems().size(), 3);
+        assertFalse(nextPage.hasMorePages());
 
     }
 

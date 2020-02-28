@@ -5,9 +5,9 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
@@ -83,26 +83,18 @@ public class ItemList<T extends Reference> extends ObjectPrinter {
     }
 
     /**
-     * Retrieve all pages of relationships that this object represents.
+     * Set all of the pages as retrieved using the list of items provided
      *
-     * @param igcrest the IGCRestClient connection to use to retrieve the relationships
+     * @param allPages list of items that have results from all pages
      */
-    public void getAllPages(IGCRestClient igcrest) {
-        if (this.items.size() < this.paging.getNumTotal()) {
-            this.items = igcrest.getAllPages(this.items, this.paging);
-            this.paging = new Paging(this.items.size());
+    public void setAllPages(List<T> allPages) {
+        if (allPages == null) {
+            this.items = Collections.emptyList();
+            this.paging = new Paging(0);
+        } else {
+            this.items = allPages;
+            this.paging = new Paging(allPages.size());
         }
-    }
-
-    /**
-     * Retrieve the next page of relationships that this object represents.
-     *
-     * @param igcrest the IGCRestClient connection to use to retrieve the relationships
-     */
-    public void getNextPage(IGCRestClient igcrest) {
-        ItemList<T> nextPage = igcrest.getNextPage(this.paging);
-        this.items = nextPage.getItems();
-        this.paging = nextPage.getPaging();
     }
 
 }

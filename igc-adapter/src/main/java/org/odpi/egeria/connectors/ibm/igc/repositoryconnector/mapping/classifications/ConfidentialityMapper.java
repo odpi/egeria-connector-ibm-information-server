@@ -84,10 +84,10 @@ public class ConfidentialityMapper extends ClassificationMapping {
         if (fromIgcObject instanceof MainObject) {
             ItemList<Term> assignedToTerms = ((MainObject) fromIgcObject).getAssignedToTerms();
             if (assignedToTerms != null) {
-                assignedToTerms.getAllPages(igcRestClient);
+                List<Term> allAssignedTerms = igcRestClient.getAllPages("assigned_to_terms", assignedToTerms);
 
                 // For each such relationship:
-                for (Term assignedTerm : assignedToTerms.getItems()) {
+                for (Term assignedTerm : allAssignedTerms) {
 
                     // Retrieve the identity characteristics (ie. the parent category) of the related term
                     Identity termIdentity = assignedTerm.getIdentity(igcRestClient);

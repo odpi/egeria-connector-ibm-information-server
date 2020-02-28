@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 
 import java.io.*;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -1020,14 +1021,40 @@ public class IGCRestClient {
     }
 
     /**
+     * Retrieve the next page of results for the provided parameters.
+     *
+     * @param propertyName the name of the property for which the list provides items (or null if the result of a search)
+     * @param list the list of items from which to retrieve the next page
+     * @param <T> the type of items to expect in the ItemList
+     * @return {@code ItemList<T>} - the next page of results
+     */
+    public <T extends Reference> ItemList<T> getNextPage(String propertyName, ItemList<T> list) {
+        return getNextPage(propertyName, list.getPaging());
+    }
+
+    /**
+     * Retrieve all pages of results from a set of Paging details and items, or if there is no next page return the
+     * items provided.
+     *
+     * @param propertyName the name of the property for which the list provides items (or null if the result of a search)
+     * @param list the ItemList for which to retrieve all pages
+     * @param <T> the type of items to expect in the ItemList
+     * @return {@code List<T>} - a List containing all items from all pages of results
+     */
+    public <T extends Reference> List<T> getAllPages(String propertyName, ItemList<T> list) {
+        return getAllPages(propertyName, list.getItems(), list.getPaging());
+    }
+
+    /**
      * Retrieve the next page of results from a set of paging details, or if there is no next page return an empty
      * ItemList.
      *
+     * @param propertyName the name of the property for which the list provides items (or null if the result of a search)
      * @param paging the "paging" portion of the JSON response from which to retrieve the next page
      * @param <T> the type of items to expect in the ItemList
      * @return {@code ItemList<T>} - the next page of results
      */
-    public <T extends Reference> ItemList<T> getNextPage(Paging paging) {
+    private <T extends Reference> ItemList<T> getNextPage(String propertyName, Paging paging) {
         ItemList<T> nextPage = null;
         try {
             nextPage = mapper.readValue("{}", new TypeReference<ItemList<T>>() {});
@@ -1036,16 +1063,27 @@ public class IGCRestClient {
                 if (this.workflowEnabled && !sNextURL.contains("workflowMode=draft")) {
                     sNextURL += "&workflowMode=draft";
                 }
-                // Strip off the hostname and port number details from the IGC response, to replace with details used
-                // in configuration of the connector (allowing a proxy or other server in front)
-                UriComponents components = UriComponentsBuilder.fromHttpUrl(sNextURL).build(true);
-                String embeddedHost = "https://" + components.getHost() + ":" + components.getPort();
-                String nextUrlNoHost = sNextURL.substring(embeddedHost.length() + 1);
-                String nextPageBody = makeRequest(nextUrlNoHost, HttpMethod.GET, null, null);
+                String requestUrl;
+                if (sNextURL.startsWith("extern:")) {
+                    // On v11.5, for virtual assets, the paging URL only has the RID and nothing else -- we must
+                    // reconstruct an appropriate paging URL from just this RID and the other parameters received by
+                    // the method
+                    requestUrl = EP_ASSET + "/" + sNextURL
+                            + "/" + URLEncoder.encode(propertyName, "UTF-8")
+                            + "?begin=" + (paging.getEndIndex() + 1)
+                            + "&pageSize=" + paging.getPageSize();
+                } else {
+                    // Strip off the hostname and port number details from the IGC response, to replace with details used
+                    // in configuration of the connector (allowing a proxy or other server in front)
+                    UriComponents components = UriComponentsBuilder.fromHttpUrl(sNextURL).build(true);
+                    String embeddedHost = "https://" + components.getHost() + ":" + components.getPort();
+                    requestUrl = sNextURL.substring(embeddedHost.length() + 1);
+                }
+                String nextPageBody = makeRequest(requestUrl, HttpMethod.GET, null, null);
                 // If the page is part of an ASSET retrieval, we need to strip off the attribute
                 // name of the relationship for proper multi-page composition
-                if (sNextURL.contains(EP_ASSET)) {
-                    String remainder = sNextURL.substring((baseURL + EP_ASSET).length() + 2);
+                if (requestUrl.startsWith(EP_ASSET)) {
+                    String remainder = requestUrl.substring(EP_ASSET.length() + 1);
                     String attributeName = remainder.substring(remainder.indexOf('/') + 1, remainder.indexOf('?'));
                     nextPageBody = nextPageBody.substring(attributeName.length() + 4, nextPageBody.length() - 1);
                 }
@@ -1058,22 +1096,23 @@ public class IGCRestClient {
     }
 
     /**
-     * Retrieve all pages of results from a set of Paging details and items, or if there is no next page return the
+     * Retrieve all pages of results from the set of Paging details and items, or if there is no next page return the
      * items provided.
      *
+     * @param propertyName the name of the property for which the list provides items (or null if the result of a search)
      * @param items the List of items for which to retrieve all pages
      * @param paging the Paging object for which to retrieve all pages
      * @param <T> the type of items to expect in the ItemList
-     * @return {@code List<Reference>} - a List containing all items from all pages of results
+     * @return {@code List<T>} - a List containing all items from all pages of results
      */
-    public <T extends Reference> List<T> getAllPages(List<T> items, Paging paging) {
+    private <T extends Reference> List<T> getAllPages(String propertyName, List<T> items, Paging paging) {
         List<T> allPages = items;
-        ItemList<T> results = getNextPage(paging);
+        ItemList<T> results = getNextPage(propertyName, paging);
         List<T> resultsItems = results.getItems();
         if (!resultsItems.isEmpty()) {
             // NOTE: this ordering of addAll is important, to avoid side-effecting the original set of items
             resultsItems.addAll(allPages);
-            allPages = getAllPages(resultsItems, results.getPaging());
+            allPages = getAllPages(propertyName, resultsItems, results.getPaging());
         }
         return allPages;
     }

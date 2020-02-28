@@ -224,8 +224,7 @@ public class DataStageJob {
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
         ItemList<Stage> stages = igcRestClient.search(igcSearch);
-        stages.getAllPages(igcRestClient);
-        buildMap(stageMap, stages);
+        buildMap(stageMap, igcRestClient.getAllPages(null, stages));
     }
 
     /**
@@ -240,8 +239,7 @@ public class DataStageJob {
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
         ItemList<Link> links = igcRestClient.search(igcSearch);
-        links.getAllPages(igcRestClient);
-        buildMap(linkMap, links);
+        buildMap(linkMap, igcRestClient.getAllPages(null, links));
     }
 
     /**
@@ -250,7 +248,7 @@ public class DataStageJob {
     private void getStageColumnDetailsForLinks() {
         String jobRid = job.getId();
         log.debug("Retrieving stage column details for job: {}", jobRid);
-        ItemList<StageColumn> stageCols = getStageColumnDetailsForLinks("stage_column", jobRid);
+        List<StageColumn> stageCols = getStageColumnDetailsForLinks("stage_column", jobRid);
         if (stageCols == null) {
             log.info("Unable to identify stage columns for job by 'stage_column', reverting to 'ds_stage_column'.");
             stageCols = getStageColumnDetailsForLinks("ds_stage_column", jobRid);
@@ -270,7 +268,7 @@ public class DataStageJob {
      * @param usingType the type by which to search for the stage columns
      * @param jobRid the RID of the job
      */
-    private ItemList<StageColumn> getStageColumnDetailsForLinks(String usingType, String jobRid) {
+    private List<StageColumn> getStageColumnDetailsForLinks(String usingType, String jobRid) {
         IGCSearch igcSearch = new IGCSearch(usingType);
         igcSearch.addProperties(DataStageConstants.getStageColumnSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("link.job_or_container", "=", jobRid);
@@ -278,8 +276,7 @@ public class DataStageJob {
         igcSearch.addConditions(conditionSet);
         ItemList<StageColumn> stageCols = igcRestClient.search(igcSearch);
         if (stageCols.getPaging().getNumTotal() > 0) {
-            stageCols.getAllPages(igcRestClient);
-            return stageCols;
+            return igcRestClient.getAllPages(null, stageCols);
         }
         return null;
     }
@@ -292,8 +289,8 @@ public class DataStageJob {
 
         Map<String, List<Classificationenabledgroup>> dataStoreDetailsMap = new HashMap<>();
         if (!getType().equals(JobType.SEQUENCE)) {
-            mapDataStoreDetailsForJob(job.getReadsFromDesign(), dataStoreDetailsMap);
-            mapDataStoreDetailsForJob(job.getWritesToDesign(), dataStoreDetailsMap);
+            mapDataStoreDetailsForJob("reads_from_(design)", job.getReadsFromDesign(), dataStoreDetailsMap);
+            mapDataStoreDetailsForJob("writes_to_(design)", job.getWritesToDesign(), dataStoreDetailsMap);
         }
 
         // Flatten the list of data store details
@@ -318,14 +315,16 @@ public class DataStageJob {
     /**
      * Map the data store details used by the job into the provided map.
      *
+     * @param propertyName the name of the property from which the candidates were retrieved
      * @param candidates the list of candidate data store details to cache
      * @param dataStoreDetailsMap the map into which to place the results
      */
-    private void mapDataStoreDetailsForJob(ItemList<InformationAsset> candidates,
+    private void mapDataStoreDetailsForJob(String propertyName,
+                                           ItemList<InformationAsset> candidates,
                                            Map<String, List<Classificationenabledgroup>> dataStoreDetailsMap) {
         if (candidates != null) {
-            candidates.getAllPages(igcRestClient);
-            for (InformationAsset candidate : candidates.getItems()) {
+            List<InformationAsset> allCandidates = igcRestClient.getAllPages(propertyName, candidates);
+            for (InformationAsset candidate : allCandidates) {
                 String candidateId = candidate.getId();
                 if (!dataStoreDetailsMap.containsKey(candidateId)) {
                     List<Classificationenabledgroup> fields = DataStageDataAsset.getDataFieldsForStore(igcRestClient, candidate);
@@ -344,9 +343,8 @@ public class DataStageJob {
      * @param objects the list of objects to cache
      * @param <T> the type of object to cache
      */
-    private <T extends Reference> void buildMap(Map<String, T> map, ItemList<T> objects) {
-        List<T> listOfObjects = objects.getItems();
-        for (T candidateObject : listOfObjects) {
+    private <T extends Reference> void buildMap(Map<String, T> map, List<T> objects) {
+        for (T candidateObject : objects) {
             String rid = candidateObject.getId();
             log.debug("...... caching RID: {}", rid);
             map.put(rid, candidateObject);
