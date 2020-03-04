@@ -1155,32 +1155,34 @@ public class IGCRestClient {
 
                         String propertyName = property.getName();
 
-                        // Attempt to instantiate and cache generic property retrieval mechanism
-                        // Note that this will return null if the bean / POJO supporting that type does not actually
-                        // contain the property, in which case we should not cache the property as one that we can
-                        // handle
-                        DynamicPropertyReader reader = getAccessor(typeName, propertyName);
-                        if (reader != null) {
+                        if (propertyName != null) {
+                            // Attempt to instantiate and cache generic property retrieval mechanism
+                            // Note that this will return null if the bean / POJO supporting that type does not actually
+                            // contain the property, in which case we should not cache the property as one that we can
+                            // handle
+                            DynamicPropertyReader reader = getAccessor(typeName, propertyName);
+                            if (reader != null) {
 
-                            if (!IGCRestConstants.getPropertiesToIgnore().contains(propertyName)) {
-                                if (propertyName.equals("created_on")) {
-                                    typesThatIncludeModificationDetails.add(typeName);
-                                }
-                                org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeReference type = property.getType();
-                                String propertyType = type.getName();
-                                if (propertyType.equals("string") || propertyType.equals("enum")) {
-                                    // TODO: confirm whether enums should be treated the same as all other string properties?
-                                    stringProperties.add(propertyName);
-                                    nonRelationship.add(propertyName);
-                                } else if (type.getUrl() != null || propertyType.equals("note")) {
-                                    if (property.getMaxCardinality() < 0) {
-                                        pagedRelationship.add(propertyName);
+                                if (!IGCRestConstants.getPropertiesToIgnore().contains(propertyName)) {
+                                    if (propertyName.equals("created_on")) {
+                                        typesThatIncludeModificationDetails.add(typeName);
                                     }
-                                } else {
-                                    nonRelationship.add(propertyName);
-                                }
-                                allProperties.add(propertyName);
+                                    org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeReference type = property.getType();
+                                    String propertyType = type.getName();
+                                    if (propertyType.equals("string") || propertyType.equals("enum")) {
+                                        // TODO: confirm whether enums should be treated the same as all other string properties?
+                                        stringProperties.add(propertyName);
+                                        nonRelationship.add(propertyName);
+                                    } else if (type.getUrl() != null || propertyType.equals("note")) {
+                                        if (property.getMaxCardinality() < 0) {
+                                            pagedRelationship.add(propertyName);
+                                        }
+                                    } else {
+                                        nonRelationship.add(propertyName);
+                                    }
+                                    allProperties.add(propertyName);
 
+                                }
                             }
                         }
 
