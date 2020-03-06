@@ -637,7 +637,20 @@ public class IGCRestClient {
      * @return TypeDetails
      */
     public TypeDetails getTypeDetails(String typeName) {
-        String response = makeRequest(EP_TYPES + "/" + typeName + "?showViewProperties=true&showCreateProperties=true&showEditProperties=true", HttpMethod.GET, null, null);
+        return getTypeDetails(typeName, true, true, true);
+    }
+
+    /**
+     * Retrieves the type details (requested properties and their details) for the provided type name in IGC.
+     *
+     * @param typeName the IGC type name for which to retrieve details
+     * @param view whether to include the viewable properties
+     * @param create whether to include the properties that can be included during creation
+     * @param edit whether to include editable properties
+     * @return TypeDetails
+     */
+    public TypeDetails getTypeDetails(String typeName, boolean view, boolean create, boolean edit) {
+        String response = makeRequest(EP_TYPES + "/" + typeName + "?showViewProperties=" + view + "&showCreateProperties=" + create + "&showEditProperties=" + edit, HttpMethod.GET, null, null);
         TypeDetails typeDetails;
         try {
             typeDetails = typeMapper.readValue(response, TypeDetails.class);
