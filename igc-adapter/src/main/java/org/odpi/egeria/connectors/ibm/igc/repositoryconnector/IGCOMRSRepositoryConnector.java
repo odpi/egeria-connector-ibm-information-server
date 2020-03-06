@@ -58,28 +58,14 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
         super.start();
         final String methodName = "start";
 
-        IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.REPOSITORY_SERVICE_STARTING;
-        auditLog.logRecord(methodName,
-                auditCode.getLogMessageId(),
-                auditCode.getSeverity(),
-                auditCode.getFormattedLogMessage(),
-                null,
-                auditCode.getSystemAction(),
-                auditCode.getUserAction());
+        auditLog.logMessage(methodName, IGCOMRSAuditCode.REPOSITORY_SERVICE_STARTING.getMessageDefinition());
 
         if (metadataCollection == null) {
             // If the metadata collection has not yet been created, attempt to create it now
             connectToIGC(methodName);
         }
 
-        auditCode = IGCOMRSAuditCode.REPOSITORY_SERVICE_STARTED;
-        auditLog.logRecord(methodName,
-                auditCode.getLogMessageId(),
-                auditCode.getSeverity(),
-                auditCode.getFormattedLogMessage(getServerName(), getIGCVersion().getVersionString()),
-                null,
-                auditCode.getSystemAction(),
-                auditCode.getUserAction());
+        auditLog.logMessage(methodName, IGCOMRSAuditCode.REPOSITORY_SERVICE_STARTED.getMessageDefinition(getServerName(), getIGCVersion().getVersionString()));
 
     }
 
@@ -98,17 +84,12 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
     @Override
     public void disconnect() {
 
+        final String methodName = "disconnect";
+
         // Close the session on the IGC REST client
         this.igcRestClient.disconnect();
         if (auditLog != null) {
-            IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.REPOSITORY_SERVICE_SHUTDOWN;
-            auditLog.logRecord("disconnect",
-                    auditCode.getLogMessageId(),
-                    auditCode.getSeverity(),
-                    auditCode.getFormattedLogMessage(getServerName()),
-                    null,
-                    auditCode.getSystemAction(),
-                    auditCode.getUserAction());
+            auditLog.logMessage(methodName, IGCOMRSAuditCode.REPOSITORY_SERVICE_SHUTDOWN.getMessageDefinition(getServerName()));
         }
 
     }
@@ -160,14 +141,7 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
 
             boolean successfulInit = false;
 
-            IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.CONNECTING_TO_IGC;
-            auditLog.logRecord(methodName,
-                    auditCode.getLogMessageId(),
-                    auditCode.getSeverity(),
-                    auditCode.getFormattedLogMessage(address),
-                    null,
-                    auditCode.getSystemAction(),
-                    auditCode.getUserAction());
+            auditLog.logMessage(methodName, IGCOMRSAuditCode.CONNECTING_TO_IGC.getMessageDefinition(address));
 
             // Create new REST API client (opens a new session)
             try {
@@ -192,14 +166,7 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
                 raiseConnectorCheckedException(IGCOMRSErrorCode.REST_CLIENT_FAILURE, methodName, null, "<null>");
             }
 
-            auditCode = IGCOMRSAuditCode.CONNECTED_TO_IGC;
-            auditLog.logRecord(methodName,
-                    auditCode.getLogMessageId(),
-                    auditCode.getSeverity(),
-                    auditCode.getFormattedLogMessage(address),
-                    null,
-                    auditCode.getSystemAction(),
-                    auditCode.getUserAction());
+            auditLog.logMessage(methodName, IGCOMRSAuditCode.CONNECTED_TO_IGC.getMessageDefinition(address));
 
             metadataCollection = new IGCOMRSMetadataCollection(this,
                     serverName,

@@ -48,7 +48,9 @@ public class IGCRestConstants {
     private static Set<String> createValidCookieNames() {
         Set<String> set = new HashSet<>();
         set.add("LtpaToken2");
+        set.add("IIS-LtpaToken2");
         set.add("JSESSIONID");
+        set.add("IIS-JSESSIONID");
         set.add("X-IBM-IISSessionId");
         set.add("X-IBM-IISSessionToken");
         return Collections.unmodifiableSet(set);

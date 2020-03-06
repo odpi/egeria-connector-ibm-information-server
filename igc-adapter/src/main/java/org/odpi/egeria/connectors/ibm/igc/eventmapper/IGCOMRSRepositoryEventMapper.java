@@ -91,14 +91,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         final String methodName = "start";
 
-        IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.EVENT_MAPPER_STARTING;
-        auditLog.logRecord(methodName,
-                auditCode.getLogMessageId(),
-                auditCode.getSeverity(),
-                auditCode.getFormattedLogMessage(),
-                null,
-                auditCode.getSystemAction(),
-                auditCode.getUserAction());
+        auditLog.logMessage(methodName, IGCOMRSAuditCode.EVENT_MAPPER_STARTING.getMessageDefinition());
 
         // Setup IGC OMRS Repository connectivity
         if ( !(repositoryConnector instanceof IGCOMRSRepositoryConnector) ) {
@@ -160,17 +153,12 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         @Override
         public void run() {
 
+            final String methodName = "run";
+
             running.set(true);
             try (final Consumer<Long, String> consumer = new KafkaConsumer<>(igcKafkaProperties)) {
                 consumer.subscribe(Collections.singletonList(igcKafkaTopic));
-                IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.EVENT_MAPPER_RUNNING;
-                auditLog.logRecord("run",
-                        auditCode.getLogMessageId(),
-                        auditCode.getSeverity(),
-                        auditCode.getFormattedLogMessage(igcomrsRepositoryConnector.getServerName()),
-                        null,
-                        auditCode.getSystemAction(),
-                        auditCode.getUserAction());
+                auditLog.logMessage(methodName, IGCOMRSAuditCode.EVENT_MAPPER_RUNNING.getMessageDefinition(igcomrsRepositoryConnector.getServerName()));
                 // TODO: Likely need to tweak these settings to give further processing time for large events
                 //  like IMAM shares -- or even switch to manual offset management rather than auto-commits
                 //  (see: https://kafka.apache.org/0110/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html)
@@ -181,15 +169,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                             processEvent(event.value());
                         }
                     } catch (Exception e) {
-                        auditCode = IGCOMRSAuditCode.EVENT_MAPPER_CONSUMER_FAILURE;
-                        auditLog.logException("consumer failure",
-                                auditCode.getLogMessageId(),
-                                auditCode.getSeverity(),
-                                auditCode.getFormattedLogMessage(),
-                                null,
-                                auditCode.getSystemAction(),
-                                auditCode.getUserAction(),
-                                e);
+                        auditLog.logException(methodName, IGCOMRSAuditCode.EVENT_MAPPER_CONSUMER_FAILURE.getMessageDefinition(), e);
                     }
                 }
             }
@@ -1721,15 +1701,9 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     @Override
     public void disconnect() throws ConnectorCheckedException {
         super.disconnect();
+        final String methodName = "disconnect";
         igcKafkaConsumer.stop();
-        IGCOMRSAuditCode auditCode = IGCOMRSAuditCode.EVENT_MAPPER_SHUTDOWN;
-        auditLog.logRecord("disconnect",
-                auditCode.getLogMessageId(),
-                auditCode.getSeverity(),
-                auditCode.getFormattedLogMessage(igcomrsRepositoryConnector.getServerName()),
-                null,
-                auditCode.getSystemAction(),
-                auditCode.getUserAction());
+        auditLog.logMessage(methodName, IGCOMRSAuditCode.EVENT_MAPPER_SHUTDOWN.getMessageDefinition(igcomrsRepositoryConnector.getServerName()));
     }
 
     /**
