@@ -695,8 +695,8 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         // automatically by the change processing, so if we arrive here we missed something in the
                         // ChangeSet class's processing
                         log.error(" ... change consolidation in ChangeSet did not work: {}", change);
-                    } else if (!change.getIgcPropertyPath().endsWith("_name") && !change.getIgcPropertyPath().endsWith("_url")) {
-                        // if the path ends with '_name' or '_url' then we should already be handling it by the '_id' clause above
+                    } else if (!change.getIgcPropertyPath().endsWith("_name") && !change.getIgcPropertyPath().endsWith("_url") && !change.getIgcPropertyPath().endsWith("_type")) {
+                        // if the path ends with '_name', '_url' or '_type' then we should already be handling it by the '_id' clause above
                         log.warn("Expected relationship for path '{}' for guid {} but found neither Reference nor ItemList: {}", change.getIgcPropertyPath(), latestVersion.getId(), relatedValue);
                     }
                 } else {
