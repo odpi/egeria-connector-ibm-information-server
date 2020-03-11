@@ -1,0 +1,105 @@
+Name:           v11710sp2-ibm-igc-5895cd968-6ldgc
+Namespace:      default
+Priority:       0
+Node:           cgk8s-node-1.fyre.ibm.com/9.20.193.94
+Start Time:     Fri, 06 Mar 2020 05:24:13 -0800
+Labels:         app.kubernetes.io/component=ibm-igc-service
+                app.kubernetes.io/instance=v11710sp2
+                app.kubernetes.io/name=ec-cts-ibmis
+                pod-template-hash=5895cd968
+Annotations:    <none>
+Status:         Running
+IP:             10.233.72.102
+Controlled By:  ReplicaSet/v11710sp2-ibm-igc-5895cd968
+Init Containers:
+  init-connector:
+    Container ID:  docker://c9d0385605d638e443e100c66f3e4a98958664e3c3a10fa5749c1a8d3cbfc08a
+    Image:         docker.io/odpi/egeria-configure:1.5
+    Image ID:      docker-pullable://odpi/egeria-configure@sha256:77839ee93adf4b7b2a3f991a66192d42b0fe0a2db7344db90b4699870694e7c0
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      /bin/bash
+      -c
+      cd /opt/egeria/connectors && wget ${CONNECTOR_URL}
+      
+    State:          Terminated
+      Reason:       Completed
+      Exit Code:    0
+      Started:      Fri, 06 Mar 2020 05:24:16 -0800
+      Finished:     Fri, 06 Mar 2020 05:24:19 -0800
+    Ready:          True
+    Restart Count:  0
+    Environment Variables from:
+      v11710sp2-configmap  ConfigMap  Optional: false
+    Environment:           <none>
+    Mounts:
+      /opt/egeria/connectors from egeria-igc-connector-volume (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-8pp4q (ro)
+Containers:
+  proxy:
+    Container ID:   docker://4a9c6aef1e1f22a161093107b3d3c8ab1dd032e5bc0fbf071cf0fe496bfe6a3b
+    Image:          docker.io/odpi/egeria:1.5
+    Image ID:       docker-pullable://odpi/egeria@sha256:b5bfb61b1e9d22346bd72c3d69aa44900243c9542b5463c17659e6d4b3d2ab9e
+    Port:           8080/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Fri, 06 Mar 2020 05:24:21 -0800
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     1
+      memory:  2Gi
+    Requests:
+      cpu:      250m
+      memory:   1Gi
+    Readiness:  tcp-socket :8080 delay=10s timeout=1s period=10s #success=1 #failure=6
+    Environment Variables from:
+      v11710sp2-configmap  ConfigMap  Optional: false
+    Environment:
+      LOADER_PATH:                                       /opt/egeria/connectors
+      LOGGING_LEVEL_ORG_ODPI_EGERIA_CONNECTORS_IBM_IGC:  DEBUG
+    Mounts:
+      /opt/egeria/connectors from egeria-igc-connector-volume (ro)
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-8pp4q (ro)
+  ibm-igc:
+    Container ID:   docker://6ee81b05445be9763a5f648b0cffa2b72fa6bc9cb5b875737cad0c3b909d3fa1
+    Image:          hyc-daell-infosvr-docker-local.artifactory.swg-devops.com/ibm/infosvr:v11710sp2-samples
+    Image ID:       docker-pullable://hyc-daell-infosvr-docker-local.artifactory.swg-devops.com/ibm/infosvr@sha256:0070c10de8004474daf1fe4d9a5bd92b8411aa344c7f97cc5e511d0513f0fca3
+    Ports:          9446/TCP, 52181/TCP, 59092/TCP
+    Host Ports:     0/TCP, 0/TCP, 0/TCP
+    State:          Running
+      Started:      Fri, 06 Mar 2020 05:24:22 -0800
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     6
+      memory:  8Gi
+    Requests:
+      cpu:        2
+      memory:     4Gi
+    Liveness:     http-get https://:9446/ibm/iis/launchpad delay=720s timeout=1s period=20s #success=1 #failure=3
+    Readiness:    http-get https://:9446/ibm/iis/launchpad delay=300s timeout=1s period=20s #success=1 #failure=12
+    Environment:  <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-8pp4q (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  egeria-igc-connector-volume:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+  default-token-8pp4q:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-8pp4q
+    Optional:    false
+QoS Class:       Burstable
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:          <none>

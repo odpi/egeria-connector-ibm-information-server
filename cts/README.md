@@ -29,6 +29,21 @@ connector. For each release, you will find the following details:
     - `cohort.coco.cts.local` - the local CTS Workbench cohort registration
     - `cohort.coco.cts.remote` - the cohort members considered remote from the CTS Workbench's perspective
 
+## Egeria 1.5
+
+| IGC version | Conformant profile(s) | Notes |
+| :--- | :--- | :--- |
+| [v11.5.0.2 SP3](results/1.5/11.5.0.2sp3) | Metadata sharing, Relationship search |
+| [v11.5.0.2 SP5](results/1.5/11.5.0.2sp5) | Metadata sharing, Relationship search |
+| [v11.5.0.2 SP6](results/1.5/11.5.0.2sp6) | None | (see known issues) |
+| [v11.7.0.0](results/1.5/11.7.0.0) | Metadata sharing, Relationship search |
+| [v11.7.0.1](results/1.5/11.7.0.1) | Metadata sharing, Relationship search |
+| [v11.7.0.1 SP1](results/1.5/11.7.0.1sp1) | Metadata sharing, Relationship search |
+| [v11.7.0.2](results/1.5/11.7.0.2) | Metadata sharing (limited), Relationship search | (see known issues) |
+| [v11.7.1.0](results/1.5/11.7.1.0) | Metadata sharing (limited), Relationship search | (see known issues) |
+| [v11.7.1.0 SP1](results/1.5/11.7.1.0sp1) | Metadata sharing (limited), Relationship search | (see known issues) |
+| [v11.7.1.0 SP2](results/1.5/11.7.1.0sp2) | Metadata sharing (limited), Relationship search | (see known issues) |
+
 ## Egeria 1.4 (connector 1.3)
 
 Note that there is no 1.4 release of the connector, so these results are based on testing release 1.3 of the connector
