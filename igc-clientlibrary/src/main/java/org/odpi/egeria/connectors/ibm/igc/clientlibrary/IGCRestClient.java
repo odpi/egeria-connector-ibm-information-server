@@ -30,7 +30,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeProperty
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.slf4j.Logger;
@@ -471,7 +470,7 @@ public class IGCRestClient {
                     toSend,
                     String.class
             );
-        } catch (HttpClientErrorException e) {
+        } catch (HttpClientErrorException.Forbidden e) {
             log.warn("Request failed -- session may have expired, retrying...", e);
             // If the response was forbidden (fails with exception), the session may have expired -- create a new one
             response = openNewSessionWithUpload(
@@ -534,7 +533,7 @@ public class IGCRestClient {
                     toSend,
                     String.class);
             setCookiesFromResponse(response);
-        } catch (HttpClientErrorException e) {
+        } catch (HttpClientErrorException.Forbidden e) {
             log.warn("Request failed -- session may have expired, retrying...", e);
             // If the response was forbidden (fails with exception), the session may have expired -- create a new one
             response = openNewSessionWithRequest(
