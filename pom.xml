@@ -104,6 +104,7 @@
         <mock-server.version>5.9.0</mock-server.version>
         <sleepycat.version>18.3.12</sleepycat.version>
         <rhino.version>1.7.12</rhino.version>
+        <netty.version>4.1.47.Final</netty.version>
         <woodstox.version>6.1.1</woodstox.version>
         <stax.version>1.0.1</stax.version>
         <maven-compiler.version>3.8.1</maven-compiler.version>
@@ -344,6 +345,12 @@
                 <groupId>org.mozilla</groupId>
                 <artifactId>rhino</artifactId>
                 <version>${rhino.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec</artifactId>
+                <version>${netty.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
