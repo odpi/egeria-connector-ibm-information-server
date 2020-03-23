@@ -5,8 +5,6 @@ package org.odpi.egeria.connectors.ibm.igc.auditlog;
 import org.odpi.openmetadata.frameworks.auditlog.messagesets.ExceptionMessageDefinition;
 import org.odpi.openmetadata.frameworks.auditlog.messagesets.ExceptionMessageSet;
 
-import java.text.MessageFormat;
-
 /**
  * The IGCOMRSErrorCode is used to define first failure data capture (FFDC) for errors that occur when working with
  * IGC as an OMRS Metadata Repository.  It is used in conjunction with both Checked and Runtime (unchecked) exceptions.
