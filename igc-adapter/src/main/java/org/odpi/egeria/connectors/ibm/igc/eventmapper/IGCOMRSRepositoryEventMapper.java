@@ -1796,10 +1796,16 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      * @throws ConnectorCheckedException always
      */
     private void raiseConnectorCheckedException(IGCOMRSErrorCode errorCode, String methodName, Exception cause, String ...params) throws ConnectorCheckedException {
-        throw new ConnectorCheckedException(errorCode.getMessageDefinition(params),
-                this.getClass().getName(),
-                methodName,
-                cause);
+        if (cause == null) {
+            throw new ConnectorCheckedException(errorCode.getMessageDefinition(params),
+                    this.getClass().getName(),
+                    methodName);
+        } else {
+            throw new ConnectorCheckedException(errorCode.getMessageDefinition(params),
+                    this.getClass().getName(),
+                    methodName,
+                    cause);
+        }
     }
 
 }
