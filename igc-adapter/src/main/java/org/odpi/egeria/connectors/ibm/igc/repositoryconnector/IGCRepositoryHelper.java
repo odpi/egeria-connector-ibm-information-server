@@ -1539,16 +1539,9 @@ public class IGCRepositoryHelper {
                     igcValueToSearch
             );
         } else {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    repositoryName,
-                    valueWithRegex);
-            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
+            throw new FunctionNotSupportedException(IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED.getMessageDefinition(repositoryName, valueWithRegex),
                     IGCRepositoryHelper.class.getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+                    methodName);
         }
 
         return igcSearchCondition;
@@ -1928,13 +1921,9 @@ public class IGCRepositoryHelper {
      * @throws RepositoryErrorException always
      */
     private void raiseRepositoryErrorException(IGCOMRSErrorCode errorCode, String methodName, String ...params) throws RepositoryErrorException {
-        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
-        throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+        throw new RepositoryErrorException(errorCode.getMessageDefinition(params),
                 this.getClass().getName(),
-                methodName,
-                errorMessage,
-                errorCode.getSystemAction(),
-                errorCode.getUserAction());
+                methodName);
     }
 
     /**
@@ -1944,14 +1933,9 @@ public class IGCRepositoryHelper {
      * @throws EntityNotKnownException always
      */
     private void raiseEntityNotKnownException(String methodName, String ...params) throws EntityNotKnownException {
-        IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
-        throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
+        throw new EntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN.getMessageDefinition(params),
                 this.getClass().getName(),
-                methodName,
-                errorMessage,
-                errorCode.getSystemAction(),
-                errorCode.getUserAction());
+                methodName);
     }
 
 }

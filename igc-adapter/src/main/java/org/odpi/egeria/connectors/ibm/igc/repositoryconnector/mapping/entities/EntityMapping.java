@@ -781,17 +781,9 @@ public abstract class EntityMapping extends InstanceMapping {
         Reference igcEntity = entityMap.getIgcEntity();
 
         if (igcEntity == null) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.ENTITY_NOT_KNOWN;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    igcGuid.toString(),
-                    "null",
-                    entityMap.getRepositoryConnector().getRepositoryName());
-            throw new EntityNotKnownException(errorCode.getHTTPErrorCode(),
+            throw new EntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN.getMessageDefinition(igcGuid.toString(), "null", entityMap.getRepositoryConnector().getRepositoryName()),
                     EntityMapping.class.getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+                    methodName);
         } else {
             EntityMapping entityMapping = entityMap.getMapping();
             IGCOMRSRepositoryConnector igcomrsRepositoryConnector = entityMap.getRepositoryConnector();

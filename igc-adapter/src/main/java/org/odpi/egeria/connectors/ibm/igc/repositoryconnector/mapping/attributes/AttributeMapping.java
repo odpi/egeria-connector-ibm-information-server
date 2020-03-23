@@ -269,16 +269,9 @@ public abstract class AttributeMapping {
             case STRUCT:
             case MAP:
             default:
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.PROPERTY_CANNOT_BE_TRANSLATED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        value.toString(),
-                        category.getName());
-                throw new PropertyErrorException(errorCode.getHTTPErrorCode(),
+                throw new PropertyErrorException(IGCOMRSErrorCode.PROPERTY_CANNOT_BE_TRANSLATED.getMessageDefinition(value.toString(), category.getName()),
                         AttributeMapping.class.getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
+                        methodName);
         }
 
         return igcValue;
