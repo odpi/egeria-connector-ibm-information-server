@@ -2,6 +2,9 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog;
 
+import org.odpi.openmetadata.frameworks.auditlog.messagesets.ExceptionMessageDefinition;
+import org.odpi.openmetadata.frameworks.auditlog.messagesets.ExceptionMessageSet;
+
 import java.text.MessageFormat;
 
 /**
@@ -22,7 +25,7 @@ import java.text.MessageFormat;
  *   <li>UserAction - describes how a AssetConsumerInterface should correct the error</li>
  * </ul>
  */
-public enum DataStageErrorCode {
+public enum DataStageErrorCode implements ExceptionMessageSet {
 
     SYNC_TIME_UPDATE_FAILURE(500, "DATA-ENGINE-IBM-DATASTAGE-500-001 ",
             "Unable to update sync time for IBM DataStage",
@@ -34,17 +37,13 @@ public enum DataStageErrorCode {
             "Check the inter-host network resolution, credentials and system logs to diagnose or report the problem."),
     ;
 
-    private int    httpErrorCode;
-    private String errorMessageId;
-    private String errorMessage;
-    private String systemAction;
-    private String userAction;
+    private ExceptionMessageDefinition messageDefinition;
 
     /**
-     * The constructor for LocalAtlasOMRSErrorCode expects to be passed one of the enumeration rows defined in
-     * LocalAtlasOMRSErrorCode above.   For example:
+     * The constructor for DataStageErrorCode expects to be passed one of the enumeration rows defined in
+     * DataStageErrorCode above.   For example:
      *
-     *     LocalAtlasOMRSErrorCode   errorCode = LocalAtlasOMRSErrorCode.NULL_INSTANCE;
+     *     DataStageErrorCode   errorCode = DataStageErrorCode.NULL_INSTANCE;
      *
      * This will expand out to the 5 parameters shown below.
      *
@@ -55,74 +54,46 @@ public enum DataStageErrorCode {
      * @param newUserAction - instructions for resolving the error
      */
     DataStageErrorCode(int newHTTPErrorCode, String newErrorMessageId, String newErrorMessage, String newSystemAction, String newUserAction) {
-        this.httpErrorCode  = newHTTPErrorCode;
-        this.errorMessageId = newErrorMessageId;
-        this.errorMessage   = newErrorMessage;
-        this.systemAction   = newSystemAction;
-        this.userAction     = newUserAction;
+        this.messageDefinition = new ExceptionMessageDefinition(newHTTPErrorCode,
+                newErrorMessageId,
+                newErrorMessage,
+                newSystemAction,
+                newUserAction);
+    }
+
+    /**
+     * Retrieve a message definition object for an exception.  This method is used when there are no message inserts.
+     *
+     * @return message definition object.
+     */
+    @Override
+    public ExceptionMessageDefinition getMessageDefinition() {
+        return messageDefinition;
     }
 
 
     /**
-     * Return the numeric code that can be used in REST responses.
+     * Retrieve a message definition object for an exception.  This method is used when there are values to be inserted into the message.
      *
-     * @return int
+     * @param params array of parameters (all strings).  They are inserted into the message according to the numbering in the message text.
+     * @return message definition object.
      */
-    public int getHTTPErrorCode() {
-        return httpErrorCode;
+    @Override
+    public ExceptionMessageDefinition getMessageDefinition(String... params) {
+        messageDefinition.setMessageParameters(params);
+        return messageDefinition;
     }
 
-
     /**
-     * Returns the unique identifier for the error message.
+     * toString() JSON-style
      *
-     * @return errorMessageId
+     * @return string description
      */
-    public String getErrorMessageId() {
-        return errorMessageId;
-    }
-
-
-    /**
-     * Returns the error message with placeholders for specific details.
-     *
-     * @return errorMessage (unformatted)
-     */
-    public String getUnformattedErrorMessage() {
-        return errorMessage;
-    }
-
-
-    /**
-     * Returns the error message with the placeholders filled out with the supplied parameters.
-     *
-     * @param params - strings that plug into the placeholders in the errorMessage
-     * @return errorMessage (formatted with supplied parameters)
-     */
-    public String getFormattedErrorMessage(String... params) {
-        MessageFormat mf = new MessageFormat(errorMessage);
-        return mf.format(params);
-    }
-
-
-    /**
-     * Returns a description of the action taken by the system when the condition that caused this exception was
-     * detected.
-     *
-     * @return systemAction
-     */
-    public String getSystemAction() {
-        return systemAction;
-    }
-
-
-    /**
-     * Returns instructions of how to resolve the issue reported in this exception.
-     *
-     * @return userAction
-     */
-    public String getUserAction() {
-        return userAction;
+    @Override
+    public String toString() {
+        return "DataStageErrorCode{" +
+                "messageDefinition=" + messageDefinition +
+                '}';
     }
 
 }

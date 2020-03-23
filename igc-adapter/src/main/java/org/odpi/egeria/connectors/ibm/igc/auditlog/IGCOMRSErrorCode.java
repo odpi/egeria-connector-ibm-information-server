@@ -2,6 +2,9 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.auditlog;
 
+import org.odpi.openmetadata.frameworks.auditlog.messagesets.ExceptionMessageDefinition;
+import org.odpi.openmetadata.frameworks.auditlog.messagesets.ExceptionMessageSet;
+
 import java.text.MessageFormat;
 
 /**
@@ -22,8 +25,16 @@ import java.text.MessageFormat;
  *   <li>UserAction - describes how a AssetConsumerInterface should correct the error</li>
  * </ul>
  */
-public enum IGCOMRSErrorCode {
+public enum IGCOMRSErrorCode implements ExceptionMessageSet {
 
+    INVALID_CLASSIFICATION_FOR_ENTITY(400, "OMRS-IGC-REPOSITORY-400-006",
+            "IGC repository is unable to assign a classification of type {0} to an entity of type {1} because the classification type is not valid for this type of entity",
+            "The system is unable to classify an entity because the ClassificationDef for the classification does not list this entity type, or one of its super-types.",
+            "Update the ClassificationDef to include the entity's type and rerun the request. Alternatively use a different classification."),
+    HOME_REFRESH(400, "OMRS-IGC-REPOSITORY-400-063",
+            "Method {0} is unable to request a refresh of instance {1} as it is a local member of metadata collection {2} in repository {3}",
+            "The system is unable to process the request.",
+            "Review the error message and other diagnostics created at the same time."),
     REST_CLIENT_FAILURE(500, "OMRS-IGC-REPOSITORY-500-001 ",
             "The IGC REST API client was not successfully initialized to \"{0}\"",
             "The system was unable to login to or access the IBM IGC environment via REST API.",
@@ -129,17 +140,13 @@ public enum IGCOMRSErrorCode {
             "Ensure your IGC repository actually contains such a relationship, and if so raise an issue on the Egeria GitHub with details."),
     ;
 
-    private int    httpErrorCode;
-    private String errorMessageId;
-    private String errorMessage;
-    private String systemAction;
-    private String userAction;
+    private ExceptionMessageDefinition messageDefinition;
 
     /**
-     * The constructor for LocalAtlasOMRSErrorCode expects to be passed one of the enumeration rows defined in
-     * LocalAtlasOMRSErrorCode above.   For example:
+     * The constructor for iGCOMRSErrorCode expects to be passed one of the enumeration rows defined in
+     * IGCOMRSErrorCode above.   For example:
      *
-     *     LocalAtlasOMRSErrorCode   errorCode = LocalAtlasOMRSErrorCode.NULL_INSTANCE;
+     *     IGCOMRSErrorCode   errorCode = IGCOMRSErrorCode.NULL_INSTANCE;
      *
      * This will expand out to the 5 parameters shown below.
      *
@@ -150,75 +157,46 @@ public enum IGCOMRSErrorCode {
      * @param newUserAction - instructions for resolving the error
      */
     IGCOMRSErrorCode(int newHTTPErrorCode, String newErrorMessageId, String newErrorMessage, String newSystemAction, String newUserAction) {
-        this.httpErrorCode  = newHTTPErrorCode;
-        this.errorMessageId = newErrorMessageId;
-        this.errorMessage   = newErrorMessage;
-        this.systemAction   = newSystemAction;
-        this.userAction     = newUserAction;
+        this.messageDefinition = new ExceptionMessageDefinition(newHTTPErrorCode,
+                newErrorMessageId,
+                newErrorMessage,
+                newSystemAction,
+                newUserAction);
+    }
+
+    /**
+     * Retrieve a message definition object for an exception.  This method is used when there are no message inserts.
+     *
+     * @return message definition object.
+     */
+    @Override
+    public ExceptionMessageDefinition getMessageDefinition() {
+        return messageDefinition;
     }
 
 
     /**
-     * Returns the numeric code that can be used in REST responses.
+     * Retrieve a message definition object for an exception.  This method is used when there are values to be inserted into the message.
      *
-     * @return int
+     * @param params array of parameters (all strings).  They are inserted into the message according to the numbering in the message text.
+     * @return message definition object.
      */
-    public int getHTTPErrorCode() {
-        return httpErrorCode;
+    @Override
+    public ExceptionMessageDefinition getMessageDefinition(String... params) {
+        messageDefinition.setMessageParameters(params);
+        return messageDefinition;
     }
 
-
     /**
-     * Returns the unique identifier for the error message.
+     * toString() JSON-style
      *
-     * @return errorMessageId
+     * @return string description
      */
-    public String getErrorMessageId() {
-        return errorMessageId;
-    }
-
-
-    /**
-     * Returns the error message with placeholders for specific details.
-     *
-     * @return errorMessage (unformatted)
-     */
-    public String getUnformattedErrorMessage() {
-        return errorMessage;
-    }
-
-
-    /**
-     * Returns the error message with the placeholders filled out with the supplied parameters.
-     *
-     * @param params - strings that plug into the placeholders in the errorMessage
-     * @return errorMessage (formatted with supplied parameters)
-     */
-    public String getFormattedErrorMessage(String... params) {
-        MessageFormat mf = new MessageFormat(errorMessage);
-        String result = mf.format(params);
-        return result;
-    }
-
-
-    /**
-     * Returns a description of the action taken by the system when the condition that caused this exception was
-     * detected.
-     *
-     * @return systemAction
-     */
-    public String getSystemAction() {
-        return systemAction;
-    }
-
-
-    /**
-     * Returns instructions of how to resolve the issue reported in this exception.
-     *
-     * @return userAction
-     */
-    public String getUserAction() {
-        return userAction;
+    @Override
+    public String toString() {
+        return "IGCOMRSErrorCode{" +
+                "messageDefinition=" + messageDefinition +
+                '}';
     }
 
 }

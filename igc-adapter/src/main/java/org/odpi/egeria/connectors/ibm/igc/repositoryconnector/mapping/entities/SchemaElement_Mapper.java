@@ -68,14 +68,9 @@ public class SchemaElement_Mapper extends ReferenceableMapper {
         try {
             igcRepositoryHelper = ((IGCOMRSMetadataCollection)igcomrsRepositoryConnector.getMetadataCollection()).getIgcRepositoryHelper();
         } catch (RepositoryErrorException e) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(igcomrsRepositoryConnector.getServerName());
-            throw new OMRSRuntimeException(errorCode.getHTTPErrorCode(),
+            throw new OMRSRuntimeException(IGCOMRSErrorCode.REST_CLIENT_FAILURE.getMessageDefinition(igcomrsRepositoryConnector.getServerName()),
                     this.getClass().getName(),
                     methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction(),
                     e);
         }
         String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
@@ -227,16 +222,9 @@ public class SchemaElement_Mapper extends ReferenceableMapper {
                 }
             }
         } else if (failOnInexactRegex) {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    repositoryName,
-                    regex);
-            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
+            throw new FunctionNotSupportedException(IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED.getMessageDefinition(repositoryName, regex),
                     this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+                    methodName);
         }
 
         return conditions;

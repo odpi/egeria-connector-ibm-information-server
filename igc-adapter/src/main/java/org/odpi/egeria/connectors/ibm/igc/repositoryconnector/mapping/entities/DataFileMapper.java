@@ -126,16 +126,9 @@ public class DataFileMapper extends DataStore_Mapper {
                 IGCSearchCondition contains = new IGCSearchCondition("name", "like %{0}%", searchableExtension);
                 igcSearchConditionSet.addCondition(contains);
             } else {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                        repositoryName,
-                        extension);
-                throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
+                throw new FunctionNotSupportedException(IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED.getMessageDefinition(repositoryName, extension),
                         this.getClass().getName(),
-                        methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction());
+                        methodName);
             }
         }
 
@@ -162,16 +155,9 @@ public class DataFileMapper extends DataStore_Mapper {
             IGCSearchCondition contains = new IGCSearchCondition("name", "like %{0}%", searchableExtension);
             igcSearchConditionSet.addCondition(contains);
         } else {
-            IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(
-                    repositoryName,
-                    searchCriteria);
-            throw new FunctionNotSupportedException(errorCode.getHTTPErrorCode(),
+            throw new FunctionNotSupportedException(IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED.getMessageDefinition(repositoryName, searchCriteria),
                     this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction());
+                    methodName);
         }
 
     }

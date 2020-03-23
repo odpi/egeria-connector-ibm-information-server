@@ -1090,14 +1090,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
             try {
                 igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
             } catch (RepositoryErrorException e) {
-                IGCOMRSErrorCode errorCode = IGCOMRSErrorCode.REST_CLIENT_FAILURE;
-                String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(igcomrsRepositoryConnector.getServerName());
-                throw new OMRSRuntimeException(errorCode.getHTTPErrorCode(),
+                throw new OMRSRuntimeException(IGCOMRSErrorCode.REST_CLIENT_FAILURE.getMessageDefinition(igcomrsRepositoryConnector.getServerName()),
                         RelationshipMapping.class.getName(),
                         methodName,
-                        errorMessage,
-                        errorCode.getSystemAction(),
-                        errorCode.getUserAction(),
                         e);
             }
             IGCRepositoryHelper igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
@@ -2077,13 +2072,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @throws RepositoryErrorException always
      */
     private static void raiseRepositoryErrorException(OMRSErrorCode errorCode, String methodName, String ...params) throws RepositoryErrorException {
-        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
-        throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+        throw new RepositoryErrorException(errorCode.getMessageDefinition(params),
                 RelationshipMapping.class.getName(),
-                methodName,
-                errorMessage,
-                errorCode.getSystemAction(),
-                errorCode.getUserAction());
+                methodName);
     }
 
 }

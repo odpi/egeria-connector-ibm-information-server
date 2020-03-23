@@ -23,6 +23,7 @@ import org.odpi.openmetadata.frameworks.connectors.ffdc.*;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
 import org.odpi.openmetadata.frameworks.connectors.properties.EndpointProperties;
 import org.odpi.openmetadata.governanceservers.dataengineproxy.connectors.DataEngineConnectorBase;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -183,16 +184,9 @@ public class DataStageConnector extends DataEngineConnectorBase {
             success = igcRestClient.update(igcUpdate);
         }
         if (!success) {
-            DataStageErrorCode errorCode = DataStageErrorCode.SYNC_TIME_UPDATE_FAILURE;
-            String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage();
-            throw new OCFRuntimeException(
-                    errorCode.getHTTPErrorCode(),
+            throw new OCFRuntimeException(DataStageErrorCode.SYNC_TIME_UPDATE_FAILURE.getMessageDefinition(),
                     this.getClass().getName(),
-                    methodName,
-                    errorMessage,
-                    errorCode.getSystemAction(),
-                    errorCode.getUserAction()
-            );
+                    methodName);
         }
     }
 
@@ -405,15 +399,9 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @throws ConnectorCheckedException always
      */
     private void raiseConnectorCheckedException(DataStageErrorCode errorCode, String methodName, String ...params) throws ConnectorCheckedException {
-        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
-        throw new ConnectorCheckedException(
-                errorCode.getHTTPErrorCode(),
+        throw new ConnectorCheckedException(errorCode.getMessageDefinition(params),
                 this.getClass().getName(),
-                methodName,
-                errorMessage,
-                errorCode.getSystemAction(),
-                errorCode.getUserAction()
-        );
+                methodName);
     }
 
 }

@@ -207,16 +207,10 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      * @throws ConnectorCheckedException always
      */
     protected void raiseConnectorCheckedException(IGCOMRSErrorCode errorCode, String methodName, Throwable cause, String ...params) throws ConnectorCheckedException {
-        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
-        throw new ConnectorCheckedException(
-                errorCode.getHTTPErrorCode(),
+        throw new ConnectorCheckedException(errorCode.getMessageDefinition(params),
                 this.getClass().getName(),
                 methodName,
-                errorMessage,
-                errorCode.getSystemAction(),
-                errorCode.getUserAction(),
-                cause
-        );
+                cause);
     }
 
     /**
@@ -228,13 +222,9 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      * @throws RepositoryErrorException always
      */
     protected void raiseRepositoryErrorException(IGCOMRSErrorCode errorCode, String methodName, Throwable cause, String ...params) throws RepositoryErrorException {
-        String errorMessage = errorCode.getErrorMessageId() + errorCode.getFormattedErrorMessage(params);
-        throw new RepositoryErrorException(errorCode.getHTTPErrorCode(),
+        throw new RepositoryErrorException(errorCode.getMessageDefinition(params),
                 this.getClass().getName(),
                 methodName,
-                errorMessage,
-                errorCode.getSystemAction(),
-                errorCode.getUserAction(),
                 cause);
     }
 
