@@ -408,10 +408,14 @@ public class Identity {
      */
     public static int isIdentityString(String candidate) {
         int charCount = 0;
-        charCount += (candidate.contains(SEPARATOR_FOR_COMPONENTS) ? 2 : 0);
-        charCount += (candidate.contains(SEPARATOR_FOR_TYPE_AND_NAME) ? 2 : 0);
-        charCount += (candidate.contains(TYPE_PREFIX) ? 1 : 0);
-        charCount += (candidate.contains(TYPE_POSTFIX) ? 1 : 0);
+        String withoutRegexFlags = candidate;
+        if (candidate.startsWith("(?i)")) {
+            withoutRegexFlags = candidate.substring(4);
+        }
+        charCount += (withoutRegexFlags.contains(SEPARATOR_FOR_COMPONENTS) ? 2 : 0);
+        charCount += (withoutRegexFlags.contains(SEPARATOR_FOR_TYPE_AND_NAME) ? 2 : 0);
+        charCount += (withoutRegexFlags.contains(TYPE_PREFIX) ? 1 : 0);
+        charCount += (withoutRegexFlags.contains(TYPE_POSTFIX) ? 1 : 0);
         return charCount;
     }
 

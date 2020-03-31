@@ -726,6 +726,19 @@ public class ConnectorTest {
             assertTrue(qualifiedName.startsWith("gen!GL@(category)="));
         }
 
+        results = testFindEntitiesByPropertyValue(
+                "36f66863-9726-4b41-97ee-714fd0dc6fe4",
+                "Glossary",
+                repositoryHelper.getContainsRegex("a", true),
+                MockConstants.EGERIA_PAGESIZE,
+                2
+        );
+
+        for (EntityDetail result : results) {
+            String qualifiedName = getStringValue(result.getProperties(), "qualifiedName");
+            assertTrue(qualifiedName.startsWith("gen!GL@(category)="));
+        }
+
     }
 
     @Test
@@ -836,6 +849,19 @@ public class ConnectorTest {
             assertTrue(qualifiedName.startsWith("(category)="));
         }
 
+        results = testFindEntitiesByPropertyValue(
+                "e507485b-9b5a-44c9-8a28-6967f7ff3672",
+                "GlossaryCategory",
+                repositoryHelper.getContainsRegex("e", true),
+                MockConstants.EGERIA_PAGESIZE,
+                12
+        );
+
+        for (EntityDetail result : results) {
+            String qualifiedName = getStringValue(result.getProperties(), "qualifiedName");
+            assertTrue(qualifiedName.startsWith("(category)="));
+        }
+
     }
 
     @Test
@@ -908,6 +934,14 @@ public class ConnectorTest {
                 6
         );
 
+        testFindEntitiesByPropertyValue(
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                repositoryHelper.getContainsRegex("address", true),
+                MockConstants.EGERIA_PAGESIZE,
+                6
+        );
+
     }
 
     @Test
@@ -916,8 +950,18 @@ public class ConnectorTest {
         final String methodName = "testGlossaryTermFindByProperty_displayName";
 
         InstanceProperties ip = new InstanceProperties();
-        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "displayName", repositoryHelper.getContainsRegex("Address"), methodName);
 
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "displayName", repositoryHelper.getContainsRegex("Address"), methodName);
+        testFindEntitiesByProperty(
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                6
+        );
+
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "displayName", repositoryHelper.getContainsRegex("address", true), methodName);
         testFindEntitiesByProperty(
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
@@ -935,9 +979,20 @@ public class ConnectorTest {
         final String methodName = "testGlossaryTermFindByProperties_ANY";
 
         InstanceProperties ip = new InstanceProperties();
+
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "displayName", repositoryHelper.getContainsRegex("Address"), methodName);
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "summary", repositoryHelper.getContainsRegex("Number"), methodName);
+        testFindEntitiesByProperty(
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                ip,
+                MatchCriteria.ANY,
+                MockConstants.EGERIA_PAGESIZE,
+                7
+        );
 
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "displayName", repositoryHelper.getContainsRegex("address", true), methodName);
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "summary", repositoryHelper.getContainsRegex("number", true), methodName);
         testFindEntitiesByProperty(
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
@@ -955,9 +1010,9 @@ public class ConnectorTest {
         final String methodName = "testGlossaryTermFindByProperties_ALL";
 
         InstanceProperties ip = new InstanceProperties();
+
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "displayName", repositoryHelper.getContainsRegex("Address"), methodName);
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "summary", repositoryHelper.getContainsRegex("number"), methodName);
-
         List<EntityDetail> results = testFindEntitiesByProperty(
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
@@ -970,6 +1025,20 @@ public class ConnectorTest {
         EntityDetail single = results.get(0);
         testQualifiedNameEquality("(category)=Coco Pharmaceuticals::(term)=Address Line 1", single.getProperties().getPropertyValue("qualifiedName"));
 
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "displayName", repositoryHelper.getContainsRegex("address", true), methodName);
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "summary", repositoryHelper.getContainsRegex("number", true), methodName);
+        results = testFindEntitiesByProperty(
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
+                MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME,
+                ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        single = results.get(0);
+        testQualifiedNameEquality("(category)=Coco Pharmaceuticals::(term)=Address Line 1", single.getProperties().getPropertyValue("qualifiedName"));
+
     }
 
     @Test
@@ -978,6 +1047,7 @@ public class ConnectorTest {
         Set<String> possibleTypes = new HashSet<>();
         possibleTypes.add("Asset");
         possibleTypes.add("Database");
+        possibleTypes.add("DataFile");
 
         testFindEntitiesByPropertyValue(
                 "896d14c2-7522-4f6c-8519-757711943fe6",
@@ -986,6 +1056,16 @@ public class ConnectorTest {
                 repositoryHelper.getContainsRegex("COMPDIR"),
                 MockConstants.EGERIA_PAGESIZE,
                 1
+        );
+
+        // Case-insensitively we should have 4 results (3 files with CompDir in their name)
+        testFindEntitiesByPropertyValue(
+                "896d14c2-7522-4f6c-8519-757711943fe6",
+                possibleTypes,
+                null,
+                repositoryHelper.getContainsRegex("compdir", true),
+                MockConstants.EGERIA_PAGESIZE,
+                4
         );
 
     }
@@ -1004,9 +1084,25 @@ public class ConnectorTest {
                 13
         );
 
+        // There should be one additional result for case-insensitive search, the "Uniform Resource Locator"
+        // data class, which has "address" (all lower-case) in its description
+        testFindEntitiesByPropertyValue(
+                possibleTypes,
+                repositoryHelper.getContainsRegex("address", true),
+                MockConstants.EGERIA_PAGESIZE,
+                14
+        );
+
         testFindEntitiesByPropertyValue(
                 possibleTypes,
                 repositoryHelper.getContainsRegex("Address"),
+                4,
+                4
+        );
+
+        testFindEntitiesByPropertyValue(
+                possibleTypes,
+                repositoryHelper.getContainsRegex("address", true),
                 4,
                 4
         );
@@ -1026,6 +1122,14 @@ public class ConnectorTest {
                 possibleTypes,
                 classifications,
                 repositoryHelper.getContainsRegex("Address"),
+                MockConstants.EGERIA_PAGESIZE,
+                6
+        );
+
+        testFindEntitiesByPropertyValue(
+                possibleTypes,
+                classifications,
+                repositoryHelper.getContainsRegex("address", true),
                 MockConstants.EGERIA_PAGESIZE,
                 6
         );
@@ -2494,13 +2598,35 @@ public class ConnectorTest {
             assertEquals(qualifiedName, MockConstants.DATABASE_COLUMN_QN);
         }
 
+        results = testFindEntitiesByPropertyValue(
+                possibleTypes,
+                repositoryHelper.getExactMatchRegex(MockConstants.DATABASE_COLUMN_QN.toLowerCase(), true),
+                MockConstants.EGERIA_PAGESIZE,
+                1);
+
+        for (EntityDetail result : results) {
+            String qualifiedName = getStringValue(result.getProperties(), "qualifiedName");
+            assertEquals(qualifiedName, MockConstants.DATABASE_COLUMN_QN);
+        }
+
         InstanceProperties ip = new InstanceProperties();
+        InstanceProperties ci = new InstanceProperties();
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "qualifiedName", repositoryHelper.getContainsRegex("ADDR"), methodName);
+        ci = repositoryHelper.addStringPropertyToInstance(sourceName, ci, "qualifiedName", repositoryHelper.getContainsRegex("addr", true), methodName);
 
         testFindEntitiesByProperty(
                 typeGUID,
                 typeName,
                 ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                12
+        );
+
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ci,
                 MatchCriteria.ALL,
                 MockConstants.EGERIA_PAGESIZE,
                 12
@@ -2518,17 +2644,46 @@ public class ConnectorTest {
         testFindEntitiesByProperty(
                 typeGUID,
                 typeName,
+                ci,
+                MatchCriteria.NONE,
+                MockConstants.EGERIA_PAGESIZE,
+                66
+        );
+
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
                 ip,
                 MatchCriteria.NONE,
                 10,
                 10
         );
 
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ci,
+                MatchCriteria.NONE,
+                10,
+                10
+        );
+
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "qualifiedName", repositoryHelper.getStartsWithRegex(MockConstants.DATABASE_COLUMN_QN.substring(0, 20)), methodName);
+        ci = repositoryHelper.addStringPropertyToInstance(sourceName, ci, "qualifiedName", repositoryHelper.getStartsWithRegex(MockConstants.DATABASE_COLUMN_QN.substring(0, 20).toLowerCase(), true), methodName);
+
         testFindEntitiesByProperty(
                 typeGUID,
                 typeName,
                 ip,
+                MatchCriteria.ANY,
+                MockConstants.EGERIA_PAGESIZE,
+                78
+        );
+
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ci,
                 MatchCriteria.ANY,
                 MockConstants.EGERIA_PAGESIZE,
                 78
@@ -2543,11 +2698,31 @@ public class ConnectorTest {
                 10
         );
 
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ci,
+                MatchCriteria.ANY,
+                10,
+                10
+        );
+
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "qualifiedName", repositoryHelper.getEndsWithRegex(MockConstants.DATABASE_COLUMN_QN.substring(20)), methodName);
+        ci = repositoryHelper.addStringPropertyToInstance(sourceName, ci, "qualifiedName", repositoryHelper.getEndsWithRegex(MockConstants.DATABASE_COLUMN_QN.substring(20).toLowerCase(), true), methodName);
+
         testFindEntitiesByProperty(
                 typeGUID,
                 typeName,
                 ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ci,
                 MatchCriteria.ALL,
                 MockConstants.EGERIA_PAGESIZE,
                 1
@@ -2564,7 +2739,23 @@ public class ConnectorTest {
         testFindEntitiesByPropertyValue(
                 "ac406bf8-e53e-49f1-9088-2af28bbbd285",
                 "Person",
+                repositoryHelper.getExactMatchRegex("(steward_user)=mr. gary geeke", true),
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        testFindEntitiesByPropertyValue(
+                "ac406bf8-e53e-49f1-9088-2af28bbbd285",
+                "Person",
                 repositoryHelper.getExactMatchRegex("Gary Geeke"),
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        testFindEntitiesByPropertyValue(
+                "ac406bf8-e53e-49f1-9088-2af28bbbd285",
+                "Person",
+                repositoryHelper.getExactMatchRegex("gary geeke", true),
                 MockConstants.EGERIA_PAGESIZE,
                 1
         );
@@ -2580,7 +2771,23 @@ public class ConnectorTest {
         testFindEntitiesByPropertyValue(
                 "ac406bf8-e53e-49f1-9088-2af28bbbd285",
                 "Person",
+                repositoryHelper.getEndsWithRegex("_user)=mr. gary geeke", true),
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        testFindEntitiesByPropertyValue(
+                "ac406bf8-e53e-49f1-9088-2af28bbbd285",
+                "Person",
                 repositoryHelper.getEndsWithRegex("Gary Geeke"),
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        testFindEntitiesByPropertyValue(
+                "ac406bf8-e53e-49f1-9088-2af28bbbd285",
+                "Person",
+                repositoryHelper.getEndsWithRegex("gary geeke", true),
                 MockConstants.EGERIA_PAGESIZE,
                 1
         );
@@ -2594,6 +2801,14 @@ public class ConnectorTest {
         );
 
         testFindEntitiesByPropertyValue(
+                "ac406bf8-e53e-49f1-9088-2af28bbbd285",
+                "Person",
+                repositoryHelper.getEndsWithRegex("geeke", true),
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        testFindEntitiesByPropertyValue(
                 "229ed5cc-de31-45fc-beb4-9919fd247398",
                 "FileFolder",
                 repositoryHelper.getExactMatchRegex("(host_(engine))=INFOSVR::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files"),
@@ -2602,9 +2817,25 @@ public class ConnectorTest {
         );
 
         testFindEntitiesByPropertyValue(
+                "229ed5cc-de31-45fc-beb4-9919fd247398",
+                "FileFolder",
+                repositoryHelper.getExactMatchRegex("(host_(engine))=infosvr::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files", true),
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        testFindEntitiesByPropertyValue(
                 "248975ec-8019-4b8a-9caf-084c8b724233",
                 "TabularSchemaType",
                 repositoryHelper.getEndsWithRegex("::(data_file_folder)=CocoPharma::(data_file)=Employee-Dept.csv::(data_file_record)=Employee-Dept"),
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        testFindEntitiesByPropertyValue(
+                "248975ec-8019-4b8a-9caf-084c8b724233",
+                "TabularSchemaType",
+                repositoryHelper.getEndsWithRegex("::(data_file_folder)=cocopharma::(data_file)=employee-dept.csv::(data_file_record)=employee-dept", true),
                 MockConstants.EGERIA_PAGESIZE,
                 1
         );
@@ -2620,6 +2851,20 @@ public class ConnectorTest {
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "dataType", repositoryHelper.getExactMatchRegex("string"), methodName);
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "specificationDetails", repositoryHelper.getExactMatchRegex("com.ibm.infosphere.classification.impl.EmailClassifier"), methodName);
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "specification", repositoryHelper.getExactMatchRegex("Java"), methodName);
+        ip = repositoryHelper.addBooleanPropertyToInstance(sourceName, ip, "userDefined", false, methodName);
+
+        testFindEntitiesByProperty(
+                "6bc727dc-e855-4979-8736-78ac3cfcd32f",
+                "DataClass",
+                ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "dataType", repositoryHelper.getExactMatchRegex("String", true), methodName);
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "specificationDetails", repositoryHelper.getExactMatchRegex("com.ibm.infosphere.classification.impl.emailclassifier", true), methodName);
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "specification", repositoryHelper.getExactMatchRegex("java", true), methodName);
         ip = repositoryHelper.addBooleanPropertyToInstance(sourceName, ip, "userDefined", false, methodName);
 
         testFindEntitiesByProperty(
@@ -2669,6 +2914,13 @@ public class ConnectorTest {
                 typeGUID,
                 typeName,
                 repositoryHelper.getExactMatchRegex("Proposed"),
+                0
+        );
+
+        testFindRelationshipsByPropertyValue(
+                typeGUID,
+                typeName,
+                repositoryHelper.getExactMatchRegex("proposed", true),
                 0
         );
 
@@ -2763,8 +3015,18 @@ public class ConnectorTest {
         final String methodName = "testFindGovernanceDefinitionByDomain";
 
         InstanceProperties ip = new InstanceProperties();
-        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "domain", repositoryHelper.getContainsRegex("Data Access"), methodName);
 
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "domain", repositoryHelper.getContainsRegex("Data Access"), methodName);
+        testFindEntitiesByProperty(
+                "578a3500-9ad3-45fe-8ada-e4e9572c37c8",
+                "GovernancePolicy",
+                ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                2
+        );
+
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "domain", repositoryHelper.getContainsRegex("data access", true), methodName);
         testFindEntitiesByProperty(
                 "578a3500-9ad3-45fe-8ada-e4e9572c37c8",
                 "GovernancePolicy",
@@ -2782,8 +3044,17 @@ public class ConnectorTest {
         final String methodName = "testFindColumnsByPrimaryKeyName";
 
         InstanceProperties ip = new InstanceProperties();
-        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "name", repositoryHelper.getStartsWithRegex("SQL"), methodName);
 
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "name", repositoryHelper.getStartsWithRegex("SQL"), methodName);
+        testFindEntitiesByClassification(
+                "aa8d5470-6dbc-4648-9e2f-045e5df9d2f9",
+                "RelationalColumn",
+                "PrimaryKey",
+                ip,
+                MatchCriteria.ANY,
+                4);
+
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "name", repositoryHelper.getStartsWithRegex("sql", true), methodName);
         testFindEntitiesByClassification(
                 "aa8d5470-6dbc-4648-9e2f-045e5df9d2f9",
                 "RelationalColumn",
@@ -2803,12 +3074,23 @@ public class ConnectorTest {
         String typeGUID = "10752b4a-4b5d-4519-9eae-fdd6d162122f";
 
         InstanceProperties ip = new InstanceProperties();
+        InstanceProperties ci = new InstanceProperties();
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "fileType", repositoryHelper.getExactMatchRegex("CSV"), methodName);
+        ci = repositoryHelper.addStringPropertyToInstance(sourceName, ci, "fileType", repositoryHelper.getExactMatchRegex("csv", true), methodName);
 
         testFindEntitiesByProperty(
                 typeGUID,
                 typeName,
                 ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                8
+        );
+
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ci,
                 MatchCriteria.ALL,
                 MockConstants.EGERIA_PAGESIZE,
                 8
@@ -2823,11 +3105,30 @@ public class ConnectorTest {
                 5
         );
 
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ci,
+                MatchCriteria.ALL,
+                5,
+                5
+        );
+
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "fileType", repositoryHelper.getStartsWithRegex("CS"), methodName);
+        ci = repositoryHelper.addStringPropertyToInstance(sourceName, ci, "fileType", repositoryHelper.getStartsWithRegex("cs", true), methodName);
         testFindEntitiesByProperty(
                 typeGUID,
                 typeName,
                 ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                8
+        );
+
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ci,
                 MatchCriteria.ALL,
                 MockConstants.EGERIA_PAGESIZE,
                 8
@@ -2841,6 +3142,14 @@ public class ConnectorTest {
                 8
         );
 
+        testFindEntitiesByPropertyValue(
+                typeGUID,
+                typeName,
+                repositoryHelper.getEndsWithRegex("csv", true),
+                MockConstants.EGERIA_PAGESIZE,
+                8
+        );
+
     }
 
     @Test
@@ -2849,8 +3158,17 @@ public class ConnectorTest {
         final String methodName = "testFindCategoryBySubjectAreaName";
 
         InstanceProperties ip = new InstanceProperties();
-        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "name", repositoryHelper.getStartsWithRegex("Org"), methodName);
 
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "name", repositoryHelper.getStartsWithRegex("Org"), methodName);
+        testFindEntitiesByClassification(
+                "e507485b-9b5a-44c9-8a28-6967f7ff3672",
+                "GlossaryCategory",
+                "SubjectArea",
+                ip,
+                MatchCriteria.ALL,
+                1);
+
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "name", repositoryHelper.getStartsWithRegex("org", true), methodName);
         testFindEntitiesByClassification(
                 "e507485b-9b5a-44c9-8a28-6967f7ff3672",
                 "GlossaryCategory",
@@ -2870,9 +3188,19 @@ public class ConnectorTest {
         String typeGUID = "79296df8-645a-4ef7-a011-912d1cdcf75a";
 
         InstanceProperties ip = new InstanceProperties();
+
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "contactMethodValue", repositoryHelper.getEndsWithRegex("w@cocopharmaceutical.com"), methodName);
         ip = repositoryHelper.addEnumPropertyToInstance(sourceName, ip, "contactMethodType", 0, "Email", "Contact through email.", methodName);
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
 
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "contactMethodValue", repositoryHelper.getEndsWithRegex("w@COCOPHARMACEUTICAL.COM", true), methodName);
         testFindEntitiesByProperty(
                 typeGUID,
                 typeName,
@@ -2890,6 +3218,14 @@ public class ConnectorTest {
                 1
         );
 
+        testFindEntitiesByPropertyValue(
+                typeGUID,
+                typeName,
+                repositoryHelper.getEndsWithRegex("w@COCOPHARMACEUTICAL.COM", true),
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
     }
 
     @Test
@@ -2901,8 +3237,18 @@ public class ConnectorTest {
         String typeGUID = "f20f5f45-1afb-41c1-9a09-34d8812626a4";
 
         InstanceProperties ip = new InstanceProperties();
-        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "namespace", repositoryHelper.getStartsWithRegex("EMPL"), methodName);
 
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "namespace", repositoryHelper.getStartsWithRegex("EMPL"), methodName);
+        testFindEntitiesByProperty(
+                typeGUID,
+                typeName,
+                ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                2
+        );
+
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "namespace", repositoryHelper.getStartsWithRegex("empl", true), methodName);
         testFindEntitiesByProperty(
                 typeGUID,
                 typeName,
@@ -2916,6 +3262,14 @@ public class ConnectorTest {
                 typeGUID,
                 typeName,
                 repositoryHelper.getStartsWithRegex("EMPL"),
+                MockConstants.EGERIA_PAGESIZE,
+                2
+        );
+
+        testFindEntitiesByPropertyValue(
+                typeGUID,
+                typeName,
+                repositoryHelper.getStartsWithRegex("empl", true),
                 MockConstants.EGERIA_PAGESIZE,
                 2
         );

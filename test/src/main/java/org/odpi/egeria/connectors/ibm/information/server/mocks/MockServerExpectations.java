@@ -725,12 +725,22 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                         "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
+        setSearchAndResponse(mockServerClient, "GlossaryTermFindByPropertyValue", "results.json",
+                json(
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setGlossaryTermFindByProperty_displayName(MockServerClient mockServerClient) {
         setSearchAndResponse(mockServerClient, "GlossaryTermFindByProperty_displayName", "results.json",
                 json(
                         "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, "GlossaryTermFindByProperty_displayName", "results.json",
+                json(
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
@@ -741,12 +751,22 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                         "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Number\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
+        setSearchAndResponse(mockServerClient, "GlossaryTermFindByProperties_ANY", "results.json",
+                json(
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"number\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"or\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setGlossaryTermFindByProperties_ALL(MockServerClient mockServerClient) {
         setSearchAndResponse(mockServerClient, "GlossaryTermFindByProperties_ALL", "results.json",
                 json(
                         "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"number\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, "GlossaryTermFindByProperties_ALL", "results.json",
+                json(
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"number\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
@@ -758,9 +778,19 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                         "{\"types\":[\"data_file\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
+        setSearchAndResponse(mockServerClient, caseName, "results_data_file.json",
+                json(
+                        "{\"types\":[\"data_file\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"compdir\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"compdir\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"compdir\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
         setSearchAndResponse(mockServerClient, caseName, "results_database.json",
                 json(
                         "{\"types\":[\"database\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"dbms\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"dbms_server_instance\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"dbms_version\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"},{\"property\":\"imported_from\",\"operator\":\"like %{0}%\",\"value\":\"COMPDIR\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_database.json",
+                json(
+                        "{\"types\":[\"database\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"compdir\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"compdir\"},{\"property\":\"dbms\",\"operator\":\"like %{0}%\",\"value\":\"compdir\"},{\"property\":\"dbms_server_instance\",\"operator\":\"like %{0}%\",\"value\":\"compdir\"},{\"property\":\"dbms_version\",\"operator\":\"like %{0}%\",\"value\":\"compdir\"},{\"property\":\"imported_from\",\"operator\":\"like %{0}%\",\"value\":\"compdir\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
@@ -772,9 +802,19 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                         "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
+        setSearchAndResponse(mockServerClient, caseName, "results_term.json",
+                json(
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
         setSearchAndResponse(mockServerClient, caseName, "results_data_class.json",
                 json(
                         "{\"types\":[\"data_class\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"class_code\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"expression\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"provider\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"data_class_type_single\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"valid_value_strings\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"data_type_filter_elements_enum\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"validValueReferenceFile\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"java_class_name_single\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"regular_expression_single\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"script\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_data_class.json",
+                json(
+                        "{\"types\":[\"data_class\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"class_code\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"expression\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"provider\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"data_class_type_single\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"valid_value_strings\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"data_type_filter_elements_enum\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"validValueReferenceFile\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"java_class_name_single\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"regular_expression_single\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"script\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
@@ -783,6 +823,11 @@ public class MockServerExpectations implements PluginExpectationInitializer {
         setSearchAndResponse(mockServerClient, "AllTypesFindByPropertyValue_limitToConfidentiality", "results.json",
                 json(
                         "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"},{\"conditions\":[{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"}],\"operator\":\"and\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, "AllTypesFindByPropertyValue_limitToConfidentiality", "results.json",
+                json(
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"or\"},{\"conditions\":[{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"}],\"operator\":\"and\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
@@ -917,7 +962,17 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 "{\"types\":[\"database_column\"],\"properties\":[\"allows_null_values\",\"averageValue\",\"constantFlag\",\"created_by\",\"created_on\",\"data_type\",\"default_value\",\"defined_foreign_key\",\"defined_primary_key\",\"domainType\",\"fraction\",\"inferredDataType\",\"inferredFormat\",\"inferredLength\",\"inferredPrecision\",\"inferredScale\",\"isInferredForeignKey\",\"isInferredPrimaryKey\",\"length\",\"level\",\"long_description\",\"minimum_length\",\"modified_by\",\"modified_on\",\"name\",\"native_id\",\"nbRecordsTested\",\"nullabilityFlag\",\"numberCompleteValues\",\"numberDistinctValues\",\"numberEmptyValues\",\"numberFormats\",\"numberNullValues\",\"numberValidValues\",\"numberZeroValues\",\"occurs\",\"odbc_type\",\"position\",\"qualityScore\",\"qualityScore_bubble\",\"quality_benchmark\",\"selected_foreign_key\",\"selected_natural_key\",\"selected_primary_key\",\"short_description\",\"start_end_columns\",\"synchronized_from\",\"type\",\"unique\",\"uniqueFlag\"],\"pageSize\":10}");
         setSearchAndResponse(mockServerClient, caseName, "results_one.json",
                 json(
+                        "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"database_table_or_view.name\",\"operator\":\"=\",\"value\":\"contactemail\"},{\"property\":\"database_table_or_view.database_schema.name\",\"operator\":\"=\",\"value\":\"db2inst1\"},{\"property\":\"database_table_or_view.database_schema.database.name\",\"operator\":\"=\",\"value\":\"compdir\"},{\"property\":\"database_table_or_view.database_schema.database.host.name\",\"operator\":\"=\",\"value\":\"infosvr\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"email\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_one.json",
+                json(
                         "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"database_table_or_view.name\",\"operator\":\"=\",\"value\":\"CONTACTEMAIL\"},{\"property\":\"database_table_or_view.database_schema.name\",\"operator\":\"=\",\"value\":\"DB2INST1\"},{\"property\":\"database_table_or_view.database_schema.database.name\",\"operator\":\"=\",\"value\":\"COMPDIR\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"EMAIL\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_one.json",
+                json(
+                        "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"database_table_or_view.name\",\"operator\":\"=\",\"value\":\"contactemail\"},{\"property\":\"database_table_or_view.database_schema.name\",\"operator\":\"=\",\"value\":\"db2inst1\"},{\"property\":\"database_table_or_view.database_schema.database.name\",\"operator\":\"=\",\"value\":\"compdir\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"email\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
         setSearchAndResponse(mockServerClient, caseName, "results_user.json",
@@ -927,7 +982,17 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 ));
         setSearchAndResponse(mockServerClient, caseName, "results_user.json",
                 json(
+                        "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"conditions\":[{\"conditions\":[{\"property\":\"courtesy_title\",\"operator\":\"like {0}%\",\"value\":\"mr. gary geeke\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"full_name\",\"operator\":\"like {0}%\",\"value\":\"mr. gary geeke\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"courtesy_title\",\"operator\":\"like {0}%\",\"value\":\"mr.\"},{\"property\":\"full_name\",\"operator\":\"like {0}%\",\"value\":\"gary geeke\"}],\"operator\":\"and\"}],\"operator\":\"or\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_user.json",
+                json(
                         "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"full_name\",\"operator\":\"=\",\"value\":\"Geeke\"},{\"property\":\"job_title\",\"operator\":\"=\",\"value\":\"Geeke\"},{\"property\":\"principal_id\",\"operator\":\"=\",\"value\":\"Geeke\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_user.json",
+                json(
+                        "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"full_name\",\"operator\":\"=\",\"value\":\"geeke\"},{\"property\":\"job_title\",\"operator\":\"=\",\"value\":\"geeke\"},{\"property\":\"principal_id\",\"operator\":\"=\",\"value\":\"geeke\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
         setSearchAndResponse(mockServerClient, caseName, "results_user.json",
@@ -937,14 +1002,29 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                         "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"full_name\",\"operator\":\"like %{0}\",\"value\":\"Geeke\"},{\"property\":\"job_title\",\"operator\":\"like %{0}\",\"value\":\"Geeke\"},{\"property\":\"principal_id\",\"operator\":\"like %{0}\",\"value\":\"Geeke\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
+        setSearchAndResponse(mockServerClient, caseName, "results_user.json",
+                json(
+                        "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"full_name\",\"operator\":\"like %{0}\",\"value\":\"geeke\"},{\"property\":\"job_title\",\"operator\":\"like %{0}\",\"value\":\"geeke\"},{\"property\":\"principal_id\",\"operator\":\"like %{0}\",\"value\":\"geeke\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
         setSearchAndResponse(mockServerClient, caseName, "results_folder.json",
                 json(
                         "{\"types\":[\"data_file_folder\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"parent_folder.name\",\"operator\":\"=\",\"value\":\"data\"},{\"property\":\"host.name\",\"operator\":\"=\",\"value\":\"INFOSVR\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"files\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
+        setSearchAndResponse(mockServerClient, caseName, "results_folder.json",
+                json(
+                        "{\"types\":[\"data_file_folder\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"parent_folder.name\",\"operator\":\"=\",\"value\":\"data\"},{\"property\":\"host.name\",\"operator\":\"=\",\"value\":\"infosvr\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"files\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
         setSearchAndResponse(mockServerClient, caseName, "results_record.json",
                 json(
                         "{\"types\":[\"data_file_record\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"data_file.name\",\"operator\":\"=\",\"value\":\"Employee-Dept.csv\"},{\"property\":\"data_file.path\",\"operator\":\"like %{0}\",\"value\":\"CocoPharma\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"Employee-Dept\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_record.json",
+                json(
+                        "{\"types\":[\"data_file_record\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"data_file.name\",\"operator\":\"=\",\"value\":\"employee-dept.csv\"},{\"property\":\"data_file.path\",\"operator\":\"like %{0}\",\"value\":\"cocopharma\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"employee-dept\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
@@ -956,6 +1036,14 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 .when(searchRequest(
                         json(
                                 getResourceFileContents("by_case" + File.separator + caseName + File.separator + "query.json"),
+                                MatchType.ONLY_MATCHING_FIELDS
+                        )))
+                .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(
+                        json(
+                                getResourceFileContents("by_case" + File.separator + caseName + File.separator + "query_ci.json"),
                                 MatchType.ONLY_MATCHING_FIELDS
                         )))
                 .respond(withResponse(getResourceFileContents("by_case" + File.separator + caseName + File.separator + "results.json")));
@@ -1019,12 +1107,22 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                         "{\"types\":[\"information_governance_policy\"],\"where\":{\"conditions\":[{\"property\":\"parent_policy.name\",\"operator\":\"like %{0}%\",\"value\":\"Data Access\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
+        setSearchAndResponse(mockServerClient, "FindGovernanceDefinitionByDomain", "results.json",
+                json(
+                        "{\"types\":[\"information_governance_policy\"],\"where\":{\"conditions\":[{\"property\":\"parent_policy.name\",\"operator\":\"like %{0}%\",\"value\":\"data access\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
     }
 
     private void setFindColumnsByPrimaryKeyName(MockServerClient mockServerClient) {
         setSearchAndResponse(mockServerClient, "FindColumnsByPrimaryKeyName", "results.json",
                 json(
                         "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"selected_primary_key\",\"operator\":\"=\",\"value\":\"true\"},{\"property\":\"defined_primary_key.name\",\"operator\":\"like {0}%\",\"value\":\"SQL\"}],\"operator\":\"or\"}],\"operator\":\"or\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, "FindColumnsByPrimaryKeyName", "results.json",
+                json(
+                        "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"selected_primary_key\",\"operator\":\"=\",\"value\":\"true\"},{\"property\":\"defined_primary_key.name\",\"operator\":\"like {0}%\",\"value\":\"sql\"}],\"operator\":\"or\"}],\"operator\":\"or\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
@@ -1038,12 +1136,27 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 ));
         setSearchAndResponse(mockServerClient, caseName, "results.json",
                 json(
+                        "{\"types\":[\"data_file\"],\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}\",\"value\":\"csv\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
+                json(
                         "{\"types\":[\"data_file\"],\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"CS\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
         setSearchAndResponse(mockServerClient, caseName, "results.json",
                 json(
+                        "{\"types\":[\"data_file\"],\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"cs\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
+                json(
                         "{\"types\":[\"data_file\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}\",\"value\":\"CSV\"},{\"property\":\"short_description\",\"operator\":\"like %{0}\",\"value\":\"CSV\"},{\"property\":\"name\",\"operator\":\"like %{0}\",\"value\":\"CSV\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
+                json(
+                        "{\"types\":[\"data_file\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}\",\"value\":\"csv\"},{\"property\":\"short_description\",\"operator\":\"like %{0}\",\"value\":\"csv\"},{\"property\":\"name\",\"operator\":\"like %{0}\",\"value\":\"csv\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
@@ -1052,6 +1165,11 @@ public class MockServerExpectations implements PluginExpectationInitializer {
         setSearchAndResponse(mockServerClient, "FindCategoryBySubjectAreaName", "results.json",
                 json(
                         "{\"types\":[\"category\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"parent_category\",\"operator\":\"isNull\",\"negated\":true},{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"conditions\":[{\"property\":\"assigned_to_terms.name\",\"operator\":\"=\",\"value\":\"SubjectArea\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like {0}%\",\"value\":\"Org\"}],\"operator\":\"and\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, "FindCategoryBySubjectAreaName", "results.json",
+                json(
+                        "{\"types\":[\"category\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"parent_category\",\"operator\":\"isNull\",\"negated\":true},{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"conditions\":[{\"property\":\"assigned_to_terms.name\",\"operator\":\"=\",\"value\":\"SubjectArea\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like {0}%\",\"value\":\"org\"}],\"operator\":\"and\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
@@ -1065,7 +1183,17 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 ));
         setSearchAndResponse(mockServerClient, caseName, "results.json",
                 json(
+                        "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"property\":\"email_address\",\"operator\":\"like %{0}\",\"value\":\"w@COCOPHARMACEUTICAL.COM\"},{\"property\":\"email_address\",\"operator\":\"isNull\",\"negated\":true}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
+                json(
                         "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"email_address\",\"operator\":\"like %{0}\",\"value\":\"w@cocopharmaceutical.com\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
+                json(
+                        "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"email_address\",\"operator\":\"like %{0}\",\"value\":\"w@COCOPHARMACEUTICAL.COM\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
@@ -1079,7 +1207,17 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 ));
         setSearchAndResponse(mockServerClient, caseName, "results.json",
                 json(
+                        "{\"types\":[\"database_schema\"],\"where\":{\"conditions\":[{\"property\":\"database.name\",\"operator\":\"like {0}%\",\"value\":\"empl\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
+                json(
                         "{\"types\":[\"database_schema\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like {0}%\",\"value\":\"EMPL\"},{\"property\":\"short_description\",\"operator\":\"like {0}%\",\"value\":\"EMPL\"},{\"property\":\"long_description\",\"operator\":\"like {0}%\",\"value\":\"EMPL\"},{\"property\":\"modified_by\",\"operator\":\"like {0}%\",\"value\":\"EMPL\"},{\"property\":\"database.name\",\"operator\":\"like {0}%\",\"value\":\"EMPL\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
+                json(
+                        "{\"types\":[\"database_schema\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like {0}%\",\"value\":\"empl\"},{\"property\":\"short_description\",\"operator\":\"like {0}%\",\"value\":\"empl\"},{\"property\":\"long_description\",\"operator\":\"like {0}%\",\"value\":\"empl\"},{\"property\":\"modified_by\",\"operator\":\"like {0}%\",\"value\":\"empl\"},{\"property\":\"database.name\",\"operator\":\"like {0}%\",\"value\":\"empl\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
