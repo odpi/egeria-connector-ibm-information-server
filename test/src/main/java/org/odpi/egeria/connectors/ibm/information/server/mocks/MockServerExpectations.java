@@ -186,12 +186,12 @@ public class MockServerExpectations implements PluginExpectationInitializer {
         // Supertype search tests (can skip folder and schema as they return no results, so our catch-all will handle)
         setAssetFindByPropertyValue(mockServerClient);
 
-        // All types search tests (can skip many as they will return no results, so our catch-all will handle)
-        setAllTypesFindByPropertyValue(mockServerClient);
-
         // Limit by classification tests (can skip many as they will return no results)
         setAllTypesFindByPropertyValue_limitToConfidentiality(mockServerClient);
         setGlossaryTermFindByClassification(mockServerClient);
+
+        // All types search tests (can skip many as they will return no results, so our catch-all will handle)
+        setAllTypesFindByPropertyValue(mockServerClient);
 
         // Relationship tests
         setGlossaryTermRelationships(mockServerClient);
@@ -795,6 +795,38 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 ));
     }
 
+    private void setAllTypesFindByPropertyValue_limitToConfidentiality(MockServerClient mockServerClient) {
+        setSearchAndResponse(mockServerClient, "AllTypesFindByPropertyValue_limitToConfidentiality", "results.json",
+                json(
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"},{\"conditions\":[{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"}],\"operator\":\"and\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, "AllTypesFindByPropertyValue_limitToConfidentiality", "results.json",
+                json(
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"or\"},{\"conditions\":[{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"}],\"operator\":\"and\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        // Ensure data_class produces no results (next set of expectations will otherwise produce results)
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(
+                        json(
+                                "{\"types\":[\"data_class\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"class_code\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"expression\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"provider\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"data_class_type_single\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"valid_value_strings\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"data_type_filter_elements_enum\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"validValueReferenceFile\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"java_class_name_single\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"regular_expression_single\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"script\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"},{\"conditions\":[{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"}],\"operator\":\"and\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        )
+                ))
+                .respond(withResponse(getResourceFileContents("no_results.json")));
+        mockServerClient
+                .withSecure(true)
+                .when(searchRequest(
+                        json(
+                                "{\"types\":[\"data_class\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"class_code\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"expression\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"provider\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"data_class_type_single\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"valid_value_strings\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"data_type_filter_elements_enum\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"validValueReferenceFile\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"java_class_name_single\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"regular_expression_single\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"script\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"or\"},{\"conditions\":[{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"}],\"operator\":\"and\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                                MatchType.ONLY_MATCHING_FIELDS
+                        )
+                ))
+                .respond(withResponse(getResourceFileContents("no_results.json")));
+    }
+
     private void setAllTypesFindByPropertyValue(MockServerClient mockServerClient) {
         String caseName = "AllTypesFindByPropertyValue";
         setSearchAndResponse(mockServerClient, caseName, "results_term.json",
@@ -815,19 +847,6 @@ public class MockServerExpectations implements PluginExpectationInitializer {
         setSearchAndResponse(mockServerClient, caseName, "results_data_class.json",
                 json(
                         "{\"types\":[\"data_class\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"class_code\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"expression\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"provider\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"data_class_type_single\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"valid_value_strings\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"data_type_filter_elements_enum\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"validValueReferenceFile\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"java_class_name_single\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"regular_expression_single\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"script\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
-                        MatchType.ONLY_MATCHING_FIELDS
-                ));
-    }
-
-    private void setAllTypesFindByPropertyValue_limitToConfidentiality(MockServerClient mockServerClient) {
-        setSearchAndResponse(mockServerClient, "AllTypesFindByPropertyValue_limitToConfidentiality", "results.json",
-                json(
-                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"Address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"Address\"}],\"operator\":\"or\"},{\"conditions\":[{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"}],\"operator\":\"and\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
-                        MatchType.ONLY_MATCHING_FIELDS
-                ));
-        setSearchAndResponse(mockServerClient, "AllTypesFindByPropertyValue_limitToConfidentiality", "results.json",
-                json(
-                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"short_description\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"long_description\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"abbreviation\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"example\",\"operator\":\"like %{0}%\",\"value\":\"address\"},{\"property\":\"usage\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"or\"},{\"conditions\":[{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"}],\"operator\":\"and\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
