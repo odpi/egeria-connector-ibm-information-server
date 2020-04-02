@@ -213,6 +213,30 @@ public class DataStageJob {
     }
 
     /**
+     * Lookup a DataStage job based on the provided Repository ID (RID) of the job.
+     *
+     * @param igcRestClient connectivity to the IGC environment
+     * @param rid the RID of the job to lookup
+     * @return DataStageJob if found, otherwise null
+     */
+    public static DataStageJob lookupJobByRid(IGCRestClient igcRestClient, String rid) {
+        IGCSearch igcSearch = new IGCSearch("dsjob");
+        igcSearch.addProperties(DataStageConstants.getJobSearchProperties());
+        IGCSearchCondition byRid = new IGCSearchCondition("_id", "=", rid);
+        IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(byRid);
+        log.info(" ... searching for job by RID: {}", rid);
+        igcSearch.addConditions(conditionSet);
+        ItemList<Dsjob> results = igcRestClient.search(igcSearch);
+        if (results != null) {
+            List<Dsjob> resultsList = results.getItems();
+            if (resultsList != null & !resultsList.isEmpty()) {
+                return new DataStageJob(igcRestClient, resultsList.get(0));
+            }
+        }
+        return null;
+    }
+
+    /**
      * Retrieve a listing of the stages within this particular DataStage job.
      */
     private void getStageDetailsForJob() {

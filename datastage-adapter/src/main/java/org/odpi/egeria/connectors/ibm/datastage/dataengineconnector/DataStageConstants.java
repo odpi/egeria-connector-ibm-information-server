@@ -41,6 +41,7 @@ public class DataStageConstants {
         searchProperties.add(SHORT_DESCRIPTION);
         searchProperties.add(LONG_DESCRIPTION);
         searchProperties.add("references_local_or_shared_containers");
+        searchProperties.add("sequenced_by_jobs");
         searchProperties.add(TYPE);
         searchProperties.add(READS_FROM_DESIGN);
         searchProperties.add(WRITES_TO_DESIGN);

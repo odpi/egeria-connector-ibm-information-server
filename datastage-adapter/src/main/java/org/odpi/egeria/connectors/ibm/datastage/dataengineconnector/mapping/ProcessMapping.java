@@ -49,6 +49,23 @@ public class ProcessMapping extends BaseMapping {
                 if (!lineageMappings.isEmpty()) {
                     process.setLineageMappings(new ArrayList<>(lineageMappings));
                 }
+                ItemList<SequenceJob> sequencedBy = job.getJobObject().getSequencedByJobs();
+                if (sequencedBy != null) {
+                    // Setup a parent process relationship to any sequences that happen to call this job
+                    // as only APPEND parents (not OWNED), since removal of the sequence does not result in removal
+                    // of the job itself
+                    List<ParentProcess> parents = new ArrayList<>();
+                    List<SequenceJob> allSequences = igcRestClient.getAllPages("sequenced_by_jobs", sequencedBy);
+                    for (SequenceJob sequenceJob : allSequences) {
+                        ParentProcess parent = new ParentProcess();
+                        parent.setQualifiedName(getFullyQualifiedName(sequenceJob));
+                        parent.setProcessContainmentType(ProcessContainmentType.APPEND);
+                        parents.add(parent);
+                    }
+                    if (!parents.isEmpty()) {
+                        process.setParentProcesses(parents);
+                    }
+                }
             }
         } else {
             log.error("Unable to create a job mapping for a sequence: {}", job);
@@ -68,22 +85,8 @@ public class ProcessMapping extends BaseMapping {
             Dsjob jobObj = sequence.getJobObject();
             process = getSkeletonProcess(jobObj);
             if (process != null) {
-                Set<PortAlias> portAliases = new HashSet<>();
-                for (Stage stage : sequence.getAllStages()) {
-                    Dsjob runsJob = stage.getRunsSequencesJobs();
-                    if (runsJob != null) {
-                        String jobId = runsJob.getId();
-                        if (jobId != null) {
-                            Process jobProcess = jobProcessByRid.getOrDefault(jobId, null);
-                            if (jobProcess != null) {
-                                portAliases.addAll(jobProcess.getPortAliases());
-                            } else {
-                                log.warn("Unable to find existing process to use for alias: {}", jobId);
-                            }
-                        }
-                    }
-                }
-                process.setPortAliases(new ArrayList<>(portAliases));
+                PortAliasMapping portAliasMapping = new PortAliasMapping(sequence, jobProcessByRid);
+                process.setPortAliases(portAliasMapping.getPortAliases());
             }
         } else {
             log.error("Unable to create a sequence mapping for a job: {}", sequence);
@@ -108,6 +111,14 @@ public class ProcessMapping extends BaseMapping {
             addDataStoreDetails(job, stage, "writes_to_(design)", stage.getWritesToDesign(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
             process.setPortImplementations(new ArrayList<>(portImplementations));
             process.setLineageMappings(new ArrayList<>(lineageMappings));
+            // Stages are owned by the job that contains them, so setup an owned parent process relationship to the
+            // job-level
+            List<ParentProcess> parents = new ArrayList<>();
+            ParentProcess parent = new ParentProcess();
+            parent.setQualifiedName(getFullyQualifiedName(job.getJobObject()));
+            parent.setProcessContainmentType(ProcessContainmentType.OWNED);
+            parents.add(parent);
+            process.setParentProcesses(parents);
         }
     }
 
