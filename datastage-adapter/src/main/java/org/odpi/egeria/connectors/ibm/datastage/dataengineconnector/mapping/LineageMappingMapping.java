@@ -111,46 +111,50 @@ class LineageMappingMapping extends BaseMapping {
         super(job.getIgcRestClient());
         lineageMappings = new HashSet<>();
         // For each field in the data store...
-        for (Classificationenabledgroup fieldObj : fields) {
-            String field1QN = getFullyQualifiedName(fieldObj);
-            ItemList<InformationAsset> relatedStageCols;
-            String propertyName;
-            if (bSource) {
-                relatedStageCols = fieldObj.getReadByDesign();
-                propertyName = "read_by_(design)";
-            } else {
-                relatedStageCols = fieldObj.getWrittenByDesign();
-                propertyName = "written_by_(design)";
-            }
-            if (relatedStageCols != null) {
-                List<InformationAsset> allRelatedStageCols = igcRestClient.getAllPages(propertyName, relatedStageCols);
-                // For each object that reads / writes to that field...
-                for (InformationAsset stageColRef : allRelatedStageCols) {
-                    StageColumn stageColFull = job.getStageColumnByRid(stageColRef.getId());
-                    if (stageColFull != null) {
-                        String field2QN = getFullyQualifiedName(stageColFull);
-                        if (bSource) {
-                            // StoreX to StoreX_STAGEA (reads_from_(design) to INPUT_PORT)
-                            LineageMapping oneToOne = getLineageMapping(field1QN, field1QN + fullyQualifiedStageName);
-                            lineageMappings.add(oneToOne);
-                            // StoreX_STAGEA to DSLink1_STAGEA (INPUT_PORT to OUTPUT_PORT)
-                            LineageMapping portToPort = getLineageMapping(field1QN + fullyQualifiedStageName, field2QN + stageNameSuffix);
-                            lineageMappings.add(portToPort);
-                        } else {
-                            // DSLink2_STAGEC to StoreY_STAGEC (INPUT_PORT to OUTPUT_PORT)
-                            LineageMapping portToPort = getLineageMapping(field1QN + fullyQualifiedStageName, field1QN);
-                            lineageMappings.add(portToPort);
-                            // StoreY_STAGEC to StoreY (OUTPUT_PORT to written_by_(design))
-                            LineageMapping oneToOne = getLineageMapping(field2QN + stageNameSuffix, field1QN + fullyQualifiedStageName);
-                            lineageMappings.add(oneToOne);
-                        }
-                    } else {
-                        log.error("Unable to find referenced stage column: {}", stageColRef);
-                    }
+        if (fields != null) {
+            for (Classificationenabledgroup fieldObj : fields) {
+                String field1QN = getFullyQualifiedName(fieldObj);
+                ItemList<InformationAsset> relatedStageCols;
+                String propertyName;
+                if (bSource) {
+                    relatedStageCols = fieldObj.getReadByDesign();
+                    propertyName = "read_by_(design)";
+                } else {
+                    relatedStageCols = fieldObj.getWrittenByDesign();
+                    propertyName = "written_by_(design)";
                 }
-            } else {
-                log.error("No fields were found for lineage mapping of: {}", fieldObj);
+                if (relatedStageCols != null) {
+                    List<InformationAsset> allRelatedStageCols = igcRestClient.getAllPages(propertyName, relatedStageCols);
+                    // For each object that reads / writes to that field...
+                    for (InformationAsset stageColRef : allRelatedStageCols) {
+                        StageColumn stageColFull = job.getStageColumnByRid(stageColRef.getId());
+                        if (stageColFull != null) {
+                            String field2QN = getFullyQualifiedName(stageColFull);
+                            if (bSource) {
+                                // StoreX to StoreX_STAGEA (reads_from_(design) to INPUT_PORT)
+                                LineageMapping oneToOne = getLineageMapping(field1QN, field1QN + fullyQualifiedStageName);
+                                lineageMappings.add(oneToOne);
+                                // StoreX_STAGEA to DSLink1_STAGEA (INPUT_PORT to OUTPUT_PORT)
+                                LineageMapping portToPort = getLineageMapping(field1QN + fullyQualifiedStageName, field2QN + stageNameSuffix);
+                                lineageMappings.add(portToPort);
+                            } else {
+                                // DSLink2_STAGEC to StoreY_STAGEC (INPUT_PORT to OUTPUT_PORT)
+                                LineageMapping portToPort = getLineageMapping(field1QN + fullyQualifiedStageName, field1QN);
+                                lineageMappings.add(portToPort);
+                                // StoreY_STAGEC to StoreY (OUTPUT_PORT to written_by_(design))
+                                LineageMapping oneToOne = getLineageMapping(field2QN + stageNameSuffix, field1QN + fullyQualifiedStageName);
+                                lineageMappings.add(oneToOne);
+                            }
+                        } else {
+                            log.error("Unable to find referenced stage column: {}", stageColRef);
+                        }
+                    }
+                } else {
+                    log.error("No fields were found for lineage mapping of: {}", fieldObj);
+                }
             }
+        } else {
+            log.warn("No fields were found for a data store for stage: {}", fullyQualifiedStageName);
         }
     }
 

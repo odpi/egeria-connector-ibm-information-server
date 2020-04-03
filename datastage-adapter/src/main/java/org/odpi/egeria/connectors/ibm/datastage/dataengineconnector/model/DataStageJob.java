@@ -46,7 +46,7 @@ public class DataStageJob {
      * @param igcRestClient connectivity to the IGC environment
      * @param job the job for which to retrieve details
      */
-    DataStageJob(IGCRestClient igcRestClient, Dsjob job) {
+    public DataStageJob(IGCRestClient igcRestClient, Dsjob job) {
 
         this.igcRestClient = igcRestClient;
         this.job = job;
@@ -229,7 +229,7 @@ public class DataStageJob {
         ItemList<Dsjob> results = igcRestClient.search(igcSearch);
         if (results != null) {
             List<Dsjob> resultsList = results.getItems();
-            if (resultsList != null & !resultsList.isEmpty()) {
+            if (resultsList != null && !resultsList.isEmpty()) {
                 return new DataStageJob(igcRestClient, resultsList.get(0));
             }
         }

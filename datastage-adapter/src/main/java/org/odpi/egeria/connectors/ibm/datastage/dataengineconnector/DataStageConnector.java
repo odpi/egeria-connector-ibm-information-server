@@ -15,6 +15,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.odpi.openmetadata.accessservices.dataengine.model.*;
@@ -23,7 +24,6 @@ import org.odpi.openmetadata.frameworks.connectors.ffdc.*;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
 import org.odpi.openmetadata.frameworks.connectors.properties.EndpointProperties;
 import org.odpi.openmetadata.governanceservers.dataengineproxy.connectors.DataEngineConnectorBase;
-import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -193,6 +193,19 @@ public class DataStageConnector extends DataEngineConnectorBase {
     /**
      * {@inheritDoc}
      */
+//    @Override
+    public synchronized Date getOldestChangeSince(Date time) {
+        final String methodName = "getOldestChangeSince";
+        Dsjob oldest = getOldestJobSince(time);
+        if (oldest != null) {
+            return oldest.getModifiedOn();
+        }
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<SchemaType> getChangedSchemaTypes(Date from, Date to) {
 
@@ -273,8 +286,8 @@ public class DataStageConnector extends DataEngineConnectorBase {
         }
         // Then load sequences, re-using the PortAliases constructed for the jobs
         // TODO: this probably will NOT work for nested sequences?
-        for (DataStageJob detailedSeq: seqList) {
-            processes.add(getProcessForSequence(detailedSeq, jobProcessByRid));
+        for (DataStageJob detailedSeq : seqList) {
+            processes.addAll(getProcessesForSequence(detailedSeq, jobProcessByRid));
         }
 
         return processes;
@@ -353,19 +366,48 @@ public class DataStageConnector extends DataEngineConnectorBase {
     }
 
     /**
-     * Translate a single Process to represent the DataStage sequence itself.
+     * Translate a DataStage sequence into a Process, as well as any other jobs that the sequence calls which are not
+     * already included as changes (executing a job from a sequence does not cause the job to be updated, so will not
+     * appear at job-level as a separate change, but needs to be included to update the process hierarchy
+     * relationships).
      *
      * @param job the job object for which to load a process
      * @param jobProcessByRid a map from job RID to its detailed process definition
-     * @return Process
+     * @return {@code List<Process>}
      */
-    private Process getProcessForSequence(DataStageJob job, Map<String, Process> jobProcessByRid) {
-        Process process = null;
+    private List<Process> getProcessesForSequence(DataStageJob job, Map<String, Process> jobProcessByRid) {
+        List<Process> processes = new ArrayList<>();
         if (job.getType().equals(DataStageJob.JobType.SEQUENCE)) {
             log.debug("Load process for sequence...");
+            // Create a copy of the map, as the next step could update it by caching additional job details
+            // necessary for the port aliases
+            Map<String, Process> alreadyOutputProcesses = new HashMap<>(jobProcessByRid);
             ProcessMapping processMapping = new ProcessMapping(job, jobProcessByRid);
-            process = processMapping.getProcess();
+            Process process = processMapping.getProcess();
             if (process != null) {
+                log.debug(" ... examining {} jobs run by the sequence", job.getAllStages().size());
+                for (Stage stage : job.getAllStages()) {
+                    Dsjob runsJob = stage.getRunsSequencesJobs();
+                    String rid = runsJob.getId();
+                    if (!alreadyOutputProcesses.containsKey(rid)) {
+                        log.debug(" ...... found a job not already included in our changes: {}", rid);
+                        // For any remaining, add them to the list of processes
+                        Process sequencedProcess = jobProcessByRid.getOrDefault(rid, null);
+                        if (sequencedProcess != null) {
+                            try {
+                                if (log.isDebugEnabled()) { log.debug(" ...... adding process: {}", objectMapper.writeValueAsString(sequencedProcess)); }
+                            } catch (JsonProcessingException e) {
+                                log.error("Unable to serialise to JSON: {}", sequencedProcess, e);
+                            }
+                            processes.add(sequencedProcess);
+                            jobProcessByRid.put(rid, sequencedProcess);
+                        } else {
+                            log.error(" ... job was not already cached by port aliases, something went wrong: {}", rid);
+                        }
+                    }
+                }
+                // And then finally add the sequence itself
+                processes.add(process);
                 try {
                     if (log.isDebugEnabled()) { log.debug(" ... process: {}", objectMapper.writeValueAsString(process)); }
                 } catch (JsonProcessingException e) {
@@ -373,7 +415,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 }
             }
         }
-        return process;
+        return processes;
     }
 
     /**
@@ -388,6 +430,28 @@ public class DataStageConnector extends DataEngineConnectorBase {
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
         ItemList<InformationGovernanceRule> results = igcRestClient.search(igcSearch);
+        return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
+    }
+
+    /**
+     * Retrieve the oldest job (modified_on date furthest in the past) since the provided time.
+     * @param time from which to consider changes
+     * @return Dsjob
+     */
+    private Dsjob getOldestJobSince(Date time) {
+        long startFrom = 0;
+        if (time != null) {
+            startFrom = time.getTime();
+        }
+        IGCSearch igcSearch = new IGCSearch("dsjob");
+        igcSearch.addProperty("modified_on");
+        IGCSearchCondition condition = new IGCSearchCondition("modified_on", ">", "" + startFrom);
+        IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
+        igcSearch.addConditions(conditionSet);
+        IGCSearchSorting sorting = new IGCSearchSorting("modified_on", true);
+        igcSearch.addSortingCriteria(sorting);
+        igcSearch.setPageSize(2); // No need to get any more than 2 results, as we will only take the top result anyway
+        ItemList<Dsjob> results = igcRestClient.search(igcSearch);
         return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
     }
 
