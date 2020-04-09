@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
@@ -9,10 +10,12 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 
 class BaseMapping {
 
+    DataStageCache cache;
     IGCRestClient igcRestClient;
 
-    BaseMapping(IGCRestClient igcRestClient) {
-        this.igcRestClient = igcRestClient;
+    BaseMapping(DataStageCache cache) {
+        this.cache = cache;
+        this.igcRestClient = cache.getIgcRestClient();
     }
 
     /**

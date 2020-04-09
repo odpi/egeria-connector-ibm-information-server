@@ -222,7 +222,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                     if ( (IGCRestClient.isVirtualAssetRid(storeRid) && includeVirtualAssets)
                             || (!IGCRestClient.isVirtualAssetRid(storeRid) && createDataStoreSchemas) ) {
                         log.debug(" ... Creating a SchemaType ...");
-                        SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(job, job.getStoreIdentityFromRid(storeRid), job.getFieldsForStore(storeRid));
+                        SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(dataStageCache, dataStageCache.getStoreIdentityFromRid(storeRid));
                         SchemaType deSchemaType = schemaTypeMapping.getSchemaType();
                         if (log.isDebugEnabled()) {
                             try {
@@ -270,7 +270,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
         List<Process> processes = new ArrayList<>();
 
         List<DataStageJob> seqList = new ArrayList<>();
-        Map<String, Process> jobProcessByRid = new HashMap<>();
         // Translate changed jobs first, to build up appropriate PortAliases list
         for (DataStageJob detailedJob : dataStageCache.getAllJobs()) {
             if (detailedJob.getType().equals(DataStageJob.JobType.SEQUENCE)) {
@@ -279,7 +278,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 processes.addAll(getProcessesForEachStage(detailedJob));
                 Process jobProcess = getProcessForJob(detailedJob);
                 if (jobProcess != null) {
-                    jobProcessByRid.put(detailedJob.getJobObject().getId(), jobProcess);
                     processes.add(jobProcess);
                 }
             }
@@ -287,7 +285,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
         // Then load sequences, re-using the PortAliases constructed for the jobs
         // TODO: this probably will NOT work for nested sequences?
         for (DataStageJob detailedSeq : seqList) {
-            processes.addAll(getProcessesForSequence(detailedSeq, jobProcessByRid));
+            processes.addAll(getProcessesForSequence(detailedSeq));
         }
 
         return processes;
@@ -328,7 +326,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
         List<Process> processes = new ArrayList<>();
         log.debug("Translating processes for each stage...");
         for (Stage stage : job.getAllStages()) {
-            ProcessMapping processMapping = new ProcessMapping(job, stage);
+            ProcessMapping processMapping = new ProcessMapping(dataStageCache, job, stage);
             Process process = processMapping.getProcess();
             if (process != null) {
                 try {
@@ -349,17 +347,13 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @return Process
      */
     private Process getProcessForJob(DataStageJob job) {
-        Process process = null;
-        if (!job.getType().equals(DataStageJob.JobType.SEQUENCE)) {
-            log.debug("Load process for job...");
-            ProcessMapping processMapping = new ProcessMapping(job);
-            process = processMapping.getProcess();
-            if (process != null) {
-                try {
-                    if (log.isDebugEnabled()) { log.debug(" ... process: {}", objectMapper.writeValueAsString(process)); }
-                } catch (JsonProcessingException e) {
-                    log.error("Unable to serialise to JSON: {}", process, e);
-                }
+        log.debug("Load process for job...");
+        Process process = dataStageCache.getProcessByRid(job.getJobObject().getId());
+        if (process != null) {
+            try {
+                if (log.isDebugEnabled()) { log.debug(" ... process: {}", objectMapper.writeValueAsString(process)); }
+            } catch (JsonProcessingException e) {
+                log.error("Unable to serialise to JSON: {}", process, e);
             }
         }
         return process;
@@ -372,47 +366,42 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * relationships).
      *
      * @param job the job object for which to load a process
-     * @param jobProcessByRid a map from job RID to its detailed process definition
      * @return {@code List<Process>}
      */
-    private List<Process> getProcessesForSequence(DataStageJob job, Map<String, Process> jobProcessByRid) {
+    private List<Process> getProcessesForSequence(DataStageJob job) {
+        log.debug("Load process for sequence...");
         List<Process> processes = new ArrayList<>();
-        if (job.getType().equals(DataStageJob.JobType.SEQUENCE)) {
-            log.debug("Load process for sequence...");
-            // Create a copy of the map, as the next step could update it by caching additional job details
-            // necessary for the port aliases
-            Map<String, Process> alreadyOutputProcesses = new HashMap<>(jobProcessByRid);
-            ProcessMapping processMapping = new ProcessMapping(job, jobProcessByRid);
-            Process process = processMapping.getProcess();
-            if (process != null) {
-                log.debug(" ... examining {} jobs run by the sequence", job.getAllStages().size());
-                for (Stage stage : job.getAllStages()) {
-                    Dsjob runsJob = stage.getRunsSequencesJobs();
-                    String rid = runsJob.getId();
-                    if (!alreadyOutputProcesses.containsKey(rid)) {
-                        log.debug(" ...... found a job not already included in our changes: {}", rid);
-                        // For any remaining, add them to the list of processes
-                        Process sequencedProcess = jobProcessByRid.getOrDefault(rid, null);
-                        if (sequencedProcess != null) {
-                            try {
-                                if (log.isDebugEnabled()) { log.debug(" ...... adding process: {}", objectMapper.writeValueAsString(sequencedProcess)); }
-                            } catch (JsonProcessingException e) {
-                                log.error("Unable to serialise to JSON: {}", sequencedProcess, e);
-                            }
-                            processes.add(sequencedProcess);
-                            jobProcessByRid.put(rid, sequencedProcess);
-                        } else {
-                            log.error(" ... job was not already cached by port aliases, something went wrong: {}", rid);
+        // Create a copy of the map, as the next step could update it by caching additional job details
+        // necessary for the port aliases
+        Set<String> alreadyOutputProcesses = dataStageCache.getCachedProcessRids();
+        Process process = dataStageCache.getProcessByRid(job.getJobObject().getId());
+        if (process != null) {
+            log.debug(" ... examining {} jobs run by the sequence", job.getAllStages().size());
+            for (Stage stage : job.getAllStages()) {
+                Dsjob runsJob = stage.getRunsSequencesJobs();
+                String rid = runsJob.getId();
+                if (rid != null && !alreadyOutputProcesses.contains(rid)) {
+                    log.debug(" ...... found a job not already included in our changes: {}", rid);
+                    // For any remaining, add them to the list of processes
+                    Process sequencedProcess = dataStageCache.getProcessByRid(rid);
+                    if (sequencedProcess != null) {
+                        try {
+                            if (log.isDebugEnabled()) { log.debug(" ...... adding process: {}", objectMapper.writeValueAsString(sequencedProcess)); }
+                        } catch (JsonProcessingException e) {
+                            log.error("Unable to serialise to JSON: {}", sequencedProcess, e);
                         }
+                        processes.add(sequencedProcess);
+                    } else {
+                        log.error(" ... job could not be found or cached, something went wrong: {}", rid);
                     }
                 }
-                // And then finally add the sequence itself
-                processes.add(process);
-                try {
-                    if (log.isDebugEnabled()) { log.debug(" ... process: {}", objectMapper.writeValueAsString(process)); }
-                } catch (JsonProcessingException e) {
-                    log.error("Unable to serialise to JSON: {}", process, e);
-                }
+            }
+            // And then finally add the sequence itself
+            processes.add(process);
+            try {
+                if (log.isDebugEnabled()) { log.debug(" ... process: {}", objectMapper.writeValueAsString(process)); }
+            } catch (JsonProcessingException e) {
+                log.error("Unable to serialise to JSON: {}", process, e);
             }
         }
         return processes;

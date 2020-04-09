@@ -2,8 +2,10 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
@@ -21,18 +23,22 @@ public class SchemaTypeMapping extends BaseMapping {
     /**
      * Creates a SchemaType for the provided data store and field information.
      *
-     * @param job the job for which to create the SchemaType
+     * @param cache used by this mapping
      * @param storeIdentity the store identity for which to create the schema type
-     * @param fields the fields that should be created for the store
      */
-    public SchemaTypeMapping(DataStageJob job, Identity storeIdentity, List<Classificationenabledgroup> fields) {
-        super(job.getIgcRestClient());
+    public SchemaTypeMapping(DataStageCache cache, Identity storeIdentity) {
+        super(cache);
         schemaType = null;
         if (storeIdentity != null) {
             schemaType = new SchemaType();
             schemaType.setQualifiedName(storeIdentity.toString());
             schemaType.setDisplayName(storeIdentity.getName());
-            AttributeMapping attributeMapping = new AttributeMapping(job, fields);
+            InformationAsset store = new InformationAsset();
+            store.setId(storeIdentity.getRid());
+            store.setType(storeIdentity.getAssetType());
+            store.setName(storeIdentity.getName());
+            List<Classificationenabledgroup> fields = cache.getFieldsForStore(store);
+            AttributeMapping attributeMapping = new AttributeMapping(cache, fields);
             schemaType.setAttributeList(attributeMapping.getAttributes());
         }
     }
@@ -40,42 +46,43 @@ public class SchemaTypeMapping extends BaseMapping {
     /**
      * Creates a SchemaType for the provided job and link information.
      *
+     * @param cache used by this mapping
      * @param job the job for which to create the SchemaType
      * @param link the link from which to retrieve stage columns for the SchemaType's attributes
      * @param stageNameSuffix the unique suffix (based on the stage name) to ensure each attribute is unique
      */
-    SchemaTypeMapping(DataStageJob job, Link link, String stageNameSuffix) {
-        super(job.getIgcRestClient());
+    SchemaTypeMapping(DataStageCache cache, DataStageJob job, Link link, String stageNameSuffix) {
+        super(cache);
         schemaType = null;
         if (link != null) {
             schemaType = new SchemaType();
             schemaType.setQualifiedName(link.getIdentity(igcRestClient).toString() + stageNameSuffix);
             schemaType.setDisplayName(link.getId());
             schemaType.setAuthor(link.getModifiedBy());
-            AttributeMapping attributeMapping = new AttributeMapping(job, link, stageNameSuffix);
+            AttributeMapping attributeMapping = new AttributeMapping(cache, job, link, stageNameSuffix);
             schemaType.setAttributeList(attributeMapping.getAttributes());
         }
     }
 
     /**
-     * Creates a SchemaType for the provided job and data store field information, for the provided stage.
+     * Creates a SchemaType for the provided data store field information, for the provided stage.
      *
-     * @param job the job for which to create the SchemaType
+     * @param cache used by this mapping
      * @param stage the stage for which to create the SchemaType
      * @param storeName the name of the data store from which the fields come
      * @param storeQualifiedName the fully-qualified name of the data store
      * @param fields the fields from the data store to use in creating the SchemaType
      * @param fullyQualifiedStageName the fully-qualified name of the stage
      */
-    SchemaTypeMapping(DataStageJob job, Stage stage, String storeName, String storeQualifiedName, List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
-        super(job.getIgcRestClient());
+    SchemaTypeMapping(DataStageCache cache, Stage stage, String storeName, String storeQualifiedName, List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
+        super(cache);
         schemaType = null;
         if (stage != null) {
             schemaType = new SchemaType();
             schemaType.setQualifiedName(storeQualifiedName + fullyQualifiedStageName);
             schemaType.setDisplayName(storeName);
             schemaType.setAuthor((String)igcRestClient.getPropertyByName(stage, "modified_by"));
-            AttributeMapping attributeMapping = new AttributeMapping(job, fields, fullyQualifiedStageName);
+            AttributeMapping attributeMapping = new AttributeMapping(cache, fields, fullyQualifiedStageName);
             schemaType.setAttributeList(attributeMapping.getAttributes());
         }
     }

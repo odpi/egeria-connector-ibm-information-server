@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataItem;
@@ -27,12 +28,13 @@ class AttributeMapping extends BaseMapping {
     /**
      * Creates a set of Attributes for the provided job and link information.
      *
+     * @param cache used by this mapping
      * @param job the job for which to create the Attributes
      * @param link the link containing stage column detail for the Attributes
      * @param stageNameSuffix the unique suffix (based on the stage name) to ensure each attribute is unique
      */
-    AttributeMapping(DataStageJob job, Link link, String stageNameSuffix) {
-        super(job.getIgcRestClient());
+    AttributeMapping(DataStageCache cache, DataStageJob job, Link link, String stageNameSuffix) {
+        super(cache);
         log.debug("Creating new AttributeMapping from job and link...");
         attributes = new ArrayList<>();
         if (link != null) {
@@ -54,14 +56,14 @@ class AttributeMapping extends BaseMapping {
     }
 
     /**
-     * Creates a set of Attributes for the provided job and data store field information.
+     * Creates a set of Attributes for the provided data store field information.
      *
-     * @param job the job for which to create the Attributes
+     * @param cache used by this mapping
      * @param fields the data store fields containing detail for the Attributes
      * @param fullyQualifiedStageName the qualified name of the stage to ensure each attribute is unique
      */
-    AttributeMapping(DataStageJob job, List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
-        super(job.getIgcRestClient());
+    AttributeMapping(DataStageCache cache, List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
+        super(cache);
         log.debug("Creating new AttributeMapping from job and fields...");
         attributes = new ArrayList<>();
         if (fields != null && !fields.isEmpty()) {
@@ -86,13 +88,13 @@ class AttributeMapping extends BaseMapping {
     }
 
     /**
-     * Creates a set of Attributes for the provided job and data store field information (for virtual assets).
+     * Creates a set of Attributes for the provided data store field information (for virtual assets).
      *
-     * @param job the job for which to create the Attributes
+     * @param cache used by this mapping
      * @param fields the data store fields containing detail for the Attributes
      */
-    AttributeMapping(DataStageJob job, List<Classificationenabledgroup> fields) {
-        this(job, fields, "");
+    AttributeMapping(DataStageCache cache, List<Classificationenabledgroup> fields) {
+        this(cache, fields, "");
     }
 
     /**

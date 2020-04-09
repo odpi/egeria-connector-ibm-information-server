@@ -5,7 +5,6 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -30,9 +29,7 @@ public class DataStageJob {
     private Map<String, Stage> stageMap;
     private Map<String, Link> linkMap;
     private Map<String, StageColumn> columnMap;
-    private Map<String, Classificationenabledgroup> fieldMap;
-    private Map<String, List<Classificationenabledgroup>> storeToFieldsMap;
-    private Map<String, Identity> storeToIdentityMap;
+    private Set<String> storesForJob;
     private List<String> inputStageRIDs;
     private List<String> outputStageRIDs;
 
@@ -43,20 +40,18 @@ public class DataStageJob {
     /**
      * Create a new detailed DataStage job object.
      *
-     * @param igcRestClient connectivity to the IGC environment
+     * @param cache cache and connectivity to the IGC environment
      * @param job the job for which to retrieve details
      */
-    public DataStageJob(IGCRestClient igcRestClient, Dsjob job) {
+    public DataStageJob(DataStageCache cache, Dsjob job) {
 
-        this.igcRestClient = igcRestClient;
+        this.igcRestClient = cache.getIgcRestClient();
         this.job = job;
         this.type = job.getType().equals("sequence_job") ? JobType.SEQUENCE : JobType.JOB;
-        this.stageMap = new HashMap<>();
-        this.linkMap = new HashMap<>();
-        this.columnMap = new HashMap<>();
-        this.fieldMap = new HashMap<>();
-        this.storeToFieldsMap = new HashMap<>();
-        this.storeToIdentityMap = new HashMap<>();
+        this.stageMap = new TreeMap<>();
+        this.linkMap = new TreeMap<>();
+        this.columnMap = new TreeMap<>();
+        this.storesForJob = new TreeSet<>();
         this.inputStageRIDs = new ArrayList<>();
         this.outputStageRIDs = new ArrayList<>();
 
@@ -66,16 +61,9 @@ public class DataStageJob {
         getLinkDetailsForJob();
         classifyStages(stageMap.values());
         getStageColumnDetailsForLinks();
-        classifyFields();
+        classifyFields(cache);
 
     }
-
-    /**
-     * Retrieve the IGC environment connectivity used to collect details for this job.
-     *
-     * @return IGCRestClient
-     */
-    public IGCRestClient getIgcRestClient() { return igcRestClient; }
 
     /**
      * Retrieve the type of job represented by this instance.
@@ -136,37 +124,12 @@ public class DataStageJob {
     public Dsjob getJobObject() { return job; }
 
     /**
-     * Retrieve the qualifiedName for the provided data store RID, or null if it cannot be found.
-     *
-     * @param rid the data store RID for which to retrieve a qualifiedName
-     * @return String
-     */
-    public String getQualifiedNameFromStoreRid(String rid) {
-        Identity storeIdentity = getStoreIdentityFromRid(rid);
-        String qualifiedName = null;
-        if (storeIdentity != null) {
-            qualifiedName = storeIdentity.toString();
-        }
-        return qualifiedName;
-    }
-
-    /**
-     * Retrieve the store identity for the provided data store RID, or null if it cannot be found.
-     *
-     * @param rid the data store RID for which to retrieve an identity
-     * @return Identity
-     */
-    public Identity getStoreIdentityFromRid(String rid) {
-        return storeToIdentityMap.getOrDefault(rid, null);
-    }
-
-    /**
      * Retrieve the set of data store RIDs that are used by this job.
      *
      * @return {@code Set<String>}
      */
     public Set<String> getStoreRids() {
-        return storeToIdentityMap.keySet();
+        return new TreeSet<>(storesForJob);
     }
 
     /**
@@ -189,51 +152,6 @@ public class DataStageJob {
     public StageColumn getStageColumnByRid(String rid) {
         log.debug("Looking up cached stage column: {}", rid);
         return columnMap.getOrDefault(rid, null);
-    }
-
-    /**
-     * Retrieve the complete data store field ('data_file_field' or 'database_column') based on its RID.
-     *
-     * @param rid the RID of the data store field object
-     * @return Classificationenabledgroup
-     */
-    public Classificationenabledgroup getDataStoreFieldByRid(String rid) {
-        log.debug("Looking up cached data store field: {}", rid);
-        return fieldMap.getOrDefault(rid, null);
-    }
-
-    /**
-     * Retrieve the list of data store fields for the provided data store ('database_table', 'view', or 'data_file_record') RID.
-     *
-     * @param rid the RID of the data store
-     * @return {@code List<Classificationenabledgroup>}
-     */
-    public List<Classificationenabledgroup> getFieldsForStore(String rid) {
-        return storeToFieldsMap.getOrDefault(rid, null);
-    }
-
-    /**
-     * Lookup a DataStage job based on the provided Repository ID (RID) of the job.
-     *
-     * @param igcRestClient connectivity to the IGC environment
-     * @param rid the RID of the job to lookup
-     * @return DataStageJob if found, otherwise null
-     */
-    public static DataStageJob lookupJobByRid(IGCRestClient igcRestClient, String rid) {
-        IGCSearch igcSearch = new IGCSearch("dsjob");
-        igcSearch.addProperties(DataStageConstants.getJobSearchProperties());
-        IGCSearchCondition byRid = new IGCSearchCondition("_id", "=", rid);
-        IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(byRid);
-        log.info(" ... searching for job by RID: {}", rid);
-        igcSearch.addConditions(conditionSet);
-        ItemList<Dsjob> results = igcRestClient.search(igcSearch);
-        if (results != null) {
-            List<Dsjob> resultsList = results.getItems();
-            if (resultsList != null && !resultsList.isEmpty()) {
-                return new DataStageJob(igcRestClient, resultsList.get(0));
-            }
-        }
-        return null;
     }
 
     /**
@@ -308,54 +226,32 @@ public class DataStageJob {
     /**
      * Retrieve a listing of all of the data assets (to field-level granularity) this particular DataStage job reads
      * from or writes to.
+     *
+     * @param cache cache and connectivity to IGC environment
      */
-    private void classifyFields() {
-
-        Map<String, List<Classificationenabledgroup>> dataStoreDetailsMap = new HashMap<>();
+    private void classifyFields(DataStageCache cache) {
         if (!getType().equals(JobType.SEQUENCE)) {
-            mapDataStoreDetailsForJob("reads_from_(design)", job.getReadsFromDesign(), dataStoreDetailsMap);
-            mapDataStoreDetailsForJob("writes_to_(design)", job.getWritesToDesign(), dataStoreDetailsMap);
-        }
-
-        // Flatten the list of data store details
-        List<Classificationenabledgroup> dataStoreDetails = new ArrayList<>();
-        for (List<Classificationenabledgroup> referenceList : dataStoreDetailsMap.values()) {
-            dataStoreDetails.addAll(referenceList);
-        }
-
-        for (Classificationenabledgroup candidateField : dataStoreDetails) {
-            String rid = candidateField.getId();
-            fieldMap.put(rid, candidateField);
-            Identity storeIdentity = candidateField.getIdentity(igcRestClient).getParentIdentity();
-            String storeId = storeIdentity.getRid();
-            storeToIdentityMap.put(storeId, storeIdentity);
-            if (!storeToFieldsMap.containsKey(storeId)) {
-                storeToFieldsMap.put(storeId, new ArrayList<>());
-            }
-            storeToFieldsMap.get(storeId).add(candidateField);
+            mapDataStoreDetailsForJob(cache, "reads_from_(design)", job.getReadsFromDesign());
+            mapDataStoreDetailsForJob(cache, "writes_to_(design)", job.getWritesToDesign());
         }
     }
 
     /**
      * Map the data store details used by the job into the provided map.
      *
+     * @param cache cache and connectivity to IGC environment
      * @param propertyName the name of the property from which the candidates were retrieved
      * @param candidates the list of candidate data store details to cache
-     * @param dataStoreDetailsMap the map into which to place the results
      */
-    private void mapDataStoreDetailsForJob(String propertyName,
-                                           ItemList<InformationAsset> candidates,
-                                           Map<String, List<Classificationenabledgroup>> dataStoreDetailsMap) {
+    private void mapDataStoreDetailsForJob(DataStageCache cache,
+                                           String propertyName,
+                                           ItemList<InformationAsset> candidates) {
         if (candidates != null) {
             List<InformationAsset> allCandidates = igcRestClient.getAllPages(propertyName, candidates);
             for (InformationAsset candidate : allCandidates) {
-                String candidateId = candidate.getId();
-                if (!dataStoreDetailsMap.containsKey(candidateId)) {
-                    List<Classificationenabledgroup> fields = DataStageDataAsset.getDataFieldsForStore(igcRestClient, candidate);
-                    if (fields != null) {
-                        dataStoreDetailsMap.put(candidateId, fields);
-                    }
-                }
+                String storeId = candidate.getId();
+                storesForJob.add(storeId);
+                cache.getFieldsForStore(candidate);
             }
         }
     }

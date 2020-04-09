@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -19,28 +20,34 @@ import java.util.stream.Stream;
  */
 public class ProcessMapping extends BaseMapping {
 
-    private static final Logger log = LoggerFactory.getLogger(ProcessMapping.class);
-
     private Process process;
 
     /**
-     * Create a new process from a DataStageJob.
+     * Create a new process from a DataStageJob that represents either a job or a sequence.
      *
-     * @param job the DataStageJob from which to create a process
+     * @param cache used by this mapping
+     * @param job the job or sequence from which to create a process
      */
-    public ProcessMapping(DataStageJob job) {
-        super(job.getIgcRestClient());
+    public ProcessMapping(DataStageCache cache, DataStageJob job) {
+        super(cache);
         process = null;
-        if (job.getType().equals(DataStageJob.JobType.JOB)) {
+        if (job.getType().equals(DataStageJob.JobType.SEQUENCE)) {
             Dsjob jobObj = job.getJobObject();
             process = getSkeletonProcess(jobObj);
             if (process != null) {
-                PortAliasMapping inputAliasMapping = new PortAliasMapping(job, job.getInputStages(), PortType.INPUT_PORT);
-                PortAliasMapping outputAliasMapping = new PortAliasMapping(job, job.getOutputStages(), PortType.OUTPUT_PORT);
+                PortAliasMapping portAliasMapping = new PortAliasMapping(cache, job);
+                process.setPortAliases(portAliasMapping.getPortAliases());
+            }
+        } else {
+            Dsjob jobObj = job.getJobObject();
+            process = getSkeletonProcess(jobObj);
+            if (process != null) {
+                PortAliasMapping inputAliasMapping = new PortAliasMapping(cache, job, job.getInputStages(), PortType.INPUT_PORT);
+                PortAliasMapping outputAliasMapping = new PortAliasMapping(cache, job, job.getOutputStages(), PortType.OUTPUT_PORT);
                 process.setPortAliases(Stream.concat(inputAliasMapping.getPortAliases().stream(), outputAliasMapping.getPortAliases().stream()).collect(Collectors.toList()));
                 Set<LineageMapping> lineageMappings = new HashSet<>();
                 for (Link link : job.getAllLinks()) {
-                    LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, link);
+                    LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, link);
                     Set<LineageMapping> crossStageLineageMappings = lineageMappingMapping.getLineageMappings();
                     if (crossStageLineageMappings != null && !crossStageLineageMappings.isEmpty()) {
                         lineageMappings.addAll(crossStageLineageMappings);
@@ -67,40 +74,18 @@ public class ProcessMapping extends BaseMapping {
                     }
                 }
             }
-        } else {
-            log.error("Unable to create a job mapping for a sequence: {}", job);
-        }
-    }
-
-    /**
-     * Create a new process from a DataStageJob that represents a sequence.
-     *
-     * @param sequence the sequence from which to create a process
-     * @param jobProcessByRid a map from job RID to the full Process for that job
-     */
-    public ProcessMapping(DataStageJob sequence, Map<String, Process> jobProcessByRid) {
-        super(sequence.getIgcRestClient());
-        process = null;
-        if (sequence.getType().equals(DataStageJob.JobType.SEQUENCE)) {
-            Dsjob jobObj = sequence.getJobObject();
-            process = getSkeletonProcess(jobObj);
-            if (process != null) {
-                PortAliasMapping portAliasMapping = new PortAliasMapping(sequence, jobProcessByRid);
-                process.setPortAliases(portAliasMapping.getPortAliases());
-            }
-        } else {
-            log.error("Unable to create a sequence mapping for a job: {}", sequence);
         }
     }
 
     /**
      * Create a new process from the provided DataStage stage.
      *
+     * @param cache used by this mapping
      * @param job the job within which the stage exists
      * @param stage the stage from which to create a process
      */
-    public ProcessMapping(DataStageJob job, Stage stage) {
-        super(job.getIgcRestClient());
+    public ProcessMapping(DataStageCache cache, DataStageJob job, Stage stage) {
+        super(cache);
         process = getSkeletonProcess(stage);
         if (process != null) {
             Set<PortImplementation> portImplementations = new HashSet<>();
@@ -172,9 +157,9 @@ public class ProcessMapping extends BaseMapping {
         List<Link> allLinks = igcRestClient.getAllPages(propertyName, links);
         for (Link linkRef : allLinks) {
             Link linkObjFull = job.getLinkByRid(linkRef.getId());
-            PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, linkObjFull, portType, stageNameSuffix);
+            PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, job, linkObjFull, portType, stageNameSuffix);
             portImplementations.add(portImplementationMapping.getPortImplementation());
-            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, linkObjFull, stageNameSuffix, portType == PortType.INPUT_PORT);
+            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, linkObjFull, stageNameSuffix, portType == PortType.INPUT_PORT);
             lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
         }
     }
@@ -203,10 +188,10 @@ public class ProcessMapping extends BaseMapping {
         String fullyQualifiedStageName = getFullyQualifiedName(stage);
         List<InformationAsset> allStores = igcRestClient.getAllPages(propertyName, stores);
         for (InformationAsset storeRef : allStores) {
-            List<Classificationenabledgroup> fieldsForStore = job.getFieldsForStore(storeRef.getId());
-            PortImplementationMapping portImplementationMapping = new PortImplementationMapping(job, stage, portType, fieldsForStore, fullyQualifiedStageName);
+            List<Classificationenabledgroup> fieldsForStore = cache.getFieldsForStore(storeRef);
+            PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, stage, portType, fieldsForStore, fullyQualifiedStageName);
             portImplementations.add(portImplementationMapping.getPortImplementation());
-            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(job, fieldsForStore, portType == PortType.INPUT_PORT, fullyQualifiedStageName, stageNameSuffix);
+            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, fieldsForStore, portType.equals(PortType.INPUT_PORT), fullyQualifiedStageName, stageNameSuffix);
             lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
         }
     }

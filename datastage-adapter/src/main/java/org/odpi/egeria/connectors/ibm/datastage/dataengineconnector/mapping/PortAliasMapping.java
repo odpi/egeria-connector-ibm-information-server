@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Dsjob;
@@ -25,21 +26,22 @@ class PortAliasMapping extends BaseMapping {
 
     private Set<PortAlias> portAliases;
 
-    private PortAliasMapping(IGCRestClient igcRestClient) {
-        super(igcRestClient);
+    private PortAliasMapping(DataStageCache cache) {
+        super(cache);
         portAliases = new HashSet<>();
     }
 
     /**
      * Create a list of PortAliases from the provided job and stage information.
      *
+     * @param cache used by this mapping
      * @param job the job for which to create PortAliases
      * @param stages the stages from which to create PortAliases
      * @param portType the type of port to map (input or output)
      */
-    PortAliasMapping(DataStageJob job, List<Stage> stages, PortType portType) {
+    PortAliasMapping(DataStageCache cache, DataStageJob job, List<Stage> stages, PortType portType) {
 
-        this(job.getIgcRestClient());
+        this(cache);
 
         for (Stage stage : stages) {
             if (portType.equals(PortType.INPUT_PORT)) {
@@ -54,12 +56,12 @@ class PortAliasMapping extends BaseMapping {
     /**
      * Create a list of PortAliases from the provided sequence job.
      *
+     * @param cache used by this mapping
      * @param sequence the sequence for which to create PortAliases
-     * @param jobProcessByRid a map from job RID to the full Process for that job
      */
-    PortAliasMapping(DataStageJob sequence, Map<String, Process> jobProcessByRid) {
+    PortAliasMapping(DataStageCache cache, DataStageJob sequence) {
 
-        this(sequence.getIgcRestClient());
+        this(cache);
 
         if (sequence.getType().equals(DataStageJob.JobType.SEQUENCE)) {
             for (Stage stage : sequence.getAllStages()) {
@@ -67,25 +69,8 @@ class PortAliasMapping extends BaseMapping {
                 if (runsJob != null) {
                     String jobId = runsJob.getId();
                     if (jobId != null) {
-                        Process jobProcess = jobProcessByRid.getOrDefault(jobId, null);
-                        if (jobProcess == null) {
-                            // If it was not in our cache (eg. because it has not changed), we need to retrieve it
-                            // and add it to the cache
-                            DataStageJob lookup = DataStageJob.lookupJobByRid(igcRestClient, jobId);
-                            if (lookup != null) {
-                                DataStageJob.JobType type = lookup.getType();
-                                ProcessMapping processMapping;
-                                if (type.equals(DataStageJob.JobType.JOB)) {
-                                    processMapping = new ProcessMapping(lookup);
-                                } else {
-                                    processMapping = new ProcessMapping(lookup, jobProcessByRid);
-                                }
-                                jobProcess = processMapping.getProcess();
-                                if (jobProcess != null) {
-                                    jobProcessByRid.put(jobId, jobProcess);
-                                }
-                            }
-                        }
+                        Process jobProcess = cache.getProcessByRid(jobId);
+
                         if (jobProcess != null) {
                             List<PortAlias> jobPortAliases = jobProcess.getPortAliases();
                             // Create a new PortAlias at the sequence level, for each underlying PortAlias of jobs
@@ -124,7 +109,7 @@ class PortAliasMapping extends BaseMapping {
     private void addPortAliases(DataStageJob job, Stage stage, String propertyName, ItemList<InformationAsset> relations, PortType portType) {
         List<InformationAsset> allRelations = igcRestClient.getAllPages(propertyName, relations);
         for (InformationAsset relation : allRelations) {
-            String fullyQualifiedStoreName = job.getQualifiedNameFromStoreRid(relation.getId());
+            String fullyQualifiedStoreName = cache.getQualifiedNameFromStoreRid(relation.getId());
             String fullyQualifiedStageName = getFullyQualifiedName(stage);
             PortAlias portAlias = getSkeletonPortAlias(fullyQualifiedStageName, stage.getName());
             portAlias.setPortType(portType);
