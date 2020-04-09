@@ -40,35 +40,4 @@ class DataStageStage {
         return outputLinks != null && outputLinks.getPaging().getNumTotal() == 0;
     }
 
-    /**
-     * Populate the link details on the provided stage.
-     *
-     * @param igcRestClient connectivity to the IGC environment
-     * @param stage the stage for which to populate link details
-
-    private static void populateWithLinkDetails(IGCRestClient igcRestClient, Stage stage) {
-        IGCSearch igcSearch = new IGCSearch("stage");
-        igcSearch.addProperties(DataStageConstants.getLinkSearchProperties());
-        IGCSearchCondition byId = new IGCSearchCondition("_id", "=", stage.getId());
-        IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(byId);
-        igcSearch.addConditions(conditionSet);
-        ItemList<Stage> foundList = igcRestClient.search(igcSearch);
-        Stage found = null;
-        if (foundList != null && !foundList.getItems().isEmpty()) {
-            found = foundList.getItems().get(0);
-        }
-        if (found != null) {
-            ItemList<Link> inputs = found.getInputLinks();
-            inputs.getAllPages(igcRestClient);
-            ItemList<Link> outputs = found.getOutputLinks();
-            outputs.getAllPages(igcRestClient);
-            stage.setInputLinks(inputs);
-            stage.setOutputLinks(outputs);
-        } else {
-            stage.setInputLinks(new ItemList<>());
-            stage.setOutputLinks(new ItemList<>());
-        }
-    }
-     */
-
 }

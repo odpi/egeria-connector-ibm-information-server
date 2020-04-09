@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -27,13 +28,14 @@ class LineageMappingMapping extends BaseMapping {
      * - {@code STAGEB ( -> processing -> )}
      *   - {@code DSLink1_STAGEB to DSLink2_STAGEB (INPUT_PORT to OUTPUT_PORT)}
      *
+     * @param cache used by this mapping
      * @param job the job for which to create the LineageMappings
      * @param link the link for which to create the LineageMappings
      * @param stageNameSuffix the stage name for which to create the LineageMappings
      * @param bSource true if processing a source link, false if a target link
      */
-    LineageMappingMapping(DataStageJob job, Link link, String stageNameSuffix, boolean bSource) {
-        super(job.getIgcRestClient());
+    LineageMappingMapping(DataStageCache cache, DataStageJob job, Link link, String stageNameSuffix, boolean bSource) {
+        super(cache);
         lineageMappings = new HashSet<>();
         ItemList<DataItem> stageColumns = link.getStageColumns();
         List<DataItem> allStageColumns = igcRestClient.getAllPages("stage_columns", stageColumns);
@@ -71,11 +73,12 @@ class LineageMappingMapping extends BaseMapping {
      * - {@code STAGEB ( -> processing -> )}
      *   - {@code DSLink2_STAGEB to DSLink2_STAGEC (cross-process mapping)}
      *
+     * @param cache used by this mapping
      * @param job the job for which to create the LineageMappings
      * @param link the link for which to create the LineageMappings
      */
-    LineageMappingMapping(DataStageJob job, Link link) {
-        super(job.getIgcRestClient());
+    LineageMappingMapping(DataStageCache cache, DataStageJob job, Link link) {
+        super(cache);
         lineageMappings = new HashSet<>();
         // Despite the plural name, a link can only have one input and one output stage so these are singular
         Stage inputStage = link.getInputStages();
@@ -101,14 +104,15 @@ class LineageMappingMapping extends BaseMapping {
      *   - {@code DSLink2_STAGEC to StoreY_STAGEC (INPUT_PORT to OUTPUT_PORT)}
      *   - {@code StoreY_STAGEC to StoreY (OUTPUT_PORT to written_by_(design))}
      *
+     * @param cache used by this mapping
      * @param job the job for which to create the LineageMappings
      * @param fields list of IGC field objects (data_file_field or database_column)
      * @param bSource true if processing a source link, false if a target link
      * @param fullyQualifiedStageName the fully qualifiedName of the stage itself
      * @param stageNameSuffix the stage name for which to create the LineageMappings
      */
-    LineageMappingMapping(DataStageJob job, List<Classificationenabledgroup> fields, boolean bSource, String fullyQualifiedStageName, String stageNameSuffix) {
-        super(job.getIgcRestClient());
+    LineageMappingMapping(DataStageCache cache, DataStageJob job, List<Classificationenabledgroup> fields, boolean bSource, String fullyQualifiedStageName, String stageNameSuffix) {
+        super(cache);
         lineageMappings = new HashSet<>();
         // For each field in the data store...
         if (fields != null) {
