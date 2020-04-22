@@ -9,7 +9,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Defines the mapping to the OMRS "TabularSchemaType" entity.
  */
-public class TabularSchemaTypeMapper extends ComplexSchemaType_Mapper {
+public class TabularSchemaTypeMapper extends ComplexSchemaTypeMapper {
 
     private static class Singleton {
         private static final TabularSchemaTypeMapper INSTANCE = new TabularSchemaTypeMapper();

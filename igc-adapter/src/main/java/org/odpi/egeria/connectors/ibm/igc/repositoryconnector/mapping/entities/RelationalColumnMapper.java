@@ -10,7 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Defines the mapping to the OMRS "RelationalColumn" entity.
  */
-public class RelationalColumnMapper extends SchemaAttribute_Mapper {
+public class RelationalColumnMapper extends SchemaAttributeMapper {
 
     private static class Singleton {
         private static final RelationalColumnMapper INSTANCE = new RelationalColumnMapper();
@@ -28,17 +28,9 @@ public class RelationalColumnMapper extends SchemaAttribute_Mapper {
                 "RelationalColumn"
         );
 
-        // The list of properties that should be mapped
-        addSimplePropertyMapping("position", "position");
-        addSimplePropertyMapping("minimum_length", "minimumLength");
-        addSimplePropertyMapping("length", "length");
-        addSimplePropertyMapping("fraction", "fraction");
-        addSimplePropertyMapping("allows_null_values", "isNullable");
-        addSimplePropertyMapping("unique", "isUnique");
-        addSimplePropertyMapping("default_value", "defaultValueOverride");
-        addSimplePropertyMapping("type", "nativeClass");
-        addLiteralPropertyMapping("allowsDuplicateValues", null);
-        addLiteralPropertyMapping("orderedValues", null);
+        // Map these now-deprecated properties to null
+        addLiteralPropertyMapping("fraction", null);
+        addLiteralPropertyMapping("isUnique", null);
 
         // The list of relationships that should be mapped
         addRelationshipMapper(NestedSchemaAttributeMapper.getInstance(null));

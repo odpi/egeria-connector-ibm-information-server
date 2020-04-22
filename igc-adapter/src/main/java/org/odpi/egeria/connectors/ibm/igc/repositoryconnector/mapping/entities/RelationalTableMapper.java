@@ -10,7 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Defines the mapping to the OMRS "RelationalTable" entity.
  */
-public class RelationalTableMapper extends SchemaElement_Mapper {
+public class RelationalTableMapper extends SchemaElementMapper {
 
     private static class Singleton {
         private static final RelationalTableMapper INSTANCE = new RelationalTableMapper();
@@ -29,19 +29,24 @@ public class RelationalTableMapper extends SchemaElement_Mapper {
                 null
         );
 
-        // The list of properties that should be mapped
+        // The list of properties that should be mapped (these are all actually derived from SchemaAttribute)
         addLiteralPropertyMapping("position", null);
-        addLiteralPropertyMapping("minCardinality", 1);
-        addLiteralPropertyMapping("maxCardinality", 1);
-        addLiteralPropertyMapping("allowsDuplicateValues", null);
-        addLiteralPropertyMapping("orderedValues", null);
-        addLiteralPropertyMapping("defaultValueOverride", null);
         addLiteralPropertyMapping("nativeClass", null);
+        addLiteralPropertyMapping("defaultValueOverride", null);
+        addLiteralPropertyMapping("minimumLength", null);
+        addLiteralPropertyMapping("length", null);
+        addLiteralPropertyMapping("significantDigits", null);
+        addLiteralPropertyMapping("isNullable", null);
         addLiteralPropertyMapping("aliases", null);
         addLiteralPropertyMapping("sortOrder", null);
+        addLiteralPropertyMapping("orderedValues", null);
+        addLiteralPropertyMapping("maxCardinality", 1);
+        addLiteralPropertyMapping("minCardinality", 1);
+        addLiteralPropertyMapping("allowsDuplicateValues", null);
 
-        // Deprecated properties will be null'd
+        // Deprecated properties will be null'd (also from SchemaAttribute)
         addLiteralPropertyMapping("name", null);
+        addLiteralPropertyMapping("cardinality", null);
 
         // The list of relationships that should be mapped
         addRelationshipMapper(AttributeForSchemaMapper_TableSchema.getInstance(null));

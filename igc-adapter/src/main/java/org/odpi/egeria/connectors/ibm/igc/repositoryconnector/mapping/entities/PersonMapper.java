@@ -9,7 +9,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Defines the mapping to the OMRS "Person" entity.
  */
-public class PersonMapper extends ActorProfile_Mapper {
+public class PersonMapper extends ActorProfileMapper {
 
     private static class Singleton {
         private static final PersonMapper INSTANCE = new PersonMapper();
@@ -33,7 +33,6 @@ public class PersonMapper extends ActorProfile_Mapper {
         addSimplePropertyMapping("full_name", "fullName");
         addSimplePropertyMapping("job_title", "jobTitle");
         addLiteralPropertyMapping("isPublic", true);
-        addLiteralPropertyMapping("description", null);
 
         // The classes to use for mapping any relationships
         addRelationshipMapper(AttachedNoteLogMapper.getInstance(null));

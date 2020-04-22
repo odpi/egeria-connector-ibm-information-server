@@ -25,9 +25,12 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.stores.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.PrimitiveDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDef;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefPatch;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryValidator;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +95,28 @@ public class IGCRepositoryHelper {
     }
 
     /**
+     * Updates the type def stored for a particular mapping, using the provided TypeDefPatch.
+     *
+     * @param typeDefPatch to apply
+     * @return boolean false when unable to find any existing mapping to which the patch would apply
+     * @throws InvalidParameterException if the typeDefPatch is null
+     * @throws PatchErrorException if the patch is either badly formatted or does not apply to the defined type
+     */
+    boolean updateEntityMapping(TypeDefPatch typeDefPatch) throws InvalidParameterException, PatchErrorException {
+        return entityMappingStore.updateMapping(typeDefPatch);
+    }
+
+    /**
+     * Retrieves the entity TypeDef by its guid, or null if the typedef is not mapped.
+     *
+     * @param guid of the typedef to retrieve
+     * @return TypeDef
+     */
+    TypeDef getEntityTypeDefByGUID(String guid) {
+        return entityMappingStore.getTypeDefByGUID(guid);
+    }
+
+    /**
      * Adds a classification mapping for the provided TypeDef, using the provided Java class for the mapping.
      *
      * @param omrsTypeDef the OMRS TypeDef
@@ -103,6 +128,28 @@ public class IGCRepositoryHelper {
     }
 
     /**
+     * Updates the type def stored for a particular mapping, using the provided TypeDefPatch.
+     *
+     * @param typeDefPatch to apply
+     * @return boolean false when unable to find any existing mapping to which the patch would apply
+     * @throws InvalidParameterException if the typeDefPatch is null
+     * @throws PatchErrorException if the patch is either badly formatted or does not apply to the defined type
+     */
+    boolean updateClassificationMapping(TypeDefPatch typeDefPatch) throws InvalidParameterException, PatchErrorException {
+        return classificationMappingStore.updateMapping(typeDefPatch);
+    }
+
+    /**
+     * Retrieves the classification TypeDef by its guid, or null if the typedef is not mapped.
+     *
+     * @param guid of the typedef to retrieve
+     * @return TypeDef
+     */
+    TypeDef getClassificationTypeDefByGUID(String guid) {
+        return classificationMappingStore.getTypeDefByGUID(guid);
+    }
+
+    /**
      * Adds a relationship mapping for the provided TypeDef, using the provided Java class for the mapping.
      *
      * @param omrsTypeDef the OMRS TypeDef
@@ -111,6 +158,28 @@ public class IGCRepositoryHelper {
      */
     boolean addRelationshipMapping(TypeDef omrsTypeDef, Class mappingClass) {
         return relationshipMappingStore.addMapping(omrsTypeDef, mappingClass);
+    }
+
+    /**
+     * Updates the type def stored for a particular mapping, using the provided TypeDefPatch.
+     *
+     * @param typeDefPatch to apply
+     * @return boolean false when unable to find any existing mapping to which the patch would apply
+     * @throws InvalidParameterException if the typeDefPatch is null
+     * @throws PatchErrorException if the patch is either badly formatted or does not apply to the defined type
+     */
+    boolean updateRelationshipMapping(TypeDefPatch typeDefPatch) throws InvalidParameterException, PatchErrorException {
+        return relationshipMappingStore.updateMapping(typeDefPatch);
+    }
+
+    /**
+     * Retrieves the relationship TypeDef by its guid, or null if the typedef is not mapped.
+     *
+     * @param guid of the typedef to retrieve
+     * @return TypeDef
+     */
+    TypeDef getRelationshipTypeDefByGUID(String guid) {
+        return relationshipMappingStore.getTypeDefByGUID(guid);
     }
 
     /**
@@ -295,43 +364,45 @@ public class IGCRepositoryHelper {
      * @param entityDetails the list of results to append into
      * @param userId unique identifier for requesting user
      * @param entityTypeGUID the GUID of the entity type that was requested as part of the search (or null for all)
-     * @param matchProperties Optional list of entity properties to match (where any String property's value should
-     *                        be defined as a Java regular expression, even if it should be an exact match).
-     * @param matchCriteria Enum defining how the properties should be matched to the entities in the repository.
+     * @param entitySubtypeGUIDs optional list of GUIDs of subtypes by which to further limit results
+     * @param matchProperties Optional list of property-based conditions to match.
      * @param fromEntityElement the starting element number of the entities to return.
      *                                This is used when retrieving elements
      *                                beyond the first page of results. Zero means start from the first element.
-     * @param limitResultsByClassification List of classifications that must be present on all returned entities.
+     * @param matchClassifications optional list of classification-based conditions to match.
      * @param sequencingProperty String name of the entity property that is to be used to sequence the results.
      *                           Null means do not sequence on a property name (see SequencingOrder).
      * @param sequencingOrder Enum defining how the results should be ordered.
      * @param pageSize the maximum number of result entities that can be returned on this request.  Zero means
      *                 unrestricted return results size.
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
-     * @throws RepositoryErrorException
+     * @throws RepositoryErrorException on any other error
      */
     void processResultsForMapping(EntityMapping mapping,
                                   List<EntityDetail> entityDetails,
                                   String userId,
                                   String entityTypeGUID,
-                                  InstanceProperties matchProperties,
-                                  MatchCriteria matchCriteria,
+                                  List<String> entitySubtypeGUIDs,
+                                  SearchProperties matchProperties,
                                   int fromEntityElement,
-                                  List<String> limitResultsByClassification,
+                                  SearchClassifications matchClassifications,
                                   String sequencingProperty,
                                   SequencingOrder sequencingOrder,
-                                  int pageSize)
-            throws FunctionNotSupportedException, RepositoryErrorException {
+                                  int pageSize) throws
+            FunctionNotSupportedException,
+            RepositoryErrorException {
 
         final String methodName = "processResultsForMapping";
+
+        IGCOMRSMetadataCollection igcomrsMetadataCollection = (IGCOMRSMetadataCollection)igcomrsRepositoryConnector.getMetadataCollection();
 
         String igcAssetType = mapping.getIgcAssetType();
         IGCSearchConditionSet classificationLimiters = getSearchCriteriaForClassifications(
                 igcAssetType,
-                limitResultsByClassification
+                matchClassifications
         );
 
-        if (limitResultsByClassification != null && !limitResultsByClassification.isEmpty() && classificationLimiters == null) {
+        if (matchClassifications != null && !matchClassifications.getConditions().isEmpty() && classificationLimiters == null) {
             log.info("Classification limiters were specified, but none apply to the asset type {}, so excluding this asset type from search.", igcAssetType);
         } else {
 
@@ -342,35 +413,21 @@ public class IGCRepositoryHelper {
              * based on the values of the InstanceProperties provided */
             IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
+            MatchCriteria outerMatchCriteria = matchProperties.getMatchCriteria();
             IGCRepositoryHelper.addTypeSpecificConditions(mapping,
-                    matchCriteria,
+                    outerMatchCriteria,
                     matchProperties,
                     igcSearchConditionSet);
 
             String qualifiedNameRegex = null;
 
-            InstanceMapping.SearchFilter filter = mapping.getAllNoneOrSome(matchProperties, matchCriteria);
+            InstanceMapping.SearchFilter filter = mapping.getAllNoneOrSome(matchProperties);
 
             if (filter.equals(InstanceMapping.SearchFilter.NONE)) {
                 igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
             } else if (filter.equals(InstanceMapping.SearchFilter.SOME)) {
                 // Otherwise, cycle through the mappings and add them
-                Map<String, InstancePropertyValue> propertiesToMatch = matchProperties.getInstanceProperties();
-                if (propertiesToMatch != null) {
-                    for (Map.Entry<String, InstancePropertyValue> entry : propertiesToMatch.entrySet()) {
-                        String omrsPropertyName = entry.getKey();
-                        InstancePropertyValue value = entry.getValue();
-                        if (omrsPropertyName.equals("qualifiedName")) {
-                            qualifiedNameRegex = (String) ((PrimitivePropertyValue) value).getPrimitiveValue();
-                        }
-                        addSearchConditionFromValue(
-                                igcSearchConditionSet,
-                                omrsPropertyName,
-                                mapping,
-                                value
-                        );
-                    }
-                }
+                qualifiedNameRegex = addAllConditions(igcSearchConditionSet, matchProperties, mapping);
             } else {
                 log.debug("Skipping detailed matchProperties iteration, as we should return all types based on criteria and literal mappings.");
             }
@@ -386,8 +443,6 @@ public class IGCRepositoryHelper {
                 if (sequencingProperty == null && sequencingOrder != null) {
                     igcSearchSorting = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
                 }
-
-                IGCRepositoryHelper.setConditionsFromMatchCriteria(igcSearchConditionSet, matchCriteria);
 
                 igcSearch.addProperties(mapping.getAllPropertiesForEntityDetail(igcRestClient, igcAssetType));
                 igcSearch.addConditions(igcSearchConditionSet);
@@ -428,13 +483,26 @@ public class IGCRepositoryHelper {
                     log.debug("Include result for name '{}' and prefix '{}'? {}", unqualifiedName, prefix, includeResult);
                 }
 
+                // And finally, ensure that the requested type matches at least one of the types in the subtype filter
+                // (if it is non-null)
+                if (entitySubtypeGUIDs != null) {
+                    includeResult = false;
+                    String omrsTypeName = mapping.getOmrsTypeDefName();
+                    for (String subtypeGUID : entitySubtypeGUIDs) {
+                        TypeDef subtype = igcomrsMetadataCollection.getAnyTypeDefByGUID(subtypeGUID);
+                        if (subtype != null && repositoryHelper.isTypeOf(metadataCollectionId, omrsTypeName, subtype.getName())) {
+                            includeResult = true;
+                            break;
+                        }
+                    }
+                }
+
                 if (includeResult) {
                     processResults(
                             mapping,
                             this.igcRestClient.search(igcSearch),
                             entityDetails,
                             matchProperties,
-                            matchCriteria,
                             null,
                             pageSize,
                             userId
@@ -442,6 +510,45 @@ public class IGCRepositoryHelper {
                 }
             }
         }
+    }
+
+    private String addAllConditions(IGCSearchConditionSet igcSearchConditionSet,
+                                    SearchProperties matchProperties,
+                                    EntityMapping mapping) throws FunctionNotSupportedException {
+        String qualifiedNameRegex = null;
+        List<PropertyCondition> conditionsToMatch = matchProperties.getConditions();
+        if (conditionsToMatch != null) {
+            for (PropertyCondition condition : conditionsToMatch) {
+                SearchProperties nestedConditions = condition.getNestedConditions();
+                if (nestedConditions != null) {
+                    IGCSearchConditionSet nestedSet = new IGCSearchConditionSet();
+                    // TODO: how to handle the fact that 'qualifiedName' can now appear across multiple conditions?
+                    String qname = addAllConditions(nestedSet, nestedConditions, mapping);
+                    igcSearchConditionSet.addNestedConditionSet(nestedSet);
+                    if (qname != null) {
+                        qualifiedNameRegex = qname;
+                    }
+                } else {
+                    String omrsPropertyName = condition.getProperty();
+                    PropertyComparisonOperator operator = condition.getOperator();
+                    InstancePropertyValue value = condition.getValue();
+                    if (omrsPropertyName.equals("qualifiedName")) {
+                        // TODO: how to handle the fact that 'qualifiedName' can now appear across multiple
+                        //  conditions?
+                        qualifiedNameRegex = value.valueAsString();
+                    }
+                    addSearchCondition(
+                            igcSearchConditionSet,
+                            omrsPropertyName,
+                            operator,
+                            value,
+                            mapping
+                    );
+                }
+            }
+            setConditionsFromMatchCriteria(igcSearchConditionSet, matchProperties.getMatchCriteria());
+        }
+        return qualifiedNameRegex;
     }
 
     /**
@@ -490,7 +597,6 @@ public class IGCRepositoryHelper {
      * @param results the IGC search results
      * @param entityDetails the list of EntityDetails to append
      * @param matchProperties the set of properties that should be matched (or null if none)
-     * @param matchCriteria the criteria by which the properties should be matched (or null if none)
      * @param searchCriteria the string search criteria that should be matched (or null if none)
      * @param pageSize the number of results per page (0 for all results)
      * @param userId the user making the request
@@ -498,8 +604,7 @@ public class IGCRepositoryHelper {
     void processResults(EntityMapping mapper,
                         ItemList<Reference> results,
                         List<EntityDetail> entityDetails,
-                        InstanceProperties matchProperties,
-                        MatchCriteria matchCriteria,
+                        SearchProperties matchProperties,
                         String searchCriteria,
                         int pageSize,
                         String userId) throws RepositoryErrorException {
@@ -509,7 +614,6 @@ public class IGCRepositoryHelper {
             List<Reference> allPages = igcRestClient.getAllPages(null, results);
             results.setAllPages(allPages);
         }
-
         for (Reference reference : results.getItems()) {
             /* Only proceed with retrieving the EntityDetail if the type from IGC is not explicitly
              * a 'main_object' (as these are non-API-accessible asset types in IGC like column analysis master,
@@ -531,7 +635,7 @@ public class IGCRepositoryHelper {
                 } catch (EntityNotKnownException e) {
                     log.error("Unable to find entity: {}", idToLookup, e);
                 }
-                if (ed != null && includeResult(ed, matchProperties, matchCriteria, searchCriteria)) {
+                if (ed != null && includeResult(ed, matchProperties, searchCriteria)) {
                     entityDetails.add(ed);
                     // Stop adding details if we have hit the page size
                     if (pageSize > 0 && entityDetails.size() == pageSize) {
@@ -544,7 +648,7 @@ public class IGCRepositoryHelper {
         // If we haven't filled a page of results (because we needed to skip some above), recurse...
         if (results.hasMorePages() && entityDetails.size() < pageSize) {
             ItemList<Reference> nextPage = igcRestClient.getNextPage(null, results);
-            processResults(mapper, nextPage, entityDetails, matchProperties, matchCriteria, searchCriteria, pageSize, userId);
+            processResults(mapper, nextPage, entityDetails, matchProperties, searchCriteria, pageSize, userId);
         }
 
     }
@@ -688,28 +792,32 @@ public class IGCRepositoryHelper {
      *
      * @param ed the EntityDetail to check
      * @param matchProperties the set of match properties against which to check (or null if none)
-     * @param matchCriteria the criteria by which to check the properties (or null if none)
      * @param searchCriteria the single string-based property to match against (or null if none)
      * @return boolean
      */
     private boolean includeResult(EntityDetail ed,
-                                  InstanceProperties matchProperties,
-                                  MatchCriteria matchCriteria,
+                                  SearchProperties matchProperties,
                                   String searchCriteria) {
-
         if (matchProperties != null) {
-            Map<String, InstancePropertyValue> propertiesToMatch = matchProperties.getInstanceProperties();
+            MatchCriteria matchCriteria = matchProperties.getMatchCriteria();
+            List<PropertyCondition> conditions = matchProperties.getConditions();
             InstanceProperties edProperties = ed.getProperties();
             if (edProperties == null) {
                 edProperties = new InstanceProperties();
             }
-            if (propertiesToMatch != null) {
-
-                for (Map.Entry<String, InstancePropertyValue> toMatch : propertiesToMatch.entrySet()) {
-                    String propertyName = toMatch.getKey();
-                    InstancePropertyValue valueToMatch = toMatch.getValue();
-                    InstancePropertyValue edValue = edProperties.getPropertyValue(propertyName);
-                    boolean bValuesMatch = valuesMatch(valueToMatch, edValue);
+            if (conditions != null) {
+                for (PropertyCondition conditionToMatch : conditions) {
+                    boolean bValuesMatch;
+                    SearchProperties nestedConditions = conditionToMatch.getNestedConditions();
+                    if (nestedConditions != null) {
+                        bValuesMatch = includeResult(ed, nestedConditions, searchCriteria);
+                    } else {
+                        String propertyName = conditionToMatch.getProperty();
+                        PropertyComparisonOperator operator = conditionToMatch.getOperator();
+                        InstancePropertyValue valueToMatch = conditionToMatch.getValue();
+                        InstancePropertyValue edValue = edProperties.getPropertyValue(propertyName);
+                        bValuesMatch = valuesMatch(valueToMatch, operator, edValue);
+                    }
                     if (matchCriteria.equals(MatchCriteria.ANY) && bValuesMatch) {
                         // If we just need to match one of the criteria and the values match, immediately return true
                         return true;
@@ -724,7 +832,6 @@ public class IGCRepositoryHelper {
                 // If we manage to get through the loop above without returning, we must have matched successfully
                 // if we were either matching everything or nothing
                 return !matchCriteria.equals(MatchCriteria.ANY);
-
             }
             // If there were no properties defined to match (empty list), then return true
             return true;
@@ -758,36 +865,79 @@ public class IGCRepositoryHelper {
      * but also cases where one of the values could contain a regular expression and the other needs to be matched
      * against it.
      *
-     * @param valueWithPossibleRegex the value that could include a regular expression
-     * @param valueToCheck the value to check against the first value
+     * @param valueRequested the value that was requested by the search
+     * @param operator the comparison to apply
+     * @param valueToCheck the actual value on the instance, to check against the first value
      * @return boolean
      */
-    private boolean valuesMatch(InstancePropertyValue valueWithPossibleRegex,
+    private boolean valuesMatch(InstancePropertyValue valueRequested,
+                                PropertyComparisonOperator operator,
                                 InstancePropertyValue valueToCheck) {
 
-        if (valueWithPossibleRegex == null && valueToCheck == null) {
-            return true;
-        }
-        if (valueWithPossibleRegex != null && valueToCheck == null) {
-            return false;
-        }
-        if (valueWithPossibleRegex == null) {
-            return false;
+        if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
+            return valueToCheck == null || valueToCheck.valueAsObject() == null;
+        } else if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+            if (valueToCheck == null) {
+                return false;
+            } else {
+                return valueToCheck.valueAsObject() != null;
+            }
         }
 
-        // At this point, both values must be non-null
+        OMRSRepositoryValidator repositoryValidator = igcomrsRepositoryConnector.getRepositoryValidator();
+        BigDecimal requestAsNumber = repositoryValidator.getNumericRepresentation(valueRequested);
+        BigDecimal valueAsNumber = repositoryValidator.getNumericRepresentation(valueToCheck);
 
-        // If the value we are checking against is a primitive and a string, we should treat it as a regular expression
-        if (valueWithPossibleRegex.getInstancePropertyCategory().equals(InstancePropertyCategory.PRIMITIVE)
-            && ((PrimitivePropertyValue) valueWithPossibleRegex).getPrimitiveDefCategory().equals(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_STRING)) {
-            String searchCriteria = valueWithPossibleRegex.valueAsString();
-            Pattern pattern = Pattern.compile(searchCriteria);
-            Matcher matcher = pattern.matcher(valueToCheck.valueAsString());
-            return matcher.matches();
-        } else {
-            // Otherwise, we just check their values for equality directly
-            return valueWithPossibleRegex.equals(valueToCheck);
+        // At this point, there should be a non-null requested value
+        switch (operator) {
+            case EQ:
+                return valueRequested.equals(valueToCheck);
+            case NEQ:
+                return !valueRequested.equals(valueToCheck);
+            case GTE:
+                if (requestAsNumber != null && valueAsNumber != null) {
+                    return valueAsNumber.compareTo(requestAsNumber) >= 0;
+                }
+            case GT:
+                if (requestAsNumber != null && valueAsNumber != null) {
+                    return valueAsNumber.compareTo(requestAsNumber) > 0;
+                }
+            case LTE:
+                if (requestAsNumber != null && valueAsNumber != null) {
+                    return valueAsNumber.compareTo(requestAsNumber) <= 0;
+                }
+            case LT:
+                if (requestAsNumber != null && valueAsNumber != null) {
+                    return valueAsNumber.compareTo(requestAsNumber) < 0;
+                }
+            case LIKE:
+                if (valueToCheck == null) {
+                    return false;
+                } else {
+                    return valueToCheck.valueAsString().matches(valueRequested.valueAsString());
+                }
+            case IN:
+                if (valueRequested instanceof ArrayPropertyValue) {
+                    ArrayPropertyValue apv = (ArrayPropertyValue) valueRequested;
+                    InstanceProperties ip = apv.getArrayValues();
+                    Map<String, InstancePropertyValue> map = ip.getInstanceProperties();
+                    for (InstancePropertyValue valueCandidate : map.values()) {
+                        if (valueCandidate.equals(valueToCheck)) {
+                            // Short-circuit out the moment we find a matching value in the array
+                            return true;
+                        }
+                    }
+                } else {
+                    // If the IN operator was used against a non-array value this was an invalid search, so terminate it
+                    return false;
+                }
+            default:
+                // do nothing...
+                break;
         }
+
+        // If we managed to get through all of the conditions above, default to a non-match
+        return false;
 
     }
 
@@ -849,18 +999,19 @@ public class IGCRepositoryHelper {
      * provided classification cannot be applied to the provided IGC asset type.
      *
      * @param igcAssetType name of the IGC asset type for which to limit the search results
-     * @param classificationName name of the classification by which to limit results
+     * @param condition classification-based condition by which to limit results
      * @return IGCSearchConditionSet
      * @throws FunctionNotSupportedException when a regular expression is provided that is not supported
      */
     private IGCSearchConditionSet getSearchCriteriaForClassification(String igcAssetType,
-                                                                     String classificationName) throws FunctionNotSupportedException {
+                                                                     ClassificationCondition condition) throws FunctionNotSupportedException {
 
         IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
+        String classificationName = condition.getName();
         ClassificationMapping classificationMapping = classificationMappingStore.getMappingByTypes(classificationName, igcAssetType);
         if (classificationMapping != null) {
-            igcSearchConditionSet = classificationMapping.getIGCSearchCriteria(repositoryHelper, repositoryName, null);
+            igcSearchConditionSet = classificationMapping.getIGCSearchCriteria(repositoryHelper, repositoryName, condition.getMatchProperties());
         } else {
             log.warn("Classification {} cannot be applied to IGC asset type {} - excluding from search limitations.", classificationName, igcAssetType);
         }
@@ -873,20 +1024,20 @@ public class IGCRepositoryHelper {
      * Retrieve the IGC search conditions to limit results by the provided list of classifications.
      *
      * @param igcAssetType name of the IGC asset type for which to limit the search results
-     * @param classificationNames list of classification names by which to limit results
+     * @param matchClassifications list of classification conditions by which to limit results
      * @return IGCSearchConditionSet
      * @throws FunctionNotSupportedException when a regular expression is provided that is not supported
      */
     IGCSearchConditionSet getSearchCriteriaForClassifications(String igcAssetType,
-                                                              List<String> classificationNames) throws FunctionNotSupportedException {
+                                                              SearchClassifications matchClassifications) throws FunctionNotSupportedException {
 
         IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
-        if (classificationNames != null && !classificationNames.isEmpty()) {
-            for (String classificationName : classificationNames) {
+        if (matchClassifications != null && !matchClassifications.getConditions().isEmpty()) {
+            for (ClassificationCondition condition : matchClassifications.getConditions()) {
                 IGCSearchConditionSet classificationLimiter = getSearchCriteriaForClassification(
                         igcAssetType,
-                        classificationName
+                        condition
                 );
                 if (classificationLimiter != null) {
                     igcSearchConditionSet.addNestedConditionSet(classificationLimiter);
@@ -1209,25 +1360,15 @@ public class IGCRepositoryHelper {
         }
     }
 
-    /**
-     * Adds the provided value to the search criteria for IGC (when we only know the OMRS property).
-     *
-     * @param igcSearchConditionSet the search conditions to which to add the criteria
-     * @param omrsPropertyName the OMRS property name to search
-     * @param mapping the mapping definition for the entity for which we're searching
-     * @param value the value for which to search
-     * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
-     */
-    private void addSearchConditionFromValue(IGCSearchConditionSet igcSearchConditionSet,
-                                             String omrsPropertyName,
-                                             EntityMapping mapping,
-                                             InstancePropertyValue value) throws FunctionNotSupportedException {
+    private void addSearchCondition(IGCSearchConditionSet igcSearchConditionSet,
+                                    String omrsPropertyName,
+                                    PropertyComparisonOperator operator,
+                                    InstancePropertyValue value,
+                                    EntityMapping mapping) throws FunctionNotSupportedException {
 
         if (omrsPropertyName != null) {
             if (omrsPropertyName.equals(EntityMapping.COMPLEX_MAPPING_SENTINEL)) {
-
                 log.warn("Unhandled search condition: complex OMRS mapping, unknown IGC property.");
-
             } else {
 
                 String igcPropertyName = mapping.getIgcPropertyName(omrsPropertyName);
@@ -1244,16 +1385,18 @@ public class IGCRepositoryHelper {
                             igcSearchConditionSet,
                             igcPropertyName,
                             omrsPropertyName,
+                            operator,
                             value);
 
                 } else if (!igcPropertyName.equals(EntityMapping.LITERAL_MAPPING_SENTINEL)) {
 
                     log.debug("Adding non-literal property search criteria for: {}", omrsPropertyName);
-                    addIGCSearchConditionFromValue(
+                    addIGCSearchCondition(
                             repositoryHelper,
                             repositoryName,
                             igcSearchConditionSet,
                             igcPropertyName,
+                            operator,
                             value);
 
                 }
@@ -1264,76 +1407,155 @@ public class IGCRepositoryHelper {
     }
 
     /**
-     * Adds the provided value to search criteria for IGC (once we know the IGC property).
+     * Adds the provided value to search criteria for IGC.
      *
      * @param repositoryHelper helper for the OMRS repository
      * @param repositoryName the name of the metadata repository
      * @param igcSearchConditionSet the search conditions to which to add the criteria
      * @param igcPropertyName the IGC property name to search
+     * @param operator the operator to use when comparing the values
      * @param value the value for which to search
-     * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
+     * @throws FunctionNotSupportedException when a regular expression or comparison operator is used for the search
+     *                                       that is not supported or does not fit the type of property being compared
      */
-    public static void addIGCSearchConditionFromValue(OMRSRepositoryHelper repositoryHelper,
-                                                      String repositoryName,
-                                                      IGCSearchConditionSet igcSearchConditionSet,
-                                                      String igcPropertyName,
-                                                      InstancePropertyValue value) throws FunctionNotSupportedException {
+    public static void addIGCSearchCondition(OMRSRepositoryHelper repositoryHelper,
+                                             String repositoryName,
+                                             IGCSearchConditionSet igcSearchConditionSet,
+                                             String igcPropertyName,
+                                             PropertyComparisonOperator operator,
+                                             InstancePropertyValue value) throws FunctionNotSupportedException {
 
-        final String methodName = "addIGCSearchConditionFromValue";
+        final String methodName = "addIGCSearchCondition";
 
-        InstancePropertyCategory category = value.getInstancePropertyCategory();
-        switch (category) {
-            case PRIMITIVE:
-                PrimitivePropertyValue actualValue = (PrimitivePropertyValue) value;
-                PrimitiveDefCategory primitiveType = actualValue.getPrimitiveDefCategory();
-                switch (primitiveType) {
-                    case OM_PRIMITIVE_TYPE_BOOLEAN:
-                    case OM_PRIMITIVE_TYPE_BYTE:
-                    case OM_PRIMITIVE_TYPE_CHAR:
-                    case OM_PRIMITIVE_TYPE_SHORT:
-                    case OM_PRIMITIVE_TYPE_INT:
-                    case OM_PRIMITIVE_TYPE_LONG:
-                    case OM_PRIMITIVE_TYPE_FLOAT:
-                    case OM_PRIMITIVE_TYPE_DOUBLE:
-                    case OM_PRIMITIVE_TYPE_BIGINTEGER:
-                    case OM_PRIMITIVE_TYPE_BIGDECIMAL:
-                        igcSearchConditionSet.addCondition(new IGCSearchCondition(
-                                igcPropertyName,
-                                "=",
-                                actualValue.getPrimitiveValue().toString()
-                        ));
-                        break;
-                    case OM_PRIMITIVE_TYPE_DATE:
-                        // For dates, we need to search within the 1 second interval, as that is all that IGC exposes
-                        // via the REST API (despite storing internally down to millisecond level)
-                        Long epoch = (Long) actualValue.getPrimitiveValue();
-                        igcSearchConditionSet.addCondition(new IGCSearchCondition(
-                                igcPropertyName,
-                                epoch,
-                                epoch + 999
-                        ));
-                        break;
-                    case OM_PRIMITIVE_TYPE_STRING:
-                    default:
-                        String candidateValue = actualValue.getPrimitiveValue().toString();
-                        IGCSearchCondition regex = IGCRepositoryHelper.getRegexSearchCondition(
-                                repositoryHelper,
-                                repositoryName,
-                                methodName,
-                                igcPropertyName,
-                                candidateValue
-                        );
-                        igcSearchConditionSet.addCondition(regex);
-                        break;
-                }
-                break;
-            case ENUM:
-                igcSearchConditionSet.addCondition(new IGCSearchCondition(
-                        igcPropertyName,
-                        "=",
-                        ((EnumPropertyValue) value).getSymbolicName()
-                ));
-                break;
+        if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
+            igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                    igcPropertyName,
+                    "isNull",
+                    false
+            ));
+        } else if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+            igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                    igcPropertyName,
+                    "isNull",
+                    true
+            ));
+        } else {
+
+            InstancePropertyCategory category = value.getInstancePropertyCategory();
+            switch (category) {
+                case PRIMITIVE:
+                    PrimitivePropertyValue actualValue = (PrimitivePropertyValue) value;
+                    PrimitiveDefCategory primitiveType = actualValue.getPrimitiveDefCategory();
+                    switch (primitiveType) {
+                        case OM_PRIMITIVE_TYPE_BOOLEAN:
+                            validateBooleanOperator(operator, methodName);
+                            igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                                    igcPropertyName,
+                                    getIgcOperator(operator),
+                                    actualValue.valueAsString()
+                            ));
+                            break;
+                        case OM_PRIMITIVE_TYPE_SHORT:
+                        case OM_PRIMITIVE_TYPE_INT:
+                        case OM_PRIMITIVE_TYPE_LONG:
+                        case OM_PRIMITIVE_TYPE_FLOAT:
+                        case OM_PRIMITIVE_TYPE_DOUBLE:
+                        case OM_PRIMITIVE_TYPE_BIGINTEGER:
+                        case OM_PRIMITIVE_TYPE_BIGDECIMAL:
+                            validateNumericOperator(operator, primitiveType.getName(), methodName);
+                            igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                                    igcPropertyName,
+                                    getIgcOperator(operator),
+                                    actualValue.valueAsString()
+                            ));
+                            break;
+                        case OM_PRIMITIVE_TYPE_DATE:
+                            validateNumericOperator(operator, primitiveType.getName(), methodName);
+                            // For dates, we need to search within the 1 second interval, as that is all that IGC exposes
+                            // via the REST API (despite storing internally down to millisecond level)
+                            Long epoch = (Long) actualValue.getPrimitiveValue();
+                            switch (operator) {
+                                case EQ:
+                                    igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                                            igcPropertyName,
+                                            epoch,
+                                            epoch + 999
+                                    ));
+                                    break;
+                                case NEQ:
+                                    // Need conditions that allow either less than or greater than the requested date
+                                    IGCSearchCondition less = new IGCSearchCondition(
+                                            igcPropertyName,
+                                            "<",
+                                            "" + epoch
+                                    );
+                                    IGCSearchCondition more = new IGCSearchCondition(
+                                            igcPropertyName,
+                                            ">",
+                                            "" + (epoch + 999)
+                                    );
+                                    IGCSearchConditionSet nested = new IGCSearchConditionSet();
+                                    nested.addCondition(less);
+                                    nested.addCondition(more);
+                                    nested.setMatchAnyCondition(true);
+                                    igcSearchConditionSet.addNestedConditionSet(nested);
+                                    break;
+                                case GTE:
+                                    igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                                            igcPropertyName,
+                                            ">=",
+                                            "" + epoch
+                                    ));
+                                    break;
+                                case GT:
+                                    igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                                            igcPropertyName,
+                                            ">",
+                                            "" + epoch
+                                    ));
+                                    break;
+                                case LTE:
+                                    igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                                            igcPropertyName,
+                                            "<=",
+                                            "" + (epoch + 999)
+                                    ));
+                                    break;
+                                case LT:
+                                    igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                                            igcPropertyName,
+                                            "<",
+                                            "" + (epoch + 999)
+                                    ));
+                                    break;
+                            }
+                            break;
+                        case OM_PRIMITIVE_TYPE_BYTE:
+                        case OM_PRIMITIVE_TYPE_CHAR:
+                        case OM_PRIMITIVE_TYPE_STRING:
+                        default:
+                            validateStringOperator(operator, primitiveType.getName(), methodName);
+                            String candidateValue = actualValue.valueAsString();
+                            IGCSearchCondition regex = IGCRepositoryHelper.getRegexSearchCondition(
+                                    repositoryHelper,
+                                    repositoryName,
+                                    methodName,
+                                    igcPropertyName,
+                                    operator,
+                                    candidateValue
+                            );
+                            igcSearchConditionSet.addCondition(regex);
+                            break;
+                    }
+                    break;
+                case ENUM:
+                    validateEnumOperator(operator, methodName);
+                    igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                            igcPropertyName,
+                            getIgcOperator(operator),
+                            ((EnumPropertyValue) value).getSymbolicName()
+                    ));
+                    break;
             /*case STRUCT:
                 Map<String, InstancePropertyValue> structValues = ((StructPropertyValue) value).getAttributes().getInstanceProperties();
                 for (Map.Entry<String, InstancePropertyValue> nextEntry : structValues.entrySet()) {
@@ -1345,121 +1567,275 @@ public class IGCRepositoryHelper {
                     );
                 }
                 break;*/
-            case MAP:
-                Map<String, InstancePropertyValue> mapValues = ((MapPropertyValue) value).getMapValues().getInstanceProperties();
-                for (Map.Entry<String, InstancePropertyValue> nextEntry : mapValues.entrySet()) {
-                    addIGCSearchConditionFromValue(
-                            repositoryHelper,
-                            repositoryName,
-                            igcSearchConditionSet,
-                            nextEntry.getKey(),
-                            nextEntry.getValue()
-                    );
-                }
-                break;
-            case ARRAY:
-                Map<String, InstancePropertyValue> arrayValues = ((ArrayPropertyValue) value).getArrayValues().getInstanceProperties();
-                for (Map.Entry<String, InstancePropertyValue> nextEntry : arrayValues.entrySet()) {
-                    addIGCSearchConditionFromValue(
-                            repositoryHelper,
-                            repositoryName,
-                            igcSearchConditionSet,
-                            igcPropertyName,
-                            nextEntry.getValue()
-                    );
-                }
-                break;
-            default:
-                // Do nothing
-                log.warn("Unable to handle search criteria for value type: {}", category);
-                break;
+                case MAP:
+                    // TODO: probably need to re-think what operators are valid for a map comparison
+                    Map<String, InstancePropertyValue> mapValues = ((MapPropertyValue) value).getMapValues().getInstanceProperties();
+                    for (Map.Entry<String, InstancePropertyValue> nextEntry : mapValues.entrySet()) {
+                        addIGCSearchCondition(
+                                repositoryHelper,
+                                repositoryName,
+                                igcSearchConditionSet,
+                                nextEntry.getKey(),
+                                operator,
+                                nextEntry.getValue()
+                        );
+                    }
+                    break;
+                case ARRAY:
+                    if (operator.equals(PropertyComparisonOperator.IN)) {
+                        InstanceProperties ip = ((ArrayPropertyValue) value).getArrayValues();
+                        if (ip != null) {
+                            Map<String, InstancePropertyValue> map = ip.getInstanceProperties();
+                            if (map != null) {
+                                List<String> valueList = new ArrayList<>();
+                                boolean primitivesOnly = true;
+                                IGCSearchConditionSet nestedConditions = new IGCSearchConditionSet();
+                                for (InstancePropertyValue oneValue : map.values()) {
+                                    if (oneValue.getInstancePropertyCategory().equals(InstancePropertyCategory.PRIMITIVE)) {
+                                        valueList.add(oneValue.valueAsString());
+                                    } else {
+                                        primitivesOnly = false;
+                                        IGCSearchConditionSet nested = new IGCSearchConditionSet();
+                                        // TODO: this will do EQ even for strings, should we be more flexible find some
+                                        //  way to do LIKE for strings as well?
+                                        addIGCSearchCondition(repositoryHelper,
+                                                repositoryName,
+                                                nested,
+                                                igcPropertyName,
+                                                PropertyComparisonOperator.EQ,
+                                                oneValue);
+                                        nestedConditions.addNestedConditionSet(nested);
+                                    }
+                                }
+                                if (primitivesOnly) {
+                                    // If all primitives, do a single in-list-based search
+                                    igcSearchConditionSet.addCondition(new IGCSearchCondition(
+                                            igcPropertyName,
+                                            valueList
+                                    ));
+                                } else {
+                                    // If complex, create multiple nested conditions and OR them
+                                    nestedConditions.setMatchAnyCondition(true);
+                                    igcSearchConditionSet.addNestedConditionSet(nestedConditions);
+                                }
+                            } else {
+                                // Force no results if the array is empty
+                                igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                            }
+                        } else {
+                            // Force no results if the array is empty
+                            igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                        }
+                    } else {
+                        // TODO: should we not also allow an exact-match (EQ) and its opposite (NEQ)?
+                        /*Map<String, InstancePropertyValue> arrayValues = ((ArrayPropertyValue) value).getArrayValues().getInstanceProperties();
+                        for (Map.Entry<String, InstancePropertyValue> nextEntry : arrayValues.entrySet()) {
+                            addIGCSearchCondition(
+                                    repositoryHelper,
+                                    repositoryName,
+                                    igcSearchConditionSet,
+                                    igcPropertyName,
+                                    operator,
+                                    nextEntry.getValue()
+                            );
+                        }*/
+                        throw new FunctionNotSupportedException(IGCOMRSErrorCode.INVALID_SEARCH_COMPARISON.getMessageDefinition(operator.getName(), category.getName()),
+                                IGCRepositoryHelper.class.getName(),
+                                methodName);
+                    }
+                    break;
+                default:
+                    // Do nothing
+                    log.warn("Unable to handle search criteria for value type: {}", category);
+                    break;
+            }
+
         }
 
     }
 
     /**
+     * Translate the provided open metadata property comparison operator into an IGC equivalent comparison operator.
+     *
+     * @param operator the open metadata property comparison operator to translate
+     * @return String
+     */
+    public static String getIgcOperator(PropertyComparisonOperator operator) {
+        switch (operator) {
+            case EQ:
+                return "=";
+            case NEQ:
+                return "<>";
+            case GTE:
+                return ">=";
+            case GT:
+                return ">";
+            case LTE:
+                return "<=";
+            case LT:
+                return "<";
+            case LIKE:
+                return "like";
+            case IN:
+                return "in";
+            case IS_NULL:
+            case NOT_NULL:
+                return "isNull";
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Validates the provided operator can be applied to booleans.
+     *
+     * @param operator the operator to check
+     * @param methodName of the calling method
+     * @throws FunctionNotSupportedException if an invalid comparison operator was requested
+     */
+    public static void validateBooleanOperator(PropertyComparisonOperator operator,
+                                               String methodName) throws FunctionNotSupportedException {
+        boolean is = operator.equals(PropertyComparisonOperator.EQ)
+                || operator.equals(PropertyComparisonOperator.NEQ)
+                || operator.equals(PropertyComparisonOperator.IS_NULL)
+                || operator.equals(PropertyComparisonOperator.NOT_NULL);
+        checkOperator(is, operator, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_BOOLEAN.getName(), methodName);
+    }
+
+    /**
+     * Validates the provided operator can be applied to enumerations.
+     *
+     * @param operator the operator to check
+     * @param methodName of the calling method
+     * @throws FunctionNotSupportedException if an invalid comparison operator was requested
+     */
+    public static void validateEnumOperator(PropertyComparisonOperator operator,
+                                            String methodName) throws FunctionNotSupportedException {
+        boolean is = operator.equals(PropertyComparisonOperator.EQ)
+                || operator.equals(PropertyComparisonOperator.NEQ)
+                || operator.equals(PropertyComparisonOperator.IS_NULL)
+                || operator.equals(PropertyComparisonOperator.NOT_NULL);
+        checkOperator(is, operator, InstancePropertyCategory.ENUM.getName(), methodName);
+    }
+
+    /**
+     * Validates the provided operator can be applied to numbers.
+     *
+     * @param operator the operator to check
+     * @param type description of the type being compared
+     * @param methodName of the calling method
+     * @throws FunctionNotSupportedException if an invalid comparison operator was requested
+     */
+    public static void validateNumericOperator(PropertyComparisonOperator operator,
+                                               String type,
+                                               String methodName) throws FunctionNotSupportedException {
+        boolean is = operator.equals(PropertyComparisonOperator.EQ)
+                || operator.equals(PropertyComparisonOperator.NEQ)
+                || operator.equals(PropertyComparisonOperator.GTE)
+                || operator.equals(PropertyComparisonOperator.GT)
+                || operator.equals(PropertyComparisonOperator.LTE)
+                || operator.equals(PropertyComparisonOperator.LT)
+                || operator.equals(PropertyComparisonOperator.IS_NULL)
+                || operator.equals(PropertyComparisonOperator.NOT_NULL);
+        checkOperator(is, operator, type, methodName);
+    }
+
+    /**
+     * Validates the provided operator can be applied to strings.
+     *
+     * @param operator the operator to check
+     * @param type description of the type being compared
+     * @param methodName of the calling method
+     * @throws FunctionNotSupportedException if an invalid comparison operator was requested
+     */
+    public static void validateStringOperator(PropertyComparisonOperator operator,
+                                              String type,
+                                              String methodName) throws FunctionNotSupportedException {
+        boolean is = operator.equals(PropertyComparisonOperator.LIKE)
+                || operator.equals(PropertyComparisonOperator.EQ)
+                || operator.equals(PropertyComparisonOperator.NEQ)
+                || operator.equals(PropertyComparisonOperator.IS_NULL)
+                || operator.equals(PropertyComparisonOperator.NOT_NULL);
+        checkOperator(is, operator, type, methodName);
+    }
+
+    private static void checkOperator(boolean isValid,
+                                      PropertyComparisonOperator operator,
+                                      String type,
+                                      String methodName) throws FunctionNotSupportedException {
+        if (!isValid) {
+            throw new FunctionNotSupportedException(IGCOMRSErrorCode.INVALID_SEARCH_COMPARISON.getMessageDefinition(operator.getName(), type),
+                    IGCRepositoryHelper.class.getName(),
+                    methodName);
+        }
+    }
+
+    /**
      * Indicates whether the provided values are equivalent (true) or not (false).
      *
-     * @param igcValue the IGC value to compare
-     * @param omrsValue the OMRS value to compare (treated as a regular expression if the type is a string)
+     * @param value the actual (literal) value to compare
+     * @param operator the operator through which to compare the values
+     * @param requestedValue the OMRS value that was requested (treated as a regular expression if the type is a string)
      * @return boolean
      */
-    public static boolean equivalentValues(Object igcValue,
-                                           InstancePropertyValue omrsValue) {
+    public static boolean equivalentValues(Object value,
+                                           PropertyComparisonOperator operator,
+                                           InstancePropertyValue requestedValue) {
 
-        if (igcValue == null && omrsValue == null) {
-            return true;
-        }
-        if (igcValue == null || omrsValue == null) {
-            return false;
+        // Handle the null operators
+        if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
+            return (value == null);
+        } else if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+            return (value != null);
+        } else {
+            if (value == null && requestedValue == null) {
+                return true;
+            }
+            if (value == null || requestedValue == null) {
+                return false;
+            }
         }
 
-        InstancePropertyCategory category = omrsValue.getInstancePropertyCategory();
+        // At this point both values should be non-null
+        InstancePropertyCategory category = requestedValue.getInstancePropertyCategory();
         switch (category) {
             case PRIMITIVE:
-                PrimitivePropertyValue actualValue = (PrimitivePropertyValue) omrsValue;
+                PrimitivePropertyValue actualValue = (PrimitivePropertyValue) requestedValue;
                 PrimitiveDefCategory primitiveType = actualValue.getPrimitiveDefCategory();
-                String igcValueAsString = "";
-                String omrsValueAsString = "";
                 switch (primitiveType) {
                     case OM_PRIMITIVE_TYPE_BOOLEAN:
-                        if (igcValue instanceof Boolean) {
-                            return ((Boolean) igcValue).booleanValue() == ((Boolean) actualValue.getPrimitiveValue()).booleanValue();
-                        }
-                        return compareAsStrings(omrsValue, igcValue);
+                        return compareBool(value, operator, actualValue);
                     case OM_PRIMITIVE_TYPE_SHORT:
-                        if (igcValue instanceof Short) {
-                            return ((Short) igcValue).intValue() == ((Short) actualValue.getPrimitiveValue()).intValue();
-                        }
-                        return compareAsStrings(omrsValue, igcValue);
+                        return compareShort(value, operator, actualValue);
                     case OM_PRIMITIVE_TYPE_INT:
-                        if (igcValue instanceof Integer) {
-                            return ((Integer) igcValue).intValue() == ((Integer) actualValue.getPrimitiveValue()).intValue();
-                        }
-                        return compareAsStrings(omrsValue, igcValue);
+                        return compareInt(value, operator, actualValue);
                     case OM_PRIMITIVE_TYPE_LONG:
-                        if (igcValue instanceof Long) {
-                            return ((Long) igcValue).longValue() == ((Long) actualValue.getPrimitiveValue()).longValue();
-                        }
-                        return compareAsStrings(omrsValue, igcValue);
+                        return compareLong(value, operator, actualValue);
                     case OM_PRIMITIVE_TYPE_FLOAT:
-                        if (igcValue instanceof Float) {
-                            return ((Float) igcValue).floatValue() == ((Float) actualValue.getPrimitiveValue()).floatValue();
-                        }
-                        return compareAsStrings(omrsValue, igcValue);
+                        return compareFloat(value, operator, actualValue);
                     case OM_PRIMITIVE_TYPE_DOUBLE:
-                        if (igcValue instanceof Double) {
-                            return ((Double) igcValue).doubleValue() == ((Double) actualValue.getPrimitiveValue()).doubleValue();
-                        }
-                        return compareAsStrings(omrsValue, igcValue);
+                        return compareDouble(value, operator, actualValue);
                     case OM_PRIMITIVE_TYPE_BIGINTEGER:
+                        return compareBigInteger(value, operator, actualValue);
                     case OM_PRIMITIVE_TYPE_BIGDECIMAL:
-                        if (igcValue instanceof BigInteger || igcValue instanceof BigDecimal) {
-                            return igcValue.equals(actualValue.getPrimitiveValue());
-                        }
-                        return compareAsStrings(omrsValue, igcValue);
+                        return compareBigDecimal(value, operator, actualValue);
                     case OM_PRIMITIVE_TYPE_DATE:
-                        if (igcValue instanceof Long) {
-                            return ((Long) igcValue).longValue() == ((Long) actualValue.getPrimitiveValue()).longValue();
-                        } else if (igcValue instanceof Date) {
-                            return ((Date) igcValue).getTime() == ((Long) actualValue.getPrimitiveValue()).longValue();
-                        }
-                        return compareAsStrings(omrsValue, igcValue);
+                        return compareDate(value, operator, actualValue);
                     case OM_PRIMITIVE_TYPE_BYTE:
                     case OM_PRIMITIVE_TYPE_CHAR:
                     case OM_PRIMITIVE_TYPE_STRING:
                     default:
-                        return compareAsStrings(omrsValue, igcValue);
+                        return compareString(value, operator, actualValue);
                 }
             case ENUM:
-                String symbolicName = ((EnumPropertyValue) omrsValue).getSymbolicName();
-                return igcValue.toString().equals(symbolicName);
+                String symbolicName = ((EnumPropertyValue) requestedValue).getSymbolicName();
+                return value.toString().equals(symbolicName);
             /*case STRUCT:
                 break;
             case MAP:
-                break;
-            case ARRAY:
                 break;*/
+            case ARRAY:
+                return compareList(value, operator, (ArrayPropertyValue) requestedValue);
             default:
                 // Do nothing
                 log.warn("Unable to handle value equivalency for value type: {}", category);
@@ -1470,29 +1846,154 @@ public class IGCRepositoryHelper {
 
     }
 
-    /**
-     * Compare the provided values as Strings to determine whether they are equivalent.
-     *
-     * @param omrsValue the OMRS value
-     * @param igcValue the IGC value
-     * @return boolean
-     */
-    private static boolean compareAsStrings(InstancePropertyValue omrsValue, Object igcValue) {
-
-        if (omrsValue == null && igcValue == null) {
-            return true;
+    private static boolean compareBool(Object value,
+                                       PropertyComparisonOperator operator,
+                                       PrimitivePropertyValue requestedValue) {
+        boolean lValue = (value instanceof Boolean) ? (Boolean) value : value.toString().toLowerCase().equals("true");
+        boolean rValue = (Boolean) requestedValue.getPrimitiveValue();
+        switch (operator) {
+            case EQ:
+                return lValue == rValue;
+            case NEQ:
+                return lValue != rValue;
+            default:
+                // If a non-boolean comparison operator was used, return false
+                return false;
         }
-        if (omrsValue != null && igcValue == null) {
-            return false;
-        }
-        if (omrsValue == null) {
-            return false;
-        }
+    }
 
-        String omrsValueAsString = omrsValue.valueAsString();
-        String igcValueAsString = igcValue.toString();
-        return igcValueAsString.equals(omrsValueAsString);
+    private static boolean compareShort(Object value,
+                                        PropertyComparisonOperator operator,
+                                        PrimitivePropertyValue requestedValue) {
+        Short lValue = (value instanceof Short) ? (Short) value : Short.parseShort(value.toString());
+        Short rValue = (Short) requestedValue.getPrimitiveValue();
+        return compareNumber(lValue.compareTo(rValue), operator);
+    }
 
+    private static boolean compareInt(Object value,
+                                      PropertyComparisonOperator operator,
+                                      PrimitivePropertyValue requestedValue) {
+        Integer lValue = (value instanceof Integer) ? (Integer) value : Integer.parseInt(value.toString());
+        Integer rValue = (Integer) requestedValue.getPrimitiveValue();
+        return compareNumber(lValue.compareTo(rValue), operator);
+    }
+
+    private static boolean compareLong(Object value,
+                                       PropertyComparisonOperator operator,
+                                       PrimitivePropertyValue requestedValue) {
+        Long lValue = (value instanceof Long) ? (Long) value : Long.parseLong(value.toString());
+        Long rValue = (Long) requestedValue.getPrimitiveValue();
+        return compareNumber(lValue.compareTo(rValue), operator);
+    }
+
+    private static boolean compareFloat(Object value,
+                                        PropertyComparisonOperator operator,
+                                        PrimitivePropertyValue requestedValue) {
+        Float lValue = (value instanceof Float) ? (Float) value : Float.parseFloat(value.toString());
+        Float rValue = (Float) requestedValue.getPrimitiveValue();
+        return compareNumber(lValue.compareTo(rValue), operator);
+    }
+
+    private static boolean compareDouble(Object value,
+                                         PropertyComparisonOperator operator,
+                                         PrimitivePropertyValue requestedValue) {
+        Double lValue = (value instanceof Double) ? (Double) value : Double.parseDouble(value.toString());
+        Double rValue = (Double) requestedValue.getPrimitiveValue();
+        return compareNumber(lValue.compareTo(rValue), operator);
+    }
+
+    private static boolean compareBigInteger(Object value,
+                                             PropertyComparisonOperator operator,
+                                             PrimitivePropertyValue requestedValue) {
+        BigInteger lValue = (value instanceof BigInteger) ? (BigInteger) value : new BigInteger(value.toString());
+        BigInteger rValue = (BigInteger) requestedValue.getPrimitiveValue();
+        return compareNumber(lValue.compareTo(rValue), operator);
+    }
+
+    private static boolean compareBigDecimal(Object value,
+                                             PropertyComparisonOperator operator,
+                                             PrimitivePropertyValue requestedValue) {
+        BigDecimal lValue = (value instanceof BigDecimal) ? (BigDecimal) value : new BigDecimal(value.toString());
+        BigDecimal rValue = (BigDecimal) requestedValue.getPrimitiveValue();
+        return compareNumber(lValue.compareTo(rValue), operator);
+    }
+
+    private static boolean compareDate(Object value,
+                                       PropertyComparisonOperator operator,
+                                       PrimitivePropertyValue requestedValue) {
+        Long lValue = -1L;
+        if (value instanceof Long) {
+            lValue = (Long) value;
+        } else if (value instanceof Date) {
+            lValue = ((Date) value).getTime();
+        }
+        Long rValue = (Long) requestedValue.getPrimitiveValue();
+        return compareNumber(lValue.compareTo(rValue), operator);
+    }
+
+    private static boolean compareNumber(int compareToResult, PropertyComparisonOperator operator) {
+        switch (operator) {
+            case EQ:
+                return compareToResult == 0;
+            case NEQ:
+                return compareToResult != 0;
+            case GTE:
+                return compareToResult >= 0;
+            case GT:
+                return compareToResult > 0;
+            case LTE:
+                return compareToResult <= 0;
+            case LT:
+                return compareToResult < 0;
+            default:
+                // If a non-numeric comparison operator was used, return false (IN fits this as it means the right-hand
+                // argument must be a list rather than a primitive)
+                return false;
+        }
+    }
+
+    private static boolean compareString(Object value,
+                                         PropertyComparisonOperator operator,
+                                         PrimitivePropertyValue requestedValue) {
+        String lValue = value.toString();
+        String rValue = requestedValue.valueAsString();
+        switch (operator) {
+            case EQ:
+                return lValue.equals(rValue);
+            case NEQ:
+                return !lValue.equals(rValue);
+            case LIKE:
+                return lValue.matches(rValue);
+            default:
+                // If a non-string comparison operator was used, return false (IN fits this as it means the right-hand
+                // argument must be a list rather than a primitive)
+                return false;
+        }
+    }
+
+    private static boolean compareList(Object value,
+                                       PropertyComparisonOperator operator,
+                                       ArrayPropertyValue requestedValue) {
+        if (operator.equals(PropertyComparisonOperator.IN)) {
+            // Only check if we're using a list-comparison operator
+            InstanceProperties ip = requestedValue.getArrayValues();
+            if (ip != null) {
+                Map<String, InstancePropertyValue> map = ip.getInstanceProperties();
+                if (map != null) {
+                    Collection<InstancePropertyValue> requestedValues = map.values();
+                    boolean anyMatch = false;
+                    for (InstancePropertyValue oneValue : requestedValues) {
+                        if (equivalentValues(value, operator, oneValue)) {
+                            anyMatch = true;
+                            break;
+                        }
+                    }
+                    return anyMatch;
+                }
+            }
+        }
+        // Note that if ultimately the array definition is empty, we will not match anything
+        return false;
     }
 
     /**
@@ -1511,35 +2012,79 @@ public class IGCRepositoryHelper {
                                                              String methodName,
                                                              String igcPropertyToSearch,
                                                              String valueWithRegex) throws FunctionNotSupportedException {
+        return getRegexSearchCondition(repositoryHelper,
+                repositoryName,
+                methodName,
+                igcPropertyToSearch,
+                PropertyComparisonOperator.LIKE,
+                valueWithRegex);
+    }
+
+    /**
+     * Adds search criteria based on the provided regular expression.
+     *
+     * @param repositoryHelper the repository helper
+     * @param repositoryName name of the respository
+     * @param methodName method adding the criteria
+     * @param igcPropertyToSearch the IGC property that should be searched
+     * @param operator to use for comparison
+     * @param valueWithRegex the value that should be used for the search, as a regular expression
+     * @return IGCSearchCondition
+     * @throws FunctionNotSupportedException when a regular expression is provided for the search that is not supported
+     */
+    public static IGCSearchCondition getRegexSearchCondition(OMRSRepositoryHelper repositoryHelper,
+                                                             String repositoryName,
+                                                             String methodName,
+                                                             String igcPropertyToSearch,
+                                                             PropertyComparisonOperator operator,
+                                                             String valueWithRegex) throws FunctionNotSupportedException {
 
         IGCSearchCondition igcSearchCondition;
         String igcValueToSearch = repositoryHelper.getUnqualifiedLiteralString(valueWithRegex);
-        if (repositoryHelper.isContainsRegex(valueWithRegex)) {
-            igcSearchCondition = new IGCSearchCondition(
-                    igcPropertyToSearch,
-                    "like %{0}%",
-                    igcValueToSearch
-            );
-        } else if (repositoryHelper.isStartsWithRegex(valueWithRegex)) {
-            igcSearchCondition = new IGCSearchCondition(
-                    igcPropertyToSearch,
-                    "like {0}%",
-                    igcValueToSearch
-            );
-        } else if (repositoryHelper.isEndsWithRegex(valueWithRegex)) {
-            igcSearchCondition = new IGCSearchCondition(
-                    igcPropertyToSearch,
-                    "like %{0}",
-                    igcValueToSearch
-            );
-        } else if (repositoryHelper.isExactMatchRegex(valueWithRegex)) {
+        if (operator.equals(PropertyComparisonOperator.LIKE)) {
+            if (repositoryHelper.isContainsRegex(valueWithRegex)) {
+                igcSearchCondition = new IGCSearchCondition(
+                        igcPropertyToSearch,
+                        "like %{0}%",
+                        igcValueToSearch
+                );
+            } else if (repositoryHelper.isStartsWithRegex(valueWithRegex)) {
+                igcSearchCondition = new IGCSearchCondition(
+                        igcPropertyToSearch,
+                        "like {0}%",
+                        igcValueToSearch
+                );
+            } else if (repositoryHelper.isEndsWithRegex(valueWithRegex)) {
+                igcSearchCondition = new IGCSearchCondition(
+                        igcPropertyToSearch,
+                        "like %{0}",
+                        igcValueToSearch
+                );
+            } else if (repositoryHelper.isExactMatchRegex(valueWithRegex)) {
+                igcSearchCondition = new IGCSearchCondition(
+                        igcPropertyToSearch,
+                        "=",
+                        igcValueToSearch
+                );
+            } else {
+                throw new FunctionNotSupportedException(IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED.getMessageDefinition(repositoryName, valueWithRegex),
+                        IGCRepositoryHelper.class.getName(),
+                        methodName);
+            }
+        } else if (operator.equals(PropertyComparisonOperator.EQ)) {
             igcSearchCondition = new IGCSearchCondition(
                     igcPropertyToSearch,
                     "=",
                     igcValueToSearch
             );
+        } else if (operator.equals(PropertyComparisonOperator.NEQ)) {
+            igcSearchCondition = new IGCSearchCondition(
+                    igcPropertyToSearch,
+                    "<>",
+                    igcValueToSearch
+            );
         } else {
-            throw new FunctionNotSupportedException(IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED.getMessageDefinition(repositoryName, valueWithRegex),
+            throw new FunctionNotSupportedException(IGCOMRSErrorCode.INVALID_SEARCH_COMPARISON.getMessageDefinition(operator.getName(), PrimitiveDefCategory.OM_PRIMITIVE_TYPE_STRING.getName()),
                     IGCRepositoryHelper.class.getName(),
                     methodName);
         }
@@ -1558,14 +2103,14 @@ public class IGCRepositoryHelper {
      */
     public static void addTypeSpecificConditions(EntityMapping mapping,
                                                  MatchCriteria matchCriteria,
-                                                 InstanceProperties matchProperties,
+                                                 SearchProperties matchProperties,
                                                  IGCSearchConditionSet igcSearchConditionSet) {
         // Only include type-specific criteria if the matchCriteria is (effectively) 'ALL'
         // - if it is 'ANY' and there are any properties this will include far too many results
         // - if it is 'NONE' then it will exclude all of the types we are actually searching for
         if ( matchCriteria == null
                 || matchCriteria.equals(MatchCriteria.ALL)
-                || (matchCriteria.equals(MatchCriteria.ANY) && (matchProperties == null || matchProperties.getPropertyCount() == 0))) {
+                || (matchCriteria.equals(MatchCriteria.ANY) && (matchProperties == null || matchProperties.getConditions().size() == 0))) {
             IGCSearchConditionSet typeSpecificConditions = mapping.getIGCSearchCriteria();
             if (typeSpecificConditions.size() > 0) {
                 igcSearchConditionSet.addNestedConditionSet(typeSpecificConditions);

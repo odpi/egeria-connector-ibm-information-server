@@ -15,6 +15,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.InstanceMa
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefAttribute;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
@@ -199,6 +200,8 @@ public abstract class ClassificationMapping extends InstanceMapping {
                 // (to release the previously-mapped values into eg. additionalProperties map)
                 EntityMapping.PropertyMapping existing = mappingByOmrsProperty.remove(omrsPropertyName);
                 mappingByIgcProperty.remove(existing.getIgcPropertyName());
+                // Remove any existing literal property mapping (no-op if there is not one)
+                removeLiteralPropertyMapping(omrsPropertyName);
             }
             mappingByOmrsProperty.put(omrsPropertyName, pm);
             mappingByIgcProperty.put(igcPropertyName, pm);
@@ -270,13 +273,13 @@ public abstract class ClassificationMapping extends InstanceMapping {
      *
      * @param repositoryHelper the repository helper
      * @param repositoryName name of the repository
-     * @param matchClassificationProperties the criteria to use when searching for the classification
+     * @param matchProperties the criteria to use when searching for the classification
      * @return IGCSearchConditionSet - the IGC search criteria to find entities based on this classification
      * @throws FunctionNotSupportedException when a regular expression is used for the search which is not supported
      */
     public IGCSearchConditionSet getIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
                                                       String repositoryName,
-                                                      InstanceProperties matchClassificationProperties) throws FunctionNotSupportedException {
+                                                      SearchProperties matchProperties) throws FunctionNotSupportedException {
         return new IGCSearchConditionSet();
     }
 

@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
@@ -16,11 +17,16 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.DataClassAssignmentStatusMapper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyCondition;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,16 +202,15 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
     public List<IGCSearch> getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
                                                        String repositoryName,
                                                        IGCRestClient igcRestClient,
-                                                       InstanceProperties matchProperties,
-                                                       MatchCriteria matchCriteria) {
+                                                       SearchProperties matchProperties) throws FunctionNotSupportedException {
 
         // If no search properties were provided, we can short-circuit and just return all such assignments via the
         // simple search criteria
         if (matchProperties == null) {
             return getSimpleIGCSearchCriteria();
         }
-        Map<String, InstancePropertyValue> mapOfValues = matchProperties.getInstanceProperties();
-        if (mapOfValues == null) {
+        List<PropertyCondition> conditions = matchProperties.getConditions();
+        if (conditions == null) {
             return getSimpleIGCSearchCriteria();
         }
 
@@ -218,86 +223,300 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         searchForClassification.addProperties(igcRestClient.getAllPropertiesForType("classification"));
         IGCSearchConditionSet conditionsForClassification = new IGCSearchConditionSet();
 
-        // First see if we are searching by status, as this changes the other properties we can search
-        // - Proposed status in IGC will have no other properties (and we can search against data_class only as there is no classification object)
-        // - Discovered status in IGC will be the link to a 'classification' object with other properties
-        boolean considerOtherProperties = true;
-        InstancePropertyValue status = mapOfValues.getOrDefault("status", null);
-        String statusName;
-        if (status != null && status.getInstancePropertyCategory().equals(InstancePropertyCategory.ENUM)) {
-            EnumPropertyValue statusEnum = (EnumPropertyValue) status;
-            statusName = statusEnum.getSymbolicName();
-            if (statusName != null) {
-                if (statusName.equals("Discovered")) {
-                    conditionsForDataClass.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
-                } else if (statusName.equals("Proposed")) {
-                    IGCSearchCondition proposed = new IGCSearchCondition("classifications_selected", "isNull", true);
-                    conditionsForDataClass.addCondition(proposed);
-                    considerOtherProperties = false;
-                } else {
-                    // If the status is something else, there will be no results from IGC
-                    conditionsForDataClass.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
-                    conditionsForClassification.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
-                    considerOtherProperties = false;
-                }
-            }
+        addAllConditions(conditionsForDataClass, conditionsForClassification, matchProperties);
+
+        if (conditionsForDataClass.size() > 0) {
+            searchForDataClass.addConditions(conditionsForDataClass);
+            searches.add(searchForDataClass);
+        }
+        if (conditionsForClassification.size() > 0) {
+            searchForClassification.addConditions(conditionsForClassification);
+            searches.add(searchForClassification);
         }
 
-        // Only need to consider other properties if we are looking for a 'Discovered' status, or not restricting based
-        // on status at all...
-        if (considerOtherProperties) {
-            Set<String> searchProperties = mapOfValues.keySet();
-            Set<String> mappedOmrsProperties = getMappedOmrsPropertyNames();
-            if (!mappedOmrsProperties.containsAll(searchProperties)) {
-                // If any of the properties included in the search is one we do not map in IGC, return no results
-                conditionsForDataClass.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
-                conditionsForClassification.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
-            } else {
-                // Otherwise we can only search against the 'classification' object, as it is the only one with any
-                // additional properties
-                // TODO: what about literal-mapped properties for Proposed classifications?
-                for (Map.Entry<String, InstancePropertyValue> entry : mapOfValues.entrySet()) {
-                    String omrsPropertyName = entry.getKey();
-                    InstancePropertyValue value = entry.getValue();
-                    switch (omrsPropertyName) {
-                        case "confidence":
-                            IGCSearchCondition byConfidence = new IGCSearchCondition("confidencePercent", "=", value.valueAsString());
-                            conditionsForClassification.addCondition(byConfidence);
+        return searches;
+
+    }
+
+    private void addAllConditions(IGCSearchConditionSet dataClassConditions,
+                                  IGCSearchConditionSet classificationConditions,
+                                  SearchProperties matchProperties) throws FunctionNotSupportedException {
+        final String methodName = "addAllConditions";
+        List<PropertyCondition> conditionsToMatch = matchProperties.getConditions();
+        if (conditionsToMatch != null) {
+            for (PropertyCondition condition : conditionsToMatch) {
+                SearchProperties nestedConditions = condition.getNestedConditions();
+                if (nestedConditions != null) {
+                    IGCSearchConditionSet nestedDataClassConditions = new IGCSearchConditionSet();
+                    IGCSearchConditionSet nestedClassificationConditions = new IGCSearchConditionSet();
+                    addAllConditions(nestedDataClassConditions, nestedClassificationConditions, nestedConditions);
+                    if (nestedDataClassConditions.size() > 0) {
+                        dataClassConditions.addNestedConditionSet(nestedDataClassConditions);
+                    }
+                    if (nestedClassificationConditions.size() > 0) {
+                        classificationConditions.addNestedConditionSet(nestedClassificationConditions);
+                    }
+                } else {
+                    String propertyName = condition.getProperty();
+                    PropertyComparisonOperator operator = condition.getOperator();
+                    InstancePropertyValue value = condition.getValue();
+                    switch (propertyName) {
+                        case "status":
+                            if (value instanceof EnumPropertyValue) {
+                                EnumPropertyValue statusToFind = (EnumPropertyValue) value;
+                                IGCRepositoryHelper.validateEnumOperator(operator, methodName);
+                                switch (operator) {
+                                    case EQ:
+                                        switch (statusToFind.getSymbolicName()) {
+                                            case "Discovered":
+                                                dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                                includeAllDetected(classificationConditions);
+                                                break;
+                                            case "Proposed":
+                                                includeAllSelected(dataClassConditions);
+                                                classificationConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                                break;
+                                            default:
+                                                includeNoResults(dataClassConditions, classificationConditions);
+                                                break;
+                                        }
+                                        break;
+                                    case NEQ:
+                                        switch (statusToFind.getSymbolicName()) {
+                                            case "Discovered":
+                                                includeAllSelected(dataClassConditions);
+                                                classificationConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                                break;
+                                            case "Proposed":
+                                                dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                                includeAllDetected(classificationConditions);
+                                                break;
+                                            default:
+                                                includeAllResults(dataClassConditions, classificationConditions);
+                                                break;
+                                        }
+                                        break;
+                                    case IS_NULL:
+                                        includeNoResults(dataClassConditions, classificationConditions);
+                                        break;
+                                    case NOT_NULL:
+                                        includeAllResults(dataClassConditions, classificationConditions);
+                                        break;
+                                    default:
+                                        throw new FunctionNotSupportedException(IGCOMRSErrorCode.INVALID_SEARCH_COMPARISON.getMessageDefinition(operator.getName(), InstancePropertyCategory.ENUM.getName()),
+                                                this.getClass().getName(),
+                                                methodName);
+                                }
+                            } else if (value == null) {
+                                if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
+                                    // should not include any detected or selected data classes
+                                    includeNoResults(dataClassConditions, classificationConditions);
+                                } else if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+                                    // should include all detected and selected data classes
+                                    includeAllResults(dataClassConditions, classificationConditions);
+                                } else {
+                                    // otherwise there is an error
+                                    throw new FunctionNotSupportedException(IGCOMRSErrorCode.NO_VALUE_FOR_SEARCH.getMessageDefinition("status", operator.getName()),
+                                            this.getClass().getName(),
+                                            methodName);
+                                }
+                            } else {
+                                throw new FunctionNotSupportedException(IGCOMRSErrorCode.INVALID_ENUMERATION.getMessageDefinition("status"),
+                                        this.getClass().getName(),
+                                        methodName);
+                            }
                             break;
                         case P_THRESHOLD:
-                            IGCSearchCondition byThreshold = new IGCSearchCondition("threshold", "=", value.valueAsString());
-                            conditionsForClassification.addCondition(byThreshold);
+                            if (value instanceof PrimitivePropertyValue) {
+                                PrimitivePropertyValue ppv = (PrimitivePropertyValue) value;
+                                IGCRepositoryHelper.validateNumericOperator(operator, ppv.getTypeName(), methodName);
+                                if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
+                                    includeAllSelected(dataClassConditions);
+                                } else if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+                                    dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                }
+                                String igcOperator = IGCRepositoryHelper.getIgcOperator(operator);
+                                IGCSearchCondition byThreshold = new IGCSearchCondition(P_THRESHOLD, igcOperator, value.valueAsString());
+                                classificationConditions.addCondition(byThreshold);
+                            } else if (value == null) {
+                                if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
+                                    includeAllSelected(dataClassConditions);
+                                    IGCSearchCondition byThreshold = new IGCSearchCondition(P_THRESHOLD, "isNull", false);
+                                    classificationConditions.addCondition(byThreshold);
+                                } else if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+                                    dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                    IGCSearchCondition byThreshold = new IGCSearchCondition(P_THRESHOLD, "isNull", true);
+                                    classificationConditions.addCondition(byThreshold);
+                                } else {
+                                    // otherwise there is an error
+                                    throw new FunctionNotSupportedException(IGCOMRSErrorCode.NO_VALUE_FOR_SEARCH.getMessageDefinition(P_THRESHOLD, operator.getName()),
+                                            this.getClass().getName(),
+                                            methodName);
+                                }
+                            } else {
+                                throw new FunctionNotSupportedException(IGCOMRSErrorCode.INVALID_PRIMITIVE.getMessageDefinition(P_THRESHOLD, value.getTypeName()),
+                                        this.getClass().getName(),
+                                        methodName);
+                            }
                             break;
                         case "partialMatch":
-                            boolean isPartialMatch = Boolean.parseBoolean(value.valueAsString());
-                            if (isPartialMatch) {
-                                IGCSearchCondition byPartialMatch = new IGCSearchCondition("confidencePercent", "<", "100");
-                                conditionsForClassification.addCondition(byPartialMatch);
+                            if (value instanceof PrimitivePropertyValue) {
+                                PrimitivePropertyValue ppv = (PrimitivePropertyValue) value;
+                                IGCRepositoryHelper.validateBooleanOperator(operator, methodName);
+                                boolean isPartialMatch = Boolean.parseBoolean(value.valueAsString());
+                                IGCSearchCondition byPartialMatch;
+                                switch (operator) {
+                                    case EQ:
+                                        dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                        byPartialMatch = new IGCSearchCondition("confidencePercent", isPartialMatch ? "<" : "=", "100");
+                                        classificationConditions.addCondition(byPartialMatch);
+                                        break;
+                                    case NEQ:
+                                        dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                        byPartialMatch = new IGCSearchCondition("confidencePercent", isPartialMatch ? "=" : "<", "100");
+                                        classificationConditions.addCondition(byPartialMatch);
+                                        break;
+                                    case IS_NULL:
+                                        includeAllSelected(dataClassConditions);
+                                        classificationConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                        break;
+                                    case NOT_NULL:
+                                        dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                        includeAllDetected(classificationConditions);
+                                        break;
+                                    default:
+                                        // do nothing, not a valid boolean operation
+                                        log.error("Invalid boolean operation for search: {}", operator);
+                                        break;
+                                }
+                            } else if (value == null) {
+                                if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
+                                    includeAllSelected(dataClassConditions);
+                                    classificationConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                } else if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+                                    dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                    includeAllDetected(classificationConditions);
+                                } else {
+                                    // otherwise there is an error
+                                    throw new FunctionNotSupportedException(IGCOMRSErrorCode.NO_VALUE_FOR_SEARCH.getMessageDefinition("partialMatch", operator.getName()),
+                                            this.getClass().getName(),
+                                            methodName);
+                                }
                             } else {
-                                IGCSearchCondition byPartialMatch = new IGCSearchCondition("confidencePercent", "=", "100");
-                                conditionsForClassification.addCondition(byPartialMatch);
+                                throw new FunctionNotSupportedException(IGCOMRSErrorCode.INVALID_PRIMITIVE.getMessageDefinition("partialMatch", value.getTypeName()),
+                                        this.getClass().getName(),
+                                        methodName);
                             }
                             break;
                         case "valueFrequency":
-                            IGCSearchCondition byValueFrequency = new IGCSearchCondition("value_frequency", "=", value.valueAsString());
-                            conditionsForClassification.addCondition(byValueFrequency);
+                            if (value instanceof PrimitivePropertyValue) {
+                                PrimitivePropertyValue ppv = (PrimitivePropertyValue) value;
+                                IGCRepositoryHelper.validateNumericOperator(operator, ppv.getTypeName(), methodName);
+                                long valueFreq = Long.parseLong(value.valueAsString());
+                                if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
+                                    includeAllSelected(dataClassConditions);
+                                } else if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+                                    dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                }
+                                String igcOperator = IGCRepositoryHelper.getIgcOperator(operator);
+                                IGCSearchCondition byValueFrequency = new IGCSearchCondition("value_frequency", igcOperator, "" + valueFreq);
+                                classificationConditions.addCondition(byValueFrequency);
+                            } else if (value == null) {
+                                if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
+                                    includeAllSelected(dataClassConditions);
+                                    IGCSearchCondition byValueFrequency = new IGCSearchCondition("value_frequency", "isNull", false);
+                                    classificationConditions.addCondition(byValueFrequency);
+                                } else if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+                                    dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                    IGCSearchCondition byValueFrequency = new IGCSearchCondition("value_frequency", "isNull", true);
+                                    classificationConditions.addCondition(byValueFrequency);
+                                } else {
+                                    // otherwise there is an error
+                                    throw new FunctionNotSupportedException(IGCOMRSErrorCode.NO_VALUE_FOR_SEARCH.getMessageDefinition("valueFrequency", operator.getName()),
+                                            this.getClass().getName(),
+                                            methodName);
+                                }
+                            } else {
+                                throw new FunctionNotSupportedException(IGCOMRSErrorCode.INVALID_PRIMITIVE.getMessageDefinition("valueFrequency", value.getTypeName()),
+                                        this.getClass().getName(),
+                                        methodName);
+                            }
+                            break;
+                        case "confidence":
+                            if (value instanceof PrimitivePropertyValue) {
+                                PrimitivePropertyValue ppv = (PrimitivePropertyValue) value;
+                                IGCRepositoryHelper.validateNumericOperator(operator, ppv.getTypeName(), methodName);
+                                int confidence = Integer.parseInt(value.valueAsString());
+                                if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
+                                    includeAllSelected(dataClassConditions);
+                                } else if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+                                    dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                }
+                                String igcOperator = IGCRepositoryHelper.getIgcOperator(operator);
+                                IGCSearchCondition byValueFrequency = new IGCSearchCondition("confidencePercent", igcOperator, "" + confidence);
+                                classificationConditions.addCondition(byValueFrequency);
+                            } else if (value == null) {
+                                if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
+                                    includeAllSelected(dataClassConditions);
+                                    IGCSearchCondition byConfidence = new IGCSearchCondition("confidencePercent", "isNull", false);
+                                    classificationConditions.addCondition(byConfidence);
+                                } else if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+                                    dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                    IGCSearchCondition byConfidence = new IGCSearchCondition("confidencePercent", "isNull", true);
+                                    classificationConditions.addCondition(byConfidence);
+                                } else {
+                                    // otherwise there is an error
+                                    throw new FunctionNotSupportedException(IGCOMRSErrorCode.NO_VALUE_FOR_SEARCH.getMessageDefinition("confidence", operator.getName()),
+                                            this.getClass().getName(),
+                                            methodName);
+                                }
+                            } else {
+                                throw new FunctionNotSupportedException(IGCOMRSErrorCode.INVALID_PRIMITIVE.getMessageDefinition("confidence", value.getTypeName()),
+                                        this.getClass().getName(),
+                                        methodName);
+                            }
+                            break;
+                        default:
+                            // Any other property is not mapped, so only include results if the request is for null value
+                            if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
+                                includeAllResults(dataClassConditions, classificationConditions);
+                            } else {
+                                includeNoResults(dataClassConditions, classificationConditions);
+                            }
                             break;
                     }
                 }
             }
+            MatchCriteria matchCriteria = matchProperties.getMatchCriteria();
+            if (dataClassConditions.size() > 0) {
+                IGCRepositoryHelper.setConditionsFromMatchCriteria(dataClassConditions, matchCriteria);
+            }
+            if (classificationConditions.size() > 0) {
+                IGCRepositoryHelper.setConditionsFromMatchCriteria(classificationConditions, matchCriteria);
+            }
         }
+    }
 
-        IGCRepositoryHelper.setConditionsFromMatchCriteria(conditionsForDataClass, matchCriteria);
-        IGCRepositoryHelper.setConditionsFromMatchCriteria(conditionsForClassification, matchCriteria);
+    private void includeAllResults(IGCSearchConditionSet dataClassConditions,
+                                   IGCSearchConditionSet classificationConditions) {
+        includeAllDetected(classificationConditions);
+        includeAllSelected(dataClassConditions);
+    }
 
-        searchForDataClass.addConditions(conditionsForDataClass);
-        searchForClassification.addConditions(conditionsForClassification);
+    private void includeAllDetected(IGCSearchConditionSet classificationConditions) {
+        IGCSearchCondition cc = new IGCSearchCondition("classifies_asset", "isNull", true);
+        classificationConditions.addCondition(cc);
+    }
 
-        searches.add(searchForDataClass);
-        searches.add(searchForClassification);
+    private void includeAllSelected(IGCSearchConditionSet dataClassConditions) {
+        IGCSearchCondition dcc = new IGCSearchCondition("classifications_selected", "isNull", true);
+        dataClassConditions.addCondition(dcc);
+    }
 
-        return searches;
-
+    private void includeNoResults(IGCSearchConditionSet dataClassConditions,
+                                  IGCSearchConditionSet classificationConditions) {
+        dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+        classificationConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
     }
 
     /**

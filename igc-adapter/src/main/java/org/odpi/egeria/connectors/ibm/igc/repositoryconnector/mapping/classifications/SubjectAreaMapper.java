@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
@@ -12,7 +13,11 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyCondition;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
@@ -119,14 +124,14 @@ public class SubjectAreaMapper extends ClassificationMapping {
      *
      * @param repositoryHelper the repository helper
      * @param repositoryName name of the repository
-     * @param matchClassificationProperties the criteria to use when searching for the classification
+     * @param matchProperties the criteria to use when searching for the classification
      * @return IGCSearchConditionSet - the IGC search criteria to find entities based on this classification
      * @throws FunctionNotSupportedException when a regular expression is used for the search which is not supported
      */
     @Override
     public IGCSearchConditionSet getIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
                                                       String repositoryName,
-                                                      InstanceProperties matchClassificationProperties) throws FunctionNotSupportedException {
+                                                      SearchProperties matchProperties) throws FunctionNotSupportedException {
 
         final String methodName = "getIGCSearchCriteria";
 
@@ -141,21 +146,8 @@ public class SubjectAreaMapper extends ClassificationMapping {
 
         IGCSearchConditionSet byName = new IGCSearchConditionSet();
         // We can only search by name, so we will ignore all other properties
-        if (matchClassificationProperties != null) {
-            Map<String, InstancePropertyValue> properties = matchClassificationProperties.getInstanceProperties();
-            if (properties.containsKey("name")) {
-                PrimitivePropertyValue name = (PrimitivePropertyValue) properties.get("name");
-                String subjectAreaName = name.valueAsString();
-                IGCSearchCondition condition = IGCRepositoryHelper.getRegexSearchCondition(
-                        repositoryHelper,
-                        repositoryName,
-                        methodName,
-                        "name",
-                        subjectAreaName
-                );
-                byName.addCondition(condition);
-                byName.setMatchAnyCondition(false);
-            }
+        if (matchProperties != null) {
+            byName = getConditionsForProperties(matchProperties, repositoryHelper, repositoryName, methodName);
         }
         if (byName.size() > 0) {
             igcSearchConditionSet.addNestedConditionSet(subjectArea);
@@ -165,6 +157,45 @@ public class SubjectAreaMapper extends ClassificationMapping {
         } else {
             return subjectArea;
         }
+
+    }
+
+    private IGCSearchConditionSet getConditionsForProperties(SearchProperties matchProperties,
+                                                             OMRSRepositoryHelper repositoryHelper,
+                                                             String repositoryName,
+                                                             String methodName) throws FunctionNotSupportedException {
+
+        IGCSearchConditionSet set = new IGCSearchConditionSet();
+
+        List<PropertyCondition> propertyConditions = matchProperties.getConditions();
+        for (PropertyCondition condition : propertyConditions) {
+            SearchProperties nestedProperties = condition.getNestedConditions();
+            if (nestedProperties != null) {
+                IGCSearchConditionSet nestedSet = getConditionsForProperties(nestedProperties, repositoryHelper, repositoryName, methodName);
+                IGCRepositoryHelper.setConditionsFromMatchCriteria(nestedSet, nestedProperties.getMatchCriteria());
+                set.addNestedConditionSet(nestedSet);
+            } else {
+                String propertyName = condition.getProperty();
+                PropertyComparisonOperator operator = condition.getOperator();
+                if (propertyName.equals("name")) {
+                    if (operator.equals(PropertyComparisonOperator.LIKE) || operator.equals(PropertyComparisonOperator.EQ)) {
+                        IGCSearchCondition byName = IGCRepositoryHelper.getRegexSearchCondition(
+                                repositoryHelper,
+                                repositoryName,
+                                methodName,
+                                "name",
+                                condition.getValue().valueAsString()
+                        );
+                        set.addCondition(byName);
+                    }
+                } else {
+                    set.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                }
+            }
+        }
+        IGCRepositoryHelper.setConditionsFromMatchCriteria(set, matchProperties.getMatchCriteria());
+
+        return set;
 
     }
 

@@ -9,6 +9,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.AssetZoneMembershipMapper_DataFile;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AssetSchemaTypeMapper_FileRecord;
@@ -16,13 +17,15 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.PrimitiveDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 
 /**
  * Defines the mapping to the OMRS "DataFile" entity.
  */
-public class DataFileMapper extends DataStore_Mapper {
+public class DataFileMapper extends DataStoreMapper {
 
     private static class Singleton {
         private static final DataFileMapper INSTANCE = new DataFileMapper();
@@ -99,6 +102,7 @@ public class DataFileMapper extends DataStore_Mapper {
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
+     * @param operator the comparison operator to use
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is provided for the search that is not supported
      */
@@ -109,9 +113,10 @@ public class DataFileMapper extends DataStore_Mapper {
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
+                                                 PropertyComparisonOperator operator,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
 
-        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, value);
+        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, operator, value);
 
         final String methodName = "addComplexPropertySearchCriteria";
 
@@ -119,16 +124,40 @@ public class DataFileMapper extends DataStore_Mapper {
         if (omrsPropertyName.equals("fileType") && value.getInstancePropertyCategory().equals(InstancePropertyCategory.PRIMITIVE)) {
             String extension = value.valueAsString();
             String searchableExtension = repositoryHelper.getUnqualifiedLiteralString(extension);
-            if (repositoryHelper.isExactMatchRegex(extension) || repositoryHelper.isEndsWithRegex(extension)) {
-                IGCSearchCondition endsWith = new IGCSearchCondition("name", "like %{0}", searchableExtension);
-                igcSearchConditionSet.addCondition(endsWith);
-            } else if (repositoryHelper.isStartsWithRegex(extension) || repositoryHelper.isContainsRegex(extension)) {
-                IGCSearchCondition contains = new IGCSearchCondition("name", "like %{0}%", searchableExtension);
-                igcSearchConditionSet.addCondition(contains);
-            } else {
-                throw new FunctionNotSupportedException(IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED.getMessageDefinition(repositoryName, extension),
-                        this.getClass().getName(),
-                        methodName);
+            IGCRepositoryHelper.validateStringOperator(operator, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_STRING.getName(), methodName);
+            IGCSearchCondition condition = null;
+            switch (operator) {
+                case IS_NULL:
+                    // Assume that any file that has no . in it has no extension, and therefore the fileType is null
+                    condition = new IGCSearchCondition("name", "like %{0}%", ".", true);
+                    break;
+                case NOT_NULL:
+                    // Assume that any file that has a . in it has an extension, and therefore has a fileType
+                    condition = new IGCSearchCondition("name", "like %{0}%", ".");
+                    break;
+                case EQ:
+                    condition = new IGCSearchCondition("name", "like %{0}", searchableExtension);
+                    break;
+                case NEQ:
+                    condition = new IGCSearchCondition("name", "like %{0}", searchableExtension, true);
+                    break;
+                case LIKE:
+                    if (repositoryHelper.isExactMatchRegex(extension) || repositoryHelper.isEndsWithRegex(extension)) {
+                        condition = new IGCSearchCondition("name", "like %{0}", searchableExtension);
+                    } else if (repositoryHelper.isStartsWithRegex(extension) || repositoryHelper.isContainsRegex(extension)) {
+                        condition = new IGCSearchCondition("name", "like %{0}%", searchableExtension);
+                    } else {
+                        throw new FunctionNotSupportedException(IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED.getMessageDefinition(repositoryName, extension),
+                                this.getClass().getName(),
+                                methodName);
+                    }
+                    break;
+                default:
+                    // Do nothing...
+                    break;
+            }
+            if (condition != null) {
+                igcSearchConditionSet.addCondition(condition);
             }
         }
 

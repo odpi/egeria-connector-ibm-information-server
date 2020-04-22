@@ -9,6 +9,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.PrimitiveDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
@@ -61,9 +62,9 @@ public class IGCRepositoryHelperTest {
         testEquivalence(now, now + 1, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_DATE);
         testEquivalence("TestString", "OtherString", PrimitiveDefCategory.OM_PRIMITIVE_TYPE_STRING);
 
-        assertTrue(IGCRepositoryHelper.equivalentValues(null, null));
-        assertFalse(IGCRepositoryHelper.equivalentValues(null, new PrimitivePropertyValue()));
-        assertFalse(IGCRepositoryHelper.equivalentValues("a", null));
+        assertTrue(IGCRepositoryHelper.equivalentValues(null, PropertyComparisonOperator.EQ, null));
+        assertFalse(IGCRepositoryHelper.equivalentValues(null, PropertyComparisonOperator.EQ, new PrimitivePropertyValue()));
+        assertFalse(IGCRepositoryHelper.equivalentValues("a", PropertyComparisonOperator.EQ, null));
 
     }
 
@@ -71,9 +72,9 @@ public class IGCRepositoryHelperTest {
         PrimitivePropertyValue testIPV = new PrimitivePropertyValue();
         testIPV.setPrimitiveDefCategory(category);
         testIPV.setPrimitiveValue(test);
-        assertTrue(IGCRepositoryHelper.equivalentValues(test, testIPV));
+        assertTrue(IGCRepositoryHelper.equivalentValues(test, PropertyComparisonOperator.EQ, testIPV));
         test = otherValue;
-        assertFalse(IGCRepositoryHelper.equivalentValues(test, testIPV));
+        assertFalse(IGCRepositoryHelper.equivalentValues(test, PropertyComparisonOperator.EQ, testIPV));
     }
 
     @Test
@@ -103,10 +104,11 @@ public class IGCRepositoryHelperTest {
         value.setPrimitiveDefCategory(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_INT);
         value.setPrimitiveValue(10);
         try {
-            IGCRepositoryHelper.addIGCSearchConditionFromValue(null,
+            IGCRepositoryHelper.addIGCSearchCondition(null,
                     "TestRepo",
                     set,
                     "testProperty",
+                    PropertyComparisonOperator.EQ,
                     value);
         } catch (FunctionNotSupportedException e) {
             assertNull(e);
@@ -118,10 +120,11 @@ public class IGCRepositoryHelperTest {
         MapPropertyValue map = new MapPropertyValue();
         map.setMapValue("testProperty", value);
         try {
-            IGCRepositoryHelper.addIGCSearchConditionFromValue(null,
+            IGCRepositoryHelper.addIGCSearchCondition(null,
                     "TestRepo",
                     set,
                     "testProperty",
+                    PropertyComparisonOperator.EQ,
                     map);
         } catch (FunctionNotSupportedException e) {
             assertNull(e);
@@ -134,26 +137,28 @@ public class IGCRepositoryHelperTest {
         array.setArrayCount(1);
         array.setArrayValue(0, value);
         try {
-            IGCRepositoryHelper.addIGCSearchConditionFromValue(null,
+            IGCRepositoryHelper.addIGCSearchCondition(null,
                     "TestRepo",
                     set,
                     "testProperty",
+                    PropertyComparisonOperator.IN,
                     array);
         } catch (FunctionNotSupportedException e) {
             assertNull(e);
         }
         assertEquals(set.size(), 1);
-        assertEquals(set.getConditionSetObject().toString(), "{\"conditions\":[{\"property\":\"testProperty\",\"operator\":\"=\",\"value\":\"10\"}],\"operator\":\"and\"}");
+        assertEquals(set.getConditionSetObject().toString(), "{\"conditions\":[{\"property\":\"testProperty\",\"operator\":\"in\",\"value\":[\"10\"]}],\"operator\":\"and\"}");
 
         set = new IGCSearchConditionSet();
         value = new PrimitivePropertyValue();
         value.setPrimitiveDefCategory(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_DATE);
         value.setPrimitiveValue(10L);
         try {
-            IGCRepositoryHelper.addIGCSearchConditionFromValue(null,
+            IGCRepositoryHelper.addIGCSearchCondition(null,
                     "TestRepo",
                     set,
                     "testProperty",
+                    PropertyComparisonOperator.EQ,
                     value);
         } catch (FunctionNotSupportedException e) {
             assertNull(e);
@@ -165,10 +170,11 @@ public class IGCRepositoryHelperTest {
         EnumPropertyValue ev = new EnumPropertyValue();
         ev.setSymbolicName("TestSymbolicName");
         try {
-            IGCRepositoryHelper.addIGCSearchConditionFromValue(null,
+            IGCRepositoryHelper.addIGCSearchCondition(null,
                     "TestRepo",
                     set,
                     "testProperty",
+                    PropertyComparisonOperator.EQ,
                     ev);
         } catch (FunctionNotSupportedException e) {
             assertNull(e);

@@ -18,6 +18,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefAttribute;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
@@ -44,6 +45,7 @@ public abstract class EntityMapping extends InstanceMapping {
 
     public static final String COMPLEX_MAPPING_SENTINEL = "__COMPLEX_PROPERTY__";
     public static final String LITERAL_MAPPING_SENTINEL = "__LITERAL_MAPPING__";
+    public static final String SUPERTYPE_SENTINEL = "__SUPERTYPE_WITH_NO_DIRECT_MAPPING__";
 
     private Map<String, PropertyMapping> mappingByIgcProperty;
     private Map<String, PropertyMapping> mappingByOmrsProperty;
@@ -216,6 +218,8 @@ public abstract class EntityMapping extends InstanceMapping {
                 PropertyMapping existing = mappingByOmrsProperty.remove(omrsPropertyName);
                 mappingByIgcProperty.remove(existing.getIgcPropertyName());
             }
+            // Remove any existing literal property mapping (no-op if there is not one)
+            removeLiteralPropertyMapping(omrsPropertyName);
             mappingByOmrsProperty.put(omrsPropertyName, pm);
             mappingByIgcProperty.put(igcPropertyName, pm);
         } else {
@@ -244,6 +248,8 @@ public abstract class EntityMapping extends InstanceMapping {
     final void addComplexOmrsProperty(String omrsPropertyName) {
         if (omrsPropertyName != null) {
             complexOmrsProperties.add(omrsPropertyName);
+            // Remove any existing literal property mapping (no-op if there is not one)
+            removeLiteralPropertyMapping(omrsPropertyName);
         } else {
             log.warn("Attempted to add null property to mapping -- OMRS.");
         }
@@ -477,6 +483,7 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
+     * @param operator the comparison operator to use
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
      */
@@ -486,6 +493,7 @@ public abstract class EntityMapping extends InstanceMapping {
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
+                                                 PropertyComparisonOperator operator,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
         // Nothing to do -- no complex properties by default
     }

@@ -10,7 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Define sthe mapping to the OMRS "Database" entity.
  */
-public class DatabaseMapper extends DataStore_Mapper {
+public class DatabaseMapper extends DataStoreMapper {
 
     private static class Singleton {
         private static final DatabaseMapper INSTANCE = new DatabaseMapper();

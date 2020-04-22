@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -13,18 +14,31 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMapp
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 
 /**
  * Defines the mapping to the OMRS "SchemaType" entity.
  */
-public class SchemaType_Mapper extends SchemaElement_Mapper {
+public class SchemaTypeMapper extends SchemaElementMapper {
 
-    protected SchemaType_Mapper(String igcAssetTypeName,
-                                String igcAssetTypeDisplayName,
-                                String omrsEntityTypeName,
-                                String prefix) {
+    private static class Singleton {
+        private static final SchemaTypeMapper INSTANCE = new SchemaTypeMapper(
+                SUPERTYPE_SENTINEL,
+                SUPERTYPE_SENTINEL,
+                "SchemaType",
+                null
+        );
+    }
+    public static SchemaTypeMapper getInstance(IGCVersionEnum version) {
+        return SchemaTypeMapper.Singleton.INSTANCE;
+    }
+
+    protected SchemaTypeMapper(String igcAssetTypeName,
+                               String igcAssetTypeDisplayName,
+                               String omrsEntityTypeName,
+                               String prefix) {
         super(
                 igcAssetTypeName,
                 igcAssetTypeDisplayName,
@@ -85,6 +99,7 @@ public class SchemaType_Mapper extends SchemaElement_Mapper {
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
+     * @param operator the comparison operator to use
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is used for the search which is not supported
      */
@@ -95,9 +110,10 @@ public class SchemaType_Mapper extends SchemaElement_Mapper {
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
+                                                 PropertyComparisonOperator operator,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
 
-        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, value);
+        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, operator, value);
 
         final String methodName = "addComplexPropertySearchCriteria";
 
@@ -109,6 +125,7 @@ public class SchemaType_Mapper extends SchemaElement_Mapper {
                     repositoryName,
                     methodName,
                     name,
+                    operator,
                     igcSearchConditionSet
             );
         }
@@ -133,6 +150,7 @@ public class SchemaType_Mapper extends SchemaElement_Mapper {
                 repositoryName,
                 methodName,
                 searchCriteria,
+                PropertyComparisonOperator.LIKE,
                 igcSearchConditionSet
         );
 
@@ -142,6 +160,7 @@ public class SchemaType_Mapper extends SchemaElement_Mapper {
                                       String repositoryName,
                                       String methodName,
                                       String toSearch,
+                                      PropertyComparisonOperator operator,
                                       IGCSearchConditionSet igcSearchConditionSet) throws FunctionNotSupportedException {
         String parentPropertyName = getParentPropertyName() + ".name";
         IGCSearchCondition regex = IGCRepositoryHelper.getRegexSearchCondition(
@@ -149,6 +168,7 @@ public class SchemaType_Mapper extends SchemaElement_Mapper {
                 repositoryName,
                 methodName,
                 parentPropertyName,
+                operator,
                 toSearch
         );
         igcSearchConditionSet.addCondition(regex);

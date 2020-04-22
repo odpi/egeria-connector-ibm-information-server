@@ -2,7 +2,9 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.MainObject;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
@@ -14,8 +16,14 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.GovernanceClassificationStatusMapper;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyCondition;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.PrimitiveDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,18 +151,20 @@ public class ConfidentialityMapper extends ClassificationMapping {
     /**
      * Search for Confidentiality by looking for a term assignment where the assigned term both sits under a
      * Confidentiality parent category and has a name matching the confidentiality level. (Note that only the
-     * 'level' classification property is used from matchClassificationProperties, as no other properties are
-     * implemented in IGC.)
+     * 'level' classification property is used from matchProperties, as no other properties are implemented in IGC.)
      *
      * @param repositoryHelper the repository helper
      * @param repositoryName name of the repository
-     * @param matchClassificationProperties the criteria to use when searching for the classification
+     * @param matchProperties the criteria to use when searching for the classification
      * @return IGCSearchConditionSet - the IGC search criteria to find entities based on this classification
+     * @throws FunctionNotSupportedException when an invalid enumeration is requested
      */
     @Override
     public IGCSearchConditionSet getIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
                                                       String repositoryName,
-                                                      InstanceProperties matchClassificationProperties) {
+                                                      SearchProperties matchProperties) throws FunctionNotSupportedException {
+
+        final String methodName = "getIGCSearchCriteria";
 
         IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
                 "assigned_to_terms.parent_category.name",
@@ -163,24 +173,122 @@ public class ConfidentialityMapper extends ClassificationMapping {
         );
         IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(igcSearchCondition);
 
-        // We can only search by level, so we will ignore all other properties
-        if (matchClassificationProperties != null) {
-            Map<String, InstancePropertyValue> properties = matchClassificationProperties.getInstanceProperties();
-            if (properties.containsKey("level")) {
-                PrimitivePropertyValue levelValue = (PrimitivePropertyValue) properties.get("level");
-                Integer level = (Integer) levelValue.getPrimitiveValue();
-                String levelAsString = level.toString() + " ";
-                IGCSearchCondition propertyCondition = new IGCSearchCondition(
-                        "assigned_to_terms.name",
-                        "like {0}%",
-                        levelAsString
-                );
-                igcSearchConditionSet.addCondition(propertyCondition);
+        if (matchProperties != null) {
+            IGCSearchConditionSet byProperties = getConditionsForProperties(matchProperties, repositoryHelper, repositoryName, methodName);
+            if (byProperties.size() > 0) {
+                igcSearchConditionSet.addNestedConditionSet(byProperties);
                 igcSearchConditionSet.setMatchAnyCondition(false);
             }
         }
 
         return igcSearchConditionSet;
+
+    }
+
+    private IGCSearchConditionSet getConditionsForProperties(SearchProperties matchProperties,
+                                                             OMRSRepositoryHelper repositoryHelper,
+                                                             String repositoryName,
+                                                             String methodName) throws FunctionNotSupportedException {
+
+        IGCSearchConditionSet set = new IGCSearchConditionSet();
+
+        List<PropertyCondition> propertyConditions = matchProperties.getConditions();
+        for (PropertyCondition condition : propertyConditions) {
+            SearchProperties nestedProperties = condition.getNestedConditions();
+            if (nestedProperties != null) {
+                IGCSearchConditionSet nestedSet = getConditionsForProperties(nestedProperties, repositoryHelper, repositoryName, methodName);
+                IGCRepositoryHelper.setConditionsFromMatchCriteria(nestedSet, nestedProperties.getMatchCriteria());
+                set.addNestedConditionSet(nestedSet);
+            } else {
+                String propertyName = condition.getProperty();
+                PropertyComparisonOperator operator = condition.getOperator();
+                InstancePropertyValue value = condition.getValue();
+                switch (propertyName) {
+                    case "status":
+                        if (value instanceof EnumPropertyValue) {
+                            EnumPropertyValue enumValue = (EnumPropertyValue) value;
+                            // Only enumeration mapped is 99, anything else should result in no results
+                            if (enumValue.getOrdinal() != 99) {
+                                set.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                            }
+                        } else if (value == null) {
+                            // Only valid combination for which we should return results in this case is asking for a
+                            // non-null keyPattern
+                            if (!operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+                                set.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                            }
+                        } else {
+                            throw new FunctionNotSupportedException(IGCOMRSErrorCode.INVALID_ENUMERATION.getMessageDefinition(propertyName),
+                                    this.getClass().getName(),
+                                    methodName);
+                        }
+                        break;
+                    case "confidence":
+                        if (value instanceof PrimitivePropertyValue) {
+                            PrimitivePropertyValue levelValue = (PrimitivePropertyValue) value;
+                            if (levelValue.getPrimitiveDefCategory().equals(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_INT)) {
+                                // Confidence can only ever match 100, so any mismatch in operators or values should give no results
+                                Integer level = (Integer) levelValue.getPrimitiveValue();
+                                boolean includeResults = (level == null && operator.equals(PropertyComparisonOperator.NOT_NULL))
+                                        || (level != null
+                                            && ((level == 100 && (operator.equals(PropertyComparisonOperator.EQ) || operator.equals(PropertyComparisonOperator.GTE) || operator.equals(PropertyComparisonOperator.LTE)))
+                                                || (level < 100 && (operator.equals(PropertyComparisonOperator.GT) || operator.equals(PropertyComparisonOperator.GTE)))
+                                                || (level > 100 && (operator.equals(PropertyComparisonOperator.LT) || operator.equals(PropertyComparisonOperator.LTE)))));
+                                if (!includeResults) {
+                                    set.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                }
+                            } else {
+                                throw new FunctionNotSupportedException(IGCOMRSErrorCode.INVALID_PRIMITIVE.getMessageDefinition(propertyName, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_INT.getName()),
+                                        this.getClass().getName(),
+                                        methodName);
+                            }
+                        } else {
+                            throw new FunctionNotSupportedException(IGCOMRSErrorCode.INVALID_PRIMITIVE.getMessageDefinition(propertyName, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_INT.getName()),
+                                    this.getClass().getName(),
+                                    methodName);
+                        }
+                        break;
+                    case "steward":
+                    case "source":
+                    case "notes":
+                        // These can only be null, if anything else is requested then no results should be returned
+                        if (!operator.equals(PropertyComparisonOperator.IS_NULL)) {
+                            set.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                        }
+                        break;
+                    case "level":
+                        if (value instanceof PrimitivePropertyValue) {
+                            PrimitivePropertyValue levelValue = (PrimitivePropertyValue) value;
+                            if (levelValue.getPrimitiveDefCategory().equals(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_INT)) {
+                                Integer level = (Integer) levelValue.getPrimitiveValue();
+                                String levelAsString = level.toString() + " ";
+                                IGCSearchCondition propertyCondition = new IGCSearchCondition(
+                                        "assigned_to_terms.name",
+                                        "like {0}%",
+                                        levelAsString
+                                );
+                                set.addCondition(propertyCondition);
+                            } else {
+                                throw new FunctionNotSupportedException(IGCOMRSErrorCode.INVALID_PRIMITIVE.getMessageDefinition(propertyName, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_INT.getName()),
+                                        this.getClass().getName(),
+                                        methodName);
+                            }
+                        } else {
+                            throw new FunctionNotSupportedException(IGCOMRSErrorCode.INVALID_PRIMITIVE.getMessageDefinition(propertyName, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_INT.getName()),
+                                    this.getClass().getName(),
+                                    methodName);
+                        }
+                        break;
+                    default:
+                        // There are no other valid properties, so in case any others are requested force no results
+                        set.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                        break;
+                }
+            }
+        }
+        IGCRepositoryHelper.setConditionsFromMatchCriteria(set, matchProperties.getMatchCriteria());
+
+        return set;
 
     }
 

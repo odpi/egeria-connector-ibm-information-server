@@ -18,38 +18,24 @@ import java.util.*;
 /**
  * Store of implemented entity mappings for the repository.
  */
-public class EntityMappingStore {
+public class EntityMappingStore extends MappingStore {
 
     private static final Logger log = LoggerFactory.getLogger(EntityMappingStore.class);
-
-    private IGCOMRSRepositoryConnector igcomrsRepositoryConnector;
-
-    private List<TypeDef> typeDefs;
 
     private Map<String, EntityMapping> omrsGuidToMapping;
     private Map<String, List<String>> igcAssetTypeToOmrsGuids;
     private Map<String, String> igcAssetDisplayNameToOmrsGuid;
     private Map<String, String> igcAssetTypeAndPrefixToOmrsGuid;
     private Map<String, Set<String>> igcPrefixToOmrsGuids;
-    private Map<String, String> omrsNameToGuid;
 
     public EntityMappingStore(IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
-        this.igcomrsRepositoryConnector = igcomrsRepositoryConnector;
-        typeDefs = new ArrayList<>();
+        super(igcomrsRepositoryConnector);
         omrsGuidToMapping = new HashMap<>();
         igcAssetTypeToOmrsGuids = new HashMap<>();
         igcAssetDisplayNameToOmrsGuid = new HashMap<>();
         igcAssetTypeAndPrefixToOmrsGuid = new HashMap<>();
         igcPrefixToOmrsGuids = new HashMap<>();
-        omrsNameToGuid = new HashMap<>();
     }
-
-    /**
-     * Retrieves a listing of all TypeDefs for which entity mappings have been implemented.
-     *
-     * @return {@code List<TypeDef>}
-     */
-    public List<TypeDef> getTypeDefs() { return this.typeDefs; }
 
     /**
      * Adds an entity mapping for the provided TypeDef, using the provided EntityMapping Java class and repository details.
@@ -64,11 +50,10 @@ public class EntityMappingStore {
         EntityMapping mapping = getEntityMapper(mappingClass);
 
         if (mapping != null) {
-            typeDefs.add(omrsTypeDef);
             String guid = omrsTypeDef.getGUID();
-            omrsGuidToMapping.put(guid, mapping);
-            omrsNameToGuid.put(omrsTypeDef.getName(), guid);
+            addTypeDef(omrsTypeDef);
             String igcAssetType = mapping.getIgcAssetType();
+            omrsGuidToMapping.put(guid, mapping);
             addIgcAssetTypeToGuid(igcAssetType, guid);
             igcAssetDisplayNameToOmrsGuid.put(mapping.getIgcAssetTypeDisplayName(), guid);
             String prefix = mapping.getIgcRidPrefix();
@@ -87,12 +72,17 @@ public class EntityMappingStore {
                 log.debug(" ... adding additional mapping from {} to: {}", otherKey, guid);
                 igcAssetTypeAndPrefixToOmrsGuid.put(otherKey, guid);
             }
-            IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
-            igcRestClient.cacheTypeDetails(mapping.getIgcAssetType());
-            List<String> otherTypes = mapping.getOtherIGCAssetTypes();
-            if (otherTypes != null && !otherTypes.isEmpty()) {
-                for (String type : otherTypes) {
-                    igcRestClient.cacheTypeDetails(type);
+            // Only proceed with retrieving and caching details from IGC if it is mapped to a real IGC type
+            if (!mapping.getIgcAssetType().equals(EntityMapping.SUPERTYPE_SENTINEL)) {
+                IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
+                igcRestClient.cacheTypeDetails(mapping.getIgcAssetType());
+                List<String> otherTypes = mapping.getOtherIGCAssetTypes();
+                if (otherTypes != null && !otherTypes.isEmpty()) {
+                    for (String type : otherTypes) {
+                        if (!type.equals(EntityMapping.SUPERTYPE_SENTINEL)) {
+                            igcRestClient.cacheTypeDetails(type);
+                        }
+                    }
                 }
             }
         }
@@ -216,12 +206,12 @@ public class EntityMappingStore {
      * @return EntityMapping
      */
     public EntityMapping getMappingByOmrsTypeName(String name) {
-        if (omrsNameToGuid.containsKey(name)) {
-            String guid = omrsNameToGuid.get(name);
-            return getMappingByOmrsTypeGUID(guid);
-        } else {
+        String guid = getGuidForName(name);
+        if (guid == null) {
             log.warn("Unable to find mapping for OMRS type: {}", name);
             return null;
+        } else {
+            return getMappingByOmrsTypeGUID(guid);
         }
     }
 

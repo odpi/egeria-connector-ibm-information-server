@@ -34,6 +34,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDef;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefPatch;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryeventmapper.OMRSRepositoryEventMapperBase;
 import org.odpi.openmetadata.repositoryservices.ffdc.OMRSErrorCode;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.*;
@@ -1736,6 +1737,21 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 localServerType,
                 localOrganizationName,
                 newAttributeTypeDef);
+    }
+
+    /**
+     * Sends an updated TypeDef event.
+     *
+     * @param typeDefPatch the patch that was applied to achieve the update
+     */
+    public void sendUpdatedTypeDefEvent(TypeDefPatch typeDefPatch) {
+        repositoryEventProcessor.processUpdatedTypeDefEvent(
+                sourceName,
+                metadataCollectionId,
+                localServerName,
+                localServerType,
+                localOrganizationName,
+                typeDefPatch);
     }
 
     /**
