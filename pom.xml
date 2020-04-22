@@ -106,6 +106,7 @@
         <rhino.version>1.7.12</rhino.version>
         <netty.version>4.1.48.Final</netty.version>
         <woodstox.version>6.1.1</woodstox.version>
+        <xmlapi.version>1.4.01</xmlapi.version>
         <stax.version>1.0.1</stax.version>
         <maven-compiler.version>3.8.1</maven-compiler.version>
         <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
@@ -183,6 +184,12 @@
                 <groupId>com.fasterxml.woodstox</groupId>
                 <artifactId>woodstox-core</artifactId>
                 <version>${woodstox.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>xml-apis</groupId>
+                <artifactId>xml-apis</artifactId>
+                <version>${xmlapi.version}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
