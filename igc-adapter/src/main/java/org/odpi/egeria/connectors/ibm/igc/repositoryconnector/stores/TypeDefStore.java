@@ -5,6 +5,10 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.stores;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefAttribute;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefLink;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefPatch;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.InvalidParameterException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.PatchErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +62,25 @@ public class TypeDefStore {
     }
 
     /**
+     * Updates the unimplemented TypeDef using the provided patch. (Still needed for tracking and inheritance.)
+     *
+     * @param sourceName of the repository in which we are updating the type def
+     * @param repositoryHelper for the repository
+     * @param typeDefPatch the patch details for the type def
+     * @throws InvalidParameterException if the typeDefPatch is null
+     * @throws PatchErrorException if there is any error applying the patch to the type def
+     */
+    public void updateUnimplementedTypeDef(String sourceName,
+                                           OMRSRepositoryHelper repositoryHelper,
+                                           TypeDefPatch typeDefPatch) throws InvalidParameterException, PatchErrorException {
+        String guid = typeDefPatch.getTypeDefGUID();
+        TypeDef unimplemented = unimplementedTypeDefs.getOrDefault(guid, null);
+        if (unimplemented != null) {
+            repositoryHelper.applyPatch(sourceName, unimplemented, typeDefPatch);
+        }
+    }
+
+    /**
      * Adds a mapping between GUID of the OMRS TypeDef and a mapping of its attribute names to definitions.
      *
      * @param attributes the list of attribute definitions for the OMRS TypeDef
@@ -72,6 +95,20 @@ public class TypeDefStore {
                 omrsGuidToAttributeMap.get(guid).put(attribute.getAttributeName(), attribute);
             }
         }
+    }
+
+    /**
+     * Retrieve a TypeDef by its GUID, irrespective of whether it has an implemented mapping or not.
+     *
+     * @param guid of the type definition
+     * @return TypeDef
+     */
+    public TypeDef getAnyTypeDefByGUID(String guid) {
+        TypeDef typeDef = getTypeDefByGUID(guid, false);
+        if (typeDef == null) {
+            typeDef = getUnimplementedTypeDefByGUID(guid);
+        }
+        return typeDef;
     }
 
     /**

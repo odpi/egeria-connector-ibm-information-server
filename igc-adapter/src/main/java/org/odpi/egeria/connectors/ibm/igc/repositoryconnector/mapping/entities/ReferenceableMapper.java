@@ -18,6 +18,8 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedTagMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.PrimitiveDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.slf4j.Logger;
@@ -205,6 +207,7 @@ public class ReferenceableMapper extends EntityMapping {
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
+     * @param operator the comparison operator to use
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
      */
@@ -215,6 +218,7 @@ public class ReferenceableMapper extends EntityMapping {
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
+                                                 PropertyComparisonOperator operator,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
 
         final String methodName = "addComplexPropertySearchCriteria";
@@ -222,29 +226,40 @@ public class ReferenceableMapper extends EntityMapping {
         if (omrsPropertyName.equals("qualifiedName")) {
 
             log.debug("Adding complex search criteria for: qualifiedName");
+            IGCRepositoryHelper.validateStringOperator(operator, PrimitiveDefCategory.OM_PRIMITIVE_TYPE_STRING.getName(), methodName);
 
-            String qualifiedName = ((PrimitivePropertyValue) value).getPrimitiveValue().toString();
-            String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedName);
+            String qualifiedName = value.valueAsString();
+            String unqualifiedName;
+            Identity.StringType stringType = Identity.StringType.EXACT;
+            if (operator.equals(PropertyComparisonOperator.LIKE)) {
+                unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(qualifiedName);
+                if (repositoryHelper.isEndsWithRegex(qualifiedName)) {
+                    stringType = Identity.StringType.ENDS_WITH;
+                } else if (repositoryHelper.isStartsWithRegex(qualifiedName)) {
+                    stringType = Identity.StringType.STARTS_WITH;
+                } else if (repositoryHelper.isContainsRegex(qualifiedName)) {
+                    stringType = Identity.StringType.CONTAINS;
+                } else if (!repositoryHelper.isExactMatchRegex(qualifiedName)) {
+                    throw new FunctionNotSupportedException(IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED.getMessageDefinition(repositoryName, qualifiedName),
+                            this.getClass().getName(),
+                            methodName);
+                }
+            } else {
+                unqualifiedName = qualifiedName;
+            }
 
             // Check if the qualifiedName has a generated prefix -- need to remove prior to next steps, if so...
             unqualifiedName = IGCRepositoryHelper.getSearchableQualifiedName(unqualifiedName);
             log.debug("Looking up identity: {}", unqualifiedName);
-            Identity.StringType stringType = Identity.StringType.EXACT;
-            if (repositoryHelper.isEndsWithRegex(qualifiedName)) {
-                stringType = Identity.StringType.ENDS_WITH;
-            } else if (repositoryHelper.isStartsWithRegex(qualifiedName)) {
-                stringType = Identity.StringType.STARTS_WITH;
-            } else if (repositoryHelper.isContainsRegex(qualifiedName)) {
-                stringType = Identity.StringType.CONTAINS;
-            }
+
             Identity identity = Identity.getFromString(unqualifiedName, igcRestClient, stringType);
             boolean skip = false;
 
-            if (repositoryHelper.isStartsWithRegex(qualifiedName)) {
+            if (stringType.equals(Identity.StringType.STARTS_WITH)) {
                 // for a startsWith, we only know the upper portions of the context, so the best we can do is search
                 // for everything and trim the results after they've been returned
                 log.debug(". . . running expensive startsWith query on: {}", qualifiedName);
-            } else if (repositoryHelper.isEndsWithRegex(qualifiedName)) {
+            } else if (stringType.equals(Identity.StringType.ENDS_WITH)) {
                 if (identity != null) {
                     // for an endsWith, we only know the lower portions of the context, which we should be able to
                     // therefore search directly
@@ -254,11 +269,11 @@ public class ReferenceableMapper extends EntityMapping {
                 } else {
                     log.debug(". . . running expensive endsWith query on: {}", qualifiedName);
                 }
-            } else if (repositoryHelper.isContainsRegex(qualifiedName)) {
+            } else if (stringType.equals(Identity.StringType.CONTAINS)) {
                 // for a contains, we only know some middle portion of the context, so the best we can do is search
                 // for everything and trim the results after they've been returned
                 log.debug(". . . running expensive contains query on: {}", qualifiedName);
-            } else if (repositoryHelper.isExactMatchRegex(qualifiedName)) {
+            } else {
                 // Identity must be translate-able and match the type being searched, if it is to be an exact match
                 if (identity != null) {
                     log.debug(". . .found identity: {}", identity);
@@ -274,10 +289,6 @@ public class ReferenceableMapper extends EntityMapping {
                     log.info("Unable to find identity '{}' -- skipping.", qualifiedName);
                     skip = true;
                 }
-            } else {
-                throw new FunctionNotSupportedException(IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED.getMessageDefinition(repositoryName, qualifiedName),
-                        this.getClass().getName(),
-                        methodName);
             }
 
             if (skip) {
@@ -290,13 +301,15 @@ public class ReferenceableMapper extends EntityMapping {
 
             log.debug("Adding complex search criteria for: additionalProperties");
 
+            // TODO: not entirely sure this is the semantic we want for a map-based search?
             Map<String, InstancePropertyValue> mapValues = ((MapPropertyValue) value).getMapValues().getInstanceProperties();
             for (Map.Entry<String, InstancePropertyValue> nextEntry : mapValues.entrySet()) {
-                IGCRepositoryHelper.addIGCSearchConditionFromValue(
+                IGCRepositoryHelper.addIGCSearchCondition(
                         repositoryHelper,
                         repositoryName,
                         igcSearchConditionSet,
                         nextEntry.getKey(),
+                        operator,
                         nextEntry.getValue()
                 );
             }

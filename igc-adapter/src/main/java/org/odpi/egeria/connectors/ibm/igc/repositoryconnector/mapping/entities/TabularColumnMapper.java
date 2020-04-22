@@ -9,7 +9,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Defines the mapping to the OMRS "TabularColumn" entity.
  */
-public class TabularColumnMapper extends SchemaAttribute_Mapper {
+public class TabularColumnMapper extends SchemaAttributeMapper {
 
     private static class Singleton {
         private static final TabularColumnMapper INSTANCE = new TabularColumnMapper();
@@ -26,13 +26,6 @@ public class TabularColumnMapper extends SchemaAttribute_Mapper {
                 "Data File Field",
                 "TabularColumn"
         );
-
-        // The list of properties that should be mapped
-        addSimplePropertyMapping("position", "position");
-        addSimplePropertyMapping("default_value", "defaultValueOverride");
-        addSimplePropertyMapping("type", "nativeClass");
-        addLiteralPropertyMapping("allowsDuplicateValues", null);
-        addLiteralPropertyMapping("orderedValues", null);
 
         // The list of relationships that should be mapped
         addRelationshipMapper(AttributeForSchemaMapper_RecordField.getInstance(null));

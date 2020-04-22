@@ -30,10 +30,22 @@ public class TypeEmbeddedAttributeMapper extends ClassificationMapping {
                 "SchemaAttribute",
                 "TypeEmbeddedAttribute"
         );
+        addLiteralPropertyMapping("qualifiedName", null);
+        addLiteralPropertyMapping("displayName", null);
+        addLiteralPropertyMapping("author", null);
+        addLiteralPropertyMapping("defaultValue", null);
+        addLiteralPropertyMapping("usage", null);
+        addLiteralPropertyMapping("description", null);
+        addLiteralPropertyMapping("schemaTypeName", null);
+        addLiteralPropertyMapping("versionNumber", null);
+        addLiteralPropertyMapping("fixedValue", null);
+        addLiteralPropertyMapping("additionalProperties", null);
+        addLiteralPropertyMapping("isDeprecated", false);
         addLiteralPropertyMapping("encodingStandard", null);
         addMappedOmrsProperty("dataType");
         addSubType(TypeEmbeddedAttributeMapper_RelationalTable.getInstance(null));
         addSubType(TypeEmbeddedAttributeMapper_RelationalColumn.getInstance(null));
+        addSubType(TypeEmbeddedAttributeMapper_TabularColumn.getInstance(null));
     }
 
     protected TypeEmbeddedAttributeMapper(String igcAssetType,

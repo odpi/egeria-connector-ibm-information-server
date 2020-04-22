@@ -22,6 +22,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCRelations
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefAttribute;
@@ -379,20 +380,18 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param repositoryName name of the repository
      * @param igcRestClient connectivity to an IGC environment
      * @param matchProperties the set of properties against which to match (or null if none)
-     * @param matchCriteria the criteria against which to match (or null / ignored if matchProperties is null)
      * @return {@code List<IGCSearch>} - the search objects by which to find these relationships
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
      */
     public List<IGCSearch> getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
                                                        String repositoryName,
                                                        IGCRestClient igcRestClient,
-                                                       InstanceProperties matchProperties,
-                                                       MatchCriteria matchCriteria) throws FunctionNotSupportedException {
+                                                       SearchProperties matchProperties) throws FunctionNotSupportedException {
         // Nothing to do -- no relationship-level properties by default -- so return the simple search
-        if (matchProperties == null || matchProperties.getInstanceProperties() == null || matchProperties.getInstanceProperties().size() == 0) {
+        if (matchProperties == null || matchProperties.getConditions() == null || matchProperties.getConditions().size() == 0) {
             return getSimpleIGCSearchCriteria();
         } else {
-            return buildDefaultComplexSearch(matchProperties, matchCriteria);
+            return buildDefaultComplexSearch(matchProperties);
         }
     }
 
@@ -416,15 +415,14 @@ public abstract class RelationshipMapping extends InstanceMapping {
             return getSimpleIGCSearchCriteria();
         } else {
             // No need to check for literal-mapped values, as currently no relationship has a string-based literal value
-            return buildDefaultComplexSearch(null, null);
+            return buildDefaultComplexSearch(null);
         }
     }
 
-    private List<IGCSearch> buildDefaultComplexSearch(InstanceProperties matchProperties, MatchCriteria matchCriteria) {
+    private List<IGCSearch> buildDefaultComplexSearch(SearchProperties matchProperties) {
 
         List<IGCSearch> searches;
-        if ( (matchProperties == null && matchCriteria == null)
-                || getAllNoneOrSome(matchProperties, matchCriteria).equals(SearchFilter.NONE)) {
+        if (matchProperties == null || getAllNoneOrSome(matchProperties).equals(SearchFilter.NONE)) {
             searches = new ArrayList<>();
             ProxyMapping pm = getProxyTwoMapping();
             IGCSearch igcSearch = new IGCSearch(pm.getIgcAssetType());

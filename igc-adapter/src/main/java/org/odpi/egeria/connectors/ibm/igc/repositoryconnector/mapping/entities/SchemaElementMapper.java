@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -16,6 +17,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGui
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.OMRSRuntimeException;
@@ -26,14 +28,26 @@ import org.slf4j.LoggerFactory;
 /**
  * Defines the mapping to the OMRS "SchemaElement" entity.
  */
-public class SchemaElement_Mapper extends ReferenceableMapper {
+public class SchemaElementMapper extends ReferenceableMapper {
 
-    private static final Logger log = LoggerFactory.getLogger(SchemaElement_Mapper.class);
+    private static final Logger log = LoggerFactory.getLogger(SchemaElementMapper.class);
 
-    protected SchemaElement_Mapper(String igcAssetTypeName,
-                                   String igcAssetTypeDisplayName,
-                                   String omrsEntityTypeName,
-                                   String prefix) {
+    private static class Singleton {
+        private static final SchemaElementMapper INSTANCE = new SchemaElementMapper(
+                SUPERTYPE_SENTINEL,
+                SUPERTYPE_SENTINEL,
+                "SchemaElement",
+                null
+        );
+    }
+    public static SchemaElementMapper getInstance(IGCVersionEnum version) {
+        return SchemaElementMapper.Singleton.INSTANCE;
+    }
+
+    protected SchemaElementMapper(String igcAssetTypeName,
+                                  String igcAssetTypeDisplayName,
+                                  String omrsEntityTypeName,
+                                  String prefix) {
         super(
                 igcAssetTypeName,
                 igcAssetTypeDisplayName,
@@ -44,6 +58,7 @@ public class SchemaElement_Mapper extends ReferenceableMapper {
         // The list of properties that should be mapped
         addSimplePropertyMapping("name", "displayName");
         addSimplePropertyMapping("short_description", "description");
+        addLiteralPropertyMapping("isDeprecated", false);
         addComplexOmrsProperty("anchorGUID");
 
     }
@@ -96,6 +111,7 @@ public class SchemaElement_Mapper extends ReferenceableMapper {
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
+     * @param operator the comparison operator to use
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is used for the search which is not supported
      */
@@ -106,9 +122,10 @@ public class SchemaElement_Mapper extends ReferenceableMapper {
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
+                                                 PropertyComparisonOperator operator,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
 
-        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, value);
+        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, operator, value);
 
         final String methodName = "addComplexPropertySearchCriteria";
 
@@ -116,7 +133,7 @@ public class SchemaElement_Mapper extends ReferenceableMapper {
         // exact match that was requested
         if (omrsPropertyName.equals("anchorGUID") && value.getInstancePropertyCategory().equals(InstancePropertyCategory.PRIMITIVE)) {
             String guidString = value.valueAsString();
-            IGCSearchConditionSet toAdd = getParentAssetSearchCriteria(repositoryHelper, repositoryName, methodName, guidString, true);
+            IGCSearchConditionSet toAdd = getParentAssetSearchCriteria(repositoryHelper, repositoryName, methodName, guidString, operator, true);
             if (toAdd.size() > 0) {
                 igcSearchConditionSet.addNestedConditionSet(toAdd);
             }
@@ -139,7 +156,7 @@ public class SchemaElement_Mapper extends ReferenceableMapper {
 
         // Only attempt to extend with criterion for anchorGUID if we have an exact match against something we can
         // reverse into a GUID, otherwise skip the criteria
-        IGCSearchConditionSet toAdd = getParentAssetSearchCriteria(repositoryHelper, repositoryName, methodName, searchCriteria, false);
+        IGCSearchConditionSet toAdd = getParentAssetSearchCriteria(repositoryHelper, repositoryName, methodName, searchCriteria, PropertyComparisonOperator.EQ, false);
         if (toAdd.size() > 0) {
             igcSearchConditionSet.addNestedConditionSet(toAdd);
         }
@@ -179,6 +196,7 @@ public class SchemaElement_Mapper extends ReferenceableMapper {
      * @param repositoryName the name of the repository
      * @param methodName the name of the method retrieving the search criteria
      * @param regex the regular expression to use in looking up the anchorGUID
+     * @param operator the comparison operator to use
      * @param failOnInexactRegex if true, throws the FunctionNotSupportedException if the regex provided is not an exact match regex
      * @return IGCSearchConditionSet
      * @throws FunctionNotSupportedException if the provided regex is not an exact match and failOnInexactRegex is true
@@ -187,39 +205,43 @@ public class SchemaElement_Mapper extends ReferenceableMapper {
                                                                  String repositoryName,
                                                                  String methodName,
                                                                  String regex,
+                                                                 PropertyComparisonOperator operator,
                                                                  boolean failOnInexactRegex) throws FunctionNotSupportedException {
 
         IGCSearchConditionSet conditions = new IGCSearchConditionSet();
-        if (repositoryHelper.isExactMatchRegex(regex)) {
-            IGCEntityGuid guid = IGCEntityGuid.fromGuid(repositoryHelper.getUnqualifiedLiteralString(regex));
-            if (guid != null) {
-                IGCSearchCondition condition;
-                switch (getIgcAssetType()) {
-                    case "database_column":
-                        IGCSearchConditionSet nested = new IGCSearchConditionSet();
-                        IGCSearchCondition view = new IGCSearchCondition("view.database_schema", "=", guid.getRid());
-                        IGCSearchCondition table = new IGCSearchCondition("database_table.database_schema", "=", guid.getRid());
-                        nested.addCondition(view);
-                        nested.addCondition(table);
-                        nested.setMatchAnyCondition(true);
-                        conditions.addNestedConditionSet(nested);
-                        break;
-                    case "database_table":
-                        condition = new IGCSearchCondition("database_schema", "=", guid.getRid());
-                        conditions.addCondition(condition);
-                        break;
-                    case "data_file_field":
-                        condition = new IGCSearchCondition("data_file_record.data_file", "=", guid.getRid());
-                        conditions.addCondition(condition);
-                        break;
-                    case "data_file_record":
-                        condition = new IGCSearchCondition("data_file", "=", guid.getRid());
-                        conditions.addCondition(condition);
-                        break;
-                    default:
-                        log.warn("Unable to add criteria for anchorGUID, type not known: {}", getIgcAssetType());
-                        break;
-                }
+        IGCEntityGuid guid = null;
+        if (operator.equals(PropertyComparisonOperator.EQ)) {
+            guid = IGCEntityGuid.fromGuid(regex);
+        } else if (repositoryHelper.isExactMatchRegex(regex)) {
+            guid = IGCEntityGuid.fromGuid(repositoryHelper.getUnqualifiedLiteralString(regex));
+        }
+        if (guid != null) {
+            IGCSearchCondition condition;
+            switch (getIgcAssetType()) {
+                case "database_column":
+                    IGCSearchConditionSet nested = new IGCSearchConditionSet();
+                    IGCSearchCondition view = new IGCSearchCondition("view.database_schema", "=", guid.getRid());
+                    IGCSearchCondition table = new IGCSearchCondition("database_table.database_schema", "=", guid.getRid());
+                    nested.addCondition(view);
+                    nested.addCondition(table);
+                    nested.setMatchAnyCondition(true);
+                    conditions.addNestedConditionSet(nested);
+                    break;
+                case "database_table":
+                    condition = new IGCSearchCondition("database_schema", "=", guid.getRid());
+                    conditions.addCondition(condition);
+                    break;
+                case "data_file_field":
+                    condition = new IGCSearchCondition("data_file_record.data_file", "=", guid.getRid());
+                    conditions.addCondition(condition);
+                    break;
+                case "data_file_record":
+                    condition = new IGCSearchCondition("data_file", "=", guid.getRid());
+                    conditions.addCondition(condition);
+                    break;
+                default:
+                    log.warn("Unable to add criteria for anchorGUID, type not known: {}", getIgcAssetType());
+                    break;
             }
         } else if (failOnInexactRegex) {
             throw new FunctionNotSupportedException(IGCOMRSErrorCode.REGEX_NOT_IMPLEMENTED.getMessageDefinition(repositoryName, regex),

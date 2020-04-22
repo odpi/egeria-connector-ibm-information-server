@@ -21,7 +21,9 @@ public class ContactMethodTypeMapper extends EnumMapping {
                 "ContactMethodType"
         );
         addDefaultEnumMapping(99, "Other", "Another usage.");
-        addEnumMapping("email", 0, "Email", "Contact through email.");
+        addEnumMapping("email_address", 0, "Email", "Contact through email.");
+        addEnumMapping("mobile_phone_number", 1, "Phone", "Contact through telephone number.");
+        addEnumMapping("instant_message_id", 2, "Chat", "Contact through chat account.");
     }
 
 }

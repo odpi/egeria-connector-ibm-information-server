@@ -7,24 +7,35 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
-import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 
 /**
  * Defines the common mappings to the OMRS "GovernanceDefinition" entity.
  */
-public class GovernanceDefinition_Mapper extends ReferenceableMapper {
+public class GovernanceDefinitionMapper extends ReferenceableMapper {
 
-    protected GovernanceDefinition_Mapper(String igcAssetTypeName,
-                                          String igcAssetTypeDisplayName,
-                                          String omrsEntityTypeName) {
+    private static class Singleton {
+        private static final GovernanceDefinitionMapper INSTANCE = new GovernanceDefinitionMapper(
+                SUPERTYPE_SENTINEL,
+                SUPERTYPE_SENTINEL,
+                "GovernanceDefinition"
+        );
+    }
+    public static GovernanceDefinitionMapper getInstance(IGCVersionEnum version) {
+        return GovernanceDefinitionMapper.Singleton.INSTANCE;
+    }
+
+    protected GovernanceDefinitionMapper(String igcAssetTypeName,
+                                         String igcAssetTypeDisplayName,
+                                         String omrsEntityTypeName) {
         super(
                 igcAssetTypeName,
                 igcAssetTypeDisplayName,
@@ -88,6 +99,7 @@ public class GovernanceDefinition_Mapper extends ReferenceableMapper {
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
+     * @param operator the comparison operator to use
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is used for the search which is not supported
      */
@@ -98,13 +110,14 @@ public class GovernanceDefinition_Mapper extends ReferenceableMapper {
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
+                                                 PropertyComparisonOperator operator,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
 
-        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, value);
+        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, operator, value);
 
         final String methodName = "addComplexPropertySearchCriteria";
 
-        // Only need to add a condition of we are after the 'fileType' and have been provided a String
+        // Only need to add a condition of we are after the 'domain' and have been provided a String
         if (omrsPropertyName.equals("domain") && value.getInstancePropertyCategory().equals(InstancePropertyCategory.PRIMITIVE)) {
             String domain = value.valueAsString();
             IGCSearchCondition condition = IGCRepositoryHelper.getRegexSearchCondition(
@@ -112,6 +125,7 @@ public class GovernanceDefinition_Mapper extends ReferenceableMapper {
                     repositoryName,
                     methodName,
                     "parent_policy.name",
+                    operator,
                     domain
             );
             igcSearchConditionSet.addCondition(condition);

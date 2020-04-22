@@ -9,6 +9,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelpe
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.NoteLogMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 
@@ -65,8 +66,7 @@ public class AttachedNoteLogMapper extends RelationshipMapping {
     public List<IGCSearch> getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
                                                        String repositoryName,
                                                        IGCRestClient igcRestClient,
-                                                       InstanceProperties matchProperties,
-                                                       MatchCriteria matchCriteria) {
+                                                       SearchProperties matchProperties) {
         // As with NoteLog entities themselves, do not search on AttachedNoteLogs
         return Collections.emptyList();
     }

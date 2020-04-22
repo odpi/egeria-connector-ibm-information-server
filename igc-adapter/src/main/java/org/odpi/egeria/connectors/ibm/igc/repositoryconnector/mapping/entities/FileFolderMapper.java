@@ -11,7 +11,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Defines the mapping to the OMRS "FileFolder" entity.
  */
-public class FileFolderMapper extends DataStore_Mapper {
+public class FileFolderMapper extends DataStoreMapper {
 
     private static class Singleton {
         private static final FileFolderMapper INSTANCE = new FileFolderMapper();

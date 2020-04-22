@@ -18,6 +18,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataClassHierarchyMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.slf4j.Logger;
@@ -262,6 +263,7 @@ public class DataClassMapper extends ReferenceableMapper {
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param igcPropertyName the IGC property name (or COMPLEX_MAPPING_SENTINEL) to search
      * @param omrsPropertyName the OMRS property name (or COMPLEX_MAPPING_SENTINEL) to search
+     * @param operator the comparison operator to use
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is provided for the search that is not supported
      */
@@ -272,9 +274,10 @@ public class DataClassMapper extends ReferenceableMapper {
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
+                                                 PropertyComparisonOperator operator,
                                                  InstancePropertyValue value) throws FunctionNotSupportedException {
 
-        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, value);
+        super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, operator, value);
 
         final String methodName = "addComplexPropertySearchCriteria";
 
@@ -307,6 +310,9 @@ public class DataClassMapper extends ReferenceableMapper {
                     asRegex.addCondition(byRegex);
                     asRegex.addCondition(withRegex);
                     asRegex.setMatchAnyCondition(false);
+                    if (operator.equals(PropertyComparisonOperator.NEQ)) {
+                        asRegex.setNegateAll(true);
+                    }
 
                     IGCSearchConditionSet asValidValues = new IGCSearchConditionSet();
                     IGCSearchCondition byValidValues = new IGCSearchCondition("data_class_type_single", "=", "ValidValues");
@@ -330,6 +336,9 @@ public class DataClassMapper extends ReferenceableMapper {
                     asValidValues.addCondition(byValidValues);
                     asValidValues.addCondition(withValidValues);
                     asValidValues.setMatchAnyCondition(false);
+                    if (operator.equals(PropertyComparisonOperator.NEQ)) {
+                        asValidValues.setNegateAll(true);
+                    }
 
                     if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
                         IGCSearchConditionSet asScript = new IGCSearchConditionSet();
@@ -344,6 +353,9 @@ public class DataClassMapper extends ReferenceableMapper {
                         asScript.addCondition(byScript);
                         asScript.addCondition(withScript);
                         asScript.setMatchAnyCondition(false);
+                        if (operator.equals(PropertyComparisonOperator.NEQ)) {
+                            asScript.setNegateAll(true);
+                        }
 
                         IGCSearchConditionSet asColumnSimilarity = new IGCSearchConditionSet();
                         IGCSearchCondition byColumnSimilarity = new IGCSearchCondition("data_class_type_single", "=", "ColumnSimilarity");
@@ -357,6 +369,9 @@ public class DataClassMapper extends ReferenceableMapper {
                         asColumnSimilarity.addCondition(byColumnSimilarity);
                         asColumnSimilarity.addCondition(withColumnSimilarity);
                         asColumnSimilarity.setMatchAnyCondition(false);
+                        if (operator.equals(PropertyComparisonOperator.NEQ)) {
+                            asColumnSimilarity.setNegateAll(true);
+                        }
 
                         IGCSearchConditionSet asUnstructuredFilter = new IGCSearchConditionSet();
                         IGCSearchCondition byUnstructuredFilter = new IGCSearchCondition("data_class_type_single", "=", "UnstructuredFilter");
@@ -369,6 +384,9 @@ public class DataClassMapper extends ReferenceableMapper {
                         asUnstructuredFilter.addCondition(byUnstructuredFilter);
                         asUnstructuredFilter.addCondition(withUnstructuredFilter);
                         asUnstructuredFilter.setMatchAnyCondition(false);
+                        if (operator.equals(PropertyComparisonOperator.NEQ)) {
+                            asUnstructuredFilter.setNegateAll(true);
+                        }
 
                         complexCriteria.addNestedConditionSet(asScript);
                         complexCriteria.addNestedConditionSet(asColumnSimilarity);
@@ -385,6 +403,9 @@ public class DataClassMapper extends ReferenceableMapper {
                     );
                     asJavaClass.addCondition(withJavaClass);
                     asJavaClass.setMatchAnyCondition(false);
+                    if (operator.equals(PropertyComparisonOperator.NEQ)) {
+                        asJavaClass.setNegateAll(true);
+                    }
 
                     complexCriteria.addNestedConditionSet(asRegex);
                     complexCriteria.addNestedConditionSet(asValidValues);
@@ -399,12 +420,44 @@ public class DataClassMapper extends ReferenceableMapper {
                 case "userDefined":
                     if (igcVersion.isEqualTo(IGCVersionEnum.V11702) || igcVersion.isHigherThan(IGCVersionEnum.V11702)) {
                         boolean isUserDefined = Boolean.parseBoolean(omrsValue);
-                        IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
-                                "provider",
-                                isUserDefined ? "<>" : "=",
-                                "IBM"
-                        );
-                        igcSearchConditionSet.addCondition(igcSearchCondition);
+                        IGCRepositoryHelper.validateBooleanOperator(operator, methodName);
+                        IGCSearchCondition igcSearchCondition = null;
+                        switch (operator) {
+                            case IS_NULL:
+                                igcSearchCondition = new IGCSearchCondition(
+                                        "provider",
+                                        "isNull",
+                                        false
+                                );
+                                break;
+                            case NOT_NULL:
+                                igcSearchCondition = new IGCSearchCondition(
+                                        "provider",
+                                        "isNull",
+                                        true
+                                );
+                                break;
+                            case EQ:
+                                igcSearchCondition = new IGCSearchCondition(
+                                        "provider",
+                                        isUserDefined ? "<>" : "=",
+                                        "IBM"
+                                );
+                                break;
+                            case NEQ:
+                                igcSearchCondition = new IGCSearchCondition(
+                                        "provider",
+                                        isUserDefined ? "=" : "<>",
+                                        "IBM"
+                                );
+                                break;
+                            default:
+                                // Do nothing...
+                                break;
+                        }
+                        if (igcSearchCondition != null) {
+                            igcSearchConditionSet.addCondition(igcSearchCondition);
+                        }
                     }
                     break;
             }
@@ -417,15 +470,15 @@ public class DataClassMapper extends ReferenceableMapper {
                                 repositoryName,
                                 methodName,
                                 igcPropertyToSearch,
+                                operator,
                                 omrsValue
                         )
                 );
             }
 
-        } else {
-            // Otherwise we've been asked to match a property that is not mapped, so force no results
-            igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
         }
+        // If it is a property that is not complex-mapped, it's inclusion (or not) should already be handled by other
+        // methods
 
     }
 

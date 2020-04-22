@@ -2481,6 +2481,43 @@ public class ConnectorTest {
     }
 
     @Test
+    public void testFindActorProfile() {
+
+        final String methodName = "testFindActorProfile";
+
+        InstanceProperties ip = repositoryHelper.addStringPropertyToInstance(sourceName, null, "name", repositoryHelper.getExactMatchRegex("cocopharma_external"), methodName);
+
+        testFindEntitiesByProperty(
+                "5a2f38dc-d69d-4a6f-ad26-ac86f118fa35",
+                "Team",
+                ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        testFindEntitiesByProperty(
+                "36db26d5-aba2-439b-bc15-d62d373c5db6",
+                "Team",
+                ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "name", repositoryHelper.getExactMatchRegex("cquartile"), methodName);
+        testFindEntitiesByProperty(
+                "ac406bf8-e53e-49f1-9088-2af28bbbd285",
+                "Person",
+                ip,
+                MatchCriteria.ALL,
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+    }
+
+    @Test
     public void testGetContactDetailsDetail() {
 
         Map<String, String> expectedValues = new HashMap<>();
@@ -2838,6 +2875,26 @@ public class ConnectorTest {
                 repositoryHelper.getEndsWithRegex("::(data_file_folder)=cocopharma::(data_file)=employee-dept.csv::(data_file_record)=employee-dept", true),
                 MockConstants.EGERIA_PAGESIZE,
                 1
+        );
+
+        Set<String> hostedTypes = new HashSet<>();
+        hostedTypes.add("TabularColumn");
+        hostedTypes.add("TabularSchemaType");
+        hostedTypes.add("DataFile");
+        hostedTypes.add("FileFolder");
+        hostedTypes.add("Endpoint");
+        hostedTypes.add("RelationalColumn");
+        hostedTypes.add("RelationalTable");
+        hostedTypes.add("DeployedDatabaseSchema");
+        hostedTypes.add("Database");
+
+        testFindEntitiesByPropertyValue(
+                null,
+                hostedTypes,
+                null,
+                repositoryHelper.getStartsWithRegex("(host_(engine))=INFO"),
+                5,
+                5
         );
 
     }

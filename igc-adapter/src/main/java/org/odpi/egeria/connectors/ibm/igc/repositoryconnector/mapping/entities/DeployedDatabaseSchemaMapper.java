@@ -10,7 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Defines the mapping to the OMRS "DeployedDatabaseSchema" entity.
  */
-public class DeployedDatabaseSchemaMapper extends DataSet_Mapper {
+public class DeployedDatabaseSchemaMapper extends DataSetMapper {
 
     private static class Singleton {
         private static final DeployedDatabaseSchemaMapper INSTANCE = new DeployedDatabaseSchemaMapper();

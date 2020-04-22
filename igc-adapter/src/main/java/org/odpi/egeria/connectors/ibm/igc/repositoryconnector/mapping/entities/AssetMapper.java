@@ -2,14 +2,27 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+
 /**
  * Defines the common mappings to the OMRS "Asset" entity.
  */
-public class Asset_Mapper extends ReferenceableMapper {
+public class AssetMapper extends ReferenceableMapper {
 
-    protected Asset_Mapper(String igcAssetTypeName,
-                           String igcAssetTypeDisplayName,
-                           String omrsEntityTypeName) {
+    private static class Singleton {
+        private static final AssetMapper INSTANCE = new AssetMapper(
+                SUPERTYPE_SENTINEL,
+                SUPERTYPE_SENTINEL,
+                "Asset"
+        );
+    }
+    public static AssetMapper getInstance(IGCVersionEnum version) {
+        return AssetMapper.Singleton.INSTANCE;
+    }
+
+    protected AssetMapper(String igcAssetTypeName,
+                          String igcAssetTypeDisplayName,
+                          String omrsEntityTypeName) {
         super(
                 igcAssetTypeName,
                 igcAssetTypeDisplayName,

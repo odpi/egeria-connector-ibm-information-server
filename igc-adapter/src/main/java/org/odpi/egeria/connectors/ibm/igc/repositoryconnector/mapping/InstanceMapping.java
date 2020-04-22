@@ -4,12 +4,10 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping;
 
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyCondition;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Provides the base class for all metadata instance mappings.
@@ -32,6 +30,17 @@ public abstract class InstanceMapping {
      */
     public void addLiteralPropertyMapping(String omrsPropertyName, Object value) {
         literalOmrsPropertyMapping.put(omrsPropertyName, value);
+    }
+
+    /**
+     * Remove a mapping between an OMRS property and a fixed (literal) value.
+     *
+     * @param omrsPropertyName the OMRS property name to remove
+     */
+    public void removeLiteralPropertyMapping(String omrsPropertyName) {
+        if (literalOmrsPropertyMapping.containsKey(omrsPropertyName)) {
+            literalOmrsPropertyMapping.remove(omrsPropertyName);
+        }
     }
 
     /**
@@ -80,34 +89,52 @@ public abstract class InstanceMapping {
      * search options.
      *
      * @param matchProperties the properties requested for matching
-     * @param matchCriteria the criteria requested for matching
      * @return SearchFilter indicating whether to retrieve all, none or some of the instances via the search
      */
-    public SearchFilter getAllNoneOrSome(InstanceProperties matchProperties, MatchCriteria matchCriteria) {
+    public SearchFilter getAllNoneOrSome(SearchProperties matchProperties) {
 
         SearchFilter filter = SearchFilter.SOME;
 
         if (matchProperties != null) {
 
             Set<String> mappedOmrsProperties = getMappedOmrsPropertyNames();
-            Map<String, InstancePropertyValue> propertiesToMatch = matchProperties.getInstanceProperties();
-            if (propertiesToMatch == null) {
-                propertiesToMatch = new HashMap<>();
+            MatchCriteria matchCriteria = matchProperties.getMatchCriteria();
+            List<PropertyCondition> conditions = matchProperties.getConditions();
+            if (conditions == null) {
+                conditions = new ArrayList<>();
             }
 
-            if (!mappedOmrsProperties.containsAll(propertiesToMatch.keySet()) && matchCriteria.equals(MatchCriteria.ALL)) {
-                // If there is some property we are being asked to search but it has no mapping,
-                // ensure we will get no results
-                filter = SearchFilter.NONE;
-            } else {
-
-                // Otherwise go through the properties themselves and figure out what results we should filter
-                boolean allValuesAreUnequal = true;
-                for (Map.Entry<String, InstancePropertyValue> entry : propertiesToMatch.entrySet()) {
-                    String omrsPropertyName = entry.getKey();
+            boolean allValuesAreUnequal = true;
+            for (PropertyCondition condition : conditions) {
+                SearchProperties nestedConditions = condition.getNestedConditions();
+                if (nestedConditions != null) {
+                    // Recuse on any nested conditions
+                    filter = getAllNoneOrSome(nestedConditions);
+                    if ( (matchCriteria.equals(MatchCriteria.NONE) && !filter.equals(SearchFilter.NONE))
+                            || (matchCriteria.equals(MatchCriteria.ALL) && !filter.equals(SearchFilter.ALL)) ) {
+                        // If some match but we have been requested to match nothing, or if we have not matched
+                        // everything but have been requested to match everything, we can short-circuit as we should
+                        // return no results
+                        filter = SearchFilter.NONE;
+                        break;
+                    } else if (matchCriteria.equals(MatchCriteria.ANY) && !filter.equals(SearchFilter.NONE)) {
+                        // Otherwise, if we simply need to match anything and we have any matches, we should return all
+                        // results
+                        filter = SearchFilter.ALL;
+                        break;
+                    }
+                    // (and in any other case we should continue looping to determine the situation...)
+                } else {
+                    String omrsPropertyName = condition.getProperty();
+                    // If there is any property we are being asked to search but it has no mapping,
+                    // ensure we will get no results
+                    if (!mappedOmrsProperties.contains(omrsPropertyName)) {
+                        filter = SearchFilter.NONE;
+                        break;
+                    }
                     if (isOmrsPropertyLiteralMapped(omrsPropertyName)) {
                         Object literalValue = getOmrsPropertyLiteralValue(omrsPropertyName);
-                        boolean valuesAreEqual = IGCRepositoryHelper.equivalentValues(literalValue, entry.getValue());
+                        boolean valuesAreEqual = IGCRepositoryHelper.equivalentValues(literalValue, condition.getOperator(), condition.getValue());
                         if (valuesAreEqual && !matchCriteria.equals(MatchCriteria.ALL)) {
                             // If the values are equal, we can immediately short-circuit: when we should match
                             // none this means we should have no results, and when we should match any this means
@@ -127,10 +154,9 @@ public abstract class InstanceMapping {
                         }
                     }
                 }
-                if (allValuesAreUnequal && matchCriteria.equals(MatchCriteria.NONE)) {
-                    filter = SearchFilter.ALL;
-                }
-
+            }
+            if (allValuesAreUnequal && matchCriteria.equals(MatchCriteria.NONE)) {
+                filter = SearchFilter.ALL;
             }
 
         }

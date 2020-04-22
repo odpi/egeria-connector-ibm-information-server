@@ -16,22 +16,15 @@ import java.util.*;
 /**
  * Store of implemented classification mappings for the repository.
  */
-public class ClassificationMappingStore {
+public class ClassificationMappingStore extends MappingStore {
 
     private static final Logger log = LoggerFactory.getLogger(ClassificationMappingStore.class);
 
-    private IGCOMRSRepositoryConnector igcomrsRepositoryConnector;
-
-    private List<TypeDef> typeDefs;
-
     private Map<String, ClassificationMapping> omrsGuidToMapping;
-    private Map<String, String> omrsNameToGuid;
 
     public ClassificationMappingStore(IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
-        typeDefs = new ArrayList<>();
+        super(igcomrsRepositoryConnector);
         omrsGuidToMapping = new HashMap<>();
-        omrsNameToGuid = new HashMap<>();
-        this.igcomrsRepositoryConnector = igcomrsRepositoryConnector;
     }
 
     /**
@@ -46,23 +39,14 @@ public class ClassificationMappingStore {
         ClassificationMapping mapping = getClassificationMapper(mappingClass);
 
         if (mapping != null) {
-            typeDefs.add(omrsTypeDef);
             String guid = omrsTypeDef.getGUID();
-            String name = omrsTypeDef.getName();
+            addTypeDef(omrsTypeDef);
             omrsGuidToMapping.put(guid, mapping);
-            omrsNameToGuid.put(name, guid);
         }
 
         return (mapping != null);
 
     }
-
-    /**
-     * Retrieves the listing of all TypeDefs for which classification mappings are implemented.
-     *
-     * @return {@code List<TypeDef>}
-     */
-    public List<TypeDef> getTypeDefs() { return this.typeDefs; }
 
     /**
      * Retrieves a classification mapping based on the GUID of the OMRS classification type.
@@ -86,11 +70,12 @@ public class ClassificationMappingStore {
      * @return ClassificationMapping
      */
     public ClassificationMapping getMappingByOmrsTypeName(String name) {
-        if (omrsNameToGuid.containsKey(name)) {
-            return getMappingByOmrsTypeGUID(omrsNameToGuid.get(name));
-        } else {
+        String guid = getGuidForName(name);
+        if (guid == null) {
             log.warn("Unable to find mapping for OMRS type: {}", name);
             return null;
+        } else {
+            return getMappingByOmrsTypeGUID(guid);
         }
     }
 

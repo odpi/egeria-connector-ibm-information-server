@@ -210,6 +210,7 @@ public class MockServerExpectations implements PluginExpectationInitializer {
         setTabularColumnRelationships(mockServerClient);
 
         // Complex search tests
+        setFindActorProfile(mockServerClient);
         setFindEntitiesByQualifiedName(mockServerClient);
         setFindDataClassByProperty(mockServerClient);
         setFindDataClassAssignmentByProperty(mockServerClient);
@@ -854,7 +855,7 @@ public class MockServerExpectations implements PluginExpectationInitializer {
     private void setGlossaryTermFindByClassification(MockServerClient mockServerClient) {
         setSearchAndResponse(mockServerClient, "GlossaryTermFindByClassification", "results.json",
                 json(
-                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"},{\"property\":\"assigned_to_terms.name\",\"operator\":\"like {0}%\",\"value\":\"3 \"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        "{\"types\":[\"term\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"category_path.name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"assigned_to_terms.parent_category.name\",\"operator\":\"=\",\"value\":\"Confidentiality\"},{\"conditions\":[{\"property\":\"assigned_to_terms.name\",\"operator\":\"like {0}%\",\"value\":\"3 \"}],\"operator\":\"and\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
@@ -973,12 +974,31 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 "{\"types\":[\"data_file_record\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"data_file_fields\",\"operator\":\"=\",\"value\":\"" + DATA_FILE_FIELD_RID + "\"}],\"operator\":\"or\"}}");
     }
 
+    private void setFindActorProfile(MockServerClient mockServerClient) {
+        String caseName = "FindActorProfile";
+        setSearchAndResponse(mockServerClient, caseName, "results_group.json",
+                json(
+                        "{\"types\":[\"group\"],\"where\":{\"conditions\":[{\"property\":\"principal_id\",\"operator\":\"=\",\"value\":\"cocopharma_external\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_user.json",
+                json(
+                        "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"property\":\"principal_id\",\"operator\":\"=\",\"value\":\"cquartile\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+    }
+
     private void setFindEntitiesByQualifiedName(MockServerClient mockServerClient) {
         String caseName = "FindEntitiesByQualifiedName";
         setSearchAndResponse(mockServerClient, caseName, "results_all.json",
                 "{\"types\":[\"database_column\"],\"properties\":[\"allows_null_values\",\"averageValue\",\"constantFlag\",\"created_by\",\"created_on\",\"data_type\",\"default_value\",\"defined_foreign_key\",\"defined_primary_key\",\"domainType\",\"fraction\",\"inferredDataType\",\"inferredFormat\",\"inferredLength\",\"inferredPrecision\",\"inferredScale\",\"isInferredForeignKey\",\"isInferredPrimaryKey\",\"length\",\"level\",\"long_description\",\"minimum_length\",\"modified_by\",\"modified_on\",\"name\",\"native_id\",\"nbRecordsTested\",\"nullabilityFlag\",\"numberCompleteValues\",\"numberDistinctValues\",\"numberEmptyValues\",\"numberFormats\",\"numberNullValues\",\"numberValidValues\",\"numberZeroValues\",\"occurs\",\"odbc_type\",\"position\",\"qualityScore\",\"qualityScore_bubble\",\"quality_benchmark\",\"selected_foreign_key\",\"selected_natural_key\",\"selected_primary_key\",\"short_description\",\"start_end_columns\",\"synchronized_from\",\"type\",\"unique\",\"uniqueFlag\"],\"pageSize\":100}");
         setSearchAndResponse(mockServerClient, caseName, "results_all.json",
                 "{\"types\":[\"database_column\"],\"properties\":[\"allows_null_values\",\"averageValue\",\"constantFlag\",\"created_by\",\"created_on\",\"data_type\",\"default_value\",\"defined_foreign_key\",\"defined_primary_key\",\"domainType\",\"fraction\",\"inferredDataType\",\"inferredFormat\",\"inferredLength\",\"inferredPrecision\",\"inferredScale\",\"isInferredForeignKey\",\"isInferredPrimaryKey\",\"length\",\"level\",\"long_description\",\"minimum_length\",\"modified_by\",\"modified_on\",\"name\",\"native_id\",\"nbRecordsTested\",\"nullabilityFlag\",\"numberCompleteValues\",\"numberDistinctValues\",\"numberEmptyValues\",\"numberFormats\",\"numberNullValues\",\"numberValidValues\",\"numberZeroValues\",\"occurs\",\"odbc_type\",\"position\",\"qualityScore\",\"qualityScore_bubble\",\"quality_benchmark\",\"selected_foreign_key\",\"selected_natural_key\",\"selected_primary_key\",\"short_description\",\"start_end_columns\",\"synchronized_from\",\"type\",\"unique\",\"uniqueFlag\"],\"pageSize\":10}");
+        setSearchAndResponse(mockServerClient, caseName, "results_one.json",
+                json(
+                        "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"database_table_or_view.name\",\"operator\":\"=\",\"value\":\"CONTACTEMAIL\"},{\"property\":\"database_table_or_view.database_schema.name\",\"operator\":\"=\",\"value\":\"DB2INST1\"},{\"property\":\"database_table_or_view.database_schema.database.name\",\"operator\":\"=\",\"value\":\"COMPDIR\"},{\"property\":\"database_table_or_view.database_schema.database.host.name\",\"operator\":\"=\",\"value\":\"INFOSVR\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"EMAIL\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
         setSearchAndResponse(mockServerClient, caseName, "results_one.json",
                 json(
                         "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"database_table_or_view.name\",\"operator\":\"=\",\"value\":\"contactemail\"},{\"property\":\"database_table_or_view.database_schema.name\",\"operator\":\"=\",\"value\":\"db2inst1\"},{\"property\":\"database_table_or_view.database_schema.database.name\",\"operator\":\"=\",\"value\":\"compdir\"},{\"property\":\"database_table_or_view.database_schema.database.host.name\",\"operator\":\"=\",\"value\":\"infosvr\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"email\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
@@ -1046,6 +1066,12 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                         "{\"types\":[\"data_file_record\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"data_file.name\",\"operator\":\"=\",\"value\":\"employee-dept.csv\"},{\"property\":\"data_file.path\",\"operator\":\"like %{0}\",\"value\":\"cocopharma\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"employee-dept\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
+        setSearchAndResponse(mockServerClient, caseName, "database_5.json",
+                "{\"types\":[\"database\"],\"properties\":[\"alias_(business_name)\",\"created_by\",\"created_on\",\"database_type\",\"dbms\",\"dbms_server_instance\",\"dbms_vendor\",\"dbms_version\",\"imported_from\",\"location\",\"long_description\",\"modified_by\",\"modified_on\",\"name\",\"native_id\",\"short_description\",\"synchronized_from\"],\"pageSize\":5}");
+        setSearchAndResponse(mockServerClient, caseName, "data_file_record_5.json",
+                "{\"types\":[\"data_file_record\"],\"properties\":[\"FKViolationCount\",\"PKDuplicateCount\",\"alias_(business_name)\",\"created_by\",\"created_on\",\"fieldCount\",\"imported_from\",\"include_for_business_lineage\",\"long_description\",\"modified_by\",\"modified_on\",\"name\",\"native_id\",\"nbRecordTested\",\"qualityScore\",\"qualityScore_bubble\",\"quality_benchmark\",\"reviewDate\",\"rowCount\",\"short_description\",\"synchronized_from\"],\"pageSize\":5}");
+        setSearchAndResponse(mockServerClient, caseName, "data_connection_5.json",
+                "{\"types\":[\"data_connection\"],\"properties\":[\"connection_string\",\"created_by\",\"created_on\",\"imported_from\",\"long_description\",\"modified_by\",\"modified_on\",\"name\",\"native_id\",\"short_description\"],\"pageSize\":5}");
     }
 
     private void setFindDataClassByProperty(MockServerClient mockServerClient) {
@@ -1134,14 +1160,15 @@ public class MockServerExpectations implements PluginExpectationInitializer {
     }
 
     private void setFindColumnsByPrimaryKeyName(MockServerClient mockServerClient) {
-        setSearchAndResponse(mockServerClient, "FindColumnsByPrimaryKeyName", "results.json",
+        String caseName = "FindColumnsByPrimaryKeyName";
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
                 json(
-                        "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"selected_primary_key\",\"operator\":\"=\",\"value\":\"true\"},{\"property\":\"defined_primary_key.name\",\"operator\":\"like {0}%\",\"value\":\"SQL\"}],\"operator\":\"or\"}],\"operator\":\"or\"}}",
+                        "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"selected_primary_key\",\"operator\":\"=\",\"value\":\"true\"},{\"conditions\":[{\"property\":\"defined_primary_key.name\",\"operator\":\"like {0}%\",\"value\":\"SQL\"}],\"operator\":\"or\"}],\"operator\":\"or\"}],\"operator\":\"or\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
-        setSearchAndResponse(mockServerClient, "FindColumnsByPrimaryKeyName", "results.json",
+        setSearchAndResponse(mockServerClient, caseName, "results.json",
                 json(
-                        "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"selected_primary_key\",\"operator\":\"=\",\"value\":\"true\"},{\"property\":\"defined_primary_key.name\",\"operator\":\"like {0}%\",\"value\":\"sql\"}],\"operator\":\"or\"}],\"operator\":\"or\"}}",
+                        "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"selected_primary_key\",\"operator\":\"=\",\"value\":\"true\"},{\"conditions\":[{\"property\":\"defined_primary_key.name\",\"operator\":\"like {0}%\",\"value\":\"sql\"}],\"operator\":\"or\"}],\"operator\":\"or\"}],\"operator\":\"or\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }

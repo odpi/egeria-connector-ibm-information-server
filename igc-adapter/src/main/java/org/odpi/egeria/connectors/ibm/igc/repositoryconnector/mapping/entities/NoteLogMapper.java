@@ -11,6 +11,8 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 
@@ -75,6 +77,7 @@ public class NoteLogMapper extends ReferenceableMapper {
                                                  IGCSearchConditionSet igcSearchConditionSet,
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
+                                                 PropertyComparisonOperator operator,
                                                  InstancePropertyValue value) {
         // We have no real way of supporting a search against NoteLogs, so we will simply always ensure that no results
         // are returned
@@ -99,7 +102,7 @@ public class NoteLogMapper extends ReferenceableMapper {
      * {@inheritDoc}
      */
     @Override
-    public SearchFilter getAllNoneOrSome(InstanceProperties matchProperties, MatchCriteria matchCriteria) {
+    public SearchFilter getAllNoneOrSome(SearchProperties matchProperties) {
         // We have no real way of supporting a search against NoteLogs, so we will simply always ensure that no results
         // are returned
         return SearchFilter.NONE;

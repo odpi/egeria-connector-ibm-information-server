@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -9,8 +10,10 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Classification;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
@@ -87,25 +90,30 @@ public class Spine_Mapper extends ClassificationMapping {
 
     /**
      * Search for SpineObject/Attribute by looking at referencing category of the term being "SpineObject/Attribute"
-     * category. (There are no properties on the SpineObject/Attribute classification, so no need to even check the
-     * provided matchClassificationProperties.)
+     * category. (There are no properties on the SpineObject/Attribute classification, so if any are specified and
+     * the matchCriteria within them is anything other than NONE, we should return no results.)
      *
      * @param repositoryHelper the repository helper
      * @param repositoryName name of the repository
-     * @param matchClassificationProperties the criteria to use when searching for the classification
+     * @param matchProperties the criteria to use when searching for the classification
      * @return IGCSearchConditionSet - the IGC search criteria to find entities based on this classification
      */
     @Override
     public IGCSearchConditionSet getIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
                                                       String repositoryName,
-                                                      InstanceProperties matchClassificationProperties) {
+                                                      SearchProperties matchProperties) {
 
-        IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
-                "referencing_categories.name",
-                "=",
-                getOmrsClassificationType()
-        );
-        IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(igcSearchCondition);
+        IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
+        if (matchProperties == null || matchProperties.getMatchCriteria().equals(MatchCriteria.NONE)) {
+            IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
+                    "referencing_categories.name",
+                    "=",
+                    getOmrsClassificationType()
+            );
+            igcSearchConditionSet.addCondition(igcSearchCondition);
+        } else {
+            igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+        }
         igcSearchConditionSet.setMatchAnyCondition(false);
         return igcSearchConditionSet;
 

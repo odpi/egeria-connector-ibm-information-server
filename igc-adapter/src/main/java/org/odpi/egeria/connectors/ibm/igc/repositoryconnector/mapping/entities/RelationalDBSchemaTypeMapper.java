@@ -9,7 +9,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Defines the mapping to the OMRS "RelationalDBSchemaType" entity.
  */
-public class RelationalDBSchemaTypeMapper extends ComplexSchemaType_Mapper {
+public class RelationalDBSchemaTypeMapper extends ComplexSchemaTypeMapper {
 
     public static final String IGC_RID_PREFIX = "RDBST";
 

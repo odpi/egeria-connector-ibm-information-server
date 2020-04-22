@@ -11,38 +11,21 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Store of implemented relationship mappings for the repository.
  */
-public class RelationshipMappingStore {
+public class RelationshipMappingStore extends MappingStore {
 
     private static final Logger log = LoggerFactory.getLogger(RelationshipMappingStore.class);
 
-    private IGCOMRSRepositoryConnector igcomrsRepositoryConnector;
-
-    private List<TypeDef> typeDefs;
-
     private Map<String, RelationshipMapping> omrsGuidToMapping;
-    private Map<String, String> omrsNameToGuid;
 
     public RelationshipMappingStore(IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
-        typeDefs = new ArrayList<>();
+        super(igcomrsRepositoryConnector);
         omrsGuidToMapping = new HashMap<>();
-        omrsNameToGuid = new HashMap<>();
-        this.igcomrsRepositoryConnector = igcomrsRepositoryConnector;
     }
-
-    /**
-     * Retrieves the listing of all TypeDefs for which relationship mappings are implemented.
-     *
-     * @return {@code List<TypeDef>}
-     */
-    public List<TypeDef> getTypeDefs() { return this.typeDefs; }
 
     /**
      * Adds a relationship mapping for the provided TypeDef, using the provided Java class for the mapping.
@@ -56,10 +39,9 @@ public class RelationshipMappingStore {
         RelationshipMapping mapping = getRelationshipMapper(mappingClass);
 
         if (mapping != null) {
-            typeDefs.add(omrsTypeDef);
+            addTypeDef(omrsTypeDef);
             String guid = omrsTypeDef.getGUID();
             omrsGuidToMapping.put(guid, mapping);
-            omrsNameToGuid.put(omrsTypeDef.getName(), guid);
         }
 
         return (mapping != null);
@@ -88,12 +70,12 @@ public class RelationshipMappingStore {
      * @return RelationshipMapping
      */
     public RelationshipMapping getMappingByOmrsTypeName(String name) {
-        if (omrsNameToGuid.containsKey(name)) {
-            String guid = omrsNameToGuid.get(name);
-            return getMappingByOmrsTypeGUID(guid);
-        } else {
+        String guid = getGuidForName(name);
+        if (guid == null) {
             log.warn("Unable to find mapping for OMRS type: {}", name);
             return null;
+        } else {
+            return getMappingByOmrsTypeGUID(guid);
         }
     }
 

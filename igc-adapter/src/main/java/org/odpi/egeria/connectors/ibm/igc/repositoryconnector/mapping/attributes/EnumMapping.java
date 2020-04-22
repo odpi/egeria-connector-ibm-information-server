@@ -17,6 +17,7 @@ public class EnumMapping extends AttributeMapping {
     private static final Logger log = LoggerFactory.getLogger(EnumMapping.class);
 
     private HashMap<String, EnumElementDef> enumDefByIgcValue;
+    private HashMap<String, String> mapSymbolicNameToIgcValue;
     private EnumElementDef defaultEnum;
 
     /**
@@ -27,6 +28,7 @@ public class EnumMapping extends AttributeMapping {
     public EnumMapping(String omrsAttributeTypeDefName) {
         super(omrsAttributeTypeDefName);
         enumDefByIgcValue = new HashMap<>();
+        mapSymbolicNameToIgcValue = new HashMap<>();
     }
 
     /**
@@ -57,6 +59,7 @@ public class EnumMapping extends AttributeMapping {
         enumElementDef.setValue(omrsSymbolicName);
         enumElementDef.setDescription(description);
         enumDefByIgcValue.put(igcValue, enumElementDef);
+        mapSymbolicNameToIgcValue.put(omrsSymbolicName, igcValue);
     }
 
     /**
@@ -76,6 +79,17 @@ public class EnumMapping extends AttributeMapping {
             value = getDefaultEnumValue();
         }
         return value;
+    }
+
+    /**
+     * Retrieve the mapped IGC value from the provided OMRS symbolic name of the enumeration (or null if there is no
+     * mapping).
+     *
+     * @param symbolicName of the OMRS enumeration value
+     * @return String giving the mapped IGC value (or null if there is no mapping)
+     */
+    public String getIgcValueForSymbolicName(String symbolicName) {
+        return mapSymbolicNameToIgcValue.getOrDefault(symbolicName, null);
     }
 
     /**
