@@ -22,8 +22,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -120,7 +118,10 @@ public class IARestClient {
         this.mapper.setDefaultPropertyInclusion(JsonInclude.Value.construct(JsonInclude.Include.NON_EMPTY, JsonInclude.Include.NON_EMPTY));
         try {
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setIgnoringElementContentWhitespace(true);
             documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            documentBuilderFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            documentBuilderFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             this.xmlParser = documentBuilderFactory.newDocumentBuilder();
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -317,7 +318,6 @@ public class IARestClient {
             if (body != null) {
                 try {
                     Document xmlDoc = xmlParser.parse(new InputSource(new StringReader(body)));
-                    minimizeXML(xmlDoc);
                     StringWriter writer = new StringWriter();
                     StreamResult result = new StreamResult(writer);
                     xmlTransformer.transform(new DOMSource(xmlDoc), result);
@@ -839,22 +839,6 @@ public class IARestClient {
             throw new IAParsingException("Unable to encode parameter value for a URL.", value, e);
         }
         return encoded;
-    }
-
-    /**
-     * Recursively remove all whitespace (including newlines) between XML elements, in-place in the provided XML.
-     *
-     * @param node the XML node from which to start the minimization
-     */
-    private void minimizeXML(Node node) {
-        NodeList children = node.getChildNodes();
-        for (int i = 0; i < children.getLength(); ++i) {
-            Node child = children.item(i);
-            if (child.getNodeType() == Node.TEXT_NODE) {
-                child.setTextContent(child.getTextContent().trim());
-            }
-            minimizeXML(child);
-        }
     }
 
 }
