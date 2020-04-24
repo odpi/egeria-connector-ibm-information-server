@@ -470,9 +470,10 @@ public class IGCRestClient {
                     toSend,
                     String.class
             );
-        } catch (HttpClientErrorException.Forbidden e) {
+        } catch (HttpClientErrorException.Forbidden | HttpClientErrorException.Unauthorized e) {
             log.warn("Request failed -- session may have expired, retrying...", e);
-            // If the response was forbidden (fails with exception), the session may have expired -- create a new one
+            // If the response was forbidden or unauthorized (fails with exception), the session may have expired so
+            // attempt to create a new one
             response = openNewSessionWithUpload(
                     endpoint,
                     method,
@@ -533,9 +534,10 @@ public class IGCRestClient {
                     toSend,
                     String.class);
             setCookiesFromResponse(response);
-        } catch (HttpClientErrorException.Forbidden e) {
+        } catch (HttpClientErrorException.Forbidden | HttpClientErrorException.Unauthorized e) {
             log.warn("Request failed -- session may have expired, retrying...", e);
-            // If the response was forbidden (fails with exception), the session may have expired -- create a new one
+            // If the response was forbidden or unauthorized (fails with exception), the session may have expired so
+            // attempt to create a new one
             response = openNewSessionWithRequest(
                     url,
                     method,
