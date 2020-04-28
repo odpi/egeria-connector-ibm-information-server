@@ -164,7 +164,9 @@ public class IGCRestConstants {
 
     private static final Set<String> IGNORE_TYPES = createIgnoreTypes();
     private static Set<String> createIgnoreTypes() {
-        return new HashSet<>();
+        Set<String> set = new HashSet<>();
+        set.add("referenced_container");
+        return Collections.unmodifiableSet(set);
     }
 
     private static final List<String> SUPER_TYPES = createSuperTypes();
