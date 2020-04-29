@@ -93,7 +93,7 @@ public class Stage extends InformationAsset {
     protected ItemList<InformationAsset> readsFromUserDefined;
 
     @JsonProperty("references_container")
-    protected ReferencedContainer referencesContainer;
+    protected SharedContainer referencesContainer;
 
     @JsonProperty("references_data_connection_mapping")
     protected ItemList<DataConnectionMapping> referencesDataConnectionMapping;
@@ -108,7 +108,7 @@ public class Stage extends InformationAsset {
     protected String schema;
 
     @JsonProperty("shared_or_local_container")
-    protected ReferencedContainer sharedOrLocalContainer;
+    protected SharedContainer sharedOrLocalContainer;
 
     @JsonProperty("sql_statement")
     protected String sqlStatement;
@@ -453,17 +453,17 @@ public class Stage extends InformationAsset {
 
     /**
      * Retrieve the {@code references_container} property (displayed as '{@literal References Container}') of the object.
-     * @return {@code ReferencedContainer}
+     * @return {@code SharedContainer}
      */
     @JsonProperty("references_container")
-    public ReferencedContainer getReferencesContainer() { return this.referencesContainer; }
+    public SharedContainer getReferencesContainer() { return this.referencesContainer; }
 
     /**
      * Set the {@code references_container} property (displayed as {@code References Container}) of the object.
      * @param referencesContainer the value to set
      */
     @JsonProperty("references_container")
-    public void setReferencesContainer(ReferencedContainer referencesContainer) { this.referencesContainer = referencesContainer; }
+    public void setReferencesContainer(SharedContainer referencesContainer) { this.referencesContainer = referencesContainer; }
 
     /**
      * Retrieve the {@code references_data_connection_mapping} property (displayed as '{@literal References Data Connection Mapping}') of the object.
@@ -523,17 +523,17 @@ public class Stage extends InformationAsset {
 
     /**
      * Retrieve the {@code shared_or_local_container} property (displayed as '{@literal Shared or Local Container}') of the object.
-     * @return {@code ReferencedContainer}
+     * @return {@code SharedContainer}
      */
     @JsonProperty("shared_or_local_container")
-    public ReferencedContainer getSharedOrLocalContainer() { return this.sharedOrLocalContainer; }
+    public SharedContainer getSharedOrLocalContainer() { return this.sharedOrLocalContainer; }
 
     /**
      * Set the {@code shared_or_local_container} property (displayed as {@code Shared or Local Container}) of the object.
      * @param sharedOrLocalContainer the value to set
      */
     @JsonProperty("shared_or_local_container")
-    public void setSharedOrLocalContainer(ReferencedContainer sharedOrLocalContainer) { this.sharedOrLocalContainer = sharedOrLocalContainer; }
+    public void setSharedOrLocalContainer(SharedContainer sharedOrLocalContainer) { this.sharedOrLocalContainer = sharedOrLocalContainer; }
 
     /**
      * Retrieve the {@code sql_statement} property (displayed as '{@literal SQL Statement}') of the object.

@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -22,6 +23,9 @@ import java.util.List;
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.EXISTING_PROPERTY, property="_type", visible=true, defaultImpl=SharedContainer.class)
 @JsonAutoDetect(getterVisibility=PUBLIC_ONLY, setterVisibility=PUBLIC_ONLY, fieldVisibility=NONE)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = LocalContainer.class, name = "local_container"),
+})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("shared_container")
@@ -29,6 +33,9 @@ public class SharedContainer extends InformationAsset {
 
     @JsonProperty("annotations")
     protected List<String> annotations;
+
+    @JsonProperty("local_containers")
+    protected LocalContainer localContainers;
 
     @JsonProperty("mapping_components")
     protected ItemList<MappingComponent> mappingComponents;
@@ -46,7 +53,10 @@ public class SharedContainer extends InformationAsset {
     protected ItemList<Stage> referencedByStages;
 
     @JsonProperty("references_containers")
-    protected ItemList<ReferencedContainer> referencesContainers;
+    protected ItemList<SharedContainer> referencesContainers;
+
+    @JsonProperty("shared_containers")
+    protected SharedContainer sharedContainers;
 
     @JsonProperty("source_mappings")
     protected ItemList<MainObject> sourceMappings;
@@ -72,6 +82,9 @@ public class SharedContainer extends InformationAsset {
     @JsonProperty("type")
     protected String type;
 
+    @JsonProperty("version")
+    protected String version;
+
     /**
      * Retrieve the {@code annotations} property (displayed as '{@literal Annotations}') of the object.
      * @return {@code List<String>}
@@ -85,6 +98,20 @@ public class SharedContainer extends InformationAsset {
      */
     @JsonProperty("annotations")
     public void setAnnotations(List<String> annotations) { this.annotations = annotations; }
+
+    /**
+     * Retrieve the {@code local_containers} property (displayed as '{@literal Local Containers}') of the object.
+     * @return {@code LocalContainer}
+     */
+    @JsonProperty("local_containers")
+    public LocalContainer getLocalContainers() { return this.localContainers; }
+
+    /**
+     * Set the {@code local_containers} property (displayed as {@code Local Containers}) of the object.
+     * @param localContainers the value to set
+     */
+    @JsonProperty("local_containers")
+    public void setLocalContainers(LocalContainer localContainers) { this.localContainers = localContainers; }
 
     /**
      * Retrieve the {@code mapping_components} property (displayed as '{@literal Mapping Components}') of the object.
@@ -158,17 +185,31 @@ public class SharedContainer extends InformationAsset {
 
     /**
      * Retrieve the {@code references_containers} property (displayed as '{@literal References Containers}') of the object.
-     * @return {@code ItemList<ReferencedContainer>}
+     * @return {@code ItemList<SharedContainer>}
      */
     @JsonProperty("references_containers")
-    public ItemList<ReferencedContainer> getReferencesContainers() { return this.referencesContainers; }
+    public ItemList<SharedContainer> getReferencesContainers() { return this.referencesContainers; }
 
     /**
      * Set the {@code references_containers} property (displayed as {@code References Containers}) of the object.
      * @param referencesContainers the value to set
      */
     @JsonProperty("references_containers")
-    public void setReferencesContainers(ItemList<ReferencedContainer> referencesContainers) { this.referencesContainers = referencesContainers; }
+    public void setReferencesContainers(ItemList<SharedContainer> referencesContainers) { this.referencesContainers = referencesContainers; }
+
+    /**
+     * Retrieve the {@code shared_containers} property (displayed as '{@literal Shared Containers}') of the object.
+     * @return {@code SharedContainer}
+     */
+    @JsonProperty("shared_containers")
+    public SharedContainer getSharedContainers() { return this.sharedContainers; }
+
+    /**
+     * Set the {@code shared_containers} property (displayed as {@code Shared Containers}) of the object.
+     * @param sharedContainers the value to set
+     */
+    @JsonProperty("shared_containers")
+    public void setSharedContainers(SharedContainer sharedContainers) { this.sharedContainers = sharedContainers; }
 
     /**
      * Retrieve the {@code source_mappings} property (displayed as '{@literal Source Mappings}') of the object.
@@ -239,5 +280,19 @@ public class SharedContainer extends InformationAsset {
      */
     @JsonProperty("type")
     public void setTheType(String type) { this.type = type; }
+
+    /**
+     * Retrieve the {@code version} property (displayed as '{@literal Version}') of the object.
+     * @return {@code String}
+     */
+    @JsonProperty("version")
+    public String getVersion() { return this.version; }
+
+    /**
+     * Set the {@code version} property (displayed as {@code Version}) of the object.
+     * @param version the value to set
+     */
+    @JsonProperty("version")
+    public void setVersion(String version) { this.version = version; }
 
 }

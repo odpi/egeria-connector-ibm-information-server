@@ -51,7 +51,7 @@ public class Parameter extends DataItem {
     protected Function isReturnOfFunction;
 
     @JsonProperty("of_container_def")
-    protected ReferencedContainer ofContainerDef;
+    protected SharedContainer ofContainerDef;
 
     @JsonProperty("of_function")
     protected Function ofFunction;
@@ -153,17 +153,17 @@ public class Parameter extends DataItem {
 
     /**
      * Retrieve the {@code of_container_def} property (displayed as '{@literal Of Container Def}') of the object.
-     * @return {@code ReferencedContainer}
+     * @return {@code SharedContainer}
      */
     @JsonProperty("of_container_def")
-    public ReferencedContainer getOfContainerDef() { return this.ofContainerDef; }
+    public SharedContainer getOfContainerDef() { return this.ofContainerDef; }
 
     /**
      * Set the {@code of_container_def} property (displayed as {@code Of Container Def}) of the object.
      * @param ofContainerDef the value to set
      */
     @JsonProperty("of_container_def")
-    public void setOfContainerDef(ReferencedContainer ofContainerDef) { this.ofContainerDef = ofContainerDef; }
+    public void setOfContainerDef(SharedContainer ofContainerDef) { this.ofContainerDef = ofContainerDef; }
 
     /**
      * Retrieve the {@code of_function} property (displayed as '{@literal Of Function}') of the object.

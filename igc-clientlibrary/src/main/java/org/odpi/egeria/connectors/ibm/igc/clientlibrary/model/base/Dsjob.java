@@ -101,7 +101,7 @@ public class Dsjob extends InformationAsset {
     protected ItemList<InformationAsset> readsFromUserDefined;
 
     @JsonProperty("references_local_or_shared_containers")
-    protected ItemList<ReferencedContainer> referencesLocalOrSharedContainers;
+    protected ItemList<SharedContainer> referencesLocalOrSharedContainers;
 
     @JsonProperty("references_table_definitions")
     protected ItemList<TableDefinition> referencesTableDefinitions;
@@ -418,17 +418,17 @@ public class Dsjob extends InformationAsset {
 
     /**
      * Retrieve the {@code references_local_or_shared_containers} property (displayed as '{@literal References Local or Shared Containers}') of the object.
-     * @return {@code ItemList<ReferencedContainer>}
+     * @return {@code ItemList<SharedContainer>}
      */
     @JsonProperty("references_local_or_shared_containers")
-    public ItemList<ReferencedContainer> getReferencesLocalOrSharedContainers() { return this.referencesLocalOrSharedContainers; }
+    public ItemList<SharedContainer> getReferencesLocalOrSharedContainers() { return this.referencesLocalOrSharedContainers; }
 
     /**
      * Set the {@code references_local_or_shared_containers} property (displayed as {@code References Local or Shared Containers}) of the object.
      * @param referencesLocalOrSharedContainers the value to set
      */
     @JsonProperty("references_local_or_shared_containers")
-    public void setReferencesLocalOrSharedContainers(ItemList<ReferencedContainer> referencesLocalOrSharedContainers) { this.referencesLocalOrSharedContainers = referencesLocalOrSharedContainers; }
+    public void setReferencesLocalOrSharedContainers(ItemList<SharedContainer> referencesLocalOrSharedContainers) { this.referencesLocalOrSharedContainers = referencesLocalOrSharedContainers; }
 
     /**
      * Retrieve the {@code references_table_definitions} property (displayed as '{@literal References Table Definitions}') of the object.

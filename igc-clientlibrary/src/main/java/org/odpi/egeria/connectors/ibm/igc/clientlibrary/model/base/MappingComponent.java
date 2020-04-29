@@ -40,7 +40,7 @@ public class MappingComponent extends Reference {
     protected String nativeId;
 
     @JsonProperty("shared_containers")
-    protected ReferencedContainer sharedContainers;
+    protected SharedContainer sharedContainers;
 
     @JsonProperty("short_description")
     protected String shortDescription;
@@ -103,17 +103,17 @@ public class MappingComponent extends Reference {
 
     /**
      * Retrieve the {@code shared_containers} property (displayed as '{@literal Shared Containers}') of the object.
-     * @return {@code ReferencedContainer}
+     * @return {@code SharedContainer}
      */
     @JsonProperty("shared_containers")
-    public ReferencedContainer getSharedContainers() { return this.sharedContainers; }
+    public SharedContainer getSharedContainers() { return this.sharedContainers; }
 
     /**
      * Set the {@code shared_containers} property (displayed as {@code Shared Containers}) of the object.
      * @param sharedContainers the value to set
      */
     @JsonProperty("shared_containers")
-    public void setSharedContainers(ReferencedContainer sharedContainers) { this.sharedContainers = sharedContainers; }
+    public void setSharedContainers(SharedContainer sharedContainers) { this.sharedContainers = sharedContainers; }
 
     /**
      * Retrieve the {@code short_description} property (displayed as '{@literal Short Description}') of the object.
