@@ -100,7 +100,7 @@
         <junit.jupiter.version>5.6.2</junit.jupiter.version>
         <junit.version>4.12</junit.version>
         <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
-        <testng.version>7.1.0</testng.version>
+        <testng.version>7.2.0</testng.version>
         <mock-server.version>5.10.0</mock-server.version>
         <sleepycat.version>18.3.12</sleepycat.version>
         <rhino.version>1.7.12</rhino.version>
