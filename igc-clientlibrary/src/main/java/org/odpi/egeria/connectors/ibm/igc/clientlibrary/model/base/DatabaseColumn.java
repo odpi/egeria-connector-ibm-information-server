@@ -240,6 +240,10 @@ public class DatabaseColumn extends Classificationenabledgroup {
     @JsonProperty("start_end_columns")
     protected String startEndColumns;
 
+    /**
+     * @deprecated No longer applicable from 11.7.1.1 onwards.
+     */
+    @Deprecated
     @JsonProperty("suggested_term_assignments")
     protected ItemList<TermAssignment> suggestedTermAssignments;
 
@@ -1093,15 +1097,19 @@ public class DatabaseColumn extends Classificationenabledgroup {
 
     /**
      * Retrieve the {@code suggested_term_assignments} property (displayed as '{@literal Suggested Term Assignments}') of the object.
+     * @deprecated No longer applicable from 11.7.1.1 onwards.
      * @return {@code ItemList<TermAssignment>}
      */
+    @Deprecated
     @JsonProperty("suggested_term_assignments")
     public ItemList<TermAssignment> getSuggestedTermAssignments() { return this.suggestedTermAssignments; }
 
     /**
      * Set the {@code suggested_term_assignments} property (displayed as {@code Suggested Term Assignments}) of the object.
+     * @deprecated No longer applicable from 11.7.1.1 onwards.
      * @param suggestedTermAssignments the value to set
      */
+    @Deprecated
     @JsonProperty("suggested_term_assignments")
     public void setSuggestedTermAssignments(ItemList<TermAssignment> suggestedTermAssignments) { this.suggestedTermAssignments = suggestedTermAssignments; }
 

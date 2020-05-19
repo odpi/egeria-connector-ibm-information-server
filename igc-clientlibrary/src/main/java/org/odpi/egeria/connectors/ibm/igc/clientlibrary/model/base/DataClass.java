@@ -64,6 +64,10 @@ public class DataClass extends InformationAsset {
     @JsonProperty("classifications_selected")
     protected ItemList<Classificationenabledgroup> classificationsSelected;
 
+    /**
+     * @deprecated No longer applicable from 11.7.1.1 onwards.
+     */
+    @Deprecated
     @JsonProperty("classified_assets_detected")
     protected ItemList<Classification> classifiedAssetsDetected;
 
@@ -280,15 +284,19 @@ public class DataClass extends InformationAsset {
 
     /**
      * Retrieve the {@code classified_assets_detected} property (displayed as '{@literal Detected Data Classifications}') of the object.
+     * @deprecated No longer applicable from 11.7.1.1 onwards.
      * @return {@code ItemList<Classification>}
      */
+    @Deprecated
     @JsonProperty("classified_assets_detected")
     public ItemList<Classification> getClassifiedAssetsDetected() { return this.classifiedAssetsDetected; }
 
     /**
      * Set the {@code classified_assets_detected} property (displayed as {@code Detected Data Classifications}) of the object.
+     * @deprecated No longer applicable from 11.7.1.1 onwards.
      * @param classifiedAssetsDetected the value to set
      */
+    @Deprecated
     @JsonProperty("classified_assets_detected")
     public void setClassifiedAssetsDetected(ItemList<Classification> classifiedAssetsDetected) { this.classifiedAssetsDetected = classifiedAssetsDetected; }
 

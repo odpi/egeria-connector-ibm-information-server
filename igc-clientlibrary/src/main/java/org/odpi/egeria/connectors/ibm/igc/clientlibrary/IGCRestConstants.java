@@ -21,7 +21,7 @@ public class IGCRestConstants {
     public static final String MOD_MODIFIED_ON = "modified_on";
 
     public static final Pattern NAMING_CHAR_WHITELIST = Pattern.compile("[^a-zA-Z0-9_]");
-    public static final Pattern COOKIE_WHITELIST = Pattern.compile("^[{}.+/=:; a-zA-Z0-9_%\\-]+$");
+    public static final Pattern COOKIE_WHITELIST = Pattern.compile("^[{}.+/=:;,\" a-zA-Z0-9_%\\-]+$");
 
     public static final String IGC_REST_COMMON_MODEL_PKG = "org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common";
     public static final String IGC_REST_BASE_MODEL_PKG = "org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base";
@@ -30,6 +30,7 @@ public class IGCRestConstants {
 
     public static final String NOTE = "note";
 
+    public static final String MAIN_OBJECT = "main_object";
     public static final String INFORMATION_ASSET = "information_asset";
     private static final String NON_STEWARD_USER = "non_steward_user";
     private static final String STEWARD_USER = "steward_user";
@@ -258,6 +259,20 @@ public class IGCRestConstants {
         return Collections.unmodifiableMap(map);
     }
 
+    private static final Set<String> FIXED_MAIN_OBJECT_PROPERTIES = createFixedMainObjectProperties();
+    private static Set<String> createFixedMainObjectProperties() {
+        Set<String> set = new HashSet<>();
+        set.add("assigned_to_terms");
+        set.add("governed_by_rules");
+        set.add("implements_rules");
+        set.add("labels");
+        set.add("long_description");
+        set.add("name");
+        set.add("short_description");
+        set.add("stewards");
+        return Collections.unmodifiableSet(set);
+    }
+
     private static final Set<String> FIXED_INFORMATION_ASSET_PROPERTIES = createFixedInformationAssetProperties();
     private static Set<String> createFixedInformationAssetProperties() {
         Set<String> set = new HashSet<>();
@@ -348,6 +363,13 @@ public class IGCRestConstants {
      * @return {@code Map<String, String>}
      */
     public static Map<String, String> getSubTypeToSuperType() { return SUB_TYPE_TO_SUPER_TYPE; }
+
+    /**
+     * Retrieve the list of properties that should be fixed at the Main Object level.
+     *
+     * @return {@code Set<String>}
+     */
+    public static Set<String> getFixedMainObjectProperties() { return FIXED_MAIN_OBJECT_PROPERTIES; }
 
     /**
      * Retrieve the list of properties that should be fixed at the Information Asset object level.

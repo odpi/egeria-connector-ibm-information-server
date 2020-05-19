@@ -108,12 +108,14 @@ public class IGCBeanGenerator {
         // and as part of this keep a list of their properties, so any classes that extend them can skip
         // including the same properties and getter / setter methods as overrides
         for (String typeName : IGCRestConstants.getSuperTypes()) {
-            if (!(skipFixedAssetGeneration
-                    && (typeName.equals(IGCRestConstants.INFORMATION_ASSET) || typeName.equals(IGCRestConstants.CLASSIFICATIONENABLEDGROUP)) )) {
+            if ( !(skipFixedAssetGeneration
+                    && (typeName.equals(IGCRestConstants.INFORMATION_ASSET) || typeName.equals(IGCRestConstants.MAIN_OBJECT)) )) {
                 TypeDetails details = igcRestClient.getTypeDetails(typeName);
                 createPOJOForType(details);
-            } else {
+            } else if (typeName.equals(IGCRestConstants.INFORMATION_ASSET)) {
                 superTypeToProperties.put(IGCRestConstants.INFORMATION_ASSET, IGCRestConstants.getFixedInformationAssetProperties());
+            } else if (typeName.equals(IGCRestConstants.MAIN_OBJECT)) {
+                superTypeToProperties.put(IGCRestConstants.MAIN_OBJECT, IGCRestConstants.getFixedMainObjectProperties());
             }
         }
 

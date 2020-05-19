@@ -26,7 +26,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
         @JsonSubTypes.Type(value = RuleExecutionResult.class, name = "Rule_Execution_Result"),
         @JsonSubTypes.Type(value = AmazonS3Bucket.class, name = "amazon_s3_bucket"),
         @JsonSubTypes.Type(value = AmazonS3DataFile.class, name = "amazon_s3_data_file"),
-        @JsonSubTypes.Type(value = AmazonS3DataFileField.class, name = "amazon_s3_data_file_field"),
         @JsonSubTypes.Type(value = AmazonS3DataFileFolder.class, name = "amazon_s3_data_file_folder"),
         @JsonSubTypes.Type(value = AmazonS3DataFileRecord.class, name = "amazon_s3_data_file_record"),
         @JsonSubTypes.Type(value = AnalyticsModel.class, name = "analytics_model"),
