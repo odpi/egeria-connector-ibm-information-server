@@ -110,7 +110,13 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         String igcKafkaBootstrap = this.connectionBean.getEndpoint().getAddress();
         igcKafkaProperties = new Properties();
         igcKafkaProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, igcKafkaBootstrap);
-        igcKafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "IGCOMRSRepositoryEventMapper_consumer");
+        igcKafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "IGC_EM_" + igcomrsRepositoryConnector.getMetadataCollectionId());
+        // TODO: May need to tweak these settings to give further processing time for large events
+        //  like IMAM shares -- or even switch to manual offset management rather than auto-commits
+        //  (see: https://kafka.apache.org/0110/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html)
+        igcKafkaProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+        igcKafkaProperties.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, "300000");
+        igcKafkaProperties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1");
         igcKafkaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         igcKafkaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 
@@ -161,15 +167,16 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             try (final Consumer<Long, String> consumer = new KafkaConsumer<>(igcKafkaProperties)) {
                 consumer.subscribe(Collections.singletonList(igcKafkaTopic));
                 auditLog.logMessage(methodName, IGCOMRSAuditCode.EVENT_MAPPER_RUNNING.getMessageDefinition(igcomrsRepositoryConnector.getServerName()));
-                // TODO: Likely need to tweak these settings to give further processing time for large events
-                //  like IMAM shares -- or even switch to manual offset management rather than auto-commits
-                //  (see: https://kafka.apache.org/0110/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html)
                 while (running.get()) {
                     try {
+                        // Per settings on the consumer properties, the poll should only ever return a single event at
+                        // a time (meaning despite the for-loop below, the wrapped try-catch should ensure that only one
+                        // event ever fails)
                         ConsumerRecords<Long, String> events = consumer.poll(pollDuration);
                         for (ConsumerRecord<Long, String> event : events) {
                             processEvent(event.value());
                         }
+                        consumer.commitSync();
                     } catch (Exception e) {
                         auditLog.logException(methodName, IGCOMRSAuditCode.EVENT_MAPPER_CONSUMER_FAILURE.getMessageDefinition(), e);
                     }
@@ -250,6 +257,9 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         break;
                     case "IGC_ETLGROUP_EVENT":
                         log.info("Found DataStage event that should be processed via data engine proxy, skipping.");
+                        break;
+                    case "IGC_XT_OMRS__GROUP1_EVENT":
+                        log.info("Found OMRS Stub event, skipping.");
                         break;
                     default:
                         processAssetEventV115((InfosphereEventsAssetEvent) eventObj);
