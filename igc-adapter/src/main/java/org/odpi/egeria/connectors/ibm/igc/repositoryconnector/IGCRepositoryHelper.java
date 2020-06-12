@@ -421,7 +421,7 @@ public class IGCRepositoryHelper {
 
             String qualifiedNameRegex = null;
 
-            InstanceMapping.SearchFilter filter = mapping.getAllNoneOrSome(matchProperties);
+            InstanceMapping.SearchFilter filter = mapping.getAllNoneOrSome(igcomrsRepositoryConnector, matchProperties);
 
             if (filter.equals(InstanceMapping.SearchFilter.NONE)) {
                 igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
@@ -1330,10 +1330,8 @@ public class IGCRepositoryHelper {
 
         List<EntityMapping> mappers = entityMappingStore.getMappingsByIgcAssetType(igcAssetType);
 
-        if (mappers == null) {
-            mappers = new ArrayList<>();
-        }
         if (mappers.isEmpty()) {
+            mappers = new ArrayList<>();
             EntityMapping defaultMapper = entityMappingStore.getDefaultEntityMapper();
             if (defaultMapper != null) {
                 mappers.add(defaultMapper);

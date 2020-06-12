@@ -138,7 +138,7 @@ public class EntityMappingStore extends MappingStore {
             return mappings;
         } else {
             log.warn("Unable to find mapping for IGC type: {}", simpleType);
-            return null;
+            return Collections.emptyList();
         }
     }
 

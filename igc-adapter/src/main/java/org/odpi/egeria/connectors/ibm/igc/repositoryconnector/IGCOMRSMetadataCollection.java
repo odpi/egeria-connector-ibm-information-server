@@ -947,7 +947,10 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     // partial, because if it is partial it may actually need a prefix which is not there)
                     log.debug(" ... proceeding on basis of identity: {}", identity);
                     String igcType = identity.getAssetType();
-                    mappers.add(igcRepositoryHelper.getEntityMappingByIgcType(igcType, prefix));
+                    EntityMapping mapping = igcRepositoryHelper.getEntityMappingByIgcType(igcType, prefix);
+                    if (mapping != null) {
+                        mappers.add(mapping);
+                    }
                 } else if (identity != null) {
                     // If all we have is a partial identity, get all of the mappers for that asset type
                     // (to ensure we include both direct-mapped and generated entities - if one is not
@@ -1918,9 +1921,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 // This will default to giving us the simple search criteria, if no complex criteria are defined
                 // for the mapping.
                 List<IGCSearch> searches = mapping.getComplexIGCSearchCriteria(
-                        repositoryHelper,
-                        repositoryName,
-                        igcRestClient,
+                        igcomrsRepositoryConnector,
                         repositoryHelper.getSearchPropertiesFromInstanceProperties(repositoryName, matchProperties, matchCriteria)
                 );
 
@@ -1930,7 +1931,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     igcRepositoryHelper.setPagingForSearch(igcSearch, fromRelationshipElement, pageSize);
 
                     // Ensure we handle NONE semantics and literal values, as we do for findEntitiesByProperty
-                    InstanceMapping.SearchFilter filter = mapping.getAllNoneOrSome(repositoryHelper.getSearchPropertiesFromInstanceProperties(repositoryName, matchProperties, matchCriteria));
+                    InstanceMapping.SearchFilter filter = mapping.getAllNoneOrSome(igcomrsRepositoryConnector,
+                            repositoryHelper.getSearchPropertiesFromInstanceProperties(repositoryName, matchProperties, matchCriteria));
 
                     if (!filter.equals(InstanceMapping.SearchFilter.NONE)) {
                         igcRepositoryHelper.processResults(mapping,
@@ -2002,12 +2004,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
                 // This will default to giving us the simple search criteria, if no complex criteria are defined
                 // for the mapping.
-                List<IGCSearch> searches = mapping.getComplexIGCSearchCriteria(
-                        repositoryHelper,
-                        repositoryName,
-                        igcRestClient,
-                        searchCriteria
-                );
+                List<IGCSearch> searches = mapping.getComplexIGCSearchCriteria(igcomrsRepositoryConnector, searchCriteria);
 
                 for (IGCSearch igcSearch : searches) {
                     // TODO: handle sequencing -- here or as part of method above?

@@ -118,7 +118,7 @@ public class NoteEntryMapper extends ReferenceableMapper {
      * {@inheritDoc}
      */
     @Override
-    public SearchFilter getAllNoneOrSome(SearchProperties matchProperties) {
+    public SearchFilter getAllNoneOrSome(IGCOMRSRepositoryConnector repositoryConnector, SearchProperties matchProperties) {
         // We have no real way of supporting a search against NoteEntry, so we will simply always ensure that no results
         // are returned
         return SearchFilter.NONE;

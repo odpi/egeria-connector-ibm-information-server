@@ -190,9 +190,7 @@ public class AttachedNoteLogEntryMapper extends RelationshipMapping {
      * {@inheritDoc}
      */
     @Override
-    public List<IGCSearch> getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
-                                                       String repositoryName,
-                                                       IGCRestClient igcRestClient,
+    public List<IGCSearch> getComplexIGCSearchCriteria(IGCOMRSRepositoryConnector repositoryConnector,
                                                        SearchProperties matchProperties) {
         // As with NoteEntry entities themselves, do not search on AttachedNoteLogEntry
         return Collections.emptyList();
@@ -202,9 +200,7 @@ public class AttachedNoteLogEntryMapper extends RelationshipMapping {
      * {@inheritDoc}
      */
     @Override
-    public List<IGCSearch> getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
-                                                       String repositoryName,
-                                                       IGCRestClient igcRestClient,
+    public List<IGCSearch> getComplexIGCSearchCriteria(IGCOMRSRepositoryConnector repositoryConnector,
                                                        String searchCriteria) throws FunctionNotSupportedException {
         // As with NoteEntry entities themselves, do not search on AttachedNoteLogEntry
         return Collections.emptyList();

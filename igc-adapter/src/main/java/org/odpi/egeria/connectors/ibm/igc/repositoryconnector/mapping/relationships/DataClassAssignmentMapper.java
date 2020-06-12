@@ -199,10 +199,10 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * {@inheritDoc}
      */
     @Override
-    public List<IGCSearch> getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
-                                                       String repositoryName,
-                                                       IGCRestClient igcRestClient,
+    public List<IGCSearch> getComplexIGCSearchCriteria(IGCOMRSRepositoryConnector repositoryConnector,
                                                        SearchProperties matchProperties) throws FunctionNotSupportedException {
+
+        IGCRestClient igcRestClient = repositoryConnector.getIGCRestClient();
 
         // If no search properties were provided, we can short-circuit and just return all such assignments via the
         // simple search criteria

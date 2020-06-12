@@ -379,13 +379,11 @@ public abstract class ClassificationMapping extends InstanceMapping {
             // If modification details are available on the IGC object, add these to the classification,
             // including setting its version number based on the last update time
             if (igcRestClient.hasModificationDetails(fromIgcObject.getType())) {
-                classification.setCreatedBy((String)igcRestClient.getPropertyByName(fromIgcObject, IGCRestConstants.MOD_CREATED_BY));
-                classification.setCreateTime((Date)igcRestClient.getPropertyByName(fromIgcObject, IGCRestConstants.MOD_CREATED_ON));
-                classification.setUpdateTime((Date)igcRestClient.getPropertyByName(fromIgcObject, IGCRestConstants.MOD_MODIFIED_ON));
-                classification.setUpdatedBy((String)igcRestClient.getPropertyByName(fromIgcObject, IGCRestConstants.MOD_MODIFIED_BY));
-                if (classification.getUpdateTime() != null) {
-                    classification.setVersion(classification.getUpdateTime().getTime());
-                }
+                InstanceMapping.setupInstanceModDetails(classification,
+                        fromIgcObject.getCreatedBy(),
+                        fromIgcObject.getCreatedOn(),
+                        fromIgcObject.getModifiedBy(),
+                        fromIgcObject.getModifiedOn());
             }
         } catch (TypeErrorException e) {
             throw new RepositoryErrorException(IGCOMRSErrorCode.INVALID_CLASSIFICATION_FOR_ENTITY.getMessageDefinition(omrsClassificationType, omrsEntityType),

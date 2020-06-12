@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relations
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.NoteLogMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
@@ -63,9 +64,7 @@ public class AttachedNoteLogMapper extends RelationshipMapping {
      * {@inheritDoc}
      */
     @Override
-    public List<IGCSearch> getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
-                                                       String repositoryName,
-                                                       IGCRestClient igcRestClient,
+    public List<IGCSearch> getComplexIGCSearchCriteria(IGCOMRSRepositoryConnector repositoryConnector,
                                                        SearchProperties matchProperties) {
         // As with NoteLog entities themselves, do not search on AttachedNoteLogs
         return Collections.emptyList();
@@ -75,9 +74,7 @@ public class AttachedNoteLogMapper extends RelationshipMapping {
      * {@inheritDoc}
      */
     @Override
-    public List<IGCSearch> getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
-                                                       String repositoryName,
-                                                       IGCRestClient igcRestClient,
+    public List<IGCSearch> getComplexIGCSearchCriteria(IGCOMRSRepositoryConnector repositoryConnector,
                                                        String searchCriteria) throws FunctionNotSupportedException {
         // As with NoteLog entities themselves, do not search on AttachedNoteLogs
         return Collections.emptyList();

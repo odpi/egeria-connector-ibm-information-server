@@ -144,7 +144,7 @@ public class TypeDefStore {
      * @return TypeDef
      */
     public TypeDef getTypeDefByGUID(String guid) {
-        return getTypeDefByGUID(guid, true);
+        return getTypeDefByGUID(guid, false);
     }
 
     /**

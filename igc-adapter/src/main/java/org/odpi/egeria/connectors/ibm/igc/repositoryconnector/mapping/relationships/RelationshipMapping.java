@@ -376,22 +376,18 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * This method needs to be overridden to define how to search for a relationship using a property value that has
      * been mapped in a complex way.
      *
-     * @param repositoryHelper helper for the OMRS repository
-     * @param repositoryName name of the repository
-     * @param igcRestClient connectivity to an IGC environment
+     * @param repositoryConnector connector to the OMRS repository
      * @param matchProperties the set of properties against which to match (or null if none)
      * @return {@code List<IGCSearch>} - the search objects by which to find these relationships
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
      */
-    public List<IGCSearch> getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
-                                                       String repositoryName,
-                                                       IGCRestClient igcRestClient,
+    public List<IGCSearch> getComplexIGCSearchCriteria(IGCOMRSRepositoryConnector repositoryConnector,
                                                        SearchProperties matchProperties) throws FunctionNotSupportedException {
         // Nothing to do -- no relationship-level properties by default -- so return the simple search
         if (matchProperties == null || matchProperties.getConditions() == null || matchProperties.getConditions().size() == 0) {
             return getSimpleIGCSearchCriteria();
         } else {
-            return buildDefaultComplexSearch(matchProperties);
+            return buildDefaultComplexSearch(repositoryConnector, matchProperties);
         }
     }
 
@@ -399,30 +395,27 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * This method needs to be overridden to define how to search for a relationship using a string-based regex match
      * against all of its potential String properties.
      *
-     * @param repositoryHelper helper for the OMRS repository
-     * @param repositoryName name of the repository
-     * @param igcRestClient connectivity to an IGC environment
+     * @param repositoryConnector connector to the OMRS repository
      * @param searchCriteria the regular expression to attempt to match against any string properties
      * @return {@code List<IGCSearch>} - the search object by which to find these relationships
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
      */
-    public List<IGCSearch> getComplexIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
-                                                       String repositoryName,
-                                                       IGCRestClient igcRestClient,
+    public List<IGCSearch> getComplexIGCSearchCriteria(IGCOMRSRepositoryConnector repositoryConnector,
                                                        String searchCriteria) throws FunctionNotSupportedException {
         // Nothing to do -- no relationship-level properties by default -- so return the simple search
         if (searchCriteria == null || searchCriteria.equals("")) {
             return getSimpleIGCSearchCriteria();
         } else {
             // No need to check for literal-mapped values, as currently no relationship has a string-based literal value
-            return buildDefaultComplexSearch(null);
+            return buildDefaultComplexSearch(repositoryConnector, null);
         }
     }
 
-    private List<IGCSearch> buildDefaultComplexSearch(SearchProperties matchProperties) {
+    private List<IGCSearch> buildDefaultComplexSearch(IGCOMRSRepositoryConnector repositoryConnector,
+                                                      SearchProperties matchProperties) {
 
         List<IGCSearch> searches;
-        if (matchProperties == null || getAllNoneOrSome(matchProperties).equals(SearchFilter.NONE)) {
+        if (matchProperties == null || getAllNoneOrSome(repositoryConnector, matchProperties).equals(SearchFilter.NONE)) {
             searches = new ArrayList<>();
             ProxyMapping pm = getProxyTwoMapping();
             IGCSearch igcSearch = new IGCSearch(pm.getIgcAssetType());
@@ -1136,13 +1129,11 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
                     if (igcRestClient.hasModificationDetails(igcObj.getType())) {
                         Reference withModDetails = igcRestClient.getModificationDetails(igcObj);
-                        entityProxy.setCreatedBy(withModDetails.getCreatedBy());
-                        entityProxy.setCreateTime(withModDetails.getCreatedOn());
-                        entityProxy.setUpdatedBy(withModDetails.getModifiedBy());
-                        entityProxy.setUpdateTime(withModDetails.getModifiedOn());
-                        if (entityProxy.getUpdateTime() != null) {
-                            entityProxy.setVersion(entityProxy.getUpdateTime().getTime());
-                        }
+                        InstanceMapping.setupInstanceModDetails(entityProxy,
+                                withModDetails.getCreatedBy(),
+                                withModDetails.getCreatedOn(),
+                                withModDetails.getModifiedBy(),
+                                withModDetails.getModifiedOn());
                     }
 
                 } catch (TypeErrorException e) {
@@ -2007,17 +1998,17 @@ public abstract class RelationshipMapping extends InstanceMapping {
             // Set the the version of the relationship to the epoch time of whichever end of the relationship has
             // modification details (they should be the same if both have modification details)
             if (ep1 != null && ep1.getUpdateTime() != null) {
-                relationship.setVersion(ep1.getUpdateTime().getTime());
-                relationship.setCreateTime(ep1.getUpdateTime());
-                relationship.setCreatedBy(ep1.getCreatedBy());
-                relationship.setUpdatedBy(ep1.getUpdatedBy());
-                relationship.setUpdateTime(ep1.getUpdateTime());
+                InstanceMapping.setupInstanceModDetails(relationship,
+                        ep1.getCreatedBy(),
+                        ep1.getCreateTime(),
+                        ep1.getUpdatedBy(),
+                        ep1.getUpdateTime());
             } else if (ep2 != null && ep2.getUpdateTime() != null) {
-                relationship.setVersion(ep2.getUpdateTime().getTime());
-                relationship.setCreateTime(ep2.getUpdateTime());
-                relationship.setCreatedBy(ep2.getCreatedBy());
-                relationship.setUpdatedBy(ep2.getUpdatedBy());
-                relationship.setUpdateTime(ep2.getUpdateTime());
+                InstanceMapping.setupInstanceModDetails(relationship,
+                        ep2.getCreatedBy(),
+                        ep2.getCreateTime(),
+                        ep2.getUpdatedBy(),
+                        ep2.getUpdateTime());
             }
 
             if (ep1 != null && ep2 != null) {
