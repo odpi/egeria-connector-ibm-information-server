@@ -20,7 +20,7 @@ data:
   # Used by IGC
   STRICT_SSL: "false"
   LOGGING_LEVEL_ROOT: {{ .Values.logging.level }}
-  IGCPROXY_ENDPOINT: http://{{ .Release.Name }}-ibm-igc-service:8080
+  IGCPROXY_ENDPOINT: https://{{ .Release.Name }}-ibm-igc-service:9443
   IBMIGC_HOST: infosvr
   IBMIGC_PORT: "9446"
   IBMIGC_KAFKA_ENDPOINT: infosvr:59092
