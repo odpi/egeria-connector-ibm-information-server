@@ -1117,7 +1117,7 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 ));
         setSearchAndResponse(mockServerClient, caseName, "classifies_asset_b1c497ce.60641b50.001mts4re.732derp.7g9t50.2rjqcak0137pg2hevl7ne.json",
                 json(
-                        "{\"types\":[\"classification\"]\"where\":{\"conditions\":[{\"property\":\"classifies_asset\",\"operator\":\"=\",\"value\":\"b1c497ce.60641b50.001mts4re.732derp.7g9t50.2rjqcak0137pg2hevl7ne\"},{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"f4951817.e469fa50.001mtr2gq.nsrej8a.75d8rp.ud414oj262acep64l8dpq\"}],\"operator\":\"and\"}}",
+                        "{\"types\":[\"classification\"],\"where\":{\"conditions\":[{\"property\":\"classifies_asset\",\"operator\":\"=\",\"value\":\"b1c497ce.60641b50.001mts4re.732derp.7g9t50.2rjqcak0137pg2hevl7ne\"},{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"f4951817.e469fa50.001mtr2gq.nsrej8a.75d8rp.ud414oj262acep64l8dpq\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
     }
