@@ -67,7 +67,7 @@ The bundled form is then automatically deployed to your IGC environment during t
 specifically, when you call the:
 
 ```
-POST http://localhost:8080/open-metadata/admin-services/users/{{user}}/servers/{{server}}/instance
+POST https://localhost:9443/open-metadata/admin-services/users/{{user}}/servers/{{server}}/instance
 ```
 
 API interface of the OMAG Server Platform that has been configured to connect to an IGC environment
