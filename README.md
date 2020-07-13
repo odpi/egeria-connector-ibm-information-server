@@ -81,11 +81,11 @@ The quick version:
     Server domain (services) tier, `isadmin` with the username for your Information Server environment, and `isadmin`
     with the password for your Information Server environment):
     ```bash
-    $ curl -X POST -H "Content-Type: application/json" --data '{"producer":{"bootstrap.servers":"localhost:9092"},"consumer":{"bootstrap.servers":"localhost:9092"}}' "http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic"
-    $ curl -X POST "http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/cohorts/mycohort"
-    $ curl -X POST -H "Content-Type: application/json" --data '{"class":"Connection","connectorType":{"class":"ConnectorType","connectorProviderClassName":"org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider"},"endpoint":{"class":"Endpoint","address":"infosvr:9446","protocol":"https"},"userId":"isadmin","clearPassword":"isadmin","configurationProperties":{"defaultZones":["default"]}}' "http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/local-repository/mode/repository-proxy/connection"
-    $ curl -X POST "http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/local-repository/event-mapper-details?connectorProvider=org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapperProvider&eventSource=infosvr:59092"
-    $ curl -X POST "http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/instance"
+    $ curl -k -X POST -H "Content-Type: application/json" --data '{"producer":{"bootstrap.servers":"localhost:9092"},"consumer":{"bootstrap.servers":"localhost:9092"}}' "https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic"
+    $ curl -k -X POST "https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/cohorts/mycohort"
+    $ curl -k -X POST -H "Content-Type: application/json" --data '{"class":"Connection","connectorType":{"class":"ConnectorType","connectorProviderClassName":"org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider"},"endpoint":{"class":"Endpoint","address":"infosvr:9446","protocol":"https"},"userId":"isadmin","clearPassword":"isadmin","configurationProperties":{"defaultZones":["default"]}}' "https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/local-repository/mode/repository-proxy/connection"
+    $ curl -k -X POST "https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/local-repository/event-mapper-details?connectorProvider=org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapperProvider&eventSource=infosvr:59092"
+    $ curl -k -X POST "https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/instance"
     ```
 
 ### Enable IGC's events
@@ -161,7 +161,7 @@ For example payloads and endpoints, see the [Postman samples](samples).
 
 1. Configure your event bus for Egeria, by POSTing a payload like the following (replace the `localhost:9092` with the
     hostname and port number where your Kafka bus is running, and assuming you are running the OMAG Server Platform
-    locally at its default port of `8080`):
+    locally at its default port of `9443`):
 
     ```json
     {
@@ -177,13 +177,13 @@ For example payloads and endpoints, see the [Postman samples](samples).
     to:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic
+    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic
     ```
 
 1. Configure the cohort, by POSTing something like the following:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/cohorts/mycohort
+    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/cohorts/mycohort
     ```
 
 1. Configure the IGC connector, by POSTing a payload like the following, replacing the `{{igc_host}}` with the hostname
@@ -214,7 +214,7 @@ For example payloads and endpoints, see the [Postman samples](samples).
     to:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/local-repository/mode/repository-proxy/connection
+    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/local-repository/mode/repository-proxy/connection
     ```
 
     You can optionally also provide a list of zone names that will be used as default zones for all Assets retrieved
@@ -226,7 +226,7 @@ For example payloads and endpoints, see the [Postman samples](samples).
 1. Configure the event mapper for IGC, by POSTing something like the following:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/local-repository/event-mapper-details?connectorProvider=org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapperProvider&eventSource=my.igc.services.host.com:59092
+    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/local-repository/event-mapper-details?connectorProvider=org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapperProvider&eventSource=my.igc.services.host.com:59092
     ```
 
     The hostname provided at the end (`my.igc.services.host.com`) should be replaced with the host on which your
@@ -239,7 +239,7 @@ For example payloads and endpoints, see the [Postman samples](samples).
     to start the instance by POSTing something like the following:
 
    ```
-   POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/myserver/instance
+   POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/instance
    ```
 
 After following these instructions, your IGC instance will be participating in the Egeria cohort. For those objects
@@ -253,10 +253,10 @@ For example payloads and endpoints, see the [Postman samples](samples).
 
 1. Configure a local Egeria metadata repository for the access services, by POSTing something like the following
     (to use the graph repository, and assuming you are running the OMAG Server Platform locally at its default port of
-    `8080`):
+    `9443`):
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/omas_server/local-repository/mode/local-graph-repository
+    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/omas_server/local-repository/mode/local-graph-repository
     ```
 
 1. Configure your event bus for the access services, by POSTing a payload like the following (replace the
@@ -276,27 +276,27 @@ For example payloads and endpoints, see the [Postman samples](samples).
     to:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/omas_server/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic
+    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/omas_server/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic
     ```
 
 1. Enable the access services by POSTing something like the following:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/omas_server/access-services?serviceMode=ENABLED
+    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/omas_server/access-services?serviceMode=ENABLED
     ```
 
 1. The access services should now be configured, and you should now be able to start them by POSTing something like the
     following:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/omas_server/instance
+    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/omas_server/instance
     ```
 
 1. Configure a local metadata repository for the DataStage connector, by POSTing something like the following
     (to use the in-memory repository):
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/datastage_proxy/local-repository/mode/in-memory-repository
+    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/datastage_proxy/local-repository/mode/in-memory-repository
     ```
 
 1. Configure the DataStage connector, by POSTing a payload like the following, replacing the `{{igc_host}}` with the
@@ -307,7 +307,7 @@ For example payloads and endpoints, see the [Postman samples](samples).
     ```json
     {
         "class": "DataEngineProxyConfig",
-        "accessServiceRootURL": "http://localhost:8080",
+        "accessServiceRootURL": "https://localhost:9443",
         "accessServiceServerName": "omas_server",
         "dataEngineConnection": {
             "class": "Connection",
@@ -334,7 +334,7 @@ For example payloads and endpoints, see the [Postman samples](samples).
     to:
 
     ```
-    POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/datastage_proxy/data-engine-proxy-service/configuration
+    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/datastage_proxy/data-engine-proxy-service/configuration
     ```
 
     Note that you need to provide the `connectorProvider` parameter, set to the name of the DataStage
@@ -362,7 +362,7 @@ For example payloads and endpoints, see the [Postman samples](samples).
     the following:
 
    ```
-   POST http://localhost:8080/open-metadata/admin-services/users/admin/servers/datastage_proxy/instance
+   POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/datastage_proxy/instance
    ```
 
 After following these instructions, your DataStage environment will be polled for any changes (including creation of new)
