@@ -1,0 +1,121 @@
+Name:           v11700-ibm-igc-768dcc47b8-hvmfh
+Namespace:      default
+Priority:       0
+Node:           cgk8s-node-1.fyre.ibm.com/9.20.193.94
+Start Time:     Mon, 13 Jul 2020 04:24:05 -0700
+Labels:         app.kubernetes.io/component=ibm-igc-service
+                app.kubernetes.io/instance=v11700
+                app.kubernetes.io/name=ec-cts-ibmis
+                pod-template-hash=768dcc47b8
+Annotations:    <none>
+Status:         Running
+IP:             10.233.72.162
+Controlled By:  ReplicaSet/v11700-ibm-igc-768dcc47b8
+Init Containers:
+  init-connector:
+    Container ID:  docker://518d64752c8ec38e613e4ab74cd373176cff32b8ecdb6b8cd0b015d2d230511f
+    Image:         docker.io/odpi/egeria-configure:2.0
+    Image ID:      docker-pullable://odpi/egeria-configure@sha256:b3839cf7e3279008e17d57b45512931a8a155b798d82e838f0b0c8a8196d9186
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      /bin/bash
+      -c
+      cd /opt/egeria/connectors && wget ${CONNECTOR_URL}
+      
+    State:          Terminated
+      Reason:       Completed
+      Exit Code:    0
+      Started:      Mon, 13 Jul 2020 04:24:14 -0700
+      Finished:     Mon, 13 Jul 2020 04:24:16 -0700
+    Ready:          True
+    Restart Count:  0
+    Environment Variables from:
+      v11700-configmap  ConfigMap  Optional: false
+    Environment:        <none>
+    Mounts:
+      /opt/egeria/connectors from egeria-igc-connector-volume (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-8pp4q (ro)
+Containers:
+  proxy:
+    Container ID:   docker://01321713359f4fae6cd5306419da39f0b2220889d58988418f78f60148187682
+    Image:          docker.io/odpi/egeria:2.0
+    Image ID:       docker-pullable://odpi/egeria@sha256:5ba55e654b352f3e4ec915898f35cbda1e58648349f208a87765f27f7e0c0b13
+    Port:           9443/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Mon, 13 Jul 2020 04:24:19 -0700
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     1
+      memory:  2Gi
+    Requests:
+      cpu:      250m
+      memory:   1Gi
+    Readiness:  tcp-socket :9443 delay=10s timeout=1s period=10s #success=1 #failure=6
+    Environment Variables from:
+      v11700-configmap  ConfigMap  Optional: false
+    Environment:
+      LOADER_PATH:                                       /opt/egeria/connectors
+      LOGGING_LEVEL_ORG_ODPI_EGERIA_CONNECTORS_IBM_IGC:  DEBUG
+    Mounts:
+      /opt/egeria/connectors from egeria-igc-connector-volume (ro)
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-8pp4q (ro)
+  ibm-igc:
+    Container ID:   docker://52d739601f38b44f3e4083b0aab201ee37c57e59a5fb1e90c4e54a3d5c5a7739
+    Image:          hyc-daell-infosvr-docker-local.artifactory.swg-devops.com/ibm/infosvr:v11700-samples
+    Image ID:       docker-pullable://hyc-daell-infosvr-docker-local.artifactory.swg-devops.com/ibm/infosvr@sha256:6b73aa57cc6ba2028e509c025fd3b7023961d3fe819f3de3362b8ba1cd968762
+    Ports:          9446/TCP, 52181/TCP, 59092/TCP
+    Host Ports:     0/TCP, 0/TCP, 0/TCP
+    State:          Running
+      Started:      Mon, 13 Jul 2020 04:24:24 -0700
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     6
+      memory:  8Gi
+    Requests:
+      cpu:        2
+      memory:     4Gi
+    Liveness:     http-get https://:9446/ibm/iis/launchpad delay=720s timeout=1s period=20s #success=1 #failure=3
+    Readiness:    http-get https://:9446/ibm/iis/launchpad delay=300s timeout=1s period=20s #success=1 #failure=12
+    Environment:  <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-8pp4q (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  egeria-igc-connector-volume:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+  default-token-8pp4q:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-8pp4q
+    Optional:    false
+QoS Class:       Burstable
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type     Reason     Age                From                                Message
+  ----     ------     ----               ----                                -------
+  Normal   Scheduled  52m                default-scheduler                   Successfully assigned default/v11700-ibm-igc-768dcc47b8-hvmfh to cgk8s-node-1.fyre.ibm.com
+  Normal   Pulling    52m                kubelet, cgk8s-node-1.fyre.ibm.com  Pulling image "docker.io/odpi/egeria-configure:2.0"
+  Normal   Pulled     52m                kubelet, cgk8s-node-1.fyre.ibm.com  Successfully pulled image "docker.io/odpi/egeria-configure:2.0"
+  Normal   Created    52m                kubelet, cgk8s-node-1.fyre.ibm.com  Created container init-connector
+  Normal   Started    52m                kubelet, cgk8s-node-1.fyre.ibm.com  Started container init-connector
+  Normal   Pulling    52m                kubelet, cgk8s-node-1.fyre.ibm.com  Pulling image "docker.io/odpi/egeria:2.0"
+  Normal   Created    52m                kubelet, cgk8s-node-1.fyre.ibm.com  Created container proxy
+  Normal   Pulled     52m                kubelet, cgk8s-node-1.fyre.ibm.com  Successfully pulled image "docker.io/odpi/egeria:2.0"
+  Normal   Started    52m                kubelet, cgk8s-node-1.fyre.ibm.com  Started container proxy
+  Normal   Pulling    52m                kubelet, cgk8s-node-1.fyre.ibm.com  Pulling image "hyc-daell-infosvr-docker-local.artifactory.swg-devops.com/ibm/infosvr:v11700-samples"
+  Normal   Pulled     52m                kubelet, cgk8s-node-1.fyre.ibm.com  Successfully pulled image "hyc-daell-infosvr-docker-local.artifactory.swg-devops.com/ibm/infosvr:v11700-samples"
+  Normal   Created    52m                kubelet, cgk8s-node-1.fyre.ibm.com  Created container ibm-igc
+  Normal   Started    52m                kubelet, cgk8s-node-1.fyre.ibm.com  Started container ibm-igc
+  Warning  Unhealthy  51m (x3 over 52m)  kubelet, cgk8s-node-1.fyre.ibm.com  Readiness probe failed: dial tcp 10.233.72.162:9443: connect: connection refused

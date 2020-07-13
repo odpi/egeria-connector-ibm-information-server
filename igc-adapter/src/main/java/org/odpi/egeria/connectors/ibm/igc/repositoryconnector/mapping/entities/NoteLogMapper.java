@@ -6,6 +6,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedNoteLogEntryMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttachedNoteLogMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
@@ -102,7 +103,7 @@ public class NoteLogMapper extends ReferenceableMapper {
      * {@inheritDoc}
      */
     @Override
-    public SearchFilter getAllNoneOrSome(SearchProperties matchProperties) {
+    public SearchFilter getAllNoneOrSome(IGCOMRSRepositoryConnector repositoryConnector, SearchProperties matchProperties) {
         // We have no real way of supporting a search against NoteLogs, so we will simply always ensure that no results
         // are returned
         return SearchFilter.NONE;

@@ -15,7 +15,7 @@ metadata:
 spec:
   ports:
     - name: proxy
-      port: 8080
+      port: 9443
     - name: web
       port: 9446
     - name: zookeeper
@@ -99,10 +99,10 @@ spec:
             - name: "LOGGING_LEVEL_ORG_ODPI_EGERIA_CONNECTORS_IBM_IGC"
               value: "DEBUG"
           ports:
-            - containerPort: 8080
+            - containerPort: 9443
           readinessProbe:
             tcpSocket:
-              port: 8080
+              port: 9443
             initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 6

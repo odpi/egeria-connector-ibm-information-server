@@ -545,13 +545,11 @@ public abstract class EntityMapping extends InstanceMapping {
         String userId = entityMap.getUserId();
 
         if (igcRestClient.hasModificationDetails(igcEntity.getType())) {
-            omrsObj.setCreatedBy((String)igcRestClient.getPropertyByName(igcEntity, IGCRestConstants.MOD_CREATED_BY));
-            omrsObj.setCreateTime((Date)igcRestClient.getPropertyByName(igcEntity, IGCRestConstants.MOD_CREATED_ON));
-            omrsObj.setUpdatedBy((String)igcRestClient.getPropertyByName(igcEntity, IGCRestConstants.MOD_MODIFIED_BY));
-            omrsObj.setUpdateTime((Date)igcRestClient.getPropertyByName(igcEntity, IGCRestConstants.MOD_MODIFIED_ON));
-            if (omrsObj.getUpdateTime() != null) {
-                omrsObj.setVersion(omrsObj.getUpdateTime().getTime());
-            }
+            InstanceMapping.setupInstanceModDetails(omrsObj,
+                    igcEntity.getCreatedBy(),
+                    igcEntity.getCreatedOn(),
+                    igcEntity.getModifiedBy(),
+                    igcEntity.getModifiedOn());
         }
 
         List<Classification> omrsClassifications = entityMap.getOmrsClassifications();
