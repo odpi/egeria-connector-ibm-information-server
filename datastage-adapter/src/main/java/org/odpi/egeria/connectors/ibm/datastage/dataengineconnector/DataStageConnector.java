@@ -48,12 +48,13 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
     private boolean includeVirtualAssets = true;
     private boolean createDataStoreSchemas = false;
+    private List<String> limitToProjects;
 
     /**
      * Default constructor used by the OCF Connector Provider.
      */
     public DataStageConnector() {
-        // Nothing to do...
+        limitToProjects = new ArrayList<>();
     }
 
     /**
@@ -71,6 +72,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void start() throws ConnectorCheckedException {
 
         super.start();
@@ -96,6 +98,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
                     igcPage = (Integer) proxyProperties.get(DataStageConnectorProvider.PAGE_SIZE);
                     includeVirtualAssets = (Boolean) proxyProperties.getOrDefault(DataStageConnectorProvider.INCLUDE_VIRTUAL_ASSETS, true);
                     createDataStoreSchemas = (Boolean) proxyProperties.getOrDefault(DataStageConnectorProvider.CREATE_DATA_STORE_SCHEMAS, false);
+                    Object projects = proxyProperties.getOrDefault(DataStageConnectorProvider.LIMIT_TO_PROJECTS, null);
+                    if (projects instanceof String) {
+                        limitToProjects.add((String)projects);
+                    } else if (projects != null) {
+                        limitToProjects.addAll((List<String>)projects);
+                    }
                 }
 
                 IGCVersionEnum igcVersion;
@@ -308,7 +316,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param to the date and time up to which to cache changes (inclusive)
      */
     private void initializeCache(Date from, Date to) {
-        DataStageCache forComparison = new DataStageCache(from, to);
+        DataStageCache forComparison = new DataStageCache(from, to, limitToProjects);
         if (dataStageCache == null || !dataStageCache.equals(forComparison)) {
             // Initialize the cache, if it is empty, or reset it if it differs from the dates and times we've been given
             dataStageCache = forComparison;

@@ -42,6 +42,7 @@ public class DataStageConnectorProvider extends DataEngineConnectorProviderBase 
     static final String PAGE_SIZE = "pageSize";
     static final String INCLUDE_VIRTUAL_ASSETS = "includeVirtualAssets";
     static final String CREATE_DATA_STORE_SCHEMAS = "createDataStoreSchemas";
+    static final String LIMIT_TO_PROJECTS = "limitToProjects";
 
     /**
      * Constructor used to initialize the ConnectorProviderBase with the Java class name of the specific
@@ -64,6 +65,7 @@ public class DataStageConnectorProvider extends DataEngineConnectorProviderBase 
         recognizedConfigurationProperties.add(PAGE_SIZE);
         recognizedConfigurationProperties.add(INCLUDE_VIRTUAL_ASSETS);
         recognizedConfigurationProperties.add(CREATE_DATA_STORE_SCHEMAS);
+        recognizedConfigurationProperties.add(LIMIT_TO_PROJECTS);
         connectorType.setRecognizedConfigurationProperties(recognizedConfigurationProperties);
 
         super.connectorTypeBean = connectorType;

@@ -324,7 +324,8 @@ For example payloads and endpoints, see the [Postman samples](samples).
             "clearPassword": "{{igc_password}}",
             "configurationProperties": {
                 "createDataStoreSchemas": false,
-                "includeVirtualAssets": true
+                "includeVirtualAssets": true,
+                "limitToProjects": [ "dstage1" ]
             }
         },
         "pollIntervalInSeconds": 60
@@ -352,6 +353,10 @@ For example payloads and endpoints, see the [Postman samples](samples).
     - `includeVirtualAssets` is a boolean that indicates whether to include the creation of schemas for virtual assets
         (when true) or not (when false). By default this will be enabled (true) to ensure that virtual assets that might
         exist in lineage are still included (as IGC alone does not communicate any information about virtual assets).
+    - `limitToProjects` is a list (or single string) that defines the DataStage projects from which we should retrieve
+        jobs and sequences. By default (when not provided), jobs and sequences from all jobs will be included; however,
+        if a list of projects is provided on this parameter, only jobs and sequences from those projects will be
+        included.
 
     Finally, note that we specify the connector should poll for changes at a particular interval. This is because
     changes to DataStage routines within DataStage do not trigger events into IGC's embedded Kafka topic (at least for
