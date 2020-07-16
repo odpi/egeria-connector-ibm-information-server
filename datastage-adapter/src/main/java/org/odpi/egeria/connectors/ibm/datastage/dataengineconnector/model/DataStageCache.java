@@ -34,20 +34,23 @@ public class DataStageCache {
     private IGCRestClient igcRestClient;
     private Date from;
     private Date to;
+    private List<String> limitToProjects;
 
     /**
      * Create a new cache for changes between the times provided.
      *
      * @param from the date and time from which to cache changes
      * @param to the date and time until which to cache changes
+     * @param limitToProjects limit the cached jobs to only those in the provided list of projects
      */
-    public DataStageCache(Date from, Date to) {
+    public DataStageCache(Date from, Date to, List<String> limitToProjects) {
         this.ridToJob = new HashMap<>();
         this.ridToProcess = new HashMap<>();
         this.storeToIdentity = new HashMap<>();
         this.storeToColumns = new HashMap<>();
         this.from = from;
         this.to = to;
+        this.limitToProjects = (limitToProjects == null ? Collections.emptyList() : limitToProjects);
     }
 
     /**
@@ -304,7 +307,12 @@ public class DataStageCache {
             conditionSet.addCondition(cFrom);
             conditionSet.setMatchAnyCondition(false);
         }
-        log.info(" ... searching for changed jobs > {} and <= {}", fromTime, toTime);
+        if (limitToProjects.size() > 0) {
+            IGCSearchCondition cProject = new IGCSearchCondition("transformation_project.name", limitToProjects);
+            conditionSet.addCondition(cProject);
+            conditionSet.setMatchAnyCondition(false);
+        }
+        log.info(" ... searching for changed jobs > {} and <= {}, limited to projects: {}", fromTime, toTime, limitToProjects);
         igcSearch.addConditions(conditionSet);
         cacheChangedJobs(igcRestClient.search(igcSearch));
 

@@ -43,25 +43,46 @@ class LineageMappingMapping extends BaseMapping {
         for (DataItem stageColumnRef : allStageColumns) {
             String colId = stageColumnRef.getId();
             StageColumn stageColumnFull = job.getStageColumnByRid(colId);
-            String thisColumnName = getFullyQualifiedName(stageColumnFull) + stageNameSuffix;
-            if (!bSource) {
-                // Create a LineageMapping from each previous stage column to this stage column
-                ItemList<DataItem> previousColumns = stageColumnFull.getPreviousStageColumns();
-                List<DataItem> allPreviousColumns = igcRestClient.getAllPages("previous_stage_columns", previousColumns);
-                for (DataItem previousColumnRef : allPreviousColumns) {
-                    StageColumn previousColumnFull = job.getStageColumnByRid(previousColumnRef.getId());
-                    LineageMapping lineageMapping = getLineageMapping(getFullyQualifiedName(previousColumnFull) + stageNameSuffix, thisColumnName);
-                    lineageMappings.add(lineageMapping);
+            String stageColumnFullQN = getFullyQualifiedName(stageColumnFull);
+            if (stageColumnFullQN != null) {
+                String thisColumnName = stageColumnFullQN + stageNameSuffix;
+                if (!bSource) {
+                    // Create a LineageMapping from each previous stage column to this stage column
+                    ItemList<DataItem> previousColumns = stageColumnFull.getPreviousStageColumns();
+                    List<DataItem> allPreviousColumns = igcRestClient.getAllPages("previous_stage_columns", previousColumns);
+                    for (DataItem previousColumnRef : allPreviousColumns) {
+                        StageColumn previousColumnFull = job.getStageColumnByRid(previousColumnRef.getId());
+                        String previousColumnFullQN = getFullyQualifiedName(previousColumnFull);
+                        if (previousColumnFullQN != null) {
+                            LineageMapping lineageMapping = getLineageMapping(previousColumnFullQN + stageNameSuffix, thisColumnName);
+                            lineageMappings.add(lineageMapping);
+                        } else {
+                            log.error("Unable to determine identity for previous column -- not including (full was {}): {}",
+                                    previousColumnFull == null ? "null" : "non-null",
+                                    previousColumnRef);
+                        }
+                    }
+                } else {
+                    // Create a LineageMapping from this stage column to each next stage column
+                    ItemList<DataItem> nextColumns = stageColumnFull.getNextStageColumns();
+                    List<DataItem> allNextColumns = igcRestClient.getAllPages("next_stage_columns", nextColumns);
+                    for (DataItem nextColumnRef : allNextColumns) {
+                        StageColumn nextColumnFull = job.getStageColumnByRid(nextColumnRef.getId());
+                        String nextColumnFullQN = getFullyQualifiedName(nextColumnFull);
+                        if (nextColumnFullQN != null) {
+                            LineageMapping lineageMapping = getLineageMapping(thisColumnName, nextColumnFullQN + stageNameSuffix);
+                            lineageMappings.add(lineageMapping);
+                        } else {
+                            log.error("Unable to determine identity for next column -- not including (full was {}): {}",
+                                    nextColumnFull == null ? "null" : "non-null",
+                                    nextColumnRef);
+                        }
+                    }
                 }
             } else {
-                // Create a LineageMapping from this stage column to each next stage column
-                ItemList<DataItem> nextColumns = stageColumnFull.getNextStageColumns();
-                List<DataItem> allNextColumns = igcRestClient.getAllPages("next_stage_columns", nextColumns);
-                for (DataItem nextColumnRef : allNextColumns) {
-                    StageColumn nextColumnFull = job.getStageColumnByRid(nextColumnRef.getId());
-                    LineageMapping lineageMapping = getLineageMapping(thisColumnName, getFullyQualifiedName(nextColumnFull) + stageNameSuffix);
-                    lineageMappings.add(lineageMapping);
-                }
+                log.error("Unable to determine identity for stage column -- not including (full was {}): {}",
+                        stageColumnFull == null ? "null" : "non-null",
+                        stageColumnRef);
             }
         }
     }
@@ -89,9 +110,15 @@ class LineageMappingMapping extends BaseMapping {
         for (DataItem stageColRef : allStageColumns) {
             StageColumn stageColFull = job.getStageColumnByRid(stageColRef.getId());
             String stageColName = getFullyQualifiedName(stageColFull);
-            // Create a single mapping between the input stage and the output stage that use this link
-            LineageMapping lineageMapping = getLineageMapping(stageColName + "_" + inputStage.getName(), stageColName + "_" + outputStage.getName());
-            lineageMappings.add(lineageMapping);
+            if (stageColName != null) {
+                // Create a single mapping between the input stage and the output stage that use this link
+                LineageMapping lineageMapping = getLineageMapping(stageColName + "_" + inputStage.getName(), stageColName + "_" + outputStage.getName());
+                lineageMappings.add(lineageMapping);
+            } else {
+                log.error("Unable to determine identity for stage column -- not including (full was {}): {}",
+                        stageColFull == null ? "null" : "non-null",
+                        stageColRef);
+            }
         }
     }
 
@@ -118,43 +145,47 @@ class LineageMappingMapping extends BaseMapping {
         if (fields != null) {
             for (Classificationenabledgroup fieldObj : fields) {
                 String field1QN = getFullyQualifiedName(fieldObj);
-                ItemList<InformationAsset> relatedStageCols;
-                String propertyName;
-                if (bSource) {
-                    relatedStageCols = fieldObj.getReadByDesign();
-                    propertyName = "read_by_(design)";
-                } else {
-                    relatedStageCols = fieldObj.getWrittenByDesign();
-                    propertyName = "written_by_(design)";
-                }
-                if (relatedStageCols != null) {
-                    List<InformationAsset> allRelatedStageCols = igcRestClient.getAllPages(propertyName, relatedStageCols);
-                    // For each object that reads / writes to that field...
-                    for (InformationAsset stageColRef : allRelatedStageCols) {
-                        StageColumn stageColFull = job.getStageColumnByRid(stageColRef.getId());
-                        if (stageColFull != null) {
-                            String field2QN = getFullyQualifiedName(stageColFull);
-                            if (bSource) {
-                                // StoreX to StoreX_STAGEA (reads_from_(design) to INPUT_PORT)
-                                LineageMapping oneToOne = getLineageMapping(field1QN, field1QN + fullyQualifiedStageName);
-                                lineageMappings.add(oneToOne);
-                                // StoreX_STAGEA to DSLink1_STAGEA (INPUT_PORT to OUTPUT_PORT)
-                                LineageMapping portToPort = getLineageMapping(field1QN + fullyQualifiedStageName, field2QN + stageNameSuffix);
-                                lineageMappings.add(portToPort);
+                if (field1QN != null) {
+                    ItemList<InformationAsset> relatedStageCols;
+                    String propertyName;
+                    if (bSource) {
+                        relatedStageCols = fieldObj.getReadByDesign();
+                        propertyName = "read_by_(design)";
+                    } else {
+                        relatedStageCols = fieldObj.getWrittenByDesign();
+                        propertyName = "written_by_(design)";
+                    }
+                    if (relatedStageCols != null) {
+                        List<InformationAsset> allRelatedStageCols = igcRestClient.getAllPages(propertyName, relatedStageCols);
+                        // For each object that reads / writes to that field...
+                        for (InformationAsset stageColRef : allRelatedStageCols) {
+                            StageColumn stageColFull = job.getStageColumnByRid(stageColRef.getId());
+                            if (stageColFull != null) {
+                                String field2QN = getFullyQualifiedName(stageColFull);
+                                if (bSource) {
+                                    // StoreX to StoreX_STAGEA (reads_from_(design) to INPUT_PORT)
+                                    LineageMapping oneToOne = getLineageMapping(field1QN, field1QN + fullyQualifiedStageName);
+                                    lineageMappings.add(oneToOne);
+                                    // StoreX_STAGEA to DSLink1_STAGEA (INPUT_PORT to OUTPUT_PORT)
+                                    LineageMapping portToPort = getLineageMapping(field1QN + fullyQualifiedStageName, field2QN + stageNameSuffix);
+                                    lineageMappings.add(portToPort);
+                                } else {
+                                    // DSLink2_STAGEC to StoreY_STAGEC (INPUT_PORT to OUTPUT_PORT)
+                                    LineageMapping portToPort = getLineageMapping(field1QN + fullyQualifiedStageName, field1QN);
+                                    lineageMappings.add(portToPort);
+                                    // StoreY_STAGEC to StoreY (OUTPUT_PORT to written_by_(design))
+                                    LineageMapping oneToOne = getLineageMapping(field2QN + stageNameSuffix, field1QN + fullyQualifiedStageName);
+                                    lineageMappings.add(oneToOne);
+                                }
                             } else {
-                                // DSLink2_STAGEC to StoreY_STAGEC (INPUT_PORT to OUTPUT_PORT)
-                                LineageMapping portToPort = getLineageMapping(field1QN + fullyQualifiedStageName, field1QN);
-                                lineageMappings.add(portToPort);
-                                // StoreY_STAGEC to StoreY (OUTPUT_PORT to written_by_(design))
-                                LineageMapping oneToOne = getLineageMapping(field2QN + stageNameSuffix, field1QN + fullyQualifiedStageName);
-                                lineageMappings.add(oneToOne);
+                                log.error("Unable to find referenced stage column: {}", stageColRef);
                             }
-                        } else {
-                            log.error("Unable to find referenced stage column: {}", stageColRef);
                         }
+                    } else {
+                        log.error("No fields were found for lineage mapping of: {}", fieldObj);
                     }
                 } else {
-                    log.error("No fields were found for lineage mapping of: {}", fieldObj);
+                    log.error("Unable to determine identity for field -- not including: {}", fieldObj);
                 }
             }
         } else {

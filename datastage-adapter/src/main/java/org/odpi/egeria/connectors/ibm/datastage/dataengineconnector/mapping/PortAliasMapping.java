@@ -76,10 +76,15 @@ class PortAliasMapping extends BaseMapping {
                             // Create a new PortAlias at the sequence level, for each underlying PortAlias of jobs
                             // that are executed, that delegateTo the underlying job's PortAlias
                             for (PortAlias delegateTo : jobPortAliases) {
-                                PortAlias sequencePortAlias = getSkeletonPortAlias(getFullyQualifiedName(stage) + "::" + delegateTo.getQualifiedName(), stage.getName() + "_" + delegateTo.getDisplayName());
-                                sequencePortAlias.setPortType(delegateTo.getPortType());
-                                sequencePortAlias.setDelegatesTo(delegateTo.getQualifiedName());
-                                portAliases.add(sequencePortAlias);
+                                String stageQN = getFullyQualifiedName(stage);
+                                if (stageQN != null) {
+                                    PortAlias sequencePortAlias = getSkeletonPortAlias(stageQN + "::" + delegateTo.getQualifiedName(), stage.getName() + "_" + delegateTo.getDisplayName());
+                                    sequencePortAlias.setPortType(delegateTo.getPortType());
+                                    sequencePortAlias.setDelegatesTo(delegateTo.getQualifiedName());
+                                    portAliases.add(sequencePortAlias);
+                                } else {
+                                    log.error("Unable to determine identity for stage -- not including: {}", stage);
+                                }
                             }
                         } else {
                             log.warn("Unable to find existing process to use for alias: {}", jobId);

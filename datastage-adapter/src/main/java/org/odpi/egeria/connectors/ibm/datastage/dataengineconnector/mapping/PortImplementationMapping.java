@@ -9,6 +9,8 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
 import org.odpi.openmetadata.accessservices.dataengine.model.PortImplementation;
 import org.odpi.openmetadata.accessservices.dataengine.model.PortType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -17,6 +19,7 @@ import java.util.List;
  */
 class PortImplementationMapping extends BaseMapping {
 
+    private static final Logger log = LoggerFactory.getLogger(PortImplementationMapping.class);
     private PortImplementation portImplementation;
 
     /**
@@ -33,11 +36,16 @@ class PortImplementationMapping extends BaseMapping {
         portImplementation = null;
         if (link != null) {
             portImplementation = new PortImplementation();
-            portImplementation.setQualifiedName(getFullyQualifiedName(link) + stageNameSuffix);
-            portImplementation.setDisplayName(link.getName());
-            portImplementation.setPortType(portType);
-            SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, job, link, stageNameSuffix);
-            portImplementation.setSchemaType(schemaTypeMapping.getSchemaType());
+            String linkQN = getFullyQualifiedName(link);
+            if (linkQN != null) {
+                portImplementation.setQualifiedName(linkQN + stageNameSuffix);
+                portImplementation.setDisplayName(link.getName());
+                portImplementation.setPortType(portType);
+                SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, job, link, stageNameSuffix);
+                portImplementation.setSchemaType(schemaTypeMapping.getSchemaType());
+            } else {
+                log.error("Unable to determine identity for link -- not including: {}", link);
+            }
         }
     }
 

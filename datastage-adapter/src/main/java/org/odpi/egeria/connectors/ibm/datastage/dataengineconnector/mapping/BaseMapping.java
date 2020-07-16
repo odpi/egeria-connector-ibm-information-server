@@ -40,7 +40,13 @@ class BaseMapping {
      * @return String
      */
     String getFullyQualifiedName(Reference igcObj) {
-        return igcObj.getIdentity(igcRestClient).toString();
+        if (igcObj != null) {
+            Identity identity = igcObj.getIdentity(igcRestClient);
+            if (identity != null) {
+                return identity.toString();
+            }
+        }
+        return null;
     }
 
     /**
