@@ -35,7 +35,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
     private static final Logger log = LoggerFactory.getLogger(DataStageConnector.class);
 
-    private static final String SYNC_RULE_NAME = "Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS";
+    private static final String SYNC_RULE_PREFIX = "Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS";
     private static final String SYNC_RULE_DESC = "GENERATED -- DO NOT UPDATE: last synced at ";
 
     private final SimpleDateFormat syncDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
@@ -182,7 +182,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
         if (exists == null) {
             // Create the entry
             IGCCreate igcCreate = new IGCCreate("information_governance_rule");
-            igcCreate.addProperty(DataStageConstants.NAME, SYNC_RULE_NAME);
+            igcCreate.addProperty(DataStageConstants.NAME, getJobSyncRuleName());
             igcCreate.addProperty(DataStageConstants.SHORT_DESCRIPTION, newDescription);
             success = igcRestClient.create(igcCreate) != null;
         } else {
@@ -423,11 +423,25 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private InformationGovernanceRule getJobSyncRule() {
         IGCSearch igcSearch = new IGCSearch("information_governance_rule");
         igcSearch.addProperty(DataStageConstants.SHORT_DESCRIPTION);
-        IGCSearchCondition condition = new IGCSearchCondition(DataStageConstants.NAME, "=", SYNC_RULE_NAME);
+        IGCSearchCondition condition = new IGCSearchCondition(DataStageConstants.NAME, "=", getJobSyncRuleName());
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
         ItemList<InformationGovernanceRule> results = igcRestClient.search(igcSearch);
         return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
+    }
+
+    /**
+     * Construct the name of a unique rule to capture the last time jobs where sync'd for a combination of filtered
+     * projects to the Data Engine OMAS.
+     *
+     * @return String
+     */
+    private String getJobSyncRuleName() {
+        String ruleName = SYNC_RULE_PREFIX;
+        if (limitToProjects.size() > 0) {
+            ruleName += " for projects: [" + String.join(",", limitToProjects) + "]";
+        }
+        return ruleName;
     }
 
     /**
