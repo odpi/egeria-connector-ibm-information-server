@@ -68,21 +68,26 @@ class AttributeMapping extends BaseMapping {
         attributes = new ArrayList<>();
         if (fields != null && !fields.isEmpty()) {
             for (Classificationenabledgroup field : fields) {
-                Attribute attribute = new Attribute();
-                attribute.setQualifiedName(getFullyQualifiedName(field) + fullyQualifiedStageName);
-                attribute.setDisplayName(field.getName());
-                String dataType = field.getDataType();
-                if (dataType != null) {
-                    attribute.setDataType(dataType);
+                String fieldQN = getFullyQualifiedName(field);
+                if (fieldQN != null) {
+                    Attribute attribute = new Attribute();
+                    attribute.setQualifiedName(fieldQN + fullyQualifiedStageName);
+                    attribute.setDisplayName(field.getName());
+                    String dataType = field.getDataType();
+                    if (dataType != null) {
+                        attribute.setDataType(dataType);
+                    } else {
+                        attribute.setDataType(field.getOdbcType());
+                    }
+                    Number position = field.getPosition();
+                    if (position != null) {
+                        attribute.setPosition(position.intValue());
+                    }
+                    attribute.setDefaultValue(field.getDefaultValue());
+                    attributes.add(attribute);
                 } else {
-                    attribute.setDataType(field.getOdbcType());
+                    log.error("Unable to determine identity for field -- not including it: {}", field);
                 }
-                Number position = field.getPosition();
-                if (position != null) {
-                    attribute.setPosition(position.intValue());
-                }
-                attribute.setDefaultValue(field.getDefaultValue());
-                attributes.add(attribute);
             }
         }
     }

@@ -20,6 +20,7 @@ import java.util.stream.Stream;
  */
 public class ProcessMapping extends BaseMapping {
 
+    private static final Logger log = LoggerFactory.getLogger(ProcessMapping.class);
     private Process process;
 
     /**
@@ -65,9 +66,14 @@ public class ProcessMapping extends BaseMapping {
                     List<SequenceJob> allSequences = igcRestClient.getAllPages("sequenced_by_jobs", sequencedBy);
                     for (SequenceJob sequenceJob : allSequences) {
                         ParentProcess parent = new ParentProcess();
-                        parent.setQualifiedName(getFullyQualifiedName(sequenceJob));
-                        parent.setProcessContainmentType(ProcessContainmentType.APPEND);
-                        parents.add(parent);
+                        String sequenceJobQN = getFullyQualifiedName(sequenceJob);
+                        if (sequenceJobQN != null) {
+                            parent.setQualifiedName(sequenceJobQN);
+                            parent.setProcessContainmentType(ProcessContainmentType.APPEND);
+                            parents.add(parent);
+                        } else {
+                            log.error("Unable to determine identity for sequence -- not including: {}", sequenceJob);
+                        }
                     }
                     if (!parents.isEmpty()) {
                         process.setParentProcesses(parents);
@@ -100,10 +106,15 @@ public class ProcessMapping extends BaseMapping {
             // job-level
             List<ParentProcess> parents = new ArrayList<>();
             ParentProcess parent = new ParentProcess();
-            parent.setQualifiedName(getFullyQualifiedName(job.getJobObject()));
-            parent.setProcessContainmentType(ProcessContainmentType.OWNED);
-            parents.add(parent);
-            process.setParentProcesses(parents);
+            String jobQN = getFullyQualifiedName(job.getJobObject());
+            if (jobQN != null) {
+                parent.setQualifiedName(jobQN);
+                parent.setProcessContainmentType(ProcessContainmentType.OWNED);
+                parents.add(parent);
+                process.setParentProcesses(parents);
+            } else {
+                log.error("Unable to determine identity for job -- not including: {}", job.getJobObject());
+            }
         }
     }
 
@@ -126,10 +137,15 @@ public class ProcessMapping extends BaseMapping {
             process = new Process();
             process.setName(igcObj.getName());
             process.setDisplayName(igcObj.getName());
-            process.setQualifiedName(getFullyQualifiedName(igcObj));
-            process.setDescription(getDescription(igcObj));
-            process.setOwner(igcObj.getCreatedBy());
-            // TODO: setAdditionalProperties or setExtendedProperties with other information on the IGC object?
+            String objQN = getFullyQualifiedName(igcObj);
+            if (objQN != null) {
+                process.setQualifiedName(objQN);
+                process.setDescription(getDescription(igcObj));
+                process.setOwner(igcObj.getCreatedBy());
+                // TODO: setAdditionalProperties or setExtendedProperties with other information on the IGC object?
+            } else {
+                log.error("Unable to determine identity for asset -- not including: {}", igcObj);
+            }
         }
         return process;
     }
@@ -186,13 +202,17 @@ public class ProcessMapping extends BaseMapping {
         String stageNameSuffix = "_" + stage.getName();
         // Setup an x_PORT for any data stores that are used by design as sources / targets
         String fullyQualifiedStageName = getFullyQualifiedName(stage);
-        List<InformationAsset> allStores = igcRestClient.getAllPages(propertyName, stores);
-        for (InformationAsset storeRef : allStores) {
-            List<Classificationenabledgroup> fieldsForStore = cache.getFieldsForStore(storeRef);
-            PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, stage, portType, fieldsForStore, fullyQualifiedStageName);
-            portImplementations.add(portImplementationMapping.getPortImplementation());
-            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, fieldsForStore, portType.equals(PortType.INPUT_PORT), fullyQualifiedStageName, stageNameSuffix);
-            lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
+        if (fullyQualifiedStageName != null) {
+            List<InformationAsset> allStores = igcRestClient.getAllPages(propertyName, stores);
+            for (InformationAsset storeRef : allStores) {
+                List<Classificationenabledgroup> fieldsForStore = cache.getFieldsForStore(storeRef);
+                PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, stage, portType, fieldsForStore, fullyQualifiedStageName);
+                portImplementations.add(portImplementationMapping.getPortImplementation());
+                LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, fieldsForStore, portType.equals(PortType.INPUT_PORT), fullyQualifiedStageName, stageNameSuffix);
+                lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
+            }
+        } else {
+            log.error("Unable to determine identity for stage -- not including: {}", stage);
         }
     }
 
