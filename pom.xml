@@ -476,8 +476,6 @@
                     <configuration>
                         <forkCount>3</forkCount>
                         <reuseForks>true</reuseForks>
-                        <!--suppress UnresolvedMavenProperty -->
-                        <argLine>-Xmx1024m ${argLine}</argLine>
                         <includes>
                             <include>**/*Test.java</include>
                         </includes>
@@ -485,18 +483,6 @@
                             <org.slf4j.simpleLogger.defaultLogLevel>INFO</org.slf4j.simpleLogger.defaultLogLevel>
                         </systemPropertyVariables>
                     </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.junit.jupiter</groupId>
-                            <artifactId>junit-jupiter-engine</artifactId>
-                            <version>${junit.jupiter.version}</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>org.junit.jupiter</groupId>
-                            <artifactId>junit-jupiter-api</artifactId>
-                            <version>${junit.jupiter.version}</version>
-                        </dependency>
-                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.mock-server</groupId>
