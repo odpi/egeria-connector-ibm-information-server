@@ -86,7 +86,28 @@ public class ReferenceableMapper extends EntityMapping {
                 omrsEntityTypeName,
                 igcRidPrefix
         );
+        init(igcRidPrefix, includeDefaultRelationships);
 
+    }
+
+    protected ReferenceableMapper(String igcAssetTypeName,
+                                  String igcAssetTypeDisplayName,
+                                  String omrsEntityTypeName,
+                                  String igcRidPrefix,
+                                  boolean includeDefaultRelationships,
+                                  boolean searchable) {
+        super(
+                igcAssetTypeName,
+                igcAssetTypeDisplayName,
+                omrsEntityTypeName,
+                igcRidPrefix,
+                searchable
+        );
+        init(igcRidPrefix, includeDefaultRelationships);
+
+    }
+
+    private void init(String igcRidPrefix, boolean includeDefaultRelationships) {
         if (includeDefaultRelationships) {
             // common set of relationships that could apply to all IGC objects (and all OMRS Referenceables)
             addRelationshipMapper(SemanticAssignmentMapper.getInstance(null));
@@ -96,13 +117,10 @@ public class ReferenceableMapper extends EntityMapping {
                 addRelationshipMapper(AttachedNoteLogMapper.getInstance(null));
             }
         }
-
         // common set of properties that apply to all Referenceable objects
         addComplexOmrsProperty("qualifiedName");
         addComplexOmrsProperty("additionalProperties");
-
         // common set of classifications that apply to all IGC objects (and all OMRS Referenceables) [none]
-
     }
 
     /**
@@ -335,6 +353,7 @@ public class ReferenceableMapper extends EntityMapping {
         List<String> stringPropertiesForType = igcRestClient.getAllStringPropertiesForType(IGCRestConstants.getAssetTypeForSearch(getIgcAssetType()));
 
         // By default, add a condition for every complex-mapped string property EXCEPT for the modification details
+        // TODO: we actually should include the modification details, and also match against the metadata collection ID and name as well?
         for (String propertyName : getComplexMappedIgcProperties()) {
             if (stringPropertiesForType.contains(propertyName) && !propertyName.equals("modified_by") && !propertyName.equals("created_by")) {
                 IGCSearchCondition condition = IGCRepositoryHelper.getRegexSearchCondition(

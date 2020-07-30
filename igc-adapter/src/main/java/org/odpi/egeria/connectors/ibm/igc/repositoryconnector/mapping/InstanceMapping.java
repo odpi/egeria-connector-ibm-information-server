@@ -10,6 +10,8 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyCondition;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -18,6 +20,9 @@ import java.util.*;
  */
 public abstract class InstanceMapping {
 
+    private static final Logger log = LoggerFactory.getLogger(InstanceMapping.class);
+
+    private boolean searchable;
     private Map<String, Object> literalOmrsPropertyMapping;
 
     public enum SearchFilter { ALL, NONE, SOME }
@@ -52,7 +57,25 @@ public abstract class InstanceMapping {
 
     public InstanceMapping() {
         this.literalOmrsPropertyMapping = new HashMap<>();
+        this.searchable = true;
     }
+
+    /**
+     * Setup an instance mapping with searchability defined by the provided parameter.
+     *
+     * @param searchable true if the mapping can be used in a search, false if it cannot
+     */
+    public InstanceMapping(boolean searchable) {
+        this();
+        this.searchable = searchable;
+    }
+
+    /**
+     * Indicates whether this mapping can be used in a search (true) or not (false).
+     *
+     * @return boolean
+     */
+    public boolean isSearchable() { return searchable; }
 
     /**
      * Add a mapping between an OMRS property and a fixed (literal) value.
@@ -149,6 +172,7 @@ public abstract class InstanceMapping {
                         // If some match but we have been requested to match nothing, or if we have not matched
                         // everything but have been requested to match everything, we can short-circuit as we should
                         // return no results
+                        log.debug("Requested search with NONE criteria but non-NONE nested filter, or ALL criteria and non-ALL nested filter: {}", nestedConditions);
                         filter = SearchFilter.NONE;
                         break;
                     } else if (matchCriteria.equals(MatchCriteria.ANY) && !filter.equals(SearchFilter.NONE)) {
@@ -160,13 +184,17 @@ public abstract class InstanceMapping {
                     // (and in any other case we should continue looping to determine the situation...)
                 } else {
                     String omrsPropertyName = condition.getProperty();
+                    // If we are being asked to search for an instance header property, ensure it is one we support
+                    // searching against (otherwise set the filter to NONE)
                     if (getHeaderProperties().contains(omrsPropertyName) && !isKnownInstanceHeaderProperty(repositoryConnector, condition)) {
+                        log.debug("Requested search for header property against which search is not supported: {}", condition);
                         filter = SearchFilter.NONE;
                         break;
                     }
                     // If there is any property we are being asked to search but it has no mapping,
                     // ensure we will get no results
                     if (!mappedOmrsProperties.contains(omrsPropertyName)) {
+                        log.debug("Requested search against a property with no mapping: {}", condition);
                         filter = SearchFilter.NONE;
                         break;
                     }
@@ -178,6 +206,7 @@ public abstract class InstanceMapping {
                             // none this means we should have no results, and when we should match any this means
                             // all results will match
                             if (matchCriteria.equals(MatchCriteria.NONE)) {
+                                log.debug("Requested search with NONE criteria, but found a literal-mapped property that matches: {}", condition);
                                 filter = SearchFilter.NONE;
                             } else {
                                 filter = SearchFilter.ALL;
@@ -187,6 +216,7 @@ public abstract class InstanceMapping {
                         } else if (!valuesAreEqual && matchCriteria.equals(MatchCriteria.ALL)) {
                             // We can also immediately short-circuit if we have been asked that all values match and
                             // we have found one that does not
+                            log.debug("Requested search with ALL criteria, but found a literal-mapped property that does not match: {}", condition);
                             filter = SearchFilter.NONE;
                             break;
                         }
@@ -266,10 +296,11 @@ public abstract class InstanceMapping {
             case "createTime":
             case "updateTime":
             case "version":
+            case "type": // TODO: is currently overloaded on eg. Database
                 known = true;
                 break;
             default:
-                // Also handles 'type', 'instanceProvenanceType', 'guid' and 'instanceURL'
+                // Also handles 'instanceProvenanceType', 'guid' and 'instanceURL'
                 // (that is, we will not support searching on any of these properties)
                 known = false;
                 break;

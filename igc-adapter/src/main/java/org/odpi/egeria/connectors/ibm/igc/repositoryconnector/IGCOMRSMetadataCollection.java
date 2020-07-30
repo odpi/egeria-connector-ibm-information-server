@@ -992,7 +992,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         );
                     }
                 } else {
-                    log.warn("Unable to confirm that the qualifiedName-embedded type ({}) is a subtype of the requested type ({}) -- skipping qualifiedName search.", mapper.getOmrsTypeDefName(), entityTypeGUID);
+                    log.info("The qualifiedName-embedded type ({}) is not a subtype of the requested type ({}) -- skipping qualifiedName search.", mapper.getOmrsTypeDefName(), entityTypeGUID);
                 }
             }
 
@@ -1144,6 +1144,10 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 // to ensure a full set of search results, so construct and run an appropriate search for each one
                 List<EntityMapping> mappingsToSearch = getMappingsToSearch(entityTypeGUID, entitySubtypeGUIDs, userId);
 
+                if (mappingsToSearch.isEmpty()) {
+                    log.warn("Found no mappings to search for entityTypeGUID: {}", entityTypeGUID);
+                }
+
                 for (EntityMapping mapping : mappingsToSearch) {
 
                     // Only continue to add results to the list if we are after all results (pageSize of 0) or we have
@@ -1283,6 +1287,10 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 // to ensure a full set of search results, so construct and run an appropriate search for each one
                 List<EntityMapping> mappingsToSearch = getMappingsToSearch(entityTypeGUID, null, userId);
 
+                if (mappingsToSearch.isEmpty()) {
+                    log.warn("Found no mappings to search for entityTypeGUID: {}", entityTypeGUID);
+                }
+
                 for (EntityMapping mapping : mappingsToSearch) {
 
                     // Only continue to add results to the list if we are after all results (pageSize of 0) or we have
@@ -1396,6 +1404,10 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             // will just return an empty list
 
             List<EntityMapping> mappingsToSearch = getMappingsToSearch(entityTypeGUID, null, userId);
+
+            if (mappingsToSearch.isEmpty()) {
+                log.warn("Found no mappings to search for entityTypeGUID: {}", entityTypeGUID);
+            }
 
             // Now iterate through all of the mappings we need to search, construct and run an appropriate search
             // for each one
@@ -1586,6 +1598,10 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             // will just return an empty list
             List<EntityMapping> mappingsToSearch = getMappingsToSearch(entityTypeGUID, null, userId);
 
+            if (mappingsToSearch.isEmpty()) {
+                log.warn("Found no mappings to search for entityTypeGUID: {}", entityTypeGUID);
+            }
+
             // Now iterate through all of the mappings we need to search, construct and run an appropriate search
             // for each one
             for (EntityMapping mapping : mappingsToSearch) {
@@ -1729,6 +1745,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         log.warn("Unable to find POJO to handle IGC asset type '{}' -- skipping search against this asset type.", igcAssetType);
                     }
 
+                } else {
+                    log.debug("Search has overrun the page size, stopping any further results.");
                 }
             }
 
@@ -2196,18 +2214,20 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         // include many objects that are not implemented)
         if (entityTypeGUID == null) {
             for (EntityMapping candidate : igcRepositoryHelper.getAllEntityMappings()) {
-                String candidateType = candidate.getOmrsTypeDefName();
-                String candidateIgcType = candidate.getIgcAssetType();
-                if (!candidateType.equals("Referenceable") && !candidateIgcType.equals(EntityMapping.SUPERTYPE_SENTINEL)) {
-                    if (entitySubtypeGUIDs == null) {
-                        mappingsToSearch.add(candidate);
-                    } else {
-                        // Only include the mapping if it is in the (non-null) subtypes list
-                        for (String subtypeGUID : entitySubtypeGUIDs) {
-                            TypeDef subtype = getAnyTypeDefByGUID(subtypeGUID);
-                            if (subtype != null && repositoryHelper.isTypeOf(metadataCollectionId, candidateType, subtype.getName())) {
-                                mappingsToSearch.add(candidate);
-                                break;
+                if (candidate.isSearchable()) { // only consider the candidate for inclusion if it is actually searchable
+                    String candidateType = candidate.getOmrsTypeDefName();
+                    String candidateIgcType = candidate.getIgcAssetType();
+                    if (!candidateType.equals("Referenceable") && !candidateIgcType.equals(EntityMapping.SUPERTYPE_SENTINEL)) {
+                        if (entitySubtypeGUIDs == null) {
+                            mappingsToSearch.add(candidate);
+                        } else {
+                            // Only include the mapping if it is in the (non-null) subtypes list
+                            for (String subtypeGUID : entitySubtypeGUIDs) {
+                                TypeDef subtype = getAnyTypeDefByGUID(subtypeGUID);
+                                if (subtype != null && repositoryHelper.isTypeOf(metadataCollectionId, candidateType, subtype.getName())) {
+                                    mappingsToSearch.add(candidate);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -2237,12 +2257,14 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                             && repositoryHelper.isTypeOf(metadataCollectionId, typeDefName, requestedTypeName)) {
                         if (entitySubtypeGUIDs == null) {
                             // Add any subtypes of the requested type into the search
-                            mappingsToSearch.add(implementedMapping);
+                            if (implementedMapping.isSearchable()) {
+                                mappingsToSearch.add(implementedMapping);
+                            }
                         } else {
                             // Only include the mapping if it is in the (non-null) subtypes list
                             for (String subtypeGUID : entitySubtypeGUIDs) {
                                 TypeDef subtype = getAnyTypeDefByGUID(subtypeGUID);
-                                if (subtype != null && repositoryHelper.isTypeOf(metadataCollectionId, typeDefName, subtype.getName())) {
+                                if (subtype != null && implementedMapping.isSearchable() && repositoryHelper.isTypeOf(metadataCollectionId, typeDefName, subtype.getName())) {
                                     mappingsToSearch.add(implementedMapping);
                                     break;
                                 }

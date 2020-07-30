@@ -101,7 +101,7 @@
         <junit.version>4.12</junit.version>
         <surefire.plugin.version>3.0.0-M5</surefire.plugin.version>
         <testng.version>7.1.1</testng.version>
-        <mock-server.version>5.11.0</mock-server.version>
+        <mock-server.version>5.11.1</mock-server.version>
         <sleepycat.version>18.3.12</sleepycat.version>
         <rhino.version>1.7.12</rhino.version>
         <netty.version>4.1.51.Final</netty.version>
@@ -476,8 +476,6 @@
                     <configuration>
                         <forkCount>3</forkCount>
                         <reuseForks>true</reuseForks>
-                        <!--suppress UnresolvedMavenProperty -->
-                        <argLine>-Xmx1024m ${argLine}</argLine>
                         <includes>
                             <include>**/*Test.java</include>
                         </includes>
@@ -485,18 +483,6 @@
                             <org.slf4j.simpleLogger.defaultLogLevel>INFO</org.slf4j.simpleLogger.defaultLogLevel>
                         </systemPropertyVariables>
                     </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.junit.jupiter</groupId>
-                            <artifactId>junit-jupiter-engine</artifactId>
-                            <version>${junit.jupiter.version}</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>org.junit.jupiter</groupId>
-                            <artifactId>junit-jupiter-api</artifactId>
-                            <version>${junit.jupiter.version}</version>
-                        </dependency>
-                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.mock-server</groupId>

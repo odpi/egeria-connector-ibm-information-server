@@ -123,7 +123,6 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         // Setup ObjectMapper for (de-)serialisation of events
         this.mapper = new ObjectMapper();
 
-        this.igcKafkaConsumer = new IGCKafkaConsumerThread();
         try {
             this.igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
             this.igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
@@ -134,7 +133,10 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         this.metadataCollectionId = igcomrsRepositoryConnector.getMetadataCollectionId();
         this.originatorServerName = igcomrsRepositoryConnector.getServerName();
         this.originatorServerType = igcomrsRepositoryConnector.getServerType();
-        igcKafkaConsumer.start();
+        if (igcomrsRepositoryConnector.isEventMapperEnabled()) {
+            this.igcKafkaConsumer = new IGCKafkaConsumerThread();
+            igcKafkaConsumer.start();
+        }
 
     }
 
@@ -1714,7 +1716,9 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     public void disconnect() throws ConnectorCheckedException {
         super.disconnect();
         final String methodName = "disconnect";
-        igcKafkaConsumer.stop();
+        if (igcKafkaConsumer != null) {
+            igcKafkaConsumer.stop();
+        }
         auditLog.logMessage(methodName, IGCOMRSAuditCode.EVENT_MAPPER_SHUTDOWN.getMessageDefinition(igcomrsRepositoryConnector.getServerName()));
     }
 

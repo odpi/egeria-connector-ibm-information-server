@@ -20,6 +20,8 @@ import java.util.List;
  * <br><br>
  * The permitted configuration options include:
  * <ul>
+ *     <li>enableEventMapper - a boolean indicating whether to enable the (experimental) event mapper (disabled by
+ *          default).</li>
  *     <li>defaultZones - a list of strings defining the default zones that should be applied to all assets homed
  *          in this repository proxy's metadata collection.</li>
  * </ul>
@@ -30,6 +32,7 @@ public class IGCOMRSRepositoryConnectorProvider extends OMRSRepositoryConnectorP
     static final String CONNECTOR_TYPE_NAME = "OMRS IGC Repository Connector";
     static final String CONNECTOR_TYPE_DESC = "OMRS IGC Repository Connector that processes events from the IBM InfoSphere Information Governance Catalog repository store.";
 
+    public static final String ENABLE_EVENT_MAPPER = "enableEventMapper";
     public static final String DEFAULT_ZONES = "defaultZones";
 
     /**
@@ -50,6 +53,7 @@ public class IGCOMRSRepositoryConnectorProvider extends OMRSRepositoryConnectorP
         connectorType.setConnectorProviderClassName(this.getClass().getName());
 
         List<String> recognizedConfigurationProperties = new ArrayList<>();
+        recognizedConfigurationProperties.add(ENABLE_EVENT_MAPPER);
         recognizedConfigurationProperties.add(DEFAULT_ZONES);
         connectorType.setRecognizedConfigurationProperties(recognizedConfigurationProperties);
 

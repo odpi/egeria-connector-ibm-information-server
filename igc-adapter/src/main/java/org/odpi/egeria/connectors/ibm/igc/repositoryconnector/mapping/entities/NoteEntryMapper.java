@@ -37,6 +37,7 @@ public class NoteEntryMapper extends ReferenceableMapper {
                 "Note",
                 "NoteEntry",
                 null,
+                false,
                 false
         );
 
