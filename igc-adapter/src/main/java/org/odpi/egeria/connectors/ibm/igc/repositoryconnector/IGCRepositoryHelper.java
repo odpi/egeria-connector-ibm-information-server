@@ -507,7 +507,11 @@ public class IGCRepositoryHelper {
                             pageSize,
                             userId
                     );
+                } else {
+                    log.debug("Skipping search for type '{}' as entitySubtypeGUIDs would filter it out anyway: {}.", igcAssetType, entitySubtypeGUIDs);
                 }
+            } else {
+                log.debug("Skipping search for type '{}' as filter determined there would be no results anyway.", igcAssetType);
             }
         }
     }

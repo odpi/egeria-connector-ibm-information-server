@@ -62,26 +62,37 @@ public abstract class EntityMapping extends InstanceMapping {
                   String igcAssetTypeDisplayName,
                   String omrsTypeDefName,
                   String igcRidPrefix) {
+        super(true);
+        init(igcAssetType, igcAssetTypeDisplayName, omrsTypeDefName, igcRidPrefix);
+    }
 
+    EntityMapping(String igcAssetType,
+                  String igcAssetTypeDisplayName,
+                  String omrsTypeDefName,
+                  String igcRidPrefix,
+                  boolean searchable) {
+        super(searchable);
+        init(igcAssetType, igcAssetTypeDisplayName, omrsTypeDefName, igcRidPrefix);
+    }
+
+    private void init(String igcAssetType,
+                      String igcAssetTypeDisplayName,
+                      String omrsTypeDefName,
+                      String igcRidPrefix) {
         this.igcAssetType = igcAssetType;
         this.igcAssetTypeDisplayName = igcAssetTypeDisplayName;
         this.omrsTypeDefName = omrsTypeDefName;
         this.igcRidPrefix = igcRidPrefix;
-
         this.mappingByIgcProperty = new HashMap<>();
         this.mappingByOmrsProperty = new HashMap<>();
         this.complexIgcProperties = new HashSet<>();
         this.complexOmrsProperties = new HashSet<>();
-
         this.relationshipMappers = new ArrayList<>();
         this.classificationMappers = new ArrayList<>();
-
         this.omrsSupportedStatuses = new ArrayList<>();
         addSupportedStatus(InstanceStatus.ACTIVE);
         addSupportedStatus(InstanceStatus.DELETED);
-
         this.otherIgcTypes = new ArrayList<>();
-
     }
 
     /**

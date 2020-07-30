@@ -231,6 +231,13 @@ public class SchemaElementMapper extends ReferenceableMapper {
                     condition = new IGCSearchCondition("database_schema", "=", guid.getRid());
                     conditions.addCondition(condition);
                     break;
+                case "database_schema":
+                    // At the RelationalDBSchemaType (database_schema) level, we should be mapping to the
+                    // DeployedDatabaseSchema (as an Asset), but since these are generated from each other the RID
+                    // will be identical -- so we should be able to narrow specifically to that RID
+                    condition = new IGCSearchCondition("_id", "=", guid.getRid());
+                    conditions.addCondition(condition);
+                    break;
                 case "data_file_field":
                     condition = new IGCSearchCondition("data_file_record.data_file", "=", guid.getRid());
                     conditions.addCondition(condition);
