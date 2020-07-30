@@ -1670,8 +1670,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                 // Using "searchText" requires using "searchProperties" (no "where" conditions) -- but does not
                                 // work with 'main_object', must be used with a specific asset type
                                 // Therefore for v11.7.0.2 we will simply drop long_description from the fields we search
-                                if (igcRestClient.getIgcVersion().isEqualTo(IGCVersionEnum.V11702)
-                                        || igcRestClient.getIgcVersion().isHigherThan(IGCVersionEnum.V11702)) {
+                                if (igcRestClient.getIgcVersion().isEqualTo(IGCVersionEnum.V11702)) {
                                     ArrayList<String> propertiesWithoutLongDescription = new ArrayList<>();
                                     for (String property : properties) {
                                         if (!property.equals("long_description")) {
