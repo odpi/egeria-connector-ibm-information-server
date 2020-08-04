@@ -44,13 +44,18 @@ class AttributeMapping extends BaseMapping {
             for (DataItem stageColumn : allStageColumns) {
                 String colId = stageColumn.getId();
                 StageColumn stageColumnObj = job.getStageColumnByRid(colId);
-                Attribute attribute = new Attribute();
-                attribute.setQualifiedName(stageColumnObj.getIdentity(igcRestClient).toString() + stageNameSuffix);
-                attribute.setDisplayName(stageColumnObj.getName());
-                attribute.setDataType(stageColumnObj.getOdbcType());
-                attribute.setPosition(index);
-                attributes.add(attribute);
-                index++;
+                String stageColumnQN = getFullyQualifiedName(stageColumnObj);
+                if(stageColumnQN!=null) {
+                    Attribute attribute = new Attribute();
+                    attribute.setQualifiedName(stageColumnQN + stageNameSuffix);
+                    attribute.setDisplayName(stageColumnObj.getName());
+                    attribute.setDataType(stageColumnObj.getOdbcType());
+                    attribute.setPosition(index);
+                    attributes.add(attribute);
+                    index++;
+                } else {
+                    log.error("Unable to determine identity for linked column -- not including it: {}", stageColumn);
+                }
             }
         }
     }
