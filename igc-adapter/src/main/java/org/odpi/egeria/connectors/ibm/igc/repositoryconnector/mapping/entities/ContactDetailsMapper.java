@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -58,15 +59,17 @@ public class ContactDetailsMapper extends ReferenceableMapper {
     /**
      * Implement any complex property mappings that cannot be simply mapped one-to-one.
      *
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param entityMap the instantiation of a mapping to carry out
      * @param instanceProperties the instance properties to which to add the complex-mapped properties
      * @return InstanceProperties
      */
     @Override
-    protected InstanceProperties complexPropertyMappings(EntityMappingInstance entityMap,
+    protected InstanceProperties complexPropertyMappings(ObjectCache cache,
+                                                         EntityMappingInstance entityMap,
                                                          InstanceProperties instanceProperties) {
 
-        instanceProperties = super.complexPropertyMappings(entityMap, instanceProperties);
+        instanceProperties = super.complexPropertyMappings(cache, entityMap, instanceProperties);
 
         final String methodName = "complexPropertyMappings";
 

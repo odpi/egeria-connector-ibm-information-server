@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relations
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Connector;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataConnection;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -62,10 +63,11 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      *
      * @param connectorAsset the connector asset to translate into a host asset
      * @param igcRestClient REST connectivity to the IGC environment
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the host asset
      */
     @Override
-    public List<Reference> getProxyOneAssetFromAsset(Reference connectorAsset, IGCRestClient igcRestClient) {
+    public List<Reference> getProxyOneAssetFromAsset(Reference connectorAsset, IGCRestClient igcRestClient, ObjectCache cache) {
         String otherAssetType = connectorAsset.getType();
         ArrayList<Reference> asList = new ArrayList<>();
         if (otherAssetType.equals("connector")) {
@@ -86,10 +88,11 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      *
      * @param connectorAsset the connector asset to translate into a data_connection asset
      * @param igcRestClient REST connectivity to the IGC environment
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the data_connection asset
      */
     @Override
-    public List<Reference> getProxyTwoAssetFromAsset(Reference connectorAsset, IGCRestClient igcRestClient) {
+    public List<Reference> getProxyTwoAssetFromAsset(Reference connectorAsset, IGCRestClient igcRestClient, ObjectCache cache) {
         if (connectorAsset != null && connectorAsset.getType().equals("connector")) {
             Connector withDataConnections = igcRestClient.getAssetWithSubsetOfProperties(
                     connectorAsset.getId(),
@@ -115,6 +118,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the host asset for which to create the relationship
      * @param toIgcObject the other entity endpoint for the relationship (or null if unknown)
      * @param fromRelationshipElement the starting element number of the relationships to return.
@@ -128,6 +132,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                            List<Relationship> relationships,
+                                           ObjectCache cache,
                                            Reference fromIgcObject,
                                            Reference toIgcObject,
                                            int fromRelationshipElement,
@@ -141,6 +146,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
             addMappedOMRSRelationships_host(
                     igcomrsRepositoryConnector,
                     relationships,
+                    cache,
                     fromIgcObject,
                     fromRelationshipElement,
                     sequencingOrder,
@@ -151,6 +157,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
             addMappedOMRSRelationships_connection(
                     igcomrsRepositoryConnector,
                     relationships,
+                    cache,
                     fromIgcObject,
                     fromRelationshipElement,
                     sequencingOrder,
@@ -158,11 +165,12 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                     userId
             );
         } else if (assetType.equals("connector")) {
-            List<Reference> connections = getProxyTwoAssetFromAsset(fromIgcObject, igcomrsRepositoryConnector.getIGCRestClient());
+            List<Reference> connections = getProxyTwoAssetFromAsset(fromIgcObject, igcomrsRepositoryConnector.getIGCRestClient(), cache);
             for (Reference connection : connections) {
                 addMappedOMRSRelationships_connection(
                         igcomrsRepositoryConnector,
                         relationships,
+                        cache,
                         connection,
                         fromRelationshipElement,
                         sequencingOrder,
@@ -183,6 +191,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the host asset for which to create the relationship
      * @param fromRelationshipElement the starting element number of the relationships to return.
      *                                This is used when retrieving elements
@@ -194,6 +203,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      */
     private void addMappedOMRSRelationships_host(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                  List<Relationship> relationships,
+                                                 ObjectCache cache,
                                                  Reference fromIgcObject,
                                                  int fromRelationshipElement,
                                                  SequencingOrder sequencingOrder,
@@ -234,6 +244,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                             (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
                                     igcomrsRepositoryConnector.getRepositoryName(),
                                     "ConnectionEndpoint"),
+                            cache,
                             fromIgcObject,
                             dataConnection,
                             "data_connections",
@@ -259,6 +270,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the data_connection object for which to create the relationship
      * @param fromRelationshipElement the starting element number of the relationships to return.
      *                                This is used when retrieving elements
@@ -270,6 +282,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      */
     private void addMappedOMRSRelationships_connection(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                        List<Relationship> relationships,
+                                                       ObjectCache cache,
                                                        Reference fromIgcObject,
                                                        int fromRelationshipElement,
                                                        SequencingOrder sequencingOrder,
@@ -315,6 +328,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                             (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
                                     igcomrsRepositoryConnector.getRepositoryName(),
                                     "ConnectionEndpoint"),
+                            cache,
                             host,
                             fromIgcObject,
                             "data_connections",

@@ -6,6 +6,7 @@ import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.CandidateKey;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DatabaseColumn;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -60,12 +61,14 @@ public class PrimaryKeyMapper extends ClassificationMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param classifications the list of classifications to which to add
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the IGC object for which the classification should exist
      * @param userId the user requesting the mapped classifications
      */
     @Override
     public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                              List<Classification> classifications,
+                                             ObjectCache cache,
                                              Reference fromIgcObject,
                                              String userId) {
 

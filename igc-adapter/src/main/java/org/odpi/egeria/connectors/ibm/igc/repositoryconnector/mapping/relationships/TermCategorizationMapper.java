@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relations
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.TermRelationshipStatusMapper;
@@ -46,15 +47,17 @@ public class TermCategorizationMapper extends RelationshipMapping {
      * a relationship for it.
      *
      * @param igcomrsRepositoryConnector connection to the IGC environment
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param oneObject the IGC object to consider for inclusion on one end of the relationship
      * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
      * @return boolean
      */
     @Override
     public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                    ObjectCache cache,
                                                     Reference oneObject,
                                                     Reference otherObject) {
-        return CategoryHierarchyLinkMapper.isCategoryRelationship(igcomrsRepositoryConnector, oneObject, otherObject);
+        return CategoryHierarchyLinkMapper.isCategoryRelationship(igcomrsRepositoryConnector, cache, oneObject, otherObject);
     }
 
 }

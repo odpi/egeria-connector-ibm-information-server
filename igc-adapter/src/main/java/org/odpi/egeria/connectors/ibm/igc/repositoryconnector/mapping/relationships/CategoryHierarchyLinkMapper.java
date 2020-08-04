@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relations
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
@@ -43,15 +44,17 @@ public class CategoryHierarchyLinkMapper extends RelationshipMapping {
      * a relationship for it.
      *
      * @param igcomrsRepositoryConnector connection to the IGC environment
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param oneObject the IGC object to consider for inclusion on one end of the relationship
      * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
      * @return boolean
      */
     @Override
     public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                    ObjectCache cache,
                                                     Reference oneObject,
                                                     Reference otherObject) {
-        return isCategoryRelationship(igcomrsRepositoryConnector, oneObject, otherObject);
+        return isCategoryRelationship(igcomrsRepositoryConnector, cache, oneObject, otherObject);
     }
 
     /**
@@ -59,18 +62,20 @@ public class CategoryHierarchyLinkMapper extends RelationshipMapping {
      * not category-related it is likely because one end is either a Classification or a Glossary.
      *
      * @param igcomrsRepositoryConnector connection to the IGC environment
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param oneObject the IGC object to consider for inclusion on one end of the relationship
      * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
      * @return boolean
      */
     public static boolean isCategoryRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                 ObjectCache cache,
                                                  Reference oneObject,
                                                  Reference otherObject) {
         log.debug("Considering inclusion of objects: {} ({}) and {} ({})", oneObject.getName(), oneObject.getType(), otherObject.getName(), otherObject.getType());
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
-        boolean isGlossary = GlossaryMapper.isGlossary(igcRestClient, oneObject) || GlossaryMapper.isGlossary(igcRestClient, otherObject);
+        boolean isGlossary = GlossaryMapper.isGlossary(igcRestClient, cache, oneObject) || GlossaryMapper.isGlossary(igcRestClient, cache, otherObject);
         if (isGlossary && log.isDebugEnabled()) { log.debug(" ... skipping, Glossary-level category."); }
-        boolean isClassification = ClassificationMapping.isClassification(igcRestClient, oneObject) || ClassificationMapping.isClassification(igcRestClient, otherObject);
+        boolean isClassification = ClassificationMapping.isClassification(igcRestClient, cache, oneObject) || ClassificationMapping.isClassification(igcRestClient, cache, otherObject);
         if (isClassification && log.isDebugEnabled()) { log.debug(" ... skipping, classification object."); }
         return !isGlossary && !isClassification;
     }

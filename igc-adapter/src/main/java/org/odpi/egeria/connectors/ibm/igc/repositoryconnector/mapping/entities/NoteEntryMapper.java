@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
@@ -54,15 +55,17 @@ public class NoteEntryMapper extends ReferenceableMapper {
     /**
      * Defines the mapping of qualifiedName to ensure uniqueness for a given note.
      *
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param entityMap the instantiation of a mapping to carry out
      * @param instanceProperties the instance properties to which to add the complex-mapped properties
      * @return InstanceProperties
      */
     @Override
-    protected InstanceProperties complexPropertyMappings(EntityMappingInstance entityMap,
+    protected InstanceProperties complexPropertyMappings(ObjectCache cache,
+                                                         EntityMappingInstance entityMap,
                                                          InstanceProperties instanceProperties) {
 
-        instanceProperties = super.complexPropertyMappings(entityMap, instanceProperties);
+        instanceProperties = super.complexPropertyMappings(cache, entityMap, instanceProperties);
 
         // Above call will already setup additionalProperties for us, we just need to override qualifiedName
         // And qualifiedName itself actually cannot be completely unique without the RID of the note, so we will

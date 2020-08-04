@@ -351,7 +351,10 @@ For example payloads and endpoints, see the [Postman samples](samples).
     To operate, the Information Server user credentials must have (at a minimum) the following roles:
     `Suite User`, `Information Governance Catalog User`, and `Information Governance Catalog Glossary Author`.
     (The first two are both read-only, non-administrative roles, while the last allows synchronization objects
-    to be created to track the last synchronization point of the DataStage job information.)
+    to be created to track the last synchronization point of the DataStage job information.) Finally, if using the
+    connector option to include virtual assets (`"includeVirtualAssets": true`), the user will also need the
+    `Information Governance Catalog Information Asset Author` role, as this role is needed to be able to retrieve the
+    full details of virtual assets.
 
     Note that you need to provide the `connectorProvider` parameter, set to the name of the DataStage
     connectorProvider class (value as given above).

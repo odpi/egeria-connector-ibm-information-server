@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Paging;
@@ -362,6 +363,7 @@ public class IGCRepositoryHelper {
      *
      * @param mapping the mapping to use for running the search
      * @param entityDetails the list of results to append into
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param userId unique identifier for requesting user
      * @param entityTypeGUID the GUID of the entity type that was requested as part of the search (or null for all)
      * @param entitySubtypeGUIDs optional list of GUIDs of subtypes by which to further limit results
@@ -380,6 +382,7 @@ public class IGCRepositoryHelper {
      */
     void processResultsForMapping(EntityMapping mapping,
                                   List<EntityDetail> entityDetails,
+                                  ObjectCache cache,
                                   String userId,
                                   String entityTypeGUID,
                                   List<String> entitySubtypeGUIDs,
@@ -502,6 +505,7 @@ public class IGCRepositoryHelper {
                             mapping,
                             this.igcRestClient.search(igcSearch),
                             entityDetails,
+                            cache,
                             matchProperties,
                             null,
                             pageSize,
@@ -600,6 +604,7 @@ public class IGCRepositoryHelper {
      * @param mapper the EntityMapping that should be used to translate the results
      * @param results the IGC search results
      * @param entityDetails the list of EntityDetails to append
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param matchProperties the set of properties that should be matched (or null if none)
      * @param searchCriteria the string search criteria that should be matched (or null if none)
      * @param pageSize the number of results per page (0 for all results)
@@ -608,6 +613,7 @@ public class IGCRepositoryHelper {
     void processResults(EntityMapping mapper,
                         ItemList<Reference> results,
                         List<EntityDetail> entityDetails,
+                        ObjectCache cache,
                         SearchProperties matchProperties,
                         String searchCriteria,
                         int pageSize,
@@ -635,7 +641,7 @@ public class IGCRepositoryHelper {
                     idToLookup = new IGCEntityGuid(metadataCollectionId, reference.getType(), reference.getId());
                 }
                 try {
-                    ed = getEntityDetailFromFullAsset(userId, idToLookup, reference);
+                    ed = getEntityDetailFromFullAsset(cache, userId, idToLookup, reference);
                 } catch (EntityNotKnownException e) {
                     log.error("Unable to find entity: {}", idToLookup, e);
                 }
@@ -652,7 +658,7 @@ public class IGCRepositoryHelper {
         // If we haven't filled a page of results (because we needed to skip some above), recurse...
         if (results.hasMorePages() && entityDetails.size() < pageSize) {
             ItemList<Reference> nextPage = igcRestClient.getNextPage(null, results);
-            processResults(mapper, nextPage, entityDetails, matchProperties, searchCriteria, pageSize, userId);
+            processResults(mapper, nextPage, entityDetails, cache, matchProperties, searchCriteria, pageSize, userId);
         }
 
     }
@@ -663,6 +669,7 @@ public class IGCRepositoryHelper {
      * @param mapper the EntityMapping that should be used to translate the results
      * @param results the IGC search results
      * @param relationships the list of Relationships to append
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param pageSize the number of results per page (0 for all results)
      * @param userId the user making the request
      */
@@ -670,6 +677,7 @@ public class IGCRepositoryHelper {
     void processResults(RelationshipMapping mapper,
                         ItemList<Reference> results,
                         List<Relationship> relationships,
+                        ObjectCache cache,
                         int pageSize,
                         String userId) throws RepositoryErrorException {
 
@@ -724,13 +732,13 @@ public class IGCRepositoryHelper {
                             if (otherEnd instanceof Reference) {
                                 Reference other = (Reference) otherEnd;
                                 if (other.getType() != null) {
-                                    endOnes.addAll(mapper.getProxyOneAssetFromAsset(other, igcRestClient));
+                                    endOnes.addAll(mapper.getProxyOneAssetFromAsset(other, igcRestClient, cache));
                                 }
                             } else if (otherEnd instanceof ItemList) {
                                 ItemList<Reference> otherEnds = (ItemList<Reference>) otherEnd;
                                 List<Reference> allOtherEnds = igcRestClient.getAllPages(igcPropertyName, otherEnds);
                                 for (Reference other : allOtherEnds) {
-                                    endOnes.addAll(mapper.getProxyOneAssetFromAsset(other, igcRestClient));
+                                    endOnes.addAll(mapper.getProxyOneAssetFromAsset(other, igcRestClient, cache));
                                 }
                             } else {
                                 log.warn("Not a relationship, skipping: {}", otherEnd);
@@ -745,7 +753,7 @@ public class IGCRepositoryHelper {
                     String endTwoType = endTwo.getType();
                     if (endOneType != null && !endOneType.equals(DEFAULT_IGC_TYPE)
                             && endTwoType != null && !endTwoType.equals(DEFAULT_IGC_TYPE)
-                            && mapper.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, endOne, endTwo)) {
+                            && mapper.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, cache, endOne, endTwo)) {
                         // We do not need a property name when the proxy order is known...
                         IGCRelationshipGuid idToLookup = RelationshipMapping.getRelationshipGUID(
                                 this,
@@ -785,7 +793,7 @@ public class IGCRepositoryHelper {
         // If we haven't filled a page of results (because we needed to skip some above), recurse...
         if (results.hasMorePages() && relationships.size() < pageSize) {
             ItemList<Reference> nextPage = igcRestClient.getNextPage(null, results);
-            processResults(mapper, nextPage, relationships, pageSize, userId);
+            processResults(mapper, nextPage, relationships, cache, pageSize, userId);
         }
 
     }
@@ -1155,6 +1163,7 @@ public class IGCRepositoryHelper {
      * Note: this method assumes that the provided IGC object is already fully-populated for an EntityDetail,
      * so will avoid any further retrieval of information.
      *
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param userId unique identifier for requesting user.
      * @param guid unique IGC identifier for the entity.
      * @param asset the IGC asset for which an EntityDetail should be constructed.
@@ -1163,7 +1172,7 @@ public class IGCRepositoryHelper {
      *                                  the metadata collection is stored.
      * @throws EntityNotKnownException the entity cannot be found in IGC
      */
-    public EntityDetail getEntityDetailFromFullAsset(String userId, IGCEntityGuid guid, Reference asset)
+    public EntityDetail getEntityDetailFromFullAsset(ObjectCache cache, String userId, IGCEntityGuid guid, Reference asset)
             throws RepositoryErrorException, EntityNotKnownException {
 
         final String methodName = "getEntityDetailFromFullAsset";
@@ -1171,9 +1180,9 @@ public class IGCRepositoryHelper {
         validateGuidAndType(guid, methodName);
 
         // Otherwise, retrieve the mapping dynamically based on the type of asset
-        EntityMappingInstance entityMap = getMappingInstanceForParameters(guid, asset, userId);
+        EntityMappingInstance entityMap = getMappingInstanceForParameters(cache, guid, asset, userId);
 
-        return getEntityDetailFromMapInstance(entityMap, guid.getGeneratedPrefix(), guid.getAssetType(), methodName);
+        return getEntityDetailFromMapInstance(cache, entityMap, guid.getGeneratedPrefix(), guid.getAssetType(), methodName);
 
     }
 
@@ -1207,6 +1216,7 @@ public class IGCRepositoryHelper {
 
     /**
      * Apply the mapping to the object and retrieve the resulting EntityDetail.
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param mappingInstance the mapping instance to apply
      * @param prefix the IGC prefix (or null if none)
      * @param igcType the IGC object type
@@ -1214,14 +1224,15 @@ public class IGCRepositoryHelper {
      * @return EntityDetail
      * @throws RepositoryErrorException if there is no mapping for the type
      */
-    private EntityDetail getEntityDetailFromMapInstance(EntityMappingInstance mappingInstance,
+    private EntityDetail getEntityDetailFromMapInstance(ObjectCache cache,
+                                                        EntityMappingInstance mappingInstance,
                                                         String prefix,
                                                         String igcType,
                                                         String methodName) throws RepositoryErrorException {
 
         EntityDetail detail = null;
         if (mappingInstance != null) {
-            detail = EntityMapping.getEntityDetail(mappingInstance);
+            detail = EntityMapping.getEntityDetail(cache, mappingInstance);
         } else {
             raiseRepositoryErrorException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, methodName, (prefix == null ? "" : prefix) + igcType, repositoryName);
         }
@@ -1232,6 +1243,7 @@ public class IGCRepositoryHelper {
     /**
      * Return the header, classifications and properties of a specific entity, using the provided IGC GUID.
      *
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param userId unique identifier for requesting user.
      * @param guid unique IGC identifier for the entity.
      * @return EntityDetail structure.
@@ -1239,7 +1251,7 @@ public class IGCRepositoryHelper {
      *                                  the metadata collection is stored.
      * @throws EntityNotKnownException the entity cannot be found in IGC
      */
-    public EntityDetail getEntityDetail(String userId, IGCEntityGuid guid)
+    public EntityDetail getEntityDetail(ObjectCache cache, String userId, IGCEntityGuid guid)
             throws RepositoryErrorException, EntityNotKnownException {
 
         final String methodName = "getEntityDetail";
@@ -1251,24 +1263,27 @@ public class IGCRepositoryHelper {
 
         // Otherwise, retrieve the mapping dynamically based on the type of asset
         EntityMappingInstance entityMap = getMappingInstanceForParameters(
+                cache,
                 igcType,
                 guid.getRid(),
                 prefix,
                 userId);
 
-        return getEntityDetailFromMapInstance(entityMap, prefix, igcType, methodName);
+        return getEntityDetailFromMapInstance(cache, entityMap, prefix, igcType, methodName);
 
     }
 
     /**
      * Retrieves an instance of a mapping that can be used for the provided parameters (or null if none exists).
      *
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param guid the IGC GUID for the entity to be mapped
      * @param asset the IGC object to be mapped
      * @param userId the user making the request
      * @return EntityMappingInstance
      */
-    private EntityMappingInstance getMappingInstanceForParameters(IGCEntityGuid guid,
+    private EntityMappingInstance getMappingInstanceForParameters(ObjectCache cache,
+                                                                  IGCEntityGuid guid,
                                                                   Reference asset,
                                                                   String userId) {
         log.debug("Looking for mapper for retrieved asset with guid {}", guid);
@@ -1280,6 +1295,7 @@ public class IGCRepositoryHelper {
             entityMap = new EntityMappingInstance(
                     found,
                     igcomrsRepositoryConnector,
+                    cache,
                     asset,
                     userId
             );
@@ -1294,13 +1310,18 @@ public class IGCRepositoryHelper {
     /**
      * Retrieves an instance of a mapping that can be used for the provided parameters (or null if none exists).
      *
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param igcAssetType the type of IGC asset to be mapped
      * @param rid the Repository ID (RID) of the IGC asset to be mapped
      * @param prefix the prefix used for the asset (if any; null otherwise)
      * @param userId the user making the request
      * @return EntityMappingInstance
      */
-    public EntityMappingInstance getMappingInstanceForParameters(String igcAssetType, String rid, String prefix, String userId) {
+    public EntityMappingInstance getMappingInstanceForParameters(ObjectCache cache,
+                                                                 String igcAssetType,
+                                                                 String rid,
+                                                                 String prefix,
+                                                                 String userId) {
 
         log.debug("Looking for mapper for type {} with prefix {}", igcAssetType, prefix);
 
@@ -1311,6 +1332,7 @@ public class IGCRepositoryHelper {
             entityMap = new EntityMappingInstance(
                     found,
                     igcomrsRepositoryConnector,
+                    cache,
                     igcAssetType,
                     rid,
                     userId

@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping;
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
@@ -70,12 +71,14 @@ public class EntityMappingInstance {
      *
      * @param mapping the definition of the mapping to carry out
      * @param igcomrsRepositoryConnector connectivity to an IGC repository
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param igcEntityType the type of IGC object for which to carry out a mapping
      * @param igcEntityRid the RID of the IGC object for which to carry out a mapping
      * @param userId the user through which to do the mapping
      */
     public EntityMappingInstance(EntityMapping mapping,
                                  IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                 ObjectCache cache,
                                  String igcEntityType,
                                  String igcEntityRid,
                                  String userId) {
@@ -99,7 +102,7 @@ public class EntityMappingInstance {
         // (if not needed the 'getBaseIgcAssetFromAlternative' is effectively a NOOP and gives back same object)
         // We need to make use of mapping.getBaseIgcAssetFromAlternative() here before we attempt to retrieve the
         // entity itself, as we may (very rarely) need to retrieve a different entity type than what we've been given
-        Reference simple = mapping.getBaseIgcAssetFromAlternative(igcEntityType, igcEntityRid, igcomrsRepositoryConnector);
+        Reference simple = mapping.getBaseIgcAssetFromAlternative(igcEntityType, igcEntityRid, igcomrsRepositoryConnector, cache);
         if (simple != null) {
             this.igcEntityType = simple.getType();
             this.igcEntityRid = simple.getId();
@@ -112,11 +115,13 @@ public class EntityMappingInstance {
      *
      * @param mapping the definition of the mapping to carry out
      * @param igcomrsRepositoryConnector connectivity to an IGC repository
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param igcEntity the already-retrieved IGC object for which to carry out a mapping
      * @param userId the user through which to do the mapping
      */
     public EntityMappingInstance(EntityMapping mapping,
                                  IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                 ObjectCache cache,
                                  Reference igcEntity,
                                  String userId) {
         this(mapping, igcomrsRepositoryConnector);
@@ -132,7 +137,7 @@ public class EntityMappingInstance {
         // (if not needed the 'getBaseIgcAssetFromAlternative' is effectively a NOOP and gives back same object)
         // We need to make use of mapping.getBaseIgcAssetFromAlternative() here before we attempt to retrieve the
         // entity itself, as we may (very rarely) need to retrieve a different entity type than what we've been given
-        Reference simple = mapping.getBaseIgcAssetFromAlternative(igcEntityType, igcEntityRid, igcomrsRepositoryConnector);
+        Reference simple = mapping.getBaseIgcAssetFromAlternative(igcEntityType, igcEntityRid, igcomrsRepositoryConnector, cache);
         if (simple != null && !simple.getId().equals(igcEntityRid)) {
             // If the base asset has changed, record the new details and reset the status as not yet retrieved
             this.igcEntityType = simple.getType();
@@ -221,10 +226,11 @@ public class EntityMappingInstance {
     /**
      * Retrieve the OMRS EntitySummary for which this mapping exists.
      *
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return EntitySummary
      */
-    public final EntitySummary getOmrsSummary() {
-        if (mapping.isOmrsType(igcomrsRepositoryConnector.getIGCRestClient(), igcEntity)) {
+    public final EntitySummary getOmrsSummary(ObjectCache cache) {
+        if (mapping.isOmrsType(igcomrsRepositoryConnector.getIGCRestClient(), cache, igcEntity)) {
             return omrsSummary;
         } else {
             return null;
@@ -234,10 +240,11 @@ public class EntityMappingInstance {
     /**
      * Retrieve the OMRS EntityDetail for which this mapping exists.
      *
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return EntityDetail
      */
-    public final EntityDetail getOmrsDetail() {
-        if (mapping.isOmrsType(igcomrsRepositoryConnector.getIGCRestClient(), igcEntity)) {
+    public final EntityDetail getOmrsDetail(ObjectCache cache) {
+        if (mapping.isOmrsType(igcomrsRepositoryConnector.getIGCRestClient(), cache, igcEntity)) {
             return omrsDetail;
         } else {
             return null;

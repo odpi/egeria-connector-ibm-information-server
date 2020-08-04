@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -127,12 +128,14 @@ public class ReferenceableMapper extends EntityMapping {
      * Configures the 'qualifiedName' and 'additionalProperties' properties of all OMRS entities that extend
      * from Referenceable.
      *
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param entityMap instantiation of a mapping to carry out
      * @param instanceProperties the instance properties to which to add the complex-mapped properties
      * @return InstanceProperties
      */
     @Override
-    protected InstanceProperties complexPropertyMappings(EntityMappingInstance entityMap,
+    protected InstanceProperties complexPropertyMappings(ObjectCache cache,
+                                                         EntityMappingInstance entityMap,
                                                          InstanceProperties instanceProperties) {
 
         final String methodName = "complexPropertyMappings";
@@ -145,7 +148,7 @@ public class ReferenceableMapper extends EntityMapping {
         String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
 
         // Map IGC's identity characteristics to create a unique 'qualifiedName'
-        String qualifiedName = igcEntity.getIdentity(igcomrsRepositoryConnector.getIGCRestClient()).toString();
+        String qualifiedName = igcEntity.getIdentity(igcomrsRepositoryConnector.getIGCRestClient(), cache).toString();
 
         if (mapping.igcRidNeedsPrefix()) {
             qualifiedName = IGCRepositoryHelper.getQualifiedNameForGeneratedEntity(mapping.getIgcRidPrefix(), qualifiedName);

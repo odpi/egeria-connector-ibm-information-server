@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataClass;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Filter;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -107,19 +108,21 @@ public class DataClassMapper extends ReferenceableMapper {
      * @param igcAssetType the type of the classification asset to translate into a data_class asset
      * @param igcRid the RID of the classification asset to translate into a data_class asset
      * @param igcomrsRepositoryConnector connectivity to IGC repository
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the data_class asset
      */
     @Override
     public Reference getBaseIgcAssetFromAlternative(String igcAssetType,
                                                     String igcRid,
-                                                    IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
+                                                    IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                    ObjectCache cache) {
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         if (igcAssetType.equals("classification")) {
             // In some versions it is not possible to search for 'classification' assets, so generally will be safer
             // to retrieve the entire object by ID (they are small objects anyway so hopefully no significant negative
             // performance impact of doing so)
             return DataClassAssignmentMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()).getProxyTwoAssetFromAsset(
-                    igcRestClient.getAssetById(igcRid), igcRestClient).get(0);
+                    igcRestClient.getAssetById(igcRid), igcRestClient, cache).get(0);
         } else {
             return igcRestClient.getAssetWithSubsetOfProperties(igcRid, igcAssetType, igcRestClient.getAllPropertiesForType(igcAssetType));
         }
@@ -128,15 +131,17 @@ public class DataClassMapper extends ReferenceableMapper {
     /**
      * Implement any complex property mappings that cannot be simply mapped one-to-one.
      *
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param entityMap the instantiation of a mapping to carry out
      * @param instanceProperties the instance properties to which to add the complex-mapped properties
      * @return InstanceProperties
      */
     @Override
-    protected InstanceProperties complexPropertyMappings(EntityMappingInstance entityMap,
+    protected InstanceProperties complexPropertyMappings(ObjectCache cache,
+                                                         EntityMappingInstance entityMap,
                                                          InstanceProperties instanceProperties) {
 
-        instanceProperties = super.complexPropertyMappings(entityMap, instanceProperties);
+        instanceProperties = super.complexPropertyMappings(cache, entityMap, instanceProperties);
 
         final String methodName = "complexPropertyMappings";
 

@@ -56,7 +56,7 @@ public class SchemaTypeMapping extends BaseMapping {
         schemaType = null;
         if (link != null) {
             schemaType = new SchemaType();
-            schemaType.setQualifiedName(link.getIdentity(igcRestClient).toString() + stageNameSuffix);
+            schemaType.setQualifiedName(link.getIdentity(igcRestClient, cache.getIgcCache()).toString() + stageNameSuffix);
             schemaType.setDisplayName(link.getId());
             schemaType.setAuthor(link.getModifiedBy());
             AttributeMapping attributeMapping = new AttributeMapping(cache, job, link, stageNameSuffix);

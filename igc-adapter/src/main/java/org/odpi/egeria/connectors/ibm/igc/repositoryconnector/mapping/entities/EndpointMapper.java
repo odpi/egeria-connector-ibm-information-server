@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Host;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
@@ -72,12 +73,14 @@ public class EndpointMapper extends ReferenceableMapper {
      * @param otherAssetType the type of the host_(engine) asset to translate into a host asset
      * @param otherAssetRid the RID of the host_(engine) asset to translate into a host asset
      * @param igcomrsRepositoryConnector connectivity to IGC repository
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the host asset
      */
     @Override
     public Reference getBaseIgcAssetFromAlternative(String otherAssetType,
                                                     String otherAssetRid,
-                                                    IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
+                                                    IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                    ObjectCache cache) {
         if (otherAssetType.equals("host_(engine)")) {
             IGCSearchCondition igcSearchCondition = new IGCSearchCondition("_id", "=", otherAssetRid);
             IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(igcSearchCondition);
@@ -89,26 +92,28 @@ public class EndpointMapper extends ReferenceableMapper {
                 return hosts.getItems().get(0);
             } else {
                 log.warn("Unable to translate host_(engine) to host, returning host_(engine).");
-                return super.getBaseIgcAssetFromAlternative(otherAssetType, otherAssetRid, igcomrsRepositoryConnector);
+                return super.getBaseIgcAssetFromAlternative(otherAssetType, otherAssetRid, igcomrsRepositoryConnector, cache);
             }
         } else {
             log.debug("Not a host_(engine) asset, just returning as-is: {}", otherAssetType);
-            return super.getBaseIgcAssetFromAlternative(otherAssetType, otherAssetRid, igcomrsRepositoryConnector);
+            return super.getBaseIgcAssetFromAlternative(otherAssetType, otherAssetRid, igcomrsRepositoryConnector, cache);
         }
     }
 
     /**
      * Implement any complex property mappings that cannot be simply mapped one-to-one.
      *
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param entityMap the instantiation of a mapping to carry out
      * @param instanceProperties the instance properties to which to add the complex-mapped properties
      * @return InstanceProperties
      */
     @Override
-    protected InstanceProperties complexPropertyMappings(EntityMappingInstance entityMap,
+    protected InstanceProperties complexPropertyMappings(ObjectCache cache,
+                                                         EntityMappingInstance entityMap,
                                                          InstanceProperties instanceProperties) {
 
-        instanceProperties = super.complexPropertyMappings(entityMap, instanceProperties);
+        instanceProperties = super.complexPropertyMappings(cache, entityMap, instanceProperties);
 
         final String methodName = "complexPropertyMappings";
 

@@ -6,6 +6,7 @@ import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -712,6 +713,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         log.debug("getEntitySummary with guid = {}", guid);
 
+        ObjectCache cache = new ObjectCache();
+
         // Lookup the basic asset based on the RID (strip off prefix (indicating a generated type), if there)
         IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(guid);
         if (igcGuid == null) {
@@ -731,6 +734,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
             // Otherwise, retrieve the mapping dynamically based on the type of asset
             EntityMappingInstance entityMap = igcRepositoryHelper.getMappingInstanceForParameters(
+                    cache,
                     igcGuid.getAssetType(),
                     igcGuid.getRid(),
                     prefix,
@@ -738,7 +742,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
             if (entityMap != null) {
                 // 2. Apply the mapping to the object, and retrieve the resulting EntityDetail
-                summary = EntityMapping.getEntitySummary(entityMap);
+                summary = EntityMapping.getEntitySummary(entityMap, cache);
             } else {
                 raiseRepositoryErrorException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, methodName, prefix + igcType, repositoryName);
             }
@@ -767,7 +771,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             raiseEntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN, methodName, guid, "<null>", repositoryName);
         }
 
-        return igcRepositoryHelper.getEntityDetail(userId, igcGuid);
+        return igcRepositoryHelper.getEntityDetail(new ObjectCache(), userId, igcGuid);
 
     }
 
@@ -831,6 +835,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         );
 
         ArrayList<Relationship> alRelationships = new ArrayList<>();
+        ObjectCache cache = new ObjectCache();
 
         // Immediately throw unimplemented exception if trying to retrieve historical view
         if (asOfTime != null) {
@@ -852,6 +857,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
             // Ensure the entity actually exists (if not, throw error to that effect)
             EntityMappingInstance entityMap = igcRepositoryHelper.getMappingInstanceForParameters(
+                    cache,
                     igcType,
                     rid,
                     prefix,
@@ -863,6 +869,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         EntityMapping.getMappedRelationships(
                                 igcGuid,
                                 entityMap,
+                                cache,
                                 relationshipTypeGUID,
                                 fromRelationshipElement,
                                 sequencingOrder,
@@ -885,6 +892,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
      * @param userId making the request
      * @param entityTypeGUID type of entity instance to which to limit results
      * @param entitySubtypeGUIDs subtype of entity instances to which to limit results
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param matchClassifications classification-based conditions to which to match results
      * @param qualifiedNameToFind the regex of the qualified name to find
      * @param matchCriteria the match criteria for the qualified name
@@ -901,6 +909,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
     private List<EntityDetail> findEntitiesByQualifiedName(String userId,
                                                            String entityTypeGUID,
                                                            List<String> entitySubtypeGUIDs,
+                                                           ObjectCache cache,
                                                            SearchClassifications matchClassifications,
                                                            String qualifiedNameToFind,
                                                            MatchCriteria matchCriteria,
@@ -980,6 +989,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         igcRepositoryHelper.processResultsForMapping(
                                 mapper,
                                 entityDetails,
+                                cache,
                                 userId,
                                 entityTypeGUID,
                                 entitySubtypeGUIDs,
@@ -1018,6 +1028,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     igcRepositoryHelper.processResultsForMapping(
                             mapper,
                             entityDetails,
+                            cache,
                             userId,
                             entityTypeGUID,
                             entitySubtypeGUIDs,
@@ -1107,6 +1118,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         );
 
         ArrayList<EntityDetail> entityDetails = new ArrayList<>();
+        ObjectCache cache = new ObjectCache();
 
         // Immediately throw unimplemented exception if trying to retrieve historical view
         if (asOfTime != null) {
@@ -1129,6 +1141,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         userId,
                         entityTypeGUID,
                         entitySubtypeGUIDs,
+                        cache,
                         matchClassifications,
                         qualifiedNameToFind,
                         matchProperties.getMatchCriteria(),
@@ -1156,6 +1169,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         igcRepositoryHelper.processResultsForMapping(
                                 mapping,
                                 entityDetails,
+                                cache,
                                 userId,
                                 entityTypeGUID,
                                 entitySubtypeGUIDs,
@@ -1249,6 +1263,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         );
 
         List<EntityDetail> entityDetails = new ArrayList<>();
+        ObjectCache cache = new ObjectCache();
 
         // Immediately throw unimplemented exception if trying to retrieve historical view
         if (asOfTime != null) {
@@ -1272,6 +1287,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         userId,
                         entityTypeGUID,
                         null,
+                        cache,
                         matchClassifications,
                         qualifiedNameToFind,
                         matchCriteria,
@@ -1299,6 +1315,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         igcRepositoryHelper.processResultsForMapping(
                                 mapping,
                                 entityDetails,
+                                cache,
                                 userId,
                                 entityTypeGUID,
                                 null,
@@ -1393,6 +1410,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         );
 
         ArrayList<EntityDetail> entityDetails = new ArrayList<>();
+        ObjectCache cache = new ObjectCache();
 
         // Immediately throw unimplemented exception if trying to retrieve historical view
         if (asOfTime != null) {
@@ -1467,6 +1485,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                             mapping,
                             this.igcRestClient.search(igcSearch),
                             entityDetails,
+                            cache,
                             null,
                             null,
                             pageSize,
@@ -1556,6 +1575,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         );
 
         ArrayList<EntityDetail> entityDetails = new ArrayList<>();
+        ObjectCache cache = new ObjectCache();
 
         // Immediately throw unimplemented exception if trying to retrieve historical view
         if (asOfTime != null) {
@@ -1733,6 +1753,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                                     mapping,
                                     this.igcRestClient.search(igcSearch),
                                     entityDetails,
+                                    cache,
                                     null,
                                     searchCriteria,
                                     pageSize,
@@ -1791,6 +1812,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         log.debug("Looking up relationship: {}", guid);
 
+        ObjectCache cache = new ObjectCache();
+
         // Translate the key properties of the GUID into IGC-retrievables
         IGCRelationshipGuid igcRelationshipGuid = IGCRelationshipGuid.fromGuid(guid);
         if (igcRelationshipGuid == null) {
@@ -1820,8 +1843,8 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     relationshipAssetType,
                     relationshipAssetType
             );
-            proxyOne = relationshipMapping.getProxyOneAssetFromAsset(relationshipAsset, igcRestClient).get(0);
-            proxyTwo = relationshipMapping.getProxyTwoAssetFromAsset(relationshipAsset, igcRestClient).get(0);
+            proxyOne = relationshipMapping.getProxyOneAssetFromAsset(relationshipAsset, igcRestClient, cache).get(0);
+            proxyTwo = relationshipMapping.getProxyTwoAssetFromAsset(relationshipAsset, igcRestClient, cache).get(0);
             mappings.add(relationshipMapping);
 
         } else {
@@ -1834,7 +1857,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     proxyOneType,
                     proxyTwoType
             );
-            proxyOne = relationshipMapping.getProxyOneAssetFromAsset(oneEnd, igcRestClient).get(0);
+            proxyOne = relationshipMapping.getProxyOneAssetFromAsset(oneEnd, igcRestClient, cache).get(0);
             // TODO: why no getProxyTwoAssetFromAsset here?
             mappings.add(relationshipMapping);
 
@@ -1854,6 +1877,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     igcomrsRepositoryConnector,
                     relationships,
                     mappings,
+                    cache,
                     relationshipTypeDef.getGUID(),
                     proxyOne,
                     proxyTwo,
@@ -1920,6 +1944,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 pageSize);
 
         List<Relationship> relationships = new ArrayList<>();
+        ObjectCache cache = new ObjectCache();
 
         // Immediately throw unimplemented exception if trying to retrieve historical view
         if (asOfTime != null) {
@@ -1956,6 +1981,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         igcRepositoryHelper.processResults(mapping,
                                 igcRestClient.search(igcSearch),
                                 relationships,
+                                cache,
                                 pageSize,
                                 userId);
                     }
@@ -2004,6 +2030,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 pageSize);
 
         List<Relationship> relationships = new ArrayList<>();
+        ObjectCache cache = new ObjectCache();
 
         // Immediately throw unimplemented exception if trying to retrieve historical view
         if (asOfTime != null) {
@@ -2030,6 +2057,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     igcRepositoryHelper.processResults(mapping,
                             igcRestClient.search(igcSearch),
                             relationships,
+                            cache,
                             pageSize,
                             userId);
                 }

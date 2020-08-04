@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relations
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -219,9 +220,10 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @param relationshipAsset the asset to use to lookup the actual first endpoint in IGC
      * @param igcRestClient REST API connectivity
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the asset to be used for endpoint one of the relationship
      */
-    public List<Reference> getProxyOneAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient) {
+    public List<Reference> getProxyOneAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient, ObjectCache cache) {
         List<Reference> referenceAsList = new ArrayList<>();
         referenceAsList.add(relationshipAsset);
         return referenceAsList;
@@ -234,9 +236,10 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @param relationshipAsset the asset to use to lookup the actual second endpoint in IGC
      * @param igcRestClient REST API connectivity
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the asset to be used for endpoint two of the relationship
      */
-    public List<Reference> getProxyTwoAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient) {
+    public List<Reference> getProxyTwoAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient, ObjectCache cache) {
         List<Reference> referenceAsList = new ArrayList<>();
         referenceAsList.add(relationshipAsset);
         return referenceAsList;
@@ -315,6 +318,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @param igcomrsRepositoryConnector connection to the IGC environment
      * @param relationships list of relationships to which to append
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the entity starting point for the relationship
      * @param toIgcObject the other entity endpoint for the relationship (or null if unknown)
      * @param fromRelationshipElement the starting element number of the relationships to return.
@@ -327,6 +331,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      */
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                            List<Relationship> relationships,
+                                           ObjectCache cache,
                                            Reference fromIgcObject,
                                            Reference toIgcObject,
                                            int fromRelationshipElement,
@@ -341,11 +346,13 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * that need to be applied.
      *
      * @param igcomrsRepositoryConnector connection to the IGC environment
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param oneObject the IGC object to consider for inclusion on one end of the relationship
      * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
      * @return boolean
      */
     public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                    ObjectCache cache,
                                                     Reference oneObject,
                                                     Reference otherObject) {
         return true;
@@ -1058,12 +1065,14 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * Retrieves an EntityProxy object for the provided IGC object.
      *
      * @param igcomrsRepositoryConnector OMRS connector to the IBM IGC repository
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param igcObj the IGC object for which to retrieve an EntityProxy
      * @param userId the user through which to retrieve the EntityProxy (unused)
      * @param ridPrefix any prefix required on the object's ID to make it unique
      * @return EntityProxy
      */
     private static EntityProxy getEntityProxyForObject(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                       ObjectCache cache,
                                                        Reference igcObj,
                                                        String userId,
                                                        String ridPrefix) {
@@ -1088,6 +1097,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             }
             IGCRepositoryHelper igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
             EntityMappingInstance entityMap = igcRepositoryHelper.getMappingInstanceForParameters(
+                    cache,
                     igcObj.getType(),
                     igcObj.getId(),
                     ridPrefix,
@@ -1096,7 +1106,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             if (entityMap != null) {
 
                 // Construct 'qualifiedName' from the Identity of the object
-                String identity = igcObj.getIdentity(igcRestClient).toString();
+                String identity = igcObj.getIdentity(igcRestClient, cache).toString();
                 if (ridPrefix != null) {
                     identity = IGCRepositoryHelper.getQualifiedNameForGeneratedEntity(ridPrefix, identity);
                 }
@@ -1128,7 +1138,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     entityProxy.setGUID(igcEntityGuid.toString());
 
                     if (igcRestClient.hasModificationDetails(igcObj.getType())) {
-                        Reference withModDetails = igcRestClient.getModificationDetails(igcObj);
+                        Reference withModDetails = igcRestClient.getModificationDetails(igcObj, cache);
                         InstanceMapping.setupInstanceModDetails(entityProxy,
                                 withModDetails.getCreatedBy(),
                                 withModDetails.getCreatedOn(),
@@ -1158,6 +1168,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcomrsRepositoryConnector connectivity to an IGC environment
      * @param relationships the list of relationships to append to
      * @param mappings the mappings to use for retrieving the relationships
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param relationshipTypeGUID String GUID of the the type of relationship required (null for all).
      * @param fromIgcObject the IGC object that is the source of the relationships
      * @param fromRelationshipElement the starting element number of the relationships to return.
@@ -1171,6 +1182,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     public static void getMappedRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                               List<Relationship> relationships,
                                               List<RelationshipMapping> mappings,
+                                              ObjectCache cache,
                                               String relationshipTypeGUID,
                                               Reference fromIgcObject,
                                               int fromRelationshipElement,
@@ -1181,6 +1193,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 igcomrsRepositoryConnector,
                 relationships,
                 mappings,
+                cache,
                 relationshipTypeGUID,
                 fromIgcObject,
                 null,
@@ -1197,6 +1210,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcomrsRepositoryConnector connectivity to an IGC environment
      * @param relationships the list of relationships to append to
      * @param mappings the mappings to use for retrieving the relationships
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param relationshipTypeGUID String GUID of the the type of relationship required (null for all).
      * @param fromIgcObject the IGC object that is the source of the relationships
      * @param toIgcObject the IGC object that is the target of the relationship (or null if not known).
@@ -1205,6 +1219,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     public static void getMappedRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                               List<Relationship> relationships,
                                               List<RelationshipMapping> mappings,
+                                              ObjectCache cache,
                                               String relationshipTypeGUID,
                                               Reference fromIgcObject,
                                               Reference toIgcObject,
@@ -1212,6 +1227,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
         getMappedRelationships(igcomrsRepositoryConnector,
                 relationships,
                 mappings,
+                cache,
                 relationshipTypeGUID,
                 fromIgcObject,
                 toIgcObject,
@@ -1227,6 +1243,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcomrsRepositoryConnector connectivity to an IGC environment
      * @param relationships the list of relationships to append to
      * @param mappings the mappings to use for retrieving the relationships
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param relationshipTypeGUID String GUID of the the type of relationship required (null for all).
      * @param fromIgcObject the IGC object that is the source of the relationships
      * @param toIgcObject the IGC object that is the target of the relationship (or null if not known).
@@ -1241,6 +1258,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     public static void getMappedRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                               List<Relationship> relationships,
                                               List<RelationshipMapping> mappings,
+                                              ObjectCache cache,
                                               String relationshipTypeGUID,
                                               Reference fromIgcObject,
                                               Reference toIgcObject,
@@ -1267,8 +1285,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 ProxyMapping pmTwo = mapping.getProxyTwoMapping();
 
                 if (mapping.isSelfReferencing()) {
-                    if (mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, fromIgcObject, fromIgcObject)) {
-                        addSelfReferencingRelationship(igcomrsRepositoryConnector, mapping, relationships, fromIgcObject, userId);
+                    if (mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, cache, fromIgcObject, fromIgcObject)) {
+                        addSelfReferencingRelationship(igcomrsRepositoryConnector, mapping, relationships, cache, fromIgcObject, userId);
                     }
                 } else if (!optimalStart.equals(RelationshipMapping.OptimalStart.CUSTOM)) {
                     if (fromIgcObject.isFullyRetrieved()
@@ -1277,6 +1295,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         addDirectRelationship(igcomrsRepositoryConnector,
                                 mapping,
                                 relationships,
+                                cache,
                                 fromIgcObject,
                                 toIgcObject,
                                 fromRelationshipElement,
@@ -1289,6 +1308,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         addInvertedRelationship(igcomrsRepositoryConnector,
                                 mapping,
                                 relationships,
+                                cache,
                                 fromIgcObject,
                                 toIgcObject,
                                 fromRelationshipElement,
@@ -1304,6 +1324,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 mapping.addMappedOMRSRelationships(
                         igcomrsRepositoryConnector,
                         relationships,
+                        cache,
                         fromIgcObject,
                         toIgcObject,
                         fromRelationshipElement,
@@ -1323,18 +1344,21 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @param mapping the mapping for the self-referencing relationship
      * @param relationships the list of relationships to append to
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the IGC object that is the source (and target) of the self-referencing relationship
      * @param userId the user retrieving the mapped relationship
      */
     private static void addSelfReferencingRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                        RelationshipMapping mapping,
                                                        List<Relationship> relationships,
+                                                       ObjectCache cache,
                                                        Reference fromIgcObject,
                                                        String userId) {
         try {
             Relationship relationship = getMappedRelationship(
                     igcomrsRepositoryConnector,
                     mapping,
+                    cache,
                     fromIgcObject,
                     fromIgcObject,
                     RelationshipMapping.SELF_REFERENCE_SENTINEL,
@@ -1353,6 +1377,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC repository
      * @param mapping the mapping for the direct relationship
      * @param relationships the list of relationships to append to
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the IGC object that is the source of the direct relationship
      * @param toIgcObject the IGC object that is the target of the direct relationship (if known, otherwise null)
      * @param fromRelationshipElement the starting element number of the relationships to return.
@@ -1367,6 +1392,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     private static void addDirectRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                               RelationshipMapping mapping,
                                               List<Relationship> relationships,
+                                              ObjectCache cache,
                                               Reference fromIgcObject,
                                               Reference toIgcObject,
                                               int fromRelationshipElement,
@@ -1381,6 +1407,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     igcomrsRepositoryConnector,
                     mapping,
                     relationships,
+                    cache,
                     fromIgcObject,
                     toIgcObject,
                     userId
@@ -1397,11 +1424,12 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 if (directRelationships instanceof Reference) {
 
                     Reference singleRelationship = (Reference) directRelationships;
-                    if (mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, fromIgcObject, singleRelationship)) {
+                    if (mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, cache, fromIgcObject, singleRelationship)) {
                         addSingleMappedRelationship(
                                 igcomrsRepositoryConnector,
                                 mapping,
                                 relationships,
+                                cache,
                                 fromIgcObject,
                                 singleRelationship,
                                 igcRelationshipName,
@@ -1442,6 +1470,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                             igcomrsRepositoryConnector,
                             mapping,
                             relationships,
+                            cache,
                             fromIgcObject,
                             allRelationships,
                             igcRelationshipName,
@@ -1465,6 +1494,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC repository
      * @param mapping the mapping for the inverted relationship
      * @param relationships the list of relationships to append to
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the IGC object that is the source of the inverted relationship (or really the target)
      * @param toIgcObject the IGC object that is the target of the inverted relationship (if known, otherwise null)
      * @param fromRelationshipElement the starting element number of the relationships to return.
@@ -1478,6 +1508,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     private static void addInvertedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                 RelationshipMapping mapping,
                                                 List<Relationship> relationships,
+                                                ObjectCache cache,
                                                 Reference fromIgcObject,
                                                 Reference toIgcObject,
                                                 int fromRelationshipElement,
@@ -1494,6 +1525,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     igcomrsRepositoryConnector,
                     mapping,
                     relationships,
+                    cache,
                     fromIgcObject,
                     toIgcObject,
                     userId
@@ -1512,6 +1544,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                             igcomrsRepositoryConnector,
                             mapping,
                             relationships,
+                            cache,
                             fromIgcObject,
                             igcSearchConditionSet,
                             assetType,
@@ -1545,6 +1578,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                             igcomrsRepositoryConnector,
                             mapping,
                             relationships,
+                            cache,
                             fromIgcObject,
                             igcSearchConditionSet,
                             sourceAssetType,
@@ -1570,6 +1604,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC repository
      * @param mapping the mapping for the inverted relationship
      * @param relationships the list of relationships to append to
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the object that is the source of the IGC relationship
      * @param igcSearchConditionSet the search criteria to use for the search
      * @param assetType the type of IGC asset for which to search
@@ -1585,6 +1620,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     private static void addSearchResultsToRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                         RelationshipMapping mapping,
                                                         List<Relationship> relationships,
+                                                        ObjectCache cache,
                                                         Reference fromIgcObject,
                                                         IGCSearchConditionSet igcSearchConditionSet,
                                                         String assetType,
@@ -1609,6 +1645,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 igcomrsRepositoryConnector,
                 mapping,
                 relationships,
+                cache,
                 fromIgcObject,
                 foundRelationships,
                 igcPropertyName,
@@ -1639,6 +1676,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     private static void addListOfMappedRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                      RelationshipMapping mapping,
                                                      List<Relationship> relationships,
+                                                     ObjectCache cache,
                                                      Reference fromIgcObject,
                                                      ItemList<Reference> igcRelationships,
                                                      String igcPropertyName,
@@ -1660,11 +1698,12 @@ public abstract class RelationshipMapping extends InstanceMapping {
         // come from this set of relationships
         for (Reference relation : igcRelationships.getItems()) {
             if (localPage.size() < totalPotentialResults
-                    && mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, fromIgcObject, relation)) {
+                    && mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, cache, fromIgcObject, relation)) {
                 addSingleMappedRelationship(
                         igcomrsRepositoryConnector,
                         mapping,
                         localPage,
+                        cache,
                         fromIgcObject,
                         relation,
                         igcPropertyName,
@@ -1682,6 +1721,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             addListOfMappedRelationships(igcomrsRepositoryConnector,
                     mapping,
                     relationships,
+                    cache,
                     fromIgcObject,
                     nextPage,
                     igcPropertyName,
@@ -1699,6 +1739,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC repository
      * @param mapping the mapping to use in translating each relationship
      * @param relationships the list of relationships to append to
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the asset that is the source of the IGC relationship
      * @param igcRelationship the IGC relationship
      * @param igcPropertyName the name of the IGC relationship property
@@ -1707,6 +1748,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     private static void addSingleMappedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                     RelationshipMapping mapping,
                                                     List<Relationship> relationships,
+                                                    ObjectCache cache,
                                                     Reference fromIgcObject,
                                                     Reference igcRelationship,
                                                     String igcPropertyName,
@@ -1721,6 +1763,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 Relationship omrsRelationship = getMappedRelationship(
                         igcomrsRepositoryConnector,
                         mapping,
+                        cache,
                         fromIgcObject,
                         igcRelationship,
                         igcPropertyName,
@@ -1742,6 +1785,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC repository
      * @param mapping the mapping to use in translating each relationship
      * @param relationships the list of relationships to append to
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param proxyOne the asset that acts as proxy one in the relationship
      * @param proxyTwo the asset that acts as proxy two in the relationship
      * @param userId the user retrieving the mapped relationship
@@ -1749,6 +1793,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     private static void addSingleMappedRelationshipWithKnownOrder(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                                   RelationshipMapping mapping,
                                                                   List<Relationship> relationships,
+                                                                  ObjectCache cache,
                                                                   Reference proxyOne,
                                                                   Reference proxyTwo,
                                                                   String userId) {
@@ -1766,6 +1811,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         igcomrsRepositoryConnector,
                         mapping,
                         omrsRelationshipDef,
+                        cache,
                         proxyOne,
                         proxyTwo,
                         null,
@@ -1788,6 +1834,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC repository
      * @param mapping the mapping details to use
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the asset that is the source of the IGC relationship
      * @param relation the related IGC object
      * @param igcPropertyName the name of the IGC relationship property
@@ -1798,6 +1845,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      */
     private static Relationship getMappedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                       RelationshipMapping mapping,
+                                                      ObjectCache cache,
                                                       Reference fromIgcObject,
                                                       Reference relation,
                                                       String igcPropertyName,
@@ -1812,6 +1860,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 igcomrsRepositoryConnector,
                 mapping,
                 omrsRelationshipDef,
+                cache,
                 fromIgcObject,
                 relation,
                 igcPropertyName,
@@ -1826,6 +1875,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC repository
      * @param relationshipMapping the definition of how to map the relationship
      * @param omrsRelationshipDef the OMRS relationship definition
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param proxyOne the IGC asset to use for endpoint 1 of the relationship
      * @param proxyTwo the IGC asset to use for endpoint 2 of the relationship
      * @param igcPropertyName the name of the IGC relationship property
@@ -1837,6 +1887,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     protected static Relationship getMappedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                         RelationshipMapping relationshipMapping,
                                                         RelationshipDef omrsRelationshipDef,
+                                                        ObjectCache cache,
                                                         Reference proxyOne,
                                                         Reference proxyTwo,
                                                         String igcPropertyName,
@@ -1845,6 +1896,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 igcomrsRepositoryConnector,
                 relationshipMapping,
                 omrsRelationshipDef,
+                cache,
                 proxyOne,
                 proxyTwo,
                 igcPropertyName,
@@ -1859,6 +1911,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC repository
      * @param relationshipMapping the definition of how to map the relationship
      * @param omrsRelationshipDef the OMRS relationship definition
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param proxyOne the IGC asset to consider for endpoint 1 of the relationship
      * @param proxyTwo the IGC asset to consider for endpoint 2 of the relationship
      * @param igcPropertyName the name of the IGC relationship property
@@ -1871,6 +1924,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     public static Relationship getMappedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                      RelationshipMapping relationshipMapping,
                                                      RelationshipDef omrsRelationshipDef,
+                                                     ObjectCache cache,
                                                      Reference proxyOne,
                                                      Reference proxyTwo,
                                                      String igcPropertyName,
@@ -1880,6 +1934,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 igcomrsRepositoryConnector,
                 relationshipMapping,
                 omrsRelationshipDef,
+                cache,
                 proxyOne,
                 proxyTwo,
                 igcPropertyName,
@@ -1895,6 +1950,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcomrsRepositoryConnector connectivity to the IGC repository
      * @param relationshipMapping the definition of how to map the relationship
      * @param omrsRelationshipDef the OMRS relationship definition
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param proxyOne the IGC asset to consider for endpoint 1 of the relationship
      * @param proxyTwo the IGC asset to consider for endpoint 2 of the relationship
      * @param igcPropertyName the name of the IGC relationship property
@@ -1908,6 +1964,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     public static Relationship getMappedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                      RelationshipMapping relationshipMapping,
                                                      RelationshipDef omrsRelationshipDef,
+                                                     ObjectCache cache,
                                                      Reference proxyOne,
                                                      Reference proxyTwo,
                                                      String igcPropertyName,
@@ -1965,12 +2022,14 @@ public abstract class RelationshipMapping extends InstanceMapping {
                     || (ridForEP1.equals(proxyOne.getId()) && ridForEP2.equals(proxyTwo.getId()))) {
                 ep1 = RelationshipMapping.getEntityProxyForObject(
                         igcomrsRepositoryConnector,
+                        cache,
                         proxyOne,
                         userId,
                         relationshipMapping.getProxyOneMapping().getIgcRidPrefix()
                 );
                 ep2 = RelationshipMapping.getEntityProxyForObject(
                         igcomrsRepositoryConnector,
+                        cache,
                         proxyTwo,
                         userId,
                         relationshipMapping.getProxyTwoMapping().getIgcRidPrefix()
@@ -1978,12 +2037,14 @@ public abstract class RelationshipMapping extends InstanceMapping {
             } else if (ridForEP2.equals(proxyOne.getId()) && ridForEP1.equals(proxyTwo.getId())) {
                 ep1 = RelationshipMapping.getEntityProxyForObject(
                         igcomrsRepositoryConnector,
+                        cache,
                         proxyTwo,
                         userId,
                         relationshipMapping.getProxyOneMapping().getIgcRidPrefix()
                 );
                 ep2 = RelationshipMapping.getEntityProxyForObject(
                         igcomrsRepositoryConnector,
+                        cache,
                         proxyOne,
                         userId,
                         relationshipMapping.getProxyTwoMapping().getIgcRidPrefix()

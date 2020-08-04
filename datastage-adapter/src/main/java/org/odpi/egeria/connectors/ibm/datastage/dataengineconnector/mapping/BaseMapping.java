@@ -41,7 +41,7 @@ class BaseMapping {
      */
     String getFullyQualifiedName(Reference igcObj) {
         if (igcObj != null) {
-            Identity identity = igcObj.getIdentity(igcRestClient);
+            Identity identity = igcObj.getIdentity(igcRestClient, cache.getIgcCache());
             if (identity != null) {
                 return identity.toString();
             }
@@ -58,7 +58,7 @@ class BaseMapping {
     String getParentQualifiedName(Reference igcObj) {
         String parentQN = null;
         if (igcObj != null) {
-            Identity thisObjIdentity = igcObj.getIdentity(igcRestClient);
+            Identity thisObjIdentity = igcObj.getIdentity(igcRestClient, cache.getIgcCache());
             Identity parentObjIdentity = thisObjIdentity.getParentIdentity();
             if (parentObjIdentity != null) {
                 parentQN = parentObjIdentity.toString();
@@ -76,7 +76,7 @@ class BaseMapping {
     String getParentDisplayName(Reference igcObj) {
         String parentDN = null;
         if (igcObj != null) {
-            Identity thisObjIdentity = igcObj.getIdentity(igcRestClient);
+            Identity thisObjIdentity = igcObj.getIdentity(igcRestClient, cache.getIgcCache());
             Identity parentObjIdentity = thisObjIdentity.getParentIdentity();
             if (parentObjIdentity != null) {
                 parentDN = parentObjIdentity.getName();

@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relations
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Note;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
@@ -96,6 +97,7 @@ public class AttachedNoteLogEntryMapper extends RelationshipMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the relationships to which to add
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the IGC asset that may have notes
      * @param toIgcObject the note (or null if all should be retrieved)
      * @param fromRelationshipElement the starting element number of the relationships to return.
@@ -109,6 +111,7 @@ public class AttachedNoteLogEntryMapper extends RelationshipMapping {
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                            List<Relationship> relationships,
+                                           ObjectCache cache,
                                            Reference fromIgcObject,
                                            Reference toIgcObject,
                                            int fromRelationshipElement,
@@ -130,12 +133,12 @@ public class AttachedNoteLogEntryMapper extends RelationshipMapping {
 
             if (toIgcObject != null && one.matchesAssetType(toIgcObject.getType())) {
                 // Just add this single relationship
-                addRelationshipSafe(igcomrsRepositoryConnector, relationshipDef, toIgcObject, fromIgcObject, userId, relationships);
+                addRelationshipSafe(igcomrsRepositoryConnector, relationshipDef, cache, toIgcObject, fromIgcObject, userId, relationships);
             } else if (toIgcObject == null) {
                 // Otherwise retrieve all of the relationships and add all of them
                 Reference asset = getAssetFromNote((Note) fromIgcObject, igcRestClient);
                 if (asset != null) {
-                    addRelationshipSafe(igcomrsRepositoryConnector, relationshipDef, asset, fromIgcObject, userId, relationships);
+                    addRelationshipSafe(igcomrsRepositoryConnector, relationshipDef, cache, asset, fromIgcObject, userId, relationships);
                 } else {
                     log.warn("Unable to find the owning asset for note: {}", fromIgcObject);
                 }
@@ -147,12 +150,12 @@ public class AttachedNoteLogEntryMapper extends RelationshipMapping {
 
             if (toIgcObject instanceof Note) {
                 // Just add this single relationship
-                addRelationshipSafe(igcomrsRepositoryConnector, relationshipDef, fromIgcObject, toIgcObject, userId, relationships);
+                addRelationshipSafe(igcomrsRepositoryConnector, relationshipDef, cache, fromIgcObject, toIgcObject, userId, relationships);
             } else {
                 // Otherwise retrieve all the relationships and add them all
                 List<Note> notes = getNotesFromAsset(fromIgcObject, igcRestClient);
                 for (Note note : notes) {
-                    addRelationshipSafe(igcomrsRepositoryConnector, relationshipDef, fromIgcObject, note, userId, relationships);
+                    addRelationshipSafe(igcomrsRepositoryConnector, relationshipDef, cache, fromIgcObject, note, userId, relationships);
                 }
             }
 
@@ -164,6 +167,7 @@ public class AttachedNoteLogEntryMapper extends RelationshipMapping {
 
     private void addRelationshipSafe(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                      RelationshipDef relationshipDef,
+                                     ObjectCache cache,
                                      Reference asset,
                                      Reference note,
                                      String userId,
@@ -173,6 +177,7 @@ public class AttachedNoteLogEntryMapper extends RelationshipMapping {
                     igcomrsRepositoryConnector,
                     AttachedNoteLogEntryMapper.getInstance(null),
                     relationshipDef,
+                    cache,
                     asset,
                     note,
                     "notes",
