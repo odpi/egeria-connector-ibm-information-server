@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCIOException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
@@ -1439,12 +1440,13 @@ public class IGCRestClient {
      * Ensures that the modification details of the asset are populated (takes no action if already populated or
      * the asset does not support them).
      *
-     * @param object the IGC object for which to populate modification details
      * @param <T> the type of IGC object (minimally a Reference)
+     * @param object the IGC object for which to populate modification details
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return T - the IGC object with its _context and modification details populated
      */
-    public <T extends Reference> T getModificationDetails(T object) {
-        return getAssetContext(object, true);
+    public <T extends Reference> T getModificationDetails(T object, ObjectCache cache) {
+        return getAssetContext(object, true, cache);
     }
 
     /**
@@ -1453,37 +1455,44 @@ public class IGCRestClient {
      * Will force retrieval of modification details even if _context is populated if 'bPopulateModDetails' is true
      * and no modification details appear to be populated. (Takes no action otherwise, just returns object as-is.)
      *
+     * @param <T> the type of IGC object (minimally a Reference)
      * @param object the IGC object for which to populate the context (and modification details)
      * @param bPopulateModDetails true to force modification detail retrieval, false otherwise
-     * @param <T> the type of IGC object (minimally a Reference)
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return T - the IGC object with its _context and modification details populated
      */
     @SuppressWarnings("unchecked")
-    private <T extends Reference> T getAssetContext(T object, boolean bPopulateModDetails) {
+    private <T extends Reference> T getAssetContext(T object, boolean bPopulateModDetails, ObjectCache cache) {
 
         T populated = object;
         if (object != null) {
 
-            boolean bHasModificationDetails = hasModificationDetails(object.getType());
+            String rid = object.getId();
+            Reference fromCache = cache.get(rid);
+            if (fromCache == null) {
+                boolean bHasModificationDetails = hasModificationDetails(object.getType());
 
-            // Only bother retrieving the context if the identity isn't already present
-            if ( (!object.isIdentityPopulated() && (object.getContext() == null || object.getContext().isEmpty()))
-                    || (bHasModificationDetails && !object.areModificationDetailsPopulated() && bPopulateModDetails)) {
+                // Only bother retrieving the context if the identity isn't already present
+                if ((!object.isIdentityPopulated() && (object.getContext() == null || object.getContext().isEmpty()))
+                        || (bHasModificationDetails && !object.areModificationDetailsPopulated() && bPopulateModDetails)) {
 
-                log.debug("Context and / or modification details are empty, populating...");
+                    log.debug("Context and / or modification details are empty, and not found in cache; populating...");
 
-                String rid = object.getId();
-                String assetType = object.getType();
-                if (object.isVirtualAsset() || IGCRestConstants.getTypesThatCannotBeSearched().contains(assetType)) {
-                    populated = (T) getAssetById(rid);
-                } else {
-                    List<String> properties = new ArrayList<>();
-                    if (bHasModificationDetails) {
-                        properties.addAll(IGCRestConstants.getModificationProperties());
+                    String assetType = object.getType();
+                    if (object.isVirtualAsset() || IGCRestConstants.getTypesThatCannotBeSearched().contains(assetType)) {
+                        populated = (T) getAssetById(rid);
+                    } else {
+                        List<String> properties = new ArrayList<>();
+                        if (bHasModificationDetails) {
+                            properties.addAll(IGCRestConstants.getModificationProperties());
+                        }
+                        populated = getAssetWithSubsetOfProperties(rid, assetType, properties, 2);
                     }
-                    populated = getAssetWithSubsetOfProperties(rid, assetType, properties, 2);
-                }
+                    cache.add(populated);
 
+                }
+            } else {
+                populated = (T) fromCache;
             }
         }
 

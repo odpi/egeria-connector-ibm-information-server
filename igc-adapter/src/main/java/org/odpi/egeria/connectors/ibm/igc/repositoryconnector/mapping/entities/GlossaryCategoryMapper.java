@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -52,10 +53,11 @@ public class GlossaryCategoryMapper extends ReferenceableMapper {
     /**
      * {@inheritDoc}
      */
-    public boolean isOmrsType(IGCRestClient igcRestClient, Reference igcObject) {
+    @Override
+    public boolean isOmrsType(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) {
         String assetType = IGCRestConstants.getAssetTypeForSearch(igcObject.getType());
         if (assetType.equals("category")) {
-            Identity catIdentity = igcObject.getIdentity(igcRestClient);
+            Identity catIdentity = igcObject.getIdentity(igcRestClient, cache);
             Identity parentIdentity = catIdentity.getParentIdentity();
             if (parentIdentity != null) {
                 Identity ultimate = catIdentity.getUltimateParentIdentity();

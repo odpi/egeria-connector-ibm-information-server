@@ -6,6 +6,7 @@ import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classification;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -80,10 +81,11 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      *
      * @param relationshipAsset the classification asset to translate into a main_object asset
      * @param igcRestClient REST connectivity to the IGC environment
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the classificationenabledgroup asset
      */
     @Override
-    public List<Reference> getProxyOneAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient) {
+    public List<Reference> getProxyOneAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient, ObjectCache cache) {
         String otherAssetType = relationshipAsset.getType();
         ArrayList<Reference> asList = new ArrayList<>();
         if (otherAssetType.equals("classification")) {
@@ -108,10 +110,11 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      *
      * @param relationshipAsset the classification asset to translate into a data_class asset
      * @param igcRestClient REST connectivity to the IGC environment
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the data_class asset
      */
     @Override
-    public List<Reference> getProxyTwoAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient) {
+    public List<Reference> getProxyTwoAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient, ObjectCache cache) {
         String otherAssetType = relationshipAsset.getType();
         ArrayList<Reference> asList = new ArrayList<>();
         if (otherAssetType.equals("classification")) {
@@ -138,6 +141,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the IGC entity from which the relationship exists
      * @param toIgcObject the other entity endpoint for the relationship (or null if unknown)
      * @param fromRelationshipElement the starting element number of the relationships to return.
@@ -154,6 +158,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                            List<Relationship> relationships,
+                                           ObjectCache cache,
                                            Reference fromIgcObject,
                                            Reference toIgcObject,
                                            int fromRelationshipElement,
@@ -165,6 +170,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             mapDetectedClassifications_fromDataClass(
                     igcomrsRepositoryConnector,
                     relationships,
+                    cache,
                     (DataClass) fromIgcObject,
                     toIgcObject instanceof Classificationenabledgroup ? (Classificationenabledgroup) toIgcObject : null,
                     sequencingOrder,
@@ -173,6 +179,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             mapSelectedClassifications_fromDataClass(
                     igcomrsRepositoryConnector,
                     relationships,
+                    cache,
                     (DataClass) fromIgcObject,
                     userId
             );
@@ -180,6 +187,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             mapDetectedClassifications_toDataClass(
                     igcomrsRepositoryConnector,
                     relationships,
+                    cache,
                     (Classificationenabledgroup) fromIgcObject,
                     toIgcObject instanceof DataClass ? (DataClass) toIgcObject : null,
                     sequencingOrder,
@@ -188,6 +196,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             mapSelectedClassifications_toDataClass(
                     igcomrsRepositoryConnector,
                     relationships,
+                    cache,
                     (Classificationenabledgroup) fromIgcObject,
                     userId
             );
@@ -524,6 +533,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param dataClass the data_class object
      * @param toIgcObject the classificationenabledgroup that is classified (if known, null otherwise)
      * @param sequencingOrder Enum defining how the results should be ordered.
@@ -531,6 +541,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      */
     private void mapDetectedClassifications_fromDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                           List<Relationship> relationships,
+                                                          ObjectCache cache,
                                                           DataClass dataClass,
                                                           Classificationenabledgroup toIgcObject,
                                                           SequencingOrder sequencingOrder,
@@ -578,6 +589,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                             (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
                                     igcomrsRepositoryConnector.getRepositoryName(),
                                     R_DATA_CLASS_ASSIGNMENT),
+                            cache,
                             classifiedObj,
                             dataClass,
                             "detected_classifications",
@@ -610,11 +622,13 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param dataClass the data_class object
      * @param userId the user requesting the mapped relationships
      */
     private void mapSelectedClassifications_fromDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                           List<Relationship> relationships,
+                                                          ObjectCache cache,
                                                           DataClass dataClass,
                                                           String userId) {
 
@@ -643,6 +657,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                         (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
                                 igcomrsRepositoryConnector.getRepositoryName(),
                                 R_DATA_CLASS_ASSIGNMENT),
+                        cache,
                         assetWithSelected,
                         dataClass,
                         "selected_classification",
@@ -667,6 +682,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the main_object object
      * @param dataClass the data_class object (if known, or null otherwise)
      * @param sequencingOrder Enum defining how the results should be ordered.
@@ -674,6 +690,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      */
     private void mapDetectedClassifications_toDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                         List<Relationship> relationships,
+                                                        ObjectCache cache,
                                                         Classificationenabledgroup fromIgcObject,
                                                         DataClass dataClass,
                                                         SequencingOrder sequencingOrder,
@@ -725,6 +742,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                             (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
                                     igcomrsRepositoryConnector.getRepositoryName(),
                                     R_DATA_CLASS_ASSIGNMENT),
+                            cache,
                             fromIgcObject,
                             dataClassObj,
                             "detected_classifications",
@@ -757,11 +775,13 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the list of relationships to which to add
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the classificationenabledgroup object
      * @param userId the user requesting the mapped relationships
      */
     private void mapSelectedClassifications_toDataClass(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                         List<Relationship> relationships,
+                                                        ObjectCache cache,
                                                         Classificationenabledgroup fromIgcObject,
                                                         String userId) {
 
@@ -785,6 +805,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                         (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
                                 igcomrsRepositoryConnector.getRepositoryName(),
                                 R_DATA_CLASS_ASSIGNMENT),
+                        cache,
                         fromIgcObject,
                         selectedClassification,
                         "selected_classification",

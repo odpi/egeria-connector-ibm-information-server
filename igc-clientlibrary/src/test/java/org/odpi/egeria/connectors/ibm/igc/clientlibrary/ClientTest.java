@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
@@ -167,7 +168,7 @@ public class ClientTest {
         assertNotNull(category.getModifiedBy());
         assertNotNull(category.getModifiedOn());
 
-        Identity identity = category.getIdentity(igcRestClient);
+        Identity identity = category.getIdentity(igcRestClient, new ObjectCache());
         assertNotNull(identity);
 
         String fullAsJSON = igcRestClient.getValueAsJSON(category);
@@ -189,7 +190,7 @@ public class ClientTest {
 
         // Note that in this case they will not be equal because there is no context on this root-level category,
         // so a search will always be run and the results with only mod details (and context) returned
-        Category withModDetails = igcRestClient.getModificationDetails(category);
+        Category withModDetails = igcRestClient.getModificationDetails(category, new ObjectCache());
         assertEquals(withModDetails.getCreatedBy(), "Administrator IIS");
         assertNotNull(withModDetails.toString());
 

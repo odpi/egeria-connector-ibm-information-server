@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -56,13 +57,14 @@ public class GlossaryMapper extends ReferenceableMapper {
      * Utility method to check if the provided IGC object should be treated as a Glossary (true) or not (false).
      *
      * @param igcRestClient connectivity to the IGC environment
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param igcObject the IGC object to check
      * @return boolean
      */
-    public static boolean isGlossary(IGCRestClient igcRestClient, Reference igcObject) {
+    public static boolean isGlossary(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) {
         String assetType = IGCRestConstants.getAssetTypeForSearch(igcObject.getType());
         if (assetType.equals("category")) {
-            Identity catIdentity = igcObject.getIdentity(igcRestClient);
+            Identity catIdentity = igcObject.getIdentity(igcRestClient, cache);
             Identity parentIdentity = catIdentity.getParentIdentity();
             return parentIdentity == null && !catIdentity.getName().equals("Classifications");
         }
@@ -72,8 +74,9 @@ public class GlossaryMapper extends ReferenceableMapper {
     /**
      * {@inheritDoc}
      */
-    public boolean isOmrsType(IGCRestClient igcRestClient, Reference igcObject) {
-        return isGlossary(igcRestClient, igcObject);
+    @Override
+    public boolean isOmrsType(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) {
+        return isGlossary(igcRestClient, cache, igcObject);
     }
 
     /**

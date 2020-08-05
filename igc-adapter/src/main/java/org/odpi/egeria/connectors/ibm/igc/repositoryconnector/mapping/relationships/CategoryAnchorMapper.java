@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relations
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -63,14 +64,15 @@ public class CategoryAnchorMapper extends RelationshipMapping {
      *
      * @param category the category to traverse upwards from to the root-level ancestor
      * @param igcRestClient REST connectivity to the IGC environment
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the host asset
      */
     @Override
-    public List<Reference> getProxyOneAssetFromAsset(Reference category, IGCRestClient igcRestClient) {
+    public List<Reference> getProxyOneAssetFromAsset(Reference category, IGCRestClient igcRestClient, ObjectCache cache) {
         String assetType = category.getType();
         ArrayList<Reference> asList = new ArrayList<>();
         if (assetType.equals("category")) {
-            Identity catIdentity = category.getIdentity(igcRestClient);
+            Identity catIdentity = category.getIdentity(igcRestClient, cache);
             if (catIdentity != null) {
                 Identity rootIdentity = catIdentity.getUltimateParentIdentity();
                 Reference root = new Reference(rootIdentity.getName(), rootIdentity.getAssetType(), rootIdentity.getRid());
@@ -97,6 +99,7 @@ public class CategoryAnchorMapper extends RelationshipMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param relationships the relationships to which to add
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the category from which to traverse upwards / downwards
      * @param toIgcObject the category from which to traverse downwards / upwards (or null if not known)
      * @param fromRelationshipElement the starting element number of the relationships to return.
@@ -110,6 +113,7 @@ public class CategoryAnchorMapper extends RelationshipMapping {
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                            List<Relationship> relationships,
+                                           ObjectCache cache,
                                            Reference fromIgcObject,
                                            Reference toIgcObject,
                                            int fromRelationshipElement,
@@ -127,7 +131,7 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                     igcomrsRepositoryConnector.getRepositoryName(),
                     "CategoryAnchor");
 
-            if (GlossaryMapper.isGlossary(igcRestClient, fromIgcObject)) {
+            if (GlossaryMapper.isGlossary(igcRestClient, cache, fromIgcObject)) {
 
                 IGCSearchConditionSet conditionSet = new IGCSearchConditionSet();
                 if (toIgcObject == null) {
@@ -168,6 +172,7 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                                     igcomrsRepositoryConnector,
                                     CategoryAnchorMapper.getInstance(null),
                                     relationshipDef,
+                                    cache,
                                     fromIgcObject,
                                     child,
                                     "subcategories",
@@ -183,7 +188,7 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                 }
             } else {
                 // We are at a child category, so we need to get the ultimate root-level category
-                Identity catIdentity = fromIgcObject.getIdentity(igcRestClient);
+                Identity catIdentity = fromIgcObject.getIdentity(igcRestClient, cache);
                 Identity rootIdentity = catIdentity.getUltimateParentIdentity();
                 Reference root = igcRestClient.getAssetWithSubsetOfProperties(
                         rootIdentity.getRid(),
@@ -196,6 +201,7 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                                 igcomrsRepositoryConnector,
                                 CategoryAnchorMapper.getInstance(null),
                                 relationshipDef,
+                                cache,
                                 root,
                                 fromIgcObject,
                                 "parent_category",
@@ -221,18 +227,20 @@ public class CategoryAnchorMapper extends RelationshipMapping {
      * Avoid creating an anchor relationship between the glossary and itself (as a category).
      *
      * @param igcomrsRepositoryConnector connection to the IGC environment
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param oneObject the IGC object to consider for inclusion on one end of the relationship
      * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
      * @return boolean
      */
     @Override
     public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                    ObjectCache cache,
                                                     Reference oneObject,
                                                     Reference otherObject) {
         log.debug("Considering inclusion of objects: {} ({}) and {} ({})", oneObject.getName(), oneObject.getType(), otherObject.getName(), otherObject.getType());
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
-        return (GlossaryMapper.isGlossary(igcRestClient, oneObject) && otherObject.getType().equals("category") && !GlossaryMapper.isGlossary(igcRestClient, otherObject))
-                || (!GlossaryMapper.isGlossary(igcRestClient, oneObject) && oneObject.getType().equals("category") && GlossaryMapper.isGlossary(igcRestClient, otherObject));
+        return (GlossaryMapper.isGlossary(igcRestClient, cache, oneObject) && otherObject.getType().equals("category") && !GlossaryMapper.isGlossary(igcRestClient, cache, otherObject))
+                || (!GlossaryMapper.isGlossary(igcRestClient, cache, oneObject) && oneObject.getType().equals("category") && GlossaryMapper.isGlossary(igcRestClient, cache, otherObject));
     }
 
 }

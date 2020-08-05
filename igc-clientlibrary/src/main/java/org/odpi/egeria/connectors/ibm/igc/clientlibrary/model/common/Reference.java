@@ -12,6 +12,7 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 
 import java.util.Date;
@@ -543,15 +544,16 @@ public class Reference extends ObjectPrinter {
      * Retrieves the semantic identity of the asset.
      *
      * @param igcrest a REST API connection to use in confirming the identity of the asset
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Identity
      */
     @JsonIgnore
-    public Identity getIdentity(IGCRestClient igcrest) {
+    public Identity getIdentity(IGCRestClient igcrest, ObjectCache cache) {
         if (!isIdentityPopulated()) {
             // If the _context is null, it is not populated, while if it is empty it has been populated but there
             // simply is no context for this object
             if (getContext() == null) {
-                Reference assetWithCtx = igcrest.getModificationDetails(this);
+                Reference assetWithCtx = igcrest.getModificationDetails(this, cache);
                 setContext(assetWithCtx.getContext());
                 setCreatedOn(assetWithCtx.getCreatedOn());
                 setCreatedBy(assetWithCtx.getCreatedBy());

@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Classification;
@@ -65,12 +66,14 @@ public class AssetZoneMembershipMapper extends ClassificationMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param classifications the list of classifications to which to add
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the IGC object against which the classification should exist
      * @param userId the user requesting the mapped classifications
      */
     @Override
     public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                              List<Classification> classifications,
+                                             ObjectCache cache,
                                              Reference fromIgcObject,
                                              String userId) {
         OMRSRepositoryHelper repositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();

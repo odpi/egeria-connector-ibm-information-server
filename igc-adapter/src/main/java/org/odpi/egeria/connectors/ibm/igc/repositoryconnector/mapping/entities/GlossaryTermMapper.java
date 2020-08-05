@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -64,10 +65,10 @@ public class GlossaryTermMapper extends ReferenceableMapper {
      * {@inheritDoc}
      */
     @Override
-    public boolean isOmrsType(IGCRestClient igcRestClient, Reference igcObject) {
+    public boolean isOmrsType(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) {
         String assetType = IGCRestConstants.getAssetTypeForSearch(igcObject.getType());
         if (assetType.equals("term")) {
-            Identity termIdentity = igcObject.getIdentity(igcRestClient);
+            Identity termIdentity = igcObject.getIdentity(igcRestClient, cache);
             Identity ultimateParentIdentity = termIdentity.getUltimateParentIdentity();
             return ultimateParentIdentity != null && !ultimateParentIdentity.getName().equals("Classifications");
         }

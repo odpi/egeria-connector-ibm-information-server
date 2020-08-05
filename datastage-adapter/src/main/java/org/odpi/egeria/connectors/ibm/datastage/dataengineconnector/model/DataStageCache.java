@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConstants;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.ProcessMapping;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -32,6 +33,7 @@ public class DataStageCache {
     private Map<String, List<Classificationenabledgroup>> storeToColumns;
 
     private IGCRestClient igcRestClient;
+    private ObjectCache igcCache;
     private Date from;
     private Date to;
     private List<String> limitToProjects;
@@ -44,6 +46,7 @@ public class DataStageCache {
      * @param limitToProjects limit the cached jobs to only those in the provided list of projects
      */
     public DataStageCache(Date from, Date to, List<String> limitToProjects) {
+        this.igcCache = new ObjectCache();
         this.ridToJob = new HashMap<>();
         this.ridToProcess = new HashMap<>();
         this.storeToIdentity = new HashMap<>();
@@ -74,6 +77,12 @@ public class DataStageCache {
      * @return Date
      */
     public Date getTo() { return to; }
+
+    /**
+     * Retrieve the embedded cache of IGC objects.
+     * @return ObjectCache
+     */
+    public ObjectCache getIgcCache() { return igcCache; }
 
     /**
      * {@inheritDoc}
@@ -232,7 +241,7 @@ public class DataStageCache {
             if (fields != null) {
                 storeToColumns.put(rid, fields);
                 if (!fields.isEmpty()) {
-                    Identity storeIdentity = fields.get(0).getIdentity(igcRestClient).getParentIdentity();
+                    Identity storeIdentity = fields.get(0).getIdentity(igcRestClient, igcCache).getParentIdentity();
                     String storeId = storeIdentity.getRid();
                     storeToIdentity.put(storeId, storeIdentity);
                 }

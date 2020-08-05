@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -67,10 +68,11 @@ public class SchemaElementMapper extends ReferenceableMapper {
      * {@inheritDoc}
      */
     @Override
-    protected InstanceProperties complexPropertyMappings(EntityMappingInstance entityMap,
+    protected InstanceProperties complexPropertyMappings(ObjectCache cache,
+                                                         EntityMappingInstance entityMap,
                                                          InstanceProperties instanceProperties) {
 
-        instanceProperties = super.complexPropertyMappings(entityMap, instanceProperties);
+        instanceProperties = super.complexPropertyMappings(cache, entityMap, instanceProperties);
 
         final String methodName = "complexPropertyMappings";
 
@@ -94,6 +96,7 @@ public class SchemaElementMapper extends ReferenceableMapper {
         instanceProperties = addAnchorGUIDProperty(repositoryHelper,
                 repositoryName,
                 igcRepositoryHelper,
+                cache,
                 igcEntity,
                 igcRestClient,
                 instanceProperties);
@@ -266,6 +269,7 @@ public class SchemaElementMapper extends ReferenceableMapper {
      * @param repositoryHelper the OMRS repository helper
      * @param repositoryName the repository name
      * @param igcRepositoryHelper the IGC repository helper
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param igcEntity the IGC object from which to determine the anchorGUID
      * @param igcRestClient connectivity to the IGC environment
      * @param instanceProperties the instance properties into which to populate the anchorGUID
@@ -274,13 +278,14 @@ public class SchemaElementMapper extends ReferenceableMapper {
     protected InstanceProperties addAnchorGUIDProperty(OMRSRepositoryHelper repositoryHelper,
                                                        String repositoryName,
                                                        IGCRepositoryHelper igcRepositoryHelper,
+                                                       ObjectCache cache,
                                                        Reference igcEntity,
                                                        IGCRestClient igcRestClient,
                                                        InstanceProperties instanceProperties) {
 
         final String methodName = "addAnchorGUIDProperty";
 
-        Identity identity = igcEntity.getIdentity(igcRestClient);
+        Identity identity = igcEntity.getIdentity(igcRestClient, cache);
         Identity asset = getParentAssetIdentity(identity);
         if (asset != null) {
             // We should be safe with no prefix here as the assets DeployedDatabaseSchema and DataFile have no prefix

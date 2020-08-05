@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
@@ -191,10 +192,11 @@ public abstract class EntityMapping extends InstanceMapping {
      * simply returns true directly.
      *
      * @param igcRestClient connectivity to the IGC environment
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param igcObject the IGC object to check matches the OMRS type or not
      * @return boolean
      */
-    public boolean isOmrsType(IGCRestClient igcRestClient, Reference igcObject) {
+    public boolean isOmrsType(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) {
         return true;
     }
 
@@ -459,11 +461,13 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param igcAssetType the IGC asset type of the alternative asset to translate into a base asset
      * @param igcRid the IGC Repository ID (RID) of the alternative asset to translate into a base asset
      * @param igcomrsRepositoryConnector connectivity to IGC repository
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - a stripped-down base asset containing only the ID and Type
      */
     public Reference getBaseIgcAssetFromAlternative(String igcAssetType,
                                                     String igcRid,
-                                                    IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
+                                                    IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
+                                                    ObjectCache cache) {
         Reference simple = new Reference();
         simple.setId(igcRid);
         simple.setType(igcAssetType);
@@ -473,11 +477,13 @@ public abstract class EntityMapping extends InstanceMapping {
     /**
      * This method needs to be overridden to define complex property mapping logic (if any).
      *
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param entityMap the instantiation of a mapping to carry out
      * @param instanceProperties the instance properties to which to add the complex-mapped properties
      * @return InstanceProperties
      */
-    protected InstanceProperties complexPropertyMappings(EntityMappingInstance entityMap,
+    protected InstanceProperties complexPropertyMappings(ObjectCache cache,
+                                                         EntityMappingInstance entityMap,
                                                          InstanceProperties instanceProperties) {
         // Nothing to do -- no complex properties by default
         // (only modification details, but because we want those on EntitySummary as well they're handled elsewhere)
@@ -544,9 +550,12 @@ public abstract class EntityMapping extends InstanceMapping {
     /**
      * Simple utility function to avoid implementing shared EntitySummary and EntityDetail setup twice.
      *
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param entityMap the instantiation of a mapping to carry out
+     * @param omrsObj the summary object to setup
      */
-    private static void setupEntityObj(EntityMappingInstance entityMap,
+    private static void setupEntityObj(ObjectCache cache,
+                                       EntityMappingInstance entityMap,
                                        EntitySummary omrsObj) {
 
         Reference igcEntity = entityMap.getIgcEntity();
@@ -573,6 +582,7 @@ public abstract class EntityMapping extends InstanceMapping {
                 classificationMapping.addMappedOMRSClassifications(
                         igcomrsRepositoryConnector,
                         omrsClassifications,
+                        cache,
                         igcEntity,
                         userId
                 );
@@ -611,9 +621,10 @@ public abstract class EntityMapping extends InstanceMapping {
      * Map the IGC entity to an OMRS EntitySummary object.
      *
      * @param entityMap the instantiation of a mapping to carry out
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @return EntitySummary
      */
-    public static final EntitySummary getEntitySummary(EntityMappingInstance entityMap) {
+    public static final EntitySummary getEntitySummary(EntityMappingInstance entityMap, ObjectCache cache) {
 
         EntityMapping mapping = entityMap.getMapping();
         IGCRestClient igcRestClient = entityMap.getRepositoryConnector().getIGCRestClient();
@@ -623,11 +634,11 @@ public abstract class EntityMapping extends InstanceMapping {
         }
         entityMap.initializeEntitySummary();
 
-        EntitySummary preliminary = entityMap.getOmrsSummary();
+        EntitySummary preliminary = entityMap.getOmrsSummary(cache);
         if (preliminary != null) {
-            setupEntityObj(entityMap, preliminary);
+            setupEntityObj(cache, entityMap, preliminary);
         }
-        return entityMap.getOmrsSummary();
+        return entityMap.getOmrsSummary(cache);
 
     }
 
@@ -661,10 +672,11 @@ public abstract class EntityMapping extends InstanceMapping {
     /**
      * Map the IGC entity to an OMRS EntityDetail object.
      *
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param entityMap the instantiation of a mapping to carry out
      * @return EntityDetail
      */
-    public static final EntityDetail getEntityDetail(EntityMappingInstance entityMap) {
+    public static EntityDetail getEntityDetail(ObjectCache cache, EntityMappingInstance entityMap) {
 
         EntityMapping mapping = entityMap.getMapping();
         IGCRestClient igcRestClient = entityMap.getRepositoryConnector().getIGCRestClient();
@@ -681,27 +693,28 @@ public abstract class EntityMapping extends InstanceMapping {
         // Handle any super-generic mappings first
         entityMap.initializeEntityDetail();
 
-        EntityDetail preliminary = entityMap.getOmrsDetail();
+        EntityDetail preliminary = entityMap.getOmrsDetail(cache);
         if (preliminary != null) {
             // Then handle any generic mappings and classifications
-            setupEntityObj(entityMap, preliminary);
+            setupEntityObj(cache, entityMap, preliminary);
 
             // Use reflection to apply POJO-specific mappings
-            InstanceProperties instanceProperties = getMappedInstanceProperties(entityMap);
+            InstanceProperties instanceProperties = getMappedInstanceProperties(cache, entityMap);
             entityMap.updateOmrsDetailWithProperties(instanceProperties);
         }
 
-        return entityMap.getOmrsDetail();
+        return entityMap.getOmrsDetail(cache);
 
     }
 
     /**
      * Retrieves the InstanceProperties based on the mappings provided.
      *
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param entityMap the instantiation of a mapping to carry out
      * @return InstanceProperties
      */
-    private static InstanceProperties getMappedInstanceProperties(EntityMappingInstance entityMap) {
+    private static InstanceProperties getMappedInstanceProperties(ObjectCache cache, EntityMappingInstance entityMap) {
 
         final String methodName = "getMappedInstanceProperties";
 
@@ -760,7 +773,7 @@ public abstract class EntityMapping extends InstanceMapping {
         }
 
         // Finally we'll apply any complex property mappings
-        mapping.complexPropertyMappings(entityMap, instanceProperties);
+        mapping.complexPropertyMappings(cache, entityMap, instanceProperties);
 
         return instanceProperties;
 
@@ -771,6 +784,7 @@ public abstract class EntityMapping extends InstanceMapping {
      *
      * @param igcGuid the IGC GUID of the entity for which to retrieve the mapped relationships
      * @param entityMap the instantiation of a mapping to carry out
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param relationshipTypeGUID String GUID of the the type of relationship required (null for all).
      * @param fromRelationshipElement the starting element number of the relationships to return.
      *                                This is used when retrieving elements
@@ -785,6 +799,7 @@ public abstract class EntityMapping extends InstanceMapping {
      */
     public static List<Relationship> getMappedRelationships(IGCEntityGuid igcGuid,
                                                             EntityMappingInstance entityMap,
+                                                            ObjectCache cache,
                                                             String relationshipTypeGUID,
                                                             int fromRelationshipElement,
                                                             SequencingOrder sequencingOrder,
@@ -822,6 +837,7 @@ public abstract class EntityMapping extends InstanceMapping {
                     igcomrsRepositoryConnector,
                     omrsRelationships,
                     relationshipMappers,
+                    cache,
                     relationshipTypeGUID,
                     igcEntity,
                     fromRelationshipElement,

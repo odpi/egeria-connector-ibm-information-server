@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classific
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -73,13 +74,14 @@ public abstract class ClassificationMapping extends InstanceMapping {
      * or not (false).
      *
      * @param igcRestClient connectivity to the IGC environment
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param igcObject the IGC object to check
      * @return boolean
      */
-    public static boolean isClassification(IGCRestClient igcRestClient, Reference igcObject) {
+    public static boolean isClassification(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) {
         String assetType = IGCRestConstants.getAssetTypeForSearch(igcObject.getType());
         if (assetType.equals("category") || assetType.equals("term")) {
-            Identity identity = igcObject.getIdentity(igcRestClient);
+            Identity identity = igcObject.getIdentity(igcRestClient, cache);
             Identity rootIdentity = identity.getUltimateParentIdentity();
             if (rootIdentity != null) {
                 return rootIdentity.getName().equals("Classifications");
@@ -245,11 +247,13 @@ public abstract class ClassificationMapping extends InstanceMapping {
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC repository via OMRS connector
      * @param classifications the list of classifications to which new classifications should be added
+     * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the IGC object from which to determine the classifications
      * @param userId the user requesting the classifications (currently unused)
      */
     public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                              List<Classification> classifications,
+                                             ObjectCache cache,
                                              Reference fromIgcObject,
                                              String userId) {
         try {
