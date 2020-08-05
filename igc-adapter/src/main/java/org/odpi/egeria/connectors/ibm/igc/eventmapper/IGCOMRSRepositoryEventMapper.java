@@ -134,7 +134,17 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         this.metadataCollectionId = igcomrsRepositoryConnector.getMetadataCollectionId();
         this.originatorServerName = igcomrsRepositoryConnector.getServerName();
         this.originatorServerType = igcomrsRepositoryConnector.getServerType();
-        if (igcomrsRepositoryConnector.isEventMapperEnabled()) {
+
+        boolean success = false;
+        try {
+            success = igcomrsRepositoryConnector.upsertOMRSBundleZip();
+            this.igcRestClient.registerPOJO(OMRSStub.class);
+        } catch (RepositoryErrorException e) {
+            raiseConnectorCheckedException(IGCOMRSErrorCode.OMRS_BUNDLE_FAILURE, methodName, e, "upload");
+        }
+        if (!success) {
+            raiseConnectorCheckedException(IGCOMRSErrorCode.OMRS_BUNDLE_FAILURE, methodName, null, "upload");
+        } else {
             this.igcKafkaConsumer = new IGCKafkaConsumerThread();
             igcKafkaConsumer.start();
         }

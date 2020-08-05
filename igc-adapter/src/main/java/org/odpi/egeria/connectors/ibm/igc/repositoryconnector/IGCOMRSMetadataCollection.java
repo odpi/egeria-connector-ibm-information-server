@@ -418,8 +418,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             }
         }
 
-        checkEventMapperIsConfigured(methodName);
-        eventMapper.sendNewTypeDefEvent(newTypeDef);
+        if (eventMapper != null) {
+            eventMapper.sendNewTypeDefEvent(newTypeDef);
+        }
 
     }
 
@@ -486,8 +487,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
         }
 
-        checkEventMapperIsConfigured(methodName);
-        eventMapper.sendNewAttributeTypeDefEvent(newAttributeTypeDef);
+        if (eventMapper != null) {
+            eventMapper.sendNewAttributeTypeDefEvent(newAttributeTypeDef);
+        }
 
     }
 
@@ -662,8 +664,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             } else {
                 log.info("Updating TypeDef '{}' based on patch.", omrsTypeDefName);
                 typeDefStore.addTypeDef(revised);
-                checkEventMapperIsConfigured(methodName);
-                eventMapper.sendUpdatedTypeDefEvent(typeDefPatch);
+                if (eventMapper != null) {
+                    eventMapper.sendUpdatedTypeDefEvent(typeDefPatch);
+                }
             }
 
         } else {
@@ -2115,13 +2118,14 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         /*
          * Send refresh message
          */
-        checkEventMapperIsConfigured(methodName);
-        eventMapper.sendRefreshEntityRequest(
-                typeDefGUID,
-                typeDefName,
-                entityGUID,
-                homeMetadataCollectionId
-        );
+        if (eventMapper != null) {
+            eventMapper.sendRefreshEntityRequest(
+                    typeDefGUID,
+                    typeDefName,
+                    entityGUID,
+                    homeMetadataCollectionId
+            );
+        }
 
     }
 
@@ -2167,13 +2171,14 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         /*
          * Process refresh request
          */
-        checkEventMapperIsConfigured(methodName);
-        eventMapper.sendRefreshRelationshipRequest(
-                typeDefGUID,
-                typeDefName,
-                relationshipGUID,
-                homeMetadataCollectionId
-        );
+        if (eventMapper != null) {
+            eventMapper.sendRefreshRelationshipRequest(
+                    typeDefGUID,
+                    typeDefName,
+                    relationshipGUID,
+                    homeMetadataCollectionId
+            );
+        }
 
     }
 
@@ -2205,17 +2210,6 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
      */
     public TypeDef getAnyTypeDefByGUID(String guid) {
         return typeDefStore.getAnyTypeDefByGUID(guid);
-    }
-
-    /**
-     * Ensure that the event mapper is configured and throw exception if it is not.
-     *
-     * @param methodName the method attempting to use the event mapper
-     */
-    private void checkEventMapperIsConfigured(String methodName) throws RepositoryErrorException {
-        if (eventMapper == null) {
-            raiseRepositoryErrorException(IGCOMRSErrorCode.EVENT_MAPPER_NOT_INITIALIZED, methodName, repositoryName);
-        }
     }
 
     /**

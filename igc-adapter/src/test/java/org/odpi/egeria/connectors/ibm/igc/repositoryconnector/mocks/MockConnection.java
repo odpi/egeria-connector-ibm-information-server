@@ -40,7 +40,6 @@ public class MockConnection extends Connection {
         List<String> defaultZones = new ArrayList<>();
         defaultZones.add("default");
         configProperties.put("defaultZones", defaultZones);
-        configProperties.put("enableEventMapper", true);
         setConfigurationProperties(configProperties);
 
     }

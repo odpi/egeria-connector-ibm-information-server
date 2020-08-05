@@ -23,7 +23,6 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
     protected IGCRestClient igcRestClient;
     protected IGCVersionEnum igcVersion;
 
-    protected boolean eventMapperEnabled = false;
     protected List<String> defaultZones;
 
     /**
@@ -103,13 +102,6 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
     public IGCRestClient getIGCRestClient() { return this.igcRestClient; }
 
     /**
-     * Determine whether the (experimental) event mapper is enabled (true) or not (false).
-     *
-     * @return boolean
-     */
-    public boolean isEventMapperEnabled() { return this.eventMapperEnabled; }
-
-    /**
      * Retrieve the list of default zones to apply to assets.
      *
      * @return {@code List<String>}
@@ -145,10 +137,6 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
                         }
                     }
                 }
-                Object emEnabled = proxyProperties.get(IGCOMRSRepositoryConnectorProvider.ENABLE_EVENT_MAPPER);
-                if (emEnabled instanceof Boolean) {
-                    this.eventMapperEnabled = (Boolean) emEnabled;
-                }
             }
 
             boolean successfulInit = false;
@@ -164,16 +152,8 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
                     }
                     // Set the version based on the IGC client's auto-determination of the IGC environment's version
                     this.igcVersion = this.igcRestClient.getIgcVersion();
-                    if (isEventMapperEnabled()) {
-                        boolean success = upsertOMRSBundleZip();
-                        this.igcRestClient.registerPOJO(OMRSStub.class);
-                        successfulInit = success;
-                    } else {
-                        successfulInit = true;
-                    }
+                    successfulInit = true;
                 }
-            } catch (RepositoryErrorException e) {
-                raiseConnectorCheckedException(IGCOMRSErrorCode.OMRS_BUNDLE_FAILURE, methodName, e, address);
             } catch (Exception e) {
                 raiseConnectorCheckedException(IGCOMRSErrorCode.REST_CLIENT_FAILURE, methodName, e, "<null>");
             }
@@ -200,7 +180,7 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      * @return boolean true on success, or if the bundle already exists and false otherwise
      * @throws RepositoryErrorException on any error upserting the bundle to IGC
      */
-    protected boolean upsertOMRSBundleZip() throws RepositoryErrorException {
+    public boolean upsertOMRSBundleZip() throws RepositoryErrorException {
 
         final String methodName = "upsertOMRSBundleZip";
 
