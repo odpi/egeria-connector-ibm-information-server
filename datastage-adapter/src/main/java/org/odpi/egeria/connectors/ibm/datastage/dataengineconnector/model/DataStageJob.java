@@ -238,6 +238,8 @@ public class DataStageJob {
     /**
      * Retrieve a listing of all of the data assets (to field-level granularity) this particular DataStage job reads
      * from or writes to.
+     *
+     * @param cache cache and connectivity to IGC environment
      */
     private void classifyFields(DataStageCache cache) {
         if (!getType().equals(JobType.SEQUENCE)) {
