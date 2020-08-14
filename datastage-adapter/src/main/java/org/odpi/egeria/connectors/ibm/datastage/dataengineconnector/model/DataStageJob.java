@@ -140,7 +140,13 @@ public class DataStageJob {
      */
     public Link getLinkByRid(String rid) {
         log.debug("Looking up cached link: {}", rid);
-        return linkMap.getOrDefault(rid, null);
+        Link link = linkMap.getOrDefault(rid, null);
+        if (link == null) {
+            log.debug("(cache miss) -- retrieving and caching link: {}", rid);
+            link = (Link) igcRestClient.getAssetById(rid);
+            linkMap.put(rid, link);
+        }
+        return link;
     }
 
     /**
@@ -151,7 +157,13 @@ public class DataStageJob {
      */
     public StageColumn getStageColumnByRid(String rid) {
         log.debug("Looking up cached stage column: {}", rid);
-        return columnMap.getOrDefault(rid, null);
+        StageColumn stageColumn = columnMap.getOrDefault(rid, null);
+        if (stageColumn == null) {
+            log.debug("(cache miss) -- retrieving and caching stage column: {}", rid);
+            stageColumn = (StageColumn) igcRestClient.getAssetById(rid);
+            columnMap.put(rid, stageColumn);
+        }
+        return stageColumn;
     }
 
     /**
