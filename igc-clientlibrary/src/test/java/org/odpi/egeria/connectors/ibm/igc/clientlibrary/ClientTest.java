@@ -17,6 +17,7 @@ import org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants;
 import org.odpi.openmetadata.http.HttpHelper;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.web.util.UriUtils;
 import org.testng.annotations.*;
 
 import java.io.File;
@@ -388,6 +389,15 @@ public class ClientTest {
         ItemList<DatabaseColumn> nextPage = igcRestClient.getNextPage("database_columns", columns);
         assertEquals(nextPage.getItems().size(), 3);
         assertFalse(nextPage.hasMorePages());
+
+    }
+
+    @Test
+    public void testRIDEncoding() {
+
+        String rid = "deflated:c2e76d84.78bf4d29.66k77fg69.pm57036.72jftc.1a947bnehtr3q8ajjieqj;column_id;-2855024043478117416";
+        String encoded = igcRestClient.getEncodedPathVariable(rid);
+        assertEquals(encoded, "deflated%3Ac2e76d84.78bf4d29.66k77fg69.pm57036.72jftc.1a947bnehtr3q8ajjieqj%3Bcolumn_id%3B-2855024043478117416");
 
     }
 

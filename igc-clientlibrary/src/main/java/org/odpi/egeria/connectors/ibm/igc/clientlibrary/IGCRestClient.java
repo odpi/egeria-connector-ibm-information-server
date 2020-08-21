@@ -3,7 +3,6 @@
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 
 import java.io.*;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -47,6 +46,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Library of methods to connect to and interact with an IBM Information Governance Catalog environment
@@ -672,7 +672,19 @@ public class IGCRestClient {
      * @return Reference - the IGC object representing the asset
      */
     public Reference getAssetById(String rid) {
-        return readJSONIntoPOJO(makeRequest(EP_ASSET + "/" + rid, HttpMethod.GET, null,null));
+        String url = EP_ASSET + "/" + getEncodedPathVariable(rid);
+        String response = makeRequest(url, HttpMethod.GET, null, null);
+        return readJSONIntoPOJO(response);
+    }
+
+    /**
+     * Calculate a path-encoded URL for the provided endpoint.
+     *
+     * @param pathVariable the value within the path to encode
+     * @return String - the encoded endpoint
+     */
+    public static String getEncodedPathVariable(String pathVariable) {
+        return UriUtils.encode(pathVariable, "UTF-8");
     }
 
     /**
@@ -1083,8 +1095,8 @@ public class IGCRestClient {
                     // On v11.5, for virtual assets, the paging URL only has the RID and nothing else -- we must
                     // reconstruct an appropriate paging URL from just this RID and the other parameters received by
                     // the method
-                    requestUrl = EP_ASSET + "/" + sNextURL
-                            + "/" + URLEncoder.encode(propertyName, "UTF-8")
+                    requestUrl = EP_ASSET + "/" + getEncodedPathVariable(sNextURL)
+                            + "/" + getEncodedPathVariable(propertyName)
                             + "?begin=" + (paging.getEndIndex() + 1)
                             + "&pageSize=" + paging.getPageSize();
                 } else {

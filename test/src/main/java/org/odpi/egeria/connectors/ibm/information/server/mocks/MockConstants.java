@@ -38,6 +38,7 @@ public class MockConstants {
 
     // RIDs used for specific scenarios to test IGC mappers
     public static final String VIRTUAL_ASSET_TABLE_RID = "extern:fr:7599ac3c8e0d4869b032d151e8ffc86d";
+    public static final String VIRTUAL_ASSET_TABLE_RID_ENCODED = "extern%3Afr%3A7599ac3c8e0d4869b032d151e8ffc86d";
     public static final String NOTE_RID = "b1c497ce.1a21c74f.00270nau6.74dr5d1.dg30je.1sa0foiromdmt9c4ga8v2";
     public static final String TERM_WITH_NOTES_RID = "6662c0f2.e1b1ec6c.00270n9bc.9a0o5ur.hsbem7.o7tuf0mn7hgv85dv4s707";
     public static final String CATEGORY_RID = "6662c0f2.ee6a64fe.o1h6evehs.j0f25pn.ihsrb3.m7984f1jgfencf15nopk0";
