@@ -1069,7 +1069,11 @@ public class IGCRestClient {
      * @return {@code List<T>} - a List containing all items from all pages of results
      */
     public <T extends Reference> List<T> getAllPages(String propertyName, ItemList<T> list) {
-        return getAllPages(propertyName, list.getItems(), list.getPaging());
+        if (list != null) {
+            return getAllPages(propertyName, list.getItems(), list.getPaging());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     /**
