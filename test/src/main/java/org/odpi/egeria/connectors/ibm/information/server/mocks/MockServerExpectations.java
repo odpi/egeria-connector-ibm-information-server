@@ -436,7 +436,7 @@ public class MockServerExpectations implements PluginExpectationInitializer {
 
     private void setVirtualAssets(MockServerClient mockServerClient) {
         String caseName = "VirtualAssets";
-        String rid = MockConstants.VIRTUAL_ASSET_TABLE_RID;
+        String rid = MockConstants.VIRTUAL_ASSET_TABLE_RID_ENCODED;
         mockServerClient
                 .withSecure(true)
                 .when(assetByRidRequest(rid))
@@ -663,7 +663,7 @@ public class MockServerExpectations implements PluginExpectationInitializer {
             String rid = getRidFromFilename(filename);
             mockServerClient
                     .withSecure(true)
-                    .when(assetByRidRequest("extern:fr:" + rid))
+                    .when(assetByRidRequest("extern%3Afr%3A" + rid))
                     .respond(withResponse(getResourceFileContents("virtual_by_rid" + File.separator + rid + ".json")));
         }
     }
