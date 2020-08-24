@@ -239,7 +239,9 @@ public class MockServerExpectations implements PluginExpectationInitializer {
         setJobSyncRuleCreate(mockServerClient);
         setJobSyncRuleUpdate(mockServerClient);
 
+        setLineageDetectResult(mockServerClient);
         setJobChangeQuery(mockServerClient);
+        setJobByRidQueries(mockServerClient);
 
     }
 
@@ -514,10 +516,37 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 .withSecure(true)
                 .when(searchRequest(
                         json(
-                                "{\"types\":[\"dsjob\"],\"properties\":[\"short_description\",\"long_description\",\"references_local_or_shared_containers\",\"type\",\"reads_from_(design)\",\"writes_to_(design)\",\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"modified_on\",\"operator\":\"<=\"}],\"operator\":\"and\"}}",
+                                "{\"types\":[\"dsjob\"],\"properties\":[\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"modified_on\",\"operator\":\"<=\"}],\"operator\":\"and\"}}",
                                 MatchType.ONLY_MATCHING_FIELDS
                         )))
                 .respond(withResponse(getResourceFileContents("changed_jobs.json")));
+    }
+
+    private void setJobByRidQueries(MockServerClient mockServerClient) {
+        Resource[] jobFiles = getFilesMatchingPattern("by_rid/dsjob/*.json");
+        if (jobFiles != null) {
+            for (Resource jobFile : jobFiles) {
+                String filename = jobFile.getFilename();
+                if (filename != null) {
+                    String rid = filename.substring(0, filename.indexOf(".json"));
+                    mockServerClient
+                            .withSecure(true)
+                            .when(searchRequest(
+                                    json(
+                                            "{\"types\":[\"dsjob\"],\"properties\":[\"short_description\",\"long_description\",\"references_local_or_shared_containers\",\"type\",\"reads_from_(design)\",\"writes_to_(design)\",\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"_id\",\"operator\":\"=\",\"value\":\"" + rid + "\"}],\"operator\":\"and\"}}",
+                                            MatchType.ONLY_MATCHING_FIELDS
+                                    )))
+                            .respond(withResponse(getResourceFileContents("by_rid" + File.separator + "dsjob" + File.separator + rid + ".json")));
+                }
+            }
+        }
+    }
+
+    private void setLineageDetectResult(MockServerClient mockServerClient) {
+        mockServerClient
+                .withSecure(true)
+                .when(detectLineageRequest())
+                .respond(withResponse(getResourceFileContents("lineage_detect.json")).withStatusCode(202));
     }
 
     private void setDetailsByRidQuery(MockServerClient mockServerClient, Resource resource) {

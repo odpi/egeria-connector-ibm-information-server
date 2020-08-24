@@ -14,6 +14,7 @@ import java.util.List;
  */
 public class DataStageConstants {
 
+    private static final List<String> STAGE_VARIABLE_SEARCH_PROPERTIES = createStageVariableSearchProperties();
     private static final List<String> STAGE_COLUMN_SEARCH_PROPERTIES = createStageColumnSearchProperties();
     private static final List<String> LINK_SEARCH_PROPERTIES = createLinkSearchProperties();
     private static final List<String> STAGE_SEARCH_PROPERTIES = createStageSearchProperties();
@@ -86,6 +87,23 @@ public class DataStageConstants {
         return Collections.unmodifiableList(searchProperties);
     }
 
+    private static List<String> createStageVariableSearchProperties() {
+        List<String> searchProperties = new ArrayList<>();
+        searchProperties.add(SHORT_DESCRIPTION);
+        searchProperties.add(LONG_DESCRIPTION);
+        searchProperties.add(LENGTH);
+        searchProperties.add(MINIMUM_LENGTH);
+        searchProperties.add("odbc_type");
+        searchProperties.add("expression");
+        searchProperties.add("previous_stage_columns");
+        searchProperties.add("next_stage_columns");
+        searchProperties.add(IGCRestConstants.MOD_CREATED_BY);
+        searchProperties.add(IGCRestConstants.MOD_CREATED_ON);
+        searchProperties.add(IGCRestConstants.MOD_MODIFIED_BY);
+        searchProperties.add(IGCRestConstants.MOD_MODIFIED_ON);
+        return Collections.unmodifiableList(searchProperties);
+    }
+
     private static List<String> createStageColumnSearchProperties() {
         List<String> searchProperties = new ArrayList<>();
         searchProperties.add(SHORT_DESCRIPTION);
@@ -127,6 +145,12 @@ public class DataStageConstants {
         searchProperties.add(IGCRestConstants.MOD_MODIFIED_ON);
         return Collections.unmodifiableList(searchProperties);
     }
+
+    /**
+     * Retrieve a list of the search properties to use when querying stage variables via the IGC REST API.
+     * @return {@code List<String>}
+     */
+    public static List<String> getStageVariableSearchProperties() { return STAGE_VARIABLE_SEARCH_PROPERTIES; }
 
     /**
      * Retrieve a list of the search properties to use when querying stage columns via the IGC REST API.

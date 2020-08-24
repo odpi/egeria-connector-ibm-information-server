@@ -169,7 +169,7 @@ public class DataStageCache {
             igcSearch.addProperties(DataStageConstants.getJobSearchProperties());
             IGCSearchCondition byRid = new IGCSearchCondition("_id", "=", rid);
             IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(byRid);
-            log.debug("(cache miss) -- searching for job by RID: {}", rid);
+            log.info("(cache miss) -- searching for job by RID: {}", rid);
             igcSearch.addConditions(conditionSet);
             ItemList<Dsjob> results = igcRestClient.search(igcSearch);
             if (results != null) {
@@ -178,7 +178,11 @@ public class DataStageCache {
                     // Assuming one is found, build its full details and then add it to the cache
                     job = new DataStageJob(this, resultsList.get(0));
                     ridToJob.put(rid, job);
+                } else {
+                    log.warn("No job found with RID: {}", rid);
                 }
+            } else {
+                log.warn("No job found with RID: {}", rid);
             }
         }
         return job;
@@ -307,7 +311,9 @@ public class DataStageCache {
         long toTime = to.getTime();
         // This will not pick up jobs used in changed sequences, those are handled by the sequence processing itself
         IGCSearch igcSearch = new IGCSearch("dsjob");
-        igcSearch.addProperties(DataStageConstants.getJobSearchProperties());
+        // We will only retrieve the bare minimum set of properties for the job at this point, as we will need to
+        // re-retrieve the full set of details after lineage is detected
+        igcSearch.addProperty("modified_on");
         IGCSearchCondition cTo = new IGCSearchCondition("modified_on", "<=", "" + toTime);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(cTo);
         if (from != null) {
@@ -339,7 +345,16 @@ public class DataStageCache {
         for (Dsjob job : jobs.getItems()) {
             String jobRid = job.getId();
             if (!ridToJob.containsKey(jobRid)) {
-                ridToJob.put(jobRid, new DataStageJob(this, job));
+                log.debug("Detecting lineage on job: {}", jobRid);
+                // Detect lineage on each job to ensure its details are fully populated before proceeding
+                boolean lineageDetected = igcRestClient.detectLineage(jobRid);
+                if (lineageDetected) {
+                    // We then need to re-retrieve the job's details, as they may have changed since lineage
+                    // detection (following call will be a no-op if the job is already in the cache)
+                    getJobByRid(jobRid);
+                } else {
+                    log.warn("Unable to detect lineage for job -- not including: {}", jobRid);
+                }
             }
         }
         if (jobs.hasMorePages()) {

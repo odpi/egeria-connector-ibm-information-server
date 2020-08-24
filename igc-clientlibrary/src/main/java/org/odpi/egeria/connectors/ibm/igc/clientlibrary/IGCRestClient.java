@@ -96,11 +96,12 @@ public class IGCRestClient {
     private ObjectMapper mapper;
     private ObjectMapper typeMapper;
 
-    private static final String EP_TYPES = "/ibm/iis/igc-rest/v1/types";
-    private static final String EP_ASSET = "/ibm/iis/igc-rest/v1/assets";
-    private static final String EP_SEARCH = "/ibm/iis/igc-rest/v1/search";
-    private static final String EP_LOGOUT  = "/ibm/iis/igc-rest/v1/logout";
-    private static final String EP_BUNDLES = "/ibm/iis/igc-rest/v1/bundles";
+    private static final String EP_BASE_API = "/ibm/iis/igc-rest/v1";
+    private static final String EP_TYPES = EP_BASE_API + "/types";
+    private static final String EP_ASSET = EP_BASE_API + "/assets";
+    private static final String EP_SEARCH = EP_BASE_API + "/search";
+    private static final String EP_LOGOUT  = EP_BASE_API + "/logout";
+    private static final String EP_BUNDLES = EP_BASE_API + "/bundles";
     private static final String EP_BUNDLE_ASSETS = EP_BUNDLES + "/assets";
 
     /**
@@ -312,7 +313,9 @@ public class IGCRestClient {
     private void setCookiesFromResponse(ResponseEntity<String> response) {
 
         // If we had a successful response, setup the cookies
-        if (response.getStatusCode() == HttpStatus.OK || response.getStatusCode() == HttpStatus.CREATED) {
+        if (response.getStatusCode() == HttpStatus.OK
+                || response.getStatusCode() == HttpStatus.CREATED
+                || response.getStatusCode() == HttpStatus.ACCEPTED) {
             HttpHeaders headers = response.getHeaders();
             if (headers.get(HttpHeaders.SET_COOKIE) != null) {
                 // Validate each cookie against our whitelist of valid cookies, to avoid any potential security exposure
@@ -903,6 +906,28 @@ public class IGCRestClient {
         } else {
             return true;
         }
+    }
+
+    /**
+     * Run lineage detection against the provided job (by RID).
+     *
+     * @param jobRid the RID of the job for which to detect lineage
+     * @return boolean giving indication of success (true) or not (false)
+     */
+    public boolean detectLineage(String jobRid) {
+        ResponseEntity<String> response = makeRequest(
+                baseURL + EP_BASE_API + "/flows/detectFlows/dsjob/" + jobRid,
+                HttpMethod.GET,
+                MediaType.APPLICATION_JSON,
+                null,
+                false
+        );
+        if (response != null) {
+            // A successful lineage detection should return 202 (ACCEPTED), anything else will be
+            // considered a failure
+            return (response.getStatusCode() == HttpStatus.ACCEPTED);
+        }
+        return false;
     }
 
     /**
