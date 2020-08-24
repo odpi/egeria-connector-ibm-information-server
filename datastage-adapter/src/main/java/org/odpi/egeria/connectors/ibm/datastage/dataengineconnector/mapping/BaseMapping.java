@@ -7,6 +7,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.interfaces.ColumnLevelLineage;
 
 class BaseMapping {
 
@@ -47,6 +48,16 @@ class BaseMapping {
             }
         }
         return null;
+    }
+
+    /**
+     * Retrieve the fully-qualified name of the provided IGC object.
+     *
+     * @param cll the column-level lineage object for which to retrieve the fully-qualified name
+     * @return String
+     */
+    String getFullyQualifiedName(ColumnLevelLineage cll) {
+        return getFullyQualifiedName((Reference) cll);
     }
 
     /**

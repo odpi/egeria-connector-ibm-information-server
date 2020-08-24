@@ -458,6 +458,11 @@ public class DataStageConnector extends DataEngineConnectorBase {
         igcSearch.addProperty("modified_on");
         IGCSearchCondition condition = new IGCSearchCondition("modified_on", ">", "" + startFrom);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
+        if (limitToProjects.size() > 0) {
+            IGCSearchCondition cProject = new IGCSearchCondition("transformation_project.name", limitToProjects);
+            conditionSet.addCondition(cProject);
+            conditionSet.setMatchAnyCondition(false);
+        }
         igcSearch.addConditions(conditionSet);
         IGCSearchSorting sorting = new IGCSearchSorting("modified_on", true);
         igcSearch.addSortingCriteria(sorting);

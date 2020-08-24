@@ -7,6 +7,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.interfaces.ColumnLevelLineage;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -29,6 +30,7 @@ public class DataStageJob {
     private Map<String, Stage> stageMap;
     private Map<String, Link> linkMap;
     private Map<String, StageColumn> columnMap;
+    private Map<String, StageVariable> varMap;
     private Set<String> storesForJob;
     private List<String> inputStageRIDs;
     private List<String> outputStageRIDs;
@@ -51,6 +53,7 @@ public class DataStageJob {
         this.stageMap = new TreeMap<>();
         this.linkMap = new TreeMap<>();
         this.columnMap = new TreeMap<>();
+        this.varMap = new TreeMap<>();
         this.storesForJob = new TreeSet<>();
         this.inputStageRIDs = new ArrayList<>();
         this.outputStageRIDs = new ArrayList<>();
@@ -59,6 +62,7 @@ public class DataStageJob {
 
         getStageDetailsForJob();
         getLinkDetailsForJob();
+        getStageVariablesForJob();
         classifyStages(stageMap.values());
         getStageColumnDetailsForLinks();
         classifyFields(cache);
@@ -150,20 +154,36 @@ public class DataStageJob {
     }
 
     /**
-     * Retrieve the complete 'stage_column' object based on its RID.
+     * Retrieve the complete column-level lineage object ('stage_column' or 'stage_variable') based on its RID.
      *
-     * @param rid the RID of the stage_column object
-     * @return StageColumn
+     * @param rid the RID of the column-level lineage object
+     * @return ColumnLevelLineage
      */
-    public StageColumn getStageColumnByRid(String rid) {
-        log.debug("Looking up cached stage column: {}", rid);
-        StageColumn stageColumn = columnMap.getOrDefault(rid, null);
-        if (stageColumn == null) {
-            log.debug("(cache miss) -- retrieving and caching stage column: {}", rid);
-            stageColumn = (StageColumn) igcRestClient.getAssetById(rid);
-            columnMap.put(rid, stageColumn);
+    public ColumnLevelLineage getColumnLevelLineageByRid(String rid) {
+        log.debug("Looking up cached stage column / variable: {}", rid);
+        ColumnLevelLineage toReturn = null;
+        StageColumn column = columnMap.getOrDefault(rid, null);
+        if (column == null) {
+            StageVariable variable = varMap.getOrDefault(rid, null);
+            if (variable == null) {
+                log.debug("(cache miss) -- retrieving and caching stage column / variable: {}", rid);
+                Reference thing = igcRestClient.getAssetById(rid);
+                if (thing != null) {
+                    if (thing.getType().equals("stage_variable")) {
+                        varMap.put(rid, (StageVariable) thing);
+                    } else {
+                        columnMap.put(rid, (StageColumn) thing);
+                    }
+                } else {
+                    log.error("Unable to find object by RID: {}", rid);
+                }
+            } else {
+                toReturn = variable;
+            }
+        } else {
+            toReturn = column;
         }
-        return stageColumn;
+        return toReturn;
     }
 
     /**
@@ -194,6 +214,21 @@ public class DataStageJob {
         igcSearch.addConditions(conditionSet);
         ItemList<Link> links = igcRestClient.search(igcSearch);
         buildMap(linkMap, igcRestClient.getAllPages(null, links));
+    }
+
+    /**
+     * Retrieve a listing of the stage variables within this particular DataStage job.
+     */
+    private void getStageVariablesForJob() {
+        String jobRid = job.getId();
+        log.debug("Retrieving stage variables for job: {}", jobRid);
+        IGCSearch igcSearch = new IGCSearch("stage_variable");
+        igcSearch.addProperties(DataStageConstants.getStageVariableSearchProperties());
+        IGCSearchCondition condition = new IGCSearchCondition("stage.job_or_container", "=", jobRid);
+        IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
+        igcSearch.addConditions(conditionSet);
+        ItemList<StageVariable> vars = igcRestClient.search(igcSearch);
+        buildMap(varMap, igcRestClient.getAllPages(null, vars));
     }
 
     /**

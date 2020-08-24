@@ -6,6 +6,7 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataSt
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.interfaces.ColumnLevelLineage;
 import org.odpi.openmetadata.accessservices.dataengine.model.LineageMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ class LineageMappingMapping extends BaseMapping {
         // For each stage column defined on the link...
         for (DataItem stageColumnRef : allStageColumns) {
             String colId = stageColumnRef.getId();
-            StageColumn stageColumnFull = job.getStageColumnByRid(colId);
+            ColumnLevelLineage stageColumnFull = job.getColumnLevelLineageByRid(colId);
             String stageColumnFullQN = getFullyQualifiedName(stageColumnFull);
             if (stageColumnFullQN != null) {
                 String thisColumnName = stageColumnFullQN + stageNameSuffix;
@@ -51,7 +52,7 @@ class LineageMappingMapping extends BaseMapping {
                     ItemList<DataItem> previousColumns = stageColumnFull.getPreviousStageColumns();
                     List<DataItem> allPreviousColumns = igcRestClient.getAllPages("previous_stage_columns", previousColumns);
                     for (DataItem previousColumnRef : allPreviousColumns) {
-                        StageColumn previousColumnFull = job.getStageColumnByRid(previousColumnRef.getId());
+                        ColumnLevelLineage previousColumnFull = job.getColumnLevelLineageByRid(previousColumnRef.getId());
                         String previousColumnFullQN = getFullyQualifiedName(previousColumnFull);
                         if (previousColumnFullQN != null) {
                             LineageMapping lineageMapping = getLineageMapping(previousColumnFullQN + stageNameSuffix, thisColumnName);
@@ -67,7 +68,7 @@ class LineageMappingMapping extends BaseMapping {
                     ItemList<DataItem> nextColumns = stageColumnFull.getNextStageColumns();
                     List<DataItem> allNextColumns = igcRestClient.getAllPages("next_stage_columns", nextColumns);
                     for (DataItem nextColumnRef : allNextColumns) {
-                        StageColumn nextColumnFull = job.getStageColumnByRid(nextColumnRef.getId());
+                        ColumnLevelLineage nextColumnFull = job.getColumnLevelLineageByRid(nextColumnRef.getId());
                         String nextColumnFullQN = getFullyQualifiedName(nextColumnFull);
                         if (nextColumnFullQN != null) {
                             LineageMapping lineageMapping = getLineageMapping(thisColumnName, nextColumnFullQN + stageNameSuffix);
@@ -108,7 +109,7 @@ class LineageMappingMapping extends BaseMapping {
         List<DataItem> allStageColumns = igcRestClient.getAllPages("stage_columns", stageColumns);
         // For each stage column defined on the link...
         for (DataItem stageColRef : allStageColumns) {
-            StageColumn stageColFull = job.getStageColumnByRid(stageColRef.getId());
+            ColumnLevelLineage stageColFull = job.getColumnLevelLineageByRid(stageColRef.getId());
             String stageColName = getFullyQualifiedName(stageColFull);
             if (stageColName != null) {
                 // Create a single mapping between the input stage and the output stage that use this link
@@ -159,7 +160,7 @@ class LineageMappingMapping extends BaseMapping {
                         List<InformationAsset> allRelatedStageCols = igcRestClient.getAllPages(propertyName, relatedStageCols);
                         // For each object that reads / writes to that field...
                         for (InformationAsset stageColRef : allRelatedStageCols) {
-                            StageColumn stageColFull = job.getStageColumnByRid(stageColRef.getId());
+                            ColumnLevelLineage stageColFull = job.getColumnLevelLineageByRid(stageColRef.getId());
                             if (stageColFull != null) {
                                 String field2QN = getFullyQualifiedName(stageColFull);
                                 if (bSource) {

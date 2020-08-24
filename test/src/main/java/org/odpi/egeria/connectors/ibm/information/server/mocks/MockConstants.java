@@ -240,6 +240,14 @@ public class MockConstants {
     }
 
     /**
+     * Create a mock IGC request for lineage detection.
+     * @return HttpRequest
+     */
+    public static HttpRequest detectLineageRequest() {
+        return request().withMethod("GET").withPath(IGC_REST_EP + "flows/detectFlows/dsjob/.*");
+    }
+
+    /**
      * Create a mock IGC request for the job synchronization rule.
      * @return HttpRequest
      */

@@ -11,6 +11,8 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_ONLY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.interfaces.ColumnLevelLineage;
+
 import java.util.List;
 
 /**
@@ -25,20 +27,25 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonTypeName("stage_variable")
-public class StageVariable extends InformationAsset {
+public class StageVariable extends InformationAsset implements ColumnLevelLineage {
 
+    // StageColumn
     @JsonProperty("expression")
     protected List<String> expression;
 
+    // DataItem (though a List<Number> there...)
     @JsonProperty("length")
     protected Number length;
 
+    // DataItem
     @JsonProperty("minimum_length")
     protected Number minimumLength;
 
+    // StageColumn -- should be part of superclass above both (used in both)
     @JsonProperty("next_stage_columns")
     protected ItemList<DataItem> nextStageColumns;
 
+    // DataItem -- should be part of superclass above both (used in both)
     /**
      * Valid values are:
      * <ul>
@@ -71,9 +78,11 @@ public class StageVariable extends InformationAsset {
     @JsonProperty("odbc_type")
     protected String odbcType;
 
+    // StageColumn -- should be part of superclass above both (used in both)
     @JsonProperty("previous_stage_columns")
     protected ItemList<DataItem> previousStageColumns;
 
+    // HERE ONLY
     @JsonProperty("stage")
     protected Stage stage;
 
@@ -123,6 +132,7 @@ public class StageVariable extends InformationAsset {
      * Retrieve the {@code next_stage_columns} property (displayed as '{@literal Next Stage Columns or Variables}') of the object.
      * @return {@code ItemList<DataItem>}
      */
+    @Override
     @JsonProperty("next_stage_columns")
     public ItemList<DataItem> getNextStageColumns() { return this.nextStageColumns; }
 
@@ -130,6 +140,7 @@ public class StageVariable extends InformationAsset {
      * Set the {@code next_stage_columns} property (displayed as {@code Next Stage Columns or Variables}) of the object.
      * @param nextStageColumns the value to set
      */
+    @Override
     @JsonProperty("next_stage_columns")
     public void setNextStageColumns(ItemList<DataItem> nextStageColumns) { this.nextStageColumns = nextStageColumns; }
 
@@ -137,6 +148,7 @@ public class StageVariable extends InformationAsset {
      * Retrieve the {@code odbc_type} property (displayed as '{@literal SQL Type}') of the object.
      * @return {@code String}
      */
+    @Override
     @JsonProperty("odbc_type")
     public String getOdbcType() { return this.odbcType; }
 
@@ -144,6 +156,7 @@ public class StageVariable extends InformationAsset {
      * Set the {@code odbc_type} property (displayed as {@code SQL Type}) of the object.
      * @param odbcType the value to set
      */
+    @Override
     @JsonProperty("odbc_type")
     public void setOdbcType(String odbcType) { this.odbcType = odbcType; }
 
@@ -151,6 +164,7 @@ public class StageVariable extends InformationAsset {
      * Retrieve the {@code previous_stage_columns} property (displayed as '{@literal Previous Stage Columns or Variables}') of the object.
      * @return {@code ItemList<DataItem>}
      */
+    @Override
     @JsonProperty("previous_stage_columns")
     public ItemList<DataItem> getPreviousStageColumns() { return this.previousStageColumns; }
 
@@ -158,6 +172,7 @@ public class StageVariable extends InformationAsset {
      * Set the {@code previous_stage_columns} property (displayed as {@code Previous Stage Columns or Variables}) of the object.
      * @param previousStageColumns the value to set
      */
+    @Override
     @JsonProperty("previous_stage_columns")
     public void setPreviousStageColumns(ItemList<DataItem> previousStageColumns) { this.previousStageColumns = previousStageColumns; }
 
