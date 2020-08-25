@@ -116,7 +116,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
         @JsonSubTypes.Type(value = SharedContainer.class, name = "shared_container"),
         @JsonSubTypes.Type(value = Stage.class, name = "stage"),
         @JsonSubTypes.Type(value = StageType.class, name = "stage_type"),
-        @JsonSubTypes.Type(value = StageVariable.class, name = "stage_variable"),
         @JsonSubTypes.Type(value = StandardizationRuleSet.class, name = "standardization_rule_set"),
         @JsonSubTypes.Type(value = StoredProcedureDefinition.class, name = "stored_procedure_definition"),
         @JsonSubTypes.Type(value = StoredProcedureParameter.class, name = "stored_procedure_parameter"),
