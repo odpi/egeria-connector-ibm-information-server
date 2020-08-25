@@ -168,12 +168,12 @@ public class DataStageJob {
             if (variable == null) {
                 log.debug("(cache miss) -- retrieving and caching stage column / variable: {}", rid);
                 Reference thing = igcRestClient.getAssetById(rid);
-                if (thing != null) {
-                    if (thing.getType().equals("stage_variable")) {
-                        varMap.put(rid, (StageVariable) thing);
-                    } else {
-                        columnMap.put(rid, (StageColumn) thing);
-                    }
+                if (thing instanceof StageVariable) {
+                    varMap.put(rid, (StageVariable) thing);
+                } else if (thing instanceof StageColumn) {
+                    columnMap.put(rid, (StageColumn) thing);
+                } else if (thing != null) {
+                    log.error("Unable to determine object type ({}) by RID: {}", thing.getType(), rid);
                 } else {
                     log.error("Unable to find object by RID: {}", rid);
                 }

@@ -31,6 +31,7 @@ import java.util.List;
         @JsonSubTypes.Type(value = RoutineArgument.class, name = "routine_argument"),
         @JsonSubTypes.Type(value = StageColumn.class, name = "stage_column"),
         @JsonSubTypes.Type(value = StageTypeDetail.class, name = "stage_type_detail"),
+        @JsonSubTypes.Type(value = StageVariable.class, name = "stage_variable"),
         @JsonSubTypes.Type(value = TransformArgument.class, name = "transform_argument"),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
