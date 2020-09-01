@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
@@ -44,7 +45,17 @@ class BaseMapping {
         if (igcObj != null) {
             Identity identity = igcObj.getIdentity(igcRestClient, cache.getIgcCache());
             if (identity != null) {
-                return identity.toString();
+                String type = igcObj.getType();
+                String qualifiedName;
+                if (IGCRestConstants.getDatastageSpecificTypes().contains(type) || IGCRestClient.isVirtualAssetRid(igcObj.getId())) {
+                    // If this is a DataStage-specific asset type, or a virtual asset, prefix the qualifiedName
+                    // so that it is clearly distinguishable (and can be used to skip any attempt at searching for
+                    // the asset by qualifiedName in IGC)
+                    qualifiedName = IGCRestConstants.NON_IGC_PREFIX + identity.toString();
+                } else {
+                    qualifiedName = identity.toString();
+                }
+                return qualifiedName;
             }
         }
         return null;
