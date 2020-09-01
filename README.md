@@ -347,6 +347,11 @@ For example payloads and endpoints, see the [Postman samples](samples).
     connector option to include virtual assets (`"includeVirtualAssets": true`), the user will also need the
     `Information Governance Catalog Information Asset Author` role, as this role is needed to be able to retrieve the
     full details of virtual assets.
+    
+    For v11.7 and above, the user will also need the `Information Governance Catalog Asset Administrator` role in order
+    to automate the detection of lineage within IGC, prior to having a complete set of lineage for the DataStage
+    connector itself to retrieve. (This is a necessary step to avoid potential race conditions between lineage being
+    fully calculated within IGC and the DataStage connector polling for the lineage information.)
 
     Note that you need to provide the `connectorProvider` parameter, set to the name of the DataStage
     connectorProvider class (value as given above).
