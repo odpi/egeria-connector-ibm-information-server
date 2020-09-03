@@ -122,7 +122,7 @@ public class DataClassMapper extends ReferenceableMapper {
             // to retrieve the entire object by ID (they are small objects anyway so hopefully no significant negative
             // performance impact of doing so)
             return DataClassAssignmentMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()).getProxyTwoAssetFromAsset(
-                    igcRestClient.getAssetById(igcRid), igcRestClient, cache).get(0);
+                    igcRestClient.getAssetById(igcRid, cache), igcRestClient, cache).get(0);
         } else {
             return igcRestClient.getAssetWithSubsetOfProperties(igcRid, igcAssetType, igcRestClient.getAllPropertiesForType(igcAssetType));
         }

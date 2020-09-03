@@ -675,9 +675,30 @@ public class IGCRestClient {
      * @return Reference - the IGC object representing the asset
      */
     public Reference getAssetById(String rid) {
-        String url = EP_ASSET + "/" + getEncodedPathVariable(rid);
-        String response = makeRequest(url, HttpMethod.GET, null, null);
-        return readJSONIntoPOJO(response);
+        return getAssetById(rid, null);
+    }
+
+    /**
+     * Retrieve all information about an asset from IGC.
+     * This can be an expensive operation that may retrieve far more information than you actually need.
+     *
+     * @see #getAssetRefById(String)
+     *
+     * @param rid the Repository ID of the asset
+     * @param cache a cache of previously-retrieved assets
+     * @return Reference - the IGC object representing the asset
+     */
+    public Reference getAssetById(String rid, ObjectCache cache) {
+        Reference result = null;
+        if (cache != null) {
+            result = cache.get(rid);
+        }
+        if (result == null) {
+            String url = EP_ASSET + "/" + getEncodedPathVariable(rid);
+            String response = makeRequest(url, HttpMethod.GET, null, null);
+            result = readJSONIntoPOJO(response);
+        }
+        return result;
     }
 
     /**

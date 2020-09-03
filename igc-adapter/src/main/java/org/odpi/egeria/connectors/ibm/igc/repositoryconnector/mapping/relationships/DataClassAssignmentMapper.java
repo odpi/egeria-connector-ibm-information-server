@@ -92,7 +92,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             Reference classifiedObj;
             Object co = igcRestClient.getPropertyByName(relationshipAsset, "classifies_asset");
             if (co == null || co.equals("") || co.equals("null")) {
-                Reference classification = igcRestClient.getAssetById(relationshipAsset.getId());
+                Reference classification = igcRestClient.getAssetById(relationshipAsset.getId(), cache);
                 classifiedObj = (Reference) igcRestClient.getPropertyByName(classification, "classifies_asset");
             } else {
                 classifiedObj = (Reference) co;
@@ -121,7 +121,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
             Reference dataClass;
             Object dc = igcRestClient.getPropertyByName(relationshipAsset,"data_class");
             if (dc == null || dc.equals("") || dc.equals("null")) {
-                Reference classification = igcRestClient.getAssetById(relationshipAsset.getId());
+                Reference classification = igcRestClient.getAssetById(relationshipAsset.getId(), cache);
                 dataClass = (Reference) igcRestClient.getPropertyByName(classification, "data_class");
             } else {
                 dataClass = (Reference) dc;
