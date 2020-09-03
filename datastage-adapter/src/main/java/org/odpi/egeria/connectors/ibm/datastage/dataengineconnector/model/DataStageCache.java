@@ -227,7 +227,7 @@ public class DataStageCache {
             } else {
                 // For virtual assets, we must retrieve the full object and page through its fields (search by RID is not possible)
                 fields = new ArrayList<>();
-                Reference virtualStore = igcRestClient.getAssetById(rid);
+                Reference virtualStore = igcRestClient.getAssetById(rid, igcCache);
                 if (virtualStore instanceof DatabaseTable) {
                     DatabaseTable virtualTable = (DatabaseTable) virtualStore;
                     fields.addAll(getDataFieldsFromVirtualList("database_columns", virtualTable.getDatabaseColumns()));
@@ -269,7 +269,7 @@ public class DataStageCache {
             fullFields = new ArrayList<>();
             List<T> allVirtualFields = igcRestClient.getAllPages(propertyName, virtualFields);
             for (Classificationenabledgroup virtualField : allVirtualFields) {
-                Classificationenabledgroup fullField = (Classificationenabledgroup) igcRestClient.getAssetById(virtualField.getId());
+                Classificationenabledgroup fullField = (Classificationenabledgroup) igcRestClient.getAssetById(virtualField.getId(), igcCache);
                 fullFields.add(fullField);
             }
         }
@@ -284,21 +284,6 @@ public class DataStageCache {
      */
     public Identity getStoreIdentityFromRid(String rid) {
         return storeToIdentity.getOrDefault(rid, null);
-    }
-
-    /**
-     * Retrieve the qualifiedName for the provided data store RID, or null if it cannot be found.
-     *
-     * @param rid the data store RID for which to retrieve a qualifiedName
-     * @return String
-     */
-    public String getQualifiedNameFromStoreRid(String rid) {
-        Identity storeIdentity = getStoreIdentityFromRid(rid);
-        String qualifiedName = null;
-        if (storeIdentity != null) {
-            qualifiedName = storeIdentity.toString();
-        }
-        return qualifiedName;
     }
 
     /**

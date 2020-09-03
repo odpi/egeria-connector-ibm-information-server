@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
  */
 public class IGCRestConstants {
 
+    public static final String NON_IGC_PREFIX = "_";
+
     public static final String MOD_CREATED_BY = "created_by";
     public static final String MOD_CREATED_ON = "created_on";
     public static final String MOD_MODIFIED_BY = "modified_by";
@@ -54,6 +56,18 @@ public class IGCRestConstants {
         set.add("IIS-JSESSIONID");
         set.add("X-IBM-IISSessionId");
         set.add("X-IBM-IISSessionToken");
+        return Collections.unmodifiableSet(set);
+    }
+
+    private static final Set<String> DATASTAGE_SPECIFIC_TYPES = createDataStageSpecificTypes();
+    private static Set<String> createDataStageSpecificTypes() {
+        Set<String> set = new HashSet<>();
+        set.add("dsjob");
+        set.add("stage");
+        set.add("link");
+        set.add("stage_variable");
+        set.add("stage_column");
+        set.add("ds_stage_column");
         return Collections.unmodifiableSet(set);
     }
 
@@ -299,6 +313,13 @@ public class IGCRestConstants {
      * @return {@code Set<String>}
      */
     public static Set<String> getValidCookieNames() { return VALID_COOKIE_NAMES; }
+
+    /**
+     * Retrieve the set of DataStage-specific asset types.
+     *
+     * @return {@code Set<String>}
+     */
+    public static Set<String> getDatastageSpecificTypes() { return DATASTAGE_SPECIFIC_TYPES; }
 
     /**
      * Retrieve the set of IGC object types that cannot be searched for via the IGC REST API.

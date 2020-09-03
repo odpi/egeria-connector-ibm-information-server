@@ -170,8 +170,10 @@ public class DataStageJob {
                 Reference thing = igcRestClient.getAssetById(rid);
                 if (thing instanceof StageVariable) {
                     varMap.put(rid, (StageVariable) thing);
+                    toReturn = varMap.get(rid);
                 } else if (thing instanceof StageColumn) {
                     columnMap.put(rid, (StageColumn) thing);
+                    toReturn = columnMap.get(rid);
                 } else if (thing != null) {
                     log.error("Unable to determine object type ({}) by RID: {}", thing.getType(), rid);
                 } else {

@@ -7,6 +7,7 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataSt
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.openmetadata.accessservices.dataengine.model.PortImplementation;
 import org.odpi.openmetadata.accessservices.dataengine.model.PortType;
 import org.slf4j.Logger;
@@ -29,19 +30,19 @@ class PortImplementationMapping extends BaseMapping {
      * @param job the job for which to create the PortImplementation
      * @param link the link containing details for the PortImplementation
      * @param portType the port type to use
-     * @param stageNameSuffix the unique suffix (based on the stage name) to ensure each schema is unique
+     * @param fullyQualifiedStageName to ensure each schema is unique
      */
-    PortImplementationMapping(DataStageCache cache, DataStageJob job, Link link, PortType portType, String stageNameSuffix) {
+    PortImplementationMapping(DataStageCache cache, DataStageJob job, Link link, PortType portType, String fullyQualifiedStageName) {
         super(cache);
         portImplementation = null;
         if (link != null) {
             portImplementation = new PortImplementation();
-            String linkQN = getFullyQualifiedName(link);
+            String linkQN = getFullyQualifiedName(link, fullyQualifiedStageName);
             if (linkQN != null) {
-                portImplementation.setQualifiedName(linkQN + stageNameSuffix);
+                portImplementation.setQualifiedName(linkQN);
                 portImplementation.setDisplayName(link.getName());
                 portImplementation.setPortType(portType);
-                SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, job, link, stageNameSuffix);
+                SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, job, link, fullyQualifiedStageName);
                 portImplementation.setSchemaType(schemaTypeMapping.getSchemaType());
             } else {
                 log.error("Unable to determine identity for link -- not including: {}", link);
@@ -63,9 +64,10 @@ class PortImplementationMapping extends BaseMapping {
         portImplementation = null;
         if (stage != null && fields != null && !fields.isEmpty()) {
             portImplementation = new PortImplementation();
+            Identity storeIdentity = getParentIdentity(fields.get(0));
             String storeQualifiedName = getParentQualifiedName(fields.get(0));
             String storeName = getParentDisplayName(fields.get(0));
-            portImplementation.setQualifiedName(storeQualifiedName + fullyQualifiedStageName);
+            portImplementation.setQualifiedName(getFullyQualifiedName(storeIdentity, fullyQualifiedStageName));
             portImplementation.setDisplayName(storeName);
             portImplementation.setPortType(portType);
             SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, stage, storeName, storeQualifiedName, fields, fullyQualifiedStageName);
