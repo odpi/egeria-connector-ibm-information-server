@@ -168,14 +168,14 @@ public class ProcessMapping extends BaseMapping {
                                           PortType portType,
                                           Set<PortImplementation> portImplementations,
                                           Set<LineageMapping> lineageMappings) {
-        String stageNameSuffix = "_" + stage.getName();
+        String stageQN = getFullyQualifiedName(stage);
         // Setup an x_PORT for each x_link into / out of the stage
         List<Link> allLinks = igcRestClient.getAllPages(propertyName, links);
         for (Link linkRef : allLinks) {
             Link linkObjFull = job.getLinkByRid(linkRef.getId());
-            PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, job, linkObjFull, portType, stageNameSuffix);
+            PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, job, linkObjFull, portType, stageQN);
             portImplementations.add(portImplementationMapping.getPortImplementation());
-            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, linkObjFull, stageNameSuffix, portType == PortType.INPUT_PORT);
+            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, linkObjFull, stageQN, portType == PortType.INPUT_PORT);
             lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
         }
     }
@@ -199,7 +199,6 @@ public class ProcessMapping extends BaseMapping {
                                      PortType portType,
                                      Set<PortImplementation> portImplementations,
                                      Set<LineageMapping> lineageMappings) {
-        String stageNameSuffix = "_" + stage.getName();
         // Setup an x_PORT for any data stores that are used by design as sources / targets
         String fullyQualifiedStageName = getFullyQualifiedName(stage);
         if (fullyQualifiedStageName != null) {
@@ -208,7 +207,7 @@ public class ProcessMapping extends BaseMapping {
                 List<Classificationenabledgroup> fieldsForStore = cache.getFieldsForStore(storeRef);
                 PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, stage, portType, fieldsForStore, fullyQualifiedStageName);
                 portImplementations.add(portImplementationMapping.getPortImplementation());
-                LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, fieldsForStore, portType.equals(PortType.INPUT_PORT), fullyQualifiedStageName, stageNameSuffix);
+                LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, fieldsForStore, portType.equals(PortType.INPUT_PORT), fullyQualifiedStageName);
                 lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
             }
         } else {

@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
  */
 public class IGCRestConstants {
 
-    public static final String NON_IGC_PREFIX = "&";
+    public static final String NON_IGC_PREFIX = "_";
 
     public static final String MOD_CREATED_BY = "created_by";
     public static final String MOD_CREATED_ON = "created_on";

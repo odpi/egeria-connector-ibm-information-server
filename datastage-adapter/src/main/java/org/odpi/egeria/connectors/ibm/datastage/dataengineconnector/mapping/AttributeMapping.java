@@ -4,6 +4,7 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataItem;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
@@ -31,9 +32,9 @@ class AttributeMapping extends BaseMapping {
      * @param cache used by this mapping
      * @param job the job for which to create the Attributes
      * @param link the link containing stage column detail for the Attributes
-     * @param stageNameSuffix the unique suffix (based on the stage name) to ensure each attribute is unique
+     * @param fullyQualifiedStageName to ensure each attribute is unique
      */
-    AttributeMapping(DataStageCache cache, DataStageJob job, Link link, String stageNameSuffix) {
+    AttributeMapping(DataStageCache cache, DataStageJob job, Link link, String fullyQualifiedStageName) {
         super(cache);
         log.debug("Creating new AttributeMapping from job and link...");
         attributes = new ArrayList<>();
@@ -45,9 +46,9 @@ class AttributeMapping extends BaseMapping {
                 String colId = stageColumn.getId();
                 ColumnLevelLineage stageColumnObj = job.getColumnLevelLineageByRid(colId);
                 String stageColumnQN = getFullyQualifiedName(stageColumnObj);
-                if(stageColumnQN!=null) {
+                if (stageColumnQN != null) {
                     Attribute attribute = new Attribute();
-                    attribute.setQualifiedName(stageColumnQN + stageNameSuffix);
+                    attribute.setQualifiedName(getFullyQualifiedName(stageColumnObj, fullyQualifiedStageName));
                     attribute.setDisplayName(stageColumnObj.getName());
                     attribute.setDataType(stageColumnObj.getOdbcType());
                     attribute.setPosition(index);
@@ -76,7 +77,7 @@ class AttributeMapping extends BaseMapping {
                 String fieldQN = getFullyQualifiedName(field);
                 if (fieldQN != null) {
                     Attribute attribute = new Attribute();
-                    attribute.setQualifiedName(fieldQN + fullyQualifiedStageName);
+                    attribute.setQualifiedName(getFullyQualifiedName(field, fullyQualifiedStageName));
                     attribute.setDisplayName(field.getName());
                     String dataType = field.getDataType();
                     if (dataType != null) {
@@ -104,7 +105,7 @@ class AttributeMapping extends BaseMapping {
      * @param fields the data store fields containing detail for the Attributes
      */
     AttributeMapping(DataStageCache cache, List<Classificationenabledgroup> fields) {
-        this(cache, fields, "");
+        this(cache, fields, null);
     }
 
     /**

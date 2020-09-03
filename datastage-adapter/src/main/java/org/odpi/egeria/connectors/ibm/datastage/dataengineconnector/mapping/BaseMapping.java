@@ -36,29 +36,67 @@ class BaseMapping {
     }
 
     /**
+     * Retrieve the fully-qualified name for the provided IGC identity.
+     *
+     * @param identity the identity of an IGC object for which to retrieve the fully-qualified name
+     * @param qualifier an additional qualifier to add, in particular for embedded elements
+     * @return String
+     */
+    String getFullyQualifiedName(Identity identity, String qualifier) {
+        if (identity != null) {
+            String type = identity.getAssetType();
+            String qualifiedName;
+            if (IGCRestConstants.getDatastageSpecificTypes().contains(type) || IGCRestClient.isVirtualAssetRid(identity.getRid())) {
+                // If this is a DataStage-specific asset type, or a virtual asset, prefix the qualifiedName
+                // so that it is clearly distinguishable (and can be used to skip any attempt at searching for
+                // the asset by qualifiedName in IGC)
+                qualifiedName = IGCRestConstants.NON_IGC_PREFIX + identity.toString();
+            } else {
+                qualifiedName = identity.toString();
+            }
+            if (qualifier != null) {
+                return qualifier + qualifiedName;
+            } else {
+                return qualifiedName;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve the fully-qualified name of the provided IGC object.
+     *
+     * @param igcObj the IGC object for which to retrieve the fully-qualified name
+     * @param qualifier an additional qualifier to add, in particular for embedded elements
+     * @return String
+     */
+    String getFullyQualifiedName(Reference igcObj, String qualifier) {
+        if (igcObj != null) {
+            Identity identity = igcObj.getIdentity(igcRestClient, cache.getIgcCache());
+            return getFullyQualifiedName(identity, qualifier);
+        }
+        return null;
+    }
+
+    /**
      * Retrieve the fully-qualified name of the provided IGC object.
      *
      * @param igcObj the IGC object for which to retrieve the fully-qualified name
      * @return String
      */
     String getFullyQualifiedName(Reference igcObj) {
-        if (igcObj != null) {
-            Identity identity = igcObj.getIdentity(igcRestClient, cache.getIgcCache());
-            if (identity != null) {
-                String type = igcObj.getType();
-                String qualifiedName;
-                if (IGCRestConstants.getDatastageSpecificTypes().contains(type) || IGCRestClient.isVirtualAssetRid(igcObj.getId())) {
-                    // If this is a DataStage-specific asset type, or a virtual asset, prefix the qualifiedName
-                    // so that it is clearly distinguishable (and can be used to skip any attempt at searching for
-                    // the asset by qualifiedName in IGC)
-                    qualifiedName = IGCRestConstants.NON_IGC_PREFIX + identity.toString();
-                } else {
-                    qualifiedName = identity.toString();
-                }
-                return qualifiedName;
-            }
-        }
-        return null;
+        return getFullyQualifiedName(igcObj, null);
+    }
+
+    /**
+     * Retrieve the fully-qualified name of the provided IGC object.
+     *
+     * @param cll the column-level lineage object for which to retrieve the fully-qualified name
+     * @param qualifier an additional qualifier to add, in particular for embedded elements
+     * @return String
+     */
+    String getFullyQualifiedName(ColumnLevelLineage cll, String qualifier) {
+        return getFullyQualifiedName((Reference) cll, qualifier);
     }
 
     /**
@@ -80,13 +118,25 @@ class BaseMapping {
     String getParentQualifiedName(Reference igcObj) {
         String parentQN = null;
         if (igcObj != null) {
-            Identity thisObjIdentity = igcObj.getIdentity(igcRestClient, cache.getIgcCache());
-            Identity parentObjIdentity = thisObjIdentity.getParentIdentity();
-            if (parentObjIdentity != null) {
-                parentQN = parentObjIdentity.toString();
-            }
+            Identity parentObjIdentity = getParentIdentity(igcObj);
+            parentQN = getFullyQualifiedName(parentObjIdentity, null);
         }
         return parentQN;
+    }
+
+    /**
+     * Retrieve the parent identity of the provided IGC object.
+     *
+     * @param igcObj the IGC object for which to retrieve the parent's identity
+     * @return Identity
+     */
+    Identity getParentIdentity(Reference igcObj) {
+        Identity parent = null;
+        if (igcObj != null) {
+            Identity identity = igcObj.getIdentity(igcRestClient, cache.getIgcCache());
+            parent = identity.getParentIdentity();
+        }
+        return parent;
     }
 
     /**

@@ -4,10 +4,10 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Dsjob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.openmetadata.accessservices.dataengine.model.PortAlias;
 import org.odpi.openmetadata.accessservices.dataengine.model.PortType;
@@ -76,9 +76,9 @@ class PortAliasMapping extends BaseMapping {
                             // Create a new PortAlias at the sequence level, for each underlying PortAlias of jobs
                             // that are executed, that delegateTo the underlying job's PortAlias
                             for (PortAlias delegateTo : jobPortAliases) {
-                                String stageQN = getFullyQualifiedName(stage);
+                                String stageQN = getFullyQualifiedName(stage, delegateTo.getQualifiedName());
                                 if (stageQN != null) {
-                                    PortAlias sequencePortAlias = getSkeletonPortAlias(stageQN + "::" + delegateTo.getQualifiedName(), stage.getName() + "_" + delegateTo.getDisplayName());
+                                    PortAlias sequencePortAlias = getSkeletonPortAlias(stageQN, stage.getName() + "_" + delegateTo.getDisplayName());
                                     sequencePortAlias.setPortType(delegateTo.getPortType());
                                     sequencePortAlias.setDelegatesTo(delegateTo.getQualifiedName());
                                     portAliases.add(sequencePortAlias);
@@ -114,11 +114,11 @@ class PortAliasMapping extends BaseMapping {
     private void addPortAliases(DataStageJob job, Stage stage, String propertyName, ItemList<InformationAsset> relations, PortType portType) {
         List<InformationAsset> allRelations = igcRestClient.getAllPages(propertyName, relations);
         for (InformationAsset relation : allRelations) {
-            String fullyQualifiedStoreName = cache.getQualifiedNameFromStoreRid(relation.getId());
+            Identity storeIdentity = cache.getStoreIdentityFromRid(relation.getId());
             String fullyQualifiedStageName = getFullyQualifiedName(stage);
             PortAlias portAlias = getSkeletonPortAlias(fullyQualifiedStageName, stage.getName());
             portAlias.setPortType(portType);
-            portAlias.setDelegatesTo(fullyQualifiedStoreName + fullyQualifiedStageName);
+            portAlias.setDelegatesTo(getFullyQualifiedName(storeIdentity, fullyQualifiedStageName));
             portAliases.add(portAlias);
         }
     }
