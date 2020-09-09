@@ -11,6 +11,8 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.openmetadata.accessservices.dataengine.model.SchemaType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -19,6 +21,7 @@ import java.util.List;
  */
 public class SchemaTypeMapping extends BaseMapping {
 
+    private static final Logger log = LoggerFactory.getLogger(SchemaTypeMapping.class);
     private SchemaType schemaType;
 
     /**
@@ -32,15 +35,21 @@ public class SchemaTypeMapping extends BaseMapping {
         schemaType = null;
         if (storeIdentity != null) {
             schemaType = new SchemaType();
-            schemaType.setQualifiedName(getFullyQualifiedName(storeIdentity, null));
-            schemaType.setDisplayName(storeIdentity.getName());
-            InformationAsset store = new InformationAsset();
-            store.setId(storeIdentity.getRid());
-            store.setType(storeIdentity.getAssetType());
-            store.setName(storeIdentity.getName());
-            List<Classificationenabledgroup> fields = cache.getFieldsForStore(store);
-            AttributeMapping attributeMapping = new AttributeMapping(cache, fields);
-            schemaType.setAttributeList(attributeMapping.getAttributes());
+            String schemaTypeQN = getFullyQualifiedName(storeIdentity, null);
+            if (schemaTypeQN != null) {
+                log.debug("Constructing SchemaType for data store & fields: {}", schemaTypeQN);
+                schemaType.setQualifiedName(schemaTypeQN);
+                schemaType.setDisplayName(storeIdentity.getName());
+                InformationAsset store = new InformationAsset();
+                store.setId(storeIdentity.getRid());
+                store.setType(storeIdentity.getAssetType());
+                store.setName(storeIdentity.getName());
+                List<Classificationenabledgroup> fields = cache.getFieldsForStore(store);
+                AttributeMapping attributeMapping = new AttributeMapping(cache, fields);
+                schemaType.setAttributeList(attributeMapping.getAttributes());
+            } else {
+                log.error("Unable to determine identity of store: {}", storeIdentity);
+            }
         }
     }
 
@@ -57,11 +66,17 @@ public class SchemaTypeMapping extends BaseMapping {
         schemaType = null;
         if (link != null) {
             schemaType = new SchemaType();
-            schemaType.setQualifiedName(getFullyQualifiedName(link, fullyQualifiedStageName));
-            schemaType.setDisplayName(link.getId());
-            schemaType.setAuthor(link.getModifiedBy());
-            AttributeMapping attributeMapping = new AttributeMapping(cache, job, link, fullyQualifiedStageName);
-            schemaType.setAttributeList(attributeMapping.getAttributes());
+            String schemaTypeQN = getFullyQualifiedName(link, fullyQualifiedStageName);
+            if (schemaTypeQN != null) {
+                log.debug("Constructing SchemaType for job & link: {}", schemaTypeQN);
+                schemaType.setQualifiedName(schemaTypeQN);
+                schemaType.setDisplayName(link.getId());
+                schemaType.setAuthor(link.getModifiedBy());
+                AttributeMapping attributeMapping = new AttributeMapping(cache, job, link, fullyQualifiedStageName);
+                schemaType.setAttributeList(attributeMapping.getAttributes());
+            } else {
+                log.error("Unable to determine identity of link: {}", link);
+            }
         }
     }
 
@@ -70,21 +85,26 @@ public class SchemaTypeMapping extends BaseMapping {
      *
      * @param cache used by this mapping
      * @param stage the stage for which to create the SchemaType
-     * @param storeName the name of the data store from which the fields come
-     * @param storeQualifiedName the fully-qualified name of the data store
+     * @param storeIdentity the store identity for which to create the SchemaType
      * @param fields the fields from the data store to use in creating the SchemaType
      * @param fullyQualifiedStageName the fully-qualified name of the stage
      */
-    SchemaTypeMapping(DataStageCache cache, Stage stage, String storeName, String storeQualifiedName, List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
+    SchemaTypeMapping(DataStageCache cache, Stage stage, Identity storeIdentity, List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
         super(cache);
         schemaType = null;
         if (stage != null) {
             schemaType = new SchemaType();
-            schemaType.setQualifiedName(IGCRestConstants.NON_IGC_PREFIX + storeQualifiedName + fullyQualifiedStageName);
-            schemaType.setDisplayName(storeName);
-            schemaType.setAuthor((String)igcRestClient.getPropertyByName(stage, "modified_by"));
-            AttributeMapping attributeMapping = new AttributeMapping(cache, fields, fullyQualifiedStageName);
-            schemaType.setAttributeList(attributeMapping.getAttributes());
+            String schemaTypeQN = getFullyQualifiedName(storeIdentity, fullyQualifiedStageName);
+            if (schemaTypeQN != null) {
+                log.debug("Constructing SchemaType for store & fields, within stage: {}", schemaTypeQN);
+                schemaType.setQualifiedName(schemaTypeQN);
+                schemaType.setDisplayName(storeIdentity.getName());
+                schemaType.setAuthor((String) igcRestClient.getPropertyByName(stage, "modified_by"));
+                AttributeMapping attributeMapping = new AttributeMapping(cache, fields, fullyQualifiedStageName);
+                schemaType.setAttributeList(attributeMapping.getAttributes());
+            } else {
+                log.error("Unable to determine identity of store: {}", storeIdentity);
+            }
         }
     }
 

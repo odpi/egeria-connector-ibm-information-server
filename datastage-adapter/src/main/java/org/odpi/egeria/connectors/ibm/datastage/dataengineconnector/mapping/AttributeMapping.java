@@ -43,6 +43,7 @@ class AttributeMapping extends BaseMapping {
             List<DataItem> allStageColumns = igcRestClient.getAllPages("stage_columns", stageColumns);
             int index = 0;
             for (DataItem stageColumn : allStageColumns) {
+                log.debug("... calculating from detailed stage column: {}", stageColumn);
                 String colId = stageColumn.getId();
                 ColumnLevelLineage stageColumnObj = job.getColumnLevelLineageByRid(colId);
                 String stageColumnQN = getFullyQualifiedName(stageColumnObj);

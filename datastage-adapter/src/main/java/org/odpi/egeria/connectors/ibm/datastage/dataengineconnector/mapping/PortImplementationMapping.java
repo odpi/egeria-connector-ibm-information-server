@@ -39,6 +39,7 @@ class PortImplementationMapping extends BaseMapping {
             portImplementation = new PortImplementation();
             String linkQN = getFullyQualifiedName(link, fullyQualifiedStageName);
             if (linkQN != null) {
+                log.debug("Constructing PortImplementation for: {}", linkQN);
                 portImplementation.setQualifiedName(linkQN);
                 portImplementation.setDisplayName(link.getName());
                 portImplementation.setPortType(portType);
@@ -65,12 +66,11 @@ class PortImplementationMapping extends BaseMapping {
         if (stage != null && fields != null && !fields.isEmpty()) {
             portImplementation = new PortImplementation();
             Identity storeIdentity = getParentIdentity(fields.get(0));
-            String storeQualifiedName = getParentQualifiedName(fields.get(0));
             String storeName = getParentDisplayName(fields.get(0));
             portImplementation.setQualifiedName(getFullyQualifiedName(storeIdentity, fullyQualifiedStageName));
             portImplementation.setDisplayName(storeName);
             portImplementation.setPortType(portType);
-            SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, stage, storeName, storeQualifiedName, fields, fullyQualifiedStageName);
+            SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, stage, storeIdentity, fields, fullyQualifiedStageName);
             portImplementation.setSchemaType(schemaTypeMapping.getSchemaType());
         }
     }
