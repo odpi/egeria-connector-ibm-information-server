@@ -96,8 +96,10 @@ public class ProcessMapping extends BaseMapping {
         if (process != null) {
             Set<PortImplementation> portImplementations = new HashSet<>();
             Set<LineageMapping> lineageMappings = new HashSet<>();
+            log.debug("Adding input links: {}", stage.getInputLinks());
             addImplementationDetails(job, stage, "input_links", stage.getInputLinks(), PortType.INPUT_PORT, portImplementations, lineageMappings);
             addDataStoreDetails(job, stage, "reads_from_(design)", stage.getReadsFromDesign(), PortType.INPUT_PORT, portImplementations, lineageMappings);
+            log.debug("Adding output links: {}", stage.getOutputLinks());
             addImplementationDetails(job, stage, "output_links", stage.getOutputLinks(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
             addDataStoreDetails(job, stage, "writes_to_(design)", stage.getWritesToDesign(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
             process.setPortImplementations(new ArrayList<>(portImplementations));
@@ -139,12 +141,14 @@ public class ProcessMapping extends BaseMapping {
             process.setDisplayName(igcObj.getName());
             String objQN = getFullyQualifiedName(igcObj);
             if (objQN != null) {
+                log.debug("Constructing process for: {}", objQN);
                 process.setQualifiedName(objQN);
                 process.setDescription(getDescription(igcObj));
                 process.setOwner(igcObj.getCreatedBy());
                 // TODO: setAdditionalProperties or setExtendedProperties with other information on the IGC object?
             } else {
                 log.error("Unable to determine identity for asset -- not including: {}", igcObj);
+                process = null;
             }
         }
         return process;
@@ -173,6 +177,7 @@ public class ProcessMapping extends BaseMapping {
         List<Link> allLinks = igcRestClient.getAllPages(propertyName, links);
         for (Link linkRef : allLinks) {
             Link linkObjFull = job.getLinkByRid(linkRef.getId());
+            log.debug("Adding implementation details for link: {}", linkObjFull);
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, job, linkObjFull, portType, stageQN);
             portImplementations.add(portImplementationMapping.getPortImplementation());
             LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, linkObjFull, stageQN, portType == PortType.INPUT_PORT);

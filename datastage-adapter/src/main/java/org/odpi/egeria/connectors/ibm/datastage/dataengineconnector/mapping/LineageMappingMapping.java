@@ -193,7 +193,7 @@ class LineageMappingMapping extends BaseMapping {
                             }
                         }
                     } else {
-                        log.error("No fields were found for lineage mapping of: {}", fieldObj);
+                        log.info("No fields were found for lineage mapping of: {}", fieldObj);
                     }
                 } else {
                     log.error("Unable to determine identity for field -- not including: {}", fieldObj);
