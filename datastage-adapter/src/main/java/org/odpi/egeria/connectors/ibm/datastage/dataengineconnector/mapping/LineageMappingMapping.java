@@ -41,16 +41,19 @@ class LineageMappingMapping extends BaseMapping {
         lineageMappings = new HashSet<>();
         ItemList<DataItem> stageColumns = link.getStageColumns();
         List<DataItem> allStageColumns = igcRestClient.getAllPages("stage_columns", stageColumns);
+        log.debug("Constructing LineageMappings for stage columns: {}", allStageColumns);
         // For each stage column defined on the link...
         for (DataItem stageColumnRef : allStageColumns) {
             String colId = stageColumnRef.getId();
             ColumnLevelLineage stageColumnFull = job.getColumnLevelLineageByRid(colId);
+            log.debug(" ... introspecting stage column: {}", stageColumnFull);
             String stageColumnFullQN = getFullyQualifiedName(stageColumnFull, fullyQualifiedStageName);
             if (stageColumnFullQN != null) {
                 if (!bSource) {
                     // Create a LineageMapping from each previous stage column to this stage column
                     ItemList<DataItem> previousColumns = stageColumnFull.getPreviousStageColumns();
                     List<DataItem> allPreviousColumns = igcRestClient.getAllPages("previous_stage_columns", previousColumns);
+                    log.debug(" ...... iterating through previous columns: {}", allPreviousColumns);
                     for (DataItem previousColumnRef : allPreviousColumns) {
                         ColumnLevelLineage previousColumnFull = job.getColumnLevelLineageByRid(previousColumnRef.getId());
                         String previousColumnFullQN = getFullyQualifiedName(previousColumnFull, fullyQualifiedStageName);
@@ -67,6 +70,7 @@ class LineageMappingMapping extends BaseMapping {
                     // Create a LineageMapping from this stage column to each next stage column
                     ItemList<DataItem> nextColumns = stageColumnFull.getNextStageColumns();
                     List<DataItem> allNextColumns = igcRestClient.getAllPages("next_stage_columns", nextColumns);
+                    log.debug(" ...... iterating through next columns: {}", allNextColumns);
                     for (DataItem nextColumnRef : allNextColumns) {
                         ColumnLevelLineage nextColumnFull = job.getColumnLevelLineageByRid(nextColumnRef.getId());
                         String nextColumnFullQN = getFullyQualifiedName(nextColumnFull, fullyQualifiedStageName);
@@ -107,6 +111,7 @@ class LineageMappingMapping extends BaseMapping {
         Stage outputStage = link.getOutputStages();
         ItemList<DataItem> stageColumns = link.getStageColumns();
         List<DataItem> allStageColumns = igcRestClient.getAllPages("stage_columns", stageColumns);
+        log.debug("Constructing LineageMappings between stages: {}", link);
         // For each stage column defined on the link...
         for (DataItem stageColRef : allStageColumns) {
             ColumnLevelLineage stageColFull = job.getColumnLevelLineageByRid(stageColRef.getId());
@@ -165,6 +170,7 @@ class LineageMappingMapping extends BaseMapping {
                         relatedStageCols = fieldObj.getWrittenByDesign();
                         propertyName = "written_by_(design)";
                     }
+                    log.debug("Constructing LineageMappings between store field and stages' {}: {}", bSource ? "source" : "target", fieldObj);
                     if (relatedStageCols != null) {
                         List<InformationAsset> allRelatedStageCols = igcRestClient.getAllPages(propertyName, relatedStageCols);
                         // For each object that reads / writes to that field...
