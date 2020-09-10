@@ -31,6 +31,8 @@ import java.util.List;
  *          or targets by DataStage exist in lineage. If an IGC proxy is also being used in the cohort, this should
  *          be left at the default value (false) to ensure that the IGC proxy remains the home metadata collection of
  *          data store entities and is responsible for notifications of their changes, etc.</li>
+ *     <li>limitToProjects - a list of projects to which any lineage information should be limited. When not specified,
+ *          all projects will be included. When specified, only jobs within those projects will be included.</li>
  * </ul>
  */
 public class DataStageConnectorProvider extends DataEngineConnectorProviderBase {

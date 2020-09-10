@@ -43,8 +43,8 @@ public class ProcessMapping extends BaseMapping {
             Dsjob jobObj = job.getJobObject();
             process = getSkeletonProcess(jobObj);
             if (process != null) {
-                PortAliasMapping inputAliasMapping = new PortAliasMapping(cache, job, job.getInputStages(), PortType.INPUT_PORT);
-                PortAliasMapping outputAliasMapping = new PortAliasMapping(cache, job, job.getOutputStages(), PortType.OUTPUT_PORT);
+                PortAliasMapping inputAliasMapping = new PortAliasMapping(cache, job.getInputStages(), PortType.INPUT_PORT);
+                PortAliasMapping outputAliasMapping = new PortAliasMapping(cache, job.getOutputStages(), PortType.OUTPUT_PORT);
                 process.setPortAliases(Stream.concat(inputAliasMapping.getPortAliases().stream(), outputAliasMapping.getPortAliases().stream()).collect(Collectors.toList()));
                 Set<LineageMapping> lineageMappings = new HashSet<>();
                 for (Link link : job.getAllLinks()) {
@@ -98,9 +98,11 @@ public class ProcessMapping extends BaseMapping {
             Set<LineageMapping> lineageMappings = new HashSet<>();
             log.debug("Adding input links: {}", stage.getInputLinks());
             addImplementationDetails(job, stage, "input_links", stage.getInputLinks(), PortType.INPUT_PORT, portImplementations, lineageMappings);
+            log.debug("Adding input stores: {}", stage.getReadsFromDesign());
             addDataStoreDetails(job, stage, "reads_from_(design)", stage.getReadsFromDesign(), PortType.INPUT_PORT, portImplementations, lineageMappings);
             log.debug("Adding output links: {}", stage.getOutputLinks());
             addImplementationDetails(job, stage, "output_links", stage.getOutputLinks(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
+            log.debug("Adding output stores: {}", stage.getWritesToDesign());
             addDataStoreDetails(job, stage, "writes_to_(design)", stage.getWritesToDesign(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
             process.setPortImplementations(new ArrayList<>(portImplementations));
             process.setLineageMappings(new ArrayList<>(lineageMappings));
@@ -211,8 +213,10 @@ public class ProcessMapping extends BaseMapping {
             List<InformationAsset> allStores = igcRestClient.getAllPages(propertyName, stores);
             for (InformationAsset storeRef : allStores) {
                 List<Classificationenabledgroup> fieldsForStore = cache.getFieldsForStore(storeRef);
+                log.debug("Adding implementation details for fields: {}", fieldsForStore);
                 PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, stage, portType, fieldsForStore, fullyQualifiedStageName);
                 portImplementations.add(portImplementationMapping.getPortImplementation());
+                log.debug("Adding lineage mappings for fields as {}: {}", portType.getName(), fieldsForStore);
                 LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, fieldsForStore, portType.equals(PortType.INPUT_PORT), fullyQualifiedStageName);
                 lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
             }

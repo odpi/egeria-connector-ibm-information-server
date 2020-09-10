@@ -35,19 +35,18 @@ class PortAliasMapping extends BaseMapping {
      * Create a list of PortAliases from the provided job and stage information.
      *
      * @param cache used by this mapping
-     * @param job the job for which to create PortAliases
      * @param stages the stages from which to create PortAliases
      * @param portType the type of port to map (input or output)
      */
-    PortAliasMapping(DataStageCache cache, DataStageJob job, List<Stage> stages, PortType portType) {
+    PortAliasMapping(DataStageCache cache, List<Stage> stages, PortType portType) {
 
         this(cache);
 
         for (Stage stage : stages) {
             if (portType.equals(PortType.INPUT_PORT)) {
-                addInputPortAliases(job, stage);
+                addInputPortAliases(stage);
             } else if (portType.equals(PortType.OUTPUT_PORT)) {
-                addOutputPortAliases(job, stage);
+                addOutputPortAliases(stage);
             }
         }
 
@@ -103,20 +102,24 @@ class PortAliasMapping extends BaseMapping {
      */
     List<PortAlias> getPortAliases() { return new ArrayList<>(portAliases); }
 
-    private void addInputPortAliases(DataStageJob job, Stage stage) {
-        addPortAliases(job, stage, "reads_from_(design)", stage.getReadsFromDesign(), PortType.INPUT_PORT);
+    private void addInputPortAliases(Stage stage) {
+        addPortAliases(stage, "reads_from_(design)", stage.getReadsFromDesign(), PortType.INPUT_PORT);
     }
 
-    private void addOutputPortAliases(DataStageJob job, Stage stage) {
-        addPortAliases(job, stage, "writes_to_(design)", stage.getWritesToDesign(), PortType.OUTPUT_PORT);
+    private void addOutputPortAliases(Stage stage) {
+        addPortAliases(stage, "writes_to_(design)", stage.getWritesToDesign(), PortType.OUTPUT_PORT);
     }
 
-    private void addPortAliases(DataStageJob job, Stage stage, String propertyName, ItemList<InformationAsset> relations, PortType portType) {
+    private void addPortAliases(Stage stage, String propertyName, ItemList<InformationAsset> relations, PortType portType) {
         List<InformationAsset> allRelations = igcRestClient.getAllPages(propertyName, relations);
+        int index = 0;
         for (InformationAsset relation : allRelations) {
+            index++;
             Identity storeIdentity = cache.getStoreIdentityFromRid(relation.getId());
             String fullyQualifiedStageName = getFullyQualifiedName(stage);
-            PortAlias portAlias = getSkeletonPortAlias(fullyQualifiedStageName, stage.getName());
+            // Use the index to at least make each PortAlias qualifiedName for this stage unique (without risking
+            // overlapping with the PortImplementation qualifiedNames that we need to delegateTo)
+            PortAlias portAlias = getSkeletonPortAlias(fullyQualifiedStageName + "_" + index, stage.getName());
             portAlias.setPortType(portType);
             portAlias.setDelegatesTo(getFullyQualifiedName(storeIdentity, fullyQualifiedStageName));
             portAliases.add(portAlias);
