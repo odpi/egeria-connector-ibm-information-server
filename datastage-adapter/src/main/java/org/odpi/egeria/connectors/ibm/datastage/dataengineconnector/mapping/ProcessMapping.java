@@ -96,12 +96,15 @@ public class ProcessMapping extends BaseMapping {
         if (process != null) {
             Set<PortImplementation> portImplementations = new HashSet<>();
             Set<LineageMapping> lineageMappings = new HashSet<>();
-            log.debug("Adding input links: {}", stage.getInputLinks());
-            addImplementationDetails(job, stage, "input_links", stage.getInputLinks(), PortType.INPUT_PORT, portImplementations, lineageMappings);
+            List<Link> allInputLinks = igcRestClient.getAllPages("input_links", stage.getInputLinks());
+            List<Link> allOutputLinks = igcRestClient.getAllPages("output_links", stage.getOutputLinks());
+            Set<String> allLinkRids = Stream.concat(allInputLinks.stream(), allOutputLinks.stream()).map(Link::getId).collect(Collectors.toSet());
+            log.debug("Adding input links: {}", allInputLinks);
+            addImplementationDetails(job, stage, allInputLinks, allLinkRids, PortType.INPUT_PORT, portImplementations, lineageMappings);
             log.debug("Adding input stores: {}", stage.getReadsFromDesign());
             addDataStoreDetails(job, stage, "reads_from_(design)", stage.getReadsFromDesign(), PortType.INPUT_PORT, portImplementations, lineageMappings);
-            log.debug("Adding output links: {}", stage.getOutputLinks());
-            addImplementationDetails(job, stage, "output_links", stage.getOutputLinks(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
+            log.debug("Adding output links: {}", allOutputLinks);
+            addImplementationDetails(job, stage, allOutputLinks, allLinkRids, PortType.OUTPUT_PORT, portImplementations, lineageMappings);
             log.debug("Adding output stores: {}", stage.getWritesToDesign());
             addDataStoreDetails(job, stage, "writes_to_(design)", stage.getWritesToDesign(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
             process.setPortImplementations(new ArrayList<>(portImplementations));
@@ -161,24 +164,22 @@ public class ProcessMapping extends BaseMapping {
      *
      * @param job the job within which the stage exists
      * @param stage the stage for which to add implementation details
-     * @param propertyName the name of the property from which links were retrieved
      * @param links the links of the stage from which to draw implementation details
+     * @param linkRids the RIDs of all links known by this stage (both input and output)
      * @param portType the type of port
      * @param portImplementations the list of PortImplementations to append to with implementation details
      * @param lineageMappings the list of LineageMappings to append to with implementation details
      */
     private void addImplementationDetails(DataStageJob job,
                                           Stage stage,
-                                          String propertyName,
-                                          ItemList<Link> links,
+                                          List<Link> links,
+                                          Set<String> linkRids,
                                           PortType portType,
                                           Set<PortImplementation> portImplementations,
                                           Set<LineageMapping> lineageMappings) {
         String stageQN = getFullyQualifiedName(stage);
         // Setup an x_PORT for each x_link into / out of the stage
-        List<Link> allLinks = igcRestClient.getAllPages(propertyName, links);
-        Set<String> linkRids = allLinks.stream().map(Link::getId).collect(Collectors.toSet());
-        for (Link linkRef : allLinks) {
+        for (Link linkRef : links) {
             Link linkObjFull = job.getLinkByRid(linkRef.getId());
             log.debug("Adding implementation details for link: {}", linkObjFull);
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, job, linkObjFull, portType, stageQN);

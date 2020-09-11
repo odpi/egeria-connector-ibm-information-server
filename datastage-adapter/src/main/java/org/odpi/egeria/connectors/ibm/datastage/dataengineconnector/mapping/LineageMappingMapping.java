@@ -52,10 +52,10 @@ class LineageMappingMapping extends BaseMapping {
             log.debug(" ... introspecting stage column: {}", stageColumnFull);
             String stageColumnFullQN = getFullyQualifiedName(stageColumnFull, fullyQualifiedStageName);
             if (stageColumnFullQN != null) {
-                // TODO: something sketchy happening somewhere in lineage mappings: the previous / next columns COULD
-                //  refer to stage columns that are not actually part of the job's input or output links. In such cases
-                //  the specific stage column that uses such a non-job-related link should be ignored (it will be
-                //  covered elsewhere by the job that actually DOES related to that link).
+                // The previous / next columns COULD refer to stage columns that are not actually part of the job's
+                // input or output links (this seems to be the case with 'lookup' stages in particular). In such cases
+                // the specific stage column that uses such a non-job-related link should be ignored (it will be
+                // covered elsewhere by the job that actually DOES related to that link).
                 if (!bSource) {
                     // Create a LineageMapping from each previous stage column to this stage column
                     ItemList<DataItem> previousColumns = stageColumnFull.getPreviousStageColumns();
