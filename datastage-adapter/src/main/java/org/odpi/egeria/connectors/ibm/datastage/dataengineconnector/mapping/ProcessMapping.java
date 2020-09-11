@@ -177,13 +177,14 @@ public class ProcessMapping extends BaseMapping {
         String stageQN = getFullyQualifiedName(stage);
         // Setup an x_PORT for each x_link into / out of the stage
         List<Link> allLinks = igcRestClient.getAllPages(propertyName, links);
+        Set<String> linkRids = allLinks.stream().map(Link::getId).collect(Collectors.toSet());
         for (Link linkRef : allLinks) {
             Link linkObjFull = job.getLinkByRid(linkRef.getId());
             log.debug("Adding implementation details for link: {}", linkObjFull);
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, job, linkObjFull, portType, stageQN);
             portImplementations.add(portImplementationMapping.getPortImplementation());
             log.debug("Adding lineage mappings for link as {}: {}", portType.getName(), linkObjFull);
-            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, linkObjFull, stageQN, portType == PortType.INPUT_PORT);
+            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, stage.getId(), linkRids, linkObjFull, stageQN, portType == PortType.INPUT_PORT);
             lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
         }
     }

@@ -7,6 +7,7 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataSt
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.interfaces.ColumnLevelLineage;
 import org.odpi.openmetadata.accessservices.dataengine.model.LineageMapping;
 import org.slf4j.Logger;
@@ -32,11 +33,13 @@ class LineageMappingMapping extends BaseMapping {
      *
      * @param cache used by this mapping
      * @param job the job for which to create the LineageMappings
+     * @param stageRid the RID of the stage for which we are building mappings
+     * @param knownLinks set of known link RIDs
      * @param link the link for which to create the LineageMappings
      * @param fullyQualifiedStageName the stage name for which to create the LineageMappings
      * @param bSource true if processing a source link, false if a target link
      */
-    LineageMappingMapping(DataStageCache cache, DataStageJob job, Link link, String fullyQualifiedStageName, boolean bSource) {
+    LineageMappingMapping(DataStageCache cache, DataStageJob job, String stageRid, Set<String> knownLinks, Link link, String fullyQualifiedStageName, boolean bSource) {
         super(cache);
         lineageMappings = new HashSet<>();
         ItemList<DataItem> stageColumns = link.getStageColumns();
@@ -49,6 +52,10 @@ class LineageMappingMapping extends BaseMapping {
             log.debug(" ... introspecting stage column: {}", stageColumnFull);
             String stageColumnFullQN = getFullyQualifiedName(stageColumnFull, fullyQualifiedStageName);
             if (stageColumnFullQN != null) {
+                // TODO: something sketchy happening somewhere in lineage mappings: the previous / next columns COULD
+                //  refer to stage columns that are not actually part of the job's input or output links. In such cases
+                //  the specific stage column that uses such a non-job-related link should be ignored (it will be
+                //  covered elsewhere by the job that actually DOES related to that link).
                 if (!bSource) {
                     // Create a LineageMapping from each previous stage column to this stage column
                     ItemList<DataItem> previousColumns = stageColumnFull.getPreviousStageColumns();
@@ -56,14 +63,18 @@ class LineageMappingMapping extends BaseMapping {
                     log.debug(" ...... iterating through previous columns: {}", allPreviousColumns);
                     for (DataItem previousColumnRef : allPreviousColumns) {
                         ColumnLevelLineage previousColumnFull = job.getColumnLevelLineageByRid(previousColumnRef.getId());
-                        String previousColumnFullQN = getFullyQualifiedName(previousColumnFull, fullyQualifiedStageName);
-                        if (previousColumnFullQN != null) {
-                            LineageMapping lineageMapping = getLineageMapping(previousColumnFullQN, stageColumnFullQN);
-                            lineageMappings.add(lineageMapping);
+                        if (stageColumnForKnownLink(previousColumnFull, stageRid, knownLinks)) {
+                            String previousColumnFullQN = getFullyQualifiedName(previousColumnFull, fullyQualifiedStageName);
+                            if (previousColumnFullQN != null) {
+                                LineageMapping lineageMapping = getLineageMapping(previousColumnFullQN, stageColumnFullQN);
+                                lineageMappings.add(lineageMapping);
+                            } else {
+                                log.error("Unable to determine identity for previous column -- not including (full was {}): {}",
+                                        previousColumnFull == null ? "null" : "non-null",
+                                        previousColumnRef);
+                            }
                         } else {
-                            log.error("Unable to determine identity for previous column -- not including (full was {}): {}",
-                                    previousColumnFull == null ? "null" : "non-null",
-                                    previousColumnRef);
+                            log.warn("Found a stage column for a link not listed as an input link for this stage -- ignoring: {}", previousColumnFull);
                         }
                     }
                 } else {
@@ -73,14 +84,18 @@ class LineageMappingMapping extends BaseMapping {
                     log.debug(" ...... iterating through next columns: {}", allNextColumns);
                     for (DataItem nextColumnRef : allNextColumns) {
                         ColumnLevelLineage nextColumnFull = job.getColumnLevelLineageByRid(nextColumnRef.getId());
-                        String nextColumnFullQN = getFullyQualifiedName(nextColumnFull, fullyQualifiedStageName);
-                        if (nextColumnFullQN != null) {
-                            LineageMapping lineageMapping = getLineageMapping(stageColumnFullQN, nextColumnFullQN);
-                            lineageMappings.add(lineageMapping);
+                        if (stageColumnForKnownLink(nextColumnFull, stageRid, knownLinks)) {
+                            String nextColumnFullQN = getFullyQualifiedName(nextColumnFull, fullyQualifiedStageName);
+                            if (nextColumnFullQN != null) {
+                                LineageMapping lineageMapping = getLineageMapping(stageColumnFullQN, nextColumnFullQN);
+                                lineageMappings.add(lineageMapping);
+                            } else {
+                                log.error("Unable to determine identity for next column -- not including (full was {}): {}",
+                                        nextColumnFull == null ? "null" : "non-null",
+                                        nextColumnRef);
+                            }
                         } else {
-                            log.error("Unable to determine identity for next column -- not including (full was {}): {}",
-                                    nextColumnFull == null ? "null" : "non-null",
-                                    nextColumnRef);
+                            log.warn("Found a stage column for a link not listed as an output link for this stage -- ignoring: {}", nextColumnFull);
                         }
                     }
                 }
@@ -229,6 +244,32 @@ class LineageMappingMapping extends BaseMapping {
         lineageMapping.setSourceAttribute(source);
         lineageMapping.setTargetAttribute(target);
         return lineageMapping;
+    }
+
+    /**
+     * Determine whether the provided stage column is part of a known input / output link for the particular
+     * stage for which we are generating a lineage mapping.
+     *
+     * @param column the stage column to check whether it is part of a known link
+     * @param stageRid the RID of the stage in which to check for known-ness
+     * @param knownLinks set of RIDs of links known as inputs / outputs from the stage
+     * @return boolean
+     */
+    private boolean stageColumnForKnownLink(ColumnLevelLineage column, String stageRid, Set<String> knownLinks) {
+        if (stageRid != null) {
+            List<Reference> context = column.getContext();
+            Reference link = context.get(context.size() - 1);
+            if (link.getType().equals("link")) {
+                return knownLinks.contains(link.getId());
+            } else if (link.getType().equals("stage")) {
+                return stageRid.equals(link.getId());
+            } else {
+                log.warn("Unknown parent type '{}' for column-level lineage -- skipping: {}", link.getType(), column);
+            }
+        } else {
+            log.error("Unable to verify stage column as stage is null -- skipping: {}", column);
+        }
+        return false;
     }
 
 }
