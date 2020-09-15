@@ -7,7 +7,7 @@ logging:
 imageDefaults:
   registry: docker.io
   namespace: odpi
-  tag: latest
+  tag: 2.2
   pullPolicy: IfNotPresent
 
 egeria:
@@ -16,8 +16,8 @@ egeria:
   server: myserver
 
 release:
-  version: 2.2-SNAPSHOT
-  repo: snapshot
+  version: 2.2
+  repo: staging
 
 image:
   egeria:
