@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the Egeria project.
+
 releases=("v11502sp3" "v11502sp5" "v11502sp6" "v11700" "v11701" "v11701sp1" "v11702" "v11710" "v11710sp1" "v11710sp2")
 parallelism=4
 throttle=180
