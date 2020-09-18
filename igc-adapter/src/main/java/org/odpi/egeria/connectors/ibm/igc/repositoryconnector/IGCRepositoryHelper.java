@@ -416,23 +416,28 @@ public class IGCRepositoryHelper {
              * based on the values of the InstanceProperties provided */
             IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
 
-            MatchCriteria outerMatchCriteria = matchProperties.getMatchCriteria();
-            IGCRepositoryHelper.addTypeSpecificConditions(mapping,
-                    outerMatchCriteria,
-                    matchProperties,
-                    igcSearchConditionSet);
-
+            // If there are any properties to match, add the matching / filtering criteria
             String qualifiedNameRegex = null;
+            InstanceMapping.SearchFilter filter;
+            if (matchProperties != null) {
+                MatchCriteria outerMatchCriteria = matchProperties.getMatchCriteria();
+                IGCRepositoryHelper.addTypeSpecificConditions(mapping,
+                        outerMatchCriteria,
+                        matchProperties,
+                        igcSearchConditionSet);
 
-            InstanceMapping.SearchFilter filter = mapping.getAllNoneOrSome(igcomrsRepositoryConnector, matchProperties);
+                filter = mapping.getAllNoneOrSome(igcomrsRepositoryConnector, matchProperties);
 
-            if (filter.equals(InstanceMapping.SearchFilter.NONE)) {
-                igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
-            } else if (filter.equals(InstanceMapping.SearchFilter.SOME)) {
-                // Otherwise, cycle through the mappings and add them
-                qualifiedNameRegex = addAllConditions(igcSearchConditionSet, matchProperties, mapping);
+                if (filter.equals(InstanceMapping.SearchFilter.NONE)) {
+                    igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                } else if (filter.equals(InstanceMapping.SearchFilter.SOME)) {
+                    // Otherwise, cycle through the mappings and add them
+                    qualifiedNameRegex = addAllConditions(igcSearchConditionSet, matchProperties, mapping);
+                } else {
+                    log.debug("Skipping detailed matchProperties iteration, as we should return all types based on criteria and literal mappings.");
+                }
             } else {
-                log.debug("Skipping detailed matchProperties iteration, as we should return all types based on criteria and literal mappings.");
+                filter = InstanceMapping.SearchFilter.ALL;
             }
 
             // If we marked to get nothing, no point in proceeding with any further search setup as we should skip
