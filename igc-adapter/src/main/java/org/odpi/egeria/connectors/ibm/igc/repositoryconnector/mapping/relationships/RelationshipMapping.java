@@ -1044,7 +1044,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         relationshipLevelRid,
                         omrsRelationshipName
                 );
-            } else {
+            } else if (proxyOneRid != null && proxyTwoRid != null) {
                 igcRelationshipGuid = igcRepositoryHelper.getRelationshipGuid(
                         endOneType,
                         endTwoType,
@@ -1054,6 +1054,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         proxyTwoRid,
                         omrsRelationshipName
                 );
+            } else {
+                log.error("One or both ends of the relationship {} between {} and {} cannot be resolved -- skipping the relationship.", omrsRelationshipName, endOneType, endTwoType);
             }
         }
 
