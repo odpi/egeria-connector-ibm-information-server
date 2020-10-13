@@ -49,6 +49,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private boolean includeVirtualAssets = true;
     private boolean createDataStoreSchemas = false;
     private List<String> limitToProjects;
+    private boolean limitToLineageEnabledJobs = false;
 
     /**
      * Default constructor used by the OCF Connector Provider.
@@ -104,6 +105,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                     } else if (projects != null) {
                         limitToProjects.addAll((List<String>)projects);
                     }
+                    limitToLineageEnabledJobs = (Boolean) proxyProperties.getOrDefault(DataStageConnectorProvider.LIMIT_TO_LINEAGE_ENABLED_JOBS, limitToLineageEnabledJobs);
                 }
 
                 IGCVersionEnum igcVersion;
@@ -316,7 +318,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param to the date and time up to which to cache changes (inclusive)
      */
     private void initializeCache(Date from, Date to) {
-        DataStageCache forComparison = new DataStageCache(from, to, limitToProjects);
+        DataStageCache forComparison = new DataStageCache(from, to, limitToProjects, limitToLineageEnabledJobs);
         if (dataStageCache == null || !dataStageCache.equals(forComparison)) {
             // Initialize the cache, if it is empty, or reset it if it differs from the dates and times we've been given
             dataStageCache = forComparison;
@@ -461,6 +463,11 @@ public class DataStageConnector extends DataEngineConnectorBase {
         if (limitToProjects.size() > 0) {
             IGCSearchCondition cProject = new IGCSearchCondition("transformation_project.name", limitToProjects);
             conditionSet.addCondition(cProject);
+            conditionSet.setMatchAnyCondition(false);
+        }
+        if(limitToLineageEnabledJobs) {
+            IGCSearchCondition cIncludeForLineage = new IGCSearchCondition("include_for_lineage","=","true");
+            conditionSet.addCondition(cIncludeForLineage);
             conditionSet.setMatchAnyCondition(false);
         }
         igcSearch.addConditions(conditionSet);
