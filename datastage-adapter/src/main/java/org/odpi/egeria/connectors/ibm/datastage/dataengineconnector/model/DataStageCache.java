@@ -37,6 +37,7 @@ public class DataStageCache {
     private Date from;
     private Date to;
     private List<String> limitToProjects;
+    private boolean limitToLineageEnabled;
 
     /**
      * Create a new cache for changes between the times provided.
@@ -45,7 +46,7 @@ public class DataStageCache {
      * @param to the date and time until which to cache changes
      * @param limitToProjects limit the cached jobs to only those in the provided list of projects
      */
-    public DataStageCache(Date from, Date to, List<String> limitToProjects) {
+    public DataStageCache(Date from, Date to, List<String> limitToProjects, boolean limitToLineageEnabledJobs) {
         this.igcCache = new ObjectCache();
         this.ridToJob = new HashMap<>();
         this.ridToProcess = new HashMap<>();
@@ -54,6 +55,7 @@ public class DataStageCache {
         this.from = from;
         this.to = to;
         this.limitToProjects = (limitToProjects == null ? Collections.emptyList() : limitToProjects);
+        this.limitToLineageEnabled = limitToLineageEnabledJobs;
     }
 
     /**
@@ -312,7 +314,12 @@ public class DataStageCache {
             conditionSet.addCondition(cProject);
             conditionSet.setMatchAnyCondition(false);
         }
-        log.info(" ... searching for changed jobs > {} and <= {}, limited to projects: {}", fromTime, toTime, limitToProjects);
+        if(limitToLineageEnabled) {
+            IGCSearchCondition cIncludeForLineage = new IGCSearchCondition("include_for_lineage","=","true");
+            conditionSet.addCondition(cIncludeForLineage);
+            conditionSet.setMatchAnyCondition(false);
+        }
+        log.info(" ... searching for changed jobs > {} and <= {}, limited to projects: {}, limited to lineage enabled: {}", fromTime, toTime, limitToProjects, limitToLineageEnabled);
         igcSearch.addConditions(conditionSet);
         cacheChangedJobs(igcRestClient.search(igcSearch));
 
