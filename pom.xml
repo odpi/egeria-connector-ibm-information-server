@@ -105,7 +105,7 @@
         <sleepycat.version>18.3.12</sleepycat.version>
         <rhino.version>1.7.13</rhino.version>
         <netty.version>4.1.52.Final</netty.version>
-        <httpclient.version>4.5.12</httpclient.version>
+        <httpclient.version>4.5.13</httpclient.version>
         <woodstox.version>6.2.1</woodstox.version>
         <xmlapi.version>1.4.01</xmlapi.version>
         <stax.version>1.0.1</stax.version>
@@ -466,7 +466,7 @@
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
-                    <version>4.0.4</version>
+                    <version>4.1.3</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
