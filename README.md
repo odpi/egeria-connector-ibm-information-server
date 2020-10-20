@@ -53,8 +53,8 @@ The IBM DataStage Data Engine Proxy Connector works through a combination of the
 
 The quick version:
 
-1. Download the latest IBM Information Server connector from: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/2.3-SNAPSHOT/egeria-connector-ibm-information-server-package-2.3-SNAPSHOT-jar-with-dependencies.jar
-1. Download the latest Egeria core from: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/server-chassis-spring/2.3-SNAPSHOT/server-chassis-spring-2.3-SNAPSHOT.jar
+1. Download the latest IBM Information Server connector from: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/2.5-SNAPSHOT/egeria-connector-ibm-information-server-package-2.5-SNAPSHOT-jar-with-dependencies.jar
+1. Download the latest Egeria core from: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/server-chassis-spring/2.5-SNAPSHOT/server-chassis-spring-2.5-SNAPSHOT.jar
 1. Rename the downloaded Egeria core file to `egeria-server-chassis-spring.jar`.
 1. Run the following command to start Egeria from the command-line, waiting for the final line of output indicating the
     server is running and ready for configuration:
@@ -100,7 +100,7 @@ To download a pre-built version of the connector, use either of the following UR
 officially-released version or the latest snapshot):
 
 - Release: https://odpi.jfrog.io/odpi/egeria-release-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/2.2/egeria-connector-ibm-information-server-package-2.2-jar-with-dependencies.jar
-- Snapshot: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/2.3-SNAPSHOT/egeria-connector-ibm-information-server-package-2.3-SNAPSHOT-jar-with-dependencies.jar
+- Snapshot: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/2.5-SNAPSHOT/egeria-connector-ibm-information-server-package-2.5-SNAPSHOT-jar-with-dependencies.jar
 
 #### Building the connector yourself
 
