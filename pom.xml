@@ -85,7 +85,11 @@
     </modules>
 
     <properties>
+<<<<<<< HEAD
         <open-metadata.version>2.5-SNAPSHOT</open-metadata.version>
+=======
+        <open-metadata.version>2.4-SNAPSHOT</open-metadata.version>
+>>>>>>> upstream/master
         <!-- Level of Java  -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -93,7 +97,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Versions of dependent libraries -->
-        <jackson.version>2.11.2</jackson.version>
+        <jackson.version>2.11.3</jackson.version>
         <slf4j.version>1.7.30</slf4j.version>
         <spring.version>5.2.9.RELEASE</spring.version>
         <junit.platform.version>1.5.2</junit.platform.version>
@@ -104,9 +108,9 @@
         <mock-server.version>5.11.1</mock-server.version>
         <sleepycat.version>18.3.12</sleepycat.version>
         <rhino.version>1.7.13</rhino.version>
-        <netty.version>4.1.52.Final</netty.version>
-        <httpclient.version>4.5.12</httpclient.version>
-        <woodstox.version>6.2.1</woodstox.version>
+        <netty.version>4.1.53.Final</netty.version>
+        <httpclient.version>4.5.13</httpclient.version>
+        <woodstox.version>6.2.3</woodstox.version>
         <xmlapi.version>1.4.01</xmlapi.version>
         <stax.version>1.0.1</stax.version>
         <maven-compiler.version>3.8.1</maven-compiler.version>
@@ -116,7 +120,7 @@
         <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
         <maven-antrun.version>3.0.0</maven-antrun.version>
-        <spotbugs.version>4.1.3</spotbugs.version>
+        <spotbugs.version>4.1.4</spotbugs.version>
         <jacoco-plugin.version>0.8.5</jacoco-plugin.version>
         <!-- Configuration of sonar code scanning-->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -466,7 +470,7 @@
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
-                    <version>4.0.4</version>
+                    <version>4.1.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

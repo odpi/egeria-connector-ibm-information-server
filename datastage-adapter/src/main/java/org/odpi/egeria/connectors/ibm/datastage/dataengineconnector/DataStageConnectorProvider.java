@@ -33,6 +33,10 @@ import java.util.List;
  *          data store entities and is responsible for notifications of their changes, etc.</li>
  *     <li>limitToProjects - a list of projects to which any lineage information should be limited. When not specified,
  *          all projects will be included. When specified, only jobs within those projects will be included.</li>
+ *     <li>
+ *         limitToLineageEnabledJobs - a boolean that indicates if the connector should only process lineage-enabled jobs.
+ *         If this is set to 'true' then only jobs having 'include_for_lineage' set to 'true' will be processed for lineage information. Default is 'false'.
+ *     </li>
  * </ul>
  */
 public class DataStageConnectorProvider extends DataEngineConnectorProviderBase {
@@ -45,6 +49,7 @@ public class DataStageConnectorProvider extends DataEngineConnectorProviderBase 
     static final String INCLUDE_VIRTUAL_ASSETS = "includeVirtualAssets";
     static final String CREATE_DATA_STORE_SCHEMAS = "createDataStoreSchemas";
     static final String LIMIT_TO_PROJECTS = "limitToProjects";
+    static final String LIMIT_TO_LINEAGE_ENABLED_JOBS = "limitToLineageEnabledJobs";
 
     /**
      * Constructor used to initialize the ConnectorProviderBase with the Java class name of the specific
@@ -68,6 +73,7 @@ public class DataStageConnectorProvider extends DataEngineConnectorProviderBase 
         recognizedConfigurationProperties.add(INCLUDE_VIRTUAL_ASSETS);
         recognizedConfigurationProperties.add(CREATE_DATA_STORE_SCHEMAS);
         recognizedConfigurationProperties.add(LIMIT_TO_PROJECTS);
+        recognizedConfigurationProperties.add(LIMIT_TO_LINEAGE_ENABLED_JOBS);
         connectorType.setRecognizedConfigurationProperties(recognizedConfigurationProperties);
 
         super.connectorTypeBean = connectorType;
