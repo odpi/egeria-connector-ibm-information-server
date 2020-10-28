@@ -9,11 +9,7 @@
     <parent>
         <artifactId>egeria-connector-ibm-information-server</artifactId>
         <groupId>org.odpi.egeria</groupId>
-<<<<<<< HEAD
         <version>2.5-SNAPSHOT</version>
-=======
-        <version>2.4-SNAPSHOT</version>
->>>>>>> upstream/master
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

@@ -274,6 +274,7 @@ public class EntityMappingInstance {
                 omrsSummary = igcomrsRepositoryConnector.getRepositoryHelper().getSkeletonEntitySummary(
                         igcomrsRepositoryConnector.getRepositoryName(),
                         igcomrsRepositoryConnector.getMetadataCollectionId(),
+                        igcomrsRepositoryConnector.getMetadataCollectionName(),
                         InstanceProvenanceType.LOCAL_COHORT,
                         userId,
                         mapping.getOmrsTypeDefName()
@@ -305,6 +306,7 @@ public class EntityMappingInstance {
                 omrsDetail = igcomrsRepositoryConnector.getRepositoryHelper().getSkeletonEntity(
                         igcomrsRepositoryConnector.getRepositoryName(),
                         igcomrsRepositoryConnector.getMetadataCollectionId(),
+                        igcomrsRepositoryConnector.getMetadataCollectionName(),
                         InstanceProvenanceType.LOCAL_COHORT,
                         userId,
                         mapping.getOmrsTypeDefName()

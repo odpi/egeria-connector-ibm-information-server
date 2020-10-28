@@ -373,6 +373,9 @@ public abstract class ClassificationMapping extends InstanceMapping {
             // Try to instantiate a new classification from the repository connector
             classification = igcomrsRepositoryConnector.getRepositoryHelper().getNewClassification(
                     igcomrsRepositoryConnector.getRepositoryName(),
+                    igcomrsRepositoryConnector.getMetadataCollectionId(),
+                    igcomrsRepositoryConnector.getMetadataCollectionName(),
+                    InstanceProvenanceType.LOCAL_COHORT,
                     userId,
                     omrsClassificationType,
                     omrsEntityType,

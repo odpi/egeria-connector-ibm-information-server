@@ -85,11 +85,7 @@
     </modules>
 
     <properties>
-<<<<<<< HEAD
         <open-metadata.version>2.5-SNAPSHOT</open-metadata.version>
-=======
-        <open-metadata.version>2.4-SNAPSHOT</open-metadata.version>
->>>>>>> upstream/master
         <!-- Level of Java  -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
