@@ -505,9 +505,13 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         List<TypeDefAttribute> properties = typeDef.getPropertiesDefinition();
         if (properties != null) {
             for (TypeDefAttribute typeDefAttribute : properties) {
-                String omrsPropertyName = typeDefAttribute.getAttributeName();
-                if (!mappedProperties.contains(omrsPropertyName)) {
-                    gaps.add(omrsPropertyName);
+                TypeDefAttributeStatus status = typeDefAttribute.getAttributeStatus();
+                if (status.equals(TypeDefAttributeStatus.ACTIVE_ATTRIBUTE)) {
+                    // We only need to check that active attributes are available
+                    String omrsPropertyName = typeDefAttribute.getAttributeName();
+                    if (!mappedProperties.contains(omrsPropertyName)) {
+                        gaps.add(omrsPropertyName);
+                    }
                 }
             }
         }
