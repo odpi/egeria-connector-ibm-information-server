@@ -54,6 +54,7 @@ public class GovernanceDefinitionMapper extends ReferenceableMapper {
         addLiteralPropertyMapping("implications", null);
         addLiteralPropertyMapping("outcomes", null);
         addLiteralPropertyMapping("results", null);
+        addLiteralPropertyMapping("domainIdentifier", null);
 
     }
 

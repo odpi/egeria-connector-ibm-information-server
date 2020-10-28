@@ -57,7 +57,13 @@ public class ConfidentialityMapper extends ClassificationMapping {
         addLiteralPropertyMapping("steward", null);
         addLiteralPropertyMapping("source", null);
         addLiteralPropertyMapping("notes", null);
-        addMappedOmrsProperty("level");
+        addLiteralPropertyMapping("confidentialityLevel", null);
+
+        // Explicitly null-out any deprecated properties
+        addLiteralPropertyMapping("level", null);
+
+        addMappedOmrsProperty("levelIdentifier");
+
         // Exclude IGC types that do not have 'assigned_to_terms'
         addExcludedIgcAssetType("connector");
         addExcludedIgcAssetType("data_connection");
@@ -120,7 +126,7 @@ public class ConfidentialityMapper extends ClassificationMapping {
                                 classificationProperties = igcomrsRepositoryConnector.getRepositoryHelper().addIntPropertyToInstance(
                                         igcomrsRepositoryConnector.getRepositoryName(),
                                         classificationProperties,
-                                        "level",
+                                        "levelIdentifier",
                                         parsedLevel,
                                         methodName
                                 );
@@ -259,7 +265,7 @@ public class ConfidentialityMapper extends ClassificationMapping {
                             set.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
                         }
                         break;
-                    case "level":
+                    case "levelIdentifier":
                         if (value instanceof PrimitivePropertyValue) {
                             PrimitivePropertyValue levelValue = (PrimitivePropertyValue) value;
                             if (levelValue.getPrimitiveDefCategory().equals(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_INT)) {

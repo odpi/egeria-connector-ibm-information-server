@@ -29,10 +29,15 @@ public class DatabaseMapper extends DataStoreMapper {
         );
 
         // The list of properties that should be mapped
-        addSimplePropertyMapping("dbms", "type");
-        addSimplePropertyMapping("dbms_version", "version");
+        addSimplePropertyMapping("dbms", "deployedImplementationType");
+        addSimplePropertyMapping("dbms_version", "databaseVersion");
         addSimplePropertyMapping("dbms_server_instance", "instance");
         addSimplePropertyMapping("imported_from", "importedFrom");
+
+        // Add literal mappings for deprecated properties (so we still pass type verification even during a
+        // patching process)
+        addLiteralPropertyMapping("type", null);
+        addLiteralPropertyMapping("version", null);
 
         // The list of relationships that should be mapped
         addRelationshipMapper(DataContentForDataSetMapper.getInstance(null));

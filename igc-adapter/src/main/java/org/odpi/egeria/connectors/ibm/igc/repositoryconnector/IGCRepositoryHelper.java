@@ -1404,6 +1404,19 @@ public class IGCRepositoryHelper {
 
                 if (igcPropertyName == null) {
                     log.warn("Unhandled search condition for unknown IGC property from OMRS property: {}", omrsPropertyName);
+                } else if (InstanceMapping.getHeaderProperties().contains(omrsPropertyName)) {
+
+                    // If the OMRS property is a header property, it should take precedence over any type-level
+                    // property with the same name
+                    log.debug("Adding header property search criteria for: {}", omrsPropertyName);
+                    InstanceMapping.addHeaderPropertySearchCriteria(
+                            igcSearchConditionSet,
+                            omrsPropertyName,
+                            operator,
+                            value,
+                            mapping,
+                            igcomrsRepositoryConnector);
+
                 } else if (igcPropertyName.equals(EntityMapping.COMPLEX_MAPPING_SENTINEL)) {
 
                     log.debug("Adding complex property search criteria for: {}", omrsPropertyName);

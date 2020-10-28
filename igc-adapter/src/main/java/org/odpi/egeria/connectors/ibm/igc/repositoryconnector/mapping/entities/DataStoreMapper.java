@@ -30,8 +30,13 @@ public class DataStoreMapper extends AssetMapper {
         );
 
         // The list of properties that should be mapped
-        addSimplePropertyMapping("created_on", "createTime");
-        addSimplePropertyMapping("modified_on", "modifiedTime");
+        addSimplePropertyMapping("created_on", "storeCreateTime");
+        addSimplePropertyMapping("modified_on", "storeUpdateTime");
+
+        // Add literal mappings for deprecated properties (so we still pass type verification even during a
+        // patching process)
+        addLiteralPropertyMapping("createTime", null);
+        addLiteralPropertyMapping("modifiedTime", null);
 
     }
 

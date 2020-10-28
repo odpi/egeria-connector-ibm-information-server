@@ -2,14 +2,19 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceAuditHeader;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyCondition;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -288,6 +293,7 @@ public abstract class InstanceMapping {
             case "replicatedBy":
             case "instanceLicense":
             case "mappingProperties":
+                // We will only support searching against these properties if they are empty
                 known = (value == null);
                 break;
             case "createdBy":
@@ -296,12 +302,12 @@ public abstract class InstanceMapping {
             case "createTime":
             case "updateTime":
             case "version":
-            case "type": // TODO: is currently overloaded on eg. Database
                 known = true;
                 break;
             default:
-                // Also handles 'instanceProvenanceType', 'guid' and 'instanceURL'
-                // (that is, we will not support searching on any of these properties)
+                // Also handles 'instanceProvenanceType', 'guid', 'instanceURL' and 'type'
+                // (that is, we will not support searching on any of these properties: note
+                // that 'type' is already covered by the find methods themselves)
                 known = false;
                 break;
         }
@@ -343,6 +349,115 @@ public abstract class InstanceMapping {
             header.setMaintainedBy(new ArrayList<>(maintainers));
         }
 
+    }
+
+    public static void addHeaderPropertySearchCriteria(IGCSearchConditionSet igcSearchConditionSet,
+                                                       String omrsPropertyName,
+                                                       PropertyComparisonOperator operator,
+                                                       InstancePropertyValue value,
+                                                       EntityMapping mapping,
+                                                       IGCOMRSRepositoryConnector igcomrsRepositoryConnector)
+            throws FunctionNotSupportedException {
+
+        final String methodName = "addHeaderPropertySearchCriteria";
+
+        String igcType = mapping.getIgcAssetType();
+        boolean hasModDetails = igcomrsRepositoryConnector.getIGCRestClient().hasModificationDetails(igcType);
+        OMRSRepositoryHelper helper = igcomrsRepositoryConnector.getRepositoryHelper();
+        String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
+
+        switch (omrsPropertyName) {
+            case "createdBy":
+                if (hasModDetails) {
+                    IGCRepositoryHelper.addIGCSearchCondition(helper,
+                            repositoryName,
+                            igcSearchConditionSet,
+                            "created_by",
+                            operator,
+                            value);
+                } else {
+                    throwUnsupportedPropertyException(methodName, omrsPropertyName, igcType);
+                }
+                break;
+            case "updatedBy":
+                if (hasModDetails) {
+                    IGCRepositoryHelper.addIGCSearchCondition(helper,
+                            repositoryName,
+                            igcSearchConditionSet,
+                            "modified_by",
+                            operator,
+                            value);
+                } else {
+                    throwUnsupportedPropertyException(methodName, omrsPropertyName, igcType);
+                }
+                break;
+            case "createTime":
+                if (hasModDetails) {
+                    IGCRepositoryHelper.addIGCSearchCondition(helper,
+                            repositoryName,
+                            igcSearchConditionSet,
+                            "created_on",
+                            operator,
+                            value);
+                } else {
+                    throwUnsupportedPropertyException(methodName, omrsPropertyName, igcType);
+                }
+                break;
+            case "updateTime":
+                if (hasModDetails) {
+                    IGCRepositoryHelper.addIGCSearchCondition(helper,
+                            repositoryName,
+                            igcSearchConditionSet,
+                            "modified_on",
+                            operator,
+                            value);
+                } else {
+                    throwUnsupportedPropertyException(methodName, omrsPropertyName, igcType);
+                }
+                break;
+            case "maintainedBy":
+                if (hasModDetails) {
+                    IGCSearchConditionSet nested = new IGCSearchConditionSet();
+                    nested.setMatchAnyCondition(true);
+                    IGCRepositoryHelper.addIGCSearchCondition(helper,
+                            repositoryName,
+                            nested,
+                            "created_by",
+                            operator,
+                            value);
+                    IGCRepositoryHelper.addIGCSearchCondition(helper,
+                            repositoryName,
+                            nested,
+                            "modified_by",
+                            operator,
+                            value);
+                    igcSearchConditionSet.addNestedConditionSet(nested);
+                } else {
+                    throwUnsupportedPropertyException(methodName, omrsPropertyName, igcType);
+                }
+                break;
+            case "version":
+                if (hasModDetails) {
+                    IGCRepositoryHelper.addIGCSearchCondition(helper,
+                            repositoryName,
+                            igcSearchConditionSet,
+                            "modified_on",
+                            operator,
+                            value);
+                }
+                break;
+            default:
+                // Nothing to do for any other properties, as they should already have caused exclusion
+                // or inclusion based on the filter (getAllNoneOrSome)
+                break;
+        }
+
+    }
+
+    private static void throwUnsupportedPropertyException(String methodName, String type, String propertyName) throws FunctionNotSupportedException {
+        throw new FunctionNotSupportedException(IGCOMRSErrorCode.UNSUPPORTED_PROPERTY_FOR_TYPE.getMessageDefinition(propertyName, type),
+                InstanceMapping.class.getName(),
+                methodName);
     }
 
 }

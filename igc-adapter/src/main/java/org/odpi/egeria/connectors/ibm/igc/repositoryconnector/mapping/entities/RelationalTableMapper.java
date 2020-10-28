@@ -43,6 +43,7 @@ public class RelationalTableMapper extends SchemaElementMapper {
         addLiteralPropertyMapping("maxCardinality", 1);
         addLiteralPropertyMapping("minCardinality", 1);
         addLiteralPropertyMapping("allowsDuplicateValues", null);
+        addLiteralPropertyMapping("precision", null);
 
         // Deprecated properties will be null'd (also from SchemaAttribute)
         addLiteralPropertyMapping("name", null);

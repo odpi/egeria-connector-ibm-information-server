@@ -81,7 +81,8 @@ public class ConnectorTest {
     private String otherMetadataCollectionId;
 
     private List<AttributeTypeDef> supportedAttributeTypeDefs;
-    private List<TypeDef> supportedTypeDefs;
+    private Map<String, TypeDef> supportedTypeDefs;
+    private List<String> supportedTypeDefNames;
 
     /**
      * Construct base objects.
@@ -92,7 +93,8 @@ public class ConnectorTest {
         metadataCollectionId = UUID.randomUUID().toString();
         otherMetadataCollectionId = UUID.randomUUID().toString();
         supportedAttributeTypeDefs = new ArrayList<>();
-        supportedTypeDefs = new ArrayList<>();
+        supportedTypeDefs = new HashMap<>();
+        supportedTypeDefNames = new ArrayList<>();
         inMemoryEventConnector = new InMemoryOpenMetadataTopicConnector();
 
     }
@@ -240,9 +242,33 @@ public class ConnectorTest {
                 assertNull(e);
             }
             if (supported) {
-                supportedTypeDefs.add(typeDef);
+                supportedTypeDefNames.add(typeDef.getName());
+                supportedTypeDefs.put(typeDef.getName(), typeDef);
             }
             contentManager.addTypeDef(igcomrsRepositoryConnector.getRepositoryName(), typeDef);
+        }
+        List<TypeDefPatch> typeDefPatches = typeStore.getTypeDefPatches();
+        if (typeDefPatches != null) {
+            for (TypeDefPatch patch : typeDefPatches) {
+                String typeDefName = patch.getTypeDefName();
+                TypeDef typeDef = null;
+                if (supportedTypeDefs.containsKey(typeDefName)) {
+                    try {
+                        typeDef = igcomrsMetadataCollection.updateTypeDef(MockConstants.EGERIA_USER, patch);
+                    } catch (TypeDefNotKnownException e) {
+                        log.debug("TypeDef is not supported -- skipping: {}", patch.getTypeDefName());
+                    } catch (InvalidParameterException | PatchErrorException e) {
+                        log.error("Unable to process the TypeDefPatch: {}", patch.getTypeDefName(), e);
+                        assertNull(e);
+                    } catch (Exception e) {
+                        log.error("Unexpected exception trying to patch type definitions.", e);
+                        assertNull(e);
+                    }
+                }
+                if (typeDef != null) {
+                    supportedTypeDefs.put(typeDef.getName(), typeDef);
+                }
+            }
         }
     }
 
@@ -261,11 +287,12 @@ public class ConnectorTest {
             }
         }
 
-        for (TypeDef typeDef : supportedTypeDefs) {
+        for (String typeDefName : supportedTypeDefNames) {
+            TypeDef typeDef = supportedTypeDefs.get(typeDefName);
             try {
                 assertTrue(igcomrsMetadataCollection.verifyTypeDef(MockConstants.EGERIA_USER, typeDef));
             } catch (InvalidParameterException | RepositoryErrorException | InvalidTypeDefException | TypeDefNotSupportedException e) {
-                log.error("Unable to verify type definition: {}", typeDef.getName(), e);
+                log.error("Unable to verify type definition: {}", typeDefName, e);
                 assertNull(e);
             } catch (Exception e) {
                 log.error("Unexpected exception trying to verify type definitions.", e);
@@ -280,8 +307,8 @@ public class ConnectorTest {
             List<TypeDef> fromGalleryTD = typeDefGallery.getTypeDefs();
             assertTrue(fromGalleryATD.containsAll(supportedAttributeTypeDefs));
             assertTrue(supportedAttributeTypeDefs.containsAll(fromGalleryATD));
-            assertTrue(fromGalleryTD.containsAll(supportedTypeDefs));
-            assertTrue(supportedTypeDefs.containsAll(fromGalleryTD));
+            assertTrue(fromGalleryTD.containsAll(supportedTypeDefs.values()));
+            assertTrue(supportedTypeDefs.values().containsAll(fromGalleryTD));
         } catch (RepositoryErrorException | InvalidParameterException e) {
             log.error("Unable to retrieve all types.", e);
             assertNull(e);
@@ -1145,7 +1172,7 @@ public class ConnectorTest {
         final String methodName = "testGlossaryTermFindByClassification";
 
         InstanceProperties ip = new InstanceProperties();
-        ip = repositoryHelper.addIntPropertyToInstance(sourceName, ip, "level", 3, methodName);
+        ip = repositoryHelper.addIntPropertyToInstance(sourceName, ip, "levelIdentifier", 3, methodName);
 
         testFindEntitiesByClassification(
                 MockConstants.EGERIA_GLOSSARY_TERM_TYPE_GUID,
@@ -1448,7 +1475,7 @@ public class ConnectorTest {
         Classification first = classifications.get(0);
         assertEquals(first.getType().getTypeDefName(), "Confidentiality");
         assertTrue(first.getVersion() > 1);
-        int level = getIntegerValue(first.getProperties(), "level");
+        int level = getIntegerValue(first.getProperties(), "levelIdentifier");
         assertEquals(level, 3);
     }
 
@@ -1499,8 +1526,9 @@ public class ConnectorTest {
 
         Map<String, String> expectedValues = new HashMap<>();
         expectedValues.put("name", "COMPDIR");
-        expectedValues.put("type", "DB2");
+        expectedValues.put("deployedImplementationType", "DB2");
         expectedValues.put("instance", "db2inst1");
+        expectedValues.put("databaseVersion", "11.01.0202");
 
         testEntityDetail(
                 "database",
@@ -4036,7 +4064,6 @@ public class ConnectorTest {
         assertEquals(detail.getType().getTypeDefName(), omrsType);
         assertTrue(detail.getVersion() > 1);
         assertNotNull(detail.getMetadataCollectionId());
-
         testExpectedValuesForEquality(detail.getProperties(), expectedValues);
 
         return detail;
