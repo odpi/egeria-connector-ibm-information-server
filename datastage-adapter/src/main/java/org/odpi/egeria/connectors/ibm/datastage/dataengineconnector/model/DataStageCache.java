@@ -45,6 +45,7 @@ public class DataStageCache {
      * @param from the date and time from which to cache changes
      * @param to the date and time until which to cache changes
      * @param limitToProjects limit the cached jobs to only those in the provided list of projects
+     * @param limitToLineageEnabledJobs limit the processing to those jobs for which lineage is enabled
      */
     public DataStageCache(Date from, Date to, List<String> limitToProjects, boolean limitToLineageEnabledJobs) {
         this.igcCache = new ObjectCache();
@@ -314,7 +315,7 @@ public class DataStageCache {
             conditionSet.addCondition(cProject);
             conditionSet.setMatchAnyCondition(false);
         }
-        if(limitToLineageEnabled) {
+        if (limitToLineageEnabled) {
             IGCSearchCondition cIncludeForLineage = new IGCSearchCondition("include_for_lineage","=","true");
             conditionSet.addCondition(cIncludeForLineage);
             conditionSet.setMatchAnyCondition(false);
