@@ -266,6 +266,7 @@ public class IGCRestClient {
      * @param contentType the type of content to expect in the payload (if any)
      * @param payload the payload (if any) for the request
      * @param alreadyTriedNewSession indicates whether a new session was already attempted (true) or not (false)
+     * @param cause the underlying exception stack, if we have already tried to open a new session without success
      * @return {@code ResponseEntity<String>}
      * @throws IGCConnectivityException if the attempt to open a new session fails
      */
@@ -273,10 +274,11 @@ public class IGCRestClient {
                                                              HttpMethod method,
                                                              MediaType contentType,
                                                              String payload,
-                                                             boolean alreadyTriedNewSession) throws IGCConnectivityException {
+                                                             boolean alreadyTriedNewSession,
+                                                             Exception cause) throws IGCConnectivityException {
         if (alreadyTriedNewSession) {
-            String formattedMessage = method + " to " + url + " with: " + payload;
-            throw new IGCConnectivityException("Opening a new session already attempted without success -- giving up.", formattedMessage);
+            String formattedMessage = "Opening a new session already attempted without success -- giving up: " + method + " to " + url + " with: " + payload;
+            throw new IGCConnectivityException(formattedMessage, cause);
         } else {
             // By removing cookies, we'll force a login
             this.cookies = null;
@@ -293,16 +295,18 @@ public class IGCRestClient {
      * @param method the HTTP method to use in sending the request
      * @param file the Spring FileSystemResource or ClassPathResource containing the file to be uploaded
      * @param alreadyTriedNewSession indicates whether a new session was already attempted (true) or not (false)
+     * @param cause the underlying exception stack, if we have already tried to open a new session without success
      * @return {@code ResponseEntity<String>}
      * @throws IGCConnectivityException if the attempt to open a new session fails
      */
     private ResponseEntity<String> openNewSessionWithUpload(String endpoint,
                                                             HttpMethod method,
                                                             AbstractResource file,
-                                                            boolean alreadyTriedNewSession) throws IGCConnectivityException {
+                                                            boolean alreadyTriedNewSession,
+                                                            Exception cause) throws IGCConnectivityException {
         if (alreadyTriedNewSession) {
-            String formattedMessage = method + " to " + endpoint + " with: " + file.toString();
-            throw new IGCConnectivityException("Opening a new session already attempted without success -- giving up.", formattedMessage);
+            String formattedMessage = "Opening a new session already attempted without success -- giving up: " + method + " to " + endpoint + " with: " + file.toString();
+            throw new IGCConnectivityException(formattedMessage, cause);
         } else {
             log.info("Session appears to have timed out -- starting a new session and re-trying the upload.");
             // By removing cookies, we'll force a login
@@ -494,7 +498,8 @@ public class IGCRestClient {
                     endpoint,
                     method,
                     file,
-                    forceLogin
+                    forceLogin,
+                    e
             );
         } catch (RestClientException e) {
             throw new IGCConnectivityException("Request failed -- check IGC environment connectivity and authentication details.", e);
@@ -561,7 +566,8 @@ public class IGCRestClient {
                     method,
                     contentType,
                     payload,
-                    forceLogin
+                    forceLogin,
+                    e
             );
         } catch (RestClientException e) {
             throw new IGCConnectivityException("Request failed -- check IGC environment connectivity and authentication details.", e);
