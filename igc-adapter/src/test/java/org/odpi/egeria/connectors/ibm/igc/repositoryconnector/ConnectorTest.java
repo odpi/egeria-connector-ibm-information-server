@@ -2,8 +2,10 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Note;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -1338,58 +1340,63 @@ public class ConnectorTest {
                 relationshipExpectations
         );
 
-        IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
-        Term term = igcRestClient.getAssetWithSubsetOfProperties("6662c0f2.e1b1ec6c.00270n9bc.9a0o5ur.hsbem7.o7tuf0mn7hgv85dv4s707", "term", new String[]{"name"});
-        Note note = igcRestClient.getAssetWithSubsetOfProperties("b1c497ce.1a21c74f.00270nb2s.3iaovvr.rbf470.568fcokgdnlg70p0q4cu7", "note", new String[]{"subject"});
+        try {
+            IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
+            Term term = igcRestClient.getAssetWithSubsetOfProperties("6662c0f2.e1b1ec6c.00270n9bc.9a0o5ur.hsbem7.o7tuf0mn7hgv85dv4s707", "term", new String[]{"name"});
+            Note note = igcRestClient.getAssetWithSubsetOfProperties("b1c497ce.1a21c74f.00270nb2s.3iaovvr.rbf470.568fcokgdnlg70p0q4cu7", "note", new String[]{"subject"});
 
-        List<Relationship> relationships = new ArrayList<>();
-        AttachedNoteLogEntryMapper mapper = AttachedNoteLogEntryMapper.getInstance(null);
-        mapper.addMappedOMRSRelationships(igcomrsRepositoryConnector,
-                relationships,
-                cache,
-                term,
-                null,
-                0,
-                null,
-                MockConstants.EGERIA_PAGESIZE,
-                MockConstants.EGERIA_USER);
-        assertEquals(relationships.size(), 2);
+            List<Relationship> relationships = new ArrayList<>();
+            AttachedNoteLogEntryMapper mapper = AttachedNoteLogEntryMapper.getInstance(null);
+            mapper.addMappedOMRSRelationships(igcomrsRepositoryConnector,
+                    relationships,
+                    cache,
+                    term,
+                    null,
+                    0,
+                    null,
+                    MockConstants.EGERIA_PAGESIZE,
+                    MockConstants.EGERIA_USER);
+            assertEquals(relationships.size(), 2);
 
-        relationships = new ArrayList<>();
-        mapper.addMappedOMRSRelationships(igcomrsRepositoryConnector,
-                relationships,
-                cache,
-                term,
-                note,
-                0,
-                null,
-                MockConstants.EGERIA_PAGESIZE,
-                MockConstants.EGERIA_USER);
-        assertEquals(relationships.size(), 1);
+            relationships = new ArrayList<>();
+            mapper.addMappedOMRSRelationships(igcomrsRepositoryConnector,
+                    relationships,
+                    cache,
+                    term,
+                    note,
+                    0,
+                    null,
+                    MockConstants.EGERIA_PAGESIZE,
+                    MockConstants.EGERIA_USER);
+            assertEquals(relationships.size(), 1);
 
-        relationships = new ArrayList<>();
-        mapper.addMappedOMRSRelationships(igcomrsRepositoryConnector,
-                relationships,
-                cache,
-                note,
-                null,
-                0,
-                null,
-                MockConstants.EGERIA_PAGESIZE,
-                MockConstants.EGERIA_USER);
-        assertEquals(relationships.size(), 1);
+            relationships = new ArrayList<>();
+            mapper.addMappedOMRSRelationships(igcomrsRepositoryConnector,
+                    relationships,
+                    cache,
+                    note,
+                    null,
+                    0,
+                    null,
+                    MockConstants.EGERIA_PAGESIZE,
+                    MockConstants.EGERIA_USER);
+            assertEquals(relationships.size(), 1);
 
-        relationships = new ArrayList<>();
-        mapper.addMappedOMRSRelationships(igcomrsRepositoryConnector,
-                relationships,
-                cache,
-                note,
-                term,
-                0,
-                null,
-                MockConstants.EGERIA_PAGESIZE,
-                MockConstants.EGERIA_USER);
-        assertEquals(relationships.size(), 1);
+            relationships = new ArrayList<>();
+            mapper.addMappedOMRSRelationships(igcomrsRepositoryConnector,
+                    relationships,
+                    cache,
+                    note,
+                    term,
+                    0,
+                    null,
+                    MockConstants.EGERIA_PAGESIZE,
+                    MockConstants.EGERIA_USER);
+            assertEquals(relationships.size(), 1);
+        } catch (IGCException | RepositoryErrorException e) {
+            log.error("Hit unexpected exception testing term and note log relationships.", e);
+            assertNull(e);
+        }
 
     }
 
@@ -1689,23 +1696,27 @@ public class ConnectorTest {
                 null
         );
 
-        Reference connector = new Reference("DB2Connector", "connector", "b1c497ce.54ec142d.001mtr38f.q8hjqk4.spumq8.k1bt587cologck6u9tf8q");
-        Reference dataConnection = new Reference("IADB", "data_connection", "b1c497ce.8e4c0a48.001mtr3so.6k54588.marlmn.hvquoercv3ji5gdi2rslf");
-        ConnectionEndpointMapper mapper = ConnectionEndpointMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion());
-        List<Reference> proxyOnes = mapper.getProxyOneAssetFromAsset(connector, igcomrsRepositoryConnector.getIGCRestClient(), cache);
-        assertEquals(proxyOnes.size(), 1);
-        assertEquals(proxyOnes.get(0).getName(), "INFOSVR");
+        try {
+            Reference connector = new Reference("DB2Connector", "connector", "b1c497ce.54ec142d.001mtr38f.q8hjqk4.spumq8.k1bt587cologck6u9tf8q");
+            Reference dataConnection = new Reference("IADB", "data_connection", "b1c497ce.8e4c0a48.001mtr3so.6k54588.marlmn.hvquoercv3ji5gdi2rslf");
+            ConnectionEndpointMapper mapper = ConnectionEndpointMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion());
+            List<Reference> proxyOnes = mapper.getProxyOneAssetFromAsset(connector, igcomrsRepositoryConnector.getIGCRestClient(), cache);
+            assertEquals(proxyOnes.size(), 1);
+            assertEquals(proxyOnes.get(0).getName(), "INFOSVR");
 
-        proxyOnes = mapper.getProxyOneAssetFromAsset(dataConnection, igcomrsRepositoryConnector.getIGCRestClient(), cache);
-        assertEquals(proxyOnes.size(), 1);
-        assertEquals(proxyOnes.get(0).getName(), "IADB");
+            proxyOnes = mapper.getProxyOneAssetFromAsset(dataConnection, igcomrsRepositoryConnector.getIGCRestClient(), cache);
+            assertEquals(proxyOnes.size(), 1);
+            assertEquals(proxyOnes.get(0).getName(), "IADB");
 
-        List<Reference> proxyTwos = mapper.getProxyTwoAssetFromAsset(connector, igcomrsRepositoryConnector.getIGCRestClient(), cache);
-        assertEquals(proxyTwos.size(), 6);
+            List<Reference> proxyTwos = mapper.getProxyTwoAssetFromAsset(connector, igcomrsRepositoryConnector.getIGCRestClient(), cache);
+            assertEquals(proxyTwos.size(), 6);
 
-        proxyTwos = mapper.getProxyTwoAssetFromAsset(dataConnection, igcomrsRepositoryConnector.getIGCRestClient(), cache);
-        assertEquals(proxyTwos.size(), 1);
-        assertEquals(proxyTwos.get(0).getName(), "IADB");
+            proxyTwos = mapper.getProxyTwoAssetFromAsset(dataConnection, igcomrsRepositoryConnector.getIGCRestClient(), cache);
+            assertEquals(proxyTwos.size(), 1);
+            assertEquals(proxyTwos.get(0).getName(), "IADB");
+        } catch (RepositoryErrorException e) {
+            assertNull(e);
+        }
 
     }
 
@@ -3377,56 +3388,61 @@ public class ConnectorTest {
 
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
-        List<String> referenceListProperties = igcRestClient.getPagedRelationshipPropertiesForType("term");
+        try {
+            List<String> referenceListProperties = igcRestClient.getPagedRelationshipPropertiesForType("term");
 
-        Reference testTerm = igcRestClient.getAssetById(MockConstants.TERM_RID);
-        OMRSStub testStub = igcRepositoryHelper.getOMRSStubForAsset(testTerm);
+            Reference testTerm = igcRestClient.getAssetById(MockConstants.TERM_RID);
+            OMRSStub testStub = igcRepositoryHelper.getOMRSStubForAsset(testTerm);
 
-        // Initial test will be against a non-existent stub
-        ChangeSet test = new ChangeSet(igcRestClient, testTerm, testStub);
-        Set<String> changedProperties = test.getChangedProperties();
-        assertNotNull(changedProperties);
-        assertEquals(changedProperties.size(), 19);
+            // Initial test will be against a non-existent stub
+            ChangeSet test = new ChangeSet(igcRestClient, testTerm, testStub);
+            Set<String> changedProperties = test.getChangedProperties();
+            assertNotNull(changedProperties);
+            assertEquals(changedProperties.size(), 19);
 
-        ChangeSet.Change newAssignedAssetInstance = getSingleChange(test, "assigned_assets");
-        assertEquals(newAssignedAssetInstance.getIgcPropertyName(), "assigned_assets");
-        assertEquals(newAssignedAssetInstance.getIgcPropertyPath(), "/assigned_assets");
-        assertEquals(newAssignedAssetInstance.getOp(), "add");
-        assertNull(newAssignedAssetInstance.getOldValue(referenceListProperties));
-        Object assignedAssets = newAssignedAssetInstance.getNewValue(referenceListProperties);
-        assertTrue(assignedAssets instanceof ItemList);
-        ItemList<?> actualAssets = (ItemList<?>) assignedAssets;
-        List<?> listOfAssets = actualAssets.getItems();
-        assertNotNull(listOfAssets);
-        assertEquals(listOfAssets.size(), 2);
+            ChangeSet.Change newAssignedAssetInstance = getSingleChange(test, "assigned_assets");
+            assertEquals(newAssignedAssetInstance.getIgcPropertyName(), "assigned_assets");
+            assertEquals(newAssignedAssetInstance.getIgcPropertyPath(), "/assigned_assets");
+            assertEquals(newAssignedAssetInstance.getOp(), "add");
+            assertNull(newAssignedAssetInstance.getOldValue(referenceListProperties));
+            Object assignedAssets = newAssignedAssetInstance.getNewValue(referenceListProperties);
+            assertTrue(assignedAssets instanceof ItemList);
+            ItemList<?> actualAssets = (ItemList<?>) assignedAssets;
+            List<?> listOfAssets = actualAssets.getItems();
+            assertNotNull(listOfAssets);
+            assertEquals(listOfAssets.size(), 2);
 
-        // Next test will have a stub populated so changes will not all be adds
-        testStub = igcRepositoryHelper.getOMRSStubForAsset(testTerm);
-        test = new ChangeSet(igcRestClient, testTerm, testStub);
-        changedProperties = test.getChangedProperties();
-        assertNotNull(changedProperties);
-        assertEquals(changedProperties.size(), 27);
+            // Next test will have a stub populated so changes will not all be adds
+            testStub = igcRepositoryHelper.getOMRSStubForAsset(testTerm);
+            test = new ChangeSet(igcRestClient, testTerm, testStub);
+            changedProperties = test.getChangedProperties();
+            assertNotNull(changedProperties);
+            assertEquals(changedProperties.size(), 27);
 
-        newAssignedAssetInstance = getSingleChange(test, "assigned_assets");
-        assertEquals(newAssignedAssetInstance.getIgcPropertyName(), "assigned_assets");
-        assertEquals(newAssignedAssetInstance.getIgcPropertyPath(), "/assigned_assets/items/0");
-        assertEquals(newAssignedAssetInstance.getOp(), "add");
-        assertNull(newAssignedAssetInstance.getOldValue(referenceListProperties)); // because it is an 'add'
-        assignedAssets = newAssignedAssetInstance.getNewValue(referenceListProperties);
-        assertTrue(assignedAssets instanceof Reference); // because we are only adding 1 new relationship
-        Reference actualAsset = (Reference) assignedAssets;
-        assertNotNull(actualAsset);
+            newAssignedAssetInstance = getSingleChange(test, "assigned_assets");
+            assertEquals(newAssignedAssetInstance.getIgcPropertyName(), "assigned_assets");
+            assertEquals(newAssignedAssetInstance.getIgcPropertyPath(), "/assigned_assets/items/0");
+            assertEquals(newAssignedAssetInstance.getOp(), "add");
+            assertNull(newAssignedAssetInstance.getOldValue(referenceListProperties)); // because it is an 'add'
+            assignedAssets = newAssignedAssetInstance.getNewValue(referenceListProperties);
+            assertTrue(assignedAssets instanceof Reference); // because we are only adding 1 new relationship
+            Reference actualAsset = (Reference) assignedAssets;
+            assertNotNull(actualAsset);
 
-        ChangeSet.Change newReplacedBy = getSingleChange(test, "replaced_by");
-        assertEquals(newReplacedBy.getIgcPropertyName(), "replaced_by");
-        assertEquals(newReplacedBy.getIgcPropertyPath(), "/replaced_by");
-        assertEquals(newReplacedBy.getOp(), "remove");
+            ChangeSet.Change newReplacedBy = getSingleChange(test, "replaced_by");
+            assertEquals(newReplacedBy.getIgcPropertyName(), "replaced_by");
+            assertEquals(newReplacedBy.getIgcPropertyPath(), "/replaced_by");
+            assertEquals(newReplacedBy.getOp(), "remove");
 
-        ChangeSet.Change newModifiedOn = getSingleChange(test, "modified_on");
-        assertEquals(newModifiedOn.getIgcPropertyName(), "modified_on");
-        assertEquals(newModifiedOn.getIgcPropertyPath(), "/modified_on");
-        assertEquals(newModifiedOn.getOp(), "replace");
-        assertNotNull(newModifiedOn.getOldValue(referenceListProperties));
+            ChangeSet.Change newModifiedOn = getSingleChange(test, "modified_on");
+            assertEquals(newModifiedOn.getIgcPropertyName(), "modified_on");
+            assertEquals(newModifiedOn.getIgcPropertyPath(), "/modified_on");
+            assertEquals(newModifiedOn.getOp(), "replace");
+            assertNotNull(newModifiedOn.getOldValue(referenceListProperties));
+        } catch (IGCException e) {
+            log.error("Hit unexpected exception testing change sets.", e);
+            assertNull(e);
+        }
 
     }
 

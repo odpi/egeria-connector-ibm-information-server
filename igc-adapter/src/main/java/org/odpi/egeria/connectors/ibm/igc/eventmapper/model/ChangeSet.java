@@ -10,6 +10,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.flipkart.zjsonpatch.DiffFlags;
 import com.flipkart.zjsonpatch.JsonDiff;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCIOException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.OMRSStub;
 import org.slf4j.Logger;
@@ -39,8 +42,11 @@ public class ChangeSet {
      * @param igcRestClient REST API connectivity to an IGC environment
      * @param asset the IGC asset (as a POJO) giving the most up-to-date definition of the asset
      * @param stub the OMRS stub giving the last-state of the asset (when an event was last triggered for it)
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    public ChangeSet(IGCRestClient igcRestClient, Reference asset, OMRSStub stub) {
+    public ChangeSet(IGCRestClient igcRestClient, Reference asset, OMRSStub stub) throws IGCConnectivityException, IGCParsingException, IGCIOException {
 
         this.objectMapper = new ObjectMapper();
         this.changesByProperty = new HashMap<>();
@@ -104,8 +110,9 @@ public class ChangeSet {
      * @param asset the latest version of the IGC entity to compare
      * @param stubPayload the payload of a previous version of the IGC entity to compare
      * @throws IOException if there are any errors processing the information as JSON
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
      */
-    private void calculateDelta(Reference asset, JsonNode stubPayload) throws IOException {
+    private void calculateDelta(Reference asset, JsonNode stubPayload) throws IOException, IGCParsingException {
 
         EnumSet<DiffFlags> flags = DiffFlags.dontNormalizeOpIntoMoveAndCopy().clone();
         JsonNode currentAsset = objectMapper.readTree(this.igcRestClient.getValueAsJSON(asset));
@@ -274,8 +281,9 @@ public class ChangeSet {
          *
          * @param referenceListProperties list of properties of the changed asset that are reference lists
          * @return Object
+         * @throws IGCParsingException if there is any issue parsing the response from IGC
          */
-        public Object getNewValue(List<String> referenceListProperties) {
+        public Object getNewValue(List<String> referenceListProperties) throws IGCParsingException {
             return getValueFromJSON(this.value, referenceListProperties, getIgcPropertyPath());
         }
 
@@ -285,8 +293,9 @@ public class ChangeSet {
          *
          * @param referenceListProperties list of properties of the changed asset that are reference lists
          * @return Object
+         * @throws IGCParsingException if there is any issue parsing the response from IGC
          */
-        public Object getOldValue(List<String> referenceListProperties) {
+        public Object getOldValue(List<String> referenceListProperties) throws IGCParsingException {
 
             Object oldValue = null;
 
@@ -316,10 +325,11 @@ public class ChangeSet {
          * @param referenceListProperties at list of all IGC properties that are ReferenceLists
          * @param path the JSON path at which the node is found
          * @return Object
+         * @throws IGCParsingException if there is any issue parsing the response from IGC
          */
         private Object getValueFromJSON(JsonNode node,
                                         List<String> referenceListProperties,
-                                        String path) {
+                                        String path) throws IGCParsingException {
 
             Object propertyValue = null;
             JsonNodeType jsonType = node.getNodeType();

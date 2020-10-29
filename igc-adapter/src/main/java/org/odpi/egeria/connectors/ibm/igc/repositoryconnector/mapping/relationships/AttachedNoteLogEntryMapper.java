@@ -2,9 +2,11 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Note;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
@@ -66,26 +68,36 @@ public class AttachedNoteLogEntryMapper extends RelationshipMapping {
 
     }
 
-    private Reference getAssetFromNote(Note note, IGCRestClient igcRestClient) {
+    private Reference getAssetFromNote(Note note, IGCRestClient igcRestClient) throws RepositoryErrorException {
+        final String methodName = "getAssetFromNote";
         Reference asset = note.getBelongingTo();
         if (asset == null) {
-            Note withAsset = igcRestClient.getAssetWithSubsetOfProperties(note.getId(), note.getType(), new String[]{"belonging_to"});
-            asset = withAsset.getBelongingTo();
+            try {
+                Note withAsset = igcRestClient.getAssetWithSubsetOfProperties(note.getId(), note.getType(), new String[]{"belonging_to"});
+                asset = withAsset.getBelongingTo();
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
         }
         return asset;
     }
 
-    private List<Note> getNotesFromAsset(Reference asset, IGCRestClient igcRestClient) {
+    private List<Note> getNotesFromAsset(Reference asset, IGCRestClient igcRestClient) throws RepositoryErrorException {
+        final String methodName = "getNotesFromAsset";
         ItemList<Note> notes = asset.getNotes();
-        if (notes != null) {
-            return igcRestClient.getAllPages("notes", notes);
-        } else {
-            String type = asset.getType();
-            if (igcRestClient.getPagedRelationshipPropertiesForType(type).contains("notes")) {
-                Reference withNotes = igcRestClient.getAssetWithSubsetOfProperties(asset.getId(), asset.getType(), new String[]{"notes"});
-                notes = withNotes.getNotes();
+        try {
+            if (notes != null) {
                 return igcRestClient.getAllPages("notes", notes);
+            } else {
+                String type = asset.getType();
+                if (igcRestClient.getPagedRelationshipPropertiesForType(type).contains("notes")) {
+                    Reference withNotes = igcRestClient.getAssetWithSubsetOfProperties(asset.getId(), asset.getType(), new String[]{"notes"});
+                    notes = withNotes.getNotes();
+                    return igcRestClient.getAllPages("notes", notes);
+                }
             }
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
         }
         return Collections.emptyList();
     }
@@ -107,6 +119,7 @@ public class AttachedNoteLogEntryMapper extends RelationshipMapping {
      * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
      *                 unrestricted return results size.
      * @param userId the user requesting the relationships
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
@@ -117,7 +130,7 @@ public class AttachedNoteLogEntryMapper extends RelationshipMapping {
                                            int fromRelationshipElement,
                                            SequencingOrder sequencingOrder,
                                            int pageSize,
-                                           String userId) {
+                                           String userId) throws RepositoryErrorException {
 
         log.debug("Adding mapped relationships from {} to {}.", fromIgcObject == null ? "<null>" : fromIgcObject.getType(), toIgcObject == null ? "<null>" : toIgcObject.getType());
 

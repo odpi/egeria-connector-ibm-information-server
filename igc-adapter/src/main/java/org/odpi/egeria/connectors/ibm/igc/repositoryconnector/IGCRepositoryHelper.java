@@ -6,6 +6,10 @@ import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCIOException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Paging;
@@ -90,8 +94,9 @@ public class IGCRepositoryHelper {
      * @param omrsTypeDef the OMRS TypeDef for which the entity mapping is implemented
      * @param mappingClass the Java class providing the EntityMapping
      * @return boolean false if unable to configure an EntityMapping from the provided class
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
-    boolean addEntityMapping(TypeDef omrsTypeDef, Class mappingClass) {
+    boolean addEntityMapping(TypeDef omrsTypeDef, Class mappingClass) throws RepositoryErrorException {
         return entityMappingStore.addMapping(omrsTypeDef, mappingClass, igcomrsRepositoryConnector);
     }
 
@@ -506,16 +511,20 @@ public class IGCRepositoryHelper {
                 }
 
                 if (includeResult) {
-                    processResults(
-                            mapping,
-                            this.igcRestClient.search(igcSearch),
-                            entityDetails,
-                            cache,
-                            matchProperties,
-                            null,
-                            pageSize,
-                            userId
-                    );
+                    try {
+                        processResults(
+                                mapping,
+                                this.igcRestClient.search(igcSearch),
+                                entityDetails,
+                                cache,
+                                matchProperties,
+                                null,
+                                pageSize,
+                                userId
+                        );
+                    } catch (IGCException e) {
+                        raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                    }
                 } else {
                     log.debug("Skipping search for type '{}' as entitySubtypeGUIDs would filter it out anyway: {}.", igcAssetType, entitySubtypeGUIDs);
                 }
@@ -527,7 +536,7 @@ public class IGCRepositoryHelper {
 
     private String addAllConditions(IGCSearchConditionSet igcSearchConditionSet,
                                     SearchProperties matchProperties,
-                                    EntityMapping mapping) throws FunctionNotSupportedException {
+                                    EntityMapping mapping) throws FunctionNotSupportedException, RepositoryErrorException {
         String qualifiedNameRegex = null;
         List<PropertyCondition> conditionsToMatch = matchProperties.getConditions();
         if (conditionsToMatch != null) {
@@ -624,10 +633,15 @@ public class IGCRepositoryHelper {
                         int pageSize,
                         String userId) throws RepositoryErrorException {
 
+        final String methodName = "processResults";
         if (pageSize == 0) {
-            // If the provided pageSize was 0, we need to retrieve ALL pages of results...
-            List<Reference> allPages = igcRestClient.getAllPages(null, results);
-            results.setAllPages(allPages);
+            try {
+                // If the provided pageSize was 0, we need to retrieve ALL pages of results...
+                List<Reference> allPages = igcRestClient.getAllPages(null, results);
+                results.setAllPages(allPages);
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
         }
         for (Reference reference : results.getItems()) {
             /* Only proceed with retrieving the EntityDetail if the type from IGC is not explicitly
@@ -662,8 +676,12 @@ public class IGCRepositoryHelper {
 
         // If we haven't filled a page of results (because we needed to skip some above), recurse...
         if (results.hasMorePages() && entityDetails.size() < pageSize) {
-            ItemList<Reference> nextPage = igcRestClient.getNextPage(null, results);
-            processResults(mapper, nextPage, entityDetails, cache, matchProperties, searchCriteria, pageSize, userId);
+            try {
+                ItemList<Reference> nextPage = igcRestClient.getNextPage(null, results);
+                processResults(mapper, nextPage, entityDetails, cache, matchProperties, searchCriteria, pageSize, userId);
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
         }
 
     }
@@ -686,10 +704,15 @@ public class IGCRepositoryHelper {
                         int pageSize,
                         String userId) throws RepositoryErrorException {
 
+        final String methodName = "processResults";
         if (pageSize == 0) {
-            // If the provided pageSize was 0, we need to retrieve ALL pages of results...
-            List<Reference> allPages = igcRestClient.getAllPages(null, results);
-            results.setAllPages(allPages);
+            try {
+                // If the provided pageSize was 0, we need to retrieve ALL pages of results...
+                List<Reference> allPages = igcRestClient.getAllPages(null, results);
+                results.setAllPages(allPages);
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
         }
 
         IGCOMRSMetadataCollection igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
@@ -706,17 +729,21 @@ public class IGCRepositoryHelper {
 
             if (relationshipLevelType != null && relationshipLevelType.equals(igcType)) {
 
-                // If the type is a relationship-level type, then use a relationship-level ProxyMapping to determine
-                // the appropriate relationship ends
-                relationshipLevelRid = candidateTwo.getId();
-                log.debug("processResults (relationship-level) with mapper: {}", mapper.getClass().getCanonicalName());
-                RelationshipMapping.RelationshipLevelProxyMapping pmRelationship = mapper.getRelationshipLevelProxyMapping();
-                String propertyToOne = pmRelationship.getIgcRelationshipPropertyToEndOne();
-                String propertyToTwo = pmRelationship.getIgcRelationshipPropertyToEndTwo();
-                Object endOne = igcRestClient.getPropertyByName(candidateTwo, propertyToOne);
-                IGCRepositoryHelper.addReferencesToList(igcRestClient, endOnes, endOne);
-                Object endTwo = igcRestClient.getPropertyByName(candidateTwo, propertyToTwo);
-                IGCRepositoryHelper.addReferencesToList(igcRestClient, endTwos, endTwo);
+                try {
+                    // If the type is a relationship-level type, then use a relationship-level ProxyMapping to determine
+                    // the appropriate relationship ends
+                    relationshipLevelRid = candidateTwo.getId();
+                    log.debug("processResults (relationship-level) with mapper: {}", mapper.getClass().getCanonicalName());
+                    RelationshipMapping.RelationshipLevelProxyMapping pmRelationship = mapper.getRelationshipLevelProxyMapping();
+                    String propertyToOne = pmRelationship.getIgcRelationshipPropertyToEndOne();
+                    String propertyToTwo = pmRelationship.getIgcRelationshipPropertyToEndTwo();
+                    Object endOne = igcRestClient.getPropertyByName(candidateTwo, propertyToOne);
+                    IGCRepositoryHelper.addReferencesToList(igcRestClient, endOnes, endOne);
+                    Object endTwo = igcRestClient.getPropertyByName(candidateTwo, propertyToTwo);
+                    IGCRepositoryHelper.addReferencesToList(igcRestClient, endTwos, endTwo);
+                } catch (IGCException e) {
+                    raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                }
 
             } else if (!igcType.equals(DEFAULT_IGC_TYPE)) {
 
@@ -725,31 +752,35 @@ public class IGCRepositoryHelper {
                 // etc and will simply result in 400-code Bad Request messages from the API)
                 endTwos.add(candidateTwo);
 
-                log.debug("processResults with mapper: {}", mapper.getClass().getCanonicalName());
-                RelationshipMapping.ProxyMapping pmTwo = mapper.getProxyTwoMapping();
-                List<String> relationshipProperties = pmTwo.getIgcRelationshipProperties();
-                for (String igcPropertyName : relationshipProperties) {
-                    if (igcPropertyName.equals(RelationshipMapping.SELF_REFERENCE_SENTINEL)) {
-                        endOnes.add(candidateTwo);
-                    } else {
-                        Object otherEnd = igcRestClient.getPropertyByName(candidateTwo, igcPropertyName);
-                        if (otherEnd != null) {
-                            if (otherEnd instanceof Reference) {
-                                Reference other = (Reference) otherEnd;
-                                if (other.getType() != null) {
-                                    endOnes.addAll(mapper.getProxyOneAssetFromAsset(other, igcRestClient, cache));
+                try {
+                    log.debug("processResults with mapper: {}", mapper.getClass().getCanonicalName());
+                    RelationshipMapping.ProxyMapping pmTwo = mapper.getProxyTwoMapping();
+                    List<String> relationshipProperties = pmTwo.getIgcRelationshipProperties();
+                    for (String igcPropertyName : relationshipProperties) {
+                        if (igcPropertyName.equals(RelationshipMapping.SELF_REFERENCE_SENTINEL)) {
+                            endOnes.add(candidateTwo);
+                        } else {
+                            Object otherEnd = igcRestClient.getPropertyByName(candidateTwo, igcPropertyName);
+                            if (otherEnd != null) {
+                                if (otherEnd instanceof Reference) {
+                                    Reference other = (Reference) otherEnd;
+                                    if (other.getType() != null) {
+                                        endOnes.addAll(mapper.getProxyOneAssetFromAsset(other, igcRestClient, cache));
+                                    }
+                                } else if (otherEnd instanceof ItemList) {
+                                    ItemList<Reference> otherEnds = (ItemList<Reference>) otherEnd;
+                                    List<Reference> allOtherEnds = igcRestClient.getAllPages(igcPropertyName, otherEnds);
+                                    for (Reference other : allOtherEnds) {
+                                        endOnes.addAll(mapper.getProxyOneAssetFromAsset(other, igcRestClient, cache));
+                                    }
+                                } else {
+                                    log.warn("Not a relationship, skipping: {}", otherEnd);
                                 }
-                            } else if (otherEnd instanceof ItemList) {
-                                ItemList<Reference> otherEnds = (ItemList<Reference>) otherEnd;
-                                List<Reference> allOtherEnds = igcRestClient.getAllPages(igcPropertyName, otherEnds);
-                                for (Reference other : allOtherEnds) {
-                                    endOnes.addAll(mapper.getProxyOneAssetFromAsset(other, igcRestClient, cache));
-                                }
-                            } else {
-                                log.warn("Not a relationship, skipping: {}", otherEnd);
                             }
                         }
                     }
+                } catch (IGCException e) {
+                    raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
                 }
             }
             for (Reference endOne : endOnes) {
@@ -797,8 +828,12 @@ public class IGCRepositoryHelper {
 
         // If we haven't filled a page of results (because we needed to skip some above), recurse...
         if (results.hasMorePages() && relationships.size() < pageSize) {
-            ItemList<Reference> nextPage = igcRestClient.getNextPage(null, results);
-            processResults(mapper, nextPage, relationships, cache, pageSize, userId);
+            try {
+                ItemList<Reference> nextPage = igcRestClient.getNextPage(null, results);
+                processResults(mapper, nextPage, relationships, cache, pageSize, userId);
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
         }
 
     }
@@ -1286,11 +1321,12 @@ public class IGCRepositoryHelper {
      * @param asset the IGC object to be mapped
      * @param userId the user making the request
      * @return EntityMappingInstance
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     private EntityMappingInstance getMappingInstanceForParameters(ObjectCache cache,
                                                                   IGCEntityGuid guid,
                                                                   Reference asset,
-                                                                  String userId) {
+                                                                  String userId) throws RepositoryErrorException {
         log.debug("Looking for mapper for retrieved asset with guid {}", guid);
 
         EntityMappingInstance entityMap = null;
@@ -1321,12 +1357,13 @@ public class IGCRepositoryHelper {
      * @param prefix the prefix used for the asset (if any; null otherwise)
      * @param userId the user making the request
      * @return EntityMappingInstance
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     public EntityMappingInstance getMappingInstanceForParameters(ObjectCache cache,
                                                                  String igcAssetType,
                                                                  String rid,
                                                                  String prefix,
-                                                                 String userId) {
+                                                                 String userId) throws RepositoryErrorException {
 
         log.debug("Looking for mapper for type {} with prefix {}", igcAssetType, prefix);
 
@@ -1389,11 +1426,22 @@ public class IGCRepositoryHelper {
         }
     }
 
+    /**
+     * Add search condition for the provided parameters.
+     *
+     * @param igcSearchConditionSet set of conditions to which to append
+     * @param omrsPropertyName name of the OMRS property to search
+     * @param operator operation to use in the search
+     * @param value to search
+     * @param mapping between IGC and OMRS
+     * @throws FunctionNotSupportedException if an unsupported regular expression was requested
+     * @throws RepositoryErrorException if any issue with interaction with IGC
+     */
     private void addSearchCondition(IGCSearchConditionSet igcSearchConditionSet,
                                     String omrsPropertyName,
                                     PropertyComparisonOperator operator,
                                     InstancePropertyValue value,
-                                    EntityMapping mapping) throws FunctionNotSupportedException {
+                                    EntityMapping mapping) throws FunctionNotSupportedException, RepositoryErrorException {
 
         if (omrsPropertyName != null) {
             if (omrsPropertyName.equals(EntityMapping.COMPLEX_MAPPING_SENTINEL)) {
@@ -2168,8 +2216,10 @@ public class IGCRepositoryHelper {
      * @param rid the Repository ID (RID) of the asset for which to retrieve the OMRS stub
      * @param type the IGC asset type of the asset for which to retrieve the OMRS stub
      * @return OMRSStub
+     * @throws IGCConnectivityException if there is any issue connecting to IGC
+     * @throws IGCParsingException if there is any issue parsing responses from IGC
      */
-    public OMRSStub getOMRSStubForAsset(String rid, String type) {
+    public OMRSStub getOMRSStubForAsset(String rid, String type) throws IGCConnectivityException, IGCParsingException {
 
         // We need to translate the provided asset into a unique name for the stub
         String stubName = getStubNameForAsset(rid, type);
@@ -2201,8 +2251,10 @@ public class IGCRepositoryHelper {
      *
      * @param asset the asset for which to retrieve the OMRS stub
      * @return OMRSStub
+     * @throws IGCConnectivityException if there is any issue connecting to IGC
+     * @throws IGCParsingException if there is any issue parsing responses from IGC
      */
-    public OMRSStub getOMRSStubForAsset(Reference asset) {
+    public OMRSStub getOMRSStubForAsset(Reference asset) throws IGCConnectivityException, IGCParsingException {
         // We need to translate the provided asset into a unique name for the stub
         return getOMRSStubForAsset(asset.getId(), asset.getType());
     }
@@ -2213,8 +2265,10 @@ public class IGCRepositoryHelper {
      *
      * @param asset the asset for which to upsert the OMRS stub
      * @return String the Repository ID (RID) of the OMRS stub
+     * @throws IGCConnectivityException if there is any issue connecting to IGC
+     * @throws IGCParsingException if there is any issue parsing responses from IGC
      */
-    public String upsertOMRSStubForAsset(Reference asset) {
+    public String upsertOMRSStubForAsset(Reference asset) throws IGCConnectivityException, IGCParsingException {
 
         String stubName = getStubNameFromAsset(asset);
 
@@ -2293,8 +2347,9 @@ public class IGCRepositoryHelper {
      * @param rid the Repository ID (RID) of the asset for which to delete the OMRS stub
      * @param assetType the IGC asset type of the asset for which to delete the OMRS stub
      * @return boolean - true on successful deletion, false otherwise
+     * @throws IGCConnectivityException if any issue interacting with IGC
      */
-    public boolean deleteOMRSStubForAsset(String rid, String assetType) {
+    public boolean deleteOMRSStubForAsset(String rid, String assetType) throws IGCConnectivityException {
 
         String stubName = getStubNameForAsset(rid, assetType);
 
@@ -2372,9 +2427,12 @@ public class IGCRepositoryHelper {
      * @param rid the Repository ID (RID) of the asset for which to retrieve all details
      * @param assetType the type of IGC asset
      * @return Reference - the object including all of its details and relationships
+     * @throws IGCConnectivityException if there is any issue connecting to IGC
+     * @throws IGCParsingException if there is any issue parsing responses from IGC
+     * @throws IGCIOException if there is any issue introspecting the IGC type system
      */
     @SuppressWarnings("unchecked")
-    public Reference getFullAssetDetails(String rid, String assetType) {
+    public Reference getFullAssetDetails(String rid, String assetType) throws IGCConnectivityException, IGCParsingException, IGCIOException {
 
         Reference fullAsset = null;
 
@@ -2481,8 +2539,10 @@ public class IGCRepositoryHelper {
      * @param igcRestClient connectivity to the IGC environment
      * @param list the list to which to append
      * @param candidate the candidate object to append into the list (if a reference or list of references)
+     * @throws IGCConnectivityException if there is any issue connecting to IGC
+     * @throws IGCParsingException if there is any issue parsing responses from IGC
      */
-    public static void addReferencesToList(IGCRestClient igcRestClient, List<Reference> list, Object candidate) {
+    public static void addReferencesToList(IGCRestClient igcRestClient, List<Reference> list, Object candidate) throws IGCConnectivityException, IGCParsingException {
         if (candidate instanceof Reference) {
             Reference reference = (Reference) candidate;
             if (reference.getType() != null) {
@@ -2511,6 +2571,21 @@ public class IGCRepositoryHelper {
         throw new RepositoryErrorException(errorCode.getMessageDefinition(params),
                 this.getClass().getName(),
                 methodName);
+    }
+
+    /**
+     * Raise a RepositoryErrorException using the provided parameters.
+     * @param errorCode the error code for the exception
+     * @param methodName the method raising the exception
+     * @param cause the underlying exception that caused this error
+     * @param params any additional parameters for the formatting of the error message
+     * @throws RepositoryErrorException always
+     */
+    private void raiseRepositoryErrorException(IGCOMRSErrorCode errorCode, String methodName, Exception cause, String ...params) throws RepositoryErrorException {
+        throw new RepositoryErrorException(errorCode.getMessageDefinition(params),
+                this.getClass().getName(),
+                methodName,
+                cause);
     }
 
     /**

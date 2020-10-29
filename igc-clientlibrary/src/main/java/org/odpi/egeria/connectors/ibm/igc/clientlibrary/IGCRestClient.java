@@ -114,8 +114,9 @@ public class IGCRestClient {
      * @param port the services (domain) tier port number
      * @param user the username with which to open and retain the session
      * @param password the password for the user
+     * @throws IGCConnectivityException if there is any issue connecting to IGC
      */
-    public IGCRestClient(String host, String port, String user, String password) {
+    public IGCRestClient(String host, String port, String user, String password) throws IGCConnectivityException {
         this("https://" + host + ":" + port, user, password);
     }
 
@@ -126,8 +127,9 @@ public class IGCRestClient {
      * @param baseURL the base URL of the domain tier of Information Server
      * @param user the username with which to open and retain the session
      * @param password the password of the user
+     * @throws IGCConnectivityException if there is any issue connecting to IGC
      */
-    public IGCRestClient(String baseURL, String user, String password) {
+    public IGCRestClient(String baseURL, String user, String password) throws IGCConnectivityException {
         this(baseURL, encodeBasicAuth(user, password));
     }
 
@@ -137,8 +139,9 @@ public class IGCRestClient {
      *
      * @param baseURL the base URL of the domain tier of Information Server
      * @param authorization the Basic-encoded authorization string to use to login to Information Server
+     * @throws IGCConnectivityException if there is any issue connecting to IGC
      */
-    protected IGCRestClient(String baseURL, String authorization) {
+    protected IGCRestClient(String baseURL, String authorization) throws IGCConnectivityException {
 
         if (baseURL == null || !baseURL.startsWith("https://")) {
             throw new IGCConnectivityException("Cannot instantiate IGCRestClient -- baseURL must be https.", baseURL);
@@ -186,8 +189,10 @@ public class IGCRestClient {
     /**
      * Start the client by trying to connect based on the configured parameters.
      * @return boolean indicating true if the client was successfully started, or false if not.
+     * @throws IGCConnectivityException if there is any issue connecting to IGC
+     * @throws IGCParsingException if there is any issue parsing a response from IGC
      */
-    public boolean start() {
+    public boolean start() throws IGCConnectivityException, IGCParsingException {
 
         // Run a simple initial query to obtain a session and setup the cookies
         IGCSearch igcSearch = new IGCSearch("category");
@@ -262,12 +267,13 @@ public class IGCRestClient {
      * @param payload the payload (if any) for the request
      * @param alreadyTriedNewSession indicates whether a new session was already attempted (true) or not (false)
      * @return {@code ResponseEntity<String>}
+     * @throws IGCConnectivityException if the attempt to open a new session fails
      */
     private ResponseEntity<String> openNewSessionWithRequest(String url,
                                                              HttpMethod method,
                                                              MediaType contentType,
                                                              String payload,
-                                                             boolean alreadyTriedNewSession) {
+                                                             boolean alreadyTriedNewSession) throws IGCConnectivityException {
         if (alreadyTriedNewSession) {
             String formattedMessage = method + " to " + url + " with: " + payload;
             throw new IGCConnectivityException("Opening a new session already attempted without success -- giving up.", formattedMessage);
@@ -288,11 +294,12 @@ public class IGCRestClient {
      * @param file the Spring FileSystemResource or ClassPathResource containing the file to be uploaded
      * @param alreadyTriedNewSession indicates whether a new session was already attempted (true) or not (false)
      * @return {@code ResponseEntity<String>}
+     * @throws IGCConnectivityException if the attempt to open a new session fails
      */
     private ResponseEntity<String> openNewSessionWithUpload(String endpoint,
                                                             HttpMethod method,
                                                             AbstractResource file,
-                                                            boolean alreadyTriedNewSession) {
+                                                            boolean alreadyTriedNewSession) throws IGCConnectivityException {
         if (alreadyTriedNewSession) {
             String formattedMessage = method + " to " + endpoint + " with: " + file.toString();
             throw new IGCConnectivityException("Opening a new session already attempted without success -- giving up.", formattedMessage);
@@ -309,8 +316,9 @@ public class IGCRestClient {
      * cookies.
      *
      * @param response the response from which to obtain the cookies
+     * @throws IGCConnectivityException if an invalid cookie is found, suggesting some attempt at hacking
      */
-    private void setCookiesFromResponse(ResponseEntity<String> response) {
+    private void setCookiesFromResponse(ResponseEntity<String> response) throws IGCConnectivityException {
 
         // If we had a successful response, setup the cookies
         if (response.getStatusCode() == HttpStatus.OK
@@ -352,8 +360,9 @@ public class IGCRestClient {
      * @param json the JSON string to convert
      * @param <T> the type of POJO into which to read
      * @return T - an IGC object that is at least a Reference, but can be more specific
+     * @throws IGCParsingException if the attempt to read the JSON fails
      */
-    public <T extends Reference> T readJSONIntoPOJO(String json) {
+    public <T extends Reference> T readJSONIntoPOJO(String json) throws IGCParsingException {
         T reference;
         try {
             reference = this.mapper.readValue(json, new TypeReference<T>(){});
@@ -369,8 +378,9 @@ public class IGCRestClient {
      * @param json the JSON string to convert
      * @param <T> the type of items that should be in the ItemList
      * @return {@code ItemList<T>}
+     * @throws IGCParsingException if the attempt to read the JSON fails
      */
-    public <T extends Reference> ItemList<T> readJSONIntoItemList(String json) {
+    public <T extends Reference> ItemList<T> readJSONIntoItemList(String json) throws IGCParsingException {
         ItemList<T> itemList;
         try {
             itemList = this.mapper.readValue(json, new TypeReference<ItemList<T>>(){});
@@ -385,8 +395,9 @@ public class IGCRestClient {
      *
      * @param asset the IGC asset to convert
      * @return String of JSON representing the asset
+     * @throws IGCParsingException if the attempt to read the JSON fails
      */
-    public String getValueAsJSON(Reference asset) {
+    public String getValueAsJSON(Reference asset) throws IGCParsingException {
         String payload;
         try {
             payload = this.mapper.writeValueAsString(asset);
@@ -453,8 +464,9 @@ public class IGCRestClient {
      * @param file the Spring FileSystemResource or ClassPathResource of the file to be uploaded
      * @param forceLogin a boolean indicating whether login should be forced (true) or session reused (false)
      * @return {@code ResponseEntity<String>}
+     * @throws IGCConnectivityException if there is any connectivity issue during the upload
      */
-    private ResponseEntity<String> uploadFile(String endpoint, HttpMethod method, AbstractResource file, boolean forceLogin) {
+    private ResponseEntity<String> uploadFile(String endpoint, HttpMethod method, AbstractResource file, boolean forceLogin) throws IGCConnectivityException {
 
         HttpHeaders headers = getHttpHeaders(forceLogin);
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -499,8 +511,9 @@ public class IGCRestClient {
      * @param method HttpMethod (POST, PUT, etc)
      * @param file the Spring FileSystemResource or ClassPathResource containing the file to be uploaded
      * @return boolean - indicates success (true) or failure (false)
+     * @throws IGCConnectivityException if there is any connectivity issue during the upload
      */
-    public boolean uploadFile(String endpoint, HttpMethod method, AbstractResource file) {
+    public boolean uploadFile(String endpoint, HttpMethod method, AbstractResource file) throws IGCConnectivityException {
         ResponseEntity<String> response = uploadFile(endpoint, method, file, false);
         return (response != null && response.getStatusCode() == HttpStatus.OK);
     }
@@ -514,12 +527,13 @@ public class IGCRestClient {
      * @param payload if POSTing some content, the JSON structure providing what should be POSTed
      * @param forceLogin a boolean indicating whether login should be forced (true) or session reused (false)
      * @return {@code ResponseEntity<String>}
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
      */
     private ResponseEntity<String> makeRequest(String url,
                                                HttpMethod method,
                                                MediaType contentType,
                                                String payload,
-                                               boolean forceLogin) {
+                                               boolean forceLogin) throws IGCConnectivityException {
         HttpHeaders headers = getHttpHeaders(forceLogin);
         HttpEntity<String> toSend;
         if (payload != null) {
@@ -563,8 +577,9 @@ public class IGCRestClient {
      * @param contentType the type of content to expect in the payload (if any)
      * @param payload if POSTing some content, the JSON structure providing what should be POSTed
      * @return String - containing the body of the response
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
      */
-    public String makeRequest(String endpoint, HttpMethod method, MediaType contentType, String payload) {
+    public String makeRequest(String endpoint, HttpMethod method, MediaType contentType, String payload) throws IGCConnectivityException {
         ResponseEntity<String> response = makeRequest(
                 baseURL + (endpoint.startsWith("/") ? endpoint : "/" + endpoint),
                 method,
@@ -590,8 +605,9 @@ public class IGCRestClient {
      * @param contentType the type of content to expect in the payload
      * @param payload the data that should be created
      * @return String - containing the RID of the created object instance
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
      */
-    public String makeCreateRequest(String endpoint, HttpMethod method, MediaType contentType, String payload) {
+    public String makeCreateRequest(String endpoint, HttpMethod method, MediaType contentType, String payload) throws IGCConnectivityException {
         ResponseEntity<String> response = makeRequest(
                 baseURL + (endpoint.startsWith("/") ? endpoint : "/" + endpoint),
                 method,
@@ -621,10 +637,11 @@ public class IGCRestClient {
      * Retrieves the list of metadata types supported by IGC.
      *
      * @param objectMapper an ObjectMapper to use for translating the types list
-     *
      * @return {@code List<TypeHeader>} the list of types supported by IGC
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the types payload
      */
-    public List<TypeHeader> getTypes(ObjectMapper objectMapper) {
+    public List<TypeHeader> getTypes(ObjectMapper objectMapper) throws IGCConnectivityException, IGCParsingException {
         String response = makeRequest(EP_TYPES, HttpMethod.GET, null,null);
         List<TypeHeader> alTypes;
         try {
@@ -640,8 +657,10 @@ public class IGCRestClient {
      *
      * @param typeName the IGC type name for which to retrieve details
      * @return TypeDetails
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the types payload
      */
-    public TypeDetails getTypeDetails(String typeName) {
+    public TypeDetails getTypeDetails(String typeName) throws IGCConnectivityException, IGCParsingException {
         return getTypeDetails(typeName, true, true, true);
     }
 
@@ -653,8 +672,10 @@ public class IGCRestClient {
      * @param create whether to include the properties that can be included during creation
      * @param edit whether to include editable properties
      * @return TypeDetails
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the types payload
      */
-    public TypeDetails getTypeDetails(String typeName, boolean view, boolean create, boolean edit) {
+    public TypeDetails getTypeDetails(String typeName, boolean view, boolean create, boolean edit) throws IGCConnectivityException, IGCParsingException {
         String response = makeRequest(EP_TYPES + "/" + typeName + "?showViewProperties=" + view + "&showCreateProperties=" + create + "&showEditProperties=" + edit, HttpMethod.GET, null, null);
         TypeDetails typeDetails;
         try {
@@ -673,8 +694,10 @@ public class IGCRestClient {
      *
      * @param rid the Repository ID of the asset
      * @return Reference - the IGC object representing the asset
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
      */
-    public Reference getAssetById(String rid) {
+    public Reference getAssetById(String rid) throws IGCConnectivityException, IGCParsingException {
         return getAssetById(rid, null);
     }
 
@@ -687,8 +710,10 @@ public class IGCRestClient {
      * @param rid the Repository ID of the asset
      * @param cache a cache of previously-retrieved assets
      * @return Reference - the IGC object representing the asset
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
      */
-    public Reference getAssetById(String rid, ObjectCache cache) {
+    public Reference getAssetById(String rid, ObjectCache cache) throws IGCConnectivityException, IGCParsingException {
         Reference result = null;
         if (cache != null) {
             result = cache.get(rid);
@@ -717,8 +742,10 @@ public class IGCRestClient {
      *
      * @param rid the Repository ID of the asset
      * @return Reference - the minimalistic IGC object representing the asset
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
      */
-    public Reference getAssetRefById(String rid) {
+    public Reference getAssetRefById(String rid) throws IGCConnectivityException, IGCParsingException {
 
         // We can search for any object by ID by using "main_object" as the type
         // (no properties needed)
@@ -756,10 +783,12 @@ public class IGCRestClient {
      * @param properties a list of the properties to retrieve
      * @param <T> the type of Reference to return
      * @return Reference - the object including only the subset of properties specified
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
      */
     public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
                                                                   String assetType,
-                                                                  List<String> properties) {
+                                                                  List<String> properties) throws IGCConnectivityException, IGCParsingException {
         return getAssetWithSubsetOfProperties(rid, assetType, properties, defaultPageSize);
     }
 
@@ -772,10 +801,12 @@ public class IGCRestClient {
      * @param properties a list of the properties to retrieve
      * @param <T> the type of Reference to return
      * @return Reference - the object including only the subset of properties specified
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
      */
     public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
                                                                   String assetType,
-                                                                  String[] properties) {
+                                                                  String[] properties) throws IGCConnectivityException, IGCParsingException {
         return getAssetWithSubsetOfProperties(rid, assetType, properties, defaultPageSize);
     }
 
@@ -789,11 +820,13 @@ public class IGCRestClient {
      * @param pageSize the maximum number of each of the asset's relationships to return on this request
      * @param <T> the type of Reference to return
      * @return Reference - the object including only the subset of properties specified
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
      */
     public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
                                                                   String assetType,
                                                                   String[] properties,
-                                                                  int pageSize) {
+                                                                  int pageSize) throws IGCConnectivityException, IGCParsingException {
         return getAssetWithSubsetOfProperties(rid, assetType, Arrays.asList(properties), pageSize);
     }
 
@@ -807,12 +840,14 @@ public class IGCRestClient {
      * @param pageSize the maximum number of each of the asset's relationships to return on this request
      * @param <T> the type of Reference to return
      * @return Reference - the object including only the subset of properties specified
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
      */
     @SuppressWarnings("unchecked")
     public <T extends Reference> T getAssetWithSubsetOfProperties(String rid,
                                                                   String assetType,
                                                                   List<String> properties,
-                                                                  int pageSize) {
+                                                                  int pageSize) throws IGCConnectivityException, IGCParsingException {
         if (IGCRestConstants.getTypesThatCannotBeSearched().contains(assetType)) {
             log.debug("Retrieving full asset {}, as it cannot be searched to retrieve only a subset of properties.", rid);
             Reference full = getAssetById(rid);
@@ -839,8 +874,9 @@ public class IGCRestClient {
      *
      * @param igcSearch the IGCSearch object defining criteria by which to search
      * @return JsonNode - the first JSON page of results from the search
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
      */
-    private String searchJson(IGCSearch igcSearch) {
+    private String searchJson(IGCSearch igcSearch) throws IGCConnectivityException {
         return makeRequest(EP_SEARCH, HttpMethod.POST, MediaType.APPLICATION_JSON, igcSearch.getQuery().toString());
     }
 
@@ -850,8 +886,10 @@ public class IGCRestClient {
      * @param igcSearch search conditions and criteria to use
      * @param <T> the type of items that should be in the ItemList
      * @return {@code ItemList<T>} - the first page of results from the search
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
      */
-    public <T extends Reference> ItemList<T> search(IGCSearch igcSearch) {
+    public <T extends Reference> ItemList<T> search(IGCSearch igcSearch) throws IGCConnectivityException, IGCParsingException {
         ItemList<T> itemList;
         String results = searchJson(igcSearch);
         try {
@@ -868,8 +906,9 @@ public class IGCRestClient {
      * @param rid the Repository ID of the asset to update
      * @param value the JSON structure defining what value(s) of the asset to update (and mode)
      * @return String - the JSON indicating the updated asset's RID and updates made
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
      */
-    private String updateJson(String rid, JsonNode value) {
+    private String updateJson(String rid, JsonNode value) throws IGCConnectivityException {
         return makeRequest(EP_ASSET + "/" + rid, HttpMethod.PUT, MediaType.APPLICATION_JSON, value.toString());
     }
 
@@ -878,8 +917,9 @@ public class IGCRestClient {
      *
      * @param igcUpdate update criteria to use
      * @return boolean - indicating success (true) or not (false) of the operation
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
      */
-    public boolean update(IGCUpdate igcUpdate) {
+    public boolean update(IGCUpdate igcUpdate) throws IGCConnectivityException {
         String result = updateJson(igcUpdate.getRidToUpdate(), igcUpdate.getUpdate());
         return (result != null);
     }
@@ -889,8 +929,9 @@ public class IGCRestClient {
      *
      * @param value the JSON structure defining what should be created
      * @return String - the created asset's RID
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
      */
-    private String createJson(JsonNode value) {
+    private String createJson(JsonNode value) throws IGCConnectivityException {
         return makeCreateRequest(EP_ASSET, HttpMethod.POST, MediaType.APPLICATION_JSON, value.toString());
     }
 
@@ -899,8 +940,9 @@ public class IGCRestClient {
      *
      * @param igcCreate creation criteria to use
      * @return String - the created asset's RID (or null if nothing was created)
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
      */
-    public String create(IGCCreate igcCreate) {
+    public String create(IGCCreate igcCreate) throws IGCConnectivityException {
         return createJson(igcCreate.getCreate());
     }
 
@@ -909,8 +951,9 @@ public class IGCRestClient {
      *
      * @param rid the RID of the asset to delete
      * @return String - null upon successful deletion, otherwise containing a message pertaining to the failure
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
      */
-    private String deleteJson(String rid) {
+    private String deleteJson(String rid) throws IGCConnectivityException {
         return makeRequest(EP_ASSET + "/" + rid, HttpMethod.DELETE, MediaType.APPLICATION_JSON, null);
     }
 
@@ -919,8 +962,9 @@ public class IGCRestClient {
      *
      * @param rid the RID of the asset to delete
      * @return boolean
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
      */
-    public boolean delete(String rid) {
+    public boolean delete(String rid) throws IGCConnectivityException {
         String result = deleteJson(rid);
         if (result != null) {
             throw new IGCConnectivityException("Unable to delete asset.", rid);
@@ -934,8 +978,9 @@ public class IGCRestClient {
      *
      * @param jobRid the RID of the job for which to detect lineage
      * @return boolean giving indication of success (true) or not (false)
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
      */
-    public boolean detectLineage(String jobRid) {
+    public boolean detectLineage(String jobRid) throws IGCConnectivityException {
         ResponseEntity<String> response = makeRequest(
                 baseURL + EP_BASE_API + "/flows/detectFlows/dsjob/" + jobRid,
                 HttpMethod.GET,
@@ -957,8 +1002,10 @@ public class IGCRestClient {
      * @param name the bundleId of the bundle
      * @param file the Spring FileSystemResource or ClassPathResource containing the file to be uploaded
      * @return boolean - indication of success (true) or failure (false)
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
      */
-    public boolean upsertOpenIgcBundle(String name, AbstractResource file) {
+    public boolean upsertOpenIgcBundle(String name, AbstractResource file) throws IGCConnectivityException, IGCParsingException {
         boolean success;
         List<String> existingBundles = getOpenIgcBundles();
         if (existingBundles.contains(name)) {
@@ -975,8 +1022,9 @@ public class IGCRestClient {
      * @param directory the directory under which the OpenIGC bundle is defined (ie. including an
      *                  'asset_type_descriptor.xml', an 'i18n' subdirectory and an 'icons' subdirectory)
      * @return File - the temporary zip file containing the bundle
+     * @throws IGCIOException if there is any issue loading the provided directory or creating a bundle from it
      */
-    public File createOpenIgcBundleFile(File directory) {
+    public File createOpenIgcBundleFile(File directory) throws IGCIOException {
 
         File bundle;
         try {
@@ -1006,8 +1054,9 @@ public class IGCRestClient {
      * @param file the file from which to recursively process
      * @param name the name of the file from which to recursively process
      * @param zipOutput the zip output stream into which to write the entries
+     * @throws IGCIOException if there is any issue loading the provided directory or creating a zip file from it
      */
-    private void recursivelyZipFiles(File file, String name, ZipOutputStream zipOutput) {
+    private void recursivelyZipFiles(File file, String name, ZipOutputStream zipOutput) throws IGCIOException {
 
         if (file.isDirectory()) {
 
@@ -1058,8 +1107,10 @@ public class IGCRestClient {
      * Retrieve the set of OpenIGC bundles already defined in the environment.
      *
      * @return {@code List<String>}
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
      */
-    public List<String> getOpenIgcBundles() {
+    public List<String> getOpenIgcBundles() throws IGCConnectivityException, IGCParsingException {
         String bundles = makeRequest(EP_BUNDLES, HttpMethod.GET, null,null);
         List<String> alBundles = new ArrayList<>();
         try {
@@ -1078,8 +1129,9 @@ public class IGCRestClient {
      *
      * @param assetXML the XML string defining the OpenIGC asset
      * @return String - the JSON structure indicating the updated assets' RID(s)
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
      */
-    public String upsertOpenIgcAsset(String assetXML) {
+    public String upsertOpenIgcAsset(String assetXML) throws IGCConnectivityException {
         return makeRequest(EP_BUNDLE_ASSETS, HttpMethod.POST, MediaType.APPLICATION_XML, assetXML);
     }
 
@@ -1088,8 +1140,9 @@ public class IGCRestClient {
      *
      * @param assetXML the XML string defining the OpenIGC asset deletion
      * @return boolean - true on success, false on failure
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
      */
-    public boolean deleteOpenIgcAsset(String assetXML) {
+    public boolean deleteOpenIgcAsset(String assetXML) throws IGCConnectivityException {
         return (makeRequest(EP_BUNDLE_ASSETS, HttpMethod.DELETE, MediaType.APPLICATION_XML, assetXML) == null);
     }
 
@@ -1100,8 +1153,10 @@ public class IGCRestClient {
      * @param list the list of items from which to retrieve the next page
      * @param <T> the type of items to expect in the ItemList
      * @return {@code ItemList<T>} - the next page of results
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
      */
-    public <T extends Reference> ItemList<T> getNextPage(String propertyName, ItemList<T> list) {
+    public <T extends Reference> ItemList<T> getNextPage(String propertyName, ItemList<T> list) throws IGCConnectivityException, IGCParsingException {
         return getNextPage(propertyName, list.getPaging());
     }
 
@@ -1113,8 +1168,10 @@ public class IGCRestClient {
      * @param list the ItemList for which to retrieve all pages
      * @param <T> the type of items to expect in the ItemList
      * @return {@code List<T>} - a List containing all items from all pages of results
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
      */
-    public <T extends Reference> List<T> getAllPages(String propertyName, ItemList<T> list) {
+    public <T extends Reference> List<T> getAllPages(String propertyName, ItemList<T> list) throws IGCConnectivityException, IGCParsingException {
         if (list != null) {
             return getAllPages(propertyName, list.getItems(), list.getPaging());
         } else {
@@ -1130,8 +1187,10 @@ public class IGCRestClient {
      * @param paging the "paging" portion of the JSON response from which to retrieve the next page
      * @param <T> the type of items to expect in the ItemList
      * @return {@code ItemList<T>} - the next page of results
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
      */
-    private <T extends Reference> ItemList<T> getNextPage(String propertyName, Paging paging) {
+    private <T extends Reference> ItemList<T> getNextPage(String propertyName, Paging paging) throws IGCConnectivityException, IGCParsingException {
         ItemList<T> nextPage = null;
         try {
             nextPage = mapper.readValue("{}", new TypeReference<ItemList<T>>() {});
@@ -1181,8 +1240,10 @@ public class IGCRestClient {
      * @param paging the Paging object for which to retrieve all pages
      * @param <T> the type of items to expect in the ItemList
      * @return {@code List<T>} - a List containing all items from all pages of results
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
      */
-    private <T extends Reference> List<T> getAllPages(String propertyName, List<T> items, Paging paging) {
+    private <T extends Reference> List<T> getAllPages(String propertyName, List<T> items, Paging paging) throws IGCConnectivityException, IGCParsingException {
         List<T> allPages = items;
         ItemList<T> results = getNextPage(propertyName, paging);
         List<T> resultsItems = results.getItems();
@@ -1196,8 +1257,9 @@ public class IGCRestClient {
 
     /**
      * Disconnect from IGC REST API and invalidate the session.
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
      */
-    public void disconnect() {
+    public void disconnect() throws IGCConnectivityException {
         makeRequest(EP_LOGOUT, HttpMethod.GET, null,null);
     }
 
@@ -1205,8 +1267,11 @@ public class IGCRestClient {
      * Cache detailed information about the IGC object type.
      *
      * @param typeName name of the IGC object type to cache
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO that defines the type and its properties
      */
-    public void cacheTypeDetails(String typeName) {
+    public void cacheTypeDetails(String typeName) throws IGCConnectivityException, IGCParsingException, IGCIOException {
 
         if (typeName != null) {
             // Only continue if the information is not already cached
@@ -1282,8 +1347,11 @@ public class IGCRestClient {
      *
      * @param typeName the name of the IGC object type
      * @return String
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    public String getDisplayNameForType(String typeName) {
+    public String getDisplayNameForType(String typeName) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         cacheTypeDetails(typeName);
         if (typeName != null) {
             return typeToDisplayName.getOrDefault(typeName, null);
@@ -1297,8 +1365,11 @@ public class IGCRestClient {
      *
      * @param typeName the name of the IGC object type
      * @return boolean
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    public boolean isCreatable(String typeName) {
+    public boolean isCreatable(String typeName) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         cacheTypeDetails(typeName);
         if (typeName != null) {
             return typesThatCanBeCreated.contains(typeName);
@@ -1312,8 +1383,11 @@ public class IGCRestClient {
      *
      * @param typeName the name of the IGC asset type for which to check whether it tracks modification details
      * @return boolean
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    public boolean hasModificationDetails(String typeName) {
+    public boolean hasModificationDetails(String typeName) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         cacheTypeDetails(typeName);
         if (typeName != null) {
             return typesThatIncludeModificationDetails.contains(typeName);
@@ -1327,8 +1401,11 @@ public class IGCRestClient {
      *
      * @param typeName the name of the IGC object type
      * @return {@code List<String>}
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    public List<String> getAllPropertiesForType(String typeName) {
+    public List<String> getAllPropertiesForType(String typeName) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         cacheTypeDetails(typeName);
         if (typeName != null) {
             return typeToAllProperties.getOrDefault(typeName, Collections.emptyList());
@@ -1343,8 +1420,11 @@ public class IGCRestClient {
      *
      * @param typeName the name of the IGC object type
      * @return {@code List<String>}
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    public List<String> getNonRelationshipPropertiesForType(String typeName) {
+    public List<String> getNonRelationshipPropertiesForType(String typeName) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         cacheTypeDetails(typeName);
         if (typeName != null) {
             return typeToNonRelationshipProperties.getOrDefault(typeName, Collections.emptyList());
@@ -1358,8 +1438,11 @@ public class IGCRestClient {
      *
      * @param typeName the name of the IGC object type
      * @return {@code List<String>}
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    public List<String> getAllStringPropertiesForType(String typeName) {
+    public List<String> getAllStringPropertiesForType(String typeName) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         cacheTypeDetails(typeName);
         if (typeName != null) {
             return typeToStringProperties.getOrDefault(typeName, Collections.emptyList());
@@ -1374,8 +1457,11 @@ public class IGCRestClient {
      *
      * @param typeName the name of the IGC object type
      * @return {@code List<String>}
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    public List<String> getPagedRelationshipPropertiesForType(String typeName) {
+    public List<String> getPagedRelationshipPropertiesForType(String typeName) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         cacheTypeDetails(typeName);
         if (typeName != null) {
             return typeToPagedRelationshipProperties.getOrDefault(typeName, Collections.emptyList());
@@ -1398,8 +1484,9 @@ public class IGCRestClient {
      * it would be "term"). See the base POJOs for examples.
      *
      * @param clazz the Java Class (POJO) object to register
+     * @throws IGCIOException if there is any issue introspecting the provided POJO class
      */
-    public void registerPOJO(Class<?> clazz) {
+    public void registerPOJO(Class<?> clazz) throws IGCIOException {
         JsonTypeName typeName = clazz.getAnnotation(JsonTypeName.class);
         if (typeName != null) {
             String typeId = typeName.value();
@@ -1418,8 +1505,9 @@ public class IGCRestClient {
      * @param assetType name of the IGC asset
      * @return Class
      * @see #registerPOJO(Class)
+     * @throws IGCIOException if there is any issue introspecting the provided POJO class
      */
-    public Class<?> getPOJOForType(String assetType) {
+    public Class<?> getPOJOForType(String assetType) throws IGCIOException {
         Class<?> igcPOJO = registeredTypes.getOrDefault(assetType, null);
         if (igcPOJO == null) {
             StringBuilder sbPojoName = new StringBuilder();
@@ -1462,8 +1550,9 @@ public class IGCRestClient {
      * @param type the IGC asset type from which to retrieve the property
      * @param property the name of the property to retrieve
      * @return DynamicPropertyReader
+     * @throws IGCIOException if there is any issue introspecting the class that defines the type and its properties
      */
-    private DynamicPropertyReader getAccessor(String type, String property) {
+    private DynamicPropertyReader getAccessor(String type, String property) throws IGCIOException {
         String key = getDynamicPropertyKey(type, property);
         if (!typeAndPropertyToAccessor.containsKey(key)) {
             try {
@@ -1483,15 +1572,16 @@ public class IGCRestClient {
      * @param object the IGC object from which to retrieve the property's value
      * @param property the name of the property for which to retrieve the value
      * @return Object
+     * @throws IGCIOException if there is any issue introspecting the class that defines the type and its properties
      */
-    public Object getPropertyByName(Reference object, String property) {
+    public Object getPropertyByName(Reference object, String property) throws IGCIOException {
         if (object != null) {
             DynamicPropertyReader accessor = getAccessor(object.getType(), property);
             if (accessor != null) {
                 return accessor.getProperty(object);
             } else {
                 String formattedMessage = object.getType() + "::" + property;
-                throw new IGCParsingException("Unable to find accessor for object type and property.", formattedMessage, null);
+                throw new IGCIOException("Unable to find accessor for object type and property.", formattedMessage, null);
             }
         } else {
             return null;
@@ -1506,8 +1596,11 @@ public class IGCRestClient {
      * @param object the IGC object for which to populate modification details
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return T - the IGC object with its _context and modification details populated
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    public <T extends Reference> T getModificationDetails(T object, ObjectCache cache) {
+    public <T extends Reference> T getModificationDetails(T object, ObjectCache cache) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         return getAssetContext(object, true, cache);
     }
 
@@ -1522,9 +1615,12 @@ public class IGCRestClient {
      * @param bPopulateModDetails true to force modification detail retrieval, false otherwise
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return T - the IGC object with its _context and modification details populated
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
     @SuppressWarnings("unchecked")
-    private <T extends Reference> T getAssetContext(T object, boolean bPopulateModDetails, ObjectCache cache) {
+    private <T extends Reference> T getAssetContext(T object, boolean bPopulateModDetails, ObjectCache cache) throws IGCConnectivityException, IGCParsingException, IGCIOException {
 
         T populated = object;
         if (object != null) {

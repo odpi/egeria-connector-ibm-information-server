@@ -2,8 +2,10 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -20,6 +22,7 @@ import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorEx
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -48,14 +51,16 @@ public class Spine_Mapper extends ClassificationMapping {
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the IGC object for which the classification should exist
      * @param userId the user requesting the mapped classifications
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                              List<Classification> classifications,
                                              ObjectCache cache,
                                              Reference fromIgcObject,
-                                             String userId) {
+                                             String userId) throws RepositoryErrorException {
 
+        final String methodName = "addMappedOMRSClassifications";
         if (fromIgcObject instanceof Term) {
             ItemList<Category> candidates = ((Term) fromIgcObject).getReferencingCategories();
 
@@ -63,7 +68,12 @@ public class Spine_Mapper extends ClassificationMapping {
 
                 // This is likely to be a NOOP in most circumstances, otherwise it may be faster to do an explicit search
                 // with a full set of criteria (referencing category name, and its parent category under Classifications)
-                List<Category> allCandidates = igcomrsRepositoryConnector.getIGCRestClient().getAllPages("referencing_categories", candidates);
+                List<Category> allCandidates = Collections.emptyList();
+                try {
+                    allCandidates = igcomrsRepositoryConnector.getIGCRestClient().getAllPages("referencing_categories", candidates);
+                } catch (IGCException e) {
+                    raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                }
                 boolean foundSpine = false;
                 for (Category candidate : allCandidates) {
                     if (candidate.getName().equals(getOmrsClassificationType())) {

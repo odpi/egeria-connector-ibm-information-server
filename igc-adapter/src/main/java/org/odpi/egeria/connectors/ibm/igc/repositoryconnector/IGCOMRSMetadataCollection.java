@@ -7,6 +7,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -1496,16 +1497,20 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                         igcSearch.addSortingCriteria(igcSearchSorting);
                     }
 
-                    igcRepositoryHelper.processResults(
-                            mapping,
-                            this.igcRestClient.search(igcSearch),
-                            entityDetails,
-                            cache,
-                            null,
-                            null,
-                            pageSize,
-                            userId
-                    );
+                    try {
+                        igcRepositoryHelper.processResults(
+                                mapping,
+                                this.igcRestClient.search(igcSearch),
+                                entityDetails,
+                                cache,
+                                null,
+                                null,
+                                pageSize,
+                                userId
+                        );
+                    } catch (IGCException e) {
+                        raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                    }
 
                 } else {
                     log.info("No classification mapping has been implemented for {} on entity {} -- skipping from search.", classificationName, mapping.getOmrsTypeDefName());
@@ -1675,110 +1680,114 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
                     // Get list of string properties from the asset type -- these are the list of properties we should use
                     // for the search
-                    List<String> properties = igcRestClient.getAllStringPropertiesForType(igcAssetType);
-                    Set<String> simpleMappedIgcProperties = mapping.getSimpleMappedIgcProperties();
-                    if (properties != null) {
+                    try {
+                        List<String> properties = igcRestClient.getAllStringPropertiesForType(igcAssetType);
+                        Set<String> simpleMappedIgcProperties = mapping.getSimpleMappedIgcProperties();
+                        if (properties != null) {
 
-                        IGCSearchConditionSet classificationLimiters = igcRepositoryHelper.getSearchCriteriaForClassifications(
-                                igcAssetType,
-                                repositoryHelper.getSearchClassificationsFromList(limitResultsByClassification)
-                        );
-
-                        if (limitResultsByClassification != null && !limitResultsByClassification.isEmpty() && classificationLimiters == null) {
-                            log.info("Classification limiters were specified, but none apply to the asset type {}, so excluding this asset type from search.", igcAssetType);
-                        } else {
-
-                            IGCSearchConditionSet outerConditions = new IGCSearchConditionSet();
-                            IGCRepositoryHelper.addTypeSpecificConditions(mapping,
-                                    MatchCriteria.ALL,
-                                    null,
-                                    outerConditions);
-
-                            // If the searchCriteria is empty, retrieve all entities of the type (no conditions)
-                            String newCriteria = sbNewCriteria.toString();
-                            if (newCriteria.equals("")) {
-                                newCriteria = searchCriteria;
-                            }
-                            if (newCriteria != null && !newCriteria.equals("")) {
-
-                                // POST'd search to IGC doesn't work on v11.7.0.2 using long_description
-                                // Using "searchText" requires using "searchProperties" (no "where" conditions) -- but does not
-                                // work with 'main_object', must be used with a specific asset type
-                                // Therefore for v11.7.0.2 we will simply drop long_description from the fields we search
-                                if (igcRestClient.getIgcVersion().isEqualTo(IGCVersionEnum.V11702)) {
-                                    ArrayList<String> propertiesWithoutLongDescription = new ArrayList<>();
-                                    for (String property : properties) {
-                                        if (!property.equals("long_description")) {
-                                            propertiesWithoutLongDescription.add(property);
-                                        }
-                                    }
-                                    properties = propertiesWithoutLongDescription;
-                                }
-
-                                IGCSearchConditionSet innerConditions = new IGCSearchConditionSet();
-                                innerConditions.setMatchAnyCondition(true);
-                                for (String property : properties) {
-                                    // Only include the simple-mapped properties in the search here, as any complex-mapped
-                                    // properties should be included by the criteria below, thereby excluding results for
-                                    // things like 'modified_by' and 'created_by'
-                                    if (simpleMappedIgcProperties.contains(property)) {
-                                        innerConditions.addCondition(
-                                                IGCRepositoryHelper.getRegexSearchCondition(
-                                                        repositoryHelper,
-                                                        repositoryName,
-                                                        methodName,
-                                                        property,
-                                                        newCriteria
-                                                ));
-                                    }
-                                }
-                                // Add any complex mappings needed by the mapping (a no-op if there are none)
-                                mapping.addComplexStringSearchCriteria(repositoryHelper,
-                                        repositoryName,
-                                        igcRestClient,
-                                        innerConditions,
-                                        newCriteria);
-                                outerConditions.addNestedConditionSet(innerConditions);
-
-                            }
-
-                            if (classificationLimiters != null) {
-                                outerConditions.addNestedConditionSet(classificationLimiters);
-                                outerConditions.setMatchAnyCondition(false);
-                            }
-
-                            IGCSearchSorting igcSearchSorting = null;
-                            if (sequencingProperty == null && sequencingOrder != null) {
-                                igcSearchSorting = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
-                            }
-
-                            igcSearch.addConditions(outerConditions);
-
-                            igcRepositoryHelper.setPagingForSearch(igcSearch, fromEntityElement, pageSize);
-
-                            if (igcSearchSorting != null) {
-                                igcSearch.addSortingCriteria(igcSearchSorting);
-                            }
-
-                            // Add properties for this IGC asset type to the search, since ultimately we will
-                            // be retrieving EntityDetails for each result
-                            igcSearch.addProperties(mapping.getAllPropertiesForEntityDetail(igcRestClient, igcAssetType));
-
-                            igcRepositoryHelper.processResults(
-                                    mapping,
-                                    this.igcRestClient.search(igcSearch),
-                                    entityDetails,
-                                    cache,
-                                    null,
-                                    searchCriteria,
-                                    pageSize,
-                                    userId
+                            IGCSearchConditionSet classificationLimiters = igcRepositoryHelper.getSearchCriteriaForClassifications(
+                                    igcAssetType,
+                                    repositoryHelper.getSearchClassificationsFromList(limitResultsByClassification)
                             );
 
-                        }
+                            if (limitResultsByClassification != null && !limitResultsByClassification.isEmpty() && classificationLimiters == null) {
+                                log.info("Classification limiters were specified, but none apply to the asset type {}, so excluding this asset type from search.", igcAssetType);
+                            } else {
 
-                    } else {
-                        log.warn("Unable to find POJO to handle IGC asset type '{}' -- skipping search against this asset type.", igcAssetType);
+                                IGCSearchConditionSet outerConditions = new IGCSearchConditionSet();
+                                IGCRepositoryHelper.addTypeSpecificConditions(mapping,
+                                        MatchCriteria.ALL,
+                                        null,
+                                        outerConditions);
+
+                                // If the searchCriteria is empty, retrieve all entities of the type (no conditions)
+                                String newCriteria = sbNewCriteria.toString();
+                                if (newCriteria.equals("")) {
+                                    newCriteria = searchCriteria;
+                                }
+                                if (newCriteria != null && !newCriteria.equals("")) {
+
+                                    // POST'd search to IGC doesn't work on v11.7.0.2 using long_description
+                                    // Using "searchText" requires using "searchProperties" (no "where" conditions) -- but does not
+                                    // work with 'main_object', must be used with a specific asset type
+                                    // Therefore for v11.7.0.2 we will simply drop long_description from the fields we search
+                                    if (igcRestClient.getIgcVersion().isEqualTo(IGCVersionEnum.V11702)) {
+                                        ArrayList<String> propertiesWithoutLongDescription = new ArrayList<>();
+                                        for (String property : properties) {
+                                            if (!property.equals("long_description")) {
+                                                propertiesWithoutLongDescription.add(property);
+                                            }
+                                        }
+                                        properties = propertiesWithoutLongDescription;
+                                    }
+
+                                    IGCSearchConditionSet innerConditions = new IGCSearchConditionSet();
+                                    innerConditions.setMatchAnyCondition(true);
+                                    for (String property : properties) {
+                                        // Only include the simple-mapped properties in the search here, as any complex-mapped
+                                        // properties should be included by the criteria below, thereby excluding results for
+                                        // things like 'modified_by' and 'created_by'
+                                        if (simpleMappedIgcProperties.contains(property)) {
+                                            innerConditions.addCondition(
+                                                    IGCRepositoryHelper.getRegexSearchCondition(
+                                                            repositoryHelper,
+                                                            repositoryName,
+                                                            methodName,
+                                                            property,
+                                                            newCriteria
+                                                    ));
+                                        }
+                                    }
+                                    // Add any complex mappings needed by the mapping (a no-op if there are none)
+                                    mapping.addComplexStringSearchCriteria(repositoryHelper,
+                                            repositoryName,
+                                            igcRestClient,
+                                            innerConditions,
+                                            newCriteria);
+                                    outerConditions.addNestedConditionSet(innerConditions);
+
+                                }
+
+                                if (classificationLimiters != null) {
+                                    outerConditions.addNestedConditionSet(classificationLimiters);
+                                    outerConditions.setMatchAnyCondition(false);
+                                }
+
+                                IGCSearchSorting igcSearchSorting = null;
+                                if (sequencingProperty == null && sequencingOrder != null) {
+                                    igcSearchSorting = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
+                                }
+
+                                igcSearch.addConditions(outerConditions);
+
+                                igcRepositoryHelper.setPagingForSearch(igcSearch, fromEntityElement, pageSize);
+
+                                if (igcSearchSorting != null) {
+                                    igcSearch.addSortingCriteria(igcSearchSorting);
+                                }
+
+                                // Add properties for this IGC asset type to the search, since ultimately we will
+                                // be retrieving EntityDetails for each result
+                                igcSearch.addProperties(mapping.getAllPropertiesForEntityDetail(igcRestClient, igcAssetType));
+
+                                igcRepositoryHelper.processResults(
+                                        mapping,
+                                        this.igcRestClient.search(igcSearch),
+                                        entityDetails,
+                                        cache,
+                                        null,
+                                        searchCriteria,
+                                        pageSize,
+                                        userId
+                                );
+
+                            }
+
+                        } else {
+                            log.warn("Unable to find POJO to handle IGC asset type '{}' -- skipping search against this asset type.", igcAssetType);
+                        }
+                    } catch (IGCException e) {
+                        raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
                     }
 
                 } else {
@@ -1846,35 +1855,43 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         // Should not need to translate from proxyone / proxytwo to alternative assets, as the RIDs provided
         // in the relationship GUID should already be pointing to the correct assets
         String relationshipLevelRid = igcRelationshipGuid.isRelationshipLevelObject() ? proxyOneRid : null;
-        Reference proxyOne;
-        Reference proxyTwo;
+        Reference proxyOne = null;
+        Reference proxyTwo = null;
         RelationshipMapping relationshipMapping;
         if (relationshipLevelRid != null) {
 
-            Reference relationshipAsset = igcRestClient.getAssetById(relationshipLevelRid);
-            String relationshipAssetType = relationshipAsset.getType();
-            relationshipMapping = igcRepositoryHelper.getRelationshipMappingByTypes(
-                    omrsRelationshipName,
-                    relationshipAssetType,
-                    relationshipAssetType
-            );
-            proxyOne = relationshipMapping.getProxyOneAssetFromAsset(relationshipAsset, igcRestClient, cache).get(0);
-            proxyTwo = relationshipMapping.getProxyTwoAssetFromAsset(relationshipAsset, igcRestClient, cache).get(0);
-            mappings.add(relationshipMapping);
+            try {
+                Reference relationshipAsset = igcRestClient.getAssetById(relationshipLevelRid);
+                String relationshipAssetType = relationshipAsset.getType();
+                relationshipMapping = igcRepositoryHelper.getRelationshipMappingByTypes(
+                        omrsRelationshipName,
+                        relationshipAssetType,
+                        relationshipAssetType
+                );
+                proxyOne = relationshipMapping.getProxyOneAssetFromAsset(relationshipAsset, igcRestClient, cache).get(0);
+                proxyTwo = relationshipMapping.getProxyTwoAssetFromAsset(relationshipAsset, igcRestClient, cache).get(0);
+                mappings.add(relationshipMapping);
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
 
         } else {
 
-            // TODO: replace with singular retrieval?
-            Reference oneEnd = igcRestClient.getAssetWithSubsetOfProperties(proxyOneRid, proxyOneType, igcRestClient.getAllPropertiesForType(proxyOneType));
-            proxyTwo = igcRestClient.getAssetWithSubsetOfProperties(proxyTwoRid, proxyTwoType, igcRestClient.getAllPropertiesForType(proxyTwoType));
-            relationshipMapping = igcRepositoryHelper.getRelationshipMappingByTypes(
-                    omrsRelationshipName,
-                    proxyOneType,
-                    proxyTwoType
-            );
-            proxyOne = relationshipMapping.getProxyOneAssetFromAsset(oneEnd, igcRestClient, cache).get(0);
-            // TODO: why no getProxyTwoAssetFromAsset here?
-            mappings.add(relationshipMapping);
+            try {
+                // TODO: replace with singular retrieval?
+                Reference oneEnd = igcRestClient.getAssetWithSubsetOfProperties(proxyOneRid, proxyOneType, igcRestClient.getAllPropertiesForType(proxyOneType));
+                proxyTwo = igcRestClient.getAssetWithSubsetOfProperties(proxyTwoRid, proxyTwoType, igcRestClient.getAllPropertiesForType(proxyTwoType));
+                relationshipMapping = igcRepositoryHelper.getRelationshipMappingByTypes(
+                        omrsRelationshipName,
+                        proxyOneType,
+                        proxyTwoType
+                );
+                proxyOne = relationshipMapping.getProxyOneAssetFromAsset(oneEnd, igcRestClient, cache).get(0);
+                // TODO: why no getProxyTwoAssetFromAsset here?
+                mappings.add(relationshipMapping);
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
 
         }
 
@@ -1993,12 +2010,16 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                             repositoryHelper.getSearchPropertiesFromInstanceProperties(repositoryName, matchProperties, matchCriteria));
 
                     if (!filter.equals(InstanceMapping.SearchFilter.NONE)) {
-                        igcRepositoryHelper.processResults(mapping,
-                                igcRestClient.search(igcSearch),
-                                relationships,
-                                cache,
-                                pageSize,
-                                userId);
+                        try {
+                            igcRepositoryHelper.processResults(mapping,
+                                    igcRestClient.search(igcSearch),
+                                    relationships,
+                                    cache,
+                                    pageSize,
+                                    userId);
+                        } catch (IGCException e) {
+                            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                        }
                     }
 
                 }
@@ -2069,12 +2090,16 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 for (IGCSearch igcSearch : searches) {
                     // TODO: handle sequencing -- here or as part of method above?
                     igcRepositoryHelper.setPagingForSearch(igcSearch, fromRelationshipElement, pageSize);
-                    igcRepositoryHelper.processResults(mapping,
-                            igcRestClient.search(igcSearch),
-                            relationships,
-                            cache,
-                            pageSize,
-                            userId);
+                    try {
+                        igcRepositoryHelper.processResults(mapping,
+                                igcRestClient.search(igcSearch),
+                                relationships,
+                                cache,
+                                pageSize,
+                                userId);
+                    } catch (IGCException e) {
+                        raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                    }
                 }
 
             }
@@ -2436,6 +2461,21 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         throw new RepositoryErrorException(errorCode.getMessageDefinition(params),
                 this.getClass().getName(),
                 methodName);
+    }
+
+    /**
+     * Throw a RepositoryErrorException using the provided information.
+     * @param errorCode the error code to use for the exception
+     * @param methodName the name of the method throwing the exception
+     * @param cause the underlying exception that caused this error
+     * @param params any additional parameters for formatting the error message
+     * @throws RepositoryErrorException always
+     */
+    private void raiseRepositoryErrorException(IGCOMRSErrorCode errorCode, String methodName, Exception cause, String ...params) throws RepositoryErrorException {
+        throw new RepositoryErrorException(errorCode.getMessageDefinition(params),
+                this.getClass().getName(),
+                methodName,
+                cause);
     }
 
     /**

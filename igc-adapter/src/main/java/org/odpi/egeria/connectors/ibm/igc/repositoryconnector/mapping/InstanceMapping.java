@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping;
 
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
@@ -15,6 +16,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -238,6 +240,12 @@ public abstract class InstanceMapping {
 
     }
 
+    /**
+     * Determine whether the provided condition includes a known instance header property.
+     * @param repositoryConnector connectivity to the IGC environment
+     * @param condition the condition to check
+     * @return boolean - true if the property is known and matches this repository, in all other cases false
+     */
     private boolean isKnownInstanceHeaderProperty(IGCOMRSRepositoryConnector repositoryConnector,
                                                   PropertyCondition condition) {
 
@@ -351,18 +359,35 @@ public abstract class InstanceMapping {
 
     }
 
+    /**
+     * Add search conditions for any header properties provided.
+     *
+     * @param igcSearchConditionSet the set of conditions to which to append
+     * @param omrsPropertyName the OMRS property name to search
+     * @param operator the operation to use for the search
+     * @param value the value to search
+     * @param mapping the mapping between IGC and OMRS
+     * @param igcomrsRepositoryConnector connectivity to the IGC environment
+     * @throws FunctionNotSupportedException if a requested regular expression is not supported
+     * @throws RepositoryErrorException if any issue interacting with IGC
+     */
     public static void addHeaderPropertySearchCriteria(IGCSearchConditionSet igcSearchConditionSet,
                                                        String omrsPropertyName,
                                                        PropertyComparisonOperator operator,
                                                        InstancePropertyValue value,
                                                        EntityMapping mapping,
                                                        IGCOMRSRepositoryConnector igcomrsRepositoryConnector)
-            throws FunctionNotSupportedException {
+            throws FunctionNotSupportedException, RepositoryErrorException {
 
         final String methodName = "addHeaderPropertySearchCriteria";
 
         String igcType = mapping.getIgcAssetType();
-        boolean hasModDetails = igcomrsRepositoryConnector.getIGCRestClient().hasModificationDetails(igcType);
+        boolean hasModDetails = false;
+        try {
+            hasModDetails = igcomrsRepositoryConnector.getIGCRestClient().hasModificationDetails(igcType);
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+        }
         OMRSRepositoryHelper helper = igcomrsRepositoryConnector.getRepositoryHelper();
         String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
 
@@ -376,7 +401,7 @@ public abstract class InstanceMapping {
                             operator,
                             value);
                 } else {
-                    throwUnsupportedPropertyException(methodName, omrsPropertyName, igcType);
+                    raiseUnsupportedPropertyException(methodName, omrsPropertyName, igcType);
                 }
                 break;
             case "updatedBy":
@@ -388,7 +413,7 @@ public abstract class InstanceMapping {
                             operator,
                             value);
                 } else {
-                    throwUnsupportedPropertyException(methodName, omrsPropertyName, igcType);
+                    raiseUnsupportedPropertyException(methodName, omrsPropertyName, igcType);
                 }
                 break;
             case "createTime":
@@ -400,7 +425,7 @@ public abstract class InstanceMapping {
                             operator,
                             value);
                 } else {
-                    throwUnsupportedPropertyException(methodName, omrsPropertyName, igcType);
+                    raiseUnsupportedPropertyException(methodName, omrsPropertyName, igcType);
                 }
                 break;
             case "updateTime":
@@ -412,7 +437,7 @@ public abstract class InstanceMapping {
                             operator,
                             value);
                 } else {
-                    throwUnsupportedPropertyException(methodName, omrsPropertyName, igcType);
+                    raiseUnsupportedPropertyException(methodName, omrsPropertyName, igcType);
                 }
                 break;
             case "maintainedBy":
@@ -433,7 +458,7 @@ public abstract class InstanceMapping {
                             value);
                     igcSearchConditionSet.addNestedConditionSet(nested);
                 } else {
-                    throwUnsupportedPropertyException(methodName, omrsPropertyName, igcType);
+                    raiseUnsupportedPropertyException(methodName, omrsPropertyName, igcType);
                 }
                 break;
             case "version":
@@ -454,10 +479,32 @@ public abstract class InstanceMapping {
 
     }
 
-    private static void throwUnsupportedPropertyException(String methodName, String type, String propertyName) throws FunctionNotSupportedException {
+    /**
+     * Throw a new FunctionNotSupportedException using the provided details.
+     * @param methodName of the caller
+     * @param type of the OMRS type we are attempting to search
+     * @param propertyName of the property that cannot be searched
+     * @throws FunctionNotSupportedException always
+     */
+    private static void raiseUnsupportedPropertyException(String methodName, String type, String propertyName) throws FunctionNotSupportedException {
         throw new FunctionNotSupportedException(IGCOMRSErrorCode.UNSUPPORTED_PROPERTY_FOR_TYPE.getMessageDefinition(propertyName, type),
                 InstanceMapping.class.getName(),
                 methodName);
+    }
+
+    /**
+     * Throw a new RepositoryErrorException using the provided details.
+     * @param errorCode the error
+     * @param methodName of the caller
+     * @param cause of the underlying problem
+     * @param params any additional details for the error
+     * @throws RepositoryErrorException always
+     */
+    protected static void raiseRepositoryErrorException(IGCOMRSErrorCode errorCode, String methodName, Exception cause, String ...params) throws RepositoryErrorException {
+        throw new RepositoryErrorException(errorCode.getMessageDefinition(params),
+                InstanceMapping.class.getName(),
+                methodName,
+                cause);
     }
 
 }

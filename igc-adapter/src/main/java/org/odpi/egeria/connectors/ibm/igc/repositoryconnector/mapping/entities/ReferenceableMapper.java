@@ -6,6 +6,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -23,6 +24,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.PrimitiveDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,11 +134,12 @@ public class ReferenceableMapper extends EntityMapping {
      * @param entityMap instantiation of a mapping to carry out
      * @param instanceProperties the instance properties to which to add the complex-mapped properties
      * @return InstanceProperties
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     protected InstanceProperties complexPropertyMappings(ObjectCache cache,
                                                          EntityMappingInstance entityMap,
-                                                         InstanceProperties instanceProperties) {
+                                                         InstanceProperties instanceProperties) throws RepositoryErrorException {
 
         final String methodName = "complexPropertyMappings";
 
@@ -148,7 +151,12 @@ public class ReferenceableMapper extends EntityMapping {
         String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
 
         // Map IGC's identity characteristics to create a unique 'qualifiedName'
-        String qualifiedName = igcEntity.getIdentity(igcomrsRepositoryConnector.getIGCRestClient(), cache).toString();
+        String qualifiedName = null;
+        try {
+            qualifiedName = igcEntity.getIdentity(igcomrsRepositoryConnector.getIGCRestClient(), cache).toString();
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+        }
 
         if (mapping.igcRidNeedsPrefix()) {
             qualifiedName = IGCRepositoryHelper.getQualifiedNameForGeneratedEntity(mapping.getIgcRidPrefix(), qualifiedName);
@@ -165,7 +173,12 @@ public class ReferenceableMapper extends EntityMapping {
         // And map any other simple (non-relationship) properties that are not otherwise mapped into 'additionalProperties'
         Map<String, String> additionalProperties = new HashMap<>();
 
-        List<String> nonRelationshipProperties = igcRestClient.getNonRelationshipPropertiesForType(igcEntity.getType());
+        List<String> nonRelationshipProperties = Collections.emptyList();
+        try {
+            nonRelationshipProperties = igcRestClient.getNonRelationshipPropertiesForType(igcEntity.getType());
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+        }
         Set<String> alreadyMapped = mapping.getAllMappedIgcProperties();
         for (ClassificationMapping classificationMapping : mapping.getClassificationMappers()) {
             alreadyMapped.addAll(classificationMapping.getMappedIgcPropertyNames());
@@ -180,27 +193,31 @@ public class ReferenceableMapper extends EntityMapping {
             // Iterate through the remaining property names, and add them to a map
             // Note that because 'additionalProperties' is a string-to-string map, we will just convert everything
             // to strings (even arrays of values, we'll concatenate into a single string)
-            for (String propertyName : nonRelationshipsSet) {
-                Object propertyValue = igcRestClient.getPropertyByName(igcEntity, propertyName);
-                String value = null;
-                if (propertyValue instanceof List) {
-                    StringBuilder sb = new StringBuilder();
-                    List<?> list = (List<?>) propertyValue;
-                    if (!list.isEmpty()) {
-                        for (int i = 0; i < list.size() - 1; i++) {
-                            sb.append(list.get(i).toString());
-                            sb.append(", ");
+            try {
+                for (String propertyName : nonRelationshipsSet) {
+                    Object propertyValue = igcRestClient.getPropertyByName(igcEntity, propertyName);
+                    String value = null;
+                    if (propertyValue instanceof List) {
+                        StringBuilder sb = new StringBuilder();
+                        List<?> list = (List<?>) propertyValue;
+                        if (!list.isEmpty()) {
+                            for (int i = 0; i < list.size() - 1; i++) {
+                                sb.append(list.get(i).toString());
+                                sb.append(", ");
+                            }
+                            sb.append(list.get(list.size() - 1));
                         }
-                        sb.append(list.get(list.size() - 1));
+                        value = sb.toString();
+                    } else if (propertyValue != null) {
+                        value = propertyValue.toString();
                     }
-                    value = sb.toString();
-                } else if (propertyValue != null) {
-                    value = propertyValue.toString();
+                    // Leave out any properties that are null or empty strings, as these are unset in IGC
+                    if (value != null && !value.equals("")) {
+                        additionalProperties.put(propertyName, value);
+                    }
                 }
-                // Leave out any properties that are null or empty strings, as these are unset in IGC
-                if (value != null && !value.equals("")) {
-                    additionalProperties.put(propertyName, value);
-                }
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
             }
 
             // and finally setup the 'additionalProperties' attribute using this map
@@ -347,27 +364,31 @@ public class ReferenceableMapper extends EntityMapping {
                                                String repositoryName,
                                                IGCRestClient igcRestClient,
                                                IGCSearchConditionSet igcSearchConditionSet,
-                                               String searchCriteria) throws FunctionNotSupportedException {
+                                               String searchCriteria) throws FunctionNotSupportedException, RepositoryErrorException {
 
         super.addComplexStringSearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, searchCriteria);
 
         final String methodName = "addComplexStringSearchCriteria";
 
-        List<String> stringPropertiesForType = igcRestClient.getAllStringPropertiesForType(IGCRestConstants.getAssetTypeForSearch(getIgcAssetType()));
+        try {
+            List<String> stringPropertiesForType = igcRestClient.getAllStringPropertiesForType(IGCRestConstants.getAssetTypeForSearch(getIgcAssetType()));
 
-        // By default, add a condition for every complex-mapped string property EXCEPT for the modification details
-        // TODO: we actually should include the modification details, and also match against the metadata collection ID and name as well?
-        for (String propertyName : getComplexMappedIgcProperties()) {
-            if (stringPropertiesForType.contains(propertyName) && !propertyName.equals("modified_by") && !propertyName.equals("created_by")) {
-                IGCSearchCondition condition = IGCRepositoryHelper.getRegexSearchCondition(
-                        repositoryHelper,
-                        repositoryName,
-                        methodName,
-                        propertyName,
-                        searchCriteria
-                );
-                igcSearchConditionSet.addCondition(condition);
+            // By default, add a condition for every complex-mapped string property EXCEPT for the modification details
+            // TODO: we actually should include the modification details, and also match against the metadata collection ID and name as well?
+            for (String propertyName : getComplexMappedIgcProperties()) {
+                if (stringPropertiesForType.contains(propertyName) && !propertyName.equals("modified_by") && !propertyName.equals("created_by")) {
+                    IGCSearchCondition condition = IGCRepositoryHelper.getRegexSearchCondition(
+                            repositoryHelper,
+                            repositoryName,
+                            methodName,
+                            propertyName,
+                            searchCriteria
+                    );
+                    igcSearchConditionSet.addCondition(condition);
+                }
             }
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
         }
 
     }

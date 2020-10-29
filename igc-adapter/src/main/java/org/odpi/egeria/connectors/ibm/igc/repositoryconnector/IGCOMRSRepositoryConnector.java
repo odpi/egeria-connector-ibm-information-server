@@ -6,7 +6,8 @@ import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSAuditCode;
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.OMRSStub;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
 import org.odpi.openmetadata.frameworks.connectors.properties.EndpointProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.OMRSMetadataCollection;
@@ -87,7 +88,11 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
         final String methodName = "disconnect";
 
         // Close the session on the IGC REST client
-        this.igcRestClient.disconnect();
+        try {
+            this.igcRestClient.disconnect();
+        } catch (IGCConnectivityException e) {
+            auditLog.logException(methodName, IGCOMRSAuditCode.FAILED_DISCONNECT.getMessageDefinition(), e);
+        }
         if (auditLog != null) {
             auditLog.logMessage(methodName, IGCOMRSAuditCode.REPOSITORY_SERVICE_SHUTDOWN.getMessageDefinition(getServerName()));
         }
@@ -185,12 +190,16 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
         final String methodName = "upsertOMRSBundleZip";
 
         ClassPathResource bundleResource = new ClassPathResource("OMRS.zip");
-        boolean success = this.igcRestClient.upsertOpenIgcBundle("OMRS", bundleResource);
-        if (!success) {
-            raiseRepositoryErrorException(IGCOMRSErrorCode.OMRS_BUNDLE_FAILURE, methodName, null, "open");
+        try {
+            boolean success = this.igcRestClient.upsertOpenIgcBundle("OMRS", bundleResource);
+            if (!success) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.OMRS_BUNDLE_FAILURE, methodName, null, "open");
+            }
+            return success;
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.OMRS_BUNDLE_FAILURE, methodName, e, "open");
         }
-
-        return success;
+        return false;
 
     }
 

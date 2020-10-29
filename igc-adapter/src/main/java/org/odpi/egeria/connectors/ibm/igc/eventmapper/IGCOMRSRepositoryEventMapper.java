@@ -7,10 +7,13 @@ import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSAuditCode;
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSRuntimeException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.events.*;
@@ -139,7 +142,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         try {
             success = igcomrsRepositoryConnector.upsertOMRSBundleZip();
             this.igcRestClient.registerPOJO(OMRSStub.class);
-        } catch (RepositoryErrorException e) {
+        } catch (RepositoryErrorException | IGCException e) {
             raiseConnectorCheckedException(IGCOMRSErrorCode.OMRS_BUNDLE_FAILURE, methodName, e, "upload");
         }
         if (!success) {
@@ -377,6 +380,8 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      */
     private void processIAEventV115(InfosphereEventsIAEvent event, ObjectCache cache) {
 
+        final String methodName = "processIAEventV115";
+
         String action = event.getEventType();
 
         switch(action) {
@@ -389,41 +394,45 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 // This is the only event we can really do something with, as IGC API can only see
                 // published information
                 String containerRid = event.getDataCollectionRid();
-                // We must do this initial retrieval as insufficient detail in event payload to know whether it is a
-                // database table or a file record that was published
-                Reference containerAsset = igcRestClient.getAssetRefById(containerRid);
-                String searchProperty = null;
-                String searchAssetType = null;
-                switch(containerAsset.getType()) {
-                    case "database_table":
-                        searchProperty = "database_table_or_view";
-                        searchAssetType = "database_column";
-                        break;
-                    case "data_file_record":
-                        searchProperty = "data_file_record";
-                        searchAssetType = "data_file_field";
-                        break;
-                    default:
-                        log.warn("Unimplemented asset type '{}' for IA publishing: {}", containerAsset.getType(), event);
-                        break;
-                }
-                // First process the containing asset itself
-                processAsset(cache, containerRid, containerAsset.getType());
-                // We should also check the columns / file fields within the table / file for changes to be processed,
-                // as the relationship itself between column and table may not change but there may be
-                // new classifications on the columns / fields from the publication
-                IGCSearchCondition igcSearchCondition = new IGCSearchCondition(searchProperty, "=", containerAsset.getId());
-                IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(igcSearchCondition);
-                IGCSearch igcSearch = new IGCSearch(searchAssetType, new String[]{ searchProperty }, igcSearchConditionSet);
-                ItemList<Reference> subAssets = igcRestClient.search(igcSearch);
-                if (subAssets != null) {
-                    List<Reference> allSubAssets = igcRestClient.getAllPages(null, subAssets);
-                    log.debug("Processing {} child assets from IA publication: {}", subAssets.getPaging().getNumTotal(), containerRid);
-                    for (Reference child : allSubAssets) {
-                        processAsset(cache, child.getId(), child.getType());
+                try {
+                    // We must do this initial retrieval as insufficient detail in event payload to know whether it is a
+                    // database table or a file record that was published
+                    Reference containerAsset = igcRestClient.getAssetRefById(containerRid);
+                    String searchProperty = null;
+                    String searchAssetType = null;
+                    switch (containerAsset.getType()) {
+                        case "database_table":
+                            searchProperty = "database_table_or_view";
+                            searchAssetType = "database_column";
+                            break;
+                        case "data_file_record":
+                            searchProperty = "data_file_record";
+                            searchAssetType = "data_file_field";
+                            break;
+                        default:
+                            log.warn("Unimplemented asset type '{}' for IA publishing: {}", containerAsset.getType(), event);
+                            break;
                     }
-                } else {
-                    log.warn("Unable to find any sub-assets for IA published container '{}': {}", containerRid, event);
+                    // First process the containing asset itself
+                    processAsset(cache, containerRid, containerAsset.getType());
+                    // We should also check the columns / file fields within the table / file for changes to be processed,
+                    // as the relationship itself between column and table may not change but there may be
+                    // new classifications on the columns / fields from the publication
+                    IGCSearchCondition igcSearchCondition = new IGCSearchCondition(searchProperty, "=", containerAsset.getId());
+                    IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(igcSearchCondition);
+                    IGCSearch igcSearch = new IGCSearch(searchAssetType, new String[]{searchProperty}, igcSearchConditionSet);
+                    ItemList<Reference> subAssets = igcRestClient.search(igcSearch);
+                    if (subAssets != null) {
+                        List<Reference> allSubAssets = igcRestClient.getAllPages(null, subAssets);
+                        log.debug("Processing {} child assets from IA publication: {}", subAssets.getPaging().getNumTotal(), containerRid);
+                        for (Reference child : allSubAssets) {
+                            processAsset(cache, child.getId(), child.getType());
+                        }
+                    } else {
+                        log.warn("Unable to find any sub-assets for IA published container '{}': {}", containerRid, event);
+                    }
+                } catch (IGCException e) {
+                    raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
                 }
                 break;
             default:
@@ -497,11 +506,16 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      * @return Reference
      */
     private Reference getIgcAssetFromStubPayload(OMRSStub stub) {
+        final String methodName = "getIgcAssetFromStubPayload";
         Reference asset = null;
         if (stub != null) {
-            log.debug("Retrieving IGC Reference for stub payload: {}", stub.getPayload());
-            asset = igcomrsRepositoryConnector.getIGCRestClient().readJSONIntoPOJO(stub.getPayload());
-            asset.setFullyRetrieved();
+            try {
+                log.debug("Retrieving IGC Reference for stub payload: {}", stub.getPayload());
+                asset = igcomrsRepositoryConnector.getIGCRestClient().readJSONIntoPOJO(stub.getPayload());
+                asset.setFullyRetrieved();
+            } catch (IGCException e) {
+                raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
         }
         return asset;
     }
@@ -569,9 +583,15 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
         // TODO: make use of 'limitToPrefix' to limit processing to only generated entities
 
+        final String methodName = "processAsset";
         log.debug("processAsset called with rid {} and type {}", rid, assetType);
 
-        Reference latestVersion = igcRepositoryHelper.getFullAssetDetails(rid, assetType);
+        Reference latestVersion = null;
+        try {
+            latestVersion = igcRepositoryHelper.getFullAssetDetails(rid, assetType);
+        } catch (IGCException e) {
+            raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+        }
 
         if (latestVersion == null) {
             // If we can't retrieve the asset by RID, it no longer exists -- so send a delete event
@@ -585,11 +605,17 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         } else {
 
             // Otherwise see if there's a stub...
-            OMRSStub stub = igcRepositoryHelper.getOMRSStubForAsset(latestVersion);
-
-            // Calculate the delta between the latest version and the previous saved stub
-            ChangeSet changeSet = new ChangeSet(igcRestClient, latestVersion, stub);
-            Set<String> changedProperties = changeSet.getChangedProperties();
+            OMRSStub stub = null;
+            ChangeSet changeSet = null;
+            Set<String> changedProperties = Collections.emptySet();
+            try {
+                stub = igcRepositoryHelper.getOMRSStubForAsset(latestVersion);
+                // Calculate the delta between the latest version and the previous saved stub
+                changeSet = new ChangeSet(igcRestClient, latestVersion, stub);
+                changedProperties = changeSet.getChangedProperties();
+            } catch (IGCException e) {
+                raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
 
             // Output any entities first
             if (stub == null) {
@@ -606,7 +632,11 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         log.debug(" .......... {}", changeSet.getChangesForProperty(propertyName));
                     }
                     log.debug(" ... before: {}", stub.getPayload());
-                    log.debug(" ... now:    {}", igcRestClient.getValueAsJSON(latestVersion));
+                    try {
+                        log.debug(" ... now:    {}", igcRestClient.getValueAsJSON(latestVersion));
+                    } catch (IGCParsingException e) {
+                        log.error(" ... unable to log the 'now' due to a parsing exception.", e);
+                    }
                 }
                 sendUpdatedEntity(latestVersion, stub, cache);
             } else {
@@ -640,13 +670,17 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         List<ChangeSet.Change> changesForProperty = changeSet.getChangesForProperty(igcProperty);
                         log.debug(" ...... found differences for property: {}", changesForProperty);
                         for (RelationshipMapping relationshipMapping : relationshipMap.get(igcProperty)) {
-                            processRelationships(
-                                    relationshipMapping,
-                                    cache,
-                                    latestVersion,
-                                    changesForProperty,
-                                    relationshipGUID
-                            );
+                            try {
+                                processRelationships(
+                                        relationshipMapping,
+                                        cache,
+                                        latestVersion,
+                                        changesForProperty,
+                                        relationshipGUID
+                                );
+                            } catch (RepositoryErrorException e) {
+                                raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                            }
                         }
                     }
                 }
@@ -667,29 +701,46 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      * @param changesForProperty the list of changes for the IGC relationship property being processed
      * @param relationshipTriggerGUID the GUID of the relationship that triggered this processing (or null if not
      *                                triggered initially by the processing of another relationship)
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     private void processRelationships(RelationshipMapping relationshipMapping,
                                       ObjectCache cache,
                                       Reference latestVersion,
                                       List<ChangeSet.Change> changesForProperty,
-                                      IGCRelationshipGuid relationshipTriggerGUID) {
+                                      IGCRelationshipGuid relationshipTriggerGUID) throws RepositoryErrorException {
 
+        final String methodName = "processRelationships";
         log.debug("processRelationships called with relationshipMapping {}, reference {} and changes {}", relationshipMapping, latestVersion, changesForProperty);
 
         for (ChangeSet.Change change : changesForProperty) {
 
             String assetType = latestVersion.getType();
-            List<String> referenceListProperties = igcRestClient.getPagedRelationshipPropertiesForType(assetType);
-            if (referenceListProperties != null) {
+            try {
+                List<String> referenceListProperties = igcRestClient.getPagedRelationshipPropertiesForType(assetType);
+                if (referenceListProperties != null) {
 
-                Object relatedValue = change.getNewValue(referenceListProperties);
-                log.debug(" ... found value: {}", relatedValue);
-                if (relatedValue != null) {
-                    if (relatedValue instanceof ItemList) {
+                    Object relatedValue = change.getNewValue(referenceListProperties);
+                    log.debug(" ... found value: {}", relatedValue);
+                    if (relatedValue != null) {
+                        if (relatedValue instanceof ItemList) {
 
-                        log.debug(" ... found ItemList, processing each item");
-                        ItemList<?> related = (ItemList<?>) relatedValue;
-                        for (Reference relatedAsset : related.getItems()) {
+                            log.debug(" ... found ItemList, processing each item");
+                            ItemList<?> related = (ItemList<?>) relatedValue;
+                            for (Reference relatedAsset : related.getItems()) {
+                                processOneOrMoreRelationships(
+                                        relationshipMapping,
+                                        latestVersion,
+                                        relatedAsset,
+                                        cache,
+                                        referenceListProperties,
+                                        change,
+                                        relationshipTriggerGUID
+                                );
+                            }
+
+                        } else if (relatedValue instanceof Reference) {
+                            log.debug(" ... found single Reference, processing it");
+                            Reference relatedAsset = (Reference) relatedValue;
                             processOneOrMoreRelationships(
                                     relationshipMapping,
                                     latestVersion,
@@ -699,35 +750,24 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                     change,
                                     relationshipTriggerGUID
                             );
+                        } else if (change.getIgcPropertyPath().endsWith("_id") && Reference.isSimpleType(relatedValue)) {
+                            // In cases where a single object has been replaced, the JSON Patch may only show each property
+                            // as needing replacement rather than the object as a whole -- this _should_ already be handled
+                            // automatically by the change processing, so if we arrive here we missed something in the
+                            // ChangeSet class's processing
+                            log.error(" ... change consolidation in ChangeSet did not work: {}", change);
+                        } else if (!change.getIgcPropertyPath().endsWith("_name") && !change.getIgcPropertyPath().endsWith("_url") && !change.getIgcPropertyPath().endsWith("_type")) {
+                            // if the path ends with '_name', '_url' or '_type' then we should already be handling it by the '_id' clause above
+                            log.warn("Expected relationship for path '{}' for guid {} but found neither Reference nor ItemList: {}", change.getIgcPropertyPath(), latestVersion.getId(), relatedValue);
                         }
-
-                    } else if (relatedValue instanceof Reference) {
-                        log.debug(" ... found single Reference, processing it");
-                        Reference relatedAsset = (Reference) relatedValue;
-                        processOneOrMoreRelationships(
-                                relationshipMapping,
-                                latestVersion,
-                                relatedAsset,
-                                cache,
-                                referenceListProperties,
-                                change,
-                                relationshipTriggerGUID
-                        );
-                    } else if (change.getIgcPropertyPath().endsWith("_id") && Reference.isSimpleType(relatedValue)) {
-                        // In cases where a single object has been replaced, the JSON Patch may only show each property
-                        // as needing replacement rather than the object as a whole -- this _should_ already be handled
-                        // automatically by the change processing, so if we arrive here we missed something in the
-                        // ChangeSet class's processing
-                        log.error(" ... change consolidation in ChangeSet did not work: {}", change);
-                    } else if (!change.getIgcPropertyPath().endsWith("_name") && !change.getIgcPropertyPath().endsWith("_url") && !change.getIgcPropertyPath().endsWith("_type")) {
-                        // if the path ends with '_name', '_url' or '_type' then we should already be handling it by the '_id' clause above
-                        log.warn("Expected relationship for path '{}' for guid {} but found neither Reference nor ItemList: {}", change.getIgcPropertyPath(), latestVersion.getId(), relatedValue);
+                    } else {
+                        log.warn("Expected relationship for path '{}' for guid {} but found nothing.", change.getIgcPropertyPath(), latestVersion.getId());
                     }
                 } else {
-                    log.warn("Expected relationship for path '{}' for guid {} but found nothing.", change.getIgcPropertyPath(), latestVersion.getId());
+                    log.warn("No registered POJO to translate asset type '{}' for guid {} -- skipping its relationships.", assetType, latestVersion.getId());
                 }
-            } else {
-                log.warn("No registered POJO to translate asset type '{}' for guid {} -- skipping its relationships.", assetType, latestVersion.getId());
+            } catch (IGCException e) {
+                raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
             }
 
         }
@@ -747,6 +787,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      * @param change the JSON Patch entry indicating a specific change (always from the perspective of latestVersion)
      * @param relationshipTriggerGUID passthrough of GUID for relationship that triggered this process (if not triggered
      *                                directly from an event), null if not triggered by another relationship
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     private void processOneOrMoreRelationships(RelationshipMapping relationshipMapping,
                                                Reference latestVersion,
@@ -754,8 +795,9 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                                ObjectCache cache,
                                                List<String> referenceListProperties,
                                                ChangeSet.Change change,
-                                               IGCRelationshipGuid relationshipTriggerGUID) {
+                                               IGCRelationshipGuid relationshipTriggerGUID) throws RepositoryErrorException {
 
+        final String methodName = "processOneOrMoreRelationships";
         String omrsRelationshipType = relationshipMapping.getOmrsRelationshipType();
         String latestVersionRID = latestVersion.getId();
 
@@ -826,16 +868,20 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
             for (Reference proxyOne : proxyOnes) {
                 for (Reference proxyTwo : proxyTwos) {
-                    processSingleRelationship(
-                            relationshipMapping,
-                            proxyOne,
-                            proxyTwo,
-                            cache,
-                            referenceListProperties,
-                            change,
-                            relationshipLevelRid,
-                            relationshipTriggerGUID
-                    );
+                    try {
+                        processSingleRelationship(
+                                relationshipMapping,
+                                proxyOne,
+                                proxyTwo,
+                                cache,
+                                referenceListProperties,
+                                change,
+                                relationshipLevelRid,
+                                relationshipTriggerGUID
+                        );
+                    } catch (RepositoryErrorException e) {
+                        raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                    }
                 }
             }
 
@@ -859,6 +905,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      * @param relationshipLevelRid the RID of the relationship-level asset (if any, or null if none)
      * @param relationshipTriggerGUID passthrough of GUID for relationship that triggered this process (if not triggered
      *                                directly from an event), null if not triggered by another relationship
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     private void processSingleRelationship(RelationshipMapping relationshipMapping,
                                            Reference proxyOne,
@@ -867,7 +914,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                            List<String> referenceListProperties,
                                            ChangeSet.Change change,
                                            String relationshipLevelRid,
-                                           IGCRelationshipGuid relationshipTriggerGUID) {
+                                           IGCRelationshipGuid relationshipTriggerGUID) throws RepositoryErrorException {
 
         String omrsRelationshipType = relationshipMapping.getOmrsRelationshipType();
         String latestVersionRID = proxyOne.getId();
@@ -994,7 +1041,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
                     } catch (RelationshipNotKnownException e) {
                         log.error("Unable to find relationship with GUID: {}", igcRelationshipGuid, e);
-                    } catch (InvalidParameterException | RepositoryErrorException e) {
+                    } catch (InvalidParameterException e) {
                         log.error("Unknown error occurred trying to retrieve relationship: {}", igcRelationshipGuid, e);
                     }
                 }
@@ -1068,6 +1115,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      * @param relationshipLevelRid the RID of the IGC asset that exists at relationship-level, or null if none
      */
     private void sendNewRelationship(Relationship relationship, String relationshipLevelRid) {
+        final String methodName = "sendNewRelationship";
         if (relationship != null) {
             repositoryEventProcessor.processNewRelationshipEvent(
                     sourceName,
@@ -1078,9 +1126,13 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     relationship
             );
             if (relationshipLevelRid != null) {
-                Reference relationshipLevelAsset = igcRestClient.getAssetById(relationshipLevelRid);
-                if (relationshipLevelAsset != null) {
-                    igcRepositoryHelper.upsertOMRSStubForAsset(relationshipLevelAsset);
+                try {
+                    Reference relationshipLevelAsset = igcRestClient.getAssetById(relationshipLevelRid);
+                    if (relationshipLevelAsset != null) {
+                        igcRepositoryHelper.upsertOMRSStubForAsset(relationshipLevelAsset);
+                    }
+                } catch (IGCException e) {
+                    raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
                 }
             }
         }
@@ -1136,17 +1188,23 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                           List<String> referenceListProperties,
                                           ChangeSet.Change change) {
 
+        final String methodName = "sendReplacedRelationship";
         String newRelationshipGUID = relationship.getGUID();
 
         String igcPropertyName = change.getIgcPropertyName();
-        Object ora = change.getOldValue(referenceListProperties);
+        Object ora = null;
+        try {
+            ora = change.getOldValue(referenceListProperties);
+        } catch (IGCException e) {
+            raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+        }
         if (ora != null) {
             Reference oldRelatedAsset = (Reference) ora;
             if (oldRelatedAsset.getId() != null) {
-                Reference newRelatedAsset = (Reference) change.getNewValue(referenceListProperties);
-                log.debug("Processing relationship replacement for: {}", oldRelatedAsset);
-                String newRelatedAssetRID = newRelatedAsset.getId();
                 try {
+                    Reference newRelatedAsset = (Reference) change.getNewValue(referenceListProperties);
+                    log.debug("Processing relationship replacement for: {}", oldRelatedAsset);
+                    String newRelatedAssetRID = newRelatedAsset.getId();
                     RelationshipDef relationshipDef = (RelationshipDef) igcomrsMetadataCollection.getTypeDefByName(localServerUserId,
                             relationshipMapping.getOmrsRelationshipType());
                     // Determine which end of the relationship is which (proxyOne vs proxyTwo), and
@@ -1184,6 +1242,8 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     } else {
                         log.warn("Unable to find previous version for relationship replacement -- sending only new: {}", newRelationshipGUID);
                     }
+                } catch (IGCException e) {
+                    raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
                 } catch (InvalidParameterException | RepositoryErrorException | TypeDefNotKnownException e) {
                     log.error("Unable to find relationship type definition '{}' / not supported for guid: {}", relationshipMapping.getOmrsRelationshipType(), newRelationshipGUID, e);
                 }
@@ -1216,6 +1276,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                         Reference proxyOne,
                                         Reference proxyTwo) {
 
+        final String methodName = "sendPurgedRelationship";
         // Determine if there is a relationship-level asset (RID)
         IGCEntityGuid proxyOneGuid = RelationshipMapping.getProxyOneGuidFromRelationship(
                 igcRepositoryHelper,
@@ -1252,8 +1313,8 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                         null,
                         relationship
                 );
-            } catch (RepositoryErrorException e) {
-                log.error("Unable to retrieve relationship details for: {}", relationshipGUID, e);
+            } catch (RepositoryErrorException | IGCException e) {
+                raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
             }
         } else {
             log.warn("Unable to produce DeletePurgedRelationshipEvent for relationship: {}", relationshipGUID);
@@ -1269,6 +1330,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      */
     private void sendNewEntity(Reference asset, ObjectCache cache) {
 
+        final String methodName = "sendNewEntity";
         boolean atLeastOneEvent = false;
 
         // Output an entity for all entities that map to this asset type -- generated and non-generated
@@ -1303,7 +1365,11 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         // Finally, update the stub with the latest version of the asset
         // (if any of the above fail, this will also be missed, so we will simply have more updates on the next event)
         if (atLeastOneEvent) {
-            igcRepositoryHelper.upsertOMRSStubForAsset(asset);
+            try {
+                igcRepositoryHelper.upsertOMRSStubForAsset(asset);
+            } catch (IGCException e) {
+                raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
         }
 
     }
@@ -1317,6 +1383,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      */
     private void sendUpdatedEntity(Reference latestVersion, OMRSStub stub, ObjectCache cache) {
 
+        final String methodName = "sendUpdatedEntity";
         boolean atLeastOneEvent = false;
 
         // See if there are any generated entities to send an event for (ie. *Type)
@@ -1347,7 +1414,11 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         // Finally, update the stub with the latest version of the asset
         // (if any of the above fail, this will also be missed, so we will simply have more updates on the next event)
         if (atLeastOneEvent) {
-            igcRepositoryHelper.upsertOMRSStubForAsset(latestVersion);
+            try {
+                igcRepositoryHelper.upsertOMRSStubForAsset(latestVersion);
+            } catch (IGCException e) {
+                raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
         }
 
     }
@@ -1476,12 +1547,19 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      */
     private void sendPurgedEntity(String igcAssetType, String rid, Set<String> alreadyPurgedRids, ObjectCache cache) {
 
+        final String methodName = "sendPurgedEntity";
+
         if (alreadyPurgedRids.contains(rid)) {
             log.debug("Received RID has already been purged -- skipping: {}", rid);
         } else {
             log.debug("Purging entity of type '{}' with RID: {}", igcAssetType, rid);
 
-            OMRSStub stub = igcRepositoryHelper.getOMRSStubForAsset(rid, igcAssetType);
+            OMRSStub stub = null;
+            try {
+                stub = igcRepositoryHelper.getOMRSStubForAsset(rid, igcAssetType);
+            } catch (IGCException e) {
+                raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
             // If there is no stub, there should not be any information that was sent previously in an event for us
             // to need to purge anything, so we should be able to skip the rest and continue on our way
             if (stub != null) {
@@ -1494,7 +1572,13 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 for (EntityMapping referenceableMapper : referenceableMappers) {
 
                     log.debug("Checking via: {}", referenceableMapper.getClass().getName());
-                    if (referenceableMapper.isOmrsType(igcRestClient, cache, fromObject)) {
+                    boolean isOmrsType = false;
+                    try {
+                        isOmrsType = referenceableMapper.isOmrsType(igcRestClient, cache, fromObject);
+                    } catch (RepositoryErrorException e) {
+                        raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                    }
+                    if (isOmrsType) {
 
                         List<PurgeMarker> purgeMarkers = new ArrayList<>();
                         String ridPrefix = referenceableMapper.getIgcRidPrefix();
@@ -1547,44 +1631,48 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                     for (String property : propertyNames) {
                                         if (!property.equals(RelationshipMapping.SELF_REFERENCE_SENTINEL)) {
                                             log.debug(" ... checking for relationship on property: {}", property);
-                                            Object relatedResult = igcRestClient.getPropertyByName(fromObject, property);
-                                            if (relatedResult != null) {
-                                                // TODO: we should also cache up all of the relationship ends that are NOT purged,
-                                                //  as these entities should have their stubs updated (to no longer refer to a
-                                                //  non-existent relationship) -- in fact, that might take care of sending the
-                                                //  correct relationship purges for us?
-                                                if (relatedResult instanceof Reference) {
-                                                    Reference relationship = (Reference) relatedResult;
-                                                    if (relationship.getType() != null) {
-                                                        // In cases of an exclusive relationship, there could be an empty
-                                                        // object rather than null, but this semantically still means there
-                                                        // is no relationship so treat it as a null relationship (skip it)
-                                                        cascadeRelationshipPurge(
-                                                                relationshipMapping,
-                                                                relationshipDef,
-                                                                cache,
-                                                                endOne,
-                                                                endTwo,
-                                                                relationship,
-                                                                property,
-                                                                iterateOnOne
-                                                        );
-                                                    }
-                                                } else if (relatedResult instanceof ItemList) {
-                                                    ItemList<?> relationships = (ItemList<?>) relatedResult;
-                                                    for (Reference relationship : relationships.getItems()) {
-                                                        cascadeRelationshipPurge(
-                                                                relationshipMapping,
-                                                                relationshipDef,
-                                                                cache,
-                                                                endOne,
-                                                                endTwo,
-                                                                relationship,
-                                                                property,
-                                                                iterateOnOne
-                                                        );
+                                            try {
+                                                Object relatedResult = igcRestClient.getPropertyByName(fromObject, property);
+                                                if (relatedResult != null) {
+                                                    // TODO: we should also cache up all of the relationship ends that are NOT purged,
+                                                    //  as these entities should have their stubs updated (to no longer refer to a
+                                                    //  non-existent relationship) -- in fact, that might take care of sending the
+                                                    //  correct relationship purges for us?
+                                                    if (relatedResult instanceof Reference) {
+                                                        Reference relationship = (Reference) relatedResult;
+                                                        if (relationship.getType() != null) {
+                                                            // In cases of an exclusive relationship, there could be an empty
+                                                            // object rather than null, but this semantically still means there
+                                                            // is no relationship so treat it as a null relationship (skip it)
+                                                            cascadeRelationshipPurge(
+                                                                    relationshipMapping,
+                                                                    relationshipDef,
+                                                                    cache,
+                                                                    endOne,
+                                                                    endTwo,
+                                                                    relationship,
+                                                                    property,
+                                                                    iterateOnOne
+                                                            );
+                                                        }
+                                                    } else if (relatedResult instanceof ItemList) {
+                                                        ItemList<?> relationships = (ItemList<?>) relatedResult;
+                                                        for (Reference relationship : relationships.getItems()) {
+                                                            cascadeRelationshipPurge(
+                                                                    relationshipMapping,
+                                                                    relationshipDef,
+                                                                    cache,
+                                                                    endOne,
+                                                                    endTwo,
+                                                                    relationship,
+                                                                    property,
+                                                                    iterateOnOne
+                                                            );
+                                                        }
                                                     }
                                                 }
+                                            } catch (IGCException e) {
+                                                raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
                                             }
                                         } else {
                                             // TODO: probably also need to purge any generated entity and relationship?
@@ -1629,7 +1717,11 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 // Finally, remove the stub (so that if such an asset is created in the future it is recognised as new
                 // rather than an update)
                 log.debug("Deleting stub: {}", rid);
-                igcRepositoryHelper.deleteOMRSStubForAsset(rid, igcAssetType);
+                try {
+                    igcRepositoryHelper.deleteOMRSStubForAsset(rid, igcAssetType);
+                } catch (IGCException e) {
+                    raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                }
             } else {
                 log.info("No stub information exists for RID {} of type {} -- cannot generated purgeEntity event.", rid, igcAssetType);
             }
@@ -1645,6 +1737,8 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      * @param cache a cache of information that may already have been retrieved about the provided object
      */
     private void recurseOnContainedEntities(PurgeMarker marker, Set<String> alreadyPurgedRids, ObjectCache cache) {
+
+        final String methodName = "recurseOnContainedEntities";
 
         RelationshipMapping relationshipMapping = marker.getMapping();
         Reference parentObject = marker.getTriggerObject();
@@ -1667,23 +1761,27 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         for (String property : relationshipProperties) {
             if (!property.equals(RelationshipMapping.SELF_REFERENCE_SENTINEL)) {
                 log.debug(" ... getting child entities from property: {}", property);
-                Object relatedResult = igcRestClient.getPropertyByName(parentObject, property);
-                if (relatedResult != null) {
-                    if (relatedResult instanceof Reference) {
-                        Reference relationship = (Reference) relatedResult;
-                        if (!relationship.getId().equals(parentRid)) {
-                            log.debug(" ... purging child entity: {}", relationship.getId());
-                            sendPurgedEntity(relationship.getType(), relationship.getId(), alreadyPurgedRids, cache);
-                        }
-                    } else if (relatedResult instanceof ItemList) {
-                        ItemList<?> relationships = (ItemList<?>) relatedResult;
-                        for (Reference relationship : relationships.getItems()) {
+                try {
+                    Object relatedResult = igcRestClient.getPropertyByName(parentObject, property);
+                    if (relatedResult != null) {
+                        if (relatedResult instanceof Reference) {
+                            Reference relationship = (Reference) relatedResult;
                             if (!relationship.getId().equals(parentRid)) {
                                 log.debug(" ... purging child entity: {}", relationship.getId());
                                 sendPurgedEntity(relationship.getType(), relationship.getId(), alreadyPurgedRids, cache);
                             }
+                        } else if (relatedResult instanceof ItemList) {
+                            ItemList<?> relationships = (ItemList<?>) relatedResult;
+                            for (Reference relationship : relationships.getItems()) {
+                                if (!relationship.getId().equals(parentRid)) {
+                                    log.debug(" ... purging child entity: {}", relationship.getId());
+                                    sendPurgedEntity(relationship.getType(), relationship.getId(), alreadyPurgedRids, cache);
+                                }
+                            }
                         }
                     }
+                } catch (IGCException e) {
+                    raiseIGCRuntimeException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
                 }
             }
         }
@@ -1889,6 +1987,22 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                     methodName,
                     cause);
         }
+    }
+
+    /**
+     * Throws an IGCOMRSRuntimeException based on the provided parameters.
+     *
+     * @param errorCode the error code for the exception
+     * @param methodName the method name throwing the exception
+     * @param cause the underlying cause of the exception (if any, otherwise null)
+     * @param params any additional parameters for formatting the error message
+     * @throws IGCOMRSRuntimeException always
+     */
+    private void raiseIGCRuntimeException(IGCOMRSErrorCode errorCode, String methodName, Exception cause, String ...params) throws IGCOMRSRuntimeException {
+        throw new IGCOMRSRuntimeException(errorCode.getMessageDefinition(params),
+                this.getClass().getName(),
+                methodName,
+                cause);
     }
 
 }

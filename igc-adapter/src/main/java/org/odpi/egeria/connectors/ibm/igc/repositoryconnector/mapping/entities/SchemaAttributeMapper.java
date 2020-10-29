@@ -2,9 +2,11 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -18,6 +20,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 
 /**
  * Defines the common mappings to the OMRS "SchemaAttribute" entity.
@@ -79,7 +82,7 @@ public class SchemaAttributeMapper extends SchemaElementMapper {
     @Override
     protected InstanceProperties complexPropertyMappings(ObjectCache cache,
                                                          EntityMappingInstance entityMap,
-                                                         InstanceProperties instanceProperties) {
+                                                         InstanceProperties instanceProperties) throws RepositoryErrorException {
 
         instanceProperties = super.complexPropertyMappings(cache, entityMap, instanceProperties);
 
@@ -92,28 +95,32 @@ public class SchemaAttributeMapper extends SchemaElementMapper {
         OMRSRepositoryHelper repositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
         String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
 
-        // setup the OMRS 'minCardinality' property
-        Boolean allowsNulls = (Boolean) igcRestClient.getPropertyByName(igcEntity, "allows_null_values");
-        if (allowsNulls != null) {
-            instanceProperties = repositoryHelper.addIntPropertyToInstance(
-                    repositoryName,
-                    instanceProperties,
-                    "minCardinality",
-                    allowsNulls ? 0 : 1,
-                    methodName
-            );
-        }
+        try {
+            // setup the OMRS 'minCardinality' property
+            Boolean allowsNulls = (Boolean) igcRestClient.getPropertyByName(igcEntity, "allows_null_values");
+            if (allowsNulls != null) {
+                instanceProperties = repositoryHelper.addIntPropertyToInstance(
+                        repositoryName,
+                        instanceProperties,
+                        "minCardinality",
+                        allowsNulls ? 0 : 1,
+                        methodName
+                );
+            }
 
-        // setup the OMRS 'allowsDuplicateValues' property
-        Boolean isUnique = (Boolean) igcRestClient.getPropertyByName(igcEntity, "unique");
-        if (isUnique != null) {
-            instanceProperties = repositoryHelper.addBooleanPropertyToInstance(
-                    repositoryName,
-                    instanceProperties,
-                    "allowsDuplicateValues",
-                    !isUnique,
-                    methodName
-            );
+            // setup the OMRS 'allowsDuplicateValues' property
+            Boolean isUnique = (Boolean) igcRestClient.getPropertyByName(igcEntity, "unique");
+            if (isUnique != null) {
+                instanceProperties = repositoryHelper.addBooleanPropertyToInstance(
+                        repositoryName,
+                        instanceProperties,
+                        "allowsDuplicateValues",
+                        !isUnique,
+                        methodName
+                );
+            }
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
         }
 
         return instanceProperties;

@@ -2,8 +2,11 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnector;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConstants;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
@@ -143,12 +146,20 @@ public class DataStageJob {
      * @return Link
      */
     public Link getLinkByRid(String rid) {
+        final String methodName = "getLinkByRid";
         log.debug("Looking up cached link: {}", rid);
         Link link = linkMap.getOrDefault(rid, null);
         if (link == null) {
             log.debug("(cache miss) -- retrieving and caching link: {}", rid);
-            link = (Link) igcRestClient.getAssetById(rid);
-            linkMap.put(rid, link);
+            try {
+                link = (Link) igcRestClient.getAssetById(rid);
+                linkMap.put(rid, link);
+            } catch (IGCException e) {
+                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                        this.getClass().getName(),
+                        methodName,
+                        e);
+            }
         }
         return link;
     }
@@ -160,6 +171,7 @@ public class DataStageJob {
      * @return ColumnLevelLineage
      */
     public ColumnLevelLineage getColumnLevelLineageByRid(String rid) {
+        final String methodName = "getColumnLevelLineageByRid";
         log.debug("Looking up cached stage column / variable: {}", rid);
         ColumnLevelLineage toReturn = null;
         StageColumn column = columnMap.getOrDefault(rid, null);
@@ -167,17 +179,24 @@ public class DataStageJob {
             StageVariable variable = varMap.getOrDefault(rid, null);
             if (variable == null) {
                 log.debug("(cache miss) -- retrieving and caching stage column / variable: {}", rid);
-                Reference thing = igcRestClient.getAssetById(rid);
-                if (thing instanceof StageVariable) {
-                    varMap.put(rid, (StageVariable) thing);
-                    toReturn = varMap.get(rid);
-                } else if (thing instanceof StageColumn) {
-                    columnMap.put(rid, (StageColumn) thing);
-                    toReturn = columnMap.get(rid);
-                } else if (thing != null) {
-                    log.error("Unable to determine object type ({}) by RID: {}", thing.getType(), rid);
-                } else {
-                    log.error("Unable to find object by RID: {}", rid);
+                try {
+                    Reference thing = igcRestClient.getAssetById(rid);
+                    if (thing instanceof StageVariable) {
+                        varMap.put(rid, (StageVariable) thing);
+                        toReturn = varMap.get(rid);
+                    } else if (thing instanceof StageColumn) {
+                        columnMap.put(rid, (StageColumn) thing);
+                        toReturn = columnMap.get(rid);
+                    } else if (thing != null) {
+                        log.error("Unable to determine object type ({}) by RID: {}", thing.getType(), rid);
+                    } else {
+                        log.error("Unable to find object by RID: {}", rid);
+                    }
+                } catch (IGCException e) {
+                    DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                            this.getClass().getName(),
+                            methodName,
+                            e);
                 }
             } else {
                 toReturn = variable;
@@ -192,6 +211,7 @@ public class DataStageJob {
      * Retrieve a listing of the stages within this particular DataStage job.
      */
     private void getStageDetailsForJob() {
+        final String methodName = "getStageDetailsForJob";
         String jobRid = job.getId();
         log.debug("Retrieving stage details for job: {}", jobRid);
         IGCSearch igcSearch = new IGCSearch("stage");
@@ -199,14 +219,22 @@ public class DataStageJob {
         IGCSearchCondition condition = new IGCSearchCondition("job_or_container", "=", jobRid);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
-        ItemList<Stage> stages = igcRestClient.search(igcSearch);
-        buildMap(stageMap, igcRestClient.getAllPages(null, stages));
+        try {
+            ItemList<Stage> stages = igcRestClient.search(igcSearch);
+            buildMap(stageMap, igcRestClient.getAllPages(null, stages));
+        } catch (IGCException e) {
+            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                    this.getClass().getName(),
+                    methodName,
+                    e);
+        }
     }
 
     /**
      * Retrieve a listing of the links within this particular DataStage job.
      */
     private void getLinkDetailsForJob() {
+        final String methodName = "getLinkDetailsForJob";
         String jobRid = job.getId();
         log.debug("Retrieving link details for job: {}", jobRid);
         IGCSearch igcSearch = new IGCSearch("link");
@@ -214,14 +242,22 @@ public class DataStageJob {
         IGCSearchCondition condition = new IGCSearchCondition("job_or_container", "=", jobRid);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
-        ItemList<Link> links = igcRestClient.search(igcSearch);
-        buildMap(linkMap, igcRestClient.getAllPages(null, links));
+        try {
+            ItemList<Link> links = igcRestClient.search(igcSearch);
+            buildMap(linkMap, igcRestClient.getAllPages(null, links));
+        } catch (IGCException e) {
+            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                    this.getClass().getName(),
+                    methodName,
+                    e);
+        }
     }
 
     /**
      * Retrieve a listing of the stage variables within this particular DataStage job.
      */
     private void getStageVariablesForJob() {
+        final String methodName = "getStageVariablesForJob";
         String jobRid = job.getId();
         log.debug("Retrieving stage variables for job: {}", jobRid);
         IGCSearch igcSearch = new IGCSearch("stage_variable");
@@ -229,8 +265,15 @@ public class DataStageJob {
         IGCSearchCondition condition = new IGCSearchCondition("stage.job_or_container", "=", jobRid);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
-        ItemList<StageVariable> vars = igcRestClient.search(igcSearch);
-        buildMap(varMap, igcRestClient.getAllPages(null, vars));
+        try {
+            ItemList<StageVariable> vars = igcRestClient.search(igcSearch);
+            buildMap(varMap, igcRestClient.getAllPages(null, vars));
+        } catch (IGCException e) {
+            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                    this.getClass().getName(),
+                    methodName,
+                    e);
+        }
     }
 
     /**
@@ -260,14 +303,22 @@ public class DataStageJob {
      * @param jobRid the RID of the job
      */
     private List<StageColumn> getStageColumnDetailsForLinks(String usingType, String jobRid) {
+        final String methodName = "getStageColumnDetailsForLinks";
         IGCSearch igcSearch = new IGCSearch(usingType);
         igcSearch.addProperties(DataStageConstants.getStageColumnSearchProperties());
         IGCSearchCondition condition = new IGCSearchCondition("link.job_or_container", "=", jobRid);
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
-        ItemList<StageColumn> stageCols = igcRestClient.search(igcSearch);
-        if (stageCols.getPaging().getNumTotal() > 0) {
-            return igcRestClient.getAllPages(null, stageCols);
+        try {
+            ItemList<StageColumn> stageCols = igcRestClient.search(igcSearch);
+            if (stageCols.getPaging().getNumTotal() > 0) {
+                return igcRestClient.getAllPages(null, stageCols);
+            }
+        } catch (IGCException e) {
+            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                    this.getClass().getName(),
+                    methodName,
+                    e);
         }
         return null;
     }
@@ -295,12 +346,20 @@ public class DataStageJob {
     private void mapDataStoreDetailsForJob(DataStageCache cache,
                                            String propertyName,
                                            ItemList<InformationAsset> candidates) {
+        final String methodName = "mapDataStoreDetailsForJob";
         if (candidates != null) {
-            List<InformationAsset> allCandidates = igcRestClient.getAllPages(propertyName, candidates);
-            for (InformationAsset candidate : allCandidates) {
-                String storeId = candidate.getId();
-                storesForJob.add(storeId);
-                cache.getFieldsForStore(candidate);
+            try {
+                List<InformationAsset> allCandidates = igcRestClient.getAllPages(propertyName, candidates);
+                for (InformationAsset candidate : allCandidates) {
+                    String storeId = candidate.getId();
+                    storesForJob.add(storeId);
+                    cache.getFieldsForStore(candidate);
+                }
+            } catch (IGCException e) {
+                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                        this.getClass().getName(),
+                        methodName,
+                        e);
             }
         }
     }

@@ -13,6 +13,9 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.PUBLIC_
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCIOException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 
 import java.util.Date;
@@ -546,9 +549,12 @@ public class Reference extends ObjectPrinter {
      * @param igcrest a REST API connection to use in confirming the identity of the asset
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Identity
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
     @JsonIgnore
-    public Identity getIdentity(IGCRestClient igcrest, ObjectCache cache) {
+    public Identity getIdentity(IGCRestClient igcrest, ObjectCache cache) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         if (!isIdentityPopulated()) {
             // If the _context is null, it is not populated, while if it is empty it has been populated but there
             // simply is no context for this object

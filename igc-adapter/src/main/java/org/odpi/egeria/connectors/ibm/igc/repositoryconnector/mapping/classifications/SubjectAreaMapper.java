@@ -2,10 +2,12 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -25,6 +27,7 @@ import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorEx
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -62,13 +65,14 @@ public class SubjectAreaMapper extends ClassificationMapping {
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the IGC object for which the classification should exist
      * @param userId the user requesing the mapped classifications
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                              List<Classification> classifications,
                                              ObjectCache cache,
                                              Reference fromIgcObject,
-                                             String userId) {
+                                             String userId) throws RepositoryErrorException {
 
         final String methodName = "addMappedOMRSClassifications";
 
@@ -80,7 +84,12 @@ public class SubjectAreaMapper extends ClassificationMapping {
 
             // Only need to continue if there are any terms
             if (assignedToTerms != null) {
-                List<Term> allAssignedToTerms = igcRestClient.getAllPages("assigned_to_terms", assignedToTerms);
+                List<Term> allAssignedToTerms = Collections.emptyList();
+                try {
+                    allAssignedToTerms = igcRestClient.getAllPages("assigned_to_terms", assignedToTerms);
+                } catch (IGCException e) {
+                    raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                }
                 log.debug("Looking for SubjectArea mapping within {} candidate terms.", allAssignedToTerms.size());
 
                 boolean isSubjectArea = false;
@@ -104,17 +113,13 @@ public class SubjectAreaMapper extends ClassificationMapping {
                             fromIgcObject.getName(),
                             methodName
                     );
-                    try {
-                        Classification classification = getMappedClassification(
-                                igcomrsRepositoryConnector,
-                                classificationProperties,
-                                fromIgcObject,
-                                userId
-                        );
-                        classifications.add(classification);
-                    } catch (RepositoryErrorException e) {
-                        log.error("Unable to map classification.", e);
-                    }
+                    Classification classification = getMappedClassification(
+                            igcomrsRepositoryConnector,
+                            classificationProperties,
+                            fromIgcObject,
+                            userId
+                    );
+                    classifications.add(classification);
 
                 }
             }

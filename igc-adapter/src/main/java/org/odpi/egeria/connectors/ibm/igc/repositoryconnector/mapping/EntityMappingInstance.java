@@ -6,6 +6,7 @@ import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
@@ -75,13 +76,14 @@ public class EntityMappingInstance {
      * @param igcEntityType the type of IGC object for which to carry out a mapping
      * @param igcEntityRid the RID of the IGC object for which to carry out a mapping
      * @param userId the user through which to do the mapping
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     public EntityMappingInstance(EntityMapping mapping,
                                  IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                  ObjectCache cache,
                                  String igcEntityType,
                                  String igcEntityRid,
-                                 String userId) {
+                                 String userId) throws RepositoryErrorException {
 
         this(mapping, igcomrsRepositoryConnector);
         this.igcEntityType = igcEntityType;
@@ -91,11 +93,17 @@ public class EntityMappingInstance {
         this.omrsClassifications = new ArrayList<>();
         this.alreadyRetrieved = false;
 
+        final String methodName = "EntityMappingInstance";
+
         // Add modification details by default, if available, to the mapping
-        if (igcomrsRepositoryConnector.getIGCRestClient().hasModificationDetails(igcEntityType)) {
-            for (String property : IGCRestConstants.getModificationProperties()) {
-                mapping.addComplexIgcProperty(property);
+        try {
+            if (igcomrsRepositoryConnector.getIGCRestClient().hasModificationDetails(igcEntityType)) {
+                for (String property : IGCRestConstants.getModificationProperties()) {
+                    mapping.addComplexIgcProperty(property);
+                }
             }
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(methodName, e);
         }
 
         // Translate the provided asset to a base asset type for the mapper, if needed
@@ -118,12 +126,13 @@ public class EntityMappingInstance {
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @param igcEntity the already-retrieved IGC object for which to carry out a mapping
      * @param userId the user through which to do the mapping
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     public EntityMappingInstance(EntityMapping mapping,
                                  IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                  ObjectCache cache,
                                  Reference igcEntity,
-                                 String userId) {
+                                 String userId) throws RepositoryErrorException {
         this(mapping, igcomrsRepositoryConnector);
         this.igcEntity = igcEntity;
         this.igcEntityType = igcEntity.getType();
@@ -228,8 +237,9 @@ public class EntityMappingInstance {
      *
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return EntitySummary
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
-    public final EntitySummary getOmrsSummary(ObjectCache cache) {
+    public final EntitySummary getOmrsSummary(ObjectCache cache) throws RepositoryErrorException {
         if (mapping.isOmrsType(igcomrsRepositoryConnector.getIGCRestClient(), cache, igcEntity)) {
             return omrsSummary;
         } else {
@@ -242,8 +252,9 @@ public class EntityMappingInstance {
      *
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return EntityDetail
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
-    public final EntityDetail getOmrsDetail(ObjectCache cache) {
+    public final EntityDetail getOmrsDetail(ObjectCache cache) throws RepositoryErrorException {
         if (mapping.isOmrsType(igcomrsRepositoryConnector.getIGCRestClient(), cache, igcEntity)) {
             return omrsDetail;
         } else {
@@ -267,8 +278,10 @@ public class EntityMappingInstance {
 
     /**
      * Utility function to initialize an EntitySummary object based on the IGC entity for this mapping.
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
-    public final void initializeEntitySummary() {
+    public final void initializeEntitySummary() throws RepositoryErrorException {
+        final String methodName = "initializeEntitySummary";
         if (omrsSummary == null) {
             try {
                 omrsSummary = igcomrsRepositoryConnector.getRepositoryHelper().getSkeletonEntitySummary(
@@ -293,14 +306,18 @@ public class EntityMappingInstance {
                 }
             } catch (TypeErrorException e) {
                 log.error("Unable to get skeleton summary entity, defaulting to basic summary.", e);
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(methodName, e);
             }
         }
     }
 
     /**
      * Utility function to initialize an EntityDetail object based on the IGC entity for this mapping.
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
-    public final void initializeEntityDetail() {
+    public final void initializeEntityDetail() throws RepositoryErrorException {
+        final String methodName = "initializeEntityDetail";
         if (omrsDetail == null) {
             try {
                 omrsDetail = igcomrsRepositoryConnector.getRepositoryHelper().getSkeletonEntity(
@@ -318,11 +335,15 @@ public class EntityMappingInstance {
                         igcEntityRid);
                 omrsDetail.setGUID(igcEntityGuid.toString());
                 if (!alreadyRetrieved && (igcEntity == null || !igcEntity.isFullyRetrieved())) {
-                    igcEntity = igcomrsRepositoryConnector.getIGCRestClient().getAssetWithSubsetOfProperties(
-                            igcEntityRid,
-                            igcEntityType,
-                            igcPropertiesToRetrieve
-                    );
+                    try {
+                        igcEntity = igcomrsRepositoryConnector.getIGCRestClient().getAssetWithSubsetOfProperties(
+                                igcEntityRid,
+                                igcEntityType,
+                                igcPropertiesToRetrieve
+                        );
+                    } catch (IGCException e) {
+                        raiseRepositoryErrorException(methodName, e);
+                    }
                 }
             } catch (TypeErrorException e) {
                 log.error("Unable to get skeleton detail entity, defaulting to basic summary.", e);
@@ -333,8 +354,10 @@ public class EntityMappingInstance {
     /**
      * Utility function to initialize the IGC entity for this mapping with the bare minimum of information needed for
      * any further processing (ie. for relationship lookups).
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
-    public final void initializeIGCReference() {
+    public final void initializeIGCReference() throws RepositoryErrorException {
+        final String methodName = "initializeIGCReference";
         if (igcEntity == null || !igcEntity.isFullyRetrieved()) {
             IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
             Set<String> directProperties = new TreeSet<>();
@@ -342,15 +365,26 @@ public class EntityMappingInstance {
             for (RelationshipMapping relationshipMapping : relationshipMappers) {
                 directProperties.addAll(relationshipMapping.getDirectRelationshipPropertiesForType(igcEntityType));
             }
-            if (igcRestClient.hasModificationDetails(igcEntityType)) {
-                directProperties.addAll(IGCRestConstants.getModificationProperties());
+            try {
+                if (igcRestClient.hasModificationDetails(igcEntityType)) {
+                    directProperties.addAll(IGCRestConstants.getModificationProperties());
+                }
+                igcEntity = igcomrsRepositoryConnector.getIGCRestClient().getAssetWithSubsetOfProperties(
+                        getIgcEntityRid(),
+                        getIgcEntityType(),
+                        new ArrayList<>(directProperties)
+                );
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(methodName, e);
             }
-            igcEntity = igcomrsRepositoryConnector.getIGCRestClient().getAssetWithSubsetOfProperties(
-                    getIgcEntityRid(),
-                    getIgcEntityType(),
-                    new ArrayList<>(directProperties)
-            );
         }
+    }
+
+    private static void raiseRepositoryErrorException(String methodName, Exception cause) throws RepositoryErrorException {
+        throw new RepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition(),
+                EntityMappingInstance.class.getName(),
+                methodName,
+                cause);
     }
 
 }

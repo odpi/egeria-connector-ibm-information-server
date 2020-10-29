@@ -2,9 +2,12 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnector;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataItem;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
@@ -36,28 +39,36 @@ class AttributeMapping extends BaseMapping {
      */
     AttributeMapping(DataStageCache cache, DataStageJob job, Link link, String fullyQualifiedStageName) {
         super(cache);
+        final String methodName = "AttributeMapping";
         log.debug("Creating new AttributeMapping from job and link...");
         attributes = new ArrayList<>();
         if (link != null) {
             ItemList<DataItem> stageColumns = link.getStageColumns();
-            List<DataItem> allStageColumns = igcRestClient.getAllPages("stage_columns", stageColumns);
-            int index = 0;
-            for (DataItem stageColumn : allStageColumns) {
-                log.debug("... calculating from detailed stage column: {}", stageColumn);
-                String colId = stageColumn.getId();
-                ColumnLevelLineage stageColumnObj = job.getColumnLevelLineageByRid(colId);
-                String stageColumnQN = getFullyQualifiedName(stageColumnObj);
-                if (stageColumnQN != null) {
-                    Attribute attribute = new Attribute();
-                    attribute.setQualifiedName(getFullyQualifiedName(stageColumnObj, fullyQualifiedStageName));
-                    attribute.setDisplayName(stageColumnObj.getName());
-                    attribute.setDataType(stageColumnObj.getOdbcType());
-                    attribute.setPosition(index);
-                    attributes.add(attribute);
-                    index++;
-                } else {
-                    log.error("Unable to determine identity for linked column -- not including it: {}", stageColumn);
+            try {
+                List<DataItem> allStageColumns = igcRestClient.getAllPages("stage_columns", stageColumns);
+                int index = 0;
+                for (DataItem stageColumn : allStageColumns) {
+                    log.debug("... calculating from detailed stage column: {}", stageColumn);
+                    String colId = stageColumn.getId();
+                    ColumnLevelLineage stageColumnObj = job.getColumnLevelLineageByRid(colId);
+                    String stageColumnQN = getFullyQualifiedName(stageColumnObj);
+                    if (stageColumnQN != null) {
+                        Attribute attribute = new Attribute();
+                        attribute.setQualifiedName(getFullyQualifiedName(stageColumnObj, fullyQualifiedStageName));
+                        attribute.setDisplayName(stageColumnObj.getName());
+                        attribute.setDataType(stageColumnObj.getOdbcType());
+                        attribute.setPosition(index);
+                        attributes.add(attribute);
+                        index++;
+                    } else {
+                        log.error("Unable to determine identity for linked column -- not including it: {}", stageColumn);
+                    }
                 }
+            } catch (IGCException e) {
+                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                        this.getClass().getName(),
+                        methodName,
+                        e);
             }
         }
     }
@@ -71,30 +82,38 @@ class AttributeMapping extends BaseMapping {
      */
     AttributeMapping(DataStageCache cache, List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
         super(cache);
+        final String methodName = "AttributeMapping";
         log.debug("Creating new AttributeMapping from job and fields...");
         attributes = new ArrayList<>();
         if (fields != null && !fields.isEmpty()) {
-            for (Classificationenabledgroup field : fields) {
-                String fieldQN = getFullyQualifiedName(field);
-                if (fieldQN != null) {
-                    Attribute attribute = new Attribute();
-                    attribute.setQualifiedName(getFullyQualifiedName(field, fullyQualifiedStageName));
-                    attribute.setDisplayName(field.getName());
-                    String dataType = field.getDataType();
-                    if (dataType != null) {
-                        attribute.setDataType(dataType);
+            try {
+                for (Classificationenabledgroup field : fields) {
+                    String fieldQN = getFullyQualifiedName(field);
+                    if (fieldQN != null) {
+                        Attribute attribute = new Attribute();
+                        attribute.setQualifiedName(getFullyQualifiedName(field, fullyQualifiedStageName));
+                        attribute.setDisplayName(field.getName());
+                        String dataType = field.getDataType();
+                        if (dataType != null) {
+                            attribute.setDataType(dataType);
+                        } else {
+                            attribute.setDataType(field.getOdbcType());
+                        }
+                        Number position = field.getPosition();
+                        if (position != null) {
+                            attribute.setPosition(position.intValue());
+                        }
+                        attribute.setDefaultValue(field.getDefaultValue());
+                        attributes.add(attribute);
                     } else {
-                        attribute.setDataType(field.getOdbcType());
+                        log.error("Unable to determine identity for field -- not including it: {}", field);
                     }
-                    Number position = field.getPosition();
-                    if (position != null) {
-                        attribute.setPosition(position.intValue());
-                    }
-                    attribute.setDefaultValue(field.getDefaultValue());
-                    attributes.add(attribute);
-                } else {
-                    log.error("Unable to determine identity for field -- not including it: {}", field);
                 }
+            } catch (IGCException e) {
+                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                        this.getClass().getName(),
+                        methodName,
+                        e);
             }
         }
     }

@@ -2,6 +2,8 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Paging;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
@@ -187,22 +189,26 @@ public class IGCRepositoryHelperTest {
     @Test
     public void testReferenceHandling() {
 
-        List<Reference> list = new ArrayList<>();
-        IGCRepositoryHelper.addReferencesToList(null, list, null);
-        assertTrue(list.isEmpty());
-        ItemList<Reference> itemList = new ItemList<>();
-        List<Reference> items = new ArrayList<>();
-        items.add(new Reference("TestName1", "term", "123"));
-        items.add(new Reference("TestName2", "term", "456"));
-        itemList.setItems(items);
-        Paging paging = new Paging();
-        paging.setNumTotal(2);
-        paging.setEndIndex(2);
-        paging.setPageSize(10);
-        itemList.setPaging(paging);
-        IGCRepositoryHelper.addReferencesToList(null, list, itemList);
-        assertFalse(list.isEmpty());
-        assertEquals(list.size(), 2);
+        try {
+            List<Reference> list = new ArrayList<>();
+            IGCRepositoryHelper.addReferencesToList(null, list, null);
+            assertTrue(list.isEmpty());
+            ItemList<Reference> itemList = new ItemList<>();
+            List<Reference> items = new ArrayList<>();
+            items.add(new Reference("TestName1", "term", "123"));
+            items.add(new Reference("TestName2", "term", "456"));
+            itemList.setItems(items);
+            Paging paging = new Paging();
+            paging.setNumTotal(2);
+            paging.setEndIndex(2);
+            paging.setPageSize(10);
+            itemList.setPaging(paging);
+            IGCRepositoryHelper.addReferencesToList(null, list, itemList);
+            assertFalse(list.isEmpty());
+            assertEquals(list.size(), 2);
+        } catch (IGCException e) {
+            assertNull(e);
+        }
 
     }
 

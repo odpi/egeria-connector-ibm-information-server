@@ -10,6 +10,7 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.Sche
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -109,27 +110,31 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 }
 
                 IGCVersionEnum igcVersion;
-                // Create new REST API client (opens a new session)
-                this.igcRestClient = new IGCRestClient("https://" + address, igcUser, igcPass);
-                if (this.igcRestClient.start()) {
+                try {
+                    // Create new REST API client (opens a new session)
+                    this.igcRestClient = new IGCRestClient("https://" + address, igcUser, igcPass);
+                    if (this.igcRestClient.start()) {
 
-                    // Set the version based on the IGC client's auto-determination of the IGC environment's version
-                    igcVersion = this.igcRestClient.getIgcVersion();
-                    // Set the default page size to whatever is provided as part of config parameters (default to 100)
-                    if (igcPage != null) {
-                        this.igcRestClient.setDefaultPageSize(igcPage);
+                        // Set the version based on the IGC client's auto-determination of the IGC environment's version
+                        igcVersion = this.igcRestClient.getIgcVersion();
+                        // Set the default page size to whatever is provided as part of config parameters (default to 100)
+                        if (igcPage != null) {
+                            this.igcRestClient.setDefaultPageSize(igcPage);
+                        } else {
+                            this.igcRestClient.setDefaultPageSize(100);
+                        }
+
+                        // Create a new SoftwareServerCapability representing this Data Engine
+                        dataEngine = new SoftwareServerCapability();
+                        dataEngine.setEngineType("IBM InfoSphere DataStage");
+                        dataEngine.setEngineVersion(igcVersion.getVersionString());
+                        dataEngine.setQualifiedName("ibm-datastage@" + address);
+                        dataEngine.setDisplayName(address);
+
                     } else {
-                        this.igcRestClient.setDefaultPageSize(100);
+                        raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, address);
                     }
-
-                    // Create a new SoftwareServerCapability representing this Data Engine
-                    dataEngine = new SoftwareServerCapability();
-                    dataEngine.setEngineType("IBM InfoSphere DataStage");
-                    dataEngine.setEngineVersion(igcVersion.getVersionString());
-                    dataEngine.setQualifiedName("ibm-datastage@" + address);
-                    dataEngine.setDisplayName(address);
-
-                } else {
+                } catch (IGCException e) {
                     raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, address);
                 }
 
@@ -143,8 +148,13 @@ public class DataStageConnector extends DataEngineConnectorBase {
      */
     @Override
     public void disconnect() {
-        // Close the session on the IGC REST client
-        this.igcRestClient.disconnect();
+        final String methodName = "disconnect";
+        try {
+            // Close the session on the IGC REST client
+            this.igcRestClient.disconnect();
+        } catch (IGCException e) {
+            raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+        }
     }
 
     /**
@@ -180,32 +190,33 @@ public class DataStageConnector extends DataEngineConnectorBase {
         final String methodName = "setChangesLastSynced";
         InformationGovernanceRule exists = getJobSyncRule();
         String newDescription = SYNC_RULE_DESC + syncDateFormat.format(time);
-        boolean success;
-        if (exists == null) {
-            // Create the entry
-            IGCCreate igcCreate = new IGCCreate("information_governance_rule");
-            igcCreate.addProperty(DataStageConstants.NAME, getJobSyncRuleName());
-            igcCreate.addProperty(DataStageConstants.SHORT_DESCRIPTION, newDescription);
-            success = igcRestClient.create(igcCreate) != null;
-        } else {
-            // Update the entry
-            IGCUpdate igcUpdate = new IGCUpdate(exists.getId());
-            igcUpdate.addProperty(DataStageConstants.SHORT_DESCRIPTION, newDescription);
-            success = igcRestClient.update(igcUpdate);
+        boolean success = false;
+        try {
+            if (exists == null) {
+                // Create the entry
+                IGCCreate igcCreate = new IGCCreate("information_governance_rule");
+                igcCreate.addProperty(DataStageConstants.NAME, getJobSyncRuleName());
+                igcCreate.addProperty(DataStageConstants.SHORT_DESCRIPTION, newDescription);
+                success = igcRestClient.create(igcCreate) != null;
+            } else {
+                // Update the entry
+                IGCUpdate igcUpdate = new IGCUpdate(exists.getId());
+                igcUpdate.addProperty(DataStageConstants.SHORT_DESCRIPTION, newDescription);
+                success = igcRestClient.update(igcUpdate);
+            }
+        } catch (IGCException e) {
+            raiseRuntimeError(DataStageErrorCode.SYNC_TIME_UPDATE_FAILURE, methodName, e);
         }
         if (!success) {
-            throw new OCFRuntimeException(DataStageErrorCode.SYNC_TIME_UPDATE_FAILURE.getMessageDefinition(),
-                    this.getClass().getName(),
-                    methodName);
+            raiseRuntimeError(DataStageErrorCode.SYNC_TIME_UPDATE_FAILURE, methodName, null);
         }
     }
 
     /**
      * {@inheritDoc}
      */
-//    @Override
+    @Override
     public synchronized Date getOldestChangeSince(Date time) {
-        final String methodName = "getOldestChangeSince";
         Dsjob oldest = getOldestJobSince(time);
         if (oldest != null) {
             return oldest.getModifiedOn();
@@ -423,13 +434,19 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @return InformationGovernanceRule
      */
     private InformationGovernanceRule getJobSyncRule() {
+        final String methodName = "getJobSyncRule";
         IGCSearch igcSearch = new IGCSearch("information_governance_rule");
         igcSearch.addProperty(DataStageConstants.SHORT_DESCRIPTION);
         IGCSearchCondition condition = new IGCSearchCondition(DataStageConstants.NAME, "=", getJobSyncRuleName());
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
-        ItemList<InformationGovernanceRule> results = igcRestClient.search(igcSearch);
-        return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
+        try {
+            ItemList<InformationGovernanceRule> results = igcRestClient.search(igcSearch);
+            return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
+        } catch (IGCException e) {
+            raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+        }
+        return null;
     }
 
     /**
@@ -452,6 +469,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @return Dsjob
      */
     private Dsjob getOldestJobSince(Date time) {
+        final String methodName = "getOldestJobSince";
         long startFrom = 0;
         if (time != null) {
             startFrom = time.getTime();
@@ -474,8 +492,13 @@ public class DataStageConnector extends DataEngineConnectorBase {
         IGCSearchSorting sorting = new IGCSearchSorting("modified_on", true);
         igcSearch.addSortingCriteria(sorting);
         igcSearch.setPageSize(2); // No need to get any more than 2 results, as we will only take the top result anyway
-        ItemList<Dsjob> results = igcRestClient.search(igcSearch);
-        return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
+        try {
+            ItemList<Dsjob> results = igcRestClient.search(igcSearch);
+            return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
+        } catch (IGCException e) {
+            raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+        }
+        return null;
     }
 
     /**
@@ -489,6 +512,31 @@ public class DataStageConnector extends DataEngineConnectorBase {
         throw new ConnectorCheckedException(errorCode.getMessageDefinition(params),
                 this.getClass().getName(),
                 methodName);
+    }
+
+    private void raiseRuntimeError(DataStageErrorCode errorCode, String methodName, Exception cause) throws OCFRuntimeException {
+        raiseRuntimeError(errorCode, this.getClass().getName(), methodName, cause);
+    }
+
+    /**
+     * Throws an OCFRuntimeException using the provided parameters.
+     * @param errorCode the error
+     * @param className of the caller
+     * @param methodName of the caller
+     * @param cause of the underlying error, if any
+     * @throws OCFRuntimeException always
+     */
+    public static void raiseRuntimeError(DataStageErrorCode errorCode, String className, String methodName, Exception cause) throws OCFRuntimeException {
+        if (cause == null) {
+            throw new OCFRuntimeException(errorCode.getMessageDefinition(),
+                    className,
+                    methodName);
+        } else {
+            throw new OCFRuntimeException(errorCode.getMessageDefinition(),
+                    className,
+                    methodName,
+                    cause);
+        }
     }
 
 }

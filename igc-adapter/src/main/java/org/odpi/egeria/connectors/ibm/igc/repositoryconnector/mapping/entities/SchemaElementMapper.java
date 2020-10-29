@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -70,7 +71,7 @@ public class SchemaElementMapper extends ReferenceableMapper {
     @Override
     protected InstanceProperties complexPropertyMappings(ObjectCache cache,
                                                          EntityMappingInstance entityMap,
-                                                         InstanceProperties instanceProperties) {
+                                                         InstanceProperties instanceProperties) throws RepositoryErrorException {
 
         instanceProperties = super.complexPropertyMappings(cache, entityMap, instanceProperties);
 
@@ -274,6 +275,7 @@ public class SchemaElementMapper extends ReferenceableMapper {
      * @param igcRestClient connectivity to the IGC environment
      * @param instanceProperties the instance properties into which to populate the anchorGUID
      * @return InstanceProperties
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     protected InstanceProperties addAnchorGUIDProperty(OMRSRepositoryHelper repositoryHelper,
                                                        String repositoryName,
@@ -281,22 +283,26 @@ public class SchemaElementMapper extends ReferenceableMapper {
                                                        ObjectCache cache,
                                                        Reference igcEntity,
                                                        IGCRestClient igcRestClient,
-                                                       InstanceProperties instanceProperties) {
+                                                       InstanceProperties instanceProperties) throws RepositoryErrorException {
 
         final String methodName = "addAnchorGUIDProperty";
 
-        Identity identity = igcEntity.getIdentity(igcRestClient, cache);
-        Identity asset = getParentAssetIdentity(identity);
-        if (asset != null) {
-            // We should be safe with no prefix here as the assets DeployedDatabaseSchema and DataFile have no prefix
-            IGCEntityGuid assetGuid = igcRepositoryHelper.getEntityGuid(asset.getAssetType(), null, asset.getRid());
-            instanceProperties = repositoryHelper.addStringPropertyToInstance(
-                    repositoryName,
-                    instanceProperties,
-                    "anchorGUID",
-                    assetGuid.toString(),
-                    methodName
-            );
+        try {
+            Identity identity = igcEntity.getIdentity(igcRestClient, cache);
+            Identity asset = getParentAssetIdentity(identity);
+            if (asset != null) {
+                // We should be safe with no prefix here as the assets DeployedDatabaseSchema and DataFile have no prefix
+                IGCEntityGuid assetGuid = igcRepositoryHelper.getEntityGuid(asset.getAssetType(), null, asset.getRid());
+                instanceProperties = repositoryHelper.addStringPropertyToInstance(
+                        repositoryName,
+                        instanceProperties,
+                        "anchorGUID",
+                        assetGuid.toString(),
+                        methodName
+                );
+            }
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
         }
 
         return instanceProperties;

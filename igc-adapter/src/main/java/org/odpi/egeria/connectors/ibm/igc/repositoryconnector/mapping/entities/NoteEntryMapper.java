@@ -17,6 +17,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 
 /**
  * Defines the mapping to the OMRS "NoteEntry" entity.
@@ -59,11 +60,12 @@ public class NoteEntryMapper extends ReferenceableMapper {
      * @param entityMap the instantiation of a mapping to carry out
      * @param instanceProperties the instance properties to which to add the complex-mapped properties
      * @return InstanceProperties
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     protected InstanceProperties complexPropertyMappings(ObjectCache cache,
                                                          EntityMappingInstance entityMap,
-                                                         InstanceProperties instanceProperties) {
+                                                         InstanceProperties instanceProperties) throws RepositoryErrorException {
 
         instanceProperties = super.complexPropertyMappings(cache, entityMap, instanceProperties);
 

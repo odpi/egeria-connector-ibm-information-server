@@ -7,6 +7,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.MainObject;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
@@ -85,13 +86,14 @@ public class ConfidentialityMapper extends ClassificationMapping {
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the IGC object for which the classification should exist
      * @param userId the user requesting the mapped classifications
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                              List<Classification> classifications,
                                              ObjectCache cache,
                                              Reference fromIgcObject,
-                                             String userId) {
+                                             String userId) throws RepositoryErrorException {
 
         final String methodName = "addMappedOMRSClassification";
 
@@ -101,27 +103,28 @@ public class ConfidentialityMapper extends ClassificationMapping {
         if (fromIgcObject instanceof MainObject) {
             ItemList<Term> assignedToTerms = ((MainObject) fromIgcObject).getAssignedToTerms();
             if (assignedToTerms != null) {
-                List<Term> allAssignedTerms = igcRestClient.getAllPages("assigned_to_terms", assignedToTerms);
 
-                // For each such relationship:
-                for (Term assignedTerm : allAssignedTerms) {
+                try {
+                    List<Term> allAssignedTerms = igcRestClient.getAllPages("assigned_to_terms", assignedToTerms);
 
-                    // Retrieve the identity characteristics (ie. the parent category) of the related term
-                    Identity termIdentity = assignedTerm.getIdentity(igcRestClient, cache);
-                    Identity catIdentity = termIdentity.getParentIdentity();
+                    // For each such relationship:
+                    for (Term assignedTerm : allAssignedTerms) {
 
-                    // Only do something with the assigned term if its immediate parent category is named
-                    // "Confidentiality"
-                    if (catIdentity.toString().endsWith("Confidentiality")) {
+                        // Retrieve the identity characteristics (ie. the parent category) of the related term
+                        Identity termIdentity = assignedTerm.getIdentity(igcRestClient, cache);
+                        Identity catIdentity = termIdentity.getParentIdentity();
 
-                        InstanceProperties classificationProperties = new InstanceProperties();
+                        // Only do something with the assigned term if its immediate parent category is named
+                        // "Confidentiality"
+                        if (catIdentity.toString().endsWith("Confidentiality")) {
 
-                        String confidentialityName = assignedTerm.getName();
-                        int spaceIndex = confidentialityName.indexOf(" ");
-                        if (spaceIndex > 0) {
+                            InstanceProperties classificationProperties = new InstanceProperties();
 
-                            String level = confidentialityName.substring(0, spaceIndex);
-                            try {
+                            String confidentialityName = assignedTerm.getName();
+                            int spaceIndex = confidentialityName.indexOf(" ");
+                            if (spaceIndex > 0) {
+
+                                String level = confidentialityName.substring(0, spaceIndex);
                                 int parsedLevel = Integer.parseInt(level);
                                 classificationProperties = igcomrsRepositoryConnector.getRepositoryHelper().addIntPropertyToInstance(
                                         igcomrsRepositoryConnector.getRepositoryName(),
@@ -130,10 +133,6 @@ public class ConfidentialityMapper extends ClassificationMapping {
                                         parsedLevel,
                                         methodName
                                 );
-                            } catch (NumberFormatException e) {
-                                log.error("Unable to detect a level in the Confidentiality classification: {}", confidentialityName, e);
-                            }
-                            try {
                                 Classification classification = getMappedClassification(
                                         igcomrsRepositoryConnector,
                                         classificationProperties,
@@ -141,16 +140,16 @@ public class ConfidentialityMapper extends ClassificationMapping {
                                         userId
                                 );
                                 classifications.add(classification);
-                            } catch (RepositoryErrorException e) {
-                                log.error("Unable to map Confidentiality classification.", e);
+
+                            } else {
+                                log.error("Unable to detect a level in the Confidentiality classification: {}", confidentialityName);
                             }
 
-                        } else {
-                            log.error("Unable to detect a level in the Confidentiality classification: {}", confidentialityName);
                         }
 
                     }
-
+                } catch (NumberFormatException | IGCException e) {
+                    raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
                 }
             }
         }

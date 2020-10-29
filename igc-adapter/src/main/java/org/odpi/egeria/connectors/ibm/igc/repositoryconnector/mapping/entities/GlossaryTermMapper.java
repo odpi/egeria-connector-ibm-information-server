@@ -2,10 +2,12 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -14,6 +16,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifica
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.*;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ConfidentialityMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.SpineObjectMapper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 
 /**
  * Defines the mapping to the OMRS "GlossaryTerm" entity.
@@ -65,12 +68,17 @@ public class GlossaryTermMapper extends ReferenceableMapper {
      * {@inheritDoc}
      */
     @Override
-    public boolean isOmrsType(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) {
+    public boolean isOmrsType(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) throws RepositoryErrorException {
+        final String methodName = "isOmrsType";
         String assetType = IGCRestConstants.getAssetTypeForSearch(igcObject.getType());
         if (assetType.equals("term")) {
-            Identity termIdentity = igcObject.getIdentity(igcRestClient, cache);
-            Identity ultimateParentIdentity = termIdentity.getUltimateParentIdentity();
-            return ultimateParentIdentity != null && !ultimateParentIdentity.getName().equals("Classifications");
+            try {
+                Identity termIdentity = igcObject.getIdentity(igcRestClient, cache);
+                Identity ultimateParentIdentity = termIdentity.getUltimateParentIdentity();
+                return ultimateParentIdentity != null && !ultimateParentIdentity.getName().equals("Classifications");
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
         }
         return false;
     }

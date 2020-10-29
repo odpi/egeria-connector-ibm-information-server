@@ -6,6 +6,7 @@ import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -222,8 +223,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcRestClient REST API connectivity
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the asset to be used for endpoint one of the relationship
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
-    public List<Reference> getProxyOneAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient, ObjectCache cache) {
+    public List<Reference> getProxyOneAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient, ObjectCache cache) throws RepositoryErrorException {
         List<Reference> referenceAsList = new ArrayList<>();
         referenceAsList.add(relationshipAsset);
         return referenceAsList;
@@ -238,8 +240,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param igcRestClient REST API connectivity
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the asset to be used for endpoint two of the relationship
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
-    public List<Reference> getProxyTwoAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient, ObjectCache cache) {
+    public List<Reference> getProxyTwoAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient, ObjectCache cache) throws RepositoryErrorException {
         List<Reference> referenceAsList = new ArrayList<>();
         referenceAsList.add(relationshipAsset);
         return referenceAsList;
@@ -328,6 +331,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
      *                 unrestricted return results size.
      * @param userId the userId doing the mapping
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                            List<Relationship> relationships,
@@ -337,7 +341,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                            int fromRelationshipElement,
                                            SequencingOrder sequencingOrder,
                                            int pageSize,
-                                           String userId) {
+                                           String userId) throws RepositoryErrorException {
         // By default there are no complex / custom mappings
     }
 
@@ -350,11 +354,12 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param oneObject the IGC object to consider for inclusion on one end of the relationship
      * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
      * @return boolean
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                     ObjectCache cache,
                                                     Reference oneObject,
-                                                    Reference otherObject) {
+                                                    Reference otherObject) throws RepositoryErrorException {
         return true;
     }
 
@@ -387,9 +392,10 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param matchProperties the set of properties against which to match (or null if none)
      * @return {@code List<IGCSearch>} - the search objects by which to find these relationships
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     public List<IGCSearch> getComplexIGCSearchCriteria(IGCOMRSRepositoryConnector repositoryConnector,
-                                                       SearchProperties matchProperties) throws FunctionNotSupportedException {
+                                                       SearchProperties matchProperties) throws FunctionNotSupportedException, RepositoryErrorException {
         // Nothing to do -- no relationship-level properties by default -- so return the simple search
         if (matchProperties == null || matchProperties.getConditions() == null || matchProperties.getConditions().size() == 0) {
             return getSimpleIGCSearchCriteria();
@@ -1072,12 +1078,13 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param userId the user through which to retrieve the EntityProxy (unused)
      * @param ridPrefix any prefix required on the object's ID to make it unique
      * @return EntityProxy
+     * @throws RepositoryErrorException on any issue interacting with IGC
      */
     private static EntityProxy getEntityProxyForObject(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                        ObjectCache cache,
                                                        Reference igcObj,
                                                        String userId,
-                                                       String ridPrefix) {
+                                                       String ridPrefix) throws RepositoryErrorException {
 
         final String methodName = "getEntityProxyForObject";
 
@@ -1088,15 +1095,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
         if (igcType != null) {
 
-            IGCOMRSMetadataCollection igcomrsMetadataCollection;
-            try {
-                igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
-            } catch (RepositoryErrorException e) {
-                throw new OMRSRuntimeException(IGCOMRSErrorCode.REST_CLIENT_FAILURE.getMessageDefinition(igcomrsRepositoryConnector.getServerName()),
-                        RelationshipMapping.class.getName(),
-                        methodName,
-                        e);
-            }
+            IGCOMRSMetadataCollection igcomrsMetadataCollection = (IGCOMRSMetadataCollection) igcomrsRepositoryConnector.getMetadataCollection();
             IGCRepositoryHelper igcRepositoryHelper = igcomrsMetadataCollection.getIgcRepositoryHelper();
             EntityMappingInstance entityMap = igcRepositoryHelper.getMappingInstanceForParameters(
                     cache,
@@ -1108,20 +1107,20 @@ public abstract class RelationshipMapping extends InstanceMapping {
             if (entityMap != null) {
 
                 // Construct 'qualifiedName' from the Identity of the object
-                String identity = igcObj.getIdentity(igcRestClient, cache).toString();
-                if (ridPrefix != null) {
-                    identity = IGCRepositoryHelper.getQualifiedNameForGeneratedEntity(ridPrefix, identity);
-                }
-
-                InstanceProperties uniqueProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(
-                        igcomrsRepositoryConnector.getRepositoryName(),
-                        null,
-                        "qualifiedName",
-                        identity,
-                        methodName
-                );
-
                 try {
+                    String identity = igcObj.getIdentity(igcRestClient, cache).toString();
+                    if (ridPrefix != null) {
+                        identity = IGCRepositoryHelper.getQualifiedNameForGeneratedEntity(ridPrefix, identity);
+                    }
+
+                    InstanceProperties uniqueProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(
+                            igcomrsRepositoryConnector.getRepositoryName(),
+                            null,
+                            "qualifiedName",
+                            identity,
+                            methodName
+                    );
+
                     entityProxy = igcomrsRepositoryConnector.getRepositoryHelper().getNewEntityProxy(
                             igcomrsRepositoryConnector.getRepositoryName(),
                             igcomrsRepositoryConnector.getMetadataCollectionId(),
@@ -1150,6 +1149,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
                 } catch (TypeErrorException e) {
                     log.error("Unable to create new EntityProxy.", e);
+                } catch (IGCException e) {
+                    raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
                 }
 
             } else {
@@ -1180,6 +1181,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
      *                 unrestricted return results size.
      * @param userId the user retrieving the mapped relationships
+     * @throws RepositoryErrorException if any issues interacting with IGC
      */
     public static void getMappedRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                               List<Relationship> relationships,
@@ -1190,7 +1192,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                               int fromRelationshipElement,
                                               SequencingOrder sequencingOrder,
                                               int pageSize,
-                                              String userId) {
+                                              String userId) throws RepositoryErrorException {
         getMappedRelationships(
                 igcomrsRepositoryConnector,
                 relationships,
@@ -1217,6 +1219,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param fromIgcObject the IGC object that is the source of the relationships
      * @param toIgcObject the IGC object that is the target of the relationship (or null if not known).
      * @param userId the user retrieving the mapped relationships
+     * @throws RepositoryErrorException if any issues interacting with IGC
      */
     public static void getMappedRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                               List<Relationship> relationships,
@@ -1225,7 +1228,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                               String relationshipTypeGUID,
                                               Reference fromIgcObject,
                                               Reference toIgcObject,
-                                              String userId) {
+                                              String userId) throws RepositoryErrorException {
         getMappedRelationships(igcomrsRepositoryConnector,
                 relationships,
                 mappings,
@@ -1256,6 +1259,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
      *                 unrestricted return results size.
      * @param userId the user retrieving the mapped relationships
+     * @throws RepositoryErrorException if any issues interacting with IGC
      */
     public static void getMappedRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                               List<Relationship> relationships,
@@ -1267,7 +1271,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                               int fromRelationshipElement,
                                               SequencingOrder sequencingOrder,
                                               int pageSize,
-                                              String userId) {
+                                              String userId) throws RepositoryErrorException {
 
         // Iterate through the provided mappings to create a number of OMRS relationships
         for (RelationshipMapping mapping : mappings) {
@@ -1389,6 +1393,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
      *                 unrestricted return results size.
      * @param userId the user retrieving the mapped relationship
+     * @throws RepositoryErrorException if any issues interacting with IGC
      */
     @SuppressWarnings("unchecked")
     private static void addDirectRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
@@ -1400,8 +1405,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                               int fromRelationshipElement,
                                               SequencingOrder sequencingOrder,
                                               int pageSize,
-                                              String userId) {
+                                              String userId) throws RepositoryErrorException {
 
+        final String methodName = "addDirectRelationship";
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
         if (toIgcObject != null) {
@@ -1420,69 +1426,74 @@ public abstract class RelationshipMapping extends InstanceMapping {
             // from a search (see below) we must also resort to this property-based retrieval
             for (String igcRelationshipName : mapping.getIgcRelationshipPropertiesForType(fromIgcObject.getType())) {
 
-                Object directRelationships = igcRestClient.getPropertyByName(fromIgcObject, igcRelationshipName);
+                try {
+                    Object directRelationships = igcRestClient.getPropertyByName(fromIgcObject, igcRelationshipName);
 
-                // Handle single instance relationship one way
-                if (directRelationships instanceof Reference) {
+                    // Handle single instance relationship one way
+                    if (directRelationships instanceof Reference) {
 
-                    Reference singleRelationship = (Reference) directRelationships;
-                    if (mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, cache, fromIgcObject, singleRelationship)) {
-                        addSingleMappedRelationship(
+                        Reference singleRelationship = (Reference) directRelationships;
+                        if (mapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, cache, fromIgcObject, singleRelationship)) {
+                            addSingleMappedRelationship(
+                                    igcomrsRepositoryConnector,
+                                    mapping,
+                                    relationships,
+                                    cache,
+                                    fromIgcObject,
+                                    singleRelationship,
+                                    igcRelationshipName,
+                                    userId
+                            );
+                        }
+
+                    } else if (directRelationships instanceof ItemList) { // and list of relationships another
+
+                        // In this scenario we must retrieve all pages, as we cannot sort the results any other way
+                        ItemList<Reference> allRelationships = (ItemList<Reference>) directRelationships;
+                        List<Reference> allPages = igcomrsRepositoryConnector.getIGCRestClient().getAllPages(igcRelationshipName, allRelationships);
+                        allRelationships.setAllPages(allPages);
+                        if (sequencingOrder != null) {
+                            // Sort the results before passing along to the next operation
+                            switch (sequencingOrder) {
+                                case GUID:
+                                    allRelationships.getItems().sort(Comparator.comparing(Reference::getId));
+                                    break;
+                                case CREATION_DATE_OLDEST:
+                                    allRelationships.getItems().sort(Comparator.comparing(Reference::getCreatedOn));
+                                    break;
+                                case CREATION_DATE_RECENT:
+                                    allRelationships.getItems().sort(Comparator.comparing(Reference::getCreatedOn).reversed());
+                                    break;
+                                case LAST_UPDATE_OLDEST:
+                                    allRelationships.getItems().sort(Comparator.comparing(Reference::getModifiedOn));
+                                    break;
+                                case LAST_UPDATE_RECENT:
+                                    allRelationships.getItems().sort(Comparator.comparing(Reference::getModifiedOn).reversed());
+                                    break;
+                                default:
+                                    log.warn("Sorting not implemented for the requested ordering: {}", sequencingOrder);
+                                    break;
+                            }
+                        }
+                        addListOfMappedRelationships(
                                 igcomrsRepositoryConnector,
                                 mapping,
                                 relationships,
                                 cache,
                                 fromIgcObject,
-                                singleRelationship,
+                                allRelationships,
                                 igcRelationshipName,
+                                fromRelationshipElement,
+                                pageSize,
                                 userId
                         );
+
+                    } else {
+                        log.debug(" ... skipping relationship {}, either empty or neither reference or list: {}", igcRelationshipName, directRelationships);
                     }
 
-                } else if (directRelationships instanceof ItemList) { // and list of relationships another
-
-                    // In this scenario we must retrieve all pages, as we cannot sort the results any other way
-                    ItemList<Reference> allRelationships = (ItemList<Reference>) directRelationships;
-                    List<Reference> allPages = igcomrsRepositoryConnector.getIGCRestClient().getAllPages(igcRelationshipName, allRelationships);
-                    allRelationships.setAllPages(allPages);
-                    if (sequencingOrder != null) {
-                        // Sort the results before passing along to the next operation
-                        switch (sequencingOrder) {
-                            case GUID:
-                                allRelationships.getItems().sort(Comparator.comparing(Reference::getId));
-                                break;
-                            case CREATION_DATE_OLDEST:
-                                allRelationships.getItems().sort(Comparator.comparing(Reference::getCreatedOn));
-                                break;
-                            case CREATION_DATE_RECENT:
-                                allRelationships.getItems().sort(Comparator.comparing(Reference::getCreatedOn).reversed());
-                                break;
-                            case LAST_UPDATE_OLDEST:
-                                allRelationships.getItems().sort(Comparator.comparing(Reference::getModifiedOn));
-                                break;
-                            case LAST_UPDATE_RECENT:
-                                allRelationships.getItems().sort(Comparator.comparing(Reference::getModifiedOn).reversed());
-                                break;
-                            default:
-                                log.warn("Sorting not implemented for the requested ordering: {}", sequencingOrder);
-                                break;
-                        }
-                    }
-                    addListOfMappedRelationships(
-                            igcomrsRepositoryConnector,
-                            mapping,
-                            relationships,
-                            cache,
-                            fromIgcObject,
-                            allRelationships,
-                            igcRelationshipName,
-                            fromRelationshipElement,
-                            pageSize,
-                            userId
-                    );
-
-                } else {
-                    log.debug(" ... skipping relationship {}, either empty or neither reference or list: {}", igcRelationshipName, directRelationships);
+                } catch (IGCException e) {
+                    raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
                 }
 
             }
@@ -1506,6 +1517,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
      *                 unrestricted return results size.
      * @param userId the user retrieving the mapped relationship
+     * @throws RepositoryErrorException if any issues interacting with IGC
      */
     private static void addInvertedRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                 RelationshipMapping mapping,
@@ -1516,7 +1528,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                 int fromRelationshipElement,
                                                 SequencingOrder sequencingOrder,
                                                 int pageSize,
-                                                String userId) {
+                                                String userId) throws RepositoryErrorException {
 
         String assetType = fromIgcObject.getType();
 
@@ -1618,6 +1630,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
      *                 unrestricted return results size.
      * @param userId the user retrieving the mapped relationship
+     * @throws RepositoryErrorException if any issues interacting with IGC
      */
     private static void addSearchResultsToRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                         RelationshipMapping mapping,
@@ -1630,31 +1643,36 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                         int fromRelationshipElement,
                                                         SequencingOrder sequencingOrder,
                                                         int pageSize,
-                                                        String userId) {
+                                                        String userId) throws RepositoryErrorException {
 
+        final String methodName = "addSearchResultsToRelationships";
         IGCSearch igcSearch = new IGCSearch(assetType, igcSearchConditionSet);
-        if (!assetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
-            if (igcomrsRepositoryConnector.getIGCRestClient().hasModificationDetails(assetType)) {
-                igcSearch.addProperties(IGCRestConstants.getModificationProperties());
+        try {
+            if (!assetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
+                if (igcomrsRepositoryConnector.getIGCRestClient().hasModificationDetails(assetType)) {
+                    igcSearch.addProperties(IGCRestConstants.getModificationProperties());
+                }
             }
+            IGCSearchSorting sorting = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
+            if (sorting != null) {
+                igcSearch.addSortingCriteria(sorting);
+            }
+            ItemList<Reference> foundRelationships = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
+            addListOfMappedRelationships(
+                    igcomrsRepositoryConnector,
+                    mapping,
+                    relationships,
+                    cache,
+                    fromIgcObject,
+                    foundRelationships,
+                    igcPropertyName,
+                    fromRelationshipElement,
+                    pageSize,
+                    userId
+            );
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
         }
-        IGCSearchSorting sorting = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
-        if (sorting != null) {
-            igcSearch.addSortingCriteria(sorting);
-        }
-        ItemList<Reference> foundRelationships = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
-        addListOfMappedRelationships(
-                igcomrsRepositoryConnector,
-                mapping,
-                relationships,
-                cache,
-                fromIgcObject,
-                foundRelationships,
-                igcPropertyName,
-                fromRelationshipElement,
-                pageSize,
-                userId
-        );
 
     }
 
@@ -1674,6 +1692,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
      *                 unrestricted return results size.
      * @param userId the user retrieving the mapped relationship
+     * @throws RepositoryErrorException if any issues interacting with IGC
      */
     private static void addListOfMappedRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                      RelationshipMapping mapping,
@@ -1684,8 +1703,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                      String igcPropertyName,
                                                      int fromRelationshipElement,
                                                      int pageSize,
-                                                     String userId) {
+                                                     String userId) throws RepositoryErrorException {
 
+        final String methodName = "addListOfMappedRelationships";
         log.debug(" ... list of references: {}", mapping.getOmrsRelationshipType());
 
         List<Relationship> localPage = new ArrayList<>();
@@ -1719,18 +1739,22 @@ public abstract class RelationshipMapping extends InstanceMapping {
         // If we haven't filled a page of results (because we needed to skip some above), recurse...
         if (igcRelationships.hasMorePages() && localPage.size() < totalPotentialResults) {
             // TODO: will we always have the property name here, or could it be null where ordering is known?
-            ItemList<Reference> nextPage = igcomrsRepositoryConnector.getIGCRestClient().getNextPage(igcPropertyName, igcRelationships);
-            addListOfMappedRelationships(igcomrsRepositoryConnector,
-                    mapping,
-                    relationships,
-                    cache,
-                    fromIgcObject,
-                    nextPage,
-                    igcPropertyName,
-                    fromRelationshipElement,
-                    pageSize,
-                    userId
-            );
+            try {
+                ItemList<Reference> nextPage = igcomrsRepositoryConnector.getIGCRestClient().getNextPage(igcPropertyName, igcRelationships);
+                addListOfMappedRelationships(igcomrsRepositoryConnector,
+                        mapping,
+                        relationships,
+                        cache,
+                        fromIgcObject,
+                        nextPage,
+                        igcPropertyName,
+                        fromRelationshipElement,
+                        pageSize,
+                        userId
+                );
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
         }
 
     }

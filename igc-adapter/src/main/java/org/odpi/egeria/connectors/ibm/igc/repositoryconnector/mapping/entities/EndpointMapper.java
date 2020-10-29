@@ -2,9 +2,11 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Host;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
@@ -21,6 +23,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,25 +78,32 @@ public class EndpointMapper extends ReferenceableMapper {
      * @param igcomrsRepositoryConnector connectivity to IGC repository
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the host asset
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     public Reference getBaseIgcAssetFromAlternative(String otherAssetType,
                                                     String otherAssetRid,
                                                     IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                    ObjectCache cache) {
+                                                    ObjectCache cache) throws RepositoryErrorException {
+        final String methodName = "getBaseIgcAssetFromAlternative";
         if (otherAssetType.equals("host_(engine)")) {
             IGCSearchCondition igcSearchCondition = new IGCSearchCondition("_id", "=", otherAssetRid);
             IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(igcSearchCondition);
             IGCSearch igcSearch = new IGCSearch("host", igcSearchConditionSet);
             igcSearch.setPageSize(2);
-            ItemList<Host> hosts = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
-            if (!hosts.getItems().isEmpty()) {
-                // As long as there is at least one result, return the first
-                return hosts.getItems().get(0);
-            } else {
-                log.warn("Unable to translate host_(engine) to host, returning host_(engine).");
-                return super.getBaseIgcAssetFromAlternative(otherAssetType, otherAssetRid, igcomrsRepositoryConnector, cache);
+            try {
+                ItemList<Host> hosts = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
+                if (!hosts.getItems().isEmpty()) {
+                    // As long as there is at least one result, return the first
+                    return hosts.getItems().get(0);
+                } else {
+                    log.warn("Unable to translate host_(engine) to host, returning host_(engine).");
+                    return super.getBaseIgcAssetFromAlternative(otherAssetType, otherAssetRid, igcomrsRepositoryConnector, cache);
+                }
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
             }
+            return null;
         } else {
             log.debug("Not a host_(engine) asset, just returning as-is: {}", otherAssetType);
             return super.getBaseIgcAssetFromAlternative(otherAssetType, otherAssetRid, igcomrsRepositoryConnector, cache);
@@ -107,11 +117,12 @@ public class EndpointMapper extends ReferenceableMapper {
      * @param entityMap the instantiation of a mapping to carry out
      * @param instanceProperties the instance properties to which to add the complex-mapped properties
      * @return InstanceProperties
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     protected InstanceProperties complexPropertyMappings(ObjectCache cache,
                                                          EntityMappingInstance entityMap,
-                                                         InstanceProperties instanceProperties) {
+                                                         InstanceProperties instanceProperties) throws RepositoryErrorException {
 
         instanceProperties = super.complexPropertyMappings(cache, entityMap, instanceProperties);
 
@@ -122,14 +133,18 @@ public class EndpointMapper extends ReferenceableMapper {
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
         // Map from name to networkAddress, without clobbering the simple name mapping
-        String networkAddress = (String) igcRestClient.getPropertyByName(igcEntity, "name");
-        instanceProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(
-                igcomrsRepositoryConnector.getRepositoryName(),
-                instanceProperties,
-                "networkAddress",
-                networkAddress,
-                methodName
-        );
+        try {
+            String networkAddress = (String) igcRestClient.getPropertyByName(igcEntity, "name");
+            instanceProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(
+                    igcomrsRepositoryConnector.getRepositoryName(),
+                    instanceProperties,
+                    "networkAddress",
+                    networkAddress,
+                    methodName
+            );
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+        }
 
         return instanceProperties;
 
