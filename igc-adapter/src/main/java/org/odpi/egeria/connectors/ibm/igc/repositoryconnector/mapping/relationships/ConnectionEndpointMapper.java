@@ -2,10 +2,12 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Connector;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataConnection;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -65,17 +67,23 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      * @param igcRestClient REST connectivity to the IGC environment
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the host asset
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
-    public List<Reference> getProxyOneAssetFromAsset(Reference connectorAsset, IGCRestClient igcRestClient, ObjectCache cache) {
+    public List<Reference> getProxyOneAssetFromAsset(Reference connectorAsset, IGCRestClient igcRestClient, ObjectCache cache) throws RepositoryErrorException {
+        final String methodName = "getProxyOneAssetFromAsset";
         String otherAssetType = connectorAsset.getType();
         ArrayList<Reference> asList = new ArrayList<>();
         if (otherAssetType.equals("connector")) {
-            Reference withHost = igcRestClient.getAssetWithSubsetOfProperties(
-                    connectorAsset.getId(),
-                    connectorAsset.getType(),
-                    new String[]{ "host", "data_connections" });
-            asList.add((Reference) igcRestClient.getPropertyByName(withHost, "host"));
+            try {
+                Reference withHost = igcRestClient.getAssetWithSubsetOfProperties(
+                        connectorAsset.getId(),
+                        connectorAsset.getType(),
+                        new String[]{"host", "data_connections"});
+                asList.add((Reference) igcRestClient.getPropertyByName(withHost, "host"));
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
         } else {
             log.debug("Not a connector asset, just returning as-is: {} of type {}", connectorAsset.getName(), connectorAsset.getType());
             asList.add(connectorAsset);
@@ -90,16 +98,23 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      * @param igcRestClient REST connectivity to the IGC environment
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the data_connection asset
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
-    public List<Reference> getProxyTwoAssetFromAsset(Reference connectorAsset, IGCRestClient igcRestClient, ObjectCache cache) {
+    public List<Reference> getProxyTwoAssetFromAsset(Reference connectorAsset, IGCRestClient igcRestClient, ObjectCache cache) throws RepositoryErrorException {
+        final String methodName = "getProxyTwoAssetFromAsset";
         if (connectorAsset != null && connectorAsset.getType().equals("connector")) {
-            Connector withDataConnections = igcRestClient.getAssetWithSubsetOfProperties(
-                    connectorAsset.getId(),
-                    connectorAsset.getType(),
-                    new String[]{ "host", "data_connections" });
-            ItemList<DataConnection> dataConnections = withDataConnections.getDataConnections();
-            return new ArrayList<>(igcRestClient.getAllPages("data_connections", dataConnections));
+            try {
+                Connector withDataConnections = igcRestClient.getAssetWithSubsetOfProperties(
+                        connectorAsset.getId(),
+                        connectorAsset.getType(),
+                        new String[]{"host", "data_connections"});
+                ItemList<DataConnection> dataConnections = withDataConnections.getDataConnections();
+                return new ArrayList<>(igcRestClient.getAllPages("data_connections", dataConnections));
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
+            return Collections.emptyList();
         } else if (connectorAsset != null) {
             log.debug("Not a connector asset, just returning as-is: {} of type {}", connectorAsset.getName(), connectorAsset.getType());
             List<Reference> referenceAsList = new ArrayList<>();
@@ -128,6 +143,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
      *                 unrestricted return results size.
      * @param userId the user ID requesting the mapped relationships
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
@@ -138,7 +154,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                                            int fromRelationshipElement,
                                            SequencingOrder sequencingOrder,
                                            int pageSize,
-                                           String userId) {
+                                           String userId) throws RepositoryErrorException {
 
         String assetType = IGCRestConstants.getAssetTypeForSearch(fromIgcObject.getType());
 
@@ -200,6 +216,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
      *                 unrestricted return results size.
      * @param userId the user requesting mapped relationships
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     private void addMappedOMRSRelationships_host(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                  List<Relationship> relationships,
@@ -208,8 +225,9 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                                                  int fromRelationshipElement,
                                                  SequencingOrder sequencingOrder,
                                                  int pageSize,
-                                                 String userId) {
+                                                 String userId) throws RepositoryErrorException {
 
+        final String methodName = "addMappedOMRSRelationships_host";
         IGCSearchCondition igcSearchCondition = new IGCSearchCondition("data_connectors.host", "=", fromIgcObject.getId());
         IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(igcSearchCondition);
         String[] properties = new String[]{ "name" };
@@ -222,22 +240,21 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
         if (pageSize > 0) {
             igcSearch.setPageSize(fromRelationshipElement + pageSize);
         }
-        ItemList<DataConnection> dataConnections = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
-        if (pageSize == 0) {
-            List<DataConnection> allPages = igcomrsRepositoryConnector.getIGCRestClient().getAllPages(null, dataConnections);
-            dataConnections.setAllPages(allPages);
-        }
 
-        for (Reference dataConnection : dataConnections.getItems()) {
+        try {
+            ItemList<DataConnection> dataConnections = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
+            if (pageSize == 0) {
+                List<DataConnection> allPages = igcomrsRepositoryConnector.getIGCRestClient().getAllPages(null, dataConnections);
+                dataConnections.setAllPages(allPages);
+            }
 
-            /* Only proceed with the connection object if it is not a 'main_object' asset
-             * (in this scenario, 'main_object' represents ColumnAnalysisMaster objects that are not accessible
-             *  and will throw bad request (400) REST API errors) */
-            if (dataConnection != null && !dataConnection.getType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
-                try {
+            for (Reference dataConnection : dataConnections.getItems()) {
 
+                /* Only proceed with the connection object if it is not a 'main_object' asset
+                 * (in this scenario, 'main_object' represents ColumnAnalysisMaster objects that are not accessible
+                 *  and will throw bad request (400) REST API errors) */
+                if (dataConnection != null && !dataConnection.getType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
                     log.debug("Retrieved connection: {} of type {}", dataConnection.getName(), dataConnection.getType());
-
                     Relationship relationship = getMappedRelationship(
                             igcomrsRepositoryConnector,
                             ConnectionEndpointMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()),
@@ -250,14 +267,12 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                             "data_connections",
                             userId
                     );
-
                     relationships.add(relationship);
-
-                } catch (RepositoryErrorException e) {
-                    log.error("Unable to map relationship.", e);
                 }
-            }
 
+            }
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
         }
 
     }
@@ -279,6 +294,7 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
      * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
      *                 unrestricted return results size.
      * @param userId the user requesting the mapped relationships
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     private void addMappedOMRSRelationships_connection(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                        List<Relationship> relationships,
@@ -287,8 +303,9 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
                                                        int fromRelationshipElement,
                                                        SequencingOrder sequencingOrder,
                                                        int pageSize,
-                                                       String userId) {
+                                                       String userId) throws RepositoryErrorException {
 
+        final String methodName = "addMappedOMRSRElationships_connection";
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         IGCSearchCondition igcSearchCondition = new IGCSearchCondition("data_connections", "=", fromIgcObject.getId());
         IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(igcSearchCondition);
@@ -302,22 +319,21 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
         if (pageSize > 0) {
             igcSearch.setPageSize(fromRelationshipElement + pageSize);
         }
-        ItemList<Connector> dataConnectors = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
-        if (pageSize == 0) {
-            List<Connector> allPages = igcomrsRepositoryConnector.getIGCRestClient().getAllPages(null, dataConnectors);
-            dataConnectors.setAllPages(allPages);
-        }
 
-        for (Reference dataConnector : dataConnectors.getItems()) {
+        try {
+            ItemList<Connector> dataConnectors = igcomrsRepositoryConnector.getIGCRestClient().search(igcSearch);
+            if (pageSize == 0) {
+                List<Connector> allPages = igcomrsRepositoryConnector.getIGCRestClient().getAllPages(null, dataConnectors);
+                dataConnectors.setAllPages(allPages);
+            }
 
-            /* Only proceed with the connector object if it is not a 'main_object' asset
-             * (in this scenario, 'main_object' represents ColumnAnalysisMaster objects that are not accessible
-             *  and will throw bad request (400) REST API errors) */
-            if (dataConnector != null && !dataConnector.getType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
-                try {
+            for (Reference dataConnector : dataConnectors.getItems()) {
 
+                /* Only proceed with the connector object if it is not a 'main_object' asset
+                 * (in this scenario, 'main_object' represents ColumnAnalysisMaster objects that are not accessible
+                 *  and will throw bad request (400) REST API errors) */
+                if (dataConnector != null && !dataConnector.getType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
                     log.debug("Retrieved connector: {} of type {}", dataConnector.getName(), dataConnector.getType());
-
                     //Reference host = (Reference) connectorGetPropertyByName.invoke(dataConnector, "host");
                     Reference host = (Reference) igcRestClient.getPropertyByName(dataConnector, "host");
                     log.debug("Retrieved host: {} of type {}", host.getName(), host.getType());
@@ -337,11 +353,12 @@ public class ConnectionEndpointMapper extends RelationshipMapping {
 
                     relationships.add(relationship);
 
-                } catch (RepositoryErrorException e) {
-                    log.error("Unable to map relationship.", e);
                 }
+
             }
 
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
         }
 
     }

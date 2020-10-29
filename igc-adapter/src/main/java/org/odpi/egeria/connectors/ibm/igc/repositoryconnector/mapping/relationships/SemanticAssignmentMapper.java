@@ -10,6 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryC
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.TermAssignmentStatusMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,12 +70,13 @@ public class SemanticAssignmentMapper extends RelationshipMapping {
      * @param oneObject the IGC object to consider for inclusion on one end of the relationship
      * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
      * @return boolean
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                     ObjectCache cache,
                                                     Reference oneObject,
-                                                    Reference otherObject) {
+                                                    Reference otherObject) throws RepositoryErrorException {
         log.debug("Considering inclusion of objects: {} ({}) and {} ({})", oneObject.getName(), oneObject.getType(), otherObject.getName(), otherObject.getType());
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         boolean isClassification = ClassificationMapping.isClassification(igcRestClient, cache, oneObject)

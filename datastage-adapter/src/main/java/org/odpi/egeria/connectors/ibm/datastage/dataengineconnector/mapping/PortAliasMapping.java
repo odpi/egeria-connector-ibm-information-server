@@ -2,8 +2,11 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnector;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Dsjob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
@@ -62,6 +65,7 @@ class PortAliasMapping extends BaseMapping {
 
         this(cache);
 
+        final String methodName = "PortAliasMapping";
         if (sequence.getType().equals(DataStageJob.JobType.SEQUENCE)) {
             for (Stage stage : sequence.getAllStages()) {
                 Dsjob runsJob = stage.getRunsSequencesJobs();
@@ -74,16 +78,23 @@ class PortAliasMapping extends BaseMapping {
                             List<PortAlias> jobPortAliases = jobProcess.getPortAliases();
                             // Create a new PortAlias at the sequence level, for each underlying PortAlias of jobs
                             // that are executed, that delegateTo the underlying job's PortAlias
-                            for (PortAlias delegateTo : jobPortAliases) {
-                                String stageQN = getFullyQualifiedName(stage, delegateTo.getQualifiedName());
-                                if (stageQN != null) {
-                                    PortAlias sequencePortAlias = getSkeletonPortAlias(stageQN, stage.getName() + "_" + delegateTo.getDisplayName());
-                                    sequencePortAlias.setPortType(delegateTo.getPortType());
-                                    sequencePortAlias.setDelegatesTo(delegateTo.getQualifiedName());
-                                    portAliases.add(sequencePortAlias);
-                                } else {
-                                    log.error("Unable to determine identity for stage -- not including: {}", stage);
+                            try {
+                                for (PortAlias delegateTo : jobPortAliases) {
+                                    String stageQN = getFullyQualifiedName(stage, delegateTo.getQualifiedName());
+                                    if (stageQN != null) {
+                                        PortAlias sequencePortAlias = getSkeletonPortAlias(stageQN, stage.getName() + "_" + delegateTo.getDisplayName());
+                                        sequencePortAlias.setPortType(delegateTo.getPortType());
+                                        sequencePortAlias.setDelegatesTo(delegateTo.getQualifiedName());
+                                        portAliases.add(sequencePortAlias);
+                                    } else {
+                                        log.error("Unable to determine identity for stage -- not including: {}", stage);
+                                    }
                                 }
+                            } catch (IGCException e) {
+                                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                                        this.getClass().getName(),
+                                        methodName,
+                                        e);
                             }
                         } else {
                             log.warn("Unable to find existing process to use for alias: {}", jobId);
@@ -111,18 +122,26 @@ class PortAliasMapping extends BaseMapping {
     }
 
     private void addPortAliases(Stage stage, String propertyName, ItemList<InformationAsset> relations, PortType portType) {
-        List<InformationAsset> allRelations = igcRestClient.getAllPages(propertyName, relations);
-        int index = 0;
-        for (InformationAsset relation : allRelations) {
-            index++;
-            Identity storeIdentity = cache.getStoreIdentityFromRid(relation.getId());
-            String fullyQualifiedStageName = getFullyQualifiedName(stage);
-            // Use the index to at least make each PortAlias qualifiedName for this stage unique (without risking
-            // overlapping with the PortImplementation qualifiedNames that we need to delegateTo)
-            PortAlias portAlias = getSkeletonPortAlias(fullyQualifiedStageName + "_" + index, stage.getName());
-            portAlias.setPortType(portType);
-            portAlias.setDelegatesTo(getFullyQualifiedName(storeIdentity, fullyQualifiedStageName));
-            portAliases.add(portAlias);
+        final String methodName = "addPortAliases";
+        try {
+            List<InformationAsset> allRelations = igcRestClient.getAllPages(propertyName, relations);
+            int index = 0;
+            for (InformationAsset relation : allRelations) {
+                index++;
+                Identity storeIdentity = cache.getStoreIdentityFromRid(relation.getId());
+                String fullyQualifiedStageName = getFullyQualifiedName(stage);
+                // Use the index to at least make each PortAlias qualifiedName for this stage unique (without risking
+                // overlapping with the PortImplementation qualifiedNames that we need to delegateTo)
+                PortAlias portAlias = getSkeletonPortAlias(fullyQualifiedStageName + "_" + index, stage.getName());
+                portAlias.setPortType(portType);
+                portAlias.setDelegatesTo(getFullyQualifiedName(storeIdentity, fullyQualifiedStageName));
+                portAliases.add(portAlias);
+            }
+        } catch (IGCException e) {
+            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                    this.getClass().getName(),
+                    methodName,
+                    e);
         }
     }
 

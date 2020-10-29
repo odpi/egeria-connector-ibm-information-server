@@ -2,10 +2,12 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -14,6 +16,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.TermCategorizationMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.SubjectAreaMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.CategoryHierarchyLinkMapper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 
 /**
  * Defines the mapping to the OMRS "GlossaryCategory" entity.
@@ -54,14 +57,19 @@ public class GlossaryCategoryMapper extends ReferenceableMapper {
      * {@inheritDoc}
      */
     @Override
-    public boolean isOmrsType(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) {
+    public boolean isOmrsType(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) throws RepositoryErrorException {
+        final String methodName = "isOmrsType";
         String assetType = IGCRestConstants.getAssetTypeForSearch(igcObject.getType());
         if (assetType.equals("category")) {
-            Identity catIdentity = igcObject.getIdentity(igcRestClient, cache);
-            Identity parentIdentity = catIdentity.getParentIdentity();
-            if (parentIdentity != null) {
-                Identity ultimate = catIdentity.getUltimateParentIdentity();
-                return !ultimate.getName().equals("Classifications");
+            try {
+                Identity catIdentity = igcObject.getIdentity(igcRestClient, cache);
+                Identity parentIdentity = catIdentity.getParentIdentity();
+                if (parentIdentity != null) {
+                    Identity ultimate = catIdentity.getUltimateParentIdentity();
+                    return !ultimate.getName().equals("Classifications");
+                }
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
             }
         }
         return false;

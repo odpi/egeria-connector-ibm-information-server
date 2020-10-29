@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants;
@@ -29,12 +30,20 @@ public class IdentityTest {
 
     public IdentityTest() {
         HttpHelper.noStrictSSL();
-        igcRestClient = new IGCRestClient(MockConstants.IGC_HOST, MockConstants.IGC_PORT, MockConstants.IGC_USER, MockConstants.IGC_PASS);
+        try {
+            igcRestClient = new IGCRestClient(MockConstants.IGC_HOST, MockConstants.IGC_PORT, MockConstants.IGC_USER, MockConstants.IGC_PASS);
+        } catch (IGCException e) {
+            assertNull(e, "Fatal error interacting with IGC.");
+        }
     }
 
     @BeforeSuite
     void startClient() {
-        assertTrue(igcRestClient.start());
+        try {
+            assertTrue(igcRestClient.start());
+        } catch (IGCException e) {
+            assertNull(e, "Fatal error interacting with IGC.");
+        }
     }
 
     @Test
@@ -163,7 +172,11 @@ public class IdentityTest {
 
     @AfterSuite
     void stopClient() {
-        igcRestClient.disconnect();
+        try {
+            igcRestClient.disconnect();
+        } catch (IGCException e) {
+            assertNull(e, "Fatal error interacting with IGC.");
+        }
     }
 
 }

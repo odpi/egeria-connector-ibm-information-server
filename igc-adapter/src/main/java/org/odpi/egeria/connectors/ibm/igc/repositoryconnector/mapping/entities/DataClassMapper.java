@@ -2,10 +2,12 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataClass;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Filter;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -22,6 +24,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,22 +113,29 @@ public class DataClassMapper extends ReferenceableMapper {
      * @param igcomrsRepositoryConnector connectivity to IGC repository
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the data_class asset
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     public Reference getBaseIgcAssetFromAlternative(String igcAssetType,
                                                     String igcRid,
                                                     IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                    ObjectCache cache) {
+                                                    ObjectCache cache) throws RepositoryErrorException {
+        final String methodName = "getBaseIgcAssetFromAlternative";
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
-        if (igcAssetType.equals("classification")) {
-            // In some versions it is not possible to search for 'classification' assets, so generally will be safer
-            // to retrieve the entire object by ID (they are small objects anyway so hopefully no significant negative
-            // performance impact of doing so)
-            return DataClassAssignmentMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()).getProxyTwoAssetFromAsset(
-                    igcRestClient.getAssetById(igcRid, cache), igcRestClient, cache).get(0);
-        } else {
-            return igcRestClient.getAssetWithSubsetOfProperties(igcRid, igcAssetType, igcRestClient.getAllPropertiesForType(igcAssetType));
+        try {
+            if (igcAssetType.equals("classification")) {
+                // In some versions it is not possible to search for 'classification' assets, so generally will be safer
+                // to retrieve the entire object by ID (they are small objects anyway so hopefully no significant negative
+                // performance impact of doing so)
+                return DataClassAssignmentMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()).getProxyTwoAssetFromAsset(
+                        igcRestClient.getAssetById(igcRid, cache), igcRestClient, cache).get(0);
+            } else {
+                return igcRestClient.getAssetWithSubsetOfProperties(igcRid, igcAssetType, igcRestClient.getAllPropertiesForType(igcAssetType));
+            }
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
         }
+        return null;
     }
 
     /**
@@ -135,11 +145,12 @@ public class DataClassMapper extends ReferenceableMapper {
      * @param entityMap the instantiation of a mapping to carry out
      * @param instanceProperties the instance properties to which to add the complex-mapped properties
      * @return InstanceProperties
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     protected InstanceProperties complexPropertyMappings(ObjectCache cache,
                                                          EntityMappingInstance entityMap,
-                                                         InstanceProperties instanceProperties) {
+                                                         InstanceProperties instanceProperties) throws RepositoryErrorException {
 
         instanceProperties = super.complexPropertyMappings(cache, entityMap, instanceProperties);
 
@@ -218,12 +229,16 @@ public class DataClassMapper extends ReferenceableMapper {
                 case "UnstructuredFilter":
                     ItemList<Filter> filters = dataClass.getFilters();
                     if (!filters.getItems().isEmpty()) {
-                        List<Filter> allFilters = igcomrsRepositoryConnector.getIGCRestClient().getAllPages("filters", filters);
-                        ArrayList<String> filterNames = new ArrayList<>();
-                        for (Filter filter : allFilters) {
-                            filterNames.add(filter.getName());
+                        try {
+                            List<Filter> allFilters = igcomrsRepositoryConnector.getIGCRestClient().getAllPages("filters", filters);
+                            ArrayList<String> filterNames = new ArrayList<>();
+                            for (Filter filter : allFilters) {
+                                filterNames.add(filter.getName());
+                            }
+                            dataClassDetails = String.join(VALUE_DELIMITER, filterNames);
+                        } catch (IGCException e) {
+                            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
                         }
-                        dataClassDetails = String.join(VALUE_DELIMITER, filterNames);
                     }
                     break;
                 default:

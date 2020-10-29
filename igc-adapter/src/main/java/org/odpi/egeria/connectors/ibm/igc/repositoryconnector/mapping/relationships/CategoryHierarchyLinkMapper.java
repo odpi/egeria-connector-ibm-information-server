@@ -9,6 +9,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.GlossaryMapper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,12 +49,13 @@ public class CategoryHierarchyLinkMapper extends RelationshipMapping {
      * @param oneObject the IGC object to consider for inclusion on one end of the relationship
      * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
      * @return boolean
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                     ObjectCache cache,
                                                     Reference oneObject,
-                                                    Reference otherObject) {
+                                                    Reference otherObject) throws RepositoryErrorException {
         return isCategoryRelationship(igcomrsRepositoryConnector, cache, oneObject, otherObject);
     }
 
@@ -66,11 +68,12 @@ public class CategoryHierarchyLinkMapper extends RelationshipMapping {
      * @param oneObject the IGC object to consider for inclusion on one end of the relationship
      * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
      * @return boolean
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     public static boolean isCategoryRelationship(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                  ObjectCache cache,
                                                  Reference oneObject,
-                                                 Reference otherObject) {
+                                                 Reference otherObject) throws RepositoryErrorException {
         log.debug("Considering inclusion of objects: {} ({}) and {} ({})", oneObject.getName(), oneObject.getType(), otherObject.getName(), otherObject.getType());
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         boolean isGlossary = GlossaryMapper.isGlossary(igcRestClient, cache, oneObject) || GlossaryMapper.isGlossary(igcRestClient, cache, otherObject);

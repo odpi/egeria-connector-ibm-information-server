@@ -6,6 +6,7 @@ import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -77,14 +78,20 @@ public abstract class ClassificationMapping extends InstanceMapping {
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @param igcObject the IGC object to check
      * @return boolean
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
-    public static boolean isClassification(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) {
+    public static boolean isClassification(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) throws RepositoryErrorException {
+        final String methodName = "isClassification";
         String assetType = IGCRestConstants.getAssetTypeForSearch(igcObject.getType());
         if (assetType.equals("category") || assetType.equals("term")) {
-            Identity identity = igcObject.getIdentity(igcRestClient, cache);
-            Identity rootIdentity = identity.getUltimateParentIdentity();
-            if (rootIdentity != null) {
-                return rootIdentity.getName().equals("Classifications");
+            try {
+                Identity identity = igcObject.getIdentity(igcRestClient, cache);
+                Identity rootIdentity = identity.getUltimateParentIdentity();
+                if (rootIdentity != null) {
+                    return rootIdentity.getName().equals("Classifications");
+                }
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
             }
         }
         return false;
@@ -250,23 +257,20 @@ public abstract class ClassificationMapping extends InstanceMapping {
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the IGC object from which to determine the classifications
      * @param userId the user requesting the classifications (currently unused)
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                              List<Classification> classifications,
                                              ObjectCache cache,
                                              Reference fromIgcObject,
-                                             String userId) {
-        try {
-            Classification classification = getMappedClassification(
-                    igcomrsRepositoryConnector,
-                    new InstanceProperties(),
-                    fromIgcObject,
-                    userId
-            );
-            classifications.add(classification);
-        } catch (RepositoryErrorException e) {
-            log.error("Unable to map classification.", e);
-        }
+                                             String userId) throws RepositoryErrorException {
+        Classification classification = getMappedClassification(
+                igcomrsRepositoryConnector,
+                new InstanceProperties(),
+                fromIgcObject,
+                userId
+        );
+        classifications.add(classification);
     }
 
     /**
@@ -333,14 +337,18 @@ public abstract class ClassificationMapping extends InstanceMapping {
             String omrsAttribute = entry.getValue().getOmrsPropertyName();
             if (omrsAttributeMap.containsKey(omrsAttribute)) {
                 TypeDefAttribute typeDefAttribute = omrsAttributeMap.get(omrsAttribute);
-                classificationProperties = AttributeMapping.addPrimitivePropertyToInstance(
-                        omrsRepositoryHelper,
-                        repositoryName,
-                        classificationProperties,
-                        typeDefAttribute,
-                        igcRestClient.getPropertyByName(fromIgcObject, igcPropertyName),
-                        methodName
-                );
+                try {
+                    classificationProperties = AttributeMapping.addPrimitivePropertyToInstance(
+                            omrsRepositoryHelper,
+                            repositoryName,
+                            classificationProperties,
+                            typeDefAttribute,
+                            igcRestClient.getPropertyByName(fromIgcObject, igcPropertyName),
+                            methodName
+                    );
+                } catch (IGCException e) {
+                    raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                }
             } else {
                 log.warn("No OMRS attribute {} defined for classification type {} -- skipping mapping.", omrsAttribute, omrsClassificationType);
             }
@@ -397,6 +405,8 @@ public abstract class ClassificationMapping extends InstanceMapping {
                     this.getClass().getName(),
                     methodName,
                     e);
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
         }
 
         return classification;

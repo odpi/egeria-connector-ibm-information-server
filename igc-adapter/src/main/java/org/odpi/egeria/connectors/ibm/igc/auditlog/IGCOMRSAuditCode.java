@@ -76,6 +76,11 @@ public enum IGCOMRSAuditCode implements AuditLogMessageSet {
             "The IBM Information Governance Catalog event mapper failed to consume an event",
             "The local server failed to consume an IBM Information Governance Catalog event.",
             "Investigate the logs for additional information and raise a GitHub issue with the details."),
+    FAILED_DISCONNECT("OMRS-IGC-REPOSITORY-0012",
+            OMRSAuditLogRecordSeverity.EXCEPTION,
+            "The IBM Information Governance Catalog connector failed to disconnect",
+            "The local server failed to disconnect from IBM Information Governance Catalog.",
+            "Investigate the logs for additional information and clear session manually in IGC if needed.")
     ;
 
     private String logMessageId;

@@ -2,15 +2,10 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * IGCConnectivityException is used for any unexpected connectivity issues hit by the IGC client library.
  */
 public class IGCConnectivityException extends IGCException {
-
-    private static final Logger log = LoggerFactory.getLogger(IGCConnectivityException.class);
 
     /**
      * Constructor used for creating an IGCConnectivityException when an unexpected error has been caught that was
@@ -29,8 +24,7 @@ public class IGCConnectivityException extends IGCException {
      * @param details details about the description of the error
      */
     public IGCConnectivityException(String errorMessage, String details) {
-        super(errorMessage);
-        log.error("Details for connectivity issue '{}': {}", errorMessage, details);
+        super(errorMessage, details);
     }
 
 }

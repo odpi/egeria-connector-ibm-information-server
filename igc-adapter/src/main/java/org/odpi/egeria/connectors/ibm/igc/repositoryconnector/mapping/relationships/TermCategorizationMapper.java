@@ -10,6 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryC
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.TermRelationshipStatusMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.ClassificationMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.GlossaryMapper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,12 +52,13 @@ public class TermCategorizationMapper extends RelationshipMapping {
      * @param oneObject the IGC object to consider for inclusion on one end of the relationship
      * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
      * @return boolean
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                     ObjectCache cache,
                                                     Reference oneObject,
-                                                    Reference otherObject) {
+                                                    Reference otherObject) throws RepositoryErrorException {
         return CategoryHierarchyLinkMapper.isCategoryRelationship(igcomrsRepositoryConnector, cache, oneObject, otherObject);
     }
 

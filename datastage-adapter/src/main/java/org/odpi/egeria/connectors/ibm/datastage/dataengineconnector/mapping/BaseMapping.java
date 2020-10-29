@@ -5,6 +5,9 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCIOException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
@@ -69,8 +72,11 @@ class BaseMapping {
      * @param igcObj the IGC object for which to retrieve the fully-qualified name
      * @param qualifier an additional qualifier to add, in particular for embedded elements
      * @return String
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    String getFullyQualifiedName(Reference igcObj, String qualifier) {
+    String getFullyQualifiedName(Reference igcObj, String qualifier) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         if (igcObj != null) {
             Identity identity = igcObj.getIdentity(igcRestClient, cache.getIgcCache());
             return getFullyQualifiedName(identity, qualifier);
@@ -83,8 +89,11 @@ class BaseMapping {
      *
      * @param igcObj the IGC object for which to retrieve the fully-qualified name
      * @return String
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    String getFullyQualifiedName(Reference igcObj) {
+    String getFullyQualifiedName(Reference igcObj) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         return getFullyQualifiedName(igcObj, null);
     }
 
@@ -94,8 +103,11 @@ class BaseMapping {
      * @param cll the column-level lineage object for which to retrieve the fully-qualified name
      * @param qualifier an additional qualifier to add, in particular for embedded elements
      * @return String
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    String getFullyQualifiedName(ColumnLevelLineage cll, String qualifier) {
+    String getFullyQualifiedName(ColumnLevelLineage cll, String qualifier) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         return getFullyQualifiedName((Reference) cll, qualifier);
     }
 
@@ -104,8 +116,11 @@ class BaseMapping {
      *
      * @param cll the column-level lineage object for which to retrieve the fully-qualified name
      * @return String
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    String getFullyQualifiedName(ColumnLevelLineage cll) {
+    String getFullyQualifiedName(ColumnLevelLineage cll) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         return getFullyQualifiedName((Reference) cll);
     }
 
@@ -114,8 +129,11 @@ class BaseMapping {
      *
      * @param igcObj the IGC object for which to retrieve the parent's fully-qualified name
      * @return String
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    String getParentQualifiedName(Reference igcObj) {
+    String getParentQualifiedName(Reference igcObj) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         String parentQN = null;
         if (igcObj != null) {
             Identity parentObjIdentity = getParentIdentity(igcObj);
@@ -129,8 +147,11 @@ class BaseMapping {
      *
      * @param igcObj the IGC object for which to retrieve the parent's identity
      * @return Identity
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    Identity getParentIdentity(Reference igcObj) {
+    Identity getParentIdentity(Reference igcObj) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         Identity parent = null;
         if (igcObj != null) {
             Identity identity = igcObj.getIdentity(igcRestClient, cache.getIgcCache());
@@ -144,8 +165,11 @@ class BaseMapping {
      *
      * @param igcObj the IGC object for which to retrieve the parent's display name
      * @return String
+     * @throws IGCConnectivityException if there is any connectivity issue during the request
+     * @throws IGCParsingException if there is any issue parsing the response from IGC
+     * @throws IGCIOException if there is any issue accessing the POJO defining the type and its properties
      */
-    String getParentDisplayName(Reference igcObj) {
+    String getParentDisplayName(Reference igcObj) throws IGCConnectivityException, IGCParsingException, IGCIOException {
         String parentDN = null;
         if (igcObj != null) {
             Identity thisObjIdentity = igcObj.getIdentity(igcRestClient, cache.getIgcCache());

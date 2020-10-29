@@ -2,10 +2,12 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Category;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -66,21 +68,27 @@ public class CategoryAnchorMapper extends RelationshipMapping {
      * @param igcRestClient REST connectivity to the IGC environment
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the host asset
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
-    public List<Reference> getProxyOneAssetFromAsset(Reference category, IGCRestClient igcRestClient, ObjectCache cache) {
+    public List<Reference> getProxyOneAssetFromAsset(Reference category, IGCRestClient igcRestClient, ObjectCache cache) throws RepositoryErrorException {
+        final String methodName = "getProxyOneAssetFromAsset";
         String assetType = category.getType();
         ArrayList<Reference> asList = new ArrayList<>();
         if (assetType.equals("category")) {
-            Identity catIdentity = category.getIdentity(igcRestClient, cache);
-            if (catIdentity != null) {
-                Identity rootIdentity = catIdentity.getUltimateParentIdentity();
-                Reference root = new Reference(rootIdentity.getName(), rootIdentity.getAssetType(), rootIdentity.getRid());
-                root.setContext(Collections.emptyList());
-                asList.add(root);
-            } else {
-                log.debug("Already at a root-level category, returning as-is: {} of type {}", category.getName(), category.getType());
-                asList.add(category);
+            try {
+                Identity catIdentity = category.getIdentity(igcRestClient, cache);
+                if (catIdentity != null) {
+                    Identity rootIdentity = catIdentity.getUltimateParentIdentity();
+                    Reference root = new Reference(rootIdentity.getName(), rootIdentity.getAssetType(), rootIdentity.getRid());
+                    root.setContext(Collections.emptyList());
+                    asList.add(root);
+                } else {
+                    log.debug("Already at a root-level category, returning as-is: {} of type {}", category.getName(), category.getType());
+                    asList.add(category);
+                }
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
             }
         } else {
             log.warn("Not a category asset, just returning as-is: {} of type {}", category.getName(), category.getType());
@@ -109,6 +117,7 @@ public class CategoryAnchorMapper extends RelationshipMapping {
      * @param pageSize the maximum number of result classifications that can be returned on this request.  Zero means
      *                 unrestricted return results size.
      * @param userId the user requesting the relationships
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
@@ -119,8 +128,9 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                                            int fromRelationshipElement,
                                            SequencingOrder sequencingOrder,
                                            int pageSize,
-                                           String userId) {
+                                           String userId) throws RepositoryErrorException {
 
+        final String methodName = "addMappedOMRSRelationships";
         String assetType = IGCRestConstants.getAssetTypeForSearch(fromIgcObject.getType());
 
         if (assetType.equals("category")) {
@@ -159,15 +169,15 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                 if (pageSize > 0) {
                     igcSearch.setPageSize(fromRelationshipElement + pageSize);
                 }
-                ItemList<Category> children = igcRestClient.search(igcSearch);
-                if (children != null) {
-                    if (pageSize == 0) {
-                        List<Category> allPages = igcRestClient.getAllPages(null, children);
-                        children.setAllPages(allPages);
-                    }
-                    log.debug(" ... found a total of {} offspring categories.", children.getItems().size());
-                    for (Category child : children.getItems()) {
-                        try {
+                try {
+                    ItemList<Category> children = igcRestClient.search(igcSearch);
+                    if (children != null) {
+                        if (pageSize == 0) {
+                            List<Category> allPages = igcRestClient.getAllPages(null, children);
+                            children.setAllPages(allPages);
+                        }
+                        log.debug(" ... found a total of {} offspring categories.", children.getItems().size());
+                        for (Category child : children.getItems()) {
                             Relationship relationship = getMappedRelationship(
                                     igcomrsRepositoryConnector,
                                     CategoryAnchorMapper.getInstance(null),
@@ -181,22 +191,22 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                                     true
                             );
                             relationships.add(relationship);
-                        } catch (RepositoryErrorException e) {
-                            log.error("Unable to map downward relationship.", e);
                         }
                     }
+                } catch (IGCException e) {
+                    raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
                 }
             } else {
                 // We are at a child category, so we need to get the ultimate root-level category
-                Identity catIdentity = fromIgcObject.getIdentity(igcRestClient, cache);
-                Identity rootIdentity = catIdentity.getUltimateParentIdentity();
-                Reference root = igcRestClient.getAssetWithSubsetOfProperties(
-                        rootIdentity.getRid(),
-                        rootIdentity.getAssetType(),
-                        IGCRestConstants.getModificationProperties());
-                if (root != null) {
-                    log.debug("Mapping ultimate parent category from: {} of type {}", fromIgcObject.getName(), fromIgcObject.getType());
-                    try {
+                try {
+                    Identity catIdentity = fromIgcObject.getIdentity(igcRestClient, cache);
+                    Identity rootIdentity = catIdentity.getUltimateParentIdentity();
+                    Reference root = igcRestClient.getAssetWithSubsetOfProperties(
+                            rootIdentity.getRid(),
+                            rootIdentity.getAssetType(),
+                            IGCRestConstants.getModificationProperties());
+                    if (root != null) {
+                        log.debug("Mapping ultimate parent category from: {} of type {}", fromIgcObject.getName(), fromIgcObject.getType());
                         Relationship relationship = getMappedRelationship(
                                 igcomrsRepositoryConnector,
                                 CategoryAnchorMapper.getInstance(null),
@@ -210,11 +220,11 @@ public class CategoryAnchorMapper extends RelationshipMapping {
                                 true
                         );
                         relationships.add(relationship);
-                    } catch (RepositoryErrorException e) {
-                        log.error("Unable to map upward relationship.", e);
+                    } else {
+                        log.error("Unable to find root-level category with identity: {}", rootIdentity);
                     }
-                } else {
-                    log.error("Unable to find root-level category with identity: {}", rootIdentity);
+                } catch (IGCException e) {
+                    raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
                 }
             }
         } else {
@@ -231,12 +241,13 @@ public class CategoryAnchorMapper extends RelationshipMapping {
      * @param oneObject the IGC object to consider for inclusion on one end of the relationship
      * @param otherObject the IGC object to consider for inclusion on the other end of the relationship
      * @return boolean
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     public boolean includeRelationshipForIgcObjects(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                     ObjectCache cache,
                                                     Reference oneObject,
-                                                    Reference otherObject) {
+                                                    Reference otherObject) throws RepositoryErrorException {
         log.debug("Considering inclusion of objects: {} ({}) and {} ({})", oneObject.getName(), oneObject.getType(), otherObject.getName(), otherObject.getType());
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         return (GlossaryMapper.isGlossary(igcRestClient, cache, oneObject) && otherObject.getType().equals("category") && !GlossaryMapper.isGlossary(igcRestClient, cache, otherObject))

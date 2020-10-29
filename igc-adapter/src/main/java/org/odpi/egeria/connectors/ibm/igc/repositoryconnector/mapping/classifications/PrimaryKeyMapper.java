@@ -7,6 +7,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.CandidateKey;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DatabaseColumn;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -27,6 +28,7 @@ import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorEx
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -64,13 +66,14 @@ public class PrimaryKeyMapper extends ClassificationMapping {
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the IGC object for which the classification should exist
      * @param userId the user requesting the mapped classifications
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     public void addMappedOMRSClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                              List<Classification> classifications,
                                              ObjectCache cache,
                                              Reference fromIgcObject,
-                                             String userId) {
+                                             String userId) throws RepositoryErrorException {
 
         final String methodName = "addMappedOMRSClassifications";
         OMRSRepositoryHelper repositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
@@ -109,8 +112,13 @@ public class PrimaryKeyMapper extends ClassificationMapping {
                 }
             } else {
 
+                List<CandidateKey> allCandidateKeys = Collections.emptyList();
                 // Otherwise setup primary key classifications for each defined candidate key
-                List<CandidateKey> allCandidateKeys = igcRestClient.getAllPages("defined_primary_key", definedPK);
+                try {
+                    allCandidateKeys = igcRestClient.getAllPages("defined_primary_key", definedPK);
+                } catch (IGCException e) {
+                    raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                }
                 for (CandidateKey candidateKey : allCandidateKeys) {
 
                     try {

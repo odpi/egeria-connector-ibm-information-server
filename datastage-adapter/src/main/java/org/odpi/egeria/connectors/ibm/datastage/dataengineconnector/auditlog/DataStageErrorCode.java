@@ -35,6 +35,10 @@ public enum DataStageErrorCode implements ExceptionMessageSet {
             "Unable to initialize DataStage connectivity to: {0}",
             "The system was unable to initialize connectivity to IBM DataStage on the provided address.",
             "Check the inter-host network resolution, credentials and system logs to diagnose or report the problem."),
+    UNKNOWN_RUNTIME_ERROR(500, "DATA-ENGINE-IBM-DATASTAGE-500-003 ",
+            "An unknown runtime error occurred, and the system is unable to proceed with its processing",
+            "The system was unable to complete processing of a given action due to a connectivity-related problem.",
+            "Check the system logs and diagnose or report the problem."),
     ;
 
     private ExceptionMessageDefinition messageDefinition;

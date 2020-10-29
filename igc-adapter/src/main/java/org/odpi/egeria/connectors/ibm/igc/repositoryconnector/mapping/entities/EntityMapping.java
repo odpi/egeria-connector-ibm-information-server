@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
@@ -25,6 +26,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.EntityNotKnownException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -195,8 +197,9 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @param igcObject the IGC object to check matches the OMRS type or not
      * @return boolean
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
-    public boolean isOmrsType(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) {
+    public boolean isOmrsType(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) throws RepositoryErrorException {
         return true;
     }
 
@@ -463,11 +466,12 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param igcomrsRepositoryConnector connectivity to IGC repository
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - a stripped-down base asset containing only the ID and Type
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     public Reference getBaseIgcAssetFromAlternative(String igcAssetType,
                                                     String igcRid,
                                                     IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
-                                                    ObjectCache cache) {
+                                                    ObjectCache cache) throws RepositoryErrorException {
         Reference simple = new Reference();
         simple.setId(igcRid);
         simple.setType(igcAssetType);
@@ -481,10 +485,11 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param entityMap the instantiation of a mapping to carry out
      * @param instanceProperties the instance properties to which to add the complex-mapped properties
      * @return InstanceProperties
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     protected InstanceProperties complexPropertyMappings(ObjectCache cache,
                                                          EntityMappingInstance entityMap,
-                                                         InstanceProperties instanceProperties) {
+                                                         InstanceProperties instanceProperties) throws RepositoryErrorException {
         // Nothing to do -- no complex properties by default
         // (only modification details, but because we want those on EntitySummary as well they're handled elsewhere)
         return instanceProperties;
@@ -525,12 +530,13 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param igcSearchConditionSet the set of search criteria to which to add
      * @param searchCriteria the regular expression to attempt to match against any string properties
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     public void addComplexStringSearchCriteria(OMRSRepositoryHelper repositoryHelper,
                                                String repositoryName,
                                                IGCRestClient igcRestClient,
                                                IGCSearchConditionSet igcSearchConditionSet,
-                                               String searchCriteria) throws FunctionNotSupportedException {
+                                               String searchCriteria) throws FunctionNotSupportedException, RepositoryErrorException {
         // Nothing to do -- no complex properties by default
     }
 
@@ -553,23 +559,29 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @param entityMap the instantiation of a mapping to carry out
      * @param omrsObj the summary object to setup
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     private static void setupEntityObj(ObjectCache cache,
                                        EntityMappingInstance entityMap,
-                                       EntitySummary omrsObj) {
+                                       EntitySummary omrsObj) throws RepositoryErrorException {
 
+        final String methodName = "setupEntityObj";
         Reference igcEntity = entityMap.getIgcEntity();
         EntityMapping mapping = entityMap.getMapping();
         IGCOMRSRepositoryConnector igcomrsRepositoryConnector = entityMap.getRepositoryConnector();
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         String userId = entityMap.getUserId();
 
-        if (igcRestClient.hasModificationDetails(igcEntity.getType())) {
-            InstanceMapping.setupInstanceModDetails(omrsObj,
-                    igcEntity.getCreatedBy(),
-                    igcEntity.getCreatedOn(),
-                    igcEntity.getModifiedBy(),
-                    igcEntity.getModifiedOn());
+        try {
+            if (igcRestClient.hasModificationDetails(igcEntity.getType())) {
+                InstanceMapping.setupInstanceModDetails(omrsObj,
+                        igcEntity.getCreatedBy(),
+                        igcEntity.getCreatedOn(),
+                        igcEntity.getModifiedBy(),
+                        igcEntity.getModifiedOn());
+            }
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
         }
 
         List<Classification> omrsClassifications = entityMap.getOmrsClassifications();
@@ -600,9 +612,11 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param igcRestClient REST connectivity to the IGC environment
      * @param igcAssetType the asset type for which to retrieve properties
      * @return {@code List<String>}
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     public final List<String> getAllPropertiesForEntitySummary(IGCRestClient igcRestClient,
-                                                               String igcAssetType) {
+                                                               String igcAssetType) throws RepositoryErrorException {
+        final String methodName = "getAllPropertiesForEntitySummary";
         Set<String> allProperties = new TreeSet<>();
         for (ClassificationMapping classificationMapping : getClassificationMappers()) {
             Set<String> classificationProperties = classificationMapping.getMappedIgcPropertyNames();
@@ -611,9 +625,13 @@ public abstract class EntityMapping extends InstanceMapping {
             }
         }
         allProperties.addAll(getAllMappedIgcProperties());
-        // Restrict the set of properties to those that are known by this particular version of IGC
-        List<String> allKnownProperties = igcRestClient.getAllPropertiesForType(igcAssetType);
-        allProperties.retainAll(allKnownProperties);
+        try {
+            // Restrict the set of properties to those that are known by this particular version of IGC
+            List<String> allKnownProperties = igcRestClient.getAllPropertiesForType(igcAssetType);
+            allProperties.retainAll(allKnownProperties);
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+        }
         return new ArrayList<>(allProperties);
     }
 
@@ -623,8 +641,9 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param entityMap the instantiation of a mapping to carry out
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return EntitySummary
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
-    public static final EntitySummary getEntitySummary(EntityMappingInstance entityMap, ObjectCache cache) {
+    public static final EntitySummary getEntitySummary(EntityMappingInstance entityMap, ObjectCache cache) throws RepositoryErrorException {
 
         EntityMapping mapping = entityMap.getMapping();
         IGCRestClient igcRestClient = entityMap.getRepositoryConnector().getIGCRestClient();
@@ -649,9 +668,11 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param igcRestClient REST connectivity to the IGC environment
      * @param igcAssetType the asset type for which to retrieve properties
      * @return {@code List<String>}
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     public final List<String> getAllPropertiesForEntityDetail(IGCRestClient igcRestClient,
-                                                              String igcAssetType) {
+                                                              String igcAssetType) throws RepositoryErrorException {
+        final String methodName = "getAllPropertiesForEntityDetail";
         Set<String> allProperties = new TreeSet<>(getAllMappedIgcProperties());
         for (ClassificationMapping classificationMapping : getClassificationMappers()) {
             Set<String> classificationProperties = classificationMapping.getMappedIgcPropertyNames();
@@ -659,13 +680,17 @@ public abstract class EntityMapping extends InstanceMapping {
                 allProperties.addAll(classificationProperties);
             }
         }
-        List<String> nonRelationshipProperties = igcRestClient.getNonRelationshipPropertiesForType(igcAssetType);
-        if (nonRelationshipProperties != null) {
-            allProperties.addAll(nonRelationshipProperties);
+        try {
+            List<String> nonRelationshipProperties = igcRestClient.getNonRelationshipPropertiesForType(igcAssetType);
+            if (nonRelationshipProperties != null) {
+                allProperties.addAll(nonRelationshipProperties);
+            }
+            // Restrict the set of properties to those that are known by this particular version of IGC
+            List<String> allKnownProperties = igcRestClient.getAllPropertiesForType(igcAssetType);
+            allProperties.retainAll(allKnownProperties);
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
         }
-        // Restrict the set of properties to those that are known by this particular version of IGC
-        List<String> allKnownProperties = igcRestClient.getAllPropertiesForType(igcAssetType);
-        allProperties.retainAll(allKnownProperties);
         return new ArrayList<>(allProperties);
     }
 
@@ -675,8 +700,9 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @param entityMap the instantiation of a mapping to carry out
      * @return EntityDetail
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
-    public static EntityDetail getEntityDetail(ObjectCache cache, EntityMappingInstance entityMap) {
+    public static EntityDetail getEntityDetail(ObjectCache cache, EntityMappingInstance entityMap) throws RepositoryErrorException {
 
         EntityMapping mapping = entityMap.getMapping();
         IGCRestClient igcRestClient = entityMap.getRepositoryConnector().getIGCRestClient();
@@ -713,8 +739,9 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @param entityMap the instantiation of a mapping to carry out
      * @return InstanceProperties
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
-    private static InstanceProperties getMappedInstanceProperties(ObjectCache cache, EntityMappingInstance entityMap) {
+    private static InstanceProperties getMappedInstanceProperties(ObjectCache cache, EntityMappingInstance entityMap) throws RepositoryErrorException {
 
         final String methodName = "getMappedInstanceProperties";
 
@@ -736,14 +763,18 @@ public abstract class EntityMapping extends InstanceMapping {
             String omrsAttribute = mapping.getOmrsPropertyName(igcPropertyName);
             if (omrsAttributeMap.containsKey(omrsAttribute)) {
                 TypeDefAttribute typeDefAttribute = omrsAttributeMap.get(omrsAttribute);
-                instanceProperties = AttributeMapping.addPrimitivePropertyToInstance(
-                        omrsRepositoryHelper,
-                        repositoryName,
-                        instanceProperties,
-                        typeDefAttribute,
-                        igcRestClient.getPropertyByName(igcEntity, igcPropertyName),
-                        methodName
-                );
+                try {
+                    instanceProperties = AttributeMapping.addPrimitivePropertyToInstance(
+                            omrsRepositoryHelper,
+                            repositoryName,
+                            instanceProperties,
+                            typeDefAttribute,
+                            igcRestClient.getPropertyByName(igcEntity, igcPropertyName),
+                            methodName
+                    );
+                } catch (IGCException e) {
+                    raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                }
             } else {
                 log.warn("No OMRS attribute {} defined for asset type {} -- skipping mapping.", omrsAttribute, omrsTypeDefName);
             }
@@ -796,6 +827,7 @@ public abstract class EntityMapping extends InstanceMapping {
      *                 unrestricted return results size.
      * @return {@code List<Relationship>}
      * @throws EntityNotKnownException if the entity for which we are looking for relationships is not known to IGC
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     public static List<Relationship> getMappedRelationships(IGCEntityGuid igcGuid,
                                                             EntityMappingInstance entityMap,
@@ -804,7 +836,7 @@ public abstract class EntityMapping extends InstanceMapping {
                                                             int fromRelationshipElement,
                                                             SequencingOrder sequencingOrder,
                                                             String sequencingProperty,
-                                                            int pageSize) throws EntityNotKnownException {
+                                                            int pageSize) throws EntityNotKnownException, RepositoryErrorException {
 
         final String methodName = "getMappedRelationships";
 

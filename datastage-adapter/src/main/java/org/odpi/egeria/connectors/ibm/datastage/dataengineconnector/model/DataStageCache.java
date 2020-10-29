@@ -2,10 +2,13 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnector;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConstants;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.ProcessMapping;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -164,6 +167,7 @@ public class DataStageCache {
      * @return DataStageJob if found, otherwise null
      */
     public DataStageJob getJobByRid(String rid) {
+        final String methodName = "getJobByRid";
         // First try to retrieve it from the cache directly
         DataStageJob job = ridToJob.getOrDefault(rid, null);
         if (job == null) {
@@ -174,18 +178,25 @@ public class DataStageCache {
             IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(byRid);
             log.info("(cache miss) -- searching for job by RID: {}", rid);
             igcSearch.addConditions(conditionSet);
-            ItemList<Dsjob> results = igcRestClient.search(igcSearch);
-            if (results != null) {
-                List<Dsjob> resultsList = results.getItems();
-                if (resultsList != null && !resultsList.isEmpty()) {
-                    // Assuming one is found, build its full details and then add it to the cache
-                    job = new DataStageJob(this, resultsList.get(0));
-                    ridToJob.put(rid, job);
+            try {
+                ItemList<Dsjob> results = igcRestClient.search(igcSearch);
+                if (results != null) {
+                    List<Dsjob> resultsList = results.getItems();
+                    if (resultsList != null && !resultsList.isEmpty()) {
+                        // Assuming one is found, build its full details and then add it to the cache
+                        job = new DataStageJob(this, resultsList.get(0));
+                        ridToJob.put(rid, job);
+                    } else {
+                        log.warn("No job found with RID: {}", rid);
+                    }
                 } else {
                     log.warn("No job found with RID: {}", rid);
                 }
-            } else {
-                log.warn("No job found with RID: {}", rid);
+            } catch (IGCException e) {
+                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                        this.getClass().getName(),
+                        methodName,
+                        e);
             }
         }
         return job;
@@ -199,6 +210,7 @@ public class DataStageCache {
      * @return {@code List<Classificationenabledgroup>} of fields in that data store
      */
     public List<Classificationenabledgroup> getFieldsForStore(InformationAsset store) {
+        final String methodName = "getFieldsForStore";
         // First try to retrieve it from the cache directly
         String rid = store.getId();
         List<Classificationenabledgroup> fields = storeToColumns.getOrDefault(rid, null);
@@ -222,35 +234,56 @@ public class DataStageCache {
                     log.warn("Unknown source / target type -- skipping: {}", store);
                 }
                 if (byParentId != null) {
-                    IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(byParentId);
-                    igcSearch.addConditions(conditionSet);
-                    ItemList<Classificationenabledgroup> ilFields = igcRestClient.search(igcSearch);
-                    fields = igcRestClient.getAllPages(null, ilFields);
+                    try {
+                        IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(byParentId);
+                        igcSearch.addConditions(conditionSet);
+                        ItemList<Classificationenabledgroup> ilFields = igcRestClient.search(igcSearch);
+                        fields = igcRestClient.getAllPages(null, ilFields);
+                    } catch (IGCException e) {
+                        DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                                this.getClass().getName(),
+                                methodName,
+                                e);
+                    }
                 }
             } else {
                 // For virtual assets, we must retrieve the full object and page through its fields (search by RID is not possible)
                 fields = new ArrayList<>();
-                Reference virtualStore = igcRestClient.getAssetById(rid, igcCache);
-                if (virtualStore instanceof DatabaseTable) {
-                    DatabaseTable virtualTable = (DatabaseTable) virtualStore;
-                    fields.addAll(getDataFieldsFromVirtualList("database_columns", virtualTable.getDatabaseColumns()));
-                } else if (virtualStore instanceof View) {
-                    View virtualView = (View) virtualStore;
-                    fields.addAll(getDataFieldsFromVirtualList("database_columns", virtualView.getDatabaseColumns()));
-                } else if (virtualStore instanceof DataFileRecord) {
-                    DataFileRecord virtualRecord = (DataFileRecord) virtualStore;
-                    fields.addAll(getDataFieldsFromVirtualList("data_file_fields", virtualRecord.getDataFileFields()));
-                } else {
-                    log.warn("Unhandled case for type: {}", virtualStore.getType());
+                try {
+                    Reference virtualStore = igcRestClient.getAssetById(rid, igcCache);
+                    if (virtualStore instanceof DatabaseTable) {
+                        DatabaseTable virtualTable = (DatabaseTable) virtualStore;
+                        fields.addAll(getDataFieldsFromVirtualList("database_columns", virtualTable.getDatabaseColumns()));
+                    } else if (virtualStore instanceof View) {
+                        View virtualView = (View) virtualStore;
+                        fields.addAll(getDataFieldsFromVirtualList("database_columns", virtualView.getDatabaseColumns()));
+                    } else if (virtualStore instanceof DataFileRecord) {
+                        DataFileRecord virtualRecord = (DataFileRecord) virtualStore;
+                        fields.addAll(getDataFieldsFromVirtualList("data_file_fields", virtualRecord.getDataFileFields()));
+                    } else {
+                        log.warn("Unhandled case for type: {}", virtualStore.getType());
+                    }
+                } catch (IGCException e) {
+                    DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                            this.getClass().getName(),
+                            methodName,
+                            e);
                 }
             }
             // Add them to the cache once they've been retrieved
             if (fields != null) {
                 storeToColumns.put(rid, fields);
                 if (!fields.isEmpty()) {
-                    Identity storeIdentity = fields.get(0).getIdentity(igcRestClient, igcCache).getParentIdentity();
-                    String storeId = storeIdentity.getRid();
-                    storeToIdentity.put(storeId, storeIdentity);
+                    try {
+                        Identity storeIdentity = fields.get(0).getIdentity(igcRestClient, igcCache).getParentIdentity();
+                        String storeId = storeIdentity.getRid();
+                        storeToIdentity.put(storeId, storeIdentity);
+                    } catch (IGCException e) {
+                        DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                                this.getClass().getName(),
+                                methodName,
+                                e);
+                    }
                 }
             }
         }
@@ -267,13 +300,21 @@ public class DataStageCache {
      * @return {@code List<Classificationenabledgroup>} containing the full list of fully-detailed virtual fields
      */
     private <T extends Classificationenabledgroup> List<Classificationenabledgroup> getDataFieldsFromVirtualList(String propertyName, ItemList<T> virtualFields) {
+        final String methodName = "getDataFieldsFromVirtualList";
         List<Classificationenabledgroup> fullFields = null;
         if (virtualFields != null) {
             fullFields = new ArrayList<>();
-            List<T> allVirtualFields = igcRestClient.getAllPages(propertyName, virtualFields);
-            for (Classificationenabledgroup virtualField : allVirtualFields) {
-                Classificationenabledgroup fullField = (Classificationenabledgroup) igcRestClient.getAssetById(virtualField.getId(), igcCache);
-                fullFields.add(fullField);
+            try {
+                List<T> allVirtualFields = igcRestClient.getAllPages(propertyName, virtualFields);
+                for (Classificationenabledgroup virtualField : allVirtualFields) {
+                    Classificationenabledgroup fullField = (Classificationenabledgroup) igcRestClient.getAssetById(virtualField.getId(), igcCache);
+                    fullFields.add(fullField);
+                }
+            } catch (IGCException e) {
+                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                        this.getClass().getName(),
+                        methodName,
+                        e);
             }
         }
         return fullFields == null ? Collections.emptyList() : fullFields;
@@ -294,6 +335,7 @@ public class DataStageCache {
      */
     private void getChangedJobs() {
 
+        final String methodName = "getChangedJobs";
         // First retrieve the changed jobs
         long fromTime = 0;
         long toTime = to.getTime();
@@ -322,7 +364,14 @@ public class DataStageCache {
         }
         log.info(" ... searching for changed jobs > {} and <= {}, limited to projects: {}, limited to lineage enabled: {}", fromTime, toTime, limitToProjects, limitToLineageEnabled);
         igcSearch.addConditions(conditionSet);
-        cacheChangedJobs(igcRestClient.search(igcSearch));
+        try {
+            cacheChangedJobs(igcRestClient.search(igcSearch));
+        } catch (IGCException e) {
+            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                    this.getClass().getName(),
+                    methodName,
+                    e);
+        }
 
     }
 
@@ -333,26 +382,34 @@ public class DataStageCache {
      */
     private void cacheChangedJobs(ItemList<Dsjob> jobs) {
 
+        final String methodName = "cacheChangedJobs";
         // This could consume significant resources (memory), which should be controlled through the proxy's
         // "batchWindowInSeconds" parameter (reducing it to a smaller number), if needed.
-        for (Dsjob job : jobs.getItems()) {
-            String jobRid = job.getId();
-            if (!ridToJob.containsKey(jobRid)) {
-                log.debug("Detecting lineage on job: {}", jobRid);
-                // Detect lineage on each job to ensure its details are fully populated before proceeding
-                boolean lineageDetected = igcRestClient.detectLineage(jobRid);
-                if (lineageDetected) {
-                    // We then need to re-retrieve the job's details, as they may have changed since lineage
-                    // detection (following call will be a no-op if the job is already in the cache)
-                    getJobByRid(jobRid);
-                } else {
-                    log.warn("Unable to detect lineage for job -- not including: {}", jobRid);
+        try {
+            for (Dsjob job : jobs.getItems()) {
+                String jobRid = job.getId();
+                if (!ridToJob.containsKey(jobRid)) {
+                    log.debug("Detecting lineage on job: {}", jobRid);
+                    // Detect lineage on each job to ensure its details are fully populated before proceeding
+                    boolean lineageDetected = igcRestClient.detectLineage(jobRid);
+                    if (lineageDetected) {
+                        // We then need to re-retrieve the job's details, as they may have changed since lineage
+                        // detection (following call will be a no-op if the job is already in the cache)
+                        getJobByRid(jobRid);
+                    } else {
+                        log.warn("Unable to detect lineage for job -- not including: {}", jobRid);
+                    }
                 }
             }
-        }
-        if (jobs.hasMorePages()) {
-            ItemList<Dsjob> nextPage = igcRestClient.getNextPage(null, jobs);
-            cacheChangedJobs(nextPage);
+            if (jobs.hasMorePages()) {
+                ItemList<Dsjob> nextPage = igcRestClient.getNextPage(null, jobs);
+                cacheChangedJobs(nextPage);
+            }
+        } catch (IGCException e) {
+            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                    this.getClass().getName(),
+                    methodName,
+                    e);
         }
 
     }

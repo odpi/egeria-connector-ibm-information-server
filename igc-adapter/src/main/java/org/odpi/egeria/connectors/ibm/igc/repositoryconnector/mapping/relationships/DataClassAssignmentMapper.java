@@ -7,6 +7,9 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classification;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -18,7 +21,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.DataClassAssignmentStatusMapper;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
@@ -83,21 +85,27 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * @param igcRestClient REST connectivity to the IGC environment
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the classificationenabledgroup asset
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
-    public List<Reference> getProxyOneAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient, ObjectCache cache) {
+    public List<Reference> getProxyOneAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient, ObjectCache cache) throws RepositoryErrorException {
+        final String methodName = "getProxyOneAssetFromAsset";
         String otherAssetType = relationshipAsset.getType();
         ArrayList<Reference> asList = new ArrayList<>();
         if (otherAssetType.equals("classification")) {
             Reference classifiedObj;
-            Object co = igcRestClient.getPropertyByName(relationshipAsset, "classifies_asset");
-            if (co == null || co.equals("") || co.equals("null")) {
-                Reference classification = igcRestClient.getAssetById(relationshipAsset.getId(), cache);
-                classifiedObj = (Reference) igcRestClient.getPropertyByName(classification, "classifies_asset");
-            } else {
-                classifiedObj = (Reference) co;
+            try {
+                Object co = igcRestClient.getPropertyByName(relationshipAsset, "classifies_asset");
+                if (co == null || co.equals("") || co.equals("null")) {
+                    Reference classification = igcRestClient.getAssetById(relationshipAsset.getId(), cache);
+                    classifiedObj = (Reference) igcRestClient.getPropertyByName(classification, "classifies_asset");
+                } else {
+                    classifiedObj = (Reference) co;
+                }
+                asList.add(classifiedObj);
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
             }
-            asList.add(classifiedObj);
         } else {
             log.debug("Not a classification asset, just returning as-is: {} of type {}", relationshipAsset.getName(), relationshipAsset.getType());
             asList.add(relationshipAsset);
@@ -112,21 +120,27 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      * @param igcRestClient REST connectivity to the IGC environment
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @return Reference - the data_class asset
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
-    public List<Reference> getProxyTwoAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient, ObjectCache cache) {
+    public List<Reference> getProxyTwoAssetFromAsset(Reference relationshipAsset, IGCRestClient igcRestClient, ObjectCache cache) throws RepositoryErrorException {
+        final String methodName = "getProxyTwoAssetFromAsset";
         String otherAssetType = relationshipAsset.getType();
         ArrayList<Reference> asList = new ArrayList<>();
         if (otherAssetType.equals("classification")) {
             Reference dataClass;
-            Object dc = igcRestClient.getPropertyByName(relationshipAsset,"data_class");
-            if (dc == null || dc.equals("") || dc.equals("null")) {
-                Reference classification = igcRestClient.getAssetById(relationshipAsset.getId(), cache);
-                dataClass = (Reference) igcRestClient.getPropertyByName(classification, "data_class");
-            } else {
-                dataClass = (Reference) dc;
+            try {
+                Object dc = igcRestClient.getPropertyByName(relationshipAsset, "data_class");
+                if (dc == null || dc.equals("") || dc.equals("null")) {
+                    Reference classification = igcRestClient.getAssetById(relationshipAsset.getId(), cache);
+                    dataClass = (Reference) igcRestClient.getPropertyByName(classification, "data_class");
+                } else {
+                    dataClass = (Reference) dc;
+                }
+                asList.add(dataClass);
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
             }
-            asList.add(dataClass);
         } else {
             log.debug("Not a classification asset, just returning as-is: {} of type {}", relationshipAsset.getName(), relationshipAsset.getType());
             asList.add(relationshipAsset);
@@ -154,6 +168,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      *                 unrestricted return results size. (This will be ignored for this relationship as there is no way
      *                 to effectively use it due to IGC search limitations.)
      * @param userId the user ID requesting the mapped relationships
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     public void addMappedOMRSRelationships(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
@@ -164,42 +179,47 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                                            int fromRelationshipElement,
                                            SequencingOrder sequencingOrder,
                                            int pageSize,
-                                           String userId) {
+                                           String userId) throws RepositoryErrorException {
 
-        if (fromIgcObject instanceof DataClass) {
-            mapDetectedClassifications_fromDataClass(
-                    igcomrsRepositoryConnector,
-                    relationships,
-                    cache,
-                    (DataClass) fromIgcObject,
-                    toIgcObject instanceof Classificationenabledgroup ? (Classificationenabledgroup) toIgcObject : null,
-                    sequencingOrder,
-                    userId
-            );
-            mapSelectedClassifications_fromDataClass(
-                    igcomrsRepositoryConnector,
-                    relationships,
-                    cache,
-                    (DataClass) fromIgcObject,
-                    userId
-            );
-        } else if (fromIgcObject instanceof Classificationenabledgroup) {
-            mapDetectedClassifications_toDataClass(
-                    igcomrsRepositoryConnector,
-                    relationships,
-                    cache,
-                    (Classificationenabledgroup) fromIgcObject,
-                    toIgcObject instanceof DataClass ? (DataClass) toIgcObject : null,
-                    sequencingOrder,
-                    userId
-            );
-            mapSelectedClassifications_toDataClass(
-                    igcomrsRepositoryConnector,
-                    relationships,
-                    cache,
-                    (Classificationenabledgroup) fromIgcObject,
-                    userId
-            );
+        final String methodName = "addMappedOMRSRelationships";
+        try {
+            if (fromIgcObject instanceof DataClass) {
+                mapDetectedClassifications_fromDataClass(
+                        igcomrsRepositoryConnector,
+                        relationships,
+                        cache,
+                        (DataClass) fromIgcObject,
+                        toIgcObject instanceof Classificationenabledgroup ? (Classificationenabledgroup) toIgcObject : null,
+                        sequencingOrder,
+                        userId
+                );
+                mapSelectedClassifications_fromDataClass(
+                        igcomrsRepositoryConnector,
+                        relationships,
+                        cache,
+                        (DataClass) fromIgcObject,
+                        userId
+                );
+            } else if (fromIgcObject instanceof Classificationenabledgroup) {
+                mapDetectedClassifications_toDataClass(
+                        igcomrsRepositoryConnector,
+                        relationships,
+                        cache,
+                        (Classificationenabledgroup) fromIgcObject,
+                        toIgcObject instanceof DataClass ? (DataClass) toIgcObject : null,
+                        sequencingOrder,
+                        userId
+                );
+                mapSelectedClassifications_toDataClass(
+                        igcomrsRepositoryConnector,
+                        relationships,
+                        cache,
+                        (Classificationenabledgroup) fromIgcObject,
+                        userId
+                );
+            }
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
         }
 
     }
@@ -209,8 +229,9 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
      */
     @Override
     public List<IGCSearch> getComplexIGCSearchCriteria(IGCOMRSRepositoryConnector repositoryConnector,
-                                                       SearchProperties matchProperties) throws FunctionNotSupportedException {
+                                                       SearchProperties matchProperties) throws FunctionNotSupportedException, RepositoryErrorException {
 
+        final String methodName = "getComplexIGCSearchCriteria";
         IGCRestClient igcRestClient = repositoryConnector.getIGCRestClient();
 
         // If no search properties were provided, we can short-circuit and just return all such assignments via the
@@ -229,7 +250,11 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
         IGCSearchConditionSet conditionsForDataClass = new IGCSearchConditionSet();
 
         IGCSearch searchForClassification = new IGCSearch("classification");
-        searchForClassification.addProperties(igcRestClient.getAllPropertiesForType("classification"));
+        try {
+            searchForClassification.addProperties(igcRestClient.getAllPropertiesForType("classification"));
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+        }
         IGCSearchConditionSet conditionsForClassification = new IGCSearchConditionSet();
 
         addAllConditions(conditionsForDataClass, conditionsForClassification, matchProperties);
@@ -545,7 +570,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                                                           DataClass dataClass,
                                                           Classificationenabledgroup toIgcObject,
                                                           SequencingOrder sequencingOrder,
-                                                          String userId) {
+                                                          String userId) throws RepositoryErrorException, IGCConnectivityException, IGCParsingException {
 
         final String methodName = "mapDetectedClassifications_fromDataClass";
         OMRSRepositoryHelper repositoryHelper = igcomrsRepositoryConnector.getRepositoryHelper();
@@ -580,38 +605,33 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
              * (in this scenario, 'main_object' represents ColumnAnalysisMaster objects that are not accessible
              *  and will throw bad request (400) REST API errors) */
             if (classifiedObj != null && !classifiedObj.getType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
-                try {
+                // Use 'classification' object to put RID of classification on the 'detected classification' relationships
+                Relationship relationship = getMappedRelationship(
+                        igcomrsRepositoryConnector,
+                        DataClassAssignmentMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()),
+                        (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
+                                igcomrsRepositoryConnector.getRepositoryName(),
+                                R_DATA_CLASS_ASSIGNMENT),
+                        cache,
+                        classifiedObj,
+                        dataClass,
+                        "detected_classifications",
+                        userId,
+                        detectedClassification.getId()
+                );
 
-                    // Use 'classification' object to put RID of classification on the 'detected classification' relationships
-                    Relationship relationship = getMappedRelationship(
-                            igcomrsRepositoryConnector,
-                            DataClassAssignmentMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()),
-                            (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
-                                    igcomrsRepositoryConnector.getRepositoryName(),
-                                    R_DATA_CLASS_ASSIGNMENT),
-                            cache,
-                            classifiedObj,
-                            dataClass,
-                            "detected_classifications",
-                            userId,
-                            detectedClassification.getId()
-                    );
+                /* Before adding to the overall set of relationships, setup the relationship properties
+                 * we have in IGC from the 'classification' object. */
+                setDetectedRelationshipProperties(detectedClassification,
+                        relationship,
+                        repositoryHelper,
+                        repositoryName,
+                        methodName,
+                        igcomrsRepositoryConnector.getIGCVersion());
 
-                    /* Before adding to the overall set of relationships, setup the relationship properties
-                     * we have in IGC from the 'classification' object. */
-                    setDetectedRelationshipProperties(detectedClassification,
-                            relationship,
-                            repositoryHelper,
-                            repositoryName,
-                            methodName,
-                            igcomrsRepositoryConnector.getIGCVersion());
+                log.debug("mapDetectedClassifications_fromDataClass - adding relationship: {}", relationship.getGUID());
+                relationships.add(relationship);
 
-                    log.debug("mapDetectedClassifications_fromDataClass - adding relationship: {}", relationship.getGUID());
-                    relationships.add(relationship);
-
-                } catch (RepositoryErrorException e) {
-                    log.error("Unable to map relationship.", e);
-                }
             }
         }
 
@@ -630,7 +650,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                                                           List<Relationship> relationships,
                                                           ObjectCache cache,
                                                           DataClass dataClass,
-                                                          String userId) {
+                                                          String userId) throws RepositoryErrorException, IGCConnectivityException, IGCParsingException {
 
         // (Note that in IGC these can only be retrieved by looking up all assets for which this data_class is selected,
         // they cannot be looked up as a relationship from the data_class object...  Therefore, start by searching
@@ -648,30 +668,24 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
 
         for (InformationAsset assetWithSelected : allAssetsWithSelected) {
 
-            try {
+            // Use 'data_class' object to put RID of data_class itself on the 'selected classification' relationships
+            Relationship relationship = getMappedRelationship(
+                    igcomrsRepositoryConnector,
+                    DataClassAssignmentMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()),
+                    (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
+                            igcomrsRepositoryConnector.getRepositoryName(),
+                            R_DATA_CLASS_ASSIGNMENT),
+                    cache,
+                    assetWithSelected,
+                    dataClass,
+                    "selected_classification",
+                    userId
+            );
 
-                // Use 'data_class' object to put RID of data_class itself on the 'selected classification' relationships
-                Relationship relationship = getMappedRelationship(
-                        igcomrsRepositoryConnector,
-                        DataClassAssignmentMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()),
-                        (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
-                                igcomrsRepositoryConnector.getRepositoryName(),
-                                R_DATA_CLASS_ASSIGNMENT),
-                        cache,
-                        assetWithSelected,
-                        dataClass,
-                        "selected_classification",
-                        userId
-                );
+            setSelectedRelationshipProperties(relationship, igcomrsRepositoryConnector.getIGCVersion());
 
-                setSelectedRelationshipProperties(relationship, igcomrsRepositoryConnector.getIGCVersion());
-
-                log.debug("mapSelectedClassifications_fromDataClass - adding relationship: {}", relationship.getGUID());
-                relationships.add(relationship);
-
-            } catch (RepositoryErrorException e) {
-                log.error("Unable to map relationship.", e);
-            }
+            log.debug("mapSelectedClassifications_fromDataClass - adding relationship: {}", relationship.getGUID());
+            relationships.add(relationship);
 
         }
 
@@ -694,7 +708,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                                                         Classificationenabledgroup fromIgcObject,
                                                         DataClass dataClass,
                                                         SequencingOrder sequencingOrder,
-                                                        String userId) {
+                                                        String userId) throws RepositoryErrorException, IGCConnectivityException, IGCParsingException {
 
         final String methodName = "mapDetectedClassifications_toDataClass";
 
@@ -733,38 +747,34 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
              * (in this scenario, 'main_object' represents ColumnAnalysisMaster objects that are not accessible
              *  and will throw bad request (400) REST API errors) */
             if (dataClassObj != null && dataClassObj.getType() != null && !dataClassObj.getType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
-                try {
 
-                    // Use 'classification' object to put RID of classification on the 'detected classification' relationships
-                    Relationship relationship = getMappedRelationship(
-                            igcomrsRepositoryConnector,
-                            DataClassAssignmentMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()),
-                            (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
-                                    igcomrsRepositoryConnector.getRepositoryName(),
-                                    R_DATA_CLASS_ASSIGNMENT),
-                            cache,
-                            fromIgcObject,
-                            dataClassObj,
-                            "detected_classifications",
-                            userId,
-                            detectedClassification.getId()
-                    );
+                // Use 'classification' object to put RID of classification on the 'detected classification' relationships
+                Relationship relationship = getMappedRelationship(
+                        igcomrsRepositoryConnector,
+                        DataClassAssignmentMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()),
+                        (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
+                                igcomrsRepositoryConnector.getRepositoryName(),
+                                R_DATA_CLASS_ASSIGNMENT),
+                        cache,
+                        fromIgcObject,
+                        dataClassObj,
+                        "detected_classifications",
+                        userId,
+                        detectedClassification.getId()
+                );
 
-                    /* Before adding to the overall set of relationships, setup the relationship properties
-                     * we have in IGC from the 'classification' object. */
-                    setDetectedRelationshipProperties(detectedClassification,
-                            relationship,
-                            repositoryHelper,
-                            repositoryName,
-                            methodName,
-                            igcomrsRepositoryConnector.getIGCVersion());
+                /* Before adding to the overall set of relationships, setup the relationship properties
+                 * we have in IGC from the 'classification' object. */
+                setDetectedRelationshipProperties(detectedClassification,
+                        relationship,
+                        repositoryHelper,
+                        repositoryName,
+                        methodName,
+                        igcomrsRepositoryConnector.getIGCVersion());
 
-                    log.debug("mapDetectedClassifications_toDataClass - adding relationship: {}", relationship.getGUID());
-                    relationships.add(relationship);
+                log.debug("mapDetectedClassifications_toDataClass - adding relationship: {}", relationship.getGUID());
+                relationships.add(relationship);
 
-                } catch (RepositoryErrorException e) {
-                    log.error("Unable to map relationship.", e);
-                }
             }
         }
 
@@ -783,7 +793,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                                                         List<Relationship> relationships,
                                                         ObjectCache cache,
                                                         Classificationenabledgroup fromIgcObject,
-                                                        String userId) {
+                                                        String userId) throws RepositoryErrorException, IGCConnectivityException, IGCParsingException {
 
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
         DataClass selectedClassification = fromIgcObject.getSelectedClassification();
@@ -797,29 +807,25 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
 
         // If the reference itself (or its type) are null the relationship does not exist
         if (selectedClassification != null && selectedClassification.getType() != null) {
-            try {
 
-                Relationship relationship = getMappedRelationship(
-                        igcomrsRepositoryConnector,
-                        DataClassAssignmentMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()),
-                        (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
-                                igcomrsRepositoryConnector.getRepositoryName(),
-                                R_DATA_CLASS_ASSIGNMENT),
-                        cache,
-                        fromIgcObject,
-                        selectedClassification,
-                        "selected_classification",
-                        userId
-                );
+            Relationship relationship = getMappedRelationship(
+                    igcomrsRepositoryConnector,
+                    DataClassAssignmentMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()),
+                    (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
+                            igcomrsRepositoryConnector.getRepositoryName(),
+                            R_DATA_CLASS_ASSIGNMENT),
+                    cache,
+                    fromIgcObject,
+                    selectedClassification,
+                    "selected_classification",
+                    userId
+            );
 
-                setSelectedRelationshipProperties(relationship, igcomrsRepositoryConnector.getIGCVersion());
+            setSelectedRelationshipProperties(relationship, igcomrsRepositoryConnector.getIGCVersion());
 
-                log.debug("mapSelectedClassifications_toDataClass - adding relationship: {}", relationship.getGUID());
-                relationships.add(relationship);
+            log.debug("mapSelectedClassifications_toDataClass - adding relationship: {}", relationship.getGUID());
+            relationships.add(relationship);
 
-            } catch (RepositoryErrorException e) {
-                log.error("Unable to map relationship.", e);
-            }
         } else {
             log.debug("No selected_classification set for asset -- skipping.");
         }
@@ -837,7 +843,7 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
     private ItemList<Classification> getDetectedClassifications(IGCOMRSRepositoryConnector igcomrsRepositoryConnector,
                                                                 String[] classificationProperties,
                                                                 IGCSearchConditionSet igcSearchConditionSet,
-                                                                SequencingOrder sequencingOrder) {
+                                                                SequencingOrder sequencingOrder) throws IGCConnectivityException, IGCParsingException {
 
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 

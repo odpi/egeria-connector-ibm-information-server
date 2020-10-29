@@ -2,8 +2,11 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnector;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
@@ -34,19 +37,27 @@ class PortImplementationMapping extends BaseMapping {
      */
     PortImplementationMapping(DataStageCache cache, DataStageJob job, Link link, PortType portType, String fullyQualifiedStageName) {
         super(cache);
+        final String methodName = "PortImplementationMapping";
         portImplementation = null;
         if (link != null) {
             portImplementation = new PortImplementation();
-            String linkQN = getFullyQualifiedName(link, fullyQualifiedStageName);
-            if (linkQN != null) {
-                log.debug("Constructing PortImplementation for: {}", linkQN);
-                portImplementation.setQualifiedName(linkQN);
-                portImplementation.setDisplayName(link.getName());
-                portImplementation.setPortType(portType);
-                SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, job, link, fullyQualifiedStageName);
-                portImplementation.setSchemaType(schemaTypeMapping.getSchemaType());
-            } else {
-                log.error("Unable to determine identity for link -- not including: {}", link);
+            try {
+                String linkQN = getFullyQualifiedName(link, fullyQualifiedStageName);
+                if (linkQN != null) {
+                    log.debug("Constructing PortImplementation for: {}", linkQN);
+                    portImplementation.setQualifiedName(linkQN);
+                    portImplementation.setDisplayName(link.getName());
+                    portImplementation.setPortType(portType);
+                    SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, job, link, fullyQualifiedStageName);
+                    portImplementation.setSchemaType(schemaTypeMapping.getSchemaType());
+                } else {
+                    log.error("Unable to determine identity for link -- not including: {}", link);
+                }
+            } catch (IGCException e) {
+                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                        this.getClass().getName(),
+                        methodName,
+                        e);
             }
         }
     }
@@ -62,16 +73,24 @@ class PortImplementationMapping extends BaseMapping {
      */
     PortImplementationMapping(DataStageCache cache, Stage stage, PortType portType, List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
         super(cache);
+        final String methodName = "PortImplementationMapping";
         portImplementation = null;
         if (stage != null && fields != null && !fields.isEmpty()) {
             portImplementation = new PortImplementation();
-            Identity storeIdentity = getParentIdentity(fields.get(0));
-            String storeName = getParentDisplayName(fields.get(0));
-            portImplementation.setQualifiedName(getFullyQualifiedName(storeIdentity, fullyQualifiedStageName));
-            portImplementation.setDisplayName(storeName);
-            portImplementation.setPortType(portType);
-            SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, stage, storeIdentity, fields, fullyQualifiedStageName);
-            portImplementation.setSchemaType(schemaTypeMapping.getSchemaType());
+            try {
+                Identity storeIdentity = getParentIdentity(fields.get(0));
+                String storeName = getParentDisplayName(fields.get(0));
+                portImplementation.setQualifiedName(getFullyQualifiedName(storeIdentity, fullyQualifiedStageName));
+                portImplementation.setDisplayName(storeName);
+                portImplementation.setPortType(portType);
+                SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, stage, storeIdentity, fields, fullyQualifiedStageName);
+                portImplementation.setSchemaType(schemaTypeMapping.getSchemaType());
+            } catch (IGCException e) {
+                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                        this.getClass().getName(),
+                        methodName,
+                        e);
+            }
         }
     }
 

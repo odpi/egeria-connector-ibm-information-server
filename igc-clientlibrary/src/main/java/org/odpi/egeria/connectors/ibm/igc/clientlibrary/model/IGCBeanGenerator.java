@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.*;
 import org.odpi.openmetadata.http.HttpHelper;
 import org.slf4j.Logger;
@@ -88,7 +89,11 @@ public class IGCBeanGenerator {
     private Map<String, Set<String>> superTypeToProperties;
 
     private IGCBeanGenerator() {
-        igcRestClient = new IGCRestClient(HOSTNAME, PORT, USERNAME, PASSWORD);
+        try {
+            igcRestClient = new IGCRestClient(HOSTNAME, PORT, USERNAME, PASSWORD);
+        } catch (IGCException e) {
+            log.error("Unable to connect to IGC.", e);
+        }
         superTypeToSubTypeToClassName = new TreeMap<>();
         superTypeToProperties = new HashMap<>();
     }
@@ -110,8 +115,12 @@ public class IGCBeanGenerator {
         for (String typeName : IGCRestConstants.getSuperTypes()) {
             if ( !(skipFixedAssetGeneration
                     && (typeName.equals(IGCRestConstants.INFORMATION_ASSET) || typeName.equals(IGCRestConstants.MAIN_OBJECT)) )) {
-                TypeDetails details = igcRestClient.getTypeDetails(typeName);
-                createPOJOForType(details);
+                try {
+                    TypeDetails details = igcRestClient.getTypeDetails(typeName);
+                    createPOJOForType(details);
+                } catch (IGCException e) {
+                    log.error("Fatal error processing type details.", e);
+                }
             } else if (typeName.equals(IGCRestConstants.INFORMATION_ASSET)) {
                 superTypeToProperties.put(IGCRestConstants.INFORMATION_ASSET, IGCRestConstants.getFixedInformationAssetProperties());
             } else if (typeName.equals(IGCRestConstants.MAIN_OBJECT)) {
@@ -123,41 +132,45 @@ public class IGCBeanGenerator {
 
     private void generateForAllIgcTypesInEnvironment(boolean skipFixedAssetGeneration) {
 
-        // Then generate the POJOs within that directory
-        List<TypeHeader> types = igcRestClient.getTypes(mapper);
-        for (TypeHeader igcType : types) {
-            String type = igcType.getId();
-            // No need to re-generate the supertypes
-            if (!IGCRestConstants.getSuperTypes().contains(type)) {
-                TypeDetails typeDetails = igcRestClient.getTypeDetails(type);
-                createPOJOForType(typeDetails);
-            }
-        }
-
-        // Finally update the supertypes with their subtypes
-        for (String superTypeName : IGCRestConstants.getSuperTypes()) {
-            String superTypeClassName = IGCRestConstants.getClassNameForAssetType(superTypeName);
-            if (!superTypeClassName.equals("Reference")) {
-                log.info("Injecting subtype information into {}...", superTypeClassName);
-                Path superTypePath = Paths.get(BASE_DIRECTORY + File.separator + superTypeClassName + ".java");
-                if (skipFixedAssetGeneration
-                        && (superTypeClassName.equals("InformationAsset") || superTypeClassName.equals("Classificationenabledgroup"))) {
-                    // If we skipped generating InformationAsset itself, we need to remove any pre-existing injected
-                    // subtypes before injecting any new ones
-                    removeInjectedSubtypes(superTypePath);
+        try {
+            // Then generate the POJOs within that directory
+            List<TypeHeader> types = igcRestClient.getTypes(mapper);
+            for (TypeHeader igcType : types) {
+                String type = igcType.getId();
+                // No need to re-generate the supertypes
+                if (!IGCRestConstants.getSuperTypes().contains(type)) {
+                    TypeDetails typeDetails = igcRestClient.getTypeDetails(type);
+                    createPOJOForType(typeDetails);
                 }
-                injectSubTypes(superTypePath, superTypeToSubTypeToClassName.get(superTypeName));
             }
+
+            // Finally update the supertypes with their subtypes
+            for (String superTypeName : IGCRestConstants.getSuperTypes()) {
+                String superTypeClassName = IGCRestConstants.getClassNameForAssetType(superTypeName);
+                if (!superTypeClassName.equals("Reference")) {
+                    log.info("Injecting subtype information into {}...", superTypeClassName);
+                    Path superTypePath = Paths.get(BASE_DIRECTORY + File.separator + superTypeClassName + ".java");
+                    if (skipFixedAssetGeneration
+                            && (superTypeClassName.equals("InformationAsset") || superTypeClassName.equals("Classificationenabledgroup"))) {
+                        // If we skipped generating InformationAsset itself, we need to remove any pre-existing injected
+                        // subtypes before injecting any new ones
+                        removeInjectedSubtypes(superTypePath);
+                    }
+                    injectSubTypes(superTypePath, superTypeToSubTypeToClassName.get(superTypeName));
+                }
+            }
+
+            // Before injecting into Reference we need to remove any previous injections (since this file is not
+            // actually generated)
+            Path refPath = Paths.get(COMMON_DIRECTORY + File.separator + "Reference.java");
+            removeInjectedSubtypes(refPath);
+            log.info("Injecting subtype information into Reference...");
+            injectSubTypes(refPath, superTypeToSubTypeToClassName.get("reference"));
+
+            igcRestClient.disconnect();
+        } catch (IGCException e) {
+            log.error("Fatal error interacting with IGC.", e);
         }
-
-        // Before injecting into Reference we need to remove any previous injections (since this file is not
-        // actually generated)
-        Path refPath = Paths.get(COMMON_DIRECTORY + File.separator + "Reference.java");
-        removeInjectedSubtypes(refPath);
-        log.info("Injecting subtype information into Reference...");
-        injectSubTypes(refPath, superTypeToSubTypeToClassName.get("reference"));
-
-        igcRestClient.disconnect();
 
     }
 

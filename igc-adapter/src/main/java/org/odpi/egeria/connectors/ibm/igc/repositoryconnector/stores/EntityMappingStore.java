@@ -2,13 +2,16 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.stores;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDef;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,9 +47,11 @@ public class EntityMappingStore extends MappingStore {
      * @param mappingClass the Java class providing the EntityMapping
      * @param igcomrsRepositoryConnector connectivity via an IGC OMRS Repository Connector
      * @return boolean false if unable to configure an EntityMapping from the provided class
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
-    public boolean addMapping(TypeDef omrsTypeDef, Class<?> mappingClass, IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
+    public boolean addMapping(TypeDef omrsTypeDef, Class<?> mappingClass, IGCOMRSRepositoryConnector igcomrsRepositoryConnector) throws RepositoryErrorException {
 
+        final String methodName = "addMapping";
         EntityMapping mapping = getEntityMapper(mappingClass);
 
         if (mapping != null) {
@@ -75,14 +80,18 @@ public class EntityMappingStore extends MappingStore {
             // Only proceed with retrieving and caching details from IGC if it is mapped to a real IGC type
             if (!mapping.getIgcAssetType().equals(EntityMapping.SUPERTYPE_SENTINEL)) {
                 IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
-                igcRestClient.cacheTypeDetails(mapping.getIgcAssetType());
-                List<String> otherTypes = mapping.getOtherIGCAssetTypes();
-                if (otherTypes != null && !otherTypes.isEmpty()) {
-                    for (String type : otherTypes) {
-                        if (!type.equals(EntityMapping.SUPERTYPE_SENTINEL)) {
-                            igcRestClient.cacheTypeDetails(type);
+                try {
+                    igcRestClient.cacheTypeDetails(mapping.getIgcAssetType());
+                    List<String> otherTypes = mapping.getOtherIGCAssetTypes();
+                    if (otherTypes != null && !otherTypes.isEmpty()) {
+                        for (String type : otherTypes) {
+                            if (!type.equals(EntityMapping.SUPERTYPE_SENTINEL)) {
+                                igcRestClient.cacheTypeDetails(type);
+                            }
                         }
                     }
+                } catch (IGCException e) {
+                    throw new RepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition(), this.getClass().getName(), methodName, e);
                 }
             }
         }

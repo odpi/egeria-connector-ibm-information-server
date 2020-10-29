@@ -2,10 +2,12 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -19,6 +21,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 
 /**
  * Defines the mapping to the OMRS "ContactDetails" entity.
@@ -63,11 +66,12 @@ public class ContactDetailsMapper extends ReferenceableMapper {
      * @param entityMap the instantiation of a mapping to carry out
      * @param instanceProperties the instance properties to which to add the complex-mapped properties
      * @return InstanceProperties
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
     @Override
     protected InstanceProperties complexPropertyMappings(ObjectCache cache,
                                                          EntityMappingInstance entityMap,
-                                                         InstanceProperties instanceProperties) {
+                                                         InstanceProperties instanceProperties) throws RepositoryErrorException {
 
         instanceProperties = super.complexPropertyMappings(cache, entityMap, instanceProperties);
 
@@ -78,17 +82,21 @@ public class ContactDetailsMapper extends ReferenceableMapper {
         IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
 
         // Set the email address as a contact method (only if there is one present)
-        String emailAddress = (String) igcRestClient.getPropertyByName(igcEntity, "email_address");
-        if (emailAddress != null && !emailAddress.equals("")) {
-            EnumPropertyValue contactMethod = ContactMethodTypeMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()).getEnumMappingByIgcValue("email_address");
-            instanceProperties.setProperty("contactMethodType", contactMethod);
-            instanceProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(
-                    igcomrsRepositoryConnector.getRepositoryName(),
-                    instanceProperties,
-                    "contactMethodValue",
-                    emailAddress,
-                    methodName
-            );
+        try {
+            String emailAddress = (String) igcRestClient.getPropertyByName(igcEntity, "email_address");
+            if (emailAddress != null && !emailAddress.equals("")) {
+                EnumPropertyValue contactMethod = ContactMethodTypeMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()).getEnumMappingByIgcValue("email_address");
+                instanceProperties.setProperty("contactMethodType", contactMethod);
+                instanceProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(
+                        igcomrsRepositoryConnector.getRepositoryName(),
+                        instanceProperties,
+                        "contactMethodValue",
+                        emailAddress,
+                        methodName
+                );
+            }
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
         }
 
         // TODO: add mappings for other types (mobile_phone_number, instant_message_id)

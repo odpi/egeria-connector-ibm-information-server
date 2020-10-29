@@ -2,9 +2,11 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -17,6 +19,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 
 /**
  * Defines the common mappings to the OMRS "GovernanceDefinition" entity.
@@ -64,7 +67,7 @@ public class GovernanceDefinitionMapper extends ReferenceableMapper {
     @Override
     protected InstanceProperties complexPropertyMappings(ObjectCache cache,
                                                          EntityMappingInstance entityMap,
-                                                         InstanceProperties instanceProperties) {
+                                                         InstanceProperties instanceProperties) throws RepositoryErrorException {
 
         instanceProperties = super.complexPropertyMappings(cache, entityMap, instanceProperties);
 
@@ -78,15 +81,19 @@ public class GovernanceDefinitionMapper extends ReferenceableMapper {
         String repositoryName = igcomrsRepositoryConnector.getRepositoryName();
 
         // setup the OMRS 'domain' property
-        Reference parentPolicy = (Reference) igcRestClient.getPropertyByName(igcEntity, "parent_policy");
-        if (parentPolicy != null) {
-            instanceProperties = repositoryHelper.addStringPropertyToInstance(
-                    repositoryName,
-                    instanceProperties,
-                    "domain",
-                    parentPolicy.getName(),
-                    methodName
-            );
+        try {
+            Reference parentPolicy = (Reference) igcRestClient.getPropertyByName(igcEntity, "parent_policy");
+            if (parentPolicy != null) {
+                instanceProperties = repositoryHelper.addStringPropertyToInstance(
+                        repositoryName,
+                        instanceProperties,
+                        "domain",
+                        parentPolicy.getName(),
+                        methodName
+                );
+            }
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
         }
 
         return instanceProperties;

@@ -2,9 +2,12 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnector;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
@@ -63,19 +66,27 @@ public class SchemaTypeMapping extends BaseMapping {
      */
     SchemaTypeMapping(DataStageCache cache, DataStageJob job, Link link, String fullyQualifiedStageName) {
         super(cache);
+        final String methodName = "SchemaTypeMapping";
         schemaType = null;
         if (link != null) {
             schemaType = new SchemaType();
-            String schemaTypeQN = getFullyQualifiedName(link, fullyQualifiedStageName);
-            if (schemaTypeQN != null) {
-                log.debug("Constructing SchemaType for job & link: {}", schemaTypeQN);
-                schemaType.setQualifiedName(schemaTypeQN);
-                schemaType.setDisplayName(link.getId());
-                schemaType.setAuthor(link.getModifiedBy());
-                AttributeMapping attributeMapping = new AttributeMapping(cache, job, link, fullyQualifiedStageName);
-                schemaType.setAttributeList(attributeMapping.getAttributes());
-            } else {
-                log.error("Unable to determine identity of link: {}", link);
+            try {
+                String schemaTypeQN = getFullyQualifiedName(link, fullyQualifiedStageName);
+                if (schemaTypeQN != null) {
+                    log.debug("Constructing SchemaType for job & link: {}", schemaTypeQN);
+                    schemaType.setQualifiedName(schemaTypeQN);
+                    schemaType.setDisplayName(link.getId());
+                    schemaType.setAuthor(link.getModifiedBy());
+                    AttributeMapping attributeMapping = new AttributeMapping(cache, job, link, fullyQualifiedStageName);
+                    schemaType.setAttributeList(attributeMapping.getAttributes());
+                } else {
+                    log.error("Unable to determine identity of link: {}", link);
+                }
+            } catch (IGCException e) {
+                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                        this.getClass().getName(),
+                        methodName,
+                        e);
             }
         }
     }
@@ -91,6 +102,7 @@ public class SchemaTypeMapping extends BaseMapping {
      */
     SchemaTypeMapping(DataStageCache cache, Stage stage, Identity storeIdentity, List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
         super(cache);
+        final String methodName = "SchemaTypeMapping";
         schemaType = null;
         if (stage != null) {
             schemaType = new SchemaType();
@@ -99,9 +111,16 @@ public class SchemaTypeMapping extends BaseMapping {
                 log.debug("Constructing SchemaType for store & fields, within stage: {}", schemaTypeQN);
                 schemaType.setQualifiedName(schemaTypeQN);
                 schemaType.setDisplayName(storeIdentity.getName());
-                schemaType.setAuthor((String) igcRestClient.getPropertyByName(stage, "modified_by"));
-                AttributeMapping attributeMapping = new AttributeMapping(cache, fields, fullyQualifiedStageName);
-                schemaType.setAttributeList(attributeMapping.getAttributes());
+                try {
+                    schemaType.setAuthor((String) igcRestClient.getPropertyByName(stage, "modified_by"));
+                    AttributeMapping attributeMapping = new AttributeMapping(cache, fields, fullyQualifiedStageName);
+                    schemaType.setAttributeList(attributeMapping.getAttributes());
+                } catch (IGCException e) {
+                    DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                            this.getClass().getName(),
+                            methodName,
+                            e);
+                }
             } else {
                 log.error("Unable to determine identity of store: {}", storeIdentity);
             }

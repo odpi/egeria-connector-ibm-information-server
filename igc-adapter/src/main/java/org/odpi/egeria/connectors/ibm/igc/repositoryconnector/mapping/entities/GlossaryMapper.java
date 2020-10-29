@@ -2,16 +2,19 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
+import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.CategoryAnchorMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.TermAnchorMapper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 
 /**
  * Defines the mapping to the OMRS "GlossaryCategory" entity.
@@ -60,13 +63,19 @@ public class GlossaryMapper extends ReferenceableMapper {
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @param igcObject the IGC object to check
      * @return boolean
+     * @throws RepositoryErrorException if any issue interacting with IGC
      */
-    public static boolean isGlossary(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) {
+    public static boolean isGlossary(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) throws RepositoryErrorException {
+        final String methodName = "isGlossary";
         String assetType = IGCRestConstants.getAssetTypeForSearch(igcObject.getType());
         if (assetType.equals("category")) {
-            Identity catIdentity = igcObject.getIdentity(igcRestClient, cache);
-            Identity parentIdentity = catIdentity.getParentIdentity();
-            return parentIdentity == null && !catIdentity.getName().equals("Classifications");
+            try {
+                Identity catIdentity = igcObject.getIdentity(igcRestClient, cache);
+                Identity parentIdentity = catIdentity.getParentIdentity();
+                return parentIdentity == null && !catIdentity.getName().equals("Classifications");
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
         }
         return false;
     }
@@ -75,7 +84,7 @@ public class GlossaryMapper extends ReferenceableMapper {
      * {@inheritDoc}
      */
     @Override
-    public boolean isOmrsType(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) {
+    public boolean isOmrsType(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) throws RepositoryErrorException {
         return isGlossary(igcRestClient, cache, igcObject);
     }
 
