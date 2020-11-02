@@ -16,14 +16,15 @@ import static org.testng.Assert.*;
 public class IdentityTest {
 
     private IGCRestClient igcRestClient;
-    private String FULL_IDENTITY_STRING = "(host_(engine))=INFOSVR::(database)=SOMETHING::(database_schema)=ELSE::(database_table)=TABLE::(database_column)=COLUMN";
-    private String PART_IDENTITY_STRING = "gine))=INFOSVR::(database)=SOME";
+    private String FULL_IDENTITY_STRING = "(host)=INFOSVR::(database)=SOMETHING::(database_schema)=ELSE::(database_table)=TABLE::(database_column)=COLUMN";
+    private String PART_IDENTITY_STRING = "ost)=INFOSVR::(database)=SOME";
+    private String PART_IDENTITY_STRING2 = "tabase)=COMPDIR::(database_schema)=DB2INST1::(database_table)=CONTACTEMAIL::(database_column)=EMAIL";
     private String HOST_PART_IDT_STRING = "(engine))=I";
-    private String DATA_FILE_EXAMPLE = "(host_(engine))=INFOSVR::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=somewhere::(data_file)=FileName.csv::(data_file_record)=FileName";
+    private String DATA_FILE_EXAMPLE = "(host)=INFOSVR::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=somewhere::(data_file)=FileName.csv::(data_file_record)=FileName";
     private String USER_EXAMPLE = "(steward_user)=Ms. Firstname Surname";
     private String USER_EXAMPLE_PART1 = "(non_steward_user)=Firstname";
     private String USER_EXAMPLE_PART2 = "(steward_user)=Ms. Firstna";
-    private String DATA_FILE_FOLDER_EXAMPLE = "(host_(engine))=INFOSVR::(data_file_folder)=/::(data_file_folder)=data";
+    private String DATA_FILE_FOLDER_EXAMPLE = "(host)=INFOSVR::(data_file_folder)=/::(data_file_folder)=data";
     private String TERM_EXAMPLE = "(category)=Some Category::(term)=Some Term";
     private String NON_IDENTITY = "JustAString";
     private String TYPE_ONLY = "(category)";
@@ -82,7 +83,7 @@ public class IdentityTest {
         Identity ultimateFromBottom = full.getUltimateParentIdentity();
         assertNotNull(ultimateFromBottom);
         assertFalse(ultimateFromBottom.isPartial());
-        assertEquals(ultimateFromBottom.getAssetType(), "host_(engine)");
+        assertEquals(ultimateFromBottom.getAssetType(), "host");
         assertEquals(ultimateFromBottom.getName(), "INFOSVR");
         Identity ultimateFromParent = parent.getUltimateParentIdentity();
         assertEquals(ultimateFromBottom, ultimateFromParent);
@@ -101,6 +102,13 @@ public class IdentityTest {
         assertTrue(part.isPartial());
         assertEquals(part.getAssetType(), "database");
         assertEquals(part.getName(), "SOME");
+
+        part = Identity.getFromString(PART_IDENTITY_STRING2, igcRestClient, Identity.StringType.ENDS_WITH);
+        assertNotNull(part);
+        assertTrue(part.isPartial());
+        assertEquals(part.getAssetType(), "database_column");
+        assertEquals(part.getName(), "EMAIL");
+        assertEquals(part.toString(), "(database_schema)=DB2INST1::(database_table)=CONTACTEMAIL::(database_column)=EMAIL");
 
     }
 

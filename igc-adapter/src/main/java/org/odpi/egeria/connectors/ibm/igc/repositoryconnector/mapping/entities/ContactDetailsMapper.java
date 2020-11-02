@@ -8,6 +8,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
@@ -22,6 +23,8 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
+
+import java.util.List;
 
 /**
  * Defines the mapping to the OMRS "ContactDetails" entity.
@@ -187,6 +190,25 @@ public class ContactDetailsMapper extends ReferenceableMapper {
             }
 
         }
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addComplexStringSearchCriteria(OMRSRepositoryHelper repositoryHelper,
+                                               String repositoryName,
+                                               IGCRestClient igcRestClient,
+                                               IGCSearchConditionSet igcSearchConditionSet,
+                                               String searchCriteria) throws FunctionNotSupportedException, RepositoryErrorException {
+
+        super.addComplexStringSearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, searchCriteria);
+
+        // Add matching against a full / qualified name as well, since this is uniquely complex for user details
+        String unqualifiedName = repositoryHelper.getUnqualifiedLiteralString(searchCriteria);
+        unqualifiedName = IGCRepositoryHelper.getSearchableQualifiedName(unqualifiedName);
+        Identity.getSearchCriteriaForUserName(igcSearchConditionSet, unqualifiedName);
 
     }
 

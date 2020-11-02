@@ -1040,7 +1040,17 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 ));
         setSearchAndResponse(mockServerClient, caseName, "results_one.json",
                 json(
+                        "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"database_table_or_view.name\",\"operator\":\"=\",\"value\":\"CONTACTEMAIL\"},{\"property\":\"database_table_or_view.database_schema.name\",\"operator\":\"=\",\"value\":\"DB2INST1\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"EMAIL\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_one.json",
+                json(
                         "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"database_table_or_view.name\",\"operator\":\"=\",\"value\":\"contactemail\"},{\"property\":\"database_table_or_view.database_schema.name\",\"operator\":\"=\",\"value\":\"db2inst1\"},{\"property\":\"database_table_or_view.database_schema.database.name\",\"operator\":\"=\",\"value\":\"compdir\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"email\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_one.json",
+                json(
+                        "{\"types\":[\"database_column\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"database_table_or_view.name\",\"operator\":\"=\",\"value\":\"contactemail\"},{\"property\":\"database_table_or_view.database_schema.name\",\"operator\":\"=\",\"value\":\"db2inst1\"},{\"property\":\"name\",\"operator\":\"=\",\"value\":\"email\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
         setSearchAndResponse(mockServerClient, caseName, "results_user.json",
@@ -1051,6 +1061,11 @@ public class MockServerExpectations implements PluginExpectationInitializer {
         setSearchAndResponse(mockServerClient, caseName, "results_user.json",
                 json(
                         "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"conditions\":[{\"conditions\":[{\"property\":\"courtesy_title\",\"operator\":\"like {0}%\",\"value\":\"mr. gary geeke\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"full_name\",\"operator\":\"like {0}%\",\"value\":\"mr. gary geeke\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"courtesy_title\",\"operator\":\"like {0}%\",\"value\":\"mr.\"},{\"property\":\"full_name\",\"operator\":\"like {0}%\",\"value\":\"gary geeke\"}],\"operator\":\"and\"}],\"operator\":\"or\"}],\"operator\":\"and\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_user.json",
+                json(
+                        "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"email_address\",\"operator\":\"like %{0}\",\"value\":\"Gary Geeke\"},{\"conditions\":[{\"conditions\":[{\"property\":\"courtesy_title\",\"operator\":\"like {0}%\",\"value\":\"Gary Geeke\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"courtesy_title\",\"operator\":\"like {0}%\",\"value\":\"Gary\"},{\"property\":\"given_name\",\"operator\":\"like {0}%\",\"value\":\"Geeke\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"given_name\",\"operator\":\"like {0}%\",\"value\":\"Gary Geeke\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"given_name\",\"operator\":\"like {0}%\",\"value\":\"Gary\"},{\"property\":\"surname\",\"operator\":\"like {0}%\",\"value\":\"Geeke\"}],\"operator\":\"and\"}],\"operator\":\"or\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
         setSearchAndResponse(mockServerClient, caseName, "results_user.json",
