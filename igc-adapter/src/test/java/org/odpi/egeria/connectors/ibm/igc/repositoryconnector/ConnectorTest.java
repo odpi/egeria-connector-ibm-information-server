@@ -2863,6 +2863,14 @@ public class ConnectorTest {
         );
 
         testFindEntitiesByPropertyValue(
+                "79296df8-645a-4ef7-a011-912d1cdcf75a",
+                "ContactDetails",
+                repositoryHelper.getEndsWithRegex("r. Gary Geeke"),
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        testFindEntitiesByPropertyValue(
                 "ac406bf8-e53e-49f1-9088-2af28bbbd285",
                 "Person",
                 repositoryHelper.getEndsWithRegex("Gary Geeke"),

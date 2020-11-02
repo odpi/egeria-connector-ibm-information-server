@@ -1065,6 +1065,11 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 ));
         setSearchAndResponse(mockServerClient, caseName, "results_user.json",
                 json(
+                        "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"email_address\",\"operator\":\"like %{0}\",\"value\":\"Gary Geeke\"},{\"conditions\":[{\"conditions\":[{\"property\":\"courtesy_title\",\"operator\":\"like {0}%\",\"value\":\"Gary Geeke\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"courtesy_title\",\"operator\":\"like {0}%\",\"value\":\"Gary\"},{\"property\":\"given_name\",\"operator\":\"like {0}%\",\"value\":\"Geeke\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"given_name\",\"operator\":\"like {0}%\",\"value\":\"Gary Geeke\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"given_name\",\"operator\":\"like {0}%\",\"value\":\"Gary\"},{\"property\":\"surname\",\"operator\":\"like {0}%\",\"value\":\"Geeke\"}],\"operator\":\"and\"}],\"operator\":\"or\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
+                        MatchType.ONLY_MATCHING_FIELDS
+                ));
+        setSearchAndResponse(mockServerClient, caseName, "results_user.json",
+                json(
                         "{\"types\":[\"user\"],\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"full_name\",\"operator\":\"=\",\"value\":\"Geeke\"},{\"property\":\"job_title\",\"operator\":\"=\",\"value\":\"Geeke\"},{\"property\":\"principal_id\",\"operator\":\"=\",\"value\":\"Geeke\"}],\"operator\":\"or\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));

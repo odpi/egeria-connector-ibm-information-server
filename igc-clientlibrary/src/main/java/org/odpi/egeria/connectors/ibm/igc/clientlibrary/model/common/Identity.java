@@ -311,75 +311,7 @@ public class Identity {
             }
         } else if (IGCRestConstants.getUserTypes().contains(assetType)) {
             // Similarly, users are complicated due to how their unique name is constructed
-            String[] nameTokens = assetName.split(" ");
-            if (nameTokens.length == 1) {
-                // If there is only a single token, use it for an OR-based startsWith search across courtesy title and
-                // first name as this could only be a partial identity, and either could be in the first position
-                IGCSearchCondition cTitle = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, nameTokens[0]);
-                IGCSearchCondition fName = new IGCSearchCondition(GIVEN_NAME, SEARCH_STARTS_WITH, nameTokens[0]);
-                IGCSearchConditionSet nested = new IGCSearchConditionSet();
-                nested.addCondition(cTitle);
-                nested.addCondition(fName);
-                nested.setMatchAnyCondition(true);
-                igcSearchConditionSet.addNestedConditionSet(nested);
-            } else if (nameTokens.length == 2) {
-                // If there are two tokens, this could be...
-                IGCSearchCondition cTitleAlone = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, nameTokens[0]);
-                IGCSearchCondition fNameAlone1 = new IGCSearchCondition(GIVEN_NAME, SEARCH_STARTS_WITH, nameTokens[0]);
-                IGCSearchCondition fNameAlone2 = new IGCSearchCondition(GIVEN_NAME, SEARCH_STARTS_WITH, nameTokens[1]);
-                IGCSearchCondition lNameAlone = new IGCSearchCondition("surname", SEARCH_STARTS_WITH, nameTokens[1]);
-                IGCSearchCondition cTitleCombined = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, assetName);
-                IGCSearchCondition fNameCombined = new IGCSearchCondition(GIVEN_NAME, SEARCH_STARTS_WITH, assetName);
-                IGCSearchConditionSet nested = new IGCSearchConditionSet();
-                // ... a multi-word courtesy title alone
-                IGCSearchConditionSet titleCombined = new IGCSearchConditionSet(cTitleCombined);
-                nested.addNestedConditionSet(titleCombined);
-                // ... a courtesy title and first name
-                IGCSearchConditionSet titleAndFname = new IGCSearchConditionSet();
-                titleAndFname.addCondition(cTitleAlone);
-                titleAndFname.addCondition(fNameAlone2);
-                titleAndFname.setMatchAnyCondition(false);
-                nested.addNestedConditionSet(titleAndFname);
-                // ... a multi-word first name
-                IGCSearchConditionSet multiWordFname = new IGCSearchConditionSet();
-                multiWordFname.addCondition(fNameCombined);
-                nested.addNestedConditionSet(multiWordFname);
-                // ... or a first name and last name
-                IGCSearchConditionSet firstAndLast = new IGCSearchConditionSet();
-                firstAndLast.addCondition(fNameAlone1);
-                firstAndLast.addCondition(lNameAlone);
-                firstAndLast.setMatchAnyCondition(false);
-                nested.addNestedConditionSet(firstAndLast);
-                nested.setMatchAnyCondition(true);
-                igcSearchConditionSet.addNestedConditionSet(nested);
-            } else if (nameTokens.length > 2) {
-                // If there are three tokens, this could be...
-                IGCSearchCondition cTitleCombined = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, assetName);
-                IGCSearchCondition fullNameCombined = new IGCSearchCondition(FULL_NAME, SEARCH_STARTS_WITH, assetName);
-                IGCSearchCondition cTitleAlone = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, nameTokens[0]);
-                StringBuilder combinedName = new StringBuilder();
-                for (int i = 1; i < nameTokens.length; i++) {
-                    combinedName.append(nameTokens[i]).append(" ");
-                }
-                // (remove the last space)
-                combinedName.deleteCharAt(combinedName.length() - 1);
-                IGCSearchCondition fullNameAlone = new IGCSearchCondition(FULL_NAME, SEARCH_STARTS_WITH, combinedName.toString());
-                IGCSearchConditionSet nested = new IGCSearchConditionSet();
-                // ... only a courtesy title, comprised of multi-words (startsWith)
-                IGCSearchConditionSet titleOnly = new IGCSearchConditionSet(cTitleCombined);
-                nested.addNestedConditionSet(titleOnly);
-                // ... only a full name, comprised of multi-word first or last names (startsWith)
-                IGCSearchConditionSet nameOnly = new IGCSearchConditionSet(fullNameCombined);
-                nested.addNestedConditionSet(nameOnly);
-                // ... a single courtesy title with the rest the full name (startsWith)
-                IGCSearchConditionSet titleAndName = new IGCSearchConditionSet();
-                titleAndName.addCondition(cTitleAlone);
-                titleAndName.addCondition(fullNameAlone);
-                titleAndName.setMatchAnyCondition(false);
-                nested.addNestedConditionSet(titleAndName);
-                nested.setMatchAnyCondition(true);
-                igcSearchConditionSet.addNestedConditionSet(nested);
-            }
+            getSearchCriteriaForUserName(igcSearchConditionSet, assetName);
         } else {
             // Build up the search criteria for all of the context first
             String propertyPath = "";
@@ -495,6 +427,85 @@ public class Identity {
         }
         return ident;
 
+    }
+
+    /**
+     * Translate the provided full name into search criteria.
+     *
+     * @param igcSearchConditionSet the search criteria to which to append
+     * @param name the name from which to build the criteria
+     */
+    public static void getSearchCriteriaForUserName(IGCSearchConditionSet igcSearchConditionSet,
+                                                    String name) {
+        String[] nameTokens = name.split(" ");
+        if (nameTokens.length == 1) {
+            // If there is only a single token, use it for an OR-based startsWith search across courtesy title and
+            // first name as this could only be a partial identity, and either could be in the first position
+            IGCSearchCondition cTitle = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, nameTokens[0]);
+            IGCSearchCondition fName = new IGCSearchCondition(GIVEN_NAME, SEARCH_STARTS_WITH, nameTokens[0]);
+            IGCSearchConditionSet nested = new IGCSearchConditionSet();
+            nested.addCondition(cTitle);
+            nested.addCondition(fName);
+            nested.setMatchAnyCondition(true);
+            igcSearchConditionSet.addNestedConditionSet(nested);
+        } else if (nameTokens.length == 2) {
+            // If there are two tokens, this could be...
+            IGCSearchCondition cTitleAlone = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, nameTokens[0]);
+            IGCSearchCondition fNameAlone1 = new IGCSearchCondition(GIVEN_NAME, SEARCH_STARTS_WITH, nameTokens[0]);
+            IGCSearchCondition fNameAlone2 = new IGCSearchCondition(GIVEN_NAME, SEARCH_STARTS_WITH, nameTokens[1]);
+            IGCSearchCondition lNameAlone = new IGCSearchCondition("surname", SEARCH_STARTS_WITH, nameTokens[1]);
+            IGCSearchCondition cTitleCombined = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, name);
+            IGCSearchCondition fNameCombined = new IGCSearchCondition(GIVEN_NAME, SEARCH_STARTS_WITH, name);
+            IGCSearchConditionSet nested = new IGCSearchConditionSet();
+            // ... a multi-word courtesy title alone
+            IGCSearchConditionSet titleCombined = new IGCSearchConditionSet(cTitleCombined);
+            nested.addNestedConditionSet(titleCombined);
+            // ... a courtesy title and first name
+            IGCSearchConditionSet titleAndFname = new IGCSearchConditionSet();
+            titleAndFname.addCondition(cTitleAlone);
+            titleAndFname.addCondition(fNameAlone2);
+            titleAndFname.setMatchAnyCondition(false);
+            nested.addNestedConditionSet(titleAndFname);
+            // ... a multi-word first name
+            IGCSearchConditionSet multiWordFname = new IGCSearchConditionSet();
+            multiWordFname.addCondition(fNameCombined);
+            nested.addNestedConditionSet(multiWordFname);
+            // ... or a first name and last name
+            IGCSearchConditionSet firstAndLast = new IGCSearchConditionSet();
+            firstAndLast.addCondition(fNameAlone1);
+            firstAndLast.addCondition(lNameAlone);
+            firstAndLast.setMatchAnyCondition(false);
+            nested.addNestedConditionSet(firstAndLast);
+            nested.setMatchAnyCondition(true);
+            igcSearchConditionSet.addNestedConditionSet(nested);
+        } else if (nameTokens.length > 2) {
+            // If there are three tokens, this could be...
+            IGCSearchCondition cTitleCombined = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, name);
+            IGCSearchCondition fullNameCombined = new IGCSearchCondition(FULL_NAME, SEARCH_STARTS_WITH, name);
+            IGCSearchCondition cTitleAlone = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, nameTokens[0]);
+            StringBuilder combinedName = new StringBuilder();
+            for (int i = 1; i < nameTokens.length; i++) {
+                combinedName.append(nameTokens[i]).append(" ");
+            }
+            // (remove the last space)
+            combinedName.deleteCharAt(combinedName.length() - 1);
+            IGCSearchCondition fullNameAlone = new IGCSearchCondition(FULL_NAME, SEARCH_STARTS_WITH, combinedName.toString());
+            IGCSearchConditionSet nested = new IGCSearchConditionSet();
+            // ... only a courtesy title, comprised of multi-words (startsWith)
+            IGCSearchConditionSet titleOnly = new IGCSearchConditionSet(cTitleCombined);
+            nested.addNestedConditionSet(titleOnly);
+            // ... only a full name, comprised of multi-word first or last names (startsWith)
+            IGCSearchConditionSet nameOnly = new IGCSearchConditionSet(fullNameCombined);
+            nested.addNestedConditionSet(nameOnly);
+            // ... a single courtesy title with the rest the full name (startsWith)
+            IGCSearchConditionSet titleAndName = new IGCSearchConditionSet();
+            titleAndName.addCondition(cTitleAlone);
+            titleAndName.addCondition(fullNameAlone);
+            titleAndName.setMatchAnyCondition(false);
+            nested.addNestedConditionSet(titleAndName);
+            nested.setMatchAnyCondition(true);
+            igcSearchConditionSet.addNestedConditionSet(nested);
+        }
     }
 
     private static List<String> getComponentsOfIdentityString(String identity) {
