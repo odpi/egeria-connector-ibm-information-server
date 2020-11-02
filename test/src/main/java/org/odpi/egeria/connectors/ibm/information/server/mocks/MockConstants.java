@@ -44,7 +44,7 @@ public class MockConstants {
     public static final String CATEGORY_RID = "6662c0f2.ee6a64fe.o1h6evehs.j0f25pn.ihsrb3.m7984f1jgfencf15nopk0";
     public static final String TERM_RID = "6662c0f2.e1b1ec6c.00263shl8.8c6cjg1.thoiqd.g2jiimda7gvarsup8a3bb";
     public static final String HOST_RID = "b1c497ce.354f5217.001mtr387.0nbvgbo.uh4485.rd8qffabbjgrsfjh2sheh";
-    public static final String HOST_QN = "(host_(engine))=INFOSVR";
+    public static final String HOST_QN = "(host)=INFOSVR";
     public static final String DATABASE_RID = "b1c497ce.6e83759b.001mts4qn.7n9l0ef.4ov512.nfvlgdgsrggoc6hdlgic5";
     public static final String DATABASE_QN = HOST_QN + "::(database)=COMPDIR";
     public static final String DATA_CONNECTION_RID = "b1c497ce.8e4c0a48.001mts4qn.7mouq34.s1cncq.51abs5f71epl37jke7irc";
@@ -74,7 +74,7 @@ public class MockConstants {
     public static final String INFORMATION_GOVERNANCE_POLICY_RID = "6662c0f2.8ed29152.000mfk806.3p93nta.95ttq9.gc3t9m9vfgg55hhm19vsp";
     public static final String INFORMATION_GOVERNANCE_POLICY_QN = "(information_governance_policy)=Data Access Policies::(information_governance_policy)=Confidential information should be masked when user does not have specific access to its Subject Area";
     public static final String USER_RID = "b1c497ce.285feb.001mts4th.dq2dkb2.ggbeni.vl04tnd0t0bjgmlg5a35vn0";
-    public static final String USER_QN = "(steward_user)=Mr. Gary Geeke";
+    public static final String USER_QN = "(user)=Mr. Gary Geeke";
     public static final String GROUP_RID = "b1c497ce.8a5be154.001mts4th.nmdbb31.7flfke.0b7taja56pjhs73o553iq";
     public static final String RID_FOR_CREATE_AND_UPDATE = "6662c0f2.e1b1ec6c.001muv34k.s0rtkp1.c38mtf.60ltvrgr67q6l6pq5t3qi";
     public static final String TERM_RID_FOR_EVENT = "6662c0f2.e1b1ec6c.00263sgva.eo5q0s7.o5rf5s.q22k66bdjh8h341n1hi1e";

@@ -169,7 +169,7 @@ public class Identity {
      */
     private static void composeString(StringBuilder sb, String type, String name, String id) {
         sb.append(TYPE_PREFIX);
-        sb.append(type);
+        sb.append(IGCRestConstants.getAssetTypeForSearch(type));
         sb.append(TYPE_POSTFIX);
         sb.append(SEPARATOR_FOR_TYPE_AND_NAME);
         sb.append(name);
@@ -257,7 +257,7 @@ public class Identity {
             for (int i = context.size() - 1; i >= 0; i--) {
                 Reference item = context.get(i);
                 String type = item.getType();
-                if (type.equals("host_(engine)")) {
+                if (type.equals("host")) {
                     dataFileHost = item.getName();
                 } else if (type.equals("data_file_folder")) {
                     String path = item.getName();

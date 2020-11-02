@@ -2,7 +2,6 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
-import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
@@ -2818,7 +2817,7 @@ public class ConnectorTest {
         testFindEntitiesByPropertyValue(
                 "ac406bf8-e53e-49f1-9088-2af28bbbd285",
                 "Person",
-                repositoryHelper.getExactMatchRegex("(steward_user)=Mr. Gary Geeke"),
+                repositoryHelper.getExactMatchRegex("(user)=Mr. Gary Geeke"),
                 MockConstants.EGERIA_PAGESIZE,
                 1
         );
@@ -2826,7 +2825,7 @@ public class ConnectorTest {
         testFindEntitiesByPropertyValue(
                 "ac406bf8-e53e-49f1-9088-2af28bbbd285",
                 "Person",
-                repositoryHelper.getExactMatchRegex("(steward_user)=mr. gary geeke", true),
+                repositoryHelper.getExactMatchRegex("(user)=mr. gary geeke", true),
                 MockConstants.EGERIA_PAGESIZE,
                 1
         );
@@ -2850,7 +2849,7 @@ public class ConnectorTest {
         testFindEntitiesByPropertyValue(
                 "ac406bf8-e53e-49f1-9088-2af28bbbd285",
                 "Person",
-                repositoryHelper.getEndsWithRegex("_user)=Mr. Gary Geeke"),
+                repositoryHelper.getEndsWithRegex("user)=Mr. Gary Geeke"),
                 MockConstants.EGERIA_PAGESIZE,
                 1
         );
@@ -2858,7 +2857,7 @@ public class ConnectorTest {
         testFindEntitiesByPropertyValue(
                 "ac406bf8-e53e-49f1-9088-2af28bbbd285",
                 "Person",
-                repositoryHelper.getEndsWithRegex("_user)=mr. gary geeke", true),
+                repositoryHelper.getEndsWithRegex("user)=mr. gary geeke", true),
                 MockConstants.EGERIA_PAGESIZE,
                 1
         );
@@ -2898,7 +2897,7 @@ public class ConnectorTest {
         testFindEntitiesByPropertyValue(
                 "229ed5cc-de31-45fc-beb4-9919fd247398",
                 "FileFolder",
-                repositoryHelper.getExactMatchRegex("(host_(engine))=INFOSVR::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files"),
+                repositoryHelper.getExactMatchRegex("(host)=INFOSVR::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files"),
                 MockConstants.EGERIA_PAGESIZE,
                 1
         );
@@ -2906,7 +2905,7 @@ public class ConnectorTest {
         testFindEntitiesByPropertyValue(
                 "229ed5cc-de31-45fc-beb4-9919fd247398",
                 "FileFolder",
-                repositoryHelper.getExactMatchRegex("(host_(engine))=infosvr::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files", true),
+                repositoryHelper.getExactMatchRegex("(host)=infosvr::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files", true),
                 MockConstants.EGERIA_PAGESIZE,
                 1
         );
@@ -2942,7 +2941,7 @@ public class ConnectorTest {
                 null,
                 hostedTypes,
                 null,
-                repositoryHelper.getStartsWithRegex("(host_(engine))=INFO"),
+                repositoryHelper.getStartsWithRegex("(host)=INFO"),
                 5,
                 5
         );
