@@ -46,6 +46,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private SoftwareServerCapability dataEngine;
 
     private DataStageCache dataStageCache;
+    private List<ProcessHierarchy> processHierarchies;
 
     private boolean includeVirtualAssets = true;
     private boolean createDataStoreSchemas = false;
@@ -275,15 +276,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public List<PortAlias> getChangedPortAliases(Date from, Date to) {
-        // do nothing -- port aliases will always be handled by other methods
-        return Collections.emptyList();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public List<Process> getChangedProcesses(Date from, Date to) {
 
         initializeCache(from, to);
@@ -296,9 +288,14 @@ public class DataStageConnector extends DataEngineConnectorBase {
             if (detailedJob.getType().equals(DataStageJob.JobType.SEQUENCE)) {
                 seqList.add(detailedJob);
             } else {
-                processes.addAll(getProcessesForEachStage(detailedJob));
+                List<Process> stageLevelProcesses = getProcessesForEachStage(detailedJob);
+                for (Process stageLevel : stageLevelProcesses) {
+                    cacheHierarchyRelationshipsFromProcessDetails(stageLevel);
+                    processes.add(stageLevel);
+                }
                 Process jobProcess = getProcessForJob(detailedJob);
                 if (jobProcess != null) {
+                    cacheHierarchyRelationshipsFromProcessDetails(jobProcess);
                     processes.add(jobProcess);
                 }
             }
@@ -306,11 +303,48 @@ public class DataStageConnector extends DataEngineConnectorBase {
         // Then load sequences, re-using the PortAliases constructed for the jobs
         // TODO: this probably will NOT work for nested sequences?
         for (DataStageJob detailedSeq : seqList) {
-            processes.addAll(getProcessesForSequence(detailedSeq));
+            List<Process> sequencedJobs = getProcessesForSequence(detailedSeq);
+            for (Process sequenced : sequencedJobs) {
+                cacheHierarchyRelationshipsFromProcessDetails(sequenced);
+                processes.add(sequenced);
+            }
         }
 
         return processes;
 
+    }
+
+    private void cacheHierarchyRelationshipsFromProcessDetails(Process process) {
+        List<ParentProcess> parents = process.getParentProcesses();
+        if (parents != null) {
+            // Store these in-memory to pass along to the getChangedProcessHierarchies() method
+            for (ParentProcess parent : parents) {
+                ProcessHierarchy hierarchy = new ProcessHierarchy();
+                hierarchy.setChildProcess(process.getQualifiedName());
+                hierarchy.setParentProcess(parent.getQualifiedName());
+                hierarchy.setProcessContainmentType(parent.getProcessContainmentType());
+                processHierarchies.add(hierarchy);
+            }
+            process.setParentProcesses(null);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<PortAlias> getChangedPortAliases(Date from, Date to) {
+        // do nothing -- port aliases will always be handled by other methods
+        return Collections.emptyList();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<ProcessHierarchy> getChangedProcessHierarchies(Date from, Date to) {
+        // Output list of changed process hierarchies from the cached information
+        return processHierarchies;
     }
 
     /**
@@ -334,6 +368,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
             // Initialize the cache, if it is empty, or reset it if it differs from the dates and times we've been given
             dataStageCache = forComparison;
             dataStageCache.initialize(igcRestClient);
+            processHierarchies = new ArrayList<>();
         }
     }
 
