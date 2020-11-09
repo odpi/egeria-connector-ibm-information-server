@@ -424,15 +424,12 @@ public class IGCRepositoryHelper {
             // If there are any properties to match, add the matching / filtering criteria
             String qualifiedNameRegex = null;
             InstanceMapping.SearchFilter filter;
+            IGCRepositoryHelper.addTypeSpecificConditions(mapping,
+                    matchProperties == null ? null : matchProperties.getMatchCriteria(),
+                    matchProperties,
+                    igcSearchConditionSet);
             if (matchProperties != null) {
-                MatchCriteria outerMatchCriteria = matchProperties.getMatchCriteria();
-                IGCRepositoryHelper.addTypeSpecificConditions(mapping,
-                        outerMatchCriteria,
-                        matchProperties,
-                        igcSearchConditionSet);
-
                 filter = mapping.getAllNoneOrSome(igcomrsRepositoryConnector, matchProperties);
-
                 if (filter.equals(InstanceMapping.SearchFilter.NONE)) {
                     igcSearchConditionSet.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
                 } else if (filter.equals(InstanceMapping.SearchFilter.SOME)) {
@@ -464,6 +461,9 @@ public class IGCRepositoryHelper {
 
                 if (igcSearchSorting != null) {
                     igcSearch.addSortingCriteria(igcSearchSorting);
+                } else {
+                    // Add a default sorting (by RID) to ensure consistent paging
+                    igcSearch.addSortingCriteria(IGCRepositoryHelper.sortFromNonPropertySequencingOrder(SequencingOrder.GUID));
                 }
 
                 // If searching by qualifiedName, exact match (or starts with) we need to check results

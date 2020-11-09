@@ -1495,6 +1495,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
                     if (igcSearchSorting != null) {
                         igcSearch.addSortingCriteria(igcSearchSorting);
+                    } else {
+                        // Add a default sorting (by RID) to ensure consistent paging
+                        igcSearch.addSortingCriteria(IGCRepositoryHelper.sortFromNonPropertySequencingOrder(SequencingOrder.GUID));
                     }
 
                     try {
@@ -1764,6 +1767,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
                                 if (igcSearchSorting != null) {
                                     igcSearch.addSortingCriteria(igcSearchSorting);
+                                } else {
+                                    // Add a default sorting (by RID) to ensure consistent paging
+                                    igcSearch.addSortingCriteria(IGCRepositoryHelper.sortFromNonPropertySequencingOrder(SequencingOrder.GUID));
                                 }
 
                                 // Add properties for this IGC asset type to the search, since ultimately we will
