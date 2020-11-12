@@ -508,6 +508,7 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param operator the comparison operator to use
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
+     * @throws RepositoryErrorException on any other error
      */
     public void addComplexPropertySearchCriteria(OMRSRepositoryHelper repositoryHelper,
                                                  String repositoryName,
@@ -516,7 +517,7 @@ public abstract class EntityMapping extends InstanceMapping {
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
                                                  PropertyComparisonOperator operator,
-                                                 InstancePropertyValue value) throws FunctionNotSupportedException {
+                                                 InstancePropertyValue value) throws FunctionNotSupportedException, RepositoryErrorException {
         // Nothing to do -- no complex properties by default
     }
 

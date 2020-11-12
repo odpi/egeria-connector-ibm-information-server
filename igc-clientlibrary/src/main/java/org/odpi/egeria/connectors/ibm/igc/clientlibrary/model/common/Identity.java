@@ -5,12 +5,15 @@ package org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCIOException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A representation of the unique characteristics of a particular asset, without relying on a unique ID string.
@@ -24,6 +27,7 @@ public class Identity {
     private static final String SEPARATOR_FOR_TYPE_AND_NAME = "=";
     public static final String TYPE_PREFIX = "(";
     private static final String TYPE_POSTFIX = ")";
+    private static final int MAX_QN_LENGTH = 16384;
 
     public enum StringType { EXACT, STARTS_WITH, ENDS_WITH, CONTAINS }
 
@@ -359,9 +363,12 @@ public class Identity {
      * @param igcRestClient connectivity to an IGC environment
      * @param stringType the type of string from which to construct the identity
      * @return Identity
+     * @throws IGCParsingException if there is any issue parsing the identity string
      * @see #toString()
      */
-    public static Identity getFromString(String identity, IGCRestClient igcRestClient, StringType stringType) {
+    public static Identity getFromString(String identity,
+                                         IGCRestClient igcRestClient,
+                                         StringType stringType) throws IGCParsingException {
         return getFromString(identity, igcRestClient, stringType, true);
     }
 
@@ -375,9 +382,13 @@ public class Identity {
      * @param warnOnNotFound indicates whether to log a warning (true) or not (false) in case the type inferred from
      *                       the identity cannot be found
      * @return Identity
+     * @throws IGCParsingException if there is any issue parsing the identity string
      * @see #toString()
      */
-    public static Identity getFromString(String identity, IGCRestClient igcRestClient, StringType stringType, boolean warnOnNotFound) {
+    public static Identity getFromString(String identity,
+                                         IGCRestClient igcRestClient,
+                                         StringType stringType,
+                                         boolean warnOnNotFound) throws IGCParsingException {
 
         List<Reference> context = new ArrayList<>();
 
@@ -508,14 +519,16 @@ public class Identity {
         }
     }
 
-    private static List<String> getComponentsOfIdentityString(String identity) {
+    private static List<String> getComponentsOfIdentityString(String identity) throws IGCParsingException {
         if (identity.contains(SEPARATOR_FOR_COMPONENTS)) {
-            return Arrays.asList(identity.split(SEPARATOR_FOR_COMPONENTS));
+            if (identity.length() < MAX_QN_LENGTH) {
+                return Arrays.asList(identity.split(SEPARATOR_FOR_COMPONENTS));
+            } else {
+                throw new IGCParsingException("Identity string exceeds maximum allowed length, cannot parse it.", identity);
+            }
         } else if (identity.contains(SEPARATOR_FOR_TYPE_AND_NAME)
                 || (identity.contains(TYPE_PREFIX) && identity.contains(TYPE_POSTFIX))) {
-            List<String> list = new ArrayList<>();
-            list.add(identity);
-            return list;
+            return Collections.singletonList(identity);
         } else {
             return Collections.emptyList();
         }

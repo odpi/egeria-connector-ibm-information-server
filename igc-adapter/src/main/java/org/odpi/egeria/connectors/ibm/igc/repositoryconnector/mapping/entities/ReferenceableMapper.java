@@ -7,6 +7,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -248,6 +249,7 @@ public class ReferenceableMapper extends EntityMapping {
      * @param operator the comparison operator to use
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is used for the search that is not supported
+     * @throws RepositoryErrorException on any other error
      */
     @Override
     public void addComplexPropertySearchCriteria(OMRSRepositoryHelper repositoryHelper,
@@ -257,7 +259,7 @@ public class ReferenceableMapper extends EntityMapping {
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
                                                  PropertyComparisonOperator operator,
-                                                 InstancePropertyValue value) throws FunctionNotSupportedException {
+                                                 InstancePropertyValue value) throws FunctionNotSupportedException, RepositoryErrorException {
 
         final String methodName = "addComplexPropertySearchCriteria";
 
@@ -290,7 +292,12 @@ public class ReferenceableMapper extends EntityMapping {
             unqualifiedName = IGCRepositoryHelper.getSearchableQualifiedName(unqualifiedName);
             log.debug("Looking up identity: {}", unqualifiedName);
 
-            Identity identity = Identity.getFromString(unqualifiedName, igcRestClient, stringType);
+            Identity identity = null;
+            try {
+                identity = Identity.getFromString(unqualifiedName, igcRestClient, stringType);
+            } catch (IGCParsingException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.INVALID_QUALIFIED_NAME, methodName, null, unqualifiedName);
+            }
             boolean skip = false;
 
             if (stringType.equals(Identity.StringType.STARTS_WITH)) {

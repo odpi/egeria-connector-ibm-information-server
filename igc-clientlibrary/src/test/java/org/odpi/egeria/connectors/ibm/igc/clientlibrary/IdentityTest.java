@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants;
@@ -67,114 +68,134 @@ public class IdentityTest {
     @Test
     public void testFromStringFull() {
 
-        Identity full = Identity.getFromString(FULL_IDENTITY_STRING, igcRestClient, Identity.StringType.EXACT);
-        assertNotNull(full);
-        assertFalse(full.isPartial());
-        assertEquals(full.getAssetType(), "database_column");
-        assertEquals(full.getName(), "COLUMN");
-        assertEquals(full.toString(), FULL_IDENTITY_STRING);
+        try {
+            Identity full = Identity.getFromString(FULL_IDENTITY_STRING, igcRestClient, Identity.StringType.EXACT);
+            assertNotNull(full);
+            assertFalse(full.isPartial());
+            assertEquals(full.getAssetType(), "database_column");
+            assertEquals(full.getName(), "COLUMN");
+            assertEquals(full.toString(), FULL_IDENTITY_STRING);
 
-        Identity parent = full.getParentIdentity();
-        assertNotNull(parent);
-        assertFalse(parent.isPartial());
-        assertEquals(parent.getAssetType(), "database_table");
-        assertEquals(parent.getName(), "TABLE");
+            Identity parent = full.getParentIdentity();
+            assertNotNull(parent);
+            assertFalse(parent.isPartial());
+            assertEquals(parent.getAssetType(), "database_table");
+            assertEquals(parent.getName(), "TABLE");
 
-        Identity ultimateFromBottom = full.getUltimateParentIdentity();
-        assertNotNull(ultimateFromBottom);
-        assertFalse(ultimateFromBottom.isPartial());
-        assertEquals(ultimateFromBottom.getAssetType(), "host");
-        assertEquals(ultimateFromBottom.getName(), "INFOSVR");
-        Identity ultimateFromParent = parent.getUltimateParentIdentity();
-        assertEquals(ultimateFromBottom, ultimateFromParent);
+            Identity ultimateFromBottom = full.getUltimateParentIdentity();
+            assertNotNull(ultimateFromBottom);
+            assertFalse(ultimateFromBottom.isPartial());
+            assertEquals(ultimateFromBottom.getAssetType(), "host");
+            assertEquals(ultimateFromBottom.getName(), "INFOSVR");
+            Identity ultimateFromParent = parent.getUltimateParentIdentity();
+            assertEquals(ultimateFromBottom, ultimateFromParent);
 
-        assertEquals(ultimateFromBottom.getUltimateParentIdentity(), ultimateFromBottom);
-        assertNull(ultimateFromBottom.getParentIdentity());
-        assertNull(ultimateFromBottom.getRid());
+            assertEquals(ultimateFromBottom.getUltimateParentIdentity(), ultimateFromBottom);
+            assertNull(ultimateFromBottom.getParentIdentity());
+            assertNull(ultimateFromBottom.getRid());
+        } catch (IGCParsingException e) {
+            assertNull(e);
+        }
 
     }
 
     @Test
     public void testFromStringPart() {
 
-        Identity part = Identity.getFromString(PART_IDENTITY_STRING, igcRestClient, Identity.StringType.CONTAINS);
-        assertNotNull(part);
-        assertTrue(part.isPartial());
-        assertEquals(part.getAssetType(), "database");
-        assertEquals(part.getName(), "SOME");
+        try {
+            Identity part = Identity.getFromString(PART_IDENTITY_STRING, igcRestClient, Identity.StringType.CONTAINS);
+            assertNotNull(part);
+            assertTrue(part.isPartial());
+            assertEquals(part.getAssetType(), "database");
+            assertEquals(part.getName(), "SOME");
 
-        part = Identity.getFromString(PART_IDENTITY_STRING2, igcRestClient, Identity.StringType.ENDS_WITH);
-        assertNotNull(part);
-        assertTrue(part.isPartial());
-        assertEquals(part.getAssetType(), "database_column");
-        assertEquals(part.getName(), "EMAIL");
-        assertEquals(part.toString(), "(database_schema)=DB2INST1::(database_table)=CONTACTEMAIL::(database_column)=EMAIL");
+            part = Identity.getFromString(PART_IDENTITY_STRING2, igcRestClient, Identity.StringType.ENDS_WITH);
+            assertNotNull(part);
+            assertTrue(part.isPartial());
+            assertEquals(part.getAssetType(), "database_column");
+            assertEquals(part.getName(), "EMAIL");
+            assertEquals(part.toString(), "(database_schema)=DB2INST1::(database_table)=CONTACTEMAIL::(database_column)=EMAIL");
+        } catch (IGCParsingException e) {
+            assertNull(e);
+        }
 
     }
 
     @Test
     public void testFromStringEdge() {
 
-        Identity edge = Identity.getFromString(HOST_PART_IDT_STRING, igcRestClient, Identity.StringType.CONTAINS);
-        assertNull(edge);
+        try {
+            Identity edge = Identity.getFromString(HOST_PART_IDT_STRING, igcRestClient, Identity.StringType.CONTAINS);
+            assertNull(edge);
 
-        edge = Identity.getFromString(NON_IDENTITY, igcRestClient, Identity.StringType.ENDS_WITH);
-        assertNull(edge);
+            edge = Identity.getFromString(NON_IDENTITY, igcRestClient, Identity.StringType.ENDS_WITH);
+            assertNull(edge);
 
-        edge = Identity.getFromString(TYPE_ONLY, igcRestClient, Identity.StringType.STARTS_WITH);
-        assertNotNull(edge);
-        assertEquals(edge.getAssetType(), "category");
+            edge = Identity.getFromString(TYPE_ONLY, igcRestClient, Identity.StringType.STARTS_WITH);
+            assertNotNull(edge);
+            assertEquals(edge.getAssetType(), "category");
+        } catch (IGCParsingException e) {
+            assertNull(e);
+        }
 
     }
 
     @Test
     public void testSearchCriteriaBuild() {
 
-        Identity full = Identity.getFromString(FULL_IDENTITY_STRING, igcRestClient, Identity.StringType.EXACT);
-        IGCSearchConditionSet conditions = full.getSearchCriteria();
-        assertNotNull(conditions);
-        assertEquals(conditions.size(), 5);
+        try {
+            Identity full = Identity.getFromString(FULL_IDENTITY_STRING, igcRestClient, Identity.StringType.EXACT);
+            IGCSearchConditionSet conditions = full.getSearchCriteria();
+            assertNotNull(conditions);
+            assertEquals(conditions.size(), 5);
 
-        Identity fileRecord = Identity.getFromString(DATA_FILE_EXAMPLE, igcRestClient, Identity.StringType.EXACT);
-        conditions = fileRecord.getSearchCriteria();
-        assertNotNull(conditions);
-        assertEquals(conditions.size(), 4);
+            Identity fileRecord = Identity.getFromString(DATA_FILE_EXAMPLE, igcRestClient, Identity.StringType.EXACT);
+            conditions = fileRecord.getSearchCriteria();
+            assertNotNull(conditions);
+            assertEquals(conditions.size(), 4);
 
-        Identity user = Identity.getFromString(USER_EXAMPLE, igcRestClient, Identity.StringType.EXACT);
-        conditions = user.getSearchCriteria();
-        assertNotNull(conditions);
-        assertEquals(conditions.size(), 1);
+            Identity user = Identity.getFromString(USER_EXAMPLE, igcRestClient, Identity.StringType.EXACT);
+            conditions = user.getSearchCriteria();
+            assertNotNull(conditions);
+            assertEquals(conditions.size(), 1);
+        } catch (IGCParsingException e) {
+            assertNull(e);
+        }
 
     }
 
     @Test
     public void testSearchCriteriaEdges() {
 
-        Identity part = Identity.getFromString(USER_EXAMPLE_PART1, igcRestClient, Identity.StringType.STARTS_WITH);
-        assertNotNull(part);
-        IGCSearchConditionSet conditions = part.getSearchCriteria();
-        assertNotNull(conditions);
-        assertEquals(conditions.size(), 1);
-        assertTrue(conditions.getConditionSetObject().toString().contains("courtesy_title"));
+        try {
+            Identity part = Identity.getFromString(USER_EXAMPLE_PART1, igcRestClient, Identity.StringType.STARTS_WITH);
+            assertNotNull(part);
+            IGCSearchConditionSet conditions = part.getSearchCriteria();
+            assertNotNull(conditions);
+            assertEquals(conditions.size(), 1);
+            assertTrue(conditions.getConditionSetObject().toString().contains("courtesy_title"));
 
-        part = Identity.getFromString(USER_EXAMPLE_PART2, igcRestClient, Identity.StringType.STARTS_WITH);
-        assertNotNull(part);
-        conditions = part.getSearchCriteria();
-        assertNotNull(conditions);
-        assertEquals(conditions.size(), 1);
-        assertTrue(conditions.getConditionSetObject().toString().contains("surname"));
+            part = Identity.getFromString(USER_EXAMPLE_PART2, igcRestClient, Identity.StringType.STARTS_WITH);
+            assertNotNull(part);
+            conditions = part.getSearchCriteria();
+            assertNotNull(conditions);
+            assertEquals(conditions.size(), 1);
+            assertTrue(conditions.getConditionSetObject().toString().contains("surname"));
 
-        Identity full = Identity.getFromString(DATA_FILE_FOLDER_EXAMPLE, igcRestClient, Identity.StringType.EXACT);
-        assertNotNull(full);
-        conditions = full.getSearchCriteria();
-        assertNotNull(conditions);
-        assertEquals(conditions.size(), 2);
+            Identity full = Identity.getFromString(DATA_FILE_FOLDER_EXAMPLE, igcRestClient, Identity.StringType.EXACT);
+            assertNotNull(full);
+            conditions = full.getSearchCriteria();
+            assertNotNull(conditions);
+            assertEquals(conditions.size(), 2);
 
-        full = Identity.getFromString(TERM_EXAMPLE, igcRestClient, Identity.StringType.EXACT);
-        assertNotNull(full);
-        conditions = full.getSearchCriteria();
-        assertNotNull(conditions);
-        assertEquals(conditions.size(), 2);
+            full = Identity.getFromString(TERM_EXAMPLE, igcRestClient, Identity.StringType.EXACT);
+            assertNotNull(full);
+            conditions = full.getSearchCriteria();
+            assertNotNull(conditions);
+            assertEquals(conditions.size(), 2);
+        } catch (IGCParsingException e) {
+            assertNull(e);
+        }
 
     }
 
