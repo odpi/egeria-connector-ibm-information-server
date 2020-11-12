@@ -18,4 +18,14 @@ public class IGCParsingException extends IGCException {
         super(errorMessage, details, caughtError);
     }
 
+    /**
+     * Constructor used for creating an IGCParsingException with some additional details, when not caused by some
+     * other underlying error
+     * @param errorMessage description of error
+     * @param details details about the description of the error
+     */
+    public IGCParsingException(String errorMessage, String details) {
+        super(errorMessage, details);
+    }
+
 }

@@ -8,6 +8,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -963,7 +964,12 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     if (repositoryHelper.isEndsWithRegex(qualifiedNameToFind)) {
                         stringType = Identity.StringType.ENDS_WITH;
                     }
-                    Identity identity = Identity.getFromString(qualifiedName, igcRestClient, stringType);
+                    Identity identity = null;
+                    try {
+                        identity = Identity.getFromString(qualifiedName, igcRestClient, stringType);
+                    } catch (IGCParsingException e) {
+                        raiseRepositoryErrorException(IGCOMRSErrorCode.INVALID_QUALIFIED_NAME, methodName, unqualifiedName);
+                    }
                     if (identity != null && !identity.isPartial()) {
                         // Resolve the asset type directly from the identity, if we can (only possible if it is not
                         // partial, because if it is partial it may actually need a prefix which is not there)

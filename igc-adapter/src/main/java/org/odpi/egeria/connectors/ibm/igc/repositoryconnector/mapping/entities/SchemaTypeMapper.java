@@ -111,6 +111,7 @@ public class SchemaTypeMapper extends SchemaElementMapper {
      * @param operator the comparison operator to use
      * @param value the value for which to search
      * @throws FunctionNotSupportedException when a regular expression is used for the search which is not supported
+     * @throws RepositoryErrorException on any other error
      */
     @Override
     public void addComplexPropertySearchCriteria(OMRSRepositoryHelper repositoryHelper,
@@ -120,7 +121,7 @@ public class SchemaTypeMapper extends SchemaElementMapper {
                                                  String igcPropertyName,
                                                  String omrsPropertyName,
                                                  PropertyComparisonOperator operator,
-                                                 InstancePropertyValue value) throws FunctionNotSupportedException {
+                                                 InstancePropertyValue value) throws FunctionNotSupportedException, RepositoryErrorException {
 
         super.addComplexPropertySearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, igcPropertyName, omrsPropertyName, operator, value);
 

@@ -501,10 +501,16 @@ public abstract class InstanceMapping {
      * @throws RepositoryErrorException always
      */
     protected static void raiseRepositoryErrorException(IGCOMRSErrorCode errorCode, String methodName, Exception cause, String ...params) throws RepositoryErrorException {
-        throw new RepositoryErrorException(errorCode.getMessageDefinition(params),
-                InstanceMapping.class.getName(),
-                methodName,
-                cause);
+        if (cause == null) {
+            throw new RepositoryErrorException(errorCode.getMessageDefinition(params),
+                    InstanceMapping.class.getName(),
+                    methodName);
+        } else {
+            throw new RepositoryErrorException(errorCode.getMessageDefinition(params),
+                    InstanceMapping.class.getName(),
+                    methodName,
+                    cause);
+        }
     }
 
 }
