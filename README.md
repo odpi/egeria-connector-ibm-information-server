@@ -192,7 +192,8 @@ For example payloads and endpoints, see the [Postman samples](samples).
         "userId": "{{igc_user}}",
         "clearPassword": "{{igc_password}}",
         "configurationProperties": {
-            "defaultZones": [ "default" ]
+            "defaultZones": [ "default" ],
+            "ignoreUnmappedInstances": true
         }
     }
     ```
@@ -206,8 +207,13 @@ For example payloads and endpoints, see the [Postman samples](samples).
     To operate, the IGC user credentials must have (at a minimum) the following roles within Information Server:
     `Suite User` and `Information Governance Catalog User`. (These are both read-only, non-administrative roles.)
 
-    You can optionally also provide a list of zone names that will be used as default zones for all Assets retrieved
-    from IGC through the proxy (in the example above this is a single zone called `default`).
+    You can optionally also provide:
+
+    - a list of zone names that will be used as default zones for all Assets retrieved from IGC through the proxy (in
+        the example above this is a single zone called `default`).
+    - override the default behavior where if an unmapped instance in IGC is retrieved a RepositoryErrorException will
+        be thrown, to instead simply log a warning and ignore the unmapped instance (not return it or throw an
+        exception) by setting `ignoreUmappedInstances` to `true`.
 
     Note that you also need to provide the `connectorProvider` parameter, set to the name of the IGC
     connectorProvider class (value as given above).

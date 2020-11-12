@@ -20,10 +20,11 @@ import java.util.List;
  * <br><br>
  * The permitted configuration options include:
  * <ul>
- *     <li>enableEventMapper - a boolean indicating whether to enable the (experimental) event mapper (disabled by
- *          default).</li>
  *     <li>defaultZones - a list of strings defining the default zones that should be applied to all assets homed
  *          in this repository proxy's metadata collection.</li>
+ *     <li>ignoreUnmappedInstances - a boolean indicating whether to ignore instances that are not mapped (will log
+ *          a warning, but not throw any exception when set to 'true') or to throw an exception if an unmapped instance
+ *          is retrieved (when set to 'false').</li>
  * </ul>
  */
 public class IGCOMRSRepositoryConnectorProvider extends OMRSRepositoryConnectorProviderBase {
@@ -33,6 +34,7 @@ public class IGCOMRSRepositoryConnectorProvider extends OMRSRepositoryConnectorP
     static final String CONNECTOR_TYPE_DESC = "OMRS IGC Repository Connector that processes events from the IBM InfoSphere Information Governance Catalog repository store.";
 
     public static final String DEFAULT_ZONES = "defaultZones";
+    public static final String IGNORE_UNMAPPED_INSTANCES = "ignoreUnmappedInstances";
 
     /**
      * Constructor used to initialize the ConnectorProviderBase with the Java class name of the specific
@@ -53,6 +55,7 @@ public class IGCOMRSRepositoryConnectorProvider extends OMRSRepositoryConnectorP
 
         List<String> recognizedConfigurationProperties = new ArrayList<>();
         recognizedConfigurationProperties.add(DEFAULT_ZONES);
+        recognizedConfigurationProperties.add(IGNORE_UNMAPPED_INSTANCES);
         connectorType.setRecognizedConfigurationProperties(recognizedConfigurationProperties);
 
         super.connectorTypeBean = connectorType;

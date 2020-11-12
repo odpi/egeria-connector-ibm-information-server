@@ -21,7 +21,6 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.InstanceMa
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCRelationshipGuid;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
@@ -29,9 +28,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.RelationshipDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDefAttribute;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
-import org.odpi.openmetadata.repositoryservices.ffdc.OMRSErrorCode;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
-import org.odpi.openmetadata.repositoryservices.ffdc.exception.OMRSRuntimeException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.TypeErrorException;
 import org.slf4j.Logger;
@@ -2016,7 +2013,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
             relationship.setType(instanceType);
         } catch (TypeErrorException e) {
             log.error("Unable to construct and set InstanceType -- skipping relationship: {}", omrsRelationshipName);
-            raiseRepositoryErrorException(OMRSErrorCode.INVALID_INSTANCE, methodName, methodName, omrsRelationshipDef.getName());
+            raiseRepositoryErrorException(IGCOMRSErrorCode.INVALID_INSTANCE, methodName, methodName, omrsRelationshipDef.getName());
         }
 
         IGCRelationshipGuid igcRelationshipGuid = RelationshipMapping.getRelationshipGUID(
@@ -2079,7 +2076,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 log.error("Unable to determine both ends of the relationship {} from {} to {}", omrsRelationshipName, proxyOne.getId(), proxyTwo.getId());
                 String omrsEndOneProperty = omrsRelationshipDef.getEndDef1().getAttributeName();
                 String omrsEndTwoProperty = omrsRelationshipDef.getEndDef2().getAttributeName();
-                raiseRepositoryErrorException(OMRSErrorCode.INVALID_RELATIONSHIP_ENDS, methodName, methodName, repositoryName, omrsRelationshipName, omrsEndOneProperty, omrsEndTwoProperty);
+                raiseRepositoryErrorException(IGCOMRSErrorCode.INVALID_RELATIONSHIP_ENDS, methodName, methodName, repositoryName, omrsRelationshipName, omrsEndOneProperty, omrsEndTwoProperty);
             }
 
             // Set the the version of the relationship to the epoch time of whichever end of the relationship has
@@ -2101,39 +2098,45 @@ public abstract class RelationshipMapping extends InstanceMapping {
             if (ep1 != null && ep2 != null) {
                 relationship.setEntityOneProxy(ep1);
                 relationship.setEntityTwoProxy(ep2);
-            }
 
-            // Set any fixed (literal) relationship property values
-            Map<String, TypeDefAttribute> omrsAttributeMap = igcomrsMetadataCollection.getTypeDefAttributesForType(omrsRelationshipName);
-            InstanceProperties relationshipProperties = new InstanceProperties();
-            for (String omrsPropertyName : relationshipMapping.getLiteralPropertyMappings()) {
-                if (omrsAttributeMap.containsKey(omrsPropertyName)) {
-                    Object value = relationshipMapping.getOmrsPropertyLiteralValue(omrsPropertyName);
-                    if (value != null) {
-                        TypeDefAttribute typeDefAttribute = omrsAttributeMap.get(omrsPropertyName);
-                        AttributeTypeDefCategory attributeTypeDefCategory = typeDefAttribute.getAttributeType().getCategory();
-                        if (attributeTypeDefCategory == AttributeTypeDefCategory.PRIMITIVE) {
-                            relationshipProperties = AttributeMapping.addPrimitivePropertyToInstance(
-                                    omrsRepositoryHelper,
-                                    repositoryName,
-                                    relationshipProperties,
-                                    typeDefAttribute,
-                                    value,
-                                    methodName
-                            );
-                        } else {
-                            relationshipProperties.setProperty(omrsPropertyName, (InstancePropertyValue) value);
+                // Set any fixed (literal) relationship property values
+                Map<String, TypeDefAttribute> omrsAttributeMap = igcomrsMetadataCollection.getTypeDefAttributesForType(omrsRelationshipName);
+                InstanceProperties relationshipProperties = new InstanceProperties();
+                for (String omrsPropertyName : relationshipMapping.getLiteralPropertyMappings()) {
+                    if (omrsAttributeMap.containsKey(omrsPropertyName)) {
+                        Object value = relationshipMapping.getOmrsPropertyLiteralValue(omrsPropertyName);
+                        if (value != null) {
+                            TypeDefAttribute typeDefAttribute = omrsAttributeMap.get(omrsPropertyName);
+                            AttributeTypeDefCategory attributeTypeDefCategory = typeDefAttribute.getAttributeType().getCategory();
+                            if (attributeTypeDefCategory == AttributeTypeDefCategory.PRIMITIVE) {
+                                relationshipProperties = AttributeMapping.addPrimitivePropertyToInstance(
+                                        omrsRepositoryHelper,
+                                        repositoryName,
+                                        relationshipProperties,
+                                        typeDefAttribute,
+                                        value,
+                                        methodName
+                                );
+                            } else {
+                                relationshipProperties.setProperty(omrsPropertyName, (InstancePropertyValue) value);
+                            }
                         }
                     }
                 }
+                relationship.setProperties(relationshipProperties);
+            } else {
+                if (igcomrsRepositoryConnector.ignoreUnmappedInstances()) {
+                    log.warn("Unable to construct proxies for both ends of relationship -- skipping: {} between {} and {}", omrsRelationshipName, proxyOne.getType(), proxyTwo.getType());
+                } else {
+                    log.error("Unable to construct proxies for both ends of relationship -- skipping: {} between {} and {}", omrsRelationshipName, proxyOne.getType(), proxyTwo.getType());
+                    raiseRepositoryErrorException(IGCOMRSErrorCode.UNMAPPED_RELATIONSHIP_ENDS, methodName, omrsRelationshipName, proxyOne.getType(), proxyTwo.getType());
+                }
             }
-            relationship.setProperties(relationshipProperties);
-
         } else {
             log.error("Unable to construct relationship GUID -- skipping relationship: {}", omrsRelationshipName);
             String omrsEndOneProperty = omrsRelationshipDef.getEndDef1().getAttributeName();
             String omrsEndTwoProperty = omrsRelationshipDef.getEndDef2().getAttributeName();
-            raiseRepositoryErrorException(OMRSErrorCode.INVALID_RELATIONSHIP_ENDS, methodName, methodName, repositoryName, omrsRelationshipName, omrsEndOneProperty, omrsEndTwoProperty);
+            raiseRepositoryErrorException(IGCOMRSErrorCode.INVALID_RELATIONSHIP_ENDS, methodName, methodName, repositoryName, omrsRelationshipName, omrsEndOneProperty, omrsEndTwoProperty);
         }
 
         return relationship;
@@ -2147,7 +2150,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param params the parameters used for formatting the message for the exception
      * @throws RepositoryErrorException always
      */
-    private static void raiseRepositoryErrorException(OMRSErrorCode errorCode, String methodName, String ...params) throws RepositoryErrorException {
+    private static void raiseRepositoryErrorException(IGCOMRSErrorCode errorCode, String methodName, String ...params) throws RepositoryErrorException {
         throw new RepositoryErrorException(errorCode.getMessageDefinition(params),
                 RelationshipMapping.class.getName(),
                 methodName);
