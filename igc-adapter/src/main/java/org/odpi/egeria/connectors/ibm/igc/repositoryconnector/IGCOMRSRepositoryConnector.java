@@ -25,12 +25,14 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
     protected IGCVersionEnum igcVersion;
 
     protected List<String> defaultZones;
+    protected boolean ignoreUnmappedInstances;
 
     /**
      * Default constructor used by the OCF Connector Provider.
      */
     public IGCOMRSRepositoryConnector() {
         defaultZones = new ArrayList<>();
+        ignoreUnmappedInstances = false;
     }
 
     /**
@@ -114,6 +116,14 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
     public List<String> getDefaultZones() { return this.defaultZones; }
 
     /**
+     * Retrieve whether we should ignore unmapped instances (log a warning, but proceed: true) or fail with an
+     * exception if their retrieval is attempted (default: false).
+     *
+     * @return boolean
+     */
+    public boolean ignoreUnmappedInstances() { return this.ignoreUnmappedInstances; }
+
+    /**
      * Connect to the IBM Information Governance Catalog host.
      *
      * @param methodName the name of the method connecting to IGC
@@ -141,6 +151,10 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
                             this.defaultZones.add((String) zone);
                         }
                     }
+                }
+                Object ignore = proxyProperties.get(IGCOMRSRepositoryConnectorProvider.IGNORE_UNMAPPED_INSTANCES);
+                if (ignore instanceof Boolean) {
+                    this.ignoreUnmappedInstances = (Boolean) ignore;
                 }
             }
 
