@@ -253,6 +253,53 @@ class LineageMappingMapping extends BaseMapping {
     }
 
     /**
+     * Creates LineageMappings between stage variables and columns (should all be mappings that are internal to the
+     * stage).
+     * - {@code previous_stage_columns -> this stage variable }
+     * - {@code this stage variable -> next_stage_columns }
+     *
+     * @param cache used by this mapping
+     * @param stageVariables list of stage variables
+     * @param fullyQualifiedStageName the fully qualifiedName of the stage itself
+     */
+    LineageMappingMapping(DataStageCache cache, List<StageVariable> stageVariables, String fullyQualifiedStageName) {
+        super(cache);
+        final String methodName = "LineageMappingMapping";
+        lineageMappings = new HashSet<>();
+        // For each stage variable...
+        if (stageVariables != null) {
+            for (StageVariable varObj : stageVariables) {
+                try {
+                    String stageVarQN = getFullyQualifiedName((Reference)varObj);
+                    if (stageVarQN != null) {
+                        ItemList<DataItem> previousStageColumns = varObj.getPreviousStageColumns();
+                        List<DataItem> inputs = igcRestClient.getAllPages("previous_stage_columns", previousStageColumns);
+                        for (DataItem input : inputs) {
+                            LineageMapping inbound = getLineageMapping(getFullyQualifiedName(input), stageVarQN);
+                            lineageMappings.add(inbound);
+                        }
+                        ItemList<DataItem> nextStageColumns = varObj.getNextStageColumns();
+                        List<DataItem> outputs = igcRestClient.getAllPages("next_stage_columns", nextStageColumns);
+                        for (DataItem output : outputs) {
+                            LineageMapping outbound = getLineageMapping(stageVarQN, getFullyQualifiedName(output));
+                            lineageMappings.add(outbound);
+                        }
+                    } else {
+                        log.error("Unable to determine identity for stage variable -- not including: {}", varObj);
+                    }
+                } catch (IGCException e) {
+                    DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                            this.getClass().getName(),
+                            methodName,
+                            e);
+                }
+            }
+        } else {
+            log.warn("No fields were found for a data store for stage: {}", fullyQualifiedStageName);
+        }
+    }
+
+    /**
      * Retrieve the LineageMappings that were setup.
      *
      * @return {@code Set<LineageMapping>}
