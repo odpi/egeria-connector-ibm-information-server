@@ -10,6 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.StageVariable;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.openmetadata.accessservices.dataengine.model.PortImplementation;
 import org.odpi.openmetadata.accessservices.dataengine.model.PortType;
@@ -91,6 +92,28 @@ class PortImplementationMapping extends BaseMapping {
                         methodName,
                         e);
             }
+        }
+    }
+
+    /**
+     * Creates a PortImplementation for the provided stage variable information, for the given stage.
+     *
+     * @param cache used by this mapping
+     * @param stage the stage for which to create the PortImplementation
+     * @param stageVariables the stage variables to include in the PortImplementation
+     * @param fullyQualifiedStageName the qualified name of the stage to ensure the schema is unique
+     */
+    PortImplementationMapping(DataStageCache cache, Stage stage, List<StageVariable> stageVariables, String fullyQualifiedStageName) {
+        super(cache);
+        final String methodName = "PortImplementationMapping";
+        portImplementation = null;
+        if (stage != null) {
+            portImplementation = new PortImplementation();
+            portImplementation.setQualifiedName(fullyQualifiedStageName);
+            portImplementation.setDisplayName(stage.getName());
+            portImplementation.setPortType(PortType.OTHER);
+            SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, stage, stageVariables, fullyQualifiedStageName);
+            portImplementation.setSchemaType(schemaTypeMapping.getSchemaType());
         }
     }
 

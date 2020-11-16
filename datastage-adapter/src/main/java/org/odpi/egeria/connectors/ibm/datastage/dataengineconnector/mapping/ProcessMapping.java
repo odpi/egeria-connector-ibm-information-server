@@ -120,6 +120,8 @@ public class ProcessMapping extends BaseMapping {
                 addImplementationDetails(job, stage, allOutputLinks, allLinkRids, PortType.OUTPUT_PORT, portImplementations, lineageMappings);
                 log.debug("Adding output stores: {}", stage.getWritesToDesign());
                 addDataStoreDetails(job, stage, "writes_to_(design)", stage.getWritesToDesign(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
+                log.debug("Adding stage variables");
+                addStageVariableDetails(job, stage, portImplementations, lineageMappings);
                 process.setPortImplementations(new ArrayList<>(portImplementations));
                 process.setLineageMappings(new ArrayList<>(lineageMappings));
                 // Stages are owned by the job that contains them, so setup an owned parent process relationship to the
@@ -217,6 +219,36 @@ public class ProcessMapping extends BaseMapping {
                 LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, stage.getId(), linkRids, linkObjFull, stageQN, portType == PortType.INPUT_PORT);
                 lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
             }
+        } catch (IGCException e) {
+            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                    this.getClass().getName(),
+                    methodName,
+                    e);
+        }
+    }
+
+    /**
+     * Add stage variable details to the provided lists, for the provided stage.
+     *
+     * @param job the job within which the stage exists
+     * @param stage the stage for which to add stage variable details
+     * @param portImplementations the set of PortImplementations to append to with implementation details
+     * @param lineageMappings the set of LineageMappings to append to with lineage mapping details
+     */
+    private void addStageVariableDetails(DataStageJob job,
+                                         Stage stage,
+                                         Set<PortImplementation> portImplementations,
+                                         Set<LineageMapping> lineageMappings) {
+        final String methodName = "addStageVariableDetails";
+        try {
+            String stageQN = getFullyQualifiedName(stage);
+            List<StageVariable> stageVarsForStage = job.getStageVarsForStage(stage.getId());
+            log.debug("Adding implementation details for stage variables of stage: {}", stageQN);
+            PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, stage, stageVarsForStage, stageQN);
+            portImplementations.add(portImplementationMapping.getPortImplementation());
+            log.debug("Adding lineage mappings for stage variables of stage: {}", stageQN);
+            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, stageVarsForStage, stageQN);
+            lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
         } catch (IGCException e) {
             DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
                     this.getClass().getName(),

@@ -6,12 +6,13 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageCon
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataItem;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.StageVariable;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.interfaces.ColumnLevelLineage;
 import org.odpi.openmetadata.accessservices.dataengine.model.Attribute;
 import org.slf4j.Logger;
@@ -126,6 +127,41 @@ class AttributeMapping extends BaseMapping {
      */
     AttributeMapping(DataStageCache cache, List<Classificationenabledgroup> fields) {
         this(cache, fields, null);
+    }
+
+    /**
+     * Creates a set of Attributes for the provided stage variable information.
+     *
+     * @param cache used by this mapping
+     * @param stageVariables for which to create a set of attributes
+     * @param fullyQualifiedStageName (always empty)
+     */
+    AttributeMapping(DataStageCache cache, List<StageVariable> stageVariables, Object fullyQualifiedStageName) {
+        super(cache);
+        final String methodName = "AttributeMapping";
+        log.debug("Creating new AttributeMapping from stage variables...");
+        attributes = new ArrayList<>();
+        if (stageVariables != null && !stageVariables.isEmpty()) {
+            try {
+                for (StageVariable var : stageVariables) {
+                    String varQN = getFullyQualifiedName((Reference)var);
+                    if (varQN != null) {
+                        Attribute attribute = new Attribute();
+                        attribute.setQualifiedName(varQN);
+                        attribute.setDisplayName(var.getName());
+                        attribute.setDataType(var.getOdbcType());
+                        attributes.add(attribute);
+                    } else {
+                        log.error("Unable to determine identity for variable -- not including it: {}", var);
+                    }
+                }
+            } catch (IGCException e) {
+                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                        this.getClass().getName(),
+                        methodName,
+                        e);
+            }
+        }
     }
 
     /**

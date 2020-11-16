@@ -97,6 +97,7 @@ public class DataStageConstants {
         searchProperties.add("expression");
         searchProperties.add("previous_stage_columns");
         searchProperties.add("next_stage_columns");
+        searchProperties.add("stage");
         searchProperties.add(IGCRestConstants.MOD_CREATED_BY);
         searchProperties.add(IGCRestConstants.MOD_CREATED_ON);
         searchProperties.add(IGCRestConstants.MOD_MODIFIED_BY);

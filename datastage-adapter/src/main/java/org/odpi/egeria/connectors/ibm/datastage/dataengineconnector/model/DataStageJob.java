@@ -6,7 +6,9 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageCon
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConstants;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
@@ -30,13 +32,14 @@ public class DataStageJob {
     private IGCRestClient igcRestClient;
     private Dsjob job;
     private JobType type;
-    private Map<String, Stage> stageMap;
-    private Map<String, Link> linkMap;
-    private Map<String, StageColumn> columnMap;
-    private Map<String, StageVariable> varMap;
-    private Set<String> storesForJob;
-    private List<String> inputStageRIDs;
-    private List<String> outputStageRIDs;
+    private final Map<String, Stage> stageMap;
+    private final Map<String, Link> linkMap;
+    private final Map<String, StageColumn> columnMap;
+    private final Map<String, StageVariable> varMap;
+    private final Map<String, Set<String>> stageToVarsMap;
+    private final Set<String> storesForJob;
+    private final List<String> inputStageRIDs;
+    private final List<String> outputStageRIDs;
 
     public enum JobType {
         JOB, SEQUENCE
@@ -57,6 +60,7 @@ public class DataStageJob {
         this.linkMap = new TreeMap<>();
         this.columnMap = new TreeMap<>();
         this.varMap = new TreeMap<>();
+        this.stageToVarsMap = new TreeMap<>();
         this.storesForJob = new TreeSet<>();
         this.inputStageRIDs = new ArrayList<>();
         this.outputStageRIDs = new ArrayList<>();
@@ -208,6 +212,49 @@ public class DataStageJob {
     }
 
     /**
+     * Retrieve the complete list of stage variables for the provided stage based on its RID.
+     *
+     * @param rid the RID of the stage for which to retrieve all stage variables
+     * @return {@code List<StageVariable>}
+     */
+    public List<StageVariable> getStageVarsForStage(String rid) {
+        final String methodName = "getStageVarsForStage";
+        log.debug("Looking up cache stage variables for stage: {}", rid);
+        Set<String> stageVarRids = stageToVarsMap.getOrDefault(rid, null);
+        if (stageVarRids == null) {
+            log.debug("(cache miss) -- retrieving and caching stage variables: {}", rid);
+            try {
+                Reference thing = igcRestClient.getAssetById(rid);
+                if (thing instanceof Stage) {
+                    Stage stage = (Stage) thing;
+                    ItemList<StageVariable> vars = stage.getStageVariable();
+                    stageToVarsMap.put(rid, new TreeSet<>());
+                    buildStageVariableMaps(igcRestClient.getAllPages("stage_variable", vars));
+                    stageVarRids = stageToVarsMap.getOrDefault(rid, null);
+                } else {
+                    log.error("Unable to find stage with RID: {} -- found asset of type {} instead.", rid, thing == null ? "<null>" : thing.getType());
+                }
+            } catch (IGCException e) {
+                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                        this.getClass().getName(),
+                        methodName,
+                        e);
+            }
+        }
+        if (stageVarRids != null && !stageVarRids.isEmpty()) {
+            List<StageVariable> stageVariables = new ArrayList<>();
+            for (String stageVarRid : stageVarRids) {
+                StageVariable var = varMap.get(stageVarRid);
+                if (var != null) {
+                    stageVariables.add(var);
+                }
+            }
+            return stageVariables;
+        }
+        return Collections.emptyList();
+    }
+
+    /**
      * Retrieve a listing of the stages within this particular DataStage job.
      */
     private void getStageDetailsForJob() {
@@ -221,7 +268,11 @@ public class DataStageJob {
         igcSearch.addConditions(conditionSet);
         try {
             ItemList<Stage> stages = igcRestClient.search(igcSearch);
-            buildMap(stageMap, igcRestClient.getAllPages(null, stages));
+            List<Stage> allStages = igcRestClient.getAllPages(null, stages);
+            for (Stage stage : allStages) {
+                stageToVarsMap.put(stage.getId(), new TreeSet<>());
+            }
+            buildMap(stageMap, allStages);
         } catch (IGCException e) {
             DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
                     this.getClass().getName(),
@@ -267,12 +318,39 @@ public class DataStageJob {
         igcSearch.addConditions(conditionSet);
         try {
             ItemList<StageVariable> vars = igcRestClient.search(igcSearch);
-            buildMap(varMap, igcRestClient.getAllPages(null, vars));
+            buildStageVariableMaps(igcRestClient.getAllPages(null, vars));
         } catch (IGCException e) {
             DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
                     this.getClass().getName(),
                     methodName,
                     e);
+        }
+    }
+
+    /**
+     * Cache relationships for all of the stage variables provided.
+     * @param allStageVars the list of stage variables to cache
+     */
+    private void buildStageVariableMaps(List<StageVariable> allStageVars) throws IGCConnectivityException, IGCParsingException {
+        for (StageVariable stageVar : allStageVars) {
+            String rid = stageVar.getId();
+            // If the modification details are empty, likely we did not get this from a search but from paging
+            // within a stage itself (cache miss), and therefore must retrieve the details of each variable one-by-one
+            // as well
+            if (stageVar.getModifiedBy() == null) {
+                log.debug("...... retrieving stage variable by RID: {}", rid);
+                stageVar = igcRestClient.getAssetWithSubsetOfProperties(rid, "stage_variable", DataStageConstants.getStageVariableSearchProperties());
+            }
+            log.debug("...... caching RID: {}", rid);
+            varMap.put(rid, stageVar);
+            String stageRid = stageVar.getStage().getId();
+            Set<String> stageVars = stageToVarsMap.getOrDefault(stageRid, null);
+            if (stageVars != null) {
+                stageVars.add(rid);
+                stageToVarsMap.put(stageRid, stageVars);
+            } else {
+                log.error("Stage variables were null for stage RID: {}", stageRid);
+            }
         }
     }
 

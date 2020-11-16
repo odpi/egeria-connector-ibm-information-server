@@ -8,11 +8,9 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataSt
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.interfaces.ColumnLevelLineage;
 import org.odpi.openmetadata.accessservices.dataengine.model.SchemaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,6 +121,36 @@ public class SchemaTypeMapping extends BaseMapping {
                 }
             } else {
                 log.error("Unable to determine identity of store: {}", storeIdentity);
+            }
+        }
+    }
+
+    /**
+     * Creates a SchemaType for the provided list of stage variables, for the provided stage.
+     *
+     * @param cache used by this mapping
+     * @param stage the stage for which to create the SchemaType
+     * @param stageVariables the stage variables to include as attributes in the SchemaType
+     * @param fullyQualifiedStageName the fully-qualified name of the stage
+     */
+    SchemaTypeMapping(DataStageCache cache, Stage stage, List<StageVariable> stageVariables, String fullyQualifiedStageName) {
+        super(cache);
+        final String methodName = "SchemaTypeMapping";
+        schemaType = null;
+        if (stage != null) {
+            schemaType = new SchemaType();
+            log.debug("Constructing SchemaType for stage variables of: {}", fullyQualifiedStageName);
+            schemaType.setQualifiedName(fullyQualifiedStageName);
+            schemaType.setDisplayName(stage.getName());
+            try {
+                schemaType.setAuthor((String) igcRestClient.getPropertyByName(stage, "modified_by"));
+                AttributeMapping attributeMapping = new AttributeMapping(cache, stageVariables, null);
+                schemaType.setAttributeList(attributeMapping.getAttributes());
+            } catch (IGCException e) {
+                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                        this.getClass().getName(),
+                        methodName,
+                        e);
             }
         }
     }
