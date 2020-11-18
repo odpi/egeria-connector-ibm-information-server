@@ -35,7 +35,7 @@ import java.util.*;
  * Defines the default mapping to an OMRS entity (the OMRS "Referenceable" entity), along with the base methods
  * for all other entity mappings.
  */
-public class ReferenceableMapper extends EntityMapping {
+public class ReferenceableMapper extends OpenMetadataRootMapper {
 
     private static final Logger log = LoggerFactory.getLogger(ReferenceableMapper.class);
 
