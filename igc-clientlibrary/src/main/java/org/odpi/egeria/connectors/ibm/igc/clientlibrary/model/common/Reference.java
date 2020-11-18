@@ -544,6 +544,16 @@ public class Reference extends ObjectPrinter {
     }
 
     /**
+     * Indicates whether this item is an embedded asset (true) or not (false).
+     *
+     * @return boolean
+     */
+    @JsonIgnore
+    public boolean isEmbeddedAsset() {
+        return IGCRestClient.isEmbeddedAssetRid(_id);
+    }
+
+    /**
      * Retrieves the semantic identity of the asset.
      *
      * @param igcrest a REST API connection to use in confirming the identity of the asset

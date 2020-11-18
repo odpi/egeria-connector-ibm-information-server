@@ -12,7 +12,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataItem;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.StageVariable;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.interfaces.ColumnLevelLineage;
 import org.odpi.openmetadata.accessservices.dataengine.model.Attribute;
 import org.slf4j.Logger;
@@ -133,10 +132,11 @@ class AttributeMapping extends BaseMapping {
      * Creates a set of Attributes for the provided stage variable information.
      *
      * @param cache used by this mapping
+     * @param job the job for which to create the Attributes
      * @param stageVariables for which to create a set of attributes
      * @param fullyQualifiedStageName (always empty)
      */
-    AttributeMapping(DataStageCache cache, List<StageVariable> stageVariables, Object fullyQualifiedStageName) {
+    AttributeMapping(DataStageCache cache, DataStageJob job, List<StageVariable> stageVariables, String fullyQualifiedStageName) {
         super(cache);
         final String methodName = "AttributeMapping";
         log.debug("Creating new AttributeMapping from stage variables...");
@@ -144,7 +144,8 @@ class AttributeMapping extends BaseMapping {
         if (stageVariables != null && !stageVariables.isEmpty()) {
             try {
                 for (StageVariable var : stageVariables) {
-                    String varQN = getFullyQualifiedName((Reference)var);
+                    ColumnLevelLineage stageVar = job.getColumnLevelLineageByRid(var.getId());
+                    String varQN = getFullyQualifiedName(stageVar, fullyQualifiedStageName);
                     if (varQN != null) {
                         Attribute attribute = new Attribute();
                         attribute.setQualifiedName(varQN);

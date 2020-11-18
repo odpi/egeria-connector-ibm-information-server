@@ -129,11 +129,12 @@ public class SchemaTypeMapping extends BaseMapping {
      * Creates a SchemaType for the provided list of stage variables, for the provided stage.
      *
      * @param cache used by this mapping
+     * @param job the job for which to create the Attributes
      * @param stage the stage for which to create the SchemaType
      * @param stageVariables the stage variables to include as attributes in the SchemaType
      * @param fullyQualifiedStageName the fully-qualified name of the stage
      */
-    SchemaTypeMapping(DataStageCache cache, Stage stage, List<StageVariable> stageVariables, String fullyQualifiedStageName) {
+    SchemaTypeMapping(DataStageCache cache, DataStageJob job, Stage stage, List<StageVariable> stageVariables, String fullyQualifiedStageName) {
         super(cache);
         final String methodName = "SchemaTypeMapping";
         schemaType = null;
@@ -144,7 +145,7 @@ public class SchemaTypeMapping extends BaseMapping {
             schemaType.setDisplayName(stage.getName());
             try {
                 schemaType.setAuthor((String) igcRestClient.getPropertyByName(stage, "modified_by"));
-                AttributeMapping attributeMapping = new AttributeMapping(cache, stageVariables, null);
+                AttributeMapping attributeMapping = new AttributeMapping(cache, job, stageVariables, fullyQualifiedStageName);
                 schemaType.setAttributeList(attributeMapping.getAttributes());
             } catch (IGCException e) {
                 DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,

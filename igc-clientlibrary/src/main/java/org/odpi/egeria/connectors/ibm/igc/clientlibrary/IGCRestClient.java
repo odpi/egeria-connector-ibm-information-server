@@ -461,6 +461,16 @@ public class IGCRestClient {
     }
 
     /**
+     * Indicates whether the provided Repository ID (RID) represents an embedded asset (true) or not (false).
+     *
+     * @param rid the Repository ID (RID) to check
+     * @return boolean
+     */
+    public static boolean isEmbeddedAssetRid(String rid) {
+        return rid == null || rid.startsWith("deflated:");
+    }
+
+    /**
      * Internal utility for making potentially repeat requests (if session expires and needs to be re-opened),
      * to upload a file to a given endpoint.
      *
@@ -1643,7 +1653,9 @@ public class IGCRestClient {
                     log.debug("Context and / or modification details are empty, and not found in cache; populating...");
 
                     String assetType = object.getType();
-                    if (object.isVirtualAsset() || IGCRestConstants.getTypesThatCannotBeSearched().contains(assetType)) {
+                    if (object.isVirtualAsset()
+                            || object.isEmbeddedAsset()
+                            || IGCRestConstants.getTypesThatCannotBeSearched().contains(assetType)) {
                         populated = (T) getAssetById(rid);
                     } else {
                         List<String> properties = new ArrayList<>();

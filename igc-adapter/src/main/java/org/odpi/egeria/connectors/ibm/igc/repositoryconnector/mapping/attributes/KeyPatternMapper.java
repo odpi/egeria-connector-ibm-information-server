@@ -15,6 +15,9 @@ public class KeyPatternMapper extends EnumMapping {
     public static KeyPatternMapper getInstance(IGCVersionEnum version) {
         return Singleton.INSTANCE;
     }
+    public static KeyPatternMapper getInstance() {
+        return Singleton.INSTANCE;
+    }
 
     protected KeyPatternMapper() {
         super(
