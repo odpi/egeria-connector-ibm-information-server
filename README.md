@@ -56,6 +56,7 @@ The quick version:
 1. Download the latest IBM Information Server connector from: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/2.5-SNAPSHOT/egeria-connector-ibm-information-server-package-2.5-SNAPSHOT-jar-with-dependencies.jar
 1. Download the latest Egeria core from: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/server-chassis-spring/2.5-SNAPSHOT/server-chassis-spring-2.5-SNAPSHOT.jar
 1. Rename the downloaded Egeria core file to `egeria-server-chassis-spring.jar`.
+1. Download the `truststore.p12` file from: https://github.com/odpi/egeria/blob/master/truststore.p12
 1. Run the following command to start Egeria from the command-line, waiting for the final line of output indicating the
     server is running and ready for configuration:
     ```bash
@@ -126,6 +127,10 @@ export STRICT_SSL=false
 
 Note that this will disable all certificate validation for SSL connections made between Egeria and your IGC
 environment, so is inherently insecure.
+
+Note that in any case, having a `truststore.p12` file available to the server chassis is required -- the simplest is to
+ensure that Egeria's own (https://github.com/odpi/egeria/blob/master/truststore.p12) is placed in the directory in which
+you are running the server chassis.
 
 ### Startup the OMAG Server Platform
 
