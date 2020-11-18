@@ -99,11 +99,12 @@ class PortImplementationMapping extends BaseMapping {
      * Creates a PortImplementation for the provided stage variable information, for the given stage.
      *
      * @param cache used by this mapping
+     * @param job the job for which to create the Attributes
      * @param stage the stage for which to create the PortImplementation
      * @param stageVariables the stage variables to include in the PortImplementation
      * @param fullyQualifiedStageName the qualified name of the stage to ensure the schema is unique
      */
-    PortImplementationMapping(DataStageCache cache, Stage stage, List<StageVariable> stageVariables, String fullyQualifiedStageName) {
+    PortImplementationMapping(DataStageCache cache, DataStageJob job, Stage stage, List<StageVariable> stageVariables, String fullyQualifiedStageName) {
         super(cache);
         final String methodName = "PortImplementationMapping";
         portImplementation = null;
@@ -112,7 +113,7 @@ class PortImplementationMapping extends BaseMapping {
             portImplementation.setQualifiedName(fullyQualifiedStageName);
             portImplementation.setDisplayName(stage.getName());
             portImplementation.setPortType(PortType.OTHER);
-            SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, stage, stageVariables, fullyQualifiedStageName);
+            SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, job, stage, stageVariables, fullyQualifiedStageName);
             portImplementation.setSchemaType(schemaTypeMapping.getSchemaType());
         }
     }
