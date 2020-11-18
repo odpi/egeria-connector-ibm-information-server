@@ -243,12 +243,16 @@ public class ProcessMapping extends BaseMapping {
         try {
             String stageQN = getFullyQualifiedName(stage);
             List<StageVariable> stageVarsForStage = job.getStageVarsForStage(stage.getId());
-            log.debug("Adding implementation details for stage variables of stage: {}", stageQN);
-            PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, job, stage, stageVarsForStage, stageQN);
-            portImplementations.add(portImplementationMapping.getPortImplementation());
-            log.debug("Adding lineage mappings for stage variables of stage: {}", stageQN);
-            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, stageVarsForStage, stageQN);
-            lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
+            if (stageVarsForStage != null && !stageVarsForStage.isEmpty()) {
+                log.debug("Adding implementation details for stage variables of stage: {}", stageQN);
+                PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, job, stage, stageVarsForStage, stageQN);
+                portImplementations.add(portImplementationMapping.getPortImplementation());
+                log.debug("Adding lineage mappings for stage variables of stage: {}", stageQN);
+                LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, stageVarsForStage, stageQN);
+                lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
+            } else {
+                log.debug("No stage variables present in stage -- skipping: {}", stageQN);
+            }
         } catch (IGCException e) {
             DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
                     this.getClass().getName(),
