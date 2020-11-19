@@ -27,21 +27,27 @@ class AttributeMapping extends BaseMapping {
 
     private static final Logger log = LoggerFactory.getLogger(AttributeMapping.class);
 
-    private List<Attribute> attributes;
+    /**
+     * Default constructor to pass in the cache for re-use.
+     *
+     * @param cache used by this mapping
+     */
+    AttributeMapping(DataStageCache cache) {
+        super(cache);
+    }
 
     /**
      * Creates a set of Attributes for the provided job and link information.
      *
-     * @param cache used by this mapping
-     * @param job the job for which to create the Attributes
      * @param link the link containing stage column detail for the Attributes
+     * @param job the job for which to create the attributes
      * @param fullyQualifiedStageName to ensure each attribute is unique
+     * @return {@code List<Attribute>}
      */
-    AttributeMapping(DataStageCache cache, DataStageJob job, Link link, String fullyQualifiedStageName) {
-        super(cache);
-        final String methodName = "AttributeMapping";
+    List<Attribute> getForLink(Link link, DataStageJob job, String fullyQualifiedStageName) {
+        final String methodName = "getForLink";
         log.debug("Creating new AttributeMapping from job and link...");
-        attributes = new ArrayList<>();
+        List<Attribute> attributes = new ArrayList<>();
         if (link != null) {
             ItemList<DataItem> stageColumns = link.getStageColumns();
             try {
@@ -71,20 +77,20 @@ class AttributeMapping extends BaseMapping {
                         e);
             }
         }
+        return attributes;
     }
 
     /**
      * Creates a set of Attributes for the provided data store field information.
      *
-     * @param cache used by this mapping
      * @param fields the data store fields containing detail for the Attributes
      * @param fullyQualifiedStageName the qualified name of the stage to ensure each attribute is unique
+     * @return {@code List<Attribute>}
      */
-    AttributeMapping(DataStageCache cache, List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
-        super(cache);
-        final String methodName = "AttributeMapping";
+    List<Attribute> getForDataStoreFields(List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
+        final String methodName = "getForDataStoreFields";
         log.debug("Creating new AttributeMapping from job and fields...");
-        attributes = new ArrayList<>();
+        List<Attribute> attributes = new ArrayList<>();
         if (fields != null && !fields.isEmpty()) {
             try {
                 for (Classificationenabledgroup field : fields) {
@@ -116,31 +122,31 @@ class AttributeMapping extends BaseMapping {
                         e);
             }
         }
+        return attributes;
     }
 
     /**
      * Creates a set of Attributes for the provided data store field information (for virtual assets).
      *
-     * @param cache used by this mapping
      * @param fields the data store fields containing detail for the Attributes
+     * @return {@code List<Attribute>}
      */
-    AttributeMapping(DataStageCache cache, List<Classificationenabledgroup> fields) {
-        this(cache, fields, null);
+    List<Attribute> getForDataStoreFields(List<Classificationenabledgroup> fields) {
+        return getForDataStoreFields(fields, null);
     }
 
     /**
      * Creates a set of Attributes for the provided stage variable information.
      *
-     * @param cache used by this mapping
-     * @param job the job for which to create the Attributes
      * @param stageVariables for which to create a set of attributes
+     * @param job the job for which to create the Attributes
      * @param fullyQualifiedStageName (always empty)
+     * @return {@code List<Attribute>}
      */
-    AttributeMapping(DataStageCache cache, DataStageJob job, List<StageVariable> stageVariables, String fullyQualifiedStageName) {
-        super(cache);
-        final String methodName = "AttributeMapping";
+    List<Attribute> getForStageVariables(List<StageVariable> stageVariables, DataStageJob job, String fullyQualifiedStageName) {
+        final String methodName = "getForStageVariables";
         log.debug("Creating new AttributeMapping from stage variables...");
-        attributes = new ArrayList<>();
+        List<Attribute> attributes = new ArrayList<>();
         if (stageVariables != null && !stageVariables.isEmpty()) {
             try {
                 for (StageVariable var : stageVariables) {
@@ -163,13 +169,7 @@ class AttributeMapping extends BaseMapping {
                         e);
             }
         }
+        return attributes;
     }
-
-    /**
-     * Retrieve the Attributes that were setup.
-     *
-     * @return {@code List<Attribute>}
-     */
-    List<Attribute> getAttributes() { return attributes; }
 
 }

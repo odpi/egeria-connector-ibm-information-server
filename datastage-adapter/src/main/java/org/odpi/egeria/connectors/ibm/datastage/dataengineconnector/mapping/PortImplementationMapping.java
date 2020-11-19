@@ -25,21 +25,28 @@ import java.util.List;
 class PortImplementationMapping extends BaseMapping {
 
     private static final Logger log = LoggerFactory.getLogger(PortImplementationMapping.class);
-    private PortImplementation portImplementation;
+
+    /**
+     * Default constructor to pass in the cache for re-use.
+     *
+     * @param cache used by this mapping
+     */
+    PortImplementationMapping(DataStageCache cache) {
+        super(cache);
+    }
 
     /**
      * Creates a PortImplementation for the provided job and link information.
      *
-     * @param cache used by this mapping
-     * @param job the job for which to create the PortImplementation
      * @param link the link containing details for the PortImplementation
+     * @param job the job for which to create the PortImplementation
      * @param portType the port type to use
      * @param fullyQualifiedStageName to ensure each schema is unique
+     * @return PortImplementation
      */
-    PortImplementationMapping(DataStageCache cache, DataStageJob job, Link link, PortType portType, String fullyQualifiedStageName) {
-        super(cache);
-        final String methodName = "PortImplementationMapping";
-        portImplementation = null;
+    PortImplementation getForLink(Link link, DataStageJob job, PortType portType, String fullyQualifiedStageName) {
+        final String methodName = "getForLink";
+        PortImplementation portImplementation = null;
         if (link != null) {
             portImplementation = new PortImplementation();
             try {
@@ -49,8 +56,8 @@ class PortImplementationMapping extends BaseMapping {
                     portImplementation.setQualifiedName(linkQN);
                     portImplementation.setDisplayName(link.getName());
                     portImplementation.setPortType(portType);
-                    SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, job, link, fullyQualifiedStageName);
-                    portImplementation.setSchemaType(schemaTypeMapping.getSchemaType());
+                    SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache);
+                    portImplementation.setSchemaType(schemaTypeMapping.getForLink(link, job, fullyQualifiedStageName));
                 } else {
                     log.error("Unable to determine identity for link -- not including: {}", link);
                 }
@@ -61,21 +68,21 @@ class PortImplementationMapping extends BaseMapping {
                         e);
             }
         }
+        return portImplementation;
     }
 
     /**
      * Creates a PortImplementation for the provided data store field information, for the given stage.
      *
-     * @param cache used by this mapping
+     * @param fields the data store fields from which to create the PortImplementation's schema
      * @param stage the stage for which to create the PortImplementation
      * @param portType the port type to use
-     * @param fields the data store fields from which to create the PortImplementation's schema
      * @param fullyQualifiedStageName the qualified name of the stage to ensure each schema is unique
+     * @return PortImplementation
      */
-    PortImplementationMapping(DataStageCache cache, Stage stage, PortType portType, List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
-        super(cache);
-        final String methodName = "PortImplementationMapping";
-        portImplementation = null;
+    PortImplementation getForDataStoreFields(List<Classificationenabledgroup> fields, Stage stage, PortType portType, String fullyQualifiedStageName) {
+        final String methodName = "getForDataStoreFields";
+        PortImplementation portImplementation = null;
         if (stage != null && fields != null && !fields.isEmpty()) {
             portImplementation = new PortImplementation();
             try {
@@ -84,8 +91,8 @@ class PortImplementationMapping extends BaseMapping {
                 portImplementation.setQualifiedName(getFullyQualifiedName(storeIdentity, fullyQualifiedStageName));
                 portImplementation.setDisplayName(storeName);
                 portImplementation.setPortType(portType);
-                SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, stage, storeIdentity, fields, fullyQualifiedStageName);
-                portImplementation.setSchemaType(schemaTypeMapping.getSchemaType());
+                SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache);
+                portImplementation.setSchemaType(schemaTypeMapping.getForDataStoreFields(fields, storeIdentity, stage, fullyQualifiedStageName));
             } catch (IGCException e) {
                 DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
                         this.getClass().getName(),
@@ -93,36 +100,29 @@ class PortImplementationMapping extends BaseMapping {
                         e);
             }
         }
+        return portImplementation;
     }
 
     /**
      * Creates a PortImplementation for the provided stage variable information, for the given stage.
      *
-     * @param cache used by this mapping
+     * @param stageVariables the stage variables to include in the PortImplementation
      * @param job the job for which to create the Attributes
      * @param stage the stage for which to create the PortImplementation
-     * @param stageVariables the stage variables to include in the PortImplementation
      * @param fullyQualifiedStageName the qualified name of the stage to ensure the schema is unique
+     * @return PortImplementation
      */
-    PortImplementationMapping(DataStageCache cache, DataStageJob job, Stage stage, List<StageVariable> stageVariables, String fullyQualifiedStageName) {
-        super(cache);
-        final String methodName = "PortImplementationMapping";
-        portImplementation = null;
+    PortImplementation getForStageVariables(List<StageVariable> stageVariables, DataStageJob job, Stage stage, String fullyQualifiedStageName) {
+        PortImplementation portImplementation = null;
         if (stage != null) {
             portImplementation = new PortImplementation();
             portImplementation.setQualifiedName(fullyQualifiedStageName);
             portImplementation.setDisplayName(stage.getName());
             portImplementation.setPortType(PortType.OTHER);
-            SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache, job, stage, stageVariables, fullyQualifiedStageName);
-            portImplementation.setSchemaType(schemaTypeMapping.getSchemaType());
+            SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache);
+            portImplementation.setSchemaType(schemaTypeMapping.getForStageVariables(stageVariables, job, stage, fullyQualifiedStageName));
         }
+        return portImplementation;
     }
-
-    /**
-     * Retrieve the PortImplementation that was setup.
-     *
-     * @return PortImplementation
-     */
-    PortImplementation getPortImplementation() { return portImplementation; }
 
 }

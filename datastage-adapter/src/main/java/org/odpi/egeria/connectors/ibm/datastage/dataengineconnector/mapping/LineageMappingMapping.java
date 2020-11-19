@@ -26,25 +26,31 @@ class LineageMappingMapping extends BaseMapping {
 
     private static final Logger log = LoggerFactory.getLogger(LineageMappingMapping.class);
 
-    private Set<LineageMapping> lineageMappings;
+    /**
+     * Default constructor to pass in the cache for re-use.
+     *
+     * @param cache used by this mapping
+     */
+    LineageMappingMapping(DataStageCache cache) {
+        super(cache);
+    }
 
     /**
      * Creates LineageMappings for stages that have links as input and output.
      * - {@code STAGEB ( -> processing -> )}
      *   - {@code DSLink1_STAGEB to DSLink2_STAGEB (INPUT_PORT to OUTPUT_PORT)}
      *
-     * @param cache used by this mapping
+     * @param link the link for which to create the LineageMappings
      * @param job the job for which to create the LineageMappings
      * @param stageRid the RID of the stage for which we are building mappings
      * @param knownLinks set of known link RIDs
-     * @param link the link for which to create the LineageMappings
      * @param fullyQualifiedStageName the stage name for which to create the LineageMappings
      * @param bSource true if processing a source link, false if a target link
+     * @return {@code Set<LineageMapping>}
      */
-    LineageMappingMapping(DataStageCache cache, DataStageJob job, String stageRid, Set<String> knownLinks, Link link, String fullyQualifiedStageName, boolean bSource) {
-        super(cache);
-        final String methodName = "LineageMappingMapping";
-        lineageMappings = new HashSet<>();
+    Set<LineageMapping> getForLinkInStage(Link link, DataStageJob job, String stageRid, Set<String> knownLinks, String fullyQualifiedStageName, boolean bSource) {
+        final String methodName = "getForLinkInStage";
+        Set<LineageMapping> lineageMappings = new HashSet<>();
         ItemList<DataItem> stageColumns = link.getStageColumns();
         try {
             List<DataItem> allStageColumns = igcRestClient.getAllPages("stage_columns", stageColumns);
@@ -115,6 +121,7 @@ class LineageMappingMapping extends BaseMapping {
                     methodName,
                     e);
         }
+        return lineageMappings;
     }
 
     /**
@@ -124,14 +131,13 @@ class LineageMappingMapping extends BaseMapping {
      * - {@code STAGEB ( -> processing -> )}
      *   - {@code DSLink2_STAGEB to DSLink2_STAGEC (cross-process mapping)}
      *
-     * @param cache used by this mapping
-     * @param job the job for which to create the LineageMappings
      * @param link the link for which to create the LineageMappings
+     * @param job the job for which to create the LineageMappings
+     * @return {@code Set<LineageMapping>}
      */
-    LineageMappingMapping(DataStageCache cache, DataStageJob job, Link link) {
-        super(cache);
-        final String methodName = "LineageMappingMapping";
-        lineageMappings = new HashSet<>();
+    Set<LineageMapping> getForLink(Link link, DataStageJob job) {
+        final String methodName = "getForLink";
+        Set<LineageMapping> lineageMappings = new HashSet<>();
         // Despite the plural name, a link can only have one input and one output stage so these are singular
         Stage inputStage = link.getInputStages();
         Stage outputStage = link.getOutputStages();
@@ -169,6 +175,7 @@ class LineageMappingMapping extends BaseMapping {
                     methodName,
                     e);
         }
+        return lineageMappings;
     }
 
     /**
@@ -180,16 +187,15 @@ class LineageMappingMapping extends BaseMapping {
      *   - {@code DSLink2_STAGEC to StoreY_STAGEC (INPUT_PORT to OUTPUT_PORT)}
      *   - {@code StoreY_STAGEC to StoreY (OUTPUT_PORT to written_by_(design))}
      *
-     * @param cache used by this mapping
-     * @param job the job for which to create the LineageMappings
      * @param fields list of IGC field objects (data_file_field or database_column)
+     * @param job the job for which to create the LineageMappings
      * @param bSource true if processing a source link, false if a target link
      * @param fullyQualifiedStageName the fully qualifiedName of the stage itself
+     * @return {@code Set<LineageMapping>}
      */
-    LineageMappingMapping(DataStageCache cache, DataStageJob job, List<Classificationenabledgroup> fields, boolean bSource, String fullyQualifiedStageName) {
-        super(cache);
-        final String methodName = "LineageMappingMapping";
-        lineageMappings = new HashSet<>();
+    Set<LineageMapping> getForDataStoreFields(List<Classificationenabledgroup> fields, DataStageJob job, boolean bSource, String fullyQualifiedStageName) {
+        final String methodName = "getForDataStoreFields";
+        Set<LineageMapping> lineageMappings = new HashSet<>();
         // For each field in the data store...
         if (fields != null) {
             for (Classificationenabledgroup fieldObj : fields) {
@@ -249,6 +255,7 @@ class LineageMappingMapping extends BaseMapping {
         } else {
             log.warn("No fields were found for a data store for stage: {}", fullyQualifiedStageName);
         }
+        return lineageMappings;
     }
 
     /**
@@ -257,15 +264,14 @@ class LineageMappingMapping extends BaseMapping {
      * - {@code previous_stage_columns -> this stage variable }
      * - {@code this stage variable -> next_stage_columns }
      *
-     * @param cache used by this mapping
-     * @param job the job for which to create the LineageMappings
      * @param stageVariables list of stage variables
+     * @param job the job for which to create the LineageMappings
      * @param fullyQualifiedStageName the fully qualifiedName of the stage itself
+     * @return {@code Set<LineageMapping>}
      */
-    LineageMappingMapping(DataStageCache cache, DataStageJob job, List<StageVariable> stageVariables, String fullyQualifiedStageName) {
-        super(cache);
-        final String methodName = "LineageMappingMapping";
-        lineageMappings = new HashSet<>();
+    Set<LineageMapping> getForStageVariables(List<StageVariable> stageVariables, DataStageJob job, String fullyQualifiedStageName) {
+        final String methodName = "getForStageVariables";
+        Set<LineageMapping> lineageMappings = new HashSet<>();
         // For each stage variable...
         if (stageVariables != null) {
             for (StageVariable varObj : stageVariables) {
@@ -302,14 +308,8 @@ class LineageMappingMapping extends BaseMapping {
         } else {
             log.warn("No fields were found for a data store for stage: {}", fullyQualifiedStageName);
         }
+        return lineageMappings;
     }
-
-    /**
-     * Retrieve the LineageMappings that were setup.
-     *
-     * @return {@code Set<LineageMapping>}
-     */
-    Set<LineageMapping> getLineageMappings() { return lineageMappings; }
 
     /**
      * Create a simple LineageMapping from source to target.

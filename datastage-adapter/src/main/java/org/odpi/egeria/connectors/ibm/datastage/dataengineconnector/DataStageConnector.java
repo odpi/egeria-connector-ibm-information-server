@@ -244,8 +244,8 @@ public class DataStageConnector extends DataEngineConnectorBase {
                     if ( (IGCRestClient.isVirtualAssetRid(storeRid) && includeVirtualAssets)
                             || (!IGCRestClient.isVirtualAssetRid(storeRid) && createDataStoreSchemas) ) {
                         log.debug(" ... Creating a SchemaType ...");
-                        SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(dataStageCache, dataStageCache.getStoreIdentityFromRid(storeRid));
-                        SchemaType deSchemaType = schemaTypeMapping.getSchemaType();
+                        SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(dataStageCache);
+                        SchemaType deSchemaType = schemaTypeMapping.getForDataStore(dataStageCache.getStoreIdentityFromRid(storeRid));
                         if (log.isDebugEnabled()) {
                             try {
                                 log.debug(" ... created: {}", objectMapper.writeValueAsString(deSchemaType));
