@@ -27,44 +27,42 @@ class PortAliasMapping extends BaseMapping {
 
     private static final Logger log = LoggerFactory.getLogger(PortAliasMapping.class);
 
-    private Set<PortAlias> portAliases;
-
-    private PortAliasMapping(DataStageCache cache) {
+    /**
+     * Default constructor to pass in the cache for re-use.
+     *
+     * @param cache used by this mapping
+     */
+    PortAliasMapping(DataStageCache cache) {
         super(cache);
-        portAliases = new HashSet<>();
     }
 
     /**
      * Create a list of PortAliases from the provided job and stage information.
      *
-     * @param cache used by this mapping
      * @param stages the stages from which to create PortAliases
      * @param portType the type of port to map (input or output)
+     * @return {@code List<PortAlias>}
      */
-    PortAliasMapping(DataStageCache cache, List<Stage> stages, PortType portType) {
-
-        this(cache);
-
+    List<PortAlias> getForStages(List<Stage> stages, PortType portType) {
+        Set<PortAlias> portAliases = new HashSet<>();
         for (Stage stage : stages) {
             if (portType.equals(PortType.INPUT_PORT)) {
-                addInputPortAliases(stage);
+                addInputPortAliases(portAliases, stage);
             } else if (portType.equals(PortType.OUTPUT_PORT)) {
-                addOutputPortAliases(stage);
+                addOutputPortAliases(portAliases, stage);
             }
         }
-
+        return new ArrayList<>(portAliases);
     }
 
     /**
      * Create a list of PortAliases from the provided sequence job.
      *
-     * @param cache used by this mapping
      * @param sequence the sequence for which to create PortAliases
+     * @return {@code List<PortAlias>}
      */
-    PortAliasMapping(DataStageCache cache, DataStageJob sequence) {
-
-        this(cache);
-
+    List<PortAlias> getForSequence(DataStageJob sequence) {
+        Set<PortAlias> portAliases = new HashSet<>();
         final String methodName = "PortAliasMapping";
         if (sequence.getType().equals(DataStageJob.JobType.SEQUENCE)) {
             for (Stage stage : sequence.getAllStages()) {
@@ -103,25 +101,18 @@ class PortAliasMapping extends BaseMapping {
                 }
             }
         }
-
+        return new ArrayList<>(portAliases);
     }
 
-    /**
-     * Retrieve the PortAliases that were setup.
-     *
-     * @return {@code List<PortAlias>}
-     */
-    List<PortAlias> getPortAliases() { return new ArrayList<>(portAliases); }
-
-    private void addInputPortAliases(Stage stage) {
-        addPortAliases(stage, "reads_from_(design)", stage.getReadsFromDesign(), PortType.INPUT_PORT);
+    private void addInputPortAliases(Set<PortAlias> portAliases, Stage stage) {
+        addPortAliases(portAliases, stage, "reads_from_(design)", stage.getReadsFromDesign(), PortType.INPUT_PORT);
     }
 
-    private void addOutputPortAliases(Stage stage) {
-        addPortAliases(stage, "writes_to_(design)", stage.getWritesToDesign(), PortType.OUTPUT_PORT);
+    private void addOutputPortAliases(Set<PortAlias> portAliases, Stage stage) {
+        addPortAliases(portAliases, stage, "writes_to_(design)", stage.getWritesToDesign(), PortType.OUTPUT_PORT);
     }
 
-    private void addPortAliases(Stage stage, String propertyName, ItemList<InformationAsset> relations, PortType portType) {
+    private void addPortAliases(Set<PortAlias> portAliases, Stage stage, String propertyName, ItemList<InformationAsset> relations, PortType portType) {
         final String methodName = "addPortAliases";
         try {
             List<InformationAsset> allRelations = igcRestClient.getAllPages(propertyName, relations);

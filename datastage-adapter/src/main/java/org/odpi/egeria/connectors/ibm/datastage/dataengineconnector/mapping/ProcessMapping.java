@@ -40,20 +40,22 @@ public class ProcessMapping extends BaseMapping {
             Dsjob jobObj = job.getJobObject();
             process = getSkeletonProcess(jobObj);
             if (process != null) {
-                PortAliasMapping portAliasMapping = new PortAliasMapping(cache, job);
-                process.setPortAliases(portAliasMapping.getPortAliases());
+                PortAliasMapping portAliasMapping = new PortAliasMapping(cache);
+                process.setPortAliases(portAliasMapping.getForSequence(job));
             }
         } else {
             Dsjob jobObj = job.getJobObject();
             process = getSkeletonProcess(jobObj);
             if (process != null) {
-                PortAliasMapping inputAliasMapping = new PortAliasMapping(cache, job.getInputStages(), PortType.INPUT_PORT);
-                PortAliasMapping outputAliasMapping = new PortAliasMapping(cache, job.getOutputStages(), PortType.OUTPUT_PORT);
-                process.setPortAliases(Stream.concat(inputAliasMapping.getPortAliases().stream(), outputAliasMapping.getPortAliases().stream()).collect(Collectors.toList()));
+                PortAliasMapping portAliasMapping = new PortAliasMapping(cache);
+                process.setPortAliases(Stream.concat(
+                        portAliasMapping.getForStages(job.getInputStages(), PortType.INPUT_PORT).stream(),
+                        portAliasMapping.getForStages(job.getOutputStages(), PortType.OUTPUT_PORT).stream())
+                        .collect(Collectors.toList()));
                 Set<LineageMapping> lineageMappings = new HashSet<>();
                 for (Link link : job.getAllLinks()) {
-                    LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, link);
-                    Set<LineageMapping> crossStageLineageMappings = lineageMappingMapping.getLineageMappings();
+                    LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache);
+                    Set<LineageMapping> crossStageLineageMappings = lineageMappingMapping.getForLink(link, job);
                     if (crossStageLineageMappings != null && !crossStageLineageMappings.isEmpty()) {
                         lineageMappings.addAll(crossStageLineageMappings);
                     }
@@ -213,11 +215,11 @@ public class ProcessMapping extends BaseMapping {
             for (Link linkRef : links) {
                 Link linkObjFull = job.getLinkByRid(linkRef.getId());
                 log.debug("Adding implementation details for link: {}", linkObjFull);
-                PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, job, linkObjFull, portType, stageQN);
-                portImplementations.add(portImplementationMapping.getPortImplementation());
+                PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache);
+                portImplementations.add(portImplementationMapping.getForLink(linkObjFull, job, portType, stageQN));
                 log.debug("Adding lineage mappings for link as {}: {}", portType.getName(), linkObjFull);
-                LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, stage.getId(), linkRids, linkObjFull, stageQN, portType == PortType.INPUT_PORT);
-                lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
+                LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache);
+                lineageMappings.addAll(lineageMappingMapping.getForLinkInStage(linkObjFull, job, stage.getId(), linkRids, stageQN, portType == PortType.INPUT_PORT));
             }
         } catch (IGCException e) {
             DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
@@ -245,11 +247,11 @@ public class ProcessMapping extends BaseMapping {
             List<StageVariable> stageVarsForStage = job.getStageVarsForStage(stage.getId());
             if (stageVarsForStage != null && !stageVarsForStage.isEmpty()) {
                 log.debug("Adding implementation details for stage variables of stage: {}", stageQN);
-                PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, job, stage, stageVarsForStage, stageQN);
-                portImplementations.add(portImplementationMapping.getPortImplementation());
+                PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache);
+                portImplementations.add(portImplementationMapping.getForStageVariables(stageVarsForStage, job, stage, stageQN));
                 log.debug("Adding lineage mappings for stage variables of stage: {}", stageQN);
-                LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, stageVarsForStage, stageQN);
-                lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
+                LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache);
+                lineageMappings.addAll(lineageMappingMapping.getForStageVariables(stageVarsForStage, job, stageQN));
             } else {
                 log.debug("No stage variables present in stage -- skipping: {}", stageQN);
             }
@@ -289,11 +291,11 @@ public class ProcessMapping extends BaseMapping {
                 for (InformationAsset storeRef : allStores) {
                     List<Classificationenabledgroup> fieldsForStore = cache.getFieldsForStore(storeRef);
                     log.debug("Adding implementation details for fields: {}", fieldsForStore);
-                    PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache, stage, portType, fieldsForStore, fullyQualifiedStageName);
-                    portImplementations.add(portImplementationMapping.getPortImplementation());
+                    PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache);
+                    portImplementations.add(portImplementationMapping.getForDataStoreFields(fieldsForStore, stage, portType, fullyQualifiedStageName));
                     log.debug("Adding lineage mappings for fields as {}: {}", portType.getName(), fieldsForStore);
-                    LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache, job, fieldsForStore, portType.equals(PortType.INPUT_PORT), fullyQualifiedStageName);
-                    lineageMappings.addAll(lineageMappingMapping.getLineageMappings());
+                    LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache);
+                    lineageMappings.addAll(lineageMappingMapping.getForDataStoreFields(fieldsForStore, job, portType.equals(PortType.INPUT_PORT), fullyQualifiedStageName));
                 }
             } else {
                 log.error("Unable to determine identity for stage -- not including: {}", stage);
