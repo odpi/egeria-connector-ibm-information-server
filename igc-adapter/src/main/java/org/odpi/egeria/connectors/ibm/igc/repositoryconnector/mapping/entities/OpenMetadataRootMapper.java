@@ -3,8 +3,6 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.KeyPatternMapper;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.EnumPropertyValue;
 
 /**
  * Defines the common mappings to the OMRS "OpenMetadataRoot" entity.
@@ -48,11 +46,6 @@ public class OpenMetadataRootMapper extends EntityMapping {
                 igcRidPrefix,
                 searchable
         );
-
-        // The list of properties that should be mapped
-        addSimplePropertyMapping("_id", "identifier");
-        EnumPropertyValue keyPattern = KeyPatternMapper.getInstance().getEnumMappingByIgcValue("LocalKey");
-        addLiteralPropertyMapping("keyPattern", keyPattern);
 
     }
 
