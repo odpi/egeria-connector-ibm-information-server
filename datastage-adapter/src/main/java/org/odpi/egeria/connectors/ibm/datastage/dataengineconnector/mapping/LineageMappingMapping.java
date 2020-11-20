@@ -189,11 +189,18 @@ class LineageMappingMapping extends BaseMapping {
      *
      * @param fields list of IGC field objects (data_file_field or database_column)
      * @param job the job for which to create the LineageMappings
+     * @param stageRid the RID of the stage for which we are building mappings
+     * @param knownLinks set of known link RIDs
      * @param bSource true if processing a source link, false if a target link
      * @param fullyQualifiedStageName the fully qualifiedName of the stage itself
      * @return {@code Set<LineageMapping>}
      */
-    Set<LineageMapping> getForDataStoreFields(List<Classificationenabledgroup> fields, DataStageJob job, boolean bSource, String fullyQualifiedStageName) {
+    Set<LineageMapping> getForDataStoreFieldsInStage(List<Classificationenabledgroup> fields,
+                                                     DataStageJob job,
+                                                     String stageRid,
+                                                     Set<String> knownLinks,
+                                                     boolean bSource,
+                                                     String fullyQualifiedStageName) {
         final String methodName = "getForDataStoreFields";
         Set<LineageMapping> lineageMappings = new HashSet<>();
         // For each field in the data store...
@@ -202,6 +209,8 @@ class LineageMappingMapping extends BaseMapping {
                 try {
                     String field1QN = getFullyQualifiedName(fieldObj);
                     if (field1QN != null) {
+                        // relatedStageCols could have more than just this stage's inputs / outputs (a given data store
+                        // may be written or read by many stages)
                         ItemList<InformationAsset> relatedStageCols;
                         String propertyName;
                         if (bSource) {
@@ -217,7 +226,8 @@ class LineageMappingMapping extends BaseMapping {
                             // For each object that reads / writes to that field...
                             for (InformationAsset stageColRef : allRelatedStageCols) {
                                 ColumnLevelLineage stageColFull = job.getColumnLevelLineageByRid(stageColRef.getId());
-                                if (stageColFull != null) {
+                                // Limit the details we capture to only the stage we're processing
+                                if (stageColumnForKnownLink(stageColFull, stageRid, knownLinks)) {
                                     String field1EmbeddedQN = getFullyQualifiedName(fieldObj, fullyQualifiedStageName);
                                     String field2EmbeddedQN = getFullyQualifiedName(stageColFull, fullyQualifiedStageName);
                                     if (bSource) {
@@ -236,7 +246,7 @@ class LineageMappingMapping extends BaseMapping {
                                         lineageMappings.add(oneToOne);
                                     }
                                 } else {
-                                    log.error("Unable to find referenced stage column: {}", stageColRef);
+                                    log.debug("Found a stage column for a link not listed as a known link for this stage -- ignoring: {}", stageColFull);
                                 }
                             }
                         } else {
