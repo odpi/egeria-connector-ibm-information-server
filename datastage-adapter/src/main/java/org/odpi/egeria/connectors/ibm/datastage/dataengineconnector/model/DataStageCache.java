@@ -141,8 +141,8 @@ public class DataStageCache {
             log.debug("(cache miss) -- building Process for job: {}", rid);
             DataStageJob job = getJobByRid(rid);
             if (job != null) {
-                ProcessMapping processMapping = new ProcessMapping(this, job);
-                process = processMapping.getProcess();
+                ProcessMapping processMapping = new ProcessMapping(this);
+                process = processMapping.getForJob(job);
                 if (process != null) {
                     ridToProcess.put(rid, process);
                 }

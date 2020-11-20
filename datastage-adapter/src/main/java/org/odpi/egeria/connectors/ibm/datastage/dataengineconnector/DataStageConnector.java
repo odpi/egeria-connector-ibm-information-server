@@ -382,8 +382,8 @@ public class DataStageConnector extends DataEngineConnectorBase {
         List<Process> processes = new ArrayList<>();
         log.debug("Translating processes for each stage...");
         for (Stage stage : job.getAllStages()) {
-            ProcessMapping processMapping = new ProcessMapping(dataStageCache, job, stage);
-            Process process = processMapping.getProcess();
+            ProcessMapping processMapping = new ProcessMapping(dataStageCache);
+            Process process = processMapping.getForStage(stage, job);
             if (process != null) {
                 try {
                     log.debug(" ... process: {}", objectMapper.writeValueAsString(process));

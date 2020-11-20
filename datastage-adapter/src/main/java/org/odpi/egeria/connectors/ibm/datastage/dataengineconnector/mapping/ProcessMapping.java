@@ -24,18 +24,25 @@ import java.util.stream.Stream;
 public class ProcessMapping extends BaseMapping {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessMapping.class);
-    private Process process;
+
+    /**
+     * Default constructor to pass in the cache for re-use.
+     *
+     * @param cache used by this mapping
+     */
+    public ProcessMapping(DataStageCache cache) {
+        super(cache);
+    }
 
     /**
      * Create a new process from a DataStageJob that represents either a job or a sequence.
      *
-     * @param cache used by this mapping
      * @param job the job or sequence from which to create a process
+     * @return Process
      */
-    public ProcessMapping(DataStageCache cache, DataStageJob job) {
-        super(cache);
-        final String methodName = "ProcessMapping";
-        process = null;
+    public Process getForJob(DataStageJob job) {
+        final String methodName = "getForJob";
+        Process process;
         if (job.getType().equals(DataStageJob.JobType.SEQUENCE)) {
             Dsjob jobObj = job.getJobObject();
             process = getSkeletonProcess(jobObj);
@@ -94,19 +101,19 @@ public class ProcessMapping extends BaseMapping {
                 }
             }
         }
+        return process;
     }
 
     /**
      * Create a new process from the provided DataStage stage.
      *
-     * @param cache used by this mapping
-     * @param job the job within which the stage exists
      * @param stage the stage from which to create a process
+     * @param job the job within which the stage exists
+     * @return Process
      */
-    public ProcessMapping(DataStageCache cache, DataStageJob job, Stage stage) {
-        super(cache);
-        final String methodName = "ProcessMapping";
-        process = getSkeletonProcess(stage);
+    public Process getForStage(Stage stage, DataStageJob job) {
+        final String methodName = "getForStage";
+        Process process = getSkeletonProcess(stage);
         if (process != null) {
             Set<PortImplementation> portImplementations = new HashSet<>();
             Set<LineageMapping> lineageMappings = new HashSet<>();
@@ -117,11 +124,11 @@ public class ProcessMapping extends BaseMapping {
                 log.debug("Adding input links: {}", allInputLinks);
                 addImplementationDetails(job, stage, allInputLinks, allLinkRids, PortType.INPUT_PORT, portImplementations, lineageMappings);
                 log.debug("Adding input stores: {}", stage.getReadsFromDesign());
-                addDataStoreDetails(job, stage, "reads_from_(design)", stage.getReadsFromDesign(), PortType.INPUT_PORT, portImplementations, lineageMappings);
+                addDataStoreDetails(job, stage, "reads_from_(design)", stage.getReadsFromDesign(), allLinkRids, PortType.INPUT_PORT, portImplementations, lineageMappings);
                 log.debug("Adding output links: {}", allOutputLinks);
                 addImplementationDetails(job, stage, allOutputLinks, allLinkRids, PortType.OUTPUT_PORT, portImplementations, lineageMappings);
                 log.debug("Adding output stores: {}", stage.getWritesToDesign());
-                addDataStoreDetails(job, stage, "writes_to_(design)", stage.getWritesToDesign(), PortType.OUTPUT_PORT, portImplementations, lineageMappings);
+                addDataStoreDetails(job, stage, "writes_to_(design)", stage.getWritesToDesign(), allLinkRids, PortType.OUTPUT_PORT, portImplementations, lineageMappings);
                 log.debug("Adding stage variables");
                 addStageVariableDetails(job, stage, portImplementations, lineageMappings);
                 process.setPortImplementations(new ArrayList<>(portImplementations));
@@ -146,14 +153,8 @@ public class ProcessMapping extends BaseMapping {
                         e);
             }
         }
+        return process;
     }
-
-    /**
-     * Retrieve the mapped process.
-     *
-     * @return Process
-     */
-    public Process getProcess() { return this.process; }
 
     /**
      * Construct a minimal Process object from the provided IGC object (stage, job, sequence, etc).
@@ -271,6 +272,7 @@ public class ProcessMapping extends BaseMapping {
      * @param stage the stage for which to add implementation details
      * @param propertyName the name of the property from which stores were retrieved
      * @param stores the stores for which to create the implementation details
+     * @param linkRids the RIDs of all links known by this stage (both input and output)
      * @param portType the type of port
      * @param portImplementations the list of PortImplementations to append to with implementation details
      * @param lineageMappings the list of LineageMappings to append to with implementation details
@@ -279,6 +281,7 @@ public class ProcessMapping extends BaseMapping {
                                      Stage stage,
                                      String propertyName,
                                      ItemList<InformationAsset> stores,
+                                     Set<String> linkRids,
                                      PortType portType,
                                      Set<PortImplementation> portImplementations,
                                      Set<LineageMapping> lineageMappings) {
@@ -295,7 +298,7 @@ public class ProcessMapping extends BaseMapping {
                     portImplementations.add(portImplementationMapping.getForDataStoreFields(fieldsForStore, stage, portType, fullyQualifiedStageName));
                     log.debug("Adding lineage mappings for fields as {}: {}", portType.getName(), fieldsForStore);
                     LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache);
-                    lineageMappings.addAll(lineageMappingMapping.getForDataStoreFields(fieldsForStore, job, portType.equals(PortType.INPUT_PORT), fullyQualifiedStageName));
+                    lineageMappings.addAll(lineageMappingMapping.getForDataStoreFieldsInStage(fieldsForStore, job, stage.getId(), linkRids, portType.equals(PortType.INPUT_PORT), fullyQualifiedStageName));
                 }
             } else {
                 log.error("Unable to determine identity for stage -- not including: {}", stage);
