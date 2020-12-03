@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 <!-- Copyright Contributors to the ODPi Egeria project. -->
 
-[![javadoc](https://javadoc.io/badge2/org.odpi.egeria/egeria-connector-ibm-igc-adapter/javadoc.svg)](https://javadoc.io/doc/org.odpi.egeria/egeria-connector-ibm-igc-adapter) [![Maven Central](https://img.shields.io/maven-central/v/org.odpi.egeria/egeria-connector-ibm-information-server)](https://mvnrepository.com/artifact/org.odpi.egeria/egeria-connector-ibm-igc-adapter)
+[![javadoc](https://javadoc.io/badge2/org.odpi.egeria/egeria-connector-ibm-igc-adapter/javadoc.svg)](https://javadoc.io/doc/org.odpi.egeria/egeria-connector-ibm-igc-adapter) [![Maven Central](https://img.shields.io/maven-central/v/org.odpi.egeria/egeria-connector-ibm-igc-adapter)](https://mvnrepository.com/artifact/org.odpi.egeria/egeria-connector-ibm-igc-adapter)
 
 # IBM InfoSphere Information Governance Catalog connector
 
