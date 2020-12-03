@@ -1,9 +1,11 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 <!-- Copyright Contributors to the ODPi Egeria project. -->
 
+[![javadoc](https://javadoc.io/badge2/org.odpi.egeria/ibm-igc-rest-client-library/javadoc.svg)](https://javadoc.io/doc/org.odpi.egeria/ibm-igc-rest-client-library) [![Maven Central](https://img.shields.io/maven-central/v/org.odpi.egeria/ibm-igc-rest-client-library)](https://mvnrepository.com/artifact/org.odpi.egeria/ibm-igc-rest-client-library)
+
 # IBM IGC REST Client Library
 
-A Java client library for connecting to IBM Information Governance Catalog's (IGC's) REST API.
+A Java client library for integrating with IBM Information Governance Catalog's (IGC's) REST API.
 
 ## Requirements
 
