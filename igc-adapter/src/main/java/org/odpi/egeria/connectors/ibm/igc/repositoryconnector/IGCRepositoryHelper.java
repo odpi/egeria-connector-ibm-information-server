@@ -12,7 +12,6 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCIOException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Paging;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -864,11 +863,20 @@ public class IGCRepositoryHelper {
                     if (nestedConditions != null) {
                         bValuesMatch = includeResult(ed, nestedConditions, searchCriteria);
                     } else {
+
                         String propertyName = conditionToMatch.getProperty();
                         PropertyComparisonOperator operator = conditionToMatch.getOperator();
                         InstancePropertyValue valueToMatch = conditionToMatch.getValue();
-                        InstancePropertyValue edValue = edProperties.getPropertyValue(propertyName);
+
+                        InstancePropertyValue edValue;
+                        if (InstanceMapping.getHeaderProperties().contains(propertyName)) {
+                            edValue = InstanceMapping.getHeaderPropertyValue(ed, propertyName);
+                        } else {
+                            edValue = edProperties.getPropertyValue(propertyName);
+                        }
+
                         bValuesMatch = valuesMatch(valueToMatch, operator, edValue);
+
                     }
                     if (matchCriteria.equals(MatchCriteria.ANY) && bValuesMatch) {
                         // If we just need to match one of the criteria and the values match, immediately return true
@@ -1450,9 +1458,7 @@ public class IGCRepositoryHelper {
 
                 String igcPropertyName = mapping.getIgcPropertyName(omrsPropertyName);
 
-                if (igcPropertyName == null) {
-                    log.warn("Unhandled search condition for unknown IGC property from OMRS property: {}", omrsPropertyName);
-                } else if (InstanceMapping.getHeaderProperties().contains(omrsPropertyName)) {
+                if (InstanceMapping.getHeaderProperties().contains(omrsPropertyName)) {
 
                     // If the OMRS property is a header property, it should take precedence over any type-level
                     // property with the same name
@@ -1465,30 +1471,34 @@ public class IGCRepositoryHelper {
                             mapping,
                             igcomrsRepositoryConnector);
 
-                } else if (igcPropertyName.equals(EntityMapping.COMPLEX_MAPPING_SENTINEL)) {
+                } else if (igcPropertyName != null) {
+                    if (igcPropertyName.equals(EntityMapping.COMPLEX_MAPPING_SENTINEL)) {
 
-                    log.debug("Adding complex property search criteria for: {}", omrsPropertyName);
-                    mapping.addComplexPropertySearchCriteria(
-                            repositoryHelper,
-                            repositoryName,
-                            igcRestClient,
-                            igcSearchConditionSet,
-                            igcPropertyName,
-                            omrsPropertyName,
-                            operator,
-                            value);
+                        log.debug("Adding complex property search criteria for: {}", omrsPropertyName);
+                        mapping.addComplexPropertySearchCriteria(
+                                repositoryHelper,
+                                repositoryName,
+                                igcRestClient,
+                                igcSearchConditionSet,
+                                igcPropertyName,
+                                omrsPropertyName,
+                                operator,
+                                value);
 
-                } else if (!igcPropertyName.equals(EntityMapping.LITERAL_MAPPING_SENTINEL)) {
+                    } else if (!igcPropertyName.equals(EntityMapping.LITERAL_MAPPING_SENTINEL)) {
 
-                    log.debug("Adding non-literal property search criteria for: {}", omrsPropertyName);
-                    addIGCSearchCondition(
-                            repositoryHelper,
-                            repositoryName,
-                            igcSearchConditionSet,
-                            igcPropertyName,
-                            operator,
-                            value);
+                        log.debug("Adding non-literal property search criteria for: {}", omrsPropertyName);
+                        addIGCSearchCondition(
+                                repositoryHelper,
+                                repositoryName,
+                                igcSearchConditionSet,
+                                igcPropertyName,
+                                operator,
+                                value);
 
+                    }
+                } else {
+                    log.warn("Unhandled search condition for unknown IGC property from OMRS property: {}", omrsPropertyName);
                 }
 
             }
