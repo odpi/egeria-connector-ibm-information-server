@@ -9,11 +9,11 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryC
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.EntityMapping;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceAuditHeader;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyCondition;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.PrimitiveDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
@@ -193,19 +193,19 @@ public abstract class InstanceMapping {
                     String omrsPropertyName = condition.getProperty();
                     // If we are being asked to search for an instance header property, ensure it is one we support
                     // searching against (otherwise set the filter to NONE)
-                    if (getHeaderProperties().contains(omrsPropertyName) && !isKnownInstanceHeaderProperty(repositoryConnector, condition)) {
-                        log.debug("Requested search for header property against which search is not supported: {}", condition);
-                        filter = SearchFilter.NONE;
-                        break;
-                    }
-                    // If there is any property we are being asked to search but it has no mapping,
-                    // ensure we will get no results
-                    if (!mappedOmrsProperties.contains(omrsPropertyName)) {
+                    if (getHeaderProperties().contains(omrsPropertyName)) {
+                        if (!isKnownInstanceHeaderProperty(repositoryConnector, condition)) {
+                            log.debug("Requested search for header property against which search is not supported: {}", condition);
+                            filter = SearchFilter.NONE;
+                            break;
+                        }
+                    } else if (!mappedOmrsProperties.contains(omrsPropertyName)) {
+                        // If there is any property we are being asked to search but it has no mapping,
+                        // ensure we will get no results
                         log.debug("Requested search against a property with no mapping: {}", condition);
                         filter = SearchFilter.NONE;
                         break;
-                    }
-                    if (isOmrsPropertyLiteralMapped(omrsPropertyName)) {
+                    } else if (isOmrsPropertyLiteralMapped(omrsPropertyName)) {
                         Object literalValue = getOmrsPropertyLiteralValue(omrsPropertyName);
                         boolean valuesAreEqual = IGCRepositoryHelper.equivalentValues(literalValue, condition.getOperator(), condition.getValue());
                         if (valuesAreEqual && !matchCriteria.equals(MatchCriteria.ALL)) {
@@ -477,6 +477,128 @@ public abstract class InstanceMapping {
                 break;
         }
 
+    }
+
+    /**
+     * Retrieve the value of the provided header property name as an InstancePropertyValue from the
+     * provided EntityDetail object.
+     *
+     * @param ed EntityDetail from which to retrieve the header property's value
+     * @param propertyName name of the header property whose value we should retrieve
+     * @return InstancePropertyValue
+     */
+    public static InstancePropertyValue getHeaderPropertyValue(EntityDetail ed,
+                                                               String propertyName) {
+
+        InstancePropertyValue ipv;
+
+        switch (propertyName) {
+            case "createdBy":
+                ipv = convertValueToIPV(ed.getCreatedBy());
+                break;
+            case "updatedBy":
+                ipv = convertValueToIPV(ed.getUpdatedBy());
+                break;
+            case "createTime":
+                ipv = convertValueToIPV(ed.getCreateTime());
+                break;
+            case "updateTime":
+                ipv = convertValueToIPV(ed.getUpdateTime());
+                break;
+            case "maintainedBy":
+                ipv = convertValueToIPV(ed.getMaintainedBy());
+                break;
+            case "version":
+                ipv = convertValueToIPV(ed.getVersion());
+                break;
+            case "metadataCollectionId":
+                ipv = convertValueToIPV(ed.getMetadataCollectionId());
+                break;
+            case "metadataCollectionName":
+                ipv = convertValueToIPV(ed.getMetadataCollectionName());
+                break;
+            case "replicatedBy":
+                ipv = convertValueToIPV(ed.getReplicatedBy());
+                break;
+            case "instanceLicense":
+                ipv = convertValueToIPV(ed.getInstanceLicense());
+                break;
+            case "mappingProperties":
+                ipv = convertValueToIPV(ed.getMappingProperties());
+                break;
+            case "instanceProvenanceType":
+                ipv = convertValueToIPV(ed.getInstanceProvenanceType());
+                break;
+            case "guid":
+                ipv = convertValueToIPV(ed.getGUID());
+                break;
+            case "instanceURL":
+                ipv = convertValueToIPV(ed.getInstanceURL());
+                break;
+            default:
+                // Currently no other header properties (besides 'type', which we'll exclude)
+                ipv = null;
+                break;
+        }
+
+        return ipv;
+
+    }
+
+    /**
+     * Convert a basic Java value into an InstancePropertyValue representation.
+     *
+     * @param value to convert
+     * @return InstancePropertyValue
+     */
+    @SuppressWarnings("unchecked")
+    private static InstancePropertyValue convertValueToIPV(Object value) {
+        InstancePropertyValue ipv = null;
+        if (value == null) {
+            return null;
+        } else if (value instanceof String) {
+            PrimitivePropertyValue ppv = new PrimitivePropertyValue();
+            ppv.setPrimitiveDefCategory(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_STRING);
+            ppv.setPrimitiveValue(value);
+            ipv = ppv;
+        } else if (value instanceof Date) {
+            PrimitivePropertyValue ppv = new PrimitivePropertyValue();
+            ppv.setPrimitiveDefCategory(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_DATE);
+            ppv.setPrimitiveValue(((Date)value).getTime());
+            ipv = ppv;
+        } else if (value instanceof Long) {
+            PrimitivePropertyValue ppv = new PrimitivePropertyValue();
+            ppv.setPrimitiveDefCategory(PrimitiveDefCategory.OM_PRIMITIVE_TYPE_LONG);
+            ppv.setPrimitiveValue(value);
+            ipv = ppv;
+        } else if (value instanceof List) {
+            List<?> asList = (List<?>) value;
+            ArrayPropertyValue apv = new ArrayPropertyValue();
+            apv.setArrayCount(asList.size());
+            int index = 0;
+            for (Object arrayValue : asList) {
+                InstancePropertyValue innerValue = convertValueToIPV(arrayValue);
+                apv.setArrayValue(index, innerValue);
+                index++;
+            }
+            ipv = apv;
+        } else if (value instanceof Map) {
+            Map<String, ?> asMap = (Map<String, ?>) value;
+            MapPropertyValue mpv = new MapPropertyValue();
+            for (Map.Entry<String, ?> entry : asMap.entrySet()) {
+                Object innerValue = entry.getValue();
+                mpv.setMapValue(entry.getKey(), convertValueToIPV(innerValue));
+            }
+            ipv = mpv;
+        } else if (value instanceof InstanceProvenanceType) {
+            InstanceProvenanceType asIPT = (InstanceProvenanceType) value;
+            EnumPropertyValue epv = new EnumPropertyValue();
+            epv.setOrdinal(asIPT.getOrdinal());
+            epv.setSymbolicName(asIPT.getName());
+            epv.setDescription(asIPT.getDescription());
+            ipv = epv;
+        }
+        return ipv;
     }
 
     /**
