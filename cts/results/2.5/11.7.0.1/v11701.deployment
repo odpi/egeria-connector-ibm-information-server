@@ -1,0 +1,121 @@
+Name:         v11701-ibm-igc-7986fc5bdd-dr45q
+Namespace:    default
+Priority:     0
+Node:         cgk8s-node-3.fyre.ibm.com/9.20.194.199
+Start Time:   Tue, 15 Dec 2020 02:09:11 -0800
+Labels:       app.kubernetes.io/component=ibm-igc-service
+              app.kubernetes.io/instance=v11701
+              app.kubernetes.io/name=ec-cts-ibmis
+              pod-template-hash=7986fc5bdd
+Annotations:  <none>
+Status:       Running
+IP:           10.233.64.28
+IPs:
+  IP:           10.233.64.28
+Controlled By:  ReplicaSet/v11701-ibm-igc-7986fc5bdd
+Init Containers:
+  init-connector:
+    Container ID:  docker://7940c356179d123cfcf17d6b89360fc6a5015080191363c7c7da3ebbf574c5b7
+    Image:         docker.io/odpi/egeria-configure:2.5
+    Image ID:      docker-pullable://odpi/egeria-configure@sha256:d2d11d864d69b86f9228d4d06f596baea75a16b485a4a822b2d3c2408b53cbc5
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      /bin/bash
+      -c
+      cd /opt/egeria/connectors && wget ${CONNECTOR_URL}
+      
+    State:          Terminated
+      Reason:       Completed
+      Exit Code:    0
+      Started:      Tue, 15 Dec 2020 02:10:02 -0800
+      Finished:     Tue, 15 Dec 2020 02:10:05 -0800
+    Ready:          True
+    Restart Count:  3
+    Environment Variables from:
+      v11701-configmap  ConfigMap  Optional: false
+    Environment:        <none>
+    Mounts:
+      /opt/egeria/connectors from egeria-igc-connector-volume (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-qs6sx (ro)
+Containers:
+  proxy:
+    Container ID:   docker://0753183c2bd208645044efdf439e74ffb1bd9757420dfa2699ae91559fc26b3b
+    Image:          docker.io/odpi/egeria:2.5
+    Image ID:       docker-pullable://odpi/egeria@sha256:0f7ee68bb53664c2013bc5a308898e0ffff00883bf4d326b46b300f67e56c315
+    Port:           9443/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Tue, 15 Dec 2020 02:10:08 -0800
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     1
+      memory:  2Gi
+    Requests:
+      cpu:      250m
+      memory:   1Gi
+    Readiness:  tcp-socket :9443 delay=10s timeout=1s period=10s #success=1 #failure=6
+    Environment Variables from:
+      v11701-configmap  ConfigMap  Optional: false
+    Environment:
+      LOADER_PATH:                                       /opt/egeria/connectors
+      LOGGING_LEVEL_ORG_ODPI_EGERIA_CONNECTORS_IBM_IGC:  DEBUG
+    Mounts:
+      /opt/egeria/connectors from egeria-igc-connector-volume (ro)
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-qs6sx (ro)
+  ibm-igc:
+    Container ID:   docker://108dc2cd25c66ce42672c9360523b119e1277dbf130769bdc283d02dd4234ef7
+    Image:          hyc-daell-infosvr-docker-local.artifactory.swg-devops.com/ibm/infosvr:v11701-samples
+    Image ID:       docker-pullable://hyc-daell-infosvr-docker-local.artifactory.swg-devops.com/ibm/infosvr@sha256:40a86f959041044d6491bec36eefef919693d15bebbe155e30c50c34a8d1ac12
+    Ports:          9446/TCP, 52181/TCP, 59092/TCP
+    Host Ports:     0/TCP, 0/TCP, 0/TCP
+    State:          Running
+      Started:      Tue, 15 Dec 2020 02:10:08 -0800
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     6
+      memory:  8Gi
+    Requests:
+      cpu:        2
+      memory:     4Gi
+    Liveness:     http-get https://:9446/ibm/iis/launchpad delay=720s timeout=1s period=20s #success=1 #failure=3
+    Readiness:    http-get https://:9446/ibm/iis/launchpad delay=300s timeout=1s period=20s #success=1 #failure=12
+    Environment:  <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-qs6sx (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  egeria-igc-connector-volume:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+  default-token-qs6sx:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-qs6sx
+    Optional:    false
+QoS Class:       Burstable
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type     Reason     Age                From               Message
+  ----     ------     ----               ----               -------
+  Normal   Scheduled  36m                default-scheduler  Successfully assigned default/v11701-ibm-igc-7986fc5bdd-dr45q to cgk8s-node-3.fyre.ibm.com
+  Warning  BackOff    35m (x3 over 35m)  kubelet            Back-off restarting failed container
+  Normal   Pulling    35m (x4 over 36m)  kubelet            Pulling image "docker.io/odpi/egeria-configure:2.5"
+  Normal   Pulled     35m (x4 over 36m)  kubelet            Successfully pulled image "docker.io/odpi/egeria-configure:2.5"
+  Normal   Created    35m (x4 over 36m)  kubelet            Created container init-connector
+  Normal   Started    35m (x4 over 36m)  kubelet            Started container init-connector
+  Normal   Pulling    35m                kubelet            Pulling image "docker.io/odpi/egeria:2.5"
+  Normal   Pulled     35m                kubelet            Successfully pulled image "docker.io/odpi/egeria:2.5"
+  Normal   Created    35m                kubelet            Created container proxy
+  Normal   Started    35m                kubelet            Started container proxy
+  Normal   Pulled     35m                kubelet            Container image "hyc-daell-infosvr-docker-local.artifactory.swg-devops.com/ibm/infosvr:v11701-samples" already present on machine
+  Normal   Created    35m                kubelet            Created container ibm-igc

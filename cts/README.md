@@ -29,6 +29,21 @@ connector. For each release, you will find the following details:
     - `cohort.coco.cts.local` - the local CTS Workbench cohort registration
     - `cohort.coco.cts.remote` - the cohort members considered remote from the CTS Workbench's perspective
 
+## Egeria 2.5
+
+| IGC version | Conformant profile(s) | Notes |
+| :--- | :--- | :--- |
+| [v11.5.0.2 SP3](results/2.5/11.5.0.2sp3) | (not tested) | (see notes on testing the full breadth of v11.5.x) |
+| [v11.5.0.2 SP5](results/2.5/11.5.0.2sp5) | Metadata sharing, Relationship search | (run locally using AdoptOpenJDK 1.8.0_275-b01) |
+| [v11.5.0.2 SP6](results/2.5/11.5.0.2sp6) | (not tested) | (see notes on testing the full breadth of v11.5.x) |
+| [v11.7.0.0](results/2.5/11.7.0.0) | Metadata sharing, Relationship search | [known issue](https://github.com/odpi/egeria-connector-ibm-information-server/issues/457) |
+| [v11.7.0.1](results/2.5/11.7.0.1) | Metadata sharing, Relationship search | [known issue](https://github.com/odpi/egeria-connector-ibm-information-server/issues/457) |
+| [v11.7.0.1 SP1](results/2.5/11.7.0.1sp1) | Metadata sharing, Relationship search | [known issue](https://github.com/odpi/egeria-connector-ibm-information-server/issues/457) |
+| [v11.7.0.2](results/2.5/11.7.0.2) | Metadata sharing (limited), Relationship search | (see known issues and [known issue](https://github.com/odpi/egeria-connector-ibm-information-server/issues/457)) |
+| [v11.7.1.0](results/2.5/11.7.1.0) | Metadata sharing (limited), Relationship search | (see known issues and [known issue](https://github.com/odpi/egeria-connector-ibm-information-server/issues/457)) |
+| [v11.7.1.0 SP1](results/2.5/11.7.1.0sp1) | Metadata sharing (limited), Relationship search | (see known issues and [known issue](https://github.com/odpi/egeria-connector-ibm-information-server/issues/457)) |
+| [v11.7.1.0 SP2](results/2.5/11.7.1.0sp2) | Metadata sharing (limited), Relationship search | (see known issues and [known issue](https://github.com/odpi/egeria-connector-ibm-information-server/issues/457)) |
+
 ## Egeria 2.2
 
 | IGC version | Conformant profile(s) | Notes |
@@ -179,6 +194,12 @@ make use of the IGC connector you are strongly encouraged to upgrade to the near
 - v11.5.0.2 SP6 - there appears to be a bug in this release on pagination of complex search criteria, causing some of the `find...` methods to fail
 - v11.7.0.0 - this release models a database column's length as an array of strings, causing deserialization to fail (a workaround may be implemented under issue [#229](https://github.com/odpi/egeria-connector-ibm-information-server/issues/229))
 - v11.7.0.2+ - these releases no longer support searching against the `long_description` property of IGC in combination with other search criteria, and therefore they cannot fully support all of the `find...` methods (tracked under issue [#215](https://github.com/odpi/egeria-connector-ibm-information-server/issues/215))
+
+### No longer testing the full breadth of v11.5.x
+
+Information Server v11.5.x uses the TLS v1.0 communication standard, which has now been deprecated for several years.
+This makes ongoing testing of these releases significantly more cumbersome, and therefore we will only continue testing
+a single v11.5.x release (v11.5.0.2sp5) for as long as remains feasible going forward.
 
 ----
 License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/),
