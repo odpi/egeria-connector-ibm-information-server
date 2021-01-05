@@ -16,7 +16,7 @@
 
     <groupId>org.odpi.egeria</groupId>
     <artifactId>egeria-connector-ibm-information-server</artifactId>
-    <version>2.5-SNAPSHOT</version>
+    <version>2.6-SNAPSHOT</version>
 
     <url>https://odpi.github.io/Egeria</url>
 
@@ -85,7 +85,7 @@
     </modules>
 
     <properties>
-        <open-metadata.version>2.5-SNAPSHOT</open-metadata.version>
+        <open-metadata.version>2.6-SNAPSHOT</open-metadata.version>
         <!-- Level of Java  -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -600,6 +600,7 @@
                         <exclude>cts/results/**/*.remote</exclude>
                         <exclude>cts/results/**/*.deployment</exclude>
                         <exclude>cts/results/**/*.configmap</exclude>
+                        <exclude>cts/results/**/*.registrystore</exclude>
                         <exclude>**/resources/ia/*.xml</exclude>
                         <exclude>**/resources/openigc/*.xml</exclude>
                     </excludes>

@@ -26,8 +26,8 @@ using Egeria:
 
 The quick version (same for all connectors):
 
-1. Download the latest IBM Information Server connector from: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/2.5-SNAPSHOT/egeria-connector-ibm-information-server-package-2.5-SNAPSHOT-jar-with-dependencies.jar
-1. Download the latest Egeria core from: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/server-chassis-spring/2.5-SNAPSHOT/server-chassis-spring-2.5-SNAPSHOT.jar
+1. Download the latest IBM Information Server connector from: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/2.6-SNAPSHOT/egeria-connector-ibm-information-server-package-2.6-SNAPSHOT-jar-with-dependencies.jar
+1. Download the latest Egeria core from: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/server-chassis-spring/2.6-SNAPSHOT/server-chassis-spring-2.6-SNAPSHOT.jar
 1. Rename the downloaded Egeria core file to `egeria-server-chassis-spring.jar`.
 1. Download the `truststore.p12` file from: https://github.com/odpi/egeria/blob/master/truststore.p12
 1. Run the following command to start Egeria from the command-line, waiting for the final line of output indicating the
@@ -64,8 +64,8 @@ placing the file into the `/lib` directory as `/lib/egeria-connector-ibm-informa
 To download a pre-built version of the connector, use either of the following URLs (depending on whether you want an
 officially-released version or the latest snapshot):
 
-- Release: https://odpi.jfrog.io/odpi/egeria-release-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/2.2/egeria-connector-ibm-information-server-package-2.2-jar-with-dependencies.jar
-- Snapshot: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/2.5-SNAPSHOT/egeria-connector-ibm-information-server-package-2.5-SNAPSHOT-jar-with-dependencies.jar
+- Release: https://odpi.jfrog.io/odpi/egeria-release-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/2.5/egeria-connector-ibm-information-server-package-2.5-jar-with-dependencies.jar
+- Snapshot: https://odpi.jfrog.io/odpi/egeria-snapshot-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/2.6-SNAPSHOT/egeria-connector-ibm-information-server-package-2.6-SNAPSHOT-jar-with-dependencies.jar
 
 #### Building the connectors yourself
 
