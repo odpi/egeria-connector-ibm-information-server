@@ -1777,11 +1777,10 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                     String igcPropertyName,
                                                     String userId) {
 
-        log.debug(" ... single reference: {} of type {}", igcRelationship.getName(), igcRelationship.getType());
         if (igcRelationship != null
                 && igcRelationship.getType() != null
                 && !igcRelationship.getType().equals("null")) {
-
+            log.debug(" ... single reference: {} of type {}", igcRelationship.getName(), igcRelationship.getType());
             try {
                 Relationship omrsRelationship = getMappedRelationship(
                         igcomrsRepositoryConnector,
@@ -1798,6 +1797,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 log.error("Unable to add relationship {} for object {}", mapping.getOmrsRelationshipType(), igcRelationship, e);
             }
 
+        } else {
+            log.debug(" ... skipping null relationship.");
         }
 
     }
@@ -1820,11 +1821,10 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                                   Reference proxyOne,
                                                                   Reference proxyTwo,
                                                                   String userId) {
-        log.debug(" ... single reference: {} of type {}", proxyTwo.getName(), proxyTwo.getType());
         if (proxyTwo != null
                 && proxyTwo.getType() != null
                 && !proxyTwo.getType().equals("null")) {
-
+            log.debug(" ... single reference: {} of type {}", proxyTwo.getName(), proxyTwo.getType());
             try {
                 RelationshipDef omrsRelationshipDef = (RelationshipDef) igcomrsRepositoryConnector.getRepositoryHelper().getTypeDefByName(
                         igcomrsRepositoryConnector.getRepositoryName(),
@@ -1847,7 +1847,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
             } catch (RepositoryErrorException e) {
                 log.error("Unable to add relationship {} for object {}", mapping.getOmrsRelationshipType(), proxyTwo, e);
             }
-
+        } else {
+            log.debug(" ... skipping null relationship.");
         }
     }
 
