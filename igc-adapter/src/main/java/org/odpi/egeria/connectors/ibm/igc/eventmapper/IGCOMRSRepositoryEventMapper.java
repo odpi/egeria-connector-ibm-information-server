@@ -1354,7 +1354,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 List<Classification> classifications = detail.getClassifications();
                 if (classifications != null) {
                     for (Classification classification : classifications) {
-                        sendNewClassification(detail);
+                        sendNewClassification(detail, classification);
                     }
                 }
             } else {
@@ -1442,7 +1442,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         ArrayList<String> matchingGUIDs = new ArrayList<>();
         for (String guid : latestClassificationByGUID.keySet()) {
             if (!lastClassificationByGUID.containsKey(guid)) {
-                sendNewClassification(detail);
+                sendNewClassification(detail, latestClassificationByGUID.get(guid));
             } else {
                 matchingGUIDs.add(guid);
             }
@@ -1450,7 +1450,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         // Then iterate through the last version, to find any removed classifications
         for (String guid : lastClassificationByGUID.keySet()) {
             if (!latestClassificationByGUID.containsKey(guid)) {
-                sendRemovedClassification(detail);
+                sendRemovedClassification(detail, lastClassificationByGUID.get(guid));
             }
         }
         // Finally, iterate through the classifications that are the same type and see if there are any changes
@@ -1458,7 +1458,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
             Classification latest = latestClassificationByGUID.get(matchingGUID);
             Classification last = lastClassificationByGUID.get(matchingGUID);
             if (!latest.equals(last)) {
-                sendChangedClassification(detail);
+                sendChangedClassification(detail, last, latest);
             }
         }
 
@@ -1489,15 +1489,17 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      * Send an event for a new classification being added to the entity's detail.
      *
      * @param detail the entity for which to send a new classification event
+     * @param classification the new classification
      */
-    private void sendNewClassification(EntityDetail detail) {
+    private void sendNewClassification(EntityDetail detail, Classification classification) {
         repositoryEventProcessor.processClassifiedEntityEvent(
                 sourceName,
                 metadataCollectionId,
                 originatorServerName,
                 originatorServerType,
                 null,
-                detail
+                detail,
+                classification
         );
     }
 
@@ -1505,15 +1507,21 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      * Send an event for an existing classification being changed on an entity's detail.
      *
      * @param detail the entity for which to send a changed classification event
+     * @param original classification
+     * @param updated classification
      */
-    private void sendChangedClassification(EntityDetail detail) {
+    private void sendChangedClassification(EntityDetail detail,
+                                           Classification original,
+                                           Classification updated) {
         repositoryEventProcessor.processReclassifiedEntityEvent(
                 sourceName,
                 metadataCollectionId,
                 originatorServerName,
                 originatorServerType,
                 null,
-                detail
+                detail,
+                original,
+                updated
         );
     }
 
@@ -1521,15 +1529,17 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
      * Send an event for a classification having been removed from an entity's detail.
      *
      * @param detail the entity for which to send a removed classification event
+     * @param classification that was removed
      */
-    private void sendRemovedClassification(EntityDetail detail) {
+    private void sendRemovedClassification(EntityDetail detail, Classification classification) {
         repositoryEventProcessor.processDeclassifiedEntityEvent(
                 sourceName,
                 metadataCollectionId,
                 originatorServerName,
                 originatorServerType,
                 null,
-                detail
+                detail,
+                classification
         );
     }
 
