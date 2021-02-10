@@ -87,3 +87,6 @@ _site/**
 _layouts/**
 Gemfile
 
+# ignore settings.xml used for automating packaging
+settings.xml
+
