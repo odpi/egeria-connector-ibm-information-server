@@ -438,19 +438,15 @@
     </repositories>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
-        <repository>
+        <snapshotRepository>
             <id>github</id>
             <name>GitHub IBM Apache Maven Packages</name>
             <url>https://maven.pkg.github.com/odpi/egeria-connector-ibm-information-server</url>
-        </repository>
+        </snapshotRepository>
     </distributionManagement>
 
 
