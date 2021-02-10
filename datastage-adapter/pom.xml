@@ -94,8 +94,8 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>verify</id>
-                        <phase>verify</phase>
+                        <id>package</id>
+                        <phase>package</phase>
                         <goals>
                             <goal>stop</goal>
                         </goals>
