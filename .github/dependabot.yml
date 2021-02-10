@@ -1,0 +1,13 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the ODPi Egeria project.
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: "/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 100
+    reviewers:
+      - cmgrote
+...
