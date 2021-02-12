@@ -705,6 +705,7 @@ public abstract class EntityMapping extends InstanceMapping {
      */
     public static EntityDetail getEntityDetail(ObjectCache cache, EntityMappingInstance entityMap) throws RepositoryErrorException {
 
+        final String methodName = "getEntityDetail";
         EntityMapping mapping = entityMap.getMapping();
         IGCRestClient igcRestClient = entityMap.getRepositoryConnector().getIGCRestClient();
 
@@ -719,6 +720,10 @@ public abstract class EntityMapping extends InstanceMapping {
 
         // Handle any super-generic mappings first
         entityMap.initializeEntityDetail();
+
+        if(entityMap.getIgcEntity() == null) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN, methodName, null, entityMap.getOmrsDetail(cache).getGUID(), entityMap.getIgcEntityRid(), entityMap.getRepositoryConnector().getRepositoryName());
+        }
 
         EntityDetail preliminary = entityMap.getOmrsDetail(cache);
         if (preliminary != null) {
