@@ -106,7 +106,7 @@
         <rhino.version>1.7.13</rhino.version>
         <netty.version>4.1.59.Final</netty.version>
         <httpclient.version>4.5.13</httpclient.version>
-        <woodstox.version>6.2.3</woodstox.version>
+        <woodstox.version>6.2.4</woodstox.version>
         <xmlapi.version>1.4.01</xmlapi.version>
         <stax.version>1.0.1</stax.version>
         <maven-compiler.version>3.8.1</maven-compiler.version>
