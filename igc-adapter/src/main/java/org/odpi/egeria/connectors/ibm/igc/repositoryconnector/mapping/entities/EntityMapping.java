@@ -725,7 +725,12 @@ public abstract class EntityMapping extends InstanceMapping {
 
         if(entityMap.getIgcEntity() == null) {
             // Igc entity was not found, raise exception providing as much details as possible
-            raiseRepositoryErrorException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN, methodName, null, preliminary !=null ? preliminary.getGUID() : "", entityMap.getIgcEntityRid() !=null ? entityMap.getIgcEntityRid() : "", entityMap.getRepositoryConnector().getRepositoryName());
+            raiseRepositoryErrorException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN,
+                    methodName,
+                    null,
+                    preliminary !=null ? preliminary.getGUID() : "",
+                    entityMap.getIgcEntityRid() !=null ? entityMap.getIgcEntityRid() : "",
+                    entityMap.getRepositoryConnector().getRepositoryName());
         }
 
         if (preliminary != null) {
