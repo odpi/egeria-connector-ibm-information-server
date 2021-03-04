@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SemanticAssignmentMapper;
 
 /**
  * Defines the common mappings to the OMRS "Asset" entity.
@@ -38,6 +39,9 @@ public class AssetMapper extends ReferenceableMapper {
         addLiteralPropertyMapping("ownerType", null);
         addLiteralPropertyMapping("zoneMembership", null);
         addLiteralPropertyMapping("latestChange", null);
+
+        // Term assignment can be done on any subtypes
+        addRelationshipMapper(SemanticAssignmentMapper.getInstance(null));
 
     }
 

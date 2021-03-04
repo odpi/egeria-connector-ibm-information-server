@@ -114,7 +114,6 @@ public class ReferenceableMapper extends OpenMetadataRootMapper {
     private void init(String igcRidPrefix, boolean includeDefaultRelationships) {
         if (includeDefaultRelationships) {
             // common set of relationships that could apply to all IGC objects (and all OMRS Referenceables)
-            addRelationshipMapper(SemanticAssignmentMapper.getInstance(null));
             addRelationshipMapper(AttachedTagMapper.getInstance(null));
             if (igcRidPrefix == null) {
                 // Only include NoteLogs for non-generated entities

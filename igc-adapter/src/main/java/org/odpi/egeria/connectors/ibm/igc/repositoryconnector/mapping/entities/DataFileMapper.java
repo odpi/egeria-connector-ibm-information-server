@@ -46,6 +46,7 @@ public class DataFileMapper extends DataStoreMapper {
         );
 
         // The list of properties that should be mapped
+        addSimplePropertyMapping("path", "pathName");
         addComplexOmrsProperty("fileType");
 
         // The list of relationships that should be mapped

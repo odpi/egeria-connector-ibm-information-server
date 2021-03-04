@@ -127,16 +127,22 @@ public class MockConstants {
      * @param properties the properties to include in the results
      * @param pageSize the number of results per page
      * @param begin the result index to start from
+     * @param includeSorting whether or not to include sorting
      * @return HttpRequest
      */
-    public static HttpRequest nextPageRequest(String types, List<String> properties, String pageSize, String begin) {
-        return request().withMethod("GET").withPath(IGC_REST_EP + "search")
+    public static HttpRequest nextPageRequest(String types, List<String> properties, String pageSize, String begin, boolean includeSorting) {
+        HttpRequest request = request().withMethod("GET").withPath(IGC_REST_EP + "search")
                 .withQueryStringParameters(
                         param("types", types),
                         param("properties", properties),
                         param("pageSize", pageSize),
-                        param("begin", begin)
+                        param("begin", begin),
+                        param("where", "{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"and\"}")
                 );
+        if (includeSorting) {
+            return request.withQueryStringParameter(param("sorts", "SearchSort{property='_id', ascending=true}"));
+        }
+        return request;
     }
 
     /**

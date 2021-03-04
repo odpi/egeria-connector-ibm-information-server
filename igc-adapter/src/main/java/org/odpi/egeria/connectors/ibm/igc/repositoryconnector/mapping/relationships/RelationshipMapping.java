@@ -428,7 +428,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
         if (matchProperties == null || getAllNoneOrSome(repositoryConnector, matchProperties).equals(SearchFilter.NONE)) {
             searches = new ArrayList<>();
             ProxyMapping pm = getProxyTwoMapping();
-            IGCSearch igcSearch = new IGCSearch(pm.getIgcAssetType());
+            IGCSearch igcSearch = new IGCSearch(pm.getAllPossibleAssetTypes());
             IGCSearchConditionSet conditions = new IGCSearchConditionSet(IGCRestConstants.getConditionToForceNoSearchResults());
             igcSearch.addConditions(conditions);
             searches.add(igcSearch);
@@ -449,7 +449,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
         // likely to be the same regardless -- instead always start from TWO and retrieve ONE
         List<IGCSearch> searches = new ArrayList<>();
         ProxyMapping pm = getProxyTwoMapping();
-        IGCSearch igcSearch = new IGCSearch(pm.getIgcAssetType());
+        IGCSearch igcSearch = new IGCSearch(pm.getAllPossibleAssetTypes());
 
         List<String> relationshipProperties = pm.getRealIgcRelationshipProperties();
 
@@ -536,7 +536,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @return boolean
      */
     public boolean sameTypeOnBothEnds() {
-        return one.getIgcAssetType().equals(two.getIgcAssetType());
+        return one.getAllPossibleAssetTypes().equals(two.getAllPossibleAssetTypes());
     }
 
     /**
@@ -564,13 +564,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
             log.error("No asset type provided.");
         } else {
             String simpleType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
-            if (simpleType.equals(one.getIgcAssetType())) {
+            if (one.matchesAssetType(simpleType)) {
                 same = this.one;
-            } else if (simpleType.equals(two.getIgcAssetType())) {
-                same = this.two;
-            } else if (one.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !one.excludeIgcAssetType.contains(simpleType)) {
-                same = this.one;
-            } else if (two.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !two.excludeIgcAssetType.contains(simpleType)) {
+            } else if (two.matchesAssetType(simpleType)) {
                 same = this.two;
             } else {
                 log.error("getProxyFromType - Provided asset type does not match either proxy type (or was explicitly excluded): {}", simpleType);
@@ -595,13 +591,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
             log.error("No asset type provided.");
         } else {
             String simpleType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
-            if (simpleType.equals(one.getIgcAssetType())) {
+            if (one.matchesAssetType(simpleType)) {
                 other = this.two;
-            } else if (simpleType.equals(two.getIgcAssetType())) {
-                other = this.one;
-            } else if (one.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !one.excludeIgcAssetType.contains(simpleType)) {
-                other = this.two;
-            } else if (two.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !two.excludeIgcAssetType.contains(simpleType)) {
+            } else if (two.matchesAssetType(simpleType)) {
                 other = this.one;
             } else {
                 log.error("getOtherProxyFromType - Provided asset type does not match either proxy type (or was explicitly excluded): {}", simpleType);
@@ -626,16 +618,12 @@ public abstract class RelationshipMapping extends InstanceMapping {
             log.error("No asset type provided.");
         } else {
             String simpleType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
-            if (sameTypeOnBothEnds() && simpleType.equals(one.getIgcAssetType())) {
+            if (sameTypeOnBothEnds() && one.matchesAssetType(simpleType)) {
                 addRealPropertiesToSet(one.getIgcRelationshipProperties(), properties);
                 addRealPropertiesToSet(two.getIgcRelationshipProperties(), properties);
-            } else if (simpleType.equals(one.getIgcAssetType())) {
+            } else if (one.matchesAssetType(simpleType)) {
                 addRealPropertiesToSet(one.getIgcRelationshipProperties(), properties);
-            } else if (simpleType.equals(two.getIgcAssetType())) {
-                addRealPropertiesToSet(two.getIgcRelationshipProperties(), properties);
-            } else if (one.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !one.excludeIgcAssetType.contains(simpleType)) {
-                addRealPropertiesToSet(one.getIgcRelationshipProperties(), properties);
-            } else if (two.getIgcAssetType().equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !two.excludeIgcAssetType.contains(simpleType)) {
+            } else if (two.matchesAssetType(simpleType)) {
                 addRealPropertiesToSet(two.getIgcRelationshipProperties(), properties);
             } else {
                 log.warn("getIgcRelationshipPropertiesForType - Provided asset type does not match either proxy type (or was explicitly excluded): {}", simpleType);
@@ -661,9 +649,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
             log.error("No asset type provided.");
         } else {
             String simpleType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
-            if (getOptimalStart().equals(OptimalStart.ONE) && simpleType.equals(one.getIgcAssetType())) {
+            if (getOptimalStart().equals(OptimalStart.ONE) && one.matchesAssetType(simpleType)) {
                 addRealPropertiesToSet(one.getIgcRelationshipProperties(), properties);
-            } else if (getOptimalStart().equals(OptimalStart.TWO) && simpleType.equals(two.getIgcAssetType())) {
+            } else if (getOptimalStart().equals(OptimalStart.TWO) && two.matchesAssetType(simpleType)) {
                 addRealPropertiesToSet(two.getIgcRelationshipProperties(), properties);
             }
         }
@@ -695,6 +683,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
         private String omrsRelationshipProperty;
         private String igcRidPrefix;
         private Set<String> excludeIgcAssetType;
+        private Set<String> allAssetTypes;
 
         ProxyMapping(String igcAssetType,
                      String igcRelationshipProperty,
@@ -709,15 +698,17 @@ public abstract class RelationshipMapping extends InstanceMapping {
             this.omrsRelationshipProperty = omrsRelationshipProperty;
             this.igcRidPrefix = igcRidPrefix;
             this.excludeIgcAssetType = new HashSet<>();
+            this.allAssetTypes = new TreeSet<>();
+            allAssetTypes.add(igcAssetType);
 
         }
 
         /**
-         * Retrieve the type of IGC asset that is expected by this side of the relationship mapping.
+         * Retrieve the list of all possible IGC assets that could be setup on this side of the relationship mapping.
          *
          * @return String
          */
-        public String getIgcAssetType() { return this.igcAssetType; }
+        public List<String> getAllPossibleAssetTypes() { return new ArrayList<>(allAssetTypes); }
 
         /**
          * Retrieve the list of IGC relationship properties that can be used from this side of the relationship
@@ -777,6 +768,19 @@ public abstract class RelationshipMapping extends InstanceMapping {
         boolean isSelfReferencing() { return this.igcRelationshipProperties.contains(SELF_REFERENCE_SENTINEL); }
 
         /**
+         * Use this method to add any other objects that could also be included in this end of the relationship.
+         *
+         * @param igcAssetType the IC asset type to include as an additional potential endpoint of the relationship
+         */
+        void addAdditionalAssetType(String igcAssetType) {
+            if (igcAssetType != null) {
+                this.allAssetTypes.add(igcAssetType);
+            } else {
+                log.warn("Attempted to add null type to mapping -- IGC.");
+            }
+        }
+
+        /**
          * When the asset this applies to is a 'main_object', use this method to add any objects that should NOT be
          * included under that umbrella.
          *
@@ -800,7 +804,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
         public boolean matchesAssetType(String igcAssetType) {
             String simplifiedType = IGCRestConstants.getAssetTypeForSearch(igcAssetType);
             return (
-                    this.igcAssetType.equals(simplifiedType)
+                    this.allAssetTypes.contains(simplifiedType)
                     || (this.igcAssetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE) && !this.excludeIgcAssetType.contains(simplifiedType))
                     || (hasLinkingAsset() && simplifiedType.equals(getLinkingAssetType()))
             );
@@ -808,8 +812,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
         @Override
         public String toString() {
-            return "igcAssetType=" +
-                    igcAssetType +
+            return "igcAssetTypes=" +
+                    allAssetTypes +
                     ", omrsRelationshipProperty=" +
                     omrsRelationshipProperty +
                     ", igcRidPrefix=" +
@@ -1551,6 +1555,8 @@ public abstract class RelationshipMapping extends InstanceMapping {
                 for (String igcRelationshipName : igcProperties) {
                     IGCSearchCondition condition = new IGCSearchCondition(igcRelationshipName, "=", fromIgcObject.getId());
                     IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(condition);
+                    List<String> typesList = new ArrayList<>();
+                    typesList.add(assetType);
                     addSearchResultsToRelationships(
                             igcomrsRepositoryConnector,
                             mapping,
@@ -1558,7 +1564,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                             cache,
                             fromIgcObject,
                             igcSearchConditionSet,
-                            assetType,
+                            typesList,
                             igcRelationshipName,
                             fromRelationshipElement,
                             sequencingOrder,
@@ -1571,9 +1577,9 @@ public abstract class RelationshipMapping extends InstanceMapping {
 
                 // Otherwise, use the optimal retrieval for the relationship (a search that will batch-retrieve _context)
                 RelationshipMapping.ProxyMapping otherSide = mapping.getOtherProxyFromType(assetType);
-                log.debug(" ... found other proxy: {} with prefix {}", otherSide == null ? "(null)" : otherSide.getIgcAssetType(), otherSide == null ? "(null)" : otherSide.getIgcRidPrefix());
+                log.debug(" ... found other proxy: {} with prefix {}", otherSide == null ? "(null)" : otherSide.getAllPossibleAssetTypes(), otherSide == null ? "(null)" : otherSide.getIgcRidPrefix());
                 RelationshipMapping.ProxyMapping thisSide = mapping.getProxyFromType(assetType);
-                log.debug(" ... found this proxy: {} with prefix {}", thisSide == null ? "(null)" : thisSide.getIgcAssetType(), thisSide == null ? "(null)" : thisSide.getIgcRidPrefix());
+                log.debug(" ... found this proxy: {} with prefix {}", thisSide == null ? "(null)" : thisSide.getAllPossibleAssetTypes(), thisSide == null ? "(null)" : thisSide.getIgcRidPrefix());
 
                 String anIgcRelationshipProperty = null;
                 IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet();
@@ -1584,7 +1590,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                         igcSearchConditionSet.addCondition(condition);
                         anIgcRelationshipProperty = igcRelationshipName;
                     }
-                    String sourceAssetType = otherSide.getIgcAssetType();
+                    List<String> sourceAssetTypes = otherSide.getAllPossibleAssetTypes();
                     addSearchResultsToRelationships(
                             igcomrsRepositoryConnector,
                             mapping,
@@ -1592,7 +1598,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                             cache,
                             fromIgcObject,
                             igcSearchConditionSet,
-                            sourceAssetType,
+                            sourceAssetTypes,
                             anIgcRelationshipProperty,
                             fromRelationshipElement,
                             sequencingOrder,
@@ -1618,7 +1624,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      * @param cache a cache of information that may already have been retrieved about the provided object
      * @param fromIgcObject the object that is the source of the IGC relationship
      * @param igcSearchConditionSet the search criteria to use for the search
-     * @param assetType the type of IGC asset for which to search
+     * @param assetTypes the types of IGC asset for which to search
      * @param igcPropertyName the name of the IGC property to search against
      * @param fromRelationshipElement the starting element number of the relationships to return.
      *                                This is used when retrieving elements
@@ -1635,7 +1641,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                         ObjectCache cache,
                                                         Reference fromIgcObject,
                                                         IGCSearchConditionSet igcSearchConditionSet,
-                                                        String assetType,
+                                                        List<String> assetTypes,
                                                         String igcPropertyName,
                                                         int fromRelationshipElement,
                                                         SequencingOrder sequencingOrder,
@@ -1643,12 +1649,19 @@ public abstract class RelationshipMapping extends InstanceMapping {
                                                         String userId) throws RepositoryErrorException {
 
         final String methodName = "addSearchResultsToRelationships";
-        IGCSearch igcSearch = new IGCSearch(assetType, igcSearchConditionSet);
+        IGCSearch igcSearch = new IGCSearch(assetTypes, igcSearchConditionSet);
         try {
-            if (!assetType.equals(IGCRepositoryHelper.DEFAULT_IGC_TYPE)) {
-                if (igcomrsRepositoryConnector.getIGCRestClient().hasModificationDetails(assetType)) {
-                    igcSearch.addProperties(IGCRestConstants.getModificationProperties());
+            boolean allHaveModDetails = true;
+            for (String assetType : assetTypes) {
+                allHaveModDetails = igcomrsRepositoryConnector.getIGCRestClient().hasModificationDetails(assetType);
+                if (!allHaveModDetails) {
+                    break;
                 }
+            }
+            // Can only add modification details to the search criteria if ALL types that we are searching
+            // for contain modification details
+            if (allHaveModDetails) {
+                igcSearch.addProperties(IGCRestConstants.getModificationProperties());
             }
             IGCSearchSorting sorting = IGCRepositoryHelper.sortFromNonPropertySequencingOrder(sequencingOrder);
             if (sorting != null) {
