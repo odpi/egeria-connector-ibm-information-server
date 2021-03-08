@@ -975,7 +975,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                     igcRepositoryHelper,
                                     igcRelationshipGuid);
                             processAsset(cache, igcEntityGuid2.getRid(),
-                                    pmTwo.getIgcAssetType(),
+                                    proxyTwoType,
                                     igcRelationshipGuid,
                                     igcEntityGuid2.getGeneratedPrefix());
                         } else {
@@ -986,7 +986,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                                     igcRepositoryHelper,
                                     igcRelationshipGuid);
                             processAsset(cache, igcEntityGuid1.getRid(),
-                                    pmOne.getIgcAssetType(),
+                                    proxyOneType,
                                     igcRelationshipGuid,
                                     igcEntityGuid1.getGeneratedPrefix());
                         } else {

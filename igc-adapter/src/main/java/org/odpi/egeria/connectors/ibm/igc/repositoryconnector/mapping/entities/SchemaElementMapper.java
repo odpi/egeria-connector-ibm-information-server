@@ -15,6 +15,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCol
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SemanticAssignmentMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyCategory;
@@ -62,6 +63,9 @@ public class SchemaElementMapper extends ReferenceableMapper {
         addSimplePropertyMapping("short_description", "description");
         addLiteralPropertyMapping("isDeprecated", false);
         addComplexOmrsProperty("anchorGUID");
+
+        // Term relationship can be added to all subtypes
+        addRelationshipMapper(SemanticAssignmentMapper.getInstance(null));
 
     }
 

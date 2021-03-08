@@ -341,17 +341,15 @@ public class MockServerExpectations implements PluginExpectationInitializer {
         properties.add("modified_by");
         properties.add("modified_on");
         setSearchAndResponse(mockServerClient, caseName, "results_1.json",
-                json(
-                        "{\"types\":[\"term\"],\"pageSize\":2,\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"and\"}}",
-                        MatchType.ONLY_MATCHING_FIELDS
-                ));
+                "{\"types\":[\"term\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":2,\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"like %{0}%\",\"value\":\"address\"}],\"operator\":\"and\"},\"sorts\":[{\"property\":\"_id\",\"ascending\":true}]}");
         mockServerClient
                 .withSecure(true)
-                .when(nextPageRequest("term", properties, "2", "2"))
+                .when(nextPageRequest("term", properties, "2", "2", true))
                 .respond(withResponse(getResourceFileContents("by_case" + File.separator + "TermFindMultipage" + File.separator + "results_2.json")));
+        // Note: there appears to be a bug in IGC that prevents the sorting criteria from being passed on to subsequent pages of results
         mockServerClient
                 .withSecure(true)
-                .when(nextPageRequest("term", properties, "2", "4"))
+                .when(nextPageRequest("term", properties, "2", "4", false))
                 .respond(withResponse(getResourceFileContents("by_case" + File.separator + "TermFindMultipage" + File.separator + "results_3.json")));
     }
 
@@ -892,7 +890,7 @@ public class MockServerExpectations implements PluginExpectationInitializer {
     private void setGlossaryTermRelationships(MockServerClient mockServerClient) {
         String caseName = "GlossaryTermRelationships";
         setSearchAndResponse(mockServerClient, caseName, "assigned_assets.json",
-                "{\"types\":[\"main_object\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"assigned_to_terms\",\"operator\":\"=\",\"value\":\"" + TERM_RID + "\"}],\"operator\":\"or\"}}");
+                "{\"types\":[\"category\",\"data_class\",\"data_file\",\"data_file_field\",\"data_file_folder\",\"data_file_record\",\"database\",\"database_column\",\"database_schema\",\"database_table\",\"host\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"assigned_to_terms\",\"operator\":\"=\",\"value\":\"" + TERM_RID + "\"}],\"operator\":\"or\"}}");
         setSearchAndResponse(mockServerClient, caseName, "parent_category.json",
                 "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"modified_by\",\"modified_on\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"terms\",\"operator\":\"=\",\"value\":\"" + TERM_RID + "\"}],\"operator\":\"or\"}}");
     }

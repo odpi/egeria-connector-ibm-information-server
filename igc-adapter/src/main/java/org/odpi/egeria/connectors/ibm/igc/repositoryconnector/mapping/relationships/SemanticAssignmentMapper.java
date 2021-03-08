@@ -30,7 +30,7 @@ public class SemanticAssignmentMapper extends RelationshipMapping {
 
     protected SemanticAssignmentMapper() {
         super(
-                IGCRepositoryHelper.DEFAULT_IGC_TYPE,
+                "database_column",
                 "term",
                 "assigned_to_terms",
                 "assigned_assets",
@@ -44,13 +44,17 @@ public class SemanticAssignmentMapper extends RelationshipMapping {
         // term-to-term relationships) - we also need to exclude other assets which have no 'assigned_to_terms'
         // relationships
         ProxyMapping pmOne = getProxyOneMapping();
-        pmOne.addExcludedIgcAssetType("term");
-        pmOne.addExcludedIgcAssetType("connector");
-        pmOne.addExcludedIgcAssetType("data_connection");
-        pmOne.addExcludedIgcAssetType("group");
-        pmOne.addExcludedIgcAssetType("information_governance_policy");
-        pmOne.addExcludedIgcAssetType("label");
-        pmOne.addExcludedIgcAssetType("user");
+        pmOne.addAdditionalAssetType("database");
+        pmOne.addAdditionalAssetType("data_class");
+        pmOne.addAdditionalAssetType("data_file");
+        pmOne.addAdditionalAssetType("database_schema");
+        pmOne.addAdditionalAssetType("host");
+        pmOne.addAdditionalAssetType("data_file_folder");
+        pmOne.addAdditionalAssetType("category");
+        pmOne.addAdditionalAssetType("database_column");
+        pmOne.addAdditionalAssetType("database_table");
+        pmOne.addAdditionalAssetType("data_file_field");
+        pmOne.addAdditionalAssetType("data_file_record");
 
         addLiteralPropertyMapping("description", null);
         addLiteralPropertyMapping("expression", null);

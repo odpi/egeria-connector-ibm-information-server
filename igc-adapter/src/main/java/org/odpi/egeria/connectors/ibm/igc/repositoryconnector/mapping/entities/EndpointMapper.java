@@ -17,6 +17,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelpe
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.ConnectionEndpointMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SemanticAssignmentMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.PrimitivePropertyValue;
@@ -61,6 +62,7 @@ public class EndpointMapper extends ReferenceableMapper {
         addLiteralPropertyMapping("protocol", null);
         addLiteralPropertyMapping("encryptionMethod", null);
 
+        addRelationshipMapper(SemanticAssignmentMapper.getInstance(null));
         // This relationship can only be retrieved inverted
         // (relationship in IGC is cannot be traversed in other direction)
         addRelationshipMapper(ConnectionEndpointMapper.getInstance(null));

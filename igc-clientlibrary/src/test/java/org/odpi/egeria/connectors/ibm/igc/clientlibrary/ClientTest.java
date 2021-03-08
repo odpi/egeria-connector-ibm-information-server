@@ -313,6 +313,7 @@ public class ClientTest {
         IGCSearch igcSearch = new IGCSearch("term", igcSearchConditionSet);
         igcSearch.addProperties(IGCRestConstants.getModificationProperties());
         igcSearch.setPageSize(2);
+        igcSearch.addSortingCriteria(new IGCSearchSorting("_id", true));
 
         try {
             // First search and get all pages in one go
@@ -336,10 +337,13 @@ public class ClientTest {
             assertTrue(results.hasMorePages());
             assertNotNull(results.getItems());
             assertEquals(results.getItems().size(), 2);
+            assertEquals(results.getItems().get(0).getId(), "6662c0f2.e1b1ec6c.00263shl8.8c6cjg1.thoiqd.g2jiimda7gvarsup8a3bb");
             ItemList<Term> nextPage = igcRestClient.getNextPage(null, results);
             assertNotNull(nextPage);
             assertNotNull(nextPage.getItems());
             assertEquals(nextPage.getItems().size(), 2);
+            // TODO: ensure that this next page of results contains different terms than the first page
+            //assertNotEquals(results.getItems().get(0).getId(), "6662c0f2.e1b1ec6c.00263shl8.8c6cjg1.thoiqd.g2jiimda7gvarsup8a3bb");
             paging = nextPage.getPaging();
             assertNotNull(paging.getPreviousPageURL());
             assertEquals(paging.getPageSize().intValue(), 2);

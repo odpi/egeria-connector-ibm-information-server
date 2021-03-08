@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SemanticAssignmentMapper;
 
 /**
  * Defines the common mappings to the OMRS "DataStore" entity.
@@ -32,6 +33,7 @@ public class DataStoreMapper extends AssetMapper {
         // The list of properties that should be mapped
         addSimplePropertyMapping("created_on", "storeCreateTime");
         addSimplePropertyMapping("modified_on", "storeUpdateTime");
+        addLiteralPropertyMapping("pathName", null);
 
         // Add literal mappings for deprecated properties (so we still pass type verification even during a
         // patching process)

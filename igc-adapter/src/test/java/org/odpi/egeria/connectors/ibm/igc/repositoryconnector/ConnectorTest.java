@@ -1500,14 +1500,14 @@ public class ConnectorTest {
 
         List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
-                new RelationshipExpectation(0, 2,
-                        "SemanticAssignment", proxyOneTypes, proxyTwoTypes,
-                        null, expectedProxyTwoQN)
-        );
-        relationshipExpectations.add(
-                new RelationshipExpectation(2, 3,
+                new RelationshipExpectation(0, 1,
                         "AttachedNoteLog", "GlossaryTerm", "NoteLog",
                         expectedProxyTwoQN, "gen!NL@" + expectedProxyTwoQN)
+        );
+        relationshipExpectations.add(
+                new RelationshipExpectation(1, 3,
+                        "SemanticAssignment", proxyOneTypes, proxyTwoTypes,
+                        null, expectedProxyTwoQN)
         );
         relationshipExpectations.add(
                 new RelationshipExpectation(3, 4,
@@ -1905,13 +1905,13 @@ public class ConnectorTest {
         List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
                 new RelationshipExpectation(0, 1,
-                        "SemanticAssignment", "RelationalColumn", "GlossaryTerm",
-                        MockConstants.DATABASE_COLUMN_QN, expectedTermQN)
+                        "AttachedNoteLog", "RelationalColumn", "NoteLog",
+                        MockConstants.DATABASE_COLUMN_QN, "gen!NL@" + MockConstants.DATABASE_COLUMN_QN)
         );
         relationshipExpectations.add(
                 new RelationshipExpectation(1, 2,
-                        "AttachedNoteLog", "RelationalColumn", "NoteLog",
-                        MockConstants.DATABASE_COLUMN_QN, "gen!NL@" + MockConstants.DATABASE_COLUMN_QN)
+                        "SemanticAssignment", "RelationalColumn", "GlossaryTerm",
+                        MockConstants.DATABASE_COLUMN_QN, expectedTermQN)
         );
         relationshipExpectations.add(
                 new RelationshipExpectation(2, 6,
@@ -2388,13 +2388,13 @@ public class ConnectorTest {
         List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
                 new RelationshipExpectation(0, 1,
-                        "SemanticAssignment", "TabularColumn", "GlossaryTerm",
-                        MockConstants.DATA_FILE_FIELD_QN, expectedTermQN)
+                        "AttachedNoteLog", "TabularColumn", "NoteLog",
+                        MockConstants.DATA_FILE_FIELD_QN, "gen!NL@" + MockConstants.DATA_FILE_FIELD_QN)
         );
         relationshipExpectations.add(
                 new RelationshipExpectation(1, 2,
-                        "AttachedNoteLog", "TabularColumn", "NoteLog",
-                        MockConstants.DATA_FILE_FIELD_QN, "gen!NL@" + MockConstants.DATA_FILE_FIELD_QN)
+                        "SemanticAssignment", "TabularColumn", "GlossaryTerm",
+                        MockConstants.DATA_FILE_FIELD_QN, expectedTermQN)
         );
         relationshipExpectations.add(
                 new RelationshipExpectation(2, 3,

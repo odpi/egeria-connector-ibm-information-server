@@ -19,6 +19,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelpe
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataClassAssignmentMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.DataClassHierarchyMapper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.SemanticAssignmentMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
@@ -100,6 +101,7 @@ public class DataClassMapper extends ReferenceableMapper {
         addLiteralPropertyMapping("namespace", null);
 
         // The list of relationships that should be mapped
+        addRelationshipMapper(SemanticAssignmentMapper.getInstance(version));
         addRelationshipMapper(DataClassHierarchyMapper.getInstance(version));
         addRelationshipMapper(DataClassAssignmentMapper.getInstance(version));
 

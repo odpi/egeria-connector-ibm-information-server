@@ -45,6 +45,18 @@ public class IGCSearch {
     }
 
     /**
+     * Creates a new search for all assets of the provided types.
+     *
+     * @param types the types of assets to retrieve
+     */
+    public IGCSearch(List<String> types) {
+        this();
+        for (String type : types) {
+            addType(type);
+        }
+    }
+
+    /**
      * Creates a new search for assets of the provided type, based on the provided criteria.
      *
      * @param type the type of assets to retrieve
@@ -52,6 +64,17 @@ public class IGCSearch {
      */
     public IGCSearch(String type, IGCSearchConditionSet conditions) {
         this(type);
+        addConditions(conditions);
+    }
+
+    /**
+     * Creates a new search for all assets of the provided types, based on the provided criteria.
+     *
+     * @param types the types of assets to retrieve
+     * @param conditions the set of conditions to use as search criteria
+     */
+    public IGCSearch(List<String> types, IGCSearchConditionSet conditions) {
+        this(types);
         addConditions(conditions);
     }
 

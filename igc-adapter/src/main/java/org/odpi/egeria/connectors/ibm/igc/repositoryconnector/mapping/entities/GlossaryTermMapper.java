@@ -48,6 +48,7 @@ public class GlossaryTermMapper extends ReferenceableMapper {
         addSimplePropertyMapping("usage", "usage");
 
         // The classes to use for mapping any relationships
+        addRelationshipMapper(SemanticAssignmentMapper.getInstance(null));
         addRelationshipMapper(TermAnchorMapper.getInstance(null));
         addRelationshipMapper(TermCategorizationMapper.getInstance(null));
         addRelationshipMapper(SynonymMapper.getInstance(null));
