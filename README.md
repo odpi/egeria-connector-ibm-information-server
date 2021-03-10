@@ -1,7 +1,11 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 <!-- Copyright Contributors to the ODPi Egeria project. -->
 
-[![GitHub](https://img.shields.io/github/license/odpi/egeria-connector-ibm-information-server)](LICENSE) [![Azure](https://dev.azure.com/odpi/egeria/_apis/build/status/odpi.egeria-connector-ibm-information-server)](https://dev.azure.com/odpi/Egeria/_build) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=egeria-connector-ibm-information-server&metric=alert_status)](https://sonarcloud.io/dashboard?id=egeria-connector-ibm-information-server) [![Maven Central](https://img.shields.io/maven-central/v/org.odpi.egeria/egeria-connector-ibm-information-server)](https://mvnrepository.com/artifact/org.odpi.egeria/egeria-connector-ibm-information-server)
+[![License](https://img.shields.io/github/license/odpi/egeria-connector-ibm-information-server)](LICENSE)
+[![Build](https://github.com/odpi/egeria-connector-ibm-information-server/workflows/Maven%20Package/badge.svg)](https://github.com/odpi/egeria-connector-ibm-information-server/actions?query=workflow%3A%22Maven+Package%22)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=egeria-connector-ibm-information-server&metric=alert_status)](https://sonarcloud.io/dashboard?id=egeria-connector-ibm-information-server)
+[![Snapshot](https://img.shields.io/maven-metadata/v?label=development&metadataUrl=https%3A%2F%2Ftoken%3A82d3aaedcfbb070176d9b30df29ea28768b90691%40maven.pkg.github.com%2Fodpi%2Fegeria-connector-ibm-information-server%2Forg%2Fodpi%2Fegeria%2Fegeria-connector-ibm-information-server%2Fmaven-metadata.xml)](https://github.com/odpi/egeria-connector-ibm-information-server/packages/617324)
+[![Release](https://img.shields.io/maven-central/v/org.odpi.egeria/egeria-connector-ibm-information-server)](https://mvnrepository.com/artifact/org.odpi.egeria/egeria-connector-ibm-information-server)
 
 # IBM InfoSphere Information Server Connectors
 
