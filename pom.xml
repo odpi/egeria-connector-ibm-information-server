@@ -428,12 +428,10 @@
         </dependency>
     </dependencies>
 
-    <!-- TODO: temporarily pull from ODPi snapshot repo for Maven, until snapshots are available in Maven Central -->
     <repositories>
         <repository>
-            <id>odpi-snapshots</id>
-            <name>ODPi Snapshots</name>
-            <url>https://odpi.jfrog.io/odpi/egeria-snapshot/</url>
+            <id>ossrh-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
     </repositories>
 
@@ -604,6 +602,7 @@
                         <exclude>cts/results/**/*.registrystore</exclude>
                         <exclude>**/resources/ia/*.xml</exclude>
                         <exclude>**/resources/openigc/*.xml</exclude>
+                        <exclude>docs/getting-started/reveal.js/**</exclude>
                     </excludes>
                     <licenseFamilies>
                         <licenseFamily implementation="org.apache.rat.license.SimpleLicenseFamily">
