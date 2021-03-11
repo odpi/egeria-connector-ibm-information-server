@@ -26,7 +26,7 @@ using Egeria:
 
 ## Quick links
 
-- See our [Getting Started](https://odpi.github.io/egeria-connector-ibm-information-server/getting-started/) guide for
+- See our [Getting Started](https://odpi.github.io/egeria-connector-ibm-information-server/getting-started/index.html) guide for
   step-by-step instructions on using these connectors to integrate IBM Information Server with Egeria.
 - See the [CTS Results](cts/README.md) for details on its conformance and rough performance numbers.
 
