@@ -34,7 +34,7 @@ The quick version:
    Server environment, and `isadmin` with the password for your Information Server environment):
     ```bash
     $ curl -k -X POST "https://localhost:9443/open-metadata/admin-services/users/admin/servers/omas_server/local-repository/mode/local-graph-repository"
-    $ curl -k -X POST -H "Content-Type: application/json" --data '{"producer":{"bootstrap.servers":"localhost:9092"},"consumer":{"bootstrap.servers":"localhost:9092"}}' "https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic"
+    $ curl -k -X POST -H "Content-Type: application/json" --data '{"producer":{"bootstrap.servers":"localhost:9092"},"consumer":{"bootstrap.servers":"localhost:9092"}}' "https://localhost:9443/open-metadata/admin-services/users/admin/servers/omas_server/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic"
     $ curl -k -X POST "https://localhost:9443/open-metadata/admin-services/users/admin/servers/omas_server/access-services?serviceMode=ENABLED"
     $ curl -k -X POST "https://localhost:9443/open-metadata/admin-services/users/admin/servers/omas_server/instance"
     $ curl -k -X POST "https://localhost:9443/open-metadata/admin-services/users/admin/servers/datastage_proxy/local-repository/mode/in-memory-repository"

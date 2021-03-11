@@ -43,10 +43,10 @@ The quick version:
    the port number of your Information Server domain (services) tier, `isadmin` with the username for your Information
    Server environment, and `isadmin` with the password for your Information Server environment):
     ```bash
-    $ curl -k -X POST -H "Content-Type: application/json" --data '{"producer":{"bootstrap.servers":"localhost:9092"},"consumer":{"bootstrap.servers":"localhost:9092"}}' "https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic"
-    $ curl -k -X POST "https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/cohorts/mycohort"
-    $ curl -k -X POST -H "Content-Type: application/json" --data '{"class":"Connection","connectorType":{"class":"ConnectorType","connectorProviderClassName":"org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider"},"endpoint":{"class":"Endpoint","address":"infosvr:9446","protocol":"https"},"userId":"isadmin","clearPassword":"isadmin","configurationProperties":{"defaultZones":["default"]}}' "https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/local-repository/mode/repository-proxy/connection"
-    $ curl -k -X POST "https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/instance"
+    $ curl -k -X POST -H "Content-Type: application/json" --data '{"producer":{"bootstrap.servers":"localhost:9092"},"consumer":{"bootstrap.servers":"localhost:9092"}}' "https://localhost:9443/open-metadata/admin-services/users/admin/servers/igcproxy/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic"
+    $ curl -k -X POST "https://localhost:9443/open-metadata/admin-services/users/admin/servers/igcproxy/cohorts/mycohort"
+    $ curl -k -X POST -H "Content-Type: application/json" --data '{"class":"Connection","connectorType":{"class":"ConnectorType","connectorProviderClassName":"org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnectorProvider"},"endpoint":{"class":"Endpoint","address":"infosvr:9446","protocol":"https"},"userId":"isadmin","clearPassword":"isadmin","configurationProperties":{"defaultZones":["default"]}}' "https://localhost:9443/open-metadata/admin-services/users/admin/servers/igcproxy/local-repository/mode/repository-proxy/connection"
+    $ curl -k -X POST "https://localhost:9443/open-metadata/admin-services/users/admin/servers/igcproxy/instance"
     ```
 
 ### Detailed steps for configuring the IGC connector
@@ -72,13 +72,13 @@ For example payloads and endpoints, see the [Postman samples](samples).
    to:
 
     ```
-    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic
+    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/igcproxy/event-bus?connectorProvider=org.odpi.openmetadata.adapters.eventbus.topic.kafka.KafkaOpenMetadataTopicProvider&topicURLRoot=OMRSTopic
     ```
 
 1. Configure the cohort, by POSTing something like the following:
 
     ```
-    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/cohorts/mycohort
+    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/igcproxy/cohorts/mycohort
     ```
 
 1. Configure the IGC connector, by POSTing a payload like the following, replacing the `{{igc_host}}` with the hostname
@@ -110,7 +110,7 @@ For example payloads and endpoints, see the [Postman samples](samples).
    to:
 
     ```
-    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/local-repository/mode/repository-proxy/connection
+    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/igcproxy/local-repository/mode/repository-proxy/connection
     ```
 
    To operate, the IGC user credentials must have (at a minimum) the following roles within Information Server:
@@ -143,7 +143,7 @@ For example payloads and endpoints, see the [Postman samples](samples).
    There should not be any need to restart the environment after enabling the event notification.
 
     ```
-    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/local-repository/event-mapper-details?connectorProvider=org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapperProvider&eventSource=my.igc.services.host.com:59092
+    POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/igcproxy/local-repository/event-mapper-details?connectorProvider=org.odpi.egeria.connectors.ibm.igc.eventmapper.IGCOMRSRepositoryEventMapperProvider&eventSource=my.igc.services.host.com:59092
     ```
 
    The hostname provided at the end (`my.igc.services.host.com`) should be replaced with the host on which your
@@ -156,7 +156,7 @@ For example payloads and endpoints, see the [Postman samples](samples).
    to start the instance by POSTing something like the following:
 
    ```
-   POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/myserver/instance
+   POST https://localhost:9443/open-metadata/admin-services/users/admin/servers/igcproxy/instance
    ```
 
 After following these instructions, your IGC instance will be participating in the Egeria cohort. For those objects
