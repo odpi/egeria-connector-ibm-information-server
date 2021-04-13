@@ -65,7 +65,7 @@
         <dependency>
             <groupId>org.odpi.egeria</groupId>
             <artifactId>egeria-connector-ibm-information-server-test</artifactId>
-            <version>${open-metadata.version}</version>
+            <version>${connector.version}</version>
             <scope>provided</scope>
         </dependency>
 
