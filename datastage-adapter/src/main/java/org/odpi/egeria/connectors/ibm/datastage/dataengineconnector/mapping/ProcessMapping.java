@@ -10,8 +10,8 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.openmetadata.accessservices.dataengine.model.*;
+import org.odpi.openmetadata.accessservices.dataengine.model.Collection;
 import org.odpi.openmetadata.accessservices.dataengine.model.Process;
-import org.odpi.openmetadata.accessservices.dataengine.model.TransformationProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -240,15 +240,15 @@ public class ProcessMapping extends BaseMapping {
 
 
     /**
-     * Add transformation project to process if it exists in the asset
+     * Add transformation project to process, as collection, if it exists in the asset
      *
      * @param asset the asset for which to add transformation project
      * @param process the process on which to add the transformation project
      */
     private void addTransformationProjectDetails(InformationAsset asset, Process process) {
         TransformationProjectMapping transformationProjectMapping = new TransformationProjectMapping(cache);
-        TransformationProject transformationProject = transformationProjectMapping.getTransformationProject(asset);
-        process.setTransformationProject(transformationProject);
+        Collection transformationProject = transformationProjectMapping.getTransformationProject(asset);
+        process.setCollection(transformationProject);
     }
 
 

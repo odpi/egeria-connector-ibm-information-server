@@ -10,7 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCIOException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.openmetadata.accessservices.dataengine.model.TransformationProject;
+import org.odpi.openmetadata.accessservices.dataengine.model.Collection;
 
 /**
  * Mappings for creating a TransformationObject.
@@ -33,11 +33,11 @@ public class TransformationProjectMapping extends BaseMapping{
      *
      * @param igcObj the asset for which to obtain the transformation project
      * */
-    public TransformationProject getTransformationProject(InformationAsset igcObj) {
+    public Collection getTransformationProject(InformationAsset igcObj) {
         String methodName = "getTransformationProject";
         for (Reference reference : igcObj.getContext()) {
             if (TRANSFORMATION_PROJECT_KEY.equals(reference.getType())) {
-                TransformationProject transformationProject = new TransformationProject();
+                Collection transformationProject = new Collection();
                 String qualifiedName = getQualifiedName(methodName, reference);
                 transformationProject.setQualifiedName(qualifiedName);
                 transformationProject.setName(reference.getName());
