@@ -34,6 +34,9 @@ public class TransformationProjectMapping extends BaseMapping{
      * @param igcObj the asset for which to obtain the transformation project
      * */
     public Collection getTransformationProject(InformationAsset igcObj) {
+        if (igcObj == null) {
+            return null;
+        }
         String methodName = "getTransformationProject";
         for (Reference reference : igcObj.getContext()) {
             if (TRANSFORMATION_PROJECT_KEY.equals(reference.getType())) {
