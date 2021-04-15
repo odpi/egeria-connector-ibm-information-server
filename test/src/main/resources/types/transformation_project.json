@@ -1,0 +1,352 @@
+{
+  "editInfo": {
+    "sections": [
+      {
+        "displayName": "Header",
+        "name": "Header",
+        "properties": [
+          "implements_rules",
+          "governed_by_rules"
+        ]
+      },
+      {
+        "displayName": "Lineage Information",
+        "name": "Lineage Information",
+        "properties": [
+          "include_for_lineage"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "displayName": "Implements Rules",
+        "name": "implements_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Governed by Rules",
+        "name": "governed_by_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Include for Lineage",
+        "name": "include_for_lineage",
+        "type": {
+          "name": "enum",
+          "validValues": [
+            {
+              "displayName": "True",
+              "id": "setToTrue"
+            },
+            {
+              "displayName": "False",
+              "id": "setToFalse"
+            }
+          ]
+        },
+        "maxCardinality": 1
+      }
+    ]
+  },
+  "_businessLineage": false,
+  "viewInfo": {
+    "sections": [
+      {
+        "displayName": "Header",
+        "name": "Header",
+        "properties": [
+          "name",
+          "host_(engine)",
+          "implements_rules",
+          "governed_by_rules"
+        ]
+      },
+      {
+        "displayName": "Lineage Information",
+        "name": "Lineage Information",
+        "properties": [
+          "include_for_lineage",
+          "include_for_lineage_desc"
+        ]
+      },
+      {
+        "displayName": "Folders",
+        "name": "Folders",
+        "properties": [
+          "folders"
+        ]
+      },
+      {
+        "displayName": "Jobs",
+        "name": "Jobs",
+        "properties": [
+          "jobs"
+        ]
+      },
+      {
+        "displayName": "Containers",
+        "name": "Containers",
+        "properties": [
+          "containers"
+        ]
+      },
+      {
+        "displayName": "Stage Types",
+        "name": "Stage Types",
+        "properties": [
+          "stage_types"
+        ]
+      },
+      {
+        "displayName": "Table Definitions",
+        "name": "Table Definitions",
+        "properties": [
+          "table_definitions"
+        ]
+      },
+      {
+        "displayName": "Standardization Rule Sets",
+        "name": "Standardization Rule Sets",
+        "properties": [
+          "standardization_rule_sets",
+          "match_specifications"
+        ]
+      },
+      {
+        "displayName": "Parameter Sets",
+        "name": "Parameter Sets",
+        "properties": [
+          "parameter_sets"
+        ]
+      },
+      {
+        "displayName": "Transforms",
+        "name": "Transforms",
+        "properties": [
+          "transforms"
+        ]
+      },
+      {
+        "displayName": "Routines",
+        "name": "Routines",
+        "properties": [
+          "routines"
+        ]
+      },
+      {
+        "displayName": "In Collections",
+        "name": "In Collections",
+        "properties": [
+          "in_collections"
+        ]
+      },
+      {
+        "displayName": "Modification Details",
+        "name": "Modification Details",
+        "properties": [
+          "created_by",
+          "created_on",
+          "modified_by",
+          "modified_on"
+        ]
+      }
+    ],
+    "properties": [
+      {
+        "displayName": "Name",
+        "name": "name",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Host (Engine)",
+        "name": "host_(engine)",
+        "type": {
+          "name": "host_(engine)",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/host_(engine)"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Implements Rules",
+        "name": "implements_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Governed by Rules",
+        "name": "governed_by_rules",
+        "type": {
+          "name": "information_governance_rule",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/information_governance_rule"
+        }
+      },
+      {
+        "displayName": "Include for Lineage",
+        "name": "include_for_lineage",
+        "type": {
+          "name": "enum",
+          "validValues": [
+            {
+              "displayName": "True",
+              "id": "setToTrue"
+            },
+            {
+              "displayName": "False",
+              "id": "setToFalse"
+            }
+          ]
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Include for Lineage",
+        "name": "include_for_lineage_desc",
+        "type": {
+          "name": "boolean"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Folders",
+        "name": "folders",
+        "type": {
+          "name": "dsfolder",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsfolder"
+        }
+      },
+      {
+        "displayName": "Jobs",
+        "name": "jobs",
+        "type": {
+          "name": "dsjob",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsjob"
+        }
+      },
+      {
+        "displayName": "Containers",
+        "name": "containers",
+        "type": {
+          "name": "shared_container",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/shared_container"
+        }
+      },
+      {
+        "displayName": "Stage Types",
+        "name": "stage_types",
+        "type": {
+          "name": "dsstage_type",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/dsstage_type"
+        }
+      },
+      {
+        "displayName": "Table Definitions",
+        "name": "table_definitions",
+        "type": {
+          "name": "table_definition",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/table_definition"
+        }
+      },
+      {
+        "displayName": "Standardization Rule Sets",
+        "name": "standardization_rule_sets",
+        "type": {
+          "name": "standardization_rule_set",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/standardization_rule_set"
+        }
+      },
+      {
+        "displayName": "Match Specifications",
+        "name": "match_specifications",
+        "type": {
+          "name": "match_specification",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/match_specification"
+        }
+      },
+      {
+        "displayName": "Parameter Sets",
+        "name": "parameter_sets",
+        "type": {
+          "name": "parameter_set",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/parameter_set"
+        }
+      },
+      {
+        "displayName": "Transforms",
+        "name": "transforms",
+        "type": {
+          "name": "transforms_function",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/transforms_function"
+        }
+      },
+      {
+        "displayName": "Routines",
+        "name": "routines",
+        "type": {
+          "name": "routine",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/routine"
+        }
+      },
+      {
+        "displayName": "In Collections",
+        "name": "in_collections",
+        "type": {
+          "name": "collection",
+          "url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/collection"
+        }
+      },
+      {
+        "displayName": "Created By",
+        "name": "created_by",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Created On",
+        "name": "created_on",
+        "type": {
+          "name": "datetime"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Modified By",
+        "name": "modified_by",
+        "type": {
+          "name": "string"
+        },
+        "maxCardinality": 1
+      },
+      {
+        "displayName": "Modified On",
+        "name": "modified_on",
+        "type": {
+          "name": "datetime"
+        },
+        "maxCardinality": 1
+      }
+    ]
+  },
+  "_name": "Transformation Project",
+  "_plural": "Transformation Projects",
+  "_id": "transformation_project",
+  "_class": "DataStageX.DSProject",
+  "_url": "https://infosvr:9446/ibm/iis/igc-rest/v1/types/transformation_project",
+  "_dataLineage": false,
+  "_group": "ETL",
+  "_parents": [
+    "information_asset"
+  ]
+}

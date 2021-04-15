@@ -16,7 +16,7 @@ egeria:
   server: myserver
 
 release:
-  version: 2.8-SNAPSHOT
+  version: 2.9-SNAPSHOT
   repo: snapshot
 
 image:

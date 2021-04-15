@@ -10,6 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.openmetadata.accessservices.dataengine.model.*;
+import org.odpi.openmetadata.accessservices.dataengine.model.Collection;
 import org.odpi.openmetadata.accessservices.dataengine.model.Process;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,12 +50,14 @@ public class ProcessMapping extends BaseMapping {
             if (process != null) {
                 PortAliasMapping portAliasMapping = new PortAliasMapping(cache);
                 process.setPortAliases(portAliasMapping.getForSequence(job));
+                addTransformationProjectDetails(jobObj, process);
             }
         } else {
             Dsjob jobObj = job.getJobObject();
             process = getSkeletonProcess(jobObj);
             if (process != null) {
                 PortAliasMapping portAliasMapping = new PortAliasMapping(cache);
+                addTransformationProjectDetails(jobObj, process);
                 process.setPortAliases(Stream.concat(
                         portAliasMapping.getForStages(job.getInputStages(), PortType.INPUT_PORT).stream(),
                         portAliasMapping.getForStages(job.getOutputStages(), PortType.OUTPUT_PORT).stream())
@@ -123,6 +126,7 @@ public class ProcessMapping extends BaseMapping {
                 Set<String> allLinkRids = Stream.concat(allInputLinks.stream(), allOutputLinks.stream()).map(Link::getId).collect(Collectors.toSet());
                 log.debug("Adding input links: {}", allInputLinks);
                 addImplementationDetails(job, stage, allInputLinks, allLinkRids, PortType.INPUT_PORT, portImplementations, lineageMappings);
+
                 log.debug("Adding input stores: {}", stage.getReadsFromDesign());
                 addDataStoreDetails(job, stage, "reads_from_(design)", stage.getReadsFromDesign(), allLinkRids, PortType.INPUT_PORT, portImplementations, lineageMappings);
                 log.debug("Adding output links: {}", allOutputLinks);
@@ -131,6 +135,10 @@ public class ProcessMapping extends BaseMapping {
                 addDataStoreDetails(job, stage, "writes_to_(design)", stage.getWritesToDesign(), allLinkRids, PortType.OUTPUT_PORT, portImplementations, lineageMappings);
                 log.debug("Adding stage variables");
                 addStageVariableDetails(job, stage, portImplementations, lineageMappings);
+
+                log.debug("Adding transformation project info ");
+                addTransformationProjectDetails(stage, process);
+
                 process.setPortImplementations(new ArrayList<>(portImplementations));
                 process.setLineageMappings(new ArrayList<>(lineageMappings));
                 // Stages are owned by the job that contains them, so setup an owned parent process relationship to the
@@ -229,6 +237,20 @@ public class ProcessMapping extends BaseMapping {
                     e);
         }
     }
+
+
+    /**
+     * Add transformation project to process, as collection, if it exists in the asset
+     *
+     * @param asset the asset for which to add transformation project
+     * @param process the process on which to add the transformation project
+     */
+    private void addTransformationProjectDetails(InformationAsset asset, Process process) {
+        TransformationProjectMapping transformationProjectMapping = new TransformationProjectMapping(cache);
+        Collection transformationProject = transformationProjectMapping.getTransformationProject(asset);
+        process.setCollection(transformationProject);
+    }
+
 
     /**
      * Add stage variable details to the provided lists, for the provided stage.
