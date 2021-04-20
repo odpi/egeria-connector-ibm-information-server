@@ -267,15 +267,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public List<PortImplementation> getChangedPortImplementations(Date from, Date to) {
-        // do nothing -- port implementations will always be handled by other methods
-        return Collections.emptyList();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public List<Process> getChangedProcesses(Date from, Date to) {
 
         initializeCache(from, to);
@@ -327,15 +318,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
             }
             process.setParentProcesses(null);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<PortAlias> getChangedPortAliases(Date from, Date to) {
-        // do nothing -- port aliases will always be handled by other methods
-        return Collections.emptyList();
     }
 
     /**
