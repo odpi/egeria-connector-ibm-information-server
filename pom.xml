@@ -85,7 +85,7 @@
     </modules>
 
     <properties>
-        <open-metadata.version>2.9-SNAPSHOT</open-metadata.version>
+        <open-metadata.version>2.9</open-metadata.version>
         <connector.version>2.9-SNAPSHOT</connector.version>
         <!-- Level of Java  -->
         <maven.compiler.source>1.8</maven.compiler.source>
