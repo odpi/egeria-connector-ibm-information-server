@@ -10,16 +10,9 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Term;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Classification;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyCondition;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
-import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,13 +25,20 @@ import java.util.List;
 public class PrimaryCategoryMapper extends ClassificationMapping {
 
     private static final Logger log = LoggerFactory.getLogger(PrimaryCategoryMapper.class);
+    private static final String ADD_CATEGORY_QUALIFIED_NAME_PROPERTY_WITH_VALUE_TO_CLASSIFICATION_OF_TERM =
+            "Add categoryQualifiedName property with value '{}' to classification {} of term {}";
+
+    private static final String TERM = "term";
+    private static final String PARENT_CATEGORY = "parent_category";
+    private static final String GLOSSARY_TERM = "GlossaryTerm";
+    private static final String PRIMARY_CATEGORY = "PrimaryCategory";
+    private static final String CATEGORY_QUALIFIED_NAME = "categoryQualifiedName";
 
     private static PrimaryCategoryMapper primaryCategoryMapper;
 
     private PrimaryCategoryMapper() {
-        super(IGCRepositoryHelper.DEFAULT_IGC_TYPE, "assigned_to_terms", "GlossaryTerm",
-                "PrimaryCategory");
-        addMappedOmrsProperty("categoryQualifiedName");
+        super(TERM, PARENT_CATEGORY, GLOSSARY_TERM, PRIMARY_CATEGORY);
+        addMappedOmrsProperty(CATEGORY_QUALIFIED_NAME);
     }
 
     public static ClassificationMapping getInstance(IGCVersionEnum version) {
@@ -82,8 +82,8 @@ public class PrimaryCategoryMapper extends ClassificationMapping {
                 classificationProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(
                         igcomrsRepositoryConnector.getRepositoryName(),
                         classificationProperties,
-                        "categoryQualifiedName",
-                        catIdentity.getName(),
+                        CATEGORY_QUALIFIED_NAME,
+                        catIdentity.toString(),
                         methodName
                 );
                 Classification classification = getMappedClassification(
@@ -92,63 +92,15 @@ public class PrimaryCategoryMapper extends ClassificationMapping {
                         fromIgcObject,
                         userId
                 );
+
                 classifications.add(classification);
-                log.debug("Add categoryQualifiedName property with value '{}' to classification {} of term {}", catIdentity.getName(),
-                        classification.getName(), termIdentity.getName());
+
+                log.debug(ADD_CATEGORY_QUALIFIED_NAME_PROPERTY_WITH_VALUE_TO_CLASSIFICATION_OF_TERM,
+                        catIdentity.toString(), classification.getName(), termIdentity.getName());
+
             } catch (NumberFormatException | IGCException e) {
                 raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
             }
         }
     }
-
-    /**
-     * Search for PrimaryCategory by looking for a term assignment where the assigned term sits under a
-     * PrimaryCategory parent category.
-     *
-     * @param repositoryHelper the repository helper
-     * @param repositoryName name of the repository
-     * @param matchProperties the criteria to use when searching for the classification
-     * @return IGCSearchConditionSet - the IGC search criteria to find entities based on this classification
-     * @throws FunctionNotSupportedException when an invalid enumeration is requested
-     */
-    @Override
-    public IGCSearchConditionSet getIGCSearchCriteria(OMRSRepositoryHelper repositoryHelper,
-                                                      String repositoryName,
-                                                      SearchProperties matchProperties) throws FunctionNotSupportedException {
-
-        IGCSearchCondition igcSearchCondition = new IGCSearchCondition(
-                "assigned_to_terms.parent_category",
-                "isNull",
-                false
-        );
-        IGCSearchConditionSet igcSearchConditionSet = new IGCSearchConditionSet(igcSearchCondition);
-
-        if (matchProperties != null) {
-            IGCSearchConditionSet byProperties = getConditionsForProperties(matchProperties);
-            if (byProperties.size() > 0) {
-                igcSearchConditionSet.addNestedConditionSet(byProperties);
-                igcSearchConditionSet.setMatchAnyCondition(false);
-            }
-        }
-        return igcSearchConditionSet;
-    }
-
-    private IGCSearchConditionSet getConditionsForProperties(SearchProperties matchProperties) {
-
-        IGCSearchConditionSet set = new IGCSearchConditionSet();
-
-        List<PropertyCondition> propertyConditions = matchProperties.getConditions();
-        for (PropertyCondition condition : propertyConditions) {
-            SearchProperties nestedProperties = condition.getNestedConditions();
-            if (nestedProperties != null) {
-                IGCSearchConditionSet nestedSet = getConditionsForProperties(nestedProperties);
-                IGCRepositoryHelper.setConditionsFromMatchCriteria(nestedSet, nestedProperties.getMatchCriteria());
-                set.addNestedConditionSet(nestedSet);
-            }
-        }
-        IGCRepositoryHelper.setConditionsFromMatchCriteria(set, matchProperties.getMatchCriteria());
-
-        return set;
-    }
-
 }
