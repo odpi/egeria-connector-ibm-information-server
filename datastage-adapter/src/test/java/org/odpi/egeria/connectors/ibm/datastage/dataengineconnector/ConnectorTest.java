@@ -146,18 +146,6 @@ public class ConnectorTest {
     }
 
     @Test
-    public void testPortImplementations() {
-        List<PortImplementation> portImplementations = dataStageConnector.getChangedPortImplementations(null, now);
-        assertTrue(portImplementations.isEmpty());
-    }
-
-    @Test
-    public void testPortAliases() {
-        List<PortAlias> portAliases = dataStageConnector.getChangedPortAliases(null, now);
-        assertTrue(portAliases.isEmpty());
-    }
-
-    @Test
     public void testProcesses() {
         List<Process> processes = dataStageConnector.getChangedProcesses(null, now);
         assertFalse(processes.isEmpty());

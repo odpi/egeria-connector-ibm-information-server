@@ -50,10 +50,9 @@ public class PrimaryCategoryMapper extends ClassificationMapping {
 
     /**
      * Implements the "PrimaryCategory" classification for IGC objects (by default we only apply to terms).
-     * We use the 'assigned_to_term' relationship from one term to any term
-     * within a parent category to represent the "PrimaryCategory" classification in OMRS.
-     * Therefore, any 'assigned_to_term' relationship on a term, where the assigned term is within a
-     * parent category in IGC, will be mapped to a "PrimaryCategory" classification in OMRS.
+     * We use the parent identify to represent categoryQualifiedName field which is the only property of the
+     * "PrimaryCategory" classification in OMRS.
+     * Therefore, all terms parents identities will be mapped to a "PrimaryCategory" classification in OMRS.
      *
      * @param igcomrsRepositoryConnector connectivity to the IGC environment
      * @param classifications the list of classifications to which to add
