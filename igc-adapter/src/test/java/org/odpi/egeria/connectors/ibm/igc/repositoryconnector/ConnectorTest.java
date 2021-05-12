@@ -2432,7 +2432,7 @@ public class ConnectorTest {
         List<Classification> classifications = detail.getClassifications();
         assertNotNull(classifications);
         assertFalse(classifications.isEmpty());
-        assertEquals(classifications.size(), 1);
+        assertEquals(classifications.size(), 2);
         Classification first = classifications.get(0);
         assertEquals(first.getType().getTypeDefName(), "SpineObject");
         assertTrue(first.getVersion() > 1);
