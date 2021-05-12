@@ -74,7 +74,7 @@ public class PrimaryCategoryMapper extends ClassificationMapping {
            try {
                 IGCRestClient igcRestClient = igcomrsRepositoryConnector.getIGCRestClient();
                 Identity termIdentity = fromIgcObject.getIdentity(igcRestClient, cache);
-                Identity catIdentity = termIdentity.getParentIdentity();
+                Identity categoryIdentity = termIdentity.getParentIdentity();
 
                 InstanceProperties classificationProperties = new InstanceProperties();
 
@@ -82,7 +82,7 @@ public class PrimaryCategoryMapper extends ClassificationMapping {
                         igcomrsRepositoryConnector.getRepositoryName(),
                         classificationProperties,
                         CATEGORY_QUALIFIED_NAME,
-                        catIdentity.toString(),
+                        categoryIdentity.toString(),
                         methodName
                 );
                 Classification classification = getMappedClassification(
@@ -95,7 +95,7 @@ public class PrimaryCategoryMapper extends ClassificationMapping {
                 classifications.add(classification);
 
                 log.debug(ADD_CATEGORY_QUALIFIED_NAME_PROPERTY_WITH_VALUE_TO_CLASSIFICATION_OF_TERM,
-                        catIdentity.toString(), classification.getName(), termIdentity.getName());
+                        categoryIdentity.toString(), classification.getName(), termIdentity.getName());
 
             } catch (NumberFormatException | IGCException e) {
                 raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
