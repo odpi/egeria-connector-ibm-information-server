@@ -7,7 +7,6 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryC
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.attributes.AttributeMapping;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDef;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.AttributeTypeDefCategory;
-import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.TypeDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +23,6 @@ public class AttributeMappingStore {
 
     private IGCOMRSRepositoryConnector igcomrsRepositoryConnector;
 
-    private Map<String, AttributeMapping> omrsGuidToMapping;
     private Map<String, AttributeTypeDef> omrsGuidToAttributeTypeDef;
     private Map<String, String> omrsNameToGuid;
     private Map<String, List<String>> omrsTypeDefCategoryToGuids;
@@ -32,7 +30,6 @@ public class AttributeMappingStore {
     private Map<String, AttributeTypeDef> unimplementedAttributeTypeDefs;
 
     public AttributeMappingStore(IGCOMRSRepositoryConnector igcomrsRepositoryConnector) {
-        omrsGuidToMapping = new HashMap<>();
         omrsGuidToAttributeTypeDef = new HashMap<>();
         omrsNameToGuid = new HashMap<>();
         omrsTypeDefCategoryToGuids = new HashMap<>();
@@ -76,7 +73,6 @@ public class AttributeMappingStore {
         if (mapping != null) {
             String guid = omrsTypeDef.getGUID();
             omrsGuidToAttributeTypeDef.put(guid, omrsTypeDef);
-            omrsGuidToMapping.put(guid, mapping);
             omrsNameToGuid.put(omrsTypeDef.getName(), guid);
             addGuidToCategory(omrsTypeDef.getCategory().getName(), guid);
         }
