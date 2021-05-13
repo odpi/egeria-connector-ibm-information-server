@@ -109,11 +109,11 @@
 							Start by downloading the IBM Information Server connectors package:
 						</p>
 						<div align="center">
-							<a href="https://search.maven.org/remotecontent?filepath=org/odpi/egeria/egeria-connector-ibm-information-server-package/2.5/egeria-connector-ibm-information-server-package-2.5-jar-with-dependencies.jar">
-								<img alt="Maven Central" src="https://img.shields.io/maven-central/v/org.odpi.egeria/egeria-connector-ibm-information-server?label=release">
+							<a href="http://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=org.odpi.egeria&a=egeria-connector-ibm-information-server-package&v=RELEASE&c=jar-with-dependencies">
+								<img alt="Release" src="https://img.shields.io/maven-central/v/org.odpi.egeria/egeria-connector-ibm-information-server-package?label=release">
 							</a>
-							<a href="https://github.com/odpi/egeria-connector-ibm-information-server/packages/617676" target="gp">
-								<img alt="Development snapshot" src="https://img.shields.io/maven-metadata/v?label=development&metadataUrl=https%3A%2F%2Ftoken%3A82d3aaedcfbb070176d9b30df29ea28768b90691%40maven.pkg.github.com%2Fodpi%2Fegeria-connector-ibm-information-server%2Forg%2Fodpi%2Fegeria%2Fegeria-connector-ibm-information-server%2Fmaven-metadata.xml">
+							<a href="https://oss.sonatype.org/content/repositories/snapshots/org/odpi/egeria/egeria-connector-ibm-information-server-package/" target="dev">
+								<img alt="Development" src="https://img.shields.io/nexus/s/org.odpi.egeria/egeria-connector-ibm-information-server-package?label=development&server=https%3A%2F%2Foss.sonatype.org">
 							</a>
 						</div>
 						<p style="font-size: x-large; text-align: left;">
@@ -124,14 +124,13 @@
 					<section>
 						<h3 style="text-align: left;">Snapshots</h3>
 						<p style="font-size: x-large; text-align: left;">
-							Our development snapshots are hosted directly within GitHub. You can download them there
-							using Maven itself, or by <a href="https://github.com/odpi/egeria-connector-ibm-information-server/packages/617676" target="gp">navigating to the site</a> and looking for the latest version of
-							the <code>jar-with-dependencies.jar</code> file.
+							Our development snapshots are hosted directly within Nexus's open source snapshot repository.
+							You can download them there using Maven itself, or by
+							<a href="https://oss.sonatype.org/content/repositories/snapshots/org/odpi/egeria/egeria-connector-ibm-information-server-package/" target="dev">navigating to the site</a>
+							and looking for the latest version of the <code>jar-with-dependencies.jar</code> file.
 						</p>
 						<p class="fragment" style="font-size: x-large; text-align: left;">
-							That being said, there are unfortunately currently a number of issues with GitHub Package's
-							web-based UI, so if you really want to use the latest development snapshot you may actually
-							find it easier to build it yourself...
+							Alternatively, you may want to build it yourself...
 						</p>
 					</section>
 					<section data-auto-animate data-menu-title="Building">
@@ -1247,11 +1246,11 @@ $ mvn clean install
 							Download Egeria's server chassis (you will need at least the same version as the connector, or later):
 						</p>
 						<div align="center">
-							<a href="https://search.maven.org/remotecontent?filepath=org/odpi/egeria/server-chassis-spring/2.7/server-chassis-spring-2.7.jar">
-								<img alt="Maven Central" src="https://img.shields.io/maven-central/v/org.odpi.egeria/server-chassis-spring?label=release">
+							<a href="http://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=org.odpi.egeria&a=server-chassis-spring&v=RELEASE">
+								<img alt="Release" src="https://img.shields.io/maven-central/v/org.odpi.egeria/server-chassis-spring?label=release">
 							</a>
-							<a href="https://oss.sonatype.org/content/repositories/snapshots/org/odpi/egeria/server-chassis-spring/" target="mc">
-								<img alt="Maven Snapshot" src="https://img.shields.io/maven-metadata/v?label=development&metadataUrl=https%3A%2F%2Foss.sonatype.org%2Fcontent%2Frepositories%2Fsnapshots%2Forg%2Fodpi%2Fegeria%2Fserver-chassis-spring%2Fmaven-metadata.xml">
+							<a href="https://oss.sonatype.org/content/repositories/snapshots/org/odpi/egeria/server-chassis-spring/" target="dev">
+								<img alt="Development" src="https://img.shields.io/nexus/s/org.odpi.egeria/server-chassis-spring?label=development&server=https%3A%2F%2Foss.sonatype.org">
 							</a>
 						</div>
 						<p style="font-size: x-large; text-align: left;">
@@ -1262,14 +1261,13 @@ $ mvn clean install
 					<section>
 						<h3 style="text-align: left;">Snapshots</h3>
 						<p style="font-size: x-large; text-align: left;">
-							Our development snapshots will soon be hosted directly within GitHub. You can download them there
-							using Maven itself, or by <a href="https://github.com/odpi/egeria-connector-crux/packages/" target="gp">navigating to the site</a> and looking for the latest version of
-							the <code>jar-with-dependencies.jar</code> file.
+							Our development snapshots are hosted on Nexus's open source repository. You can download them there
+							using Maven itself, or by
+							<a href="https://oss.sonatype.org/content/repositories/snapshots/org/odpi/egeria/server-chassis-spring/" target="dev">navigating to the site</a>
+							and looking for the latest version of the <code>jar-with-dependencies.jar</code> file.
 						</p>
 						<p class="fragment" style="font-size: x-large; text-align: left;">
-							That being said, there are unfortunately currently a number of issues with GitHub Package's
-							web-based UI, so if you really want to use the latest development snapshot you may actually
-							find it easier to build it yourself...
+							Alternatively, you may want to build it yourself...
 						</p>
 					</section>
 					<section data-auto-animate data-menu-title="Building">
@@ -1564,7 +1562,7 @@ Fri Feb 12 20:16:49 GMT 2021 OMAG server platform ready for more configuration
 						<h4 style="text-align: left;">Startup options</h4>
 						<pre data-id="code-animation" class="shell session" style="font-size: small;"><code class="hljs" data-trim data-line-numbers="5">
 $ ls -1
-egeria-connector-crux-{version}-jar-with-dependencies.jar
+egeria-connector-ibm-information-server-package-{version}-jar-with-dependencies.jar
 server-chassis-spring-{version}.jar
 truststore.p12
 $ java -Dloader.path=. -jar server-chassis-spring-{version}.jar
@@ -1598,7 +1596,7 @@ Fri Feb 12 20:16:49 GMT 2021 OMAG server platform ready for more configuration
 						<h4 style="text-align: left;">Startup options</h4>
 						<pre data-id="code-animation" class="shell session" style="font-size: small;"><code class="hljs" data-trim data-line-numbers="18-19">
 $ ls -1
-egeria-connector-crux-{version}-jar-with-dependencies.jar
+egeria-connector-ibm-information-server-package-{version}-jar-with-dependencies.jar
 server-chassis-spring-{version}.jar
 truststore.p12
 $ java -Dloader.path=. -jar server-chassis-spring-{version}.jar
