@@ -32,7 +32,8 @@ public class TransformationProjectMapping extends BaseMapping{
      * Retrieves the transformation project from an asset's context and returns it or null if it does not exists
      *
      * @param igcObj the asset for which to obtain the transformation project
-     * */
+     * @return Collection
+     */
     public Collection getTransformationProject(InformationAsset igcObj) {
         if (igcObj == null) {
             return null;
