@@ -49,5 +49,6 @@ jobs:
         with:
           name: Assemblies
           path: |
-            connector/target/*.jar
-            migrator/target/*.jar
+            distribution/target/*.jar
+            ia-clientlibrary/target/*.jar
+            igc-clientlibrary/target/*.jar
