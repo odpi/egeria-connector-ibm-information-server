@@ -261,11 +261,11 @@ public abstract class InstanceMapping {
                 if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
                     known = true;
                 } else if (operator.equals(PropertyComparisonOperator.EQ)) {
-                    known = actualMCID.equals(value.valueAsString());
+                    known = value != null && actualMCID.equals(value.valueAsString());
                 } else if (operator.equals(PropertyComparisonOperator.LIKE)) {
-                    known = actualMCID.matches(value.valueAsString());
+                    known = value != null && actualMCID.matches(value.valueAsString());
                 } else if (operator.equals(PropertyComparisonOperator.NEQ)) {
-                    known = !actualMCID.equals(value.valueAsString());
+                    known = value != null && !actualMCID.equals(value.valueAsString());
                 } else {
                     known = false;
                 }

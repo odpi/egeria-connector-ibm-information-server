@@ -19,6 +19,8 @@ public enum JobLogEntryType implements IAEnum {
     @JsonValue
     private String value;
     JobLogEntryType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

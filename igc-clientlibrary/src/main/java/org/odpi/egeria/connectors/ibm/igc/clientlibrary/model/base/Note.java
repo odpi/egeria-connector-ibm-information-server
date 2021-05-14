@@ -150,6 +150,7 @@ public class Note extends Reference {
      *
      * @return String
      */
+    @Override
     public String getName() { return getId(); }
 
 }

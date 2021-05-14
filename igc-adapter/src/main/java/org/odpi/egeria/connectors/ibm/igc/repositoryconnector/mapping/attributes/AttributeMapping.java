@@ -100,7 +100,7 @@ public abstract class AttributeMapping {
                                 intValue = ((Number) propertyValue).intValue();
                             } else {
                                 String propertyVal = propertyValue.toString();
-                                if (!propertyVal.equals("")) {
+                                if (propertyVal.length() != 0) {
                                     intValue = Integer.valueOf(propertyVal);
                                 }
                             }
@@ -122,7 +122,7 @@ public abstract class AttributeMapping {
                                 longValue = ((Number) propertyValue).longValue();
                             } else {
                                 String propertyVal = propertyValue.toString();
-                                if (!propertyVal.equals("")) {
+                                if (propertyVal.length() != 0) {
                                     longValue = Long.valueOf(propertyVal);
                                 }
                             }
@@ -144,7 +144,7 @@ public abstract class AttributeMapping {
                                 floatValue = ((Number) propertyValue).floatValue();
                             } else {
                                 String propertyVal = propertyValue.toString();
-                                if (!propertyVal.equals("")) {
+                                if (propertyVal.length() != 0) {
                                     floatValue = Float.valueOf(propertyVal);
                                 }
                             }
@@ -167,7 +167,7 @@ public abstract class AttributeMapping {
                             }
                             // IGC will respond with empty strings when there is no value set, so only bother
                             // adding a string value to the mapped property if it is non-empty
-                            if (stringValue != null && !stringValue.equals("")) {
+                            if (stringValue != null && stringValue.length() != 0) {
                                 resultingProperties = omrsRepositoryHelper.addStringPropertyToInstance(
                                         sourceName,
                                         properties,

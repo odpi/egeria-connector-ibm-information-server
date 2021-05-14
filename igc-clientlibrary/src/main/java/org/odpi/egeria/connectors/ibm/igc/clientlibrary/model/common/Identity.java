@@ -268,7 +268,7 @@ public class Identity {
                     if (path.equals("/")) {
                         dataFilePath = "/" + dataFilePath;
                     } else {
-                        dataFilePath = path + (dataFilePath.equals("") ? "" : "/" + dataFilePath);
+                        dataFilePath = path + (dataFilePath.length() == 0 ? "" : "/" + dataFilePath);
                     }
                 } else {
                     // Add context up as conditions until we hit 'data_file_folder' elements
@@ -277,23 +277,23 @@ public class Identity {
                 }
             }
             // If the propertyPath is empty, we must be searching for just a file folder on its own
-            if (propertyPath.equals("")) {
+            if (propertyPath.length() == 0) {
                 // Add the immediate parent folder (cannot do the entire hierarchy in the case of a data file folder)
                 String parentName = "";
-                if (!dataFilePath.equals("")) {
+                if (dataFilePath.length() != 0) {
                     parentName = dataFilePath;
                     int index = dataFilePath.lastIndexOf("/");
                     if (index >= 0) {
                         parentName = dataFilePath.substring(index + 1);
                     }
                 }
-                if (!parentName.equals("")) {
+                if (parentName.length() != 0) {
                     log.debug(LOG_ADDING_SEARCH_CONDITION, "parent_folder.name", "=", parentName);
                     IGCSearchCondition cPath = new IGCSearchCondition("parent_folder.name", "=", parentName);
                     igcSearchConditionSet.addCondition(cPath);
                 }
                 // Add the 'host' element as 'host.name' (but only if we found one)
-                if (!dataFileHost.equals("")) {
+                if (dataFileHost.length() != 0) {
                     log.debug(LOG_ADDING_SEARCH_CONDITION, "host.name", "=", dataFileHost);
                     IGCSearchCondition cHost = new IGCSearchCondition("host.name", "=", dataFileHost);
                     igcSearchConditionSet.addCondition(cHost);
@@ -301,13 +301,13 @@ public class Identity {
             } else {
                 // Otherwise, we are looking for some file-related asset within a folder, so add these further conditions
                 // Concatenate the 'data_file_folder' elements into a string with '/' separators, and add as '...data_file.path'
-                if (!dataFilePath.equals("")) {
+                if (dataFilePath.length() != 0) {
                     log.debug(LOG_ADDING_SEARCH_CONDITION, propertyPath + ".path", "like %{0}", dataFilePath);
                     IGCSearchCondition cPath = new IGCSearchCondition(propertyPath + ".path", "like %{0}", dataFilePath);
                     igcSearchConditionSet.addCondition(cPath);
                 }
                 // Add the 'host' element as '...datafile.host.name'
-                if (!dataFileHost.equals("")) {
+                if (dataFileHost.length() != 0) {
                     log.debug(LOG_ADDING_SEARCH_CONDITION, propertyPath + ".host.name", "=", dataFileHost);
                     IGCSearchCondition cHost = new IGCSearchCondition(propertyPath + ".host.name", "=", dataFileHost);
                     igcSearchConditionSet.addCondition(cHost);

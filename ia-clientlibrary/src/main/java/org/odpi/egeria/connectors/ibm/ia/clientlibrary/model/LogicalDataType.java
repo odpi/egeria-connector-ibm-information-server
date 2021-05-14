@@ -16,6 +16,8 @@ public enum LogicalDataType implements IAEnum {
     @JsonValue
     private String value;
     LogicalDataType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

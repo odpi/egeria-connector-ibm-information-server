@@ -87,7 +87,7 @@ public class ContactDetailsMapper extends ReferenceableMapper {
         // Set the email address as a contact method (only if there is one present)
         try {
             String emailAddress = (String) igcRestClient.getPropertyByName(igcEntity, "email_address");
-            if (emailAddress != null && !emailAddress.equals("")) {
+            if (emailAddress != null && emailAddress.length() != 0) {
                 EnumPropertyValue contactMethod = ContactMethodTypeMapper.getInstance(igcomrsRepositoryConnector.getIGCVersion()).getEnumMappingByIgcValue("email_address");
                 instanceProperties.setProperty("contactMethodType", contactMethod);
                 instanceProperties = igcomrsRepositoryConnector.getRepositoryHelper().addStringPropertyToInstance(

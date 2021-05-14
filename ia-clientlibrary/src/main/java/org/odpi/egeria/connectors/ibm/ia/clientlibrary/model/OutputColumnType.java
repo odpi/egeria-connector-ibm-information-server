@@ -14,6 +14,8 @@ public enum OutputColumnType implements IAEnum {
     @JsonValue
     private String value;
     OutputColumnType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

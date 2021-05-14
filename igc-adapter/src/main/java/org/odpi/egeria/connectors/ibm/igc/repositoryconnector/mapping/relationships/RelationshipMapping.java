@@ -152,6 +152,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      *
      * @return {@code Set<String>}
      */
+    @Override
     public Set<String> getMappedOmrsPropertyNames() {
         HashSet<String> omrsProperties = new HashSet<>();
         if (mappedOmrsPropertyNames != null) {
@@ -413,7 +414,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
     public List<IGCSearch> getComplexIGCSearchCriteria(IGCOMRSRepositoryConnector repositoryConnector,
                                                        String searchCriteria) throws FunctionNotSupportedException {
         // Nothing to do -- no relationship-level properties by default -- so return the simple search
-        if (searchCriteria == null || searchCriteria.equals("")) {
+        if (searchCriteria == null || searchCriteria.length() == 0) {
             return getSimpleIGCSearchCriteria();
         } else {
             // No need to check for literal-mapped values, as currently no relationship has a string-based literal value
@@ -667,7 +668,7 @@ public abstract class RelationshipMapping extends InstanceMapping {
      */
     private void addRealPropertiesToSet(List<String> candidates, Set<String> realProperties) {
         for (String propertyName : candidates) {
-            if (!propertyName.equals(SELF_REFERENCE_SENTINEL) && !propertyName.equals("")) {
+            if (!propertyName.equals(SELF_REFERENCE_SENTINEL) && propertyName.length() != 0) {
                 realProperties.add(propertyName);
             }
         }

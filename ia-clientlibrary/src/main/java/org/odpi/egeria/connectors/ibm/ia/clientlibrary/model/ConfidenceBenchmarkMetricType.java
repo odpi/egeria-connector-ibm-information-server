@@ -14,6 +14,8 @@ public enum ConfidenceBenchmarkMetricType implements IAEnum {
     @JsonValue
     private String value;
     ConfidenceBenchmarkMetricType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

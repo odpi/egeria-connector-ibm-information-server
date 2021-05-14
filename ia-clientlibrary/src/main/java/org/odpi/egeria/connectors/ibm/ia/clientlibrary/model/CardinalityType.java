@@ -14,6 +14,8 @@ public enum CardinalityType implements IAEnum {
     @JsonValue
     private String value;
     CardinalityType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

@@ -13,6 +13,8 @@ public enum SampleType implements IAEnum {
     @JsonValue
     private String value;
     SampleType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

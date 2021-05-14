@@ -14,6 +14,8 @@ public enum BenchmarkComparisonOperatorType implements IAEnum {
     @JsonValue
     private String value;
     BenchmarkComparisonOperatorType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

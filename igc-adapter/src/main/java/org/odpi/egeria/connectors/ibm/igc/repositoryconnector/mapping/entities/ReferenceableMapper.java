@@ -212,7 +212,7 @@ public class ReferenceableMapper extends OpenMetadataRootMapper {
                         value = propertyValue.toString();
                     }
                     // Leave out any properties that are null or empty strings, as these are unset in IGC
-                    if (value != null && !value.equals("")) {
+                    if (value != null && value.length() != 0) {
                         additionalProperties.put(propertyName, value);
                     }
                 }

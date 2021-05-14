@@ -210,6 +210,10 @@ public class IGCSearch {
         return query;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String toString() {
         return getQuery().toString();
     }

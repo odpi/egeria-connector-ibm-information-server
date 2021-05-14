@@ -56,7 +56,7 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      * {@inheritDoc}
      */
     @Override
-    public void start() throws ConnectorCheckedException {
+    public synchronized void start() throws ConnectorCheckedException {
 
         super.start();
         final String methodName = "start";
@@ -85,7 +85,7 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
      * Free up any resources held since the connector is no longer needed.
      */
     @Override
-    public void disconnect() {
+    public synchronized void disconnect() {
 
         final String methodName = "disconnect";
 
@@ -93,7 +93,9 @@ public class IGCOMRSRepositoryConnector extends OMRSRepositoryConnector {
         try {
             this.igcRestClient.disconnect();
         } catch (IGCConnectivityException e) {
-            auditLog.logException(methodName, IGCOMRSAuditCode.FAILED_DISCONNECT.getMessageDefinition(), e);
+            if (auditLog != null) {
+                auditLog.logException(methodName, IGCOMRSAuditCode.FAILED_DISCONNECT.getMessageDefinition(), e);
+            }
         }
         if (auditLog != null) {
             auditLog.logMessage(methodName, IGCOMRSAuditCode.REPOSITORY_SERVICE_SHUTDOWN.getMessageDefinition(getServerName()));

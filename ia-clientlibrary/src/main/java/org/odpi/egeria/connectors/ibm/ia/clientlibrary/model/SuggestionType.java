@@ -11,6 +11,8 @@ public enum SuggestionType implements IAEnum {
     @JsonValue
     private String value;
     SuggestionType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

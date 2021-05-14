@@ -336,6 +336,7 @@ public abstract class EntityMapping extends InstanceMapping {
      *
      * @return {@code Set<String>}
      */
+    @Override
     public Set<String> getMappedOmrsPropertyNames() {
         HashSet<String> omrsProperties = new HashSet<>(getSimpleMappedOmrsProperties());
         if (getComplexMappedOmrsProperties() != null) {

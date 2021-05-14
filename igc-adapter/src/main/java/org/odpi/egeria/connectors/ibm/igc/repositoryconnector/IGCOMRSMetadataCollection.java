@@ -152,6 +152,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             case CLASSIFICATION_DEF:
                 typeDefs = igcRepositoryHelper.getMappedClassificationTypes();
                 break;
+            default:
+                log.warn("Unable to find a TypeDef of type: {}", category);
+                break;
         }
         return typeDefs;
 
@@ -573,6 +576,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                     if (classificationMapping != null) {
                         mappedProperties = classificationMapping.getMappedOmrsPropertyNames();
                     }
+                    break;
+                default:
+                    log.warn("Unable to verify a TypeDef of type: {}", typeDef.getCategory());
                     break;
             }
 
@@ -1711,10 +1717,10 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
                                 // If the searchCriteria is empty, retrieve all entities of the type (no conditions)
                                 String newCriteria = sbNewCriteria.toString();
-                                if (newCriteria.equals("")) {
+                                if (newCriteria.length() == 0) {
                                     newCriteria = searchCriteria;
                                 }
-                                if (newCriteria != null && !newCriteria.equals("")) {
+                                if (newCriteria != null && newCriteria.length() != 0) {
 
                                     // POST'd search to IGC doesn't work on v11.7.0.2 using long_description
                                     // Using "searchText" requires using "searchProperties" (no "where" conditions) -- but does not

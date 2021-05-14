@@ -23,6 +23,8 @@ public enum ResourceType implements IAEnum {
     @JsonValue
     private String value;
     ResourceType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

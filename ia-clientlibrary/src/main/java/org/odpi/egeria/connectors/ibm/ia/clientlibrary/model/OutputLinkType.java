@@ -14,6 +14,8 @@ public enum OutputLinkType implements IAEnum {
     @JsonValue
     private String value;
     OutputLinkType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }
