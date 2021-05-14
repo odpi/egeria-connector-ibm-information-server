@@ -76,7 +76,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public void start() throws ConnectorCheckedException {
+    public synchronized void start() throws ConnectorCheckedException {
 
         super.start();
         final String methodName = "start";
@@ -88,7 +88,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
             raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, "<null>");
         } else {
             String address = endpointProperties.getAddress();
-            if (address == null || address.equals("")) {
+            if (address == null || address.length() == 0) {
                 raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, address);
             } else {
 
@@ -148,7 +148,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public void disconnect() {
+    public synchronized void disconnect() {
         final String methodName = "disconnect";
         try {
             // Close the session on the IGC REST client

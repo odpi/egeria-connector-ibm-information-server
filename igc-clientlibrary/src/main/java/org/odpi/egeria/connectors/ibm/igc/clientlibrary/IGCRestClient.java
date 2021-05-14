@@ -1078,13 +1078,13 @@ public class IGCRestClient {
 
             // Make sure the directory name ends with a separator
             String directoryName = name;
-            if (!directoryName.equals("")) {
+            if (directoryName.length() != 0) {
                 directoryName = directoryName.endsWith(File.separator) ? directoryName : directoryName + File.separator;
             }
 
             // Create an entry in the zip file for the directory, then recurse on the files within it
             try {
-                if (!directoryName.equals("")) {
+                if (directoryName.length() != 0) {
                     zipOutput.putNextEntry(new ZipEntry(directoryName));
                 }
                 File[] files = file.listFiles();

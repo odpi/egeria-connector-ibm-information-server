@@ -14,6 +14,8 @@ public enum ValidityBenchmarkMetricType implements IAEnum {
     @JsonValue
     private String value;
     ValidityBenchmarkMetricType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

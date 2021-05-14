@@ -13,6 +13,8 @@ public enum BenchmarkBaselineType implements IAEnum {
     @JsonValue
     private String value;
     BenchmarkBaselineType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

@@ -65,7 +65,7 @@ public class EntityMappingStore extends MappingStore {
             String coreKey = getPrefixedTypeKey(igcAssetType, prefix);
             log.debug(" ... adding core mapping from {} to: {}", coreKey, guid);
             igcAssetTypeAndPrefixToOmrsGuid.put(coreKey, guid);
-            if (prefix != null && !prefix.equals("")) {
+            if (prefix != null && prefix.length() != 0) {
                 if (!igcPrefixToOmrsGuids.containsKey(prefix)) {
                     igcPrefixToOmrsGuids.put(prefix, new HashSet<>());
                 }
@@ -273,7 +273,7 @@ public class EntityMappingStore extends MappingStore {
      * @return String
      */
     private String getPrefixedTypeKey(String type, String prefix) {
-        if (prefix != null && !prefix.equals("")) {
+        if (prefix != null && prefix.length() != 0) {
             return prefix + "$" + type;
         } else {
             return type;

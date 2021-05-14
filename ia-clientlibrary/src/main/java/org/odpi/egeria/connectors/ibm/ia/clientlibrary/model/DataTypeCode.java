@@ -23,6 +23,8 @@ public enum DataTypeCode implements IAEnum {
     @JsonValue
     private String value;
     DataTypeCode(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

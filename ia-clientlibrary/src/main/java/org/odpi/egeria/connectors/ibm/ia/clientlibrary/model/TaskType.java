@@ -19,6 +19,8 @@ public enum TaskType implements IAEnum {
     @JsonValue
     private String value;
     TaskType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

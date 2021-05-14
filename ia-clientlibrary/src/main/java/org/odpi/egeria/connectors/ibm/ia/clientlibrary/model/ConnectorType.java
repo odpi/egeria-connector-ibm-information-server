@@ -15,6 +15,8 @@ public enum ConnectorType implements IAEnum {
     @JsonValue
     private String value;
     ConnectorType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

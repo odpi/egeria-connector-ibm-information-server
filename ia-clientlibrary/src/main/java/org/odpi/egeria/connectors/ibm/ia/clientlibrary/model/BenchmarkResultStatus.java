@@ -12,6 +12,8 @@ public enum BenchmarkResultStatus implements IAEnum {
     @JsonValue
     private String value;
     BenchmarkResultStatus(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

@@ -12,6 +12,8 @@ public enum UpdateMethodType implements IAEnum {
     @JsonValue
     private String value;
     UpdateMethodType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

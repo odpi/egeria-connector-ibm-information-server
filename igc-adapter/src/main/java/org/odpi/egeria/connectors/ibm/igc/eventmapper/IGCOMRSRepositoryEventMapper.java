@@ -529,7 +529,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
     private Map<String, String> getRIDsAndTypesFromEventString(String payload) {
 
         Map<String, String> dict = new HashMap<>();
-        if (payload != null && !payload.equals("")) {
+        if (payload != null && payload.length() != 0) {
             for (String asset : payload.split(",")) {
                 asset = asset.trim();
                 String[] assetTokens = asset.split(":");

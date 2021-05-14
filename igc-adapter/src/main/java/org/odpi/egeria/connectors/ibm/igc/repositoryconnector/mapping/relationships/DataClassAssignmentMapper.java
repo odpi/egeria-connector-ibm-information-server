@@ -446,15 +446,20 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                             if (value instanceof PrimitivePropertyValue) {
                                 PrimitivePropertyValue ppv = (PrimitivePropertyValue) value;
                                 IGCRepositoryHelper.validateNumericOperator(operator, ppv.getTypeName(), methodName);
-                                long valueFreq = Long.parseLong(value.valueAsString());
-                                if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
-                                    includeAllSelected(dataClassConditions);
-                                } else if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+                                try {
+                                    long valueFreq = Long.parseLong(value.valueAsString());
+                                    if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
+                                        includeAllSelected(dataClassConditions);
+                                    } else if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+                                        dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                    }
+                                    String igcOperator = IGCRepositoryHelper.getIgcOperator(operator);
+                                    IGCSearchCondition byValueFrequency = new IGCSearchCondition("value_frequency", igcOperator, "" + valueFreq);
+                                    classificationConditions.addCondition(byValueFrequency);
+                                } catch (NumberFormatException e) {
+                                    log.warn("Unable to translate the valueFrequency into a number -- ensuring no results: {}", value.valueAsString(), e);
                                     dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
                                 }
-                                String igcOperator = IGCRepositoryHelper.getIgcOperator(operator);
-                                IGCSearchCondition byValueFrequency = new IGCSearchCondition("value_frequency", igcOperator, "" + valueFreq);
-                                classificationConditions.addCondition(byValueFrequency);
                             } else if (value == null) {
                                 if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
                                     includeAllSelected(dataClassConditions);
@@ -480,15 +485,20 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                             if (value instanceof PrimitivePropertyValue) {
                                 PrimitivePropertyValue ppv = (PrimitivePropertyValue) value;
                                 IGCRepositoryHelper.validateNumericOperator(operator, ppv.getTypeName(), methodName);
-                                int confidence = Integer.parseInt(value.valueAsString());
-                                if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
-                                    includeAllSelected(dataClassConditions);
-                                } else if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+                                try {
+                                    int confidence = Integer.parseInt(value.valueAsString());
+                                    if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
+                                        includeAllSelected(dataClassConditions);
+                                    } else if (operator.equals(PropertyComparisonOperator.NOT_NULL)) {
+                                        dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
+                                    }
+                                    String igcOperator = IGCRepositoryHelper.getIgcOperator(operator);
+                                    IGCSearchCondition byValueFrequency = new IGCSearchCondition("confidencePercent", igcOperator, "" + confidence);
+                                    classificationConditions.addCondition(byValueFrequency);
+                                } catch (NumberFormatException e) {
+                                    log.warn("Unable to translate the confidence into a number -- ensuring no results: {}", value.valueAsString(), e);
                                     dataClassConditions.addCondition(IGCRestConstants.getConditionToForceNoSearchResults());
                                 }
-                                String igcOperator = IGCRepositoryHelper.getIgcOperator(operator);
-                                IGCSearchCondition byValueFrequency = new IGCSearchCondition("confidencePercent", igcOperator, "" + confidence);
-                                classificationConditions.addCondition(byValueFrequency);
                             } else if (value == null) {
                                 if (operator.equals(PropertyComparisonOperator.IS_NULL)) {
                                     includeAllSelected(dataClassConditions);

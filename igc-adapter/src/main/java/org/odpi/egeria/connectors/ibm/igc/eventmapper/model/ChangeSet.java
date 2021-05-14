@@ -68,7 +68,7 @@ public class ChangeSet {
                 log.debug("No existing stub -- calculating differences.");
                 calculateDelta(asset, stubPayload);
             } else {
-                Long stubModified = stubPayload.path("modified_on").asLong(0);
+                long stubModified = stubPayload.path("modified_on").asLong(0);
                 if (stubModified == 0) {
                     log.debug("No timestamp inside stub -- calculating differences.");
                     calculateDelta(asset, stubPayload);
@@ -80,7 +80,7 @@ public class ChangeSet {
                     if (assetModified == null) {
                         log.debug("No timestamp inside asset -- calculating differences.");
                         calculateDelta(asset, stubPayload);
-                    } else if (!stubModified.equals(assetModified.getTime())) {
+                    } else if (stubModified != assetModified.getTime()) {
                         log.debug("Modification timestamp of stub ({}) does not match asset ({}) -- calculating differences.", stubModified, assetModified.getTime());
                         calculateDelta(asset, stubPayload);
                     } else {
@@ -191,9 +191,14 @@ public class ChangeSet {
             // If we have an items array, determine the right index and retrieve the object
             String arrayIndex = objectPath.substring(objectPath.lastIndexOf('/') + 1);
             String listPath = objectPath.substring(1, objectPath.indexOf("/items"));
-            int idx = Integer.parseInt(arrayIndex);
-            ArrayNode references = (ArrayNode) asset.path(listPath).path("items");
-            return references.get(idx);
+            try {
+                int idx = Integer.parseInt(arrayIndex);
+                ArrayNode references = (ArrayNode) asset.path(listPath).path("items");
+                return references.get(idx);
+            } catch (NumberFormatException e) {
+                log.warn("Unable to parse the numeric index from value -- returning null: {}", arrayIndex, e);
+                return null;
+            }
         } else {
             // Otherwise just return the object directly (there is only one)
             // We need to remove the leading '/' before doing so...

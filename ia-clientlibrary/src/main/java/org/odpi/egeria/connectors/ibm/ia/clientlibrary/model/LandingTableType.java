@@ -12,6 +12,8 @@ public enum LandingTableType implements IAEnum {
     @JsonValue
     private String value;
     LandingTableType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

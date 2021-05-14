@@ -123,6 +123,7 @@ public abstract class ClassificationMapping extends InstanceMapping {
      *
      * @return {@code Set<String>}
      */
+    @Override
     public Set<String> getMappedOmrsPropertyNames() {
         HashSet<String> omrsProperties = new HashSet<>();
         if (mappedOmrsPropertyNames != null) {
@@ -370,6 +371,9 @@ public abstract class ClassificationMapping extends InstanceMapping {
                                 value,
                                 methodName
                         );
+                    } else if (classificationProperties == null) {
+                        classificationProperties = new InstanceProperties();
+                        classificationProperties.setProperty(omrsPropertyName, (InstancePropertyValue)value);
                     } else {
                         classificationProperties.setProperty(omrsPropertyName, (InstancePropertyValue)value);
                     }

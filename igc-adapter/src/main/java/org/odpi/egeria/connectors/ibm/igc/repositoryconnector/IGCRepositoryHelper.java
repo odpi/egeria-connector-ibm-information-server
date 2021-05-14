@@ -895,7 +895,7 @@ public class IGCRepositoryHelper {
             }
             // If there were no properties defined to match (empty list), then return true
             return true;
-        } else if (searchCriteria != null && !searchCriteria.equals("")) {
+        } else if (searchCriteria != null && searchCriteria.length() != 0) {
             InstanceProperties edProperties = ed.getProperties();
             if (edProperties == null) {
                 return false;
@@ -1628,6 +1628,10 @@ public class IGCRepositoryHelper {
                                             "" + (epoch + 999)
                                     ));
                                     break;
+                                default:
+                                    // Do nothing
+                                    log.warn("Unable to use search operator for date value: {}", operator);
+                                    break;
                             }
                             break;
                         case OM_PRIMITIVE_TYPE_BYTE:
@@ -1965,40 +1969,85 @@ public class IGCRepositoryHelper {
     private static boolean compareShort(Object value,
                                         PropertyComparisonOperator operator,
                                         PrimitivePropertyValue requestedValue) {
-        Short lValue = (value instanceof Short) ? (Short) value : Short.parseShort(value.toString());
+        Short lValue;
+        try {
+            lValue = (value instanceof Short) ? (Short) value : Short.parseShort(value.toString());
+        } catch (NumberFormatException e) {
+            log.warn("Unable to translate value into a short, treating as null: {}", value, e);
+            lValue = null;
+        }
         Short rValue = (Short) requestedValue.getPrimitiveValue();
+        if (lValue == null) {
+            return compareNumber(rValue == null ? 0 : -1, operator);
+        }
         return compareNumber(lValue.compareTo(rValue), operator);
     }
 
     private static boolean compareInt(Object value,
                                       PropertyComparisonOperator operator,
                                       PrimitivePropertyValue requestedValue) {
-        Integer lValue = (value instanceof Integer) ? (Integer) value : Integer.parseInt(value.toString());
+        Integer lValue;
+        try {
+            lValue = (value instanceof Integer) ? (Integer) value : Integer.parseInt(value.toString());
+        } catch (NumberFormatException e) {
+            log.warn("Unable to translate value into an integer, treating as null: {}", value, e);
+            lValue = null;
+        }
         Integer rValue = (Integer) requestedValue.getPrimitiveValue();
+        if (lValue == null) {
+            return compareNumber(rValue == null ? 0 : -1, operator);
+        }
         return compareNumber(lValue.compareTo(rValue), operator);
     }
 
     private static boolean compareLong(Object value,
                                        PropertyComparisonOperator operator,
                                        PrimitivePropertyValue requestedValue) {
-        Long lValue = (value instanceof Long) ? (Long) value : Long.parseLong(value.toString());
+        Long lValue;
+        try {
+            lValue = (value instanceof Long) ? (Long) value : Long.parseLong(value.toString());
+        } catch (NumberFormatException e) {
+            log.warn("Unable to translate value into a long, treating as null: {}", value, e);
+            lValue = null;
+        }
         Long rValue = (Long) requestedValue.getPrimitiveValue();
+        if (lValue == null) {
+            return compareNumber(rValue == null ? 0 : -1, operator);
+        }
         return compareNumber(lValue.compareTo(rValue), operator);
     }
 
     private static boolean compareFloat(Object value,
                                         PropertyComparisonOperator operator,
                                         PrimitivePropertyValue requestedValue) {
-        Float lValue = (value instanceof Float) ? (Float) value : Float.parseFloat(value.toString());
+        Float lValue;
+        try {
+            lValue = (value instanceof Float) ? (Float) value : Float.parseFloat(value.toString());
+        } catch (NumberFormatException e) {
+            log.warn("Unable to translate value into a float, treating as null: {}", value, e);
+            lValue = null;
+        }
         Float rValue = (Float) requestedValue.getPrimitiveValue();
+        if (lValue == null) {
+            return compareNumber(rValue == null ? 0 : -1, operator);
+        }
         return compareNumber(lValue.compareTo(rValue), operator);
     }
 
     private static boolean compareDouble(Object value,
                                          PropertyComparisonOperator operator,
                                          PrimitivePropertyValue requestedValue) {
-        Double lValue = (value instanceof Double) ? (Double) value : Double.parseDouble(value.toString());
+        Double lValue;
+        try {
+            lValue = (value instanceof Double) ? (Double) value : Double.parseDouble(value.toString());
+        } catch (NumberFormatException e) {
+            log.warn("Unable to translate value into a double, treating as null: {}", value, e);
+            lValue = null;
+        }
         Double rValue = (Double) requestedValue.getPrimitiveValue();
+        if (lValue == null) {
+            return compareNumber(rValue == null ? 0 : -1, operator);
+        }
         return compareNumber(lValue.compareTo(rValue), operator);
     }
 

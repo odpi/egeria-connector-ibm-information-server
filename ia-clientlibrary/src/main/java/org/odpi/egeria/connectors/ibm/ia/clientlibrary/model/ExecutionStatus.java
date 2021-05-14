@@ -16,6 +16,8 @@ public enum ExecutionStatus implements IAEnum {
     @JsonValue
     private String value;
     ExecutionStatus(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

@@ -15,6 +15,8 @@ public enum OutputType implements IAEnum {
     @JsonValue
     private String value;
     OutputType(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }

@@ -18,6 +18,8 @@ public enum AnalysisStatus implements IAEnum {
     @JsonValue
     private String value;
     AnalysisStatus(String value) { this.value = value; }
+
+    @Override
     public String getValue() { return value; }
 
 }
