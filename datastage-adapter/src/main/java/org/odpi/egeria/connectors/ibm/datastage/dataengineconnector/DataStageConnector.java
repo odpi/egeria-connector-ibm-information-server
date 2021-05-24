@@ -130,7 +130,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                         dataEngine.setEngineType("IBM InfoSphere DataStage");
                         dataEngine.setEngineVersion(igcVersion.getVersionString());
                         dataEngine.setQualifiedName("ibm-datastage@" + address);
-                        dataEngine.setDisplayName(address);
+                        dataEngine.setName(address);
 
                     } else {
                         raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, address);
