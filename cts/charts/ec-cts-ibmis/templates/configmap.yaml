@@ -29,5 +29,5 @@ data:
   IBMIGC_SERVER: {{ .Values.ibmigc.proxyserver }}
 
   # Used for downloads
-  CONNECTOR_URL: https://odpi.jfrog.io/odpi/egeria-{{ .Values.release.repo }}-local/org/odpi/egeria/egeria-connector-ibm-information-server-package/{{ .Values.release.version }}/egeria-connector-ibm-information-server-package-{{ .Values.release.version }}-jar-with-dependencies.jar
+  CONNECTOR_URL: {{  .Values.connector.url }}
   CTS_REPORT_NAME: {{ .Release.Name }}

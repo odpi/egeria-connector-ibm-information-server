@@ -15,18 +15,17 @@ egeria:
   cohort: coco
   server: myserver
 
-release:
-  version: 2.9-SNAPSHOT
-  repo: snapshot
+connector:
+  url: "http://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=org.odpi.egeria&a=egeria-connector-ibm-information-server-package&v=RELEASE&c=jar-with-dependencies"
 
 image:
   egeria:
     name: egeria
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
 
   configure:
     name: egeria-configure
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
 
 # NOTE: this image is "bring your own". Furthermore, the tag will be automatically built based on the
 # name used for the Helm chart release + "-samples". So for example, if you deploy the Helm chart with
