@@ -449,13 +449,15 @@ public class Identity {
                                                     String name) {
         String[] nameTokens = name.split(" ");
         if (nameTokens.length == 1) {
-            // If there is only a single token, use it for an OR-based startsWith search across courtesy title and
-            // first name as this could only be a partial identity, and either could be in the first position
+            // If there is only a single token, use it for an OR-based startsWith search across courtesy title,
+            // first name and last name as this could only be a partial identity, and any could be in the first position
             IGCSearchCondition cTitle = new IGCSearchCondition(COURTESY_TITLE, SEARCH_STARTS_WITH, nameTokens[0]);
             IGCSearchCondition fName = new IGCSearchCondition(GIVEN_NAME, SEARCH_STARTS_WITH, nameTokens[0]);
+            IGCSearchCondition lName = new IGCSearchCondition("surname", SEARCH_STARTS_WITH, nameTokens[0]);
             IGCSearchConditionSet nested = new IGCSearchConditionSet();
             nested.addCondition(cTitle);
             nested.addCondition(fName);
+            nested.addCondition(lName);
             nested.setMatchAnyCondition(true);
             igcSearchConditionSet.addNestedConditionSet(nested);
         } else if (nameTokens.length == 2) {
