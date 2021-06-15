@@ -228,7 +228,6 @@ public class MockServerExpectations implements PluginExpectationInitializer {
         setTermAddEvent(mockServerClient);
         setDataFileDeleteEvent(mockServerClient);
         setIMAMShareEvent(mockServerClient);
-        setIAPublishEvent(mockServerClient);
 
     }
 
@@ -1363,14 +1362,6 @@ public class MockServerExpectations implements PluginExpectationInitializer {
         setStubLookupForRid(mockServerClient, caseName, "data_connection", DATA_CONNECTION_RID);
         setStubLookupForRid(mockServerClient, caseName, "connector", "b1c497ce.54ec142d.001mtr38f.q8hjqk4.spumq8.k1bt587cologck6u9tf8q");
         setStubLookupForRid(mockServerClient, caseName, "database_table", "b1c497ce.54bd3a08.001mts4qn.7n9a341.3l2hic.d867phul07pgt3478ctim");
-
-    }
-
-    private void setIAPublishEvent(MockServerClient mockServerClient) {
-
-        String caseName = "IAPublishEvent";
-
-
 
     }
 
