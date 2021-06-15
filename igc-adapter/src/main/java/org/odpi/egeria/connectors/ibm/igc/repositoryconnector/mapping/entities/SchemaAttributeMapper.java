@@ -179,11 +179,17 @@ public class SchemaAttributeMapper extends SchemaElementMapper {
                     );
                     break;
                 case EQ:
-                case NEQ:
                     condition = new IGCSearchCondition(
                             "allows_null_values",
                             "=",
                             optional ? "true" : "false"
+                    );
+                    break;
+                case NEQ:
+                    condition = new IGCSearchCondition(
+                            "allows_null_values",
+                            "=",
+                            optional ? "false" : "true"
                     );
                     break;
                 case GTE:
