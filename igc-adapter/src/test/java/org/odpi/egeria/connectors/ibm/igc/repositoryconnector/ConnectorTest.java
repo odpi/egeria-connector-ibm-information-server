@@ -2906,6 +2906,14 @@ public class ConnectorTest {
         );
 
         testFindEntitiesByPropertyValue(
+                "79296df8-645a-4ef7-a011-912d1cdcf75a",
+                "ContactDetails",
+                repositoryHelper.getEndsWithRegex("dministrator IIS"),
+                MockConstants.EGERIA_PAGESIZE,
+                1
+        );
+
+        testFindEntitiesByPropertyValue(
                 "229ed5cc-de31-45fc-beb4-9919fd247398",
                 "FileFolder",
                 repositoryHelper.getExactMatchRegex("(host)=INFOSVR::(data_file_folder)=/::(data_file_folder)=data::(data_file_folder)=files"),
