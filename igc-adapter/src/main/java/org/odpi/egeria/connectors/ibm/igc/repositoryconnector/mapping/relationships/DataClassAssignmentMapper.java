@@ -395,7 +395,6 @@ public class DataClassAssignmentMapper extends RelationshipMapping {
                             break;
                         case "partialMatch":
                             if (value instanceof PrimitivePropertyValue) {
-                                PrimitivePropertyValue ppv = (PrimitivePropertyValue) value;
                                 IGCRepositoryHelper.validateBooleanOperator(operator, methodName);
                                 boolean isPartialMatch = Boolean.parseBoolean(value.valueAsString());
                                 IGCSearchCondition byPartialMatch;

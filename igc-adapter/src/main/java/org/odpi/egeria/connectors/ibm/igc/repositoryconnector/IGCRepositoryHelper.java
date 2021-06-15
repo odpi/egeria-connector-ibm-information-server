@@ -322,14 +322,13 @@ public class IGCRepositoryHelper {
      * Retrieve a mapping from IGC property name to the OMRS relationship type it represents.
      *
      * @param assetType the IGC asset type for which to find mappings
-     * @param userId the userId making the request
      * @return {@code Map<String, RelationshipMapping>} - keyed by IGC asset type with values of the RelationshipMappings
      */
-    public Map<String, List<RelationshipMapping>> getIgcPropertiesToRelationshipMappings(String assetType, String userId) {
+    public Map<String, List<RelationshipMapping>> getIgcPropertiesToRelationshipMappings(String assetType) {
 
         HashMap<String, List<RelationshipMapping>> map = new HashMap<>();
 
-        List<EntityMapping> mappers = getMappers(assetType, userId);
+        List<EntityMapping> mappers = getMappers(assetType);
         for (EntityMapping mapper : mappers) {
             List<RelationshipMapping> relationshipMappings = mapper.getRelationshipMappers();
             for (RelationshipMapping relationshipMapping : relationshipMappings) {
@@ -1304,7 +1303,6 @@ public class IGCRepositoryHelper {
 
         final String methodName = "getEntityDetail";
 
-        EntityDetail detail;
         validateGuidAndType(guid, methodName);
         String prefix = guid.getGeneratedPrefix();
         String igcType = guid.getAssetType();
@@ -1399,10 +1397,9 @@ public class IGCRepositoryHelper {
      * Retrieves the classes to use for mapping the provided IGC asset type to an OMRS entity.
      *
      * @param igcAssetType the name of the IGC asset type
-     * @param userId the user through which to retrieve the mappings (unused)
      * @return {@code List<EntityMapping>}
      */
-    public List<EntityMapping> getMappers(String igcAssetType, String userId) {
+    public List<EntityMapping> getMappers(String igcAssetType) {
 
         List<EntityMapping> mappers = entityMappingStore.getMappingsByIgcAssetType(igcAssetType);
 

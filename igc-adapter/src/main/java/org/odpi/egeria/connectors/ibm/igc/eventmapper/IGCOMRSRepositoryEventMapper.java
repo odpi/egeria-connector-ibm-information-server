@@ -645,8 +645,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
             // Retrieve the mapping from IGC property name to OMRS relationship type
             Map<String, List<RelationshipMapping>> relationshipMap = igcRepositoryHelper.getIgcPropertiesToRelationshipMappings(
-                    latestVersion.getType(),
-                    localServerUserId
+                    latestVersion.getType()
             );
             log.debug(" ... found mappings: {}", relationshipMap);
 
@@ -928,9 +927,6 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
                 && relationshipMapping.includeRelationshipForIgcObjects(igcomrsRepositoryConnector, cache, proxyOne, proxyTwo)) {
 
             log.debug("processSingleRelationship processing between {} and {} for type: {}", latestVersionRID, relatedRID, omrsRelationshipType);
-
-            RelationshipMapping.ProxyMapping pmOne = relationshipMapping.getProxyOneMapping();
-            RelationshipMapping.ProxyMapping pmTwo = relationshipMapping.getProxyTwoMapping();
 
             IGCRelationshipGuid igcRelationshipGuid = RelationshipMapping.getRelationshipGUID(
                     igcRepositoryHelper,
@@ -1334,7 +1330,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         boolean atLeastOneEvent = false;
 
         // Output an entity for all entities that map to this asset type -- generated and non-generated
-        List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(asset.getType(), localServerUserId);
+        List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(asset.getType());
         for (EntityMapping referenceableMapper : referenceableMappers) {
             String ridPrefix = referenceableMapper.getIgcRidPrefix();
             IGCEntityGuid igcEntityGuid = igcRepositoryHelper.getEntityGuid(asset.getType(), ridPrefix, asset.getId());
@@ -1387,7 +1383,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
         boolean atLeastOneEvent = false;
 
         // See if there are any generated entities to send an event for (ie. *Type)
-        List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(latestVersion.getType(), localServerUserId);
+        List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(latestVersion.getType());
         for (EntityMapping referenceableMapper : referenceableMappers) {
             // Generated entities MUST have a prefix, so if there is no prefix ignore that mapper
             String ridPrefix = referenceableMapper.getIgcRidPrefix();
@@ -1578,7 +1574,7 @@ public class IGCOMRSRepositoryEventMapper extends OMRSRepositoryEventMapperBase
 
                 // Purge entities by getting all mappers used for that entity (ie. *Type generated entities
                 // as well as non-generated entities)
-                List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(igcAssetType, localServerUserId);
+                List<EntityMapping> referenceableMappers = igcRepositoryHelper.getMappers(igcAssetType);
                 for (EntityMapping referenceableMapper : referenceableMappers) {
 
                     log.debug("Checking via: {}", referenceableMapper.getClass().getName());
