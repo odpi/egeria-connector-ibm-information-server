@@ -214,6 +214,7 @@ public class MockServerExpectations implements PluginExpectationInitializer {
         setFindEntitiesByQualifiedName(mockServerClient);
         setFindDataClassByProperty(mockServerClient);
         setFindDataClassAssignmentByProperty(mockServerClient);
+        setFindAllAttributeForSchemas(mockServerClient);
         setFindSchemaElementByAnchorGUID(mockServerClient);
         setFindGovernanceDefinitionByDomain(mockServerClient);
         setFindColumnsByPrimaryKeyName(mockServerClient);
@@ -1114,6 +1115,8 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                 "{\"types\":[\"data_file_record\"],\"properties\":[\"FKViolationCount\",\"PKDuplicateCount\",\"alias_(business_name)\",\"created_by\",\"created_on\",\"fieldCount\",\"imported_from\",\"include_for_business_lineage\",\"long_description\",\"modified_by\",\"modified_on\",\"name\",\"native_id\",\"nbRecordTested\",\"qualityScore\",\"qualityScore_bubble\",\"quality_benchmark\",\"reviewDate\",\"rowCount\",\"short_description\",\"synchronized_from\"],\"pageSize\":5,\"sorts\":[{\"property\":\"_id\",\"ascending\":true}]}");
         setSearchAndResponse(mockServerClient, caseName, "data_connection_5.json",
                 "{\"types\":[\"data_connection\"],\"properties\":[\"connection_string\",\"created_by\",\"created_on\",\"imported_from\",\"long_description\",\"modified_by\",\"modified_on\",\"name\",\"native_id\",\"short_description\"],\"pageSize\":5,\"sorts\":[{\"property\":\"_id\",\"ascending\":true}]}");
+        setSearchAndResponse(mockServerClient, caseName, "category_5.json",
+                "{\"types\":[\"category\"],\"properties\":[\"created_by\",\"created_on\",\"glossary_type\",\"language\",\"long_description\",\"modified_by\",\"modified_on\",\"name\",\"native_id\",\"short_description\",\"workflow_current_state\",\"workflow_stored_state\"],\"pageSize\":5,\"where\":{\"conditions\":[{\"conditions\":[{\"property\":\"parent_category\",\"operator\":\"isNull\",\"negated\":false},{\"property\":\"name\",\"operator\":\"<>\",\"value\":\"Classifications\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"=\",\"value\":\"Default Glossary\"}],\"operator\":\"and\"},{\"conditions\":[{\"conditions\":[{\"property\":\"name\",\"operator\":\"=\",\"value\":\"Default Glossary\"}],\"operator\":\"and\"},{\"conditions\":[{\"property\":\"name\",\"operator\":\"<>\",\"value\":\"Default Glossary\"}],\"operator\":\"and\"}],\"operator\":\"or\"}],\"operator\":\"and\"},\"sorts\":[{\"property\":\"_id\",\"ascending\":true}]}");
     }
 
     private void setFindDataClassByProperty(MockServerClient mockServerClient) {
@@ -1162,6 +1165,12 @@ public class MockServerExpectations implements PluginExpectationInitializer {
                         "{\"types\":[\"classification\"],\"where\":{\"conditions\":[{\"property\":\"classifies_asset\",\"operator\":\"=\",\"value\":\"b1c497ce.60641b50.001mts4re.732derp.7g9t50.2rjqcak0137pg2hevl7ne\"},{\"property\":\"data_class\",\"operator\":\"=\",\"value\":\"f4951817.e469fa50.001mtr2gq.nsrej8a.75d8rp.ud414oj262acep64l8dpq\"}],\"operator\":\"and\"}}",
                         MatchType.ONLY_MATCHING_FIELDS
                 ));
+    }
+
+    private void setFindAllAttributeForSchemas(MockServerClient mockServerClient) {
+        String caseName = "FindAllAttributeForSchemas";
+        setSearchAndResponse(mockServerClient, caseName, "table.json",
+                "{\"types\":[\"database_table\"],\"properties\":[\"database_schema\"],\"pageSize\":2,\"where\":{\"conditions\":[{\"property\":\"database_schema\",\"operator\":\"isNull\",\"negated\":true}],\"operator\":\"or\"}}");
     }
 
     private void setFindSchemaElementByAnchorGUID(MockServerClient mockServerClient) {

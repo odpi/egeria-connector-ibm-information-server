@@ -173,22 +173,31 @@ public abstract class InstanceMapping {
                 SearchProperties nestedConditions = condition.getNestedConditions();
                 if (nestedConditions != null) {
                     // Recurse on any nested conditions
-                    filter = getAllNoneOrSome(repositoryConnector, nestedConditions);
-                    if ( (matchCriteria.equals(MatchCriteria.NONE) && !filter.equals(SearchFilter.NONE))
-                            || (matchCriteria.equals(MatchCriteria.ALL) && !filter.equals(SearchFilter.ALL)) ) {
-                        // If some match but we have been requested to match nothing, or if we have not matched
-                        // everything but have been requested to match everything, we can short-circuit as we should
-                        // return no results
-                        log.debug("Requested search with NONE criteria but non-NONE nested filter, or ALL criteria and non-ALL nested filter: {}", nestedConditions);
-                        filter = SearchFilter.NONE;
-                        break;
-                    } else if (matchCriteria.equals(MatchCriteria.ANY) && !filter.equals(SearchFilter.NONE)) {
-                        // Otherwise, if we simply need to match anything and we have any matches, we should return all
-                        // results
-                        filter = SearchFilter.ALL;
-                        break;
+                    SearchFilter nestedFilter = getAllNoneOrSome(repositoryConnector, nestedConditions);
+                    switch (matchCriteria) {
+                        case ALL:
+                            log.debug("Requested search with ALL criteria, will pass-through nested filter as-is: {}", nestedFilter);
+                            filter = nestedFilter;
+                            break;
+                        case NONE:
+                            if (nestedFilter == SearchFilter.ALL) {
+                                log.debug("Requested search with NONE criteria but nested filter would return all results -- should therefore force no results: {}", nestedConditions);
+                                filter = SearchFilter.NONE;
+                            } else {
+                                log.debug("Requested search with NONE criteria and non-ALL nested filter, passing through: {}", nestedFilter);
+                                filter = nestedFilter;
+                            }
+                            break;
+                        case ANY:
+                            if (nestedFilter == SearchFilter.ALL) {
+                                log.debug("Requested search with ANY criteria and nested filter would return all results -- should therefore include all results: {}", nestedConditions);
+                                filter = nestedFilter;
+                            } else {
+                                log.debug("Requested search with ANY criteria and nested filter would return some or no results -- may therefore be some results overall: {}", nestedConditions);
+                                filter = SearchFilter.SOME;
+                            }
+                            break;
                     }
-                    // (and in any other case we should continue looping to determine the situation...)
                 } else {
                     String omrsPropertyName = condition.getProperty();
                     // If we are being asked to search for an instance header property, ensure it is one we support
@@ -210,7 +219,7 @@ public abstract class InstanceMapping {
                         boolean valuesAreEqual = IGCRepositoryHelper.equivalentValues(literalValue, condition.getOperator(), condition.getValue());
                         if (valuesAreEqual && !matchCriteria.equals(MatchCriteria.ALL)) {
                             // If the values are equal, we can immediately short-circuit: when we should match
-                            // none this means we should have no results, and when we should match any this means
+                            // NONE this means we should have no results, and when we should match ANY this means
                             // all results will match
                             if (matchCriteria.equals(MatchCriteria.NONE)) {
                                 log.debug("Requested search with NONE criteria, but found a literal-mapped property that matches: {}", condition);

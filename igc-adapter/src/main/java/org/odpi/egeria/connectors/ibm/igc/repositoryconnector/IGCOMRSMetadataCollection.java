@@ -2020,23 +2020,27 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
                 for (IGCSearch igcSearch : searches) {
 
-                    // TODO: handle sequencing -- here or as part of method above?
-                    igcRepositoryHelper.setPagingForSearch(igcSearch, fromRelationshipElement, pageSize);
+                    // Since we could end up running multiple searches across different types, stop searching once we
+                    // have reached the requested pageSize
+                    if (relationships.size() < pageSize) {
+                        // TODO: handle sequencing -- here or as part of method above?
+                        igcRepositoryHelper.setPagingForSearch(igcSearch, fromRelationshipElement, pageSize);
 
-                    // Ensure we handle NONE semantics and literal values, as we do for findEntitiesByProperty
-                    InstanceMapping.SearchFilter filter = mapping.getAllNoneOrSome(igcomrsRepositoryConnector,
-                            repositoryHelper.getSearchPropertiesFromInstanceProperties(repositoryName, matchProperties, matchCriteria));
+                        // Ensure we handle NONE semantics and literal values, as we do for findEntitiesByProperty
+                        InstanceMapping.SearchFilter filter = mapping.getAllNoneOrSome(igcomrsRepositoryConnector,
+                                repositoryHelper.getSearchPropertiesFromInstanceProperties(repositoryName, matchProperties, matchCriteria));
 
-                    if (!filter.equals(InstanceMapping.SearchFilter.NONE)) {
-                        try {
-                            igcRepositoryHelper.processResults(mapping,
-                                    igcRestClient.search(igcSearch),
-                                    relationships,
-                                    cache,
-                                    pageSize,
-                                    userId);
-                        } catch (IGCException e) {
-                            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                        if (!filter.equals(InstanceMapping.SearchFilter.NONE)) {
+                            try {
+                                igcRepositoryHelper.processResults(mapping,
+                                        igcRestClient.search(igcSearch),
+                                        relationships,
+                                        cache,
+                                        pageSize,
+                                        userId);
+                            } catch (IGCException e) {
+                                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                            }
                         }
                     }
 
@@ -2105,18 +2109,22 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
                 // for the mapping.
                 List<IGCSearch> searches = mapping.getComplexIGCSearchCriteria(igcomrsRepositoryConnector, searchCriteria);
 
-                for (IGCSearch igcSearch : searches) {
-                    // TODO: handle sequencing -- here or as part of method above?
-                    igcRepositoryHelper.setPagingForSearch(igcSearch, fromRelationshipElement, pageSize);
-                    try {
-                        igcRepositoryHelper.processResults(mapping,
-                                igcRestClient.search(igcSearch),
-                                relationships,
-                                cache,
-                                pageSize,
-                                userId);
-                    } catch (IGCException e) {
-                        raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                // Since we could end up running multiple searches across different types, stop searching once we
+                // have reached the requested pageSize
+                if (relationships.size() < pageSize) {
+                    for (IGCSearch igcSearch : searches) {
+                        // TODO: handle sequencing -- here or as part of method above?
+                        igcRepositoryHelper.setPagingForSearch(igcSearch, fromRelationshipElement, pageSize);
+                        try {
+                            igcRepositoryHelper.processResults(mapping,
+                                    igcRestClient.search(igcSearch),
+                                    relationships,
+                                    cache,
+                                    pageSize,
+                                    userId);
+                        } catch (IGCException e) {
+                            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+                        }
                     }
                 }
 
