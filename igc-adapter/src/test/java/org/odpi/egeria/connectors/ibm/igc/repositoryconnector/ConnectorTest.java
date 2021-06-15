@@ -617,7 +617,7 @@ public class ConnectorTest {
         assertNotNull(classificationMapping);
         assertEquals(classificationMapping.getOmrsClassificationType(), "PrimaryKey");
         assertEquals(classificationMapping.getIgcAssetType(), "database_column");
-        List<EntityMapping> defaultMappings = igcRepositoryHelper.getMappers("unmapped_type", null);
+        List<EntityMapping> defaultMappings = igcRepositoryHelper.getMappers("unmapped_type");
         assertNotNull(defaultMappings);
         assertEquals(defaultMappings.size(), 1);
         assertEquals(defaultMappings.get(0).getOmrsTypeDefName(), "Referenceable");
@@ -3118,8 +3118,6 @@ public class ConnectorTest {
 
     @Test
     public void testFindAllAttributeForSchemas() {
-
-        final String methodName = "testFindAllAttributeForSchemas";
 
         String typeGUID = "86b176a2-015c-44a6-8106-54d5d69ba661";
         String typeName = "AttributeForSchema";

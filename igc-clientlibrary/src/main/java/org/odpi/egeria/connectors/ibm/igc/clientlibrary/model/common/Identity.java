@@ -169,9 +169,8 @@ public class Identity {
      * @param sb the object into which to compose the string
      * @param type the IGC asset type
      * @param name the name of the IGC asset
-     * @param id the Repository ID (RID) of the IGC asset
      */
-    private static void composeString(StringBuilder sb, String type, String name, String id) {
+    private static void composeString(StringBuilder sb, String type, String name) {
         sb.append(TYPE_PREFIX);
         sb.append(IGCRestConstants.getAssetTypeForSearch(type));
         sb.append(TYPE_POSTFIX);
@@ -630,10 +629,10 @@ public class Identity {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (Reference ref : context) {
-            composeString(sb, ref.getType(), ref.getName(), ref.getId());
+            composeString(sb, ref.getType(), ref.getName());
             sb.append(SEPARATOR_FOR_COMPONENTS);
         }
-        composeString(sb, assetType, assetName, rid);
+        composeString(sb, assetType, assetName);
         return sb.toString();
     }
 

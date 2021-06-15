@@ -2005,7 +2005,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             // Otherwise, only bother searching if we are after ACTIVE (or "all") relationships -- non-ACTIVE means we
             // will just return an empty list
             // This method should give us only the leaf-level relationship mappings (those WITHOUT any subtypes)
-            List<RelationshipMapping> mappingsToSearch = getRelationshipMappingsToSearch(relationshipTypeGUID, userId);
+            List<RelationshipMapping> mappingsToSearch = getRelationshipMappingsToSearch(relationshipTypeGUID);
 
             // Now iterate through all of the mappings we need to search, construct and run an appropriate search
             // for each one
@@ -2099,7 +2099,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             // Otherwise, only bother searching if we are after ACTIVE (or "all") relationships -- non-ACTIVE means we
             // will just return an empty list
             // This method should give us only the leaf-level relationship mappings (those WITHOUT any subtypes)
-            List<RelationshipMapping> mappingsToSearch = getRelationshipMappingsToSearch(relationshipTypeGUID, userId);
+            List<RelationshipMapping> mappingsToSearch = getRelationshipMappingsToSearch(relationshipTypeGUID);
 
             // Now iterate through all of the mappings we need to search, construct and run an appropriate search
             // for each one
@@ -2292,7 +2292,6 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             InvalidParameterException,
             RepositoryErrorException {
 
-        final String methodName = "getMappingsToSearch";
         List<EntityMapping> mappingsToSearch = new ArrayList<>();
 
         // If no entityType was provided, add all implemented types (except Referenceable, as that could itself
@@ -2369,10 +2368,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
      * Retrieve the listing of implemented mappings that should be used for a relationship search.
      *
      * @param relationshipTypeGUID the GUID of the OMRS relationship type for which to search
-     * @param userId the userId through which to search
      * @return {@code List<RelationshipMapping>}
      */
-    private List<RelationshipMapping> getRelationshipMappingsToSearch(String relationshipTypeGUID, String userId) {
+    private List<RelationshipMapping> getRelationshipMappingsToSearch(String relationshipTypeGUID) {
 
         List<RelationshipMapping> mappingsToSearch = new ArrayList<>();
 
