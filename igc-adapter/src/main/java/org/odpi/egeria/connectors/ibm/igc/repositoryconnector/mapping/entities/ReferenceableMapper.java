@@ -324,12 +324,15 @@ public class ReferenceableMapper extends OpenMetadataRootMapper {
                     String igcType = IGCRestConstants.getAssetTypeForSearch(identity.getAssetType());
                     if (igcType.equals(getIgcAssetType()) || getOtherIGCAssetTypes().contains(igcType)) {
                         IGCSearchConditionSet nested = identity.getSearchCriteria();
+                        if (operator == PropertyComparisonOperator.NEQ) {
+                            nested.setNegateAll(true);
+                        }
                         igcSearchConditionSet.addNestedConditionSet(nested);
                     } else {
                         log.info("Search type did not match identity type -- skipping.");
                         skip = true;
                     }
-                } else {
+                } else if (operator != PropertyComparisonOperator.NEQ) {
                     log.info("Unable to find identity '{}' -- skipping.", qualifiedName);
                     skip = true;
                 }

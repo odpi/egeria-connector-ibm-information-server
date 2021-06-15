@@ -41,6 +41,9 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.MatchCriteria;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.SequencingOrder;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.*;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyComparisonOperator;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.PropertyCondition;
+import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.*;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
 import org.odpi.openmetadata.repositoryservices.eventmanagement.OMRSRepositoryEventExchangeRule;
@@ -2954,6 +2957,65 @@ public class ConnectorTest {
                 5
         );
 
+        typeName = "Glossary";
+        typeGUID = "36f66863-9726-4b41-97ee-714fd0dc6fe4";
+
+        possibleTypes = new HashSet<>();
+        possibleTypes.add(typeName);
+
+        InstanceProperties qn = repositoryHelper.addStringPropertyToInstance(sourceName, null, "qualifiedName", "gen!GL@(category)=Default Glossary", methodName);
+        SearchProperties searchProperties = new SearchProperties();
+        searchProperties.setMatchCriteria(MatchCriteria.ALL);
+
+        List<PropertyCondition> outer = new ArrayList<>();
+        PropertyCondition one = new PropertyCondition();
+        one.setProperty("qualifiedName");
+        one.setOperator(PropertyComparisonOperator.EQ);
+        one.setValue(qn.getPropertyValue("qualifiedName"));
+        outer.add(one);
+
+        InstanceProperties invalid = repositoryHelper.addStringPropertyToInstance(sourceName, null, "qualifiedName", "InvalidValue", methodName);
+        PropertyCondition two = new PropertyCondition();
+        two.setProperty("qualifiedName");
+        two.setOperator(PropertyComparisonOperator.NEQ);
+        two.setValue(invalid.getPropertyValue("qualifiedName"));
+        outer.add(two);
+
+        SearchProperties nestedProperties = new SearchProperties();
+        nestedProperties.setMatchCriteria(MatchCriteria.ANY);
+
+        List<PropertyCondition> inner = new ArrayList<>();
+        PropertyCondition three = new PropertyCondition();
+        three.setProperty("qualifiedName");
+        three.setOperator(PropertyComparisonOperator.EQ);
+        three.setValue(qn.getPropertyValue("qualifiedName"));
+        inner.add(three);
+
+        PropertyCondition four = new PropertyCondition();
+        four.setProperty("qualifiedName");
+        four.setOperator(PropertyComparisonOperator.NEQ);
+        four.setValue(qn.getPropertyValue("qualifiedName"));
+        inner.add(four);
+
+        nestedProperties.setConditions(inner);
+
+        PropertyCondition five = new PropertyCondition();
+        five.setNestedConditions(nestedProperties);
+        outer.add(five);
+
+        searchProperties.setConditions(outer);
+
+        testFindEntities(
+                typeGUID,
+                typeName,
+                null,
+                searchProperties,
+                5,
+                1,
+                null,
+                null
+        );
+
     }
 
     @Test
@@ -3051,6 +3113,24 @@ public class ConnectorTest {
                 MockConstants.EGERIA_PAGESIZE,
                 1
         );
+
+    }
+
+    @Test
+    public void testFindAllAttributeForSchemas() {
+
+        final String methodName = "testFindAllAttributeForSchemas";
+
+        String typeGUID = "86b176a2-015c-44a6-8106-54d5d69ba661";
+        String typeName = "AttributeForSchema";
+
+        testFindRelationshipsByProperty(
+                typeGUID,
+                typeName,
+                null,
+                null,
+                2,
+                2);
 
     }
 
@@ -3922,6 +4002,85 @@ public class ConnectorTest {
     }
 
     /**
+     * Executes a common set of tests against a list of EntityDetail objects after first searching for them by property.
+     *
+     * @param typeGUID the entity type GUID to search
+     * @param typeName the name of the type to search
+     * @param subTypes GUIDs of any subtypes to match against
+     * @param searchProperties the criteria against which to search
+     * @param pageSize the number of results to limit
+     * @param totalNumberExpected the total number of expected results
+     * @param sequencingOrder the ordering to use for the results
+     * @param sequencingProperty the property by which to sort (if sequencing order is based on a property)
+     * @return {@code List<EntityDetail>} the results of the query
+     */
+    private List<EntityDetail> testFindEntities(String typeGUID,
+                                                String typeName,
+                                                List<String> subTypes,
+                                                SearchProperties searchProperties,
+                                                int pageSize,
+                                                int totalNumberExpected,
+                                                SequencingOrder sequencingOrder,
+                                                String sequencingProperty) {
+
+        List<EntityDetail> results = null;
+
+        try {
+            results = igcomrsMetadataCollection.findEntities(
+                    MockConstants.EGERIA_USER,
+                    typeGUID,
+                    subTypes,
+                    searchProperties,
+                    0,
+                    null,
+                    null,
+                    null,
+                    sequencingProperty,
+                    sequencingOrder,
+                    pageSize
+            );
+        } catch (InvalidParameterException | TypeErrorException | RepositoryErrorException | PropertyErrorException | PagingErrorException | FunctionNotSupportedException | UserNotAuthorizedException e) {
+            log.error("Unable to search for {} entities by: {}", typeName, searchProperties, e);
+            assertNull(e);
+        } catch (Exception e) {
+            log.error("Unexpected exception trying to search for {} entities by: {}", typeName, searchProperties, e);
+            assertNull(e);
+        }
+
+        if (totalNumberExpected <= 0) {
+            assertTrue(results == null || results.isEmpty());
+        } else {
+            assertNotNull(results);
+            assertFalse(results.isEmpty());
+            assertEquals(results.size(), totalNumberExpected);
+            for (EntityDetail result : results) {
+                assertEquals(result.getType().getTypeDefName(), typeName);
+                assertTrue(result.getVersion() > 1);
+
+                // TODO: need to understand how the refresh request methods are actually meant to work...
+                /*
+                try {
+                    igcomrsMetadataCollection.refreshEntityReferenceCopy(MockConstants.EGERIA_USER,
+                            result.getGUID(),
+                            result.getType().getTypeDefGUID(),
+                            result.getType().getTypeDefName(),
+                            result.getMetadataCollectionId());
+                } catch (InvalidParameterException | RepositoryErrorException | HomeEntityException | UserNotAuthorizedException e) {
+                    log.error("Unable to send a refresh event for entity GUID: {}", result.getGUID());
+                    assertNull(e);
+                } catch (Exception e) {
+                    log.error("Unexpected exception trying to send a refresh event for entity GUID: {}", result.getGUID(), e);
+                    assertNull(e);
+                }*/
+
+            }
+        }
+
+        return results;
+
+    }
+
+    /**
      * Executes a common set of tests against a list of Relationship objects after first searching for them by property.
      *
      * @param typeGUID the relationship type GUID to search
@@ -3992,6 +4151,7 @@ public class ConnectorTest {
             assertNull(e);
         } catch (Exception e) {
             log.error("Unexpected exception trying to search for {} relationships by property: {}", typeName, matchProperties, e);
+            e.printStackTrace();
             assertNull(e);
         }
 
