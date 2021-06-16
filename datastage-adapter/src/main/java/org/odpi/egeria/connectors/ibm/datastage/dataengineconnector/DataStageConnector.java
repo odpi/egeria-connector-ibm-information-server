@@ -36,7 +36,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
     private static final Logger log = LoggerFactory.getLogger(DataStageConnector.class);
 
-    private static final String SYNC_RULE_PREFIX = "Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS";
+    private static final String SYNC_RULE_PREFIX = "Job metadata will be synced through Egeria";
     private static final String SYNC_RULE_DESC = "GENERATED -- DO NOT UPDATE: last synced at ";
 
     private final SimpleDateFormat syncDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
@@ -52,6 +52,8 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private boolean createDataStoreSchemas = false;
     private List<String> limitToProjects;
     private boolean limitToLineageEnabledJobs = false;
+
+    private LineageMode mode = LineageMode.GRANULAR;
 
     /**
      * Default constructor used by the OCF Connector Provider.
@@ -108,6 +110,14 @@ public class DataStageConnector extends DataEngineConnectorBase {
                         limitToProjects.addAll((List<String>)projects);
                     }
                     limitToLineageEnabledJobs = (Boolean) proxyProperties.getOrDefault(DataStageConnectorProvider.LIMIT_TO_LINEAGE_ENABLED_JOBS, limitToLineageEnabledJobs);
+                    Object lineageMode = proxyProperties.getOrDefault(DataStageConnectorProvider.MODE, null);
+                    if (lineageMode != null) {
+                        try {
+                            mode = LineageMode.valueOf((String) lineageMode);
+                        } catch (IllegalArgumentException e) {
+                            log.warn("Lineage mode specified in the configuration is not a known value.", e);
+                        }
+                    }
                 }
 
                 IGCVersionEnum igcVersion;
@@ -279,10 +289,13 @@ public class DataStageConnector extends DataEngineConnectorBase {
             if (detailedJob.getType().equals(DataStageJob.JobType.SEQUENCE)) {
                 seqList.add(detailedJob);
             } else {
-                List<Process> stageLevelProcesses = getProcessesForEachStage(detailedJob);
-                for (Process stageLevel : stageLevelProcesses) {
-                    cacheHierarchyRelationshipsFromProcessDetails(stageLevel);
-                    processes.add(stageLevel);
+                if (mode == LineageMode.GRANULAR) {
+                    // Only translate stage-level details for granular mode
+                    List<Process> stageLevelProcesses = getProcessesForEachStage(detailedJob);
+                    for (Process stageLevel : stageLevelProcesses) {
+                        cacheHierarchyRelationshipsFromProcessDetails(stageLevel);
+                        processes.add(stageLevel);
+                    }
                 }
                 Process jobProcess = getProcessForJob(detailedJob);
                 if (jobProcess != null) {
@@ -345,7 +358,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param to the date and time up to which to cache changes (inclusive)
      */
     private void initializeCache(Date from, Date to) {
-        DataStageCache forComparison = new DataStageCache(from, to, limitToProjects, limitToLineageEnabledJobs);
+        DataStageCache forComparison = new DataStageCache(from, to, mode, limitToProjects, limitToLineageEnabledJobs);
         if (dataStageCache == null || !dataStageCache.equals(forComparison)) {
             // Initialize the cache, if it is empty, or reset it if it differs from the dates and times we've been given
             dataStageCache = forComparison;
@@ -388,6 +401,9 @@ public class DataStageConnector extends DataEngineConnectorBase {
         log.debug("Load process for job...");
         Process process = dataStageCache.getProcessByRid(job.getJobObject().getId());
         if (process != null) {
+            if (mode == LineageMode.JOB_LEVEL) {
+                // TODO: fill in the LineageMapping at this process level
+            }
             try {
                 if (log.isDebugEnabled()) { log.debug(" ... process: {}", objectMapper.writeValueAsString(process)); }
             } catch (JsonProcessingException e) {
@@ -467,13 +483,13 @@ public class DataStageConnector extends DataEngineConnectorBase {
     }
 
     /**
-     * Construct the name of a unique rule to capture the last time jobs where sync'd for a combination of filtered
-     * projects to the Data Engine OMAS.
+     * Construct the name of a unique rule to capture the last time jobs were sync'd for a combination of filtered
+     * projects (and mode) to the Data Engine OMAS.
      *
      * @return String
      */
     private String getJobSyncRuleName() {
-        String ruleName = SYNC_RULE_PREFIX;
+        String ruleName = SYNC_RULE_PREFIX + " (" + mode.getName() + ")";
         if (limitToProjects.size() > 0) {
             ruleName += " for projects: [" + String.join(",", limitToProjects) + "]";
         }

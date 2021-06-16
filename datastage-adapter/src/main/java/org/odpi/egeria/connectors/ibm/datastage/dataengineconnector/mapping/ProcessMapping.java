@@ -6,6 +6,7 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageCon
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.LineageMode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -56,23 +57,8 @@ public class ProcessMapping extends BaseMapping {
             Dsjob jobObj = job.getJobObject();
             process = getSkeletonProcess(jobObj);
             if (process != null) {
-                PortAliasMapping portAliasMapping = new PortAliasMapping(cache);
+
                 addTransformationProjectDetails(jobObj, process);
-                process.setPortAliases(Stream.concat(
-                        portAliasMapping.getForStages(job.getInputStages(), PortType.INPUT_PORT).stream(),
-                        portAliasMapping.getForStages(job.getOutputStages(), PortType.OUTPUT_PORT).stream())
-                        .collect(Collectors.toList()));
-                Set<LineageMapping> lineageMappings = new HashSet<>();
-                for (Link link : job.getAllLinks()) {
-                    LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache);
-                    Set<LineageMapping> crossStageLineageMappings = lineageMappingMapping.getForLink(link, job);
-                    if (crossStageLineageMappings != null && !crossStageLineageMappings.isEmpty()) {
-                        lineageMappings.addAll(crossStageLineageMappings);
-                    }
-                }
-                if (!lineageMappings.isEmpty()) {
-                    process.setLineageMappings(new ArrayList<>(lineageMappings));
-                }
                 ItemList<SequenceJob> sequencedBy = job.getJobObject().getSequencedByJobs();
                 if (sequencedBy != null) {
                     // Setup a parent process relationship to any sequences that happen to call this job
@@ -101,6 +87,36 @@ public class ProcessMapping extends BaseMapping {
                                 methodName,
                                 e);
                     }
+                }
+
+                if (cache.getMode() == LineageMode.JOB_LEVEL) {
+
+                    // Setup job-level lineage mappings
+                    LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache);
+                    Set<LineageMapping> jobLevelLineage = lineageMappingMapping.getForJob(job);
+                    if (jobLevelLineage != null && !jobLevelLineage.isEmpty()) {
+                        process.setLineageMappings(new ArrayList<>(jobLevelLineage));
+                    }
+
+                } else if (cache.getMode() == LineageMode.GRANULAR) {
+
+                    PortAliasMapping portAliasMapping = new PortAliasMapping(cache);
+                    process.setPortAliases(Stream.concat(
+                            portAliasMapping.getForStages(job.getInputStages(), PortType.INPUT_PORT).stream(),
+                            portAliasMapping.getForStages(job.getOutputStages(), PortType.OUTPUT_PORT).stream())
+                            .collect(Collectors.toList()));
+                    Set<LineageMapping> lineageMappings = new HashSet<>();
+                    for (Link link : job.getAllLinks()) {
+                        LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache);
+                        Set<LineageMapping> crossStageLineageMappings = lineageMappingMapping.getForLink(link, job);
+                        if (crossStageLineageMappings != null && !crossStageLineageMappings.isEmpty()) {
+                            lineageMappings.addAll(crossStageLineageMappings);
+                        }
+                    }
+                    if (!lineageMappings.isEmpty()) {
+                        process.setLineageMappings(new ArrayList<>(lineageMappings));
+                    }
+
                 }
             }
         }

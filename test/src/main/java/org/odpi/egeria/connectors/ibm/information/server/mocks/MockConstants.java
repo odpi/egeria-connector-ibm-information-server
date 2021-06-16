@@ -258,7 +258,7 @@ public class MockConstants {
      * @return HttpRequest
      */
     public static HttpRequest jobSyncRuleRequest() {
-        return searchRequest("{\"types\":[\"information_governance_rule\"],\"properties\":[\"short_description\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"=\",\"value\":\"Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS\"}],\"operator\":\"and\"}}");
+        return searchRequest("{\"types\":[\"information_governance_rule\"],\"properties\":[\"short_description\"],\"pageSize\":100,\"where\":{\"conditions\":[{\"property\":\"name\",\"operator\":\"=\",\"value\":\"Job metadata will be synced through Egeria (GRANULAR)\"}],\"operator\":\"and\"}}");
     }
 
     /**
@@ -269,7 +269,7 @@ public class MockConstants {
         return request().withMethod("POST").withPath(IGC_REST_EP + "assets")
                 .withBody(
                         json(
-                                "{\"_type\":\"information_governance_rule\",\"name\":\"Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS\"}",
+                                "{\"_type\":\"information_governance_rule\",\"name\":\"Job metadata will be synced through Egeria (GRANULAR)\"}",
                                 MatchType.ONLY_MATCHING_FIELDS
                         )
                 );
