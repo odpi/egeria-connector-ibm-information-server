@@ -79,7 +79,7 @@ spec:
             - "-c"
             - >
                 cd /opt/egeria/connectors &&
-                wget ${CONNECTOR_URL}
+                curl --location ${CONNECTOR_URL} --output ${CONNECTOR_JAR}
           volumeMounts:
             - mountPath: /opt/egeria/connectors
               name: egeria-igc-connector-volume
