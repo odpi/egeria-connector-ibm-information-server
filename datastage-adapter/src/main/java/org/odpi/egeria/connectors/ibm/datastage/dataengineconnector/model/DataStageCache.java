@@ -39,6 +39,7 @@ public class DataStageCache {
     private ObjectCache igcCache;
     private Date from;
     private Date to;
+    private LineageMode mode;
     private List<String> limitToProjects;
     private boolean limitToLineageEnabled;
 
@@ -47,10 +48,11 @@ public class DataStageCache {
      *
      * @param from the date and time from which to cache changes
      * @param to the date and time until which to cache changes
+     * @param mode the mode of operation for the connector, indicating the level of detail to include for lineage
      * @param limitToProjects limit the cached jobs to only those in the provided list of projects
      * @param limitToLineageEnabledJobs limit the processing to those jobs for which lineage is enabled
      */
-    public DataStageCache(Date from, Date to, List<String> limitToProjects, boolean limitToLineageEnabledJobs) {
+    public DataStageCache(Date from, Date to, LineageMode mode, List<String> limitToProjects, boolean limitToLineageEnabledJobs) {
         this.igcCache = new ObjectCache();
         this.ridToJob = new HashMap<>();
         this.ridToProcess = new HashMap<>();
@@ -58,6 +60,7 @@ public class DataStageCache {
         this.storeToColumns = new HashMap<>();
         this.from = from;
         this.to = to;
+        this.mode = mode;
         this.limitToProjects = (limitToProjects == null ? Collections.emptyList() : limitToProjects);
         this.limitToLineageEnabled = limitToLineageEnabledJobs;
     }
@@ -71,6 +74,12 @@ public class DataStageCache {
         this.igcRestClient = igcRestClient;
         getChangedJobs();
     }
+
+    /**
+     * Retrieve the mode of operation of the cache (level of detail to inclue for lineage).
+     * @return LineageMode
+     */
+    public LineageMode getMode() { return mode; }
 
     /**
      * Retrieve the date and time from which this cache contains change information.
@@ -210,59 +219,37 @@ public class DataStageCache {
      * @return {@code List<Classificationenabledgroup>} of fields in that data store
      */
     public List<Classificationenabledgroup> getFieldsForStore(InformationAsset store) {
+
         final String methodName = "getFieldsForStore";
+
         // First try to retrieve it from the cache directly
         String rid = store.getId();
-        List<Classificationenabledgroup> fields = storeToColumns.getOrDefault(rid, null);
-        if (fields == null) {
-            // If not there, run a search to retrieve it
-            String storeType = store.getType();
-            log.debug("(cache miss) -- retrieving data field details for {}: {}", storeType, rid);
+        String storeType = store.getType();
+
+        List<Classificationenabledgroup> fields = null;
+
+        // Regardless of mode, we at least need the store identity
+        Identity storeIdentity = storeToIdentity.getOrDefault(rid, null);
+        if (storeIdentity == null && mode == LineageMode.JOB_LEVEL) {
+
+            // If not there, retrieve it and cache it
+            log.debug("(cache miss) -- retrieving data store details for {}: {}", storeType, rid);
             if (!store.isVirtualAsset()) {
                 // For non-virtual assets the most efficient way of retrieving this information is via a search (by RID)
-                IGCSearch igcSearch = new IGCSearch();
-                IGCSearchCondition byParentId = null;
-                if (storeType.equals("database_table") || storeType.equals("view")) {
-                    igcSearch.addType("database_column");
-                    igcSearch.addProperties(DataStageConstants.getDataFieldSearchProperties());
-                    byParentId = new IGCSearchCondition("database_table_or_view", "=", rid);
-                } else if (storeType.equals("data_file_record")) {
-                    igcSearch.addType("data_file_field");
-                    igcSearch.addProperties(DataStageConstants.getDataFieldSearchProperties());
-                    byParentId = new IGCSearchCondition("data_file_record", "=", rid);
-                } else {
-                    log.warn("Unknown source / target type -- skipping: {}", store);
-                }
-                if (byParentId != null) {
-                    try {
-                        IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(byParentId);
-                        igcSearch.addConditions(conditionSet);
-                        ItemList<Classificationenabledgroup> ilFields = igcRestClient.search(igcSearch);
-                        fields = igcRestClient.getAllPages(null, ilFields);
-                    } catch (IGCException e) {
-                        DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                                this.getClass().getName(),
-                                methodName,
-                                e);
-                    }
+                try {
+                    storeIdentity = store.getIdentity(igcRestClient, igcCache);
+                    storeToIdentity.put(rid, storeIdentity);
+                } catch (IGCException e) {
+                    DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                            this.getClass().getName(),
+                            methodName,
+                            e);
                 }
             } else {
-                // For virtual assets, we must retrieve the full object and page through its fields (search by RID is not possible)
-                fields = new ArrayList<>();
+                // For virtual assets, we must retrieve the full object (search by RID is not possible)
                 try {
                     Reference virtualStore = igcRestClient.getAssetById(rid, igcCache);
-                    if (virtualStore instanceof DatabaseTable) {
-                        DatabaseTable virtualTable = (DatabaseTable) virtualStore;
-                        fields.addAll(getDataFieldsFromVirtualList("database_columns", virtualTable.getDatabaseColumns()));
-                    } else if (virtualStore instanceof View) {
-                        View virtualView = (View) virtualStore;
-                        fields.addAll(getDataFieldsFromVirtualList("database_columns", virtualView.getDatabaseColumns()));
-                    } else if (virtualStore instanceof DataFileRecord) {
-                        DataFileRecord virtualRecord = (DataFileRecord) virtualStore;
-                        fields.addAll(getDataFieldsFromVirtualList("data_file_fields", virtualRecord.getDataFileFields()));
-                    } else {
-                        log.warn("Unhandled case for type: {}", virtualStore.getType());
-                    }
+                    storeToIdentity.put(rid, virtualStore.getIdentity(igcRestClient, igcCache));
                 } catch (IGCException e) {
                     DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
                             this.getClass().getName(),
@@ -270,14 +257,58 @@ public class DataStageCache {
                             e);
                 }
             }
-            // Add them to the cache once they've been retrieved
-            if (fields != null) {
-                storeToColumns.put(rid, fields);
-                if (!fields.isEmpty()) {
+
+        } else if (mode == LineageMode.GRANULAR) {
+
+            fields = storeToColumns.getOrDefault(rid, null);
+            if (fields == null) {
+                // If not there, run a search to retrieve it
+                log.debug("(cache miss) -- retrieving data field details for {}: {}", storeType, rid);
+                if (!store.isVirtualAsset()) {
+                    // For non-virtual assets the most efficient way of retrieving this information is via a search (by RID)
+                    IGCSearch igcSearch = new IGCSearch();
+                    IGCSearchCondition byParentId = null;
+                    if (storeType.equals("database_table") || storeType.equals("view")) {
+                        igcSearch.addType("database_column");
+                        igcSearch.addProperties(DataStageConstants.getDataFieldSearchProperties());
+                        byParentId = new IGCSearchCondition("database_table_or_view", "=", rid);
+                    } else if (storeType.equals("data_file_record")) {
+                        igcSearch.addType("data_file_field");
+                        igcSearch.addProperties(DataStageConstants.getDataFieldSearchProperties());
+                        byParentId = new IGCSearchCondition("data_file_record", "=", rid);
+                    } else {
+                        log.warn("Unknown source / target type -- skipping: {}", store);
+                    }
+                    if (byParentId != null) {
+                        try {
+                            IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(byParentId);
+                            igcSearch.addConditions(conditionSet);
+                            ItemList<Classificationenabledgroup> ilFields = igcRestClient.search(igcSearch);
+                            fields = igcRestClient.getAllPages(null, ilFields);
+                        } catch (IGCException e) {
+                            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                                    this.getClass().getName(),
+                                    methodName,
+                                    e);
+                        }
+                    }
+                } else {
+                    // For virtual assets, we must retrieve the full object and page through its fields (search by RID is not possible)
+                    fields = new ArrayList<>();
                     try {
-                        Identity storeIdentity = fields.get(0).getIdentity(igcRestClient, igcCache).getParentIdentity();
-                        String storeId = storeIdentity.getRid();
-                        storeToIdentity.put(storeId, storeIdentity);
+                        Reference virtualStore = igcRestClient.getAssetById(rid, igcCache);
+                        if (virtualStore instanceof DatabaseTable) {
+                            DatabaseTable virtualTable = (DatabaseTable) virtualStore;
+                            fields.addAll(getDataFieldsFromVirtualList("database_columns", virtualTable.getDatabaseColumns()));
+                        } else if (virtualStore instanceof View) {
+                            View virtualView = (View) virtualStore;
+                            fields.addAll(getDataFieldsFromVirtualList("database_columns", virtualView.getDatabaseColumns()));
+                        } else if (virtualStore instanceof DataFileRecord) {
+                            DataFileRecord virtualRecord = (DataFileRecord) virtualStore;
+                            fields.addAll(getDataFieldsFromVirtualList("data_file_fields", virtualRecord.getDataFileFields()));
+                        } else {
+                            log.warn("Unhandled case for type: {}", virtualStore.getType());
+                        }
                     } catch (IGCException e) {
                         DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
                                 this.getClass().getName(),
@@ -285,7 +316,25 @@ public class DataStageCache {
                                 e);
                     }
                 }
+                // Add them to the cache once they've been retrieved
+                if (fields != null) {
+                    storeToColumns.put(rid, fields);
+                    if (!fields.isEmpty()) {
+                        try {
+                            storeIdentity = fields.get(0).getIdentity(igcRestClient, igcCache).getParentIdentity();
+                            String storeId = storeIdentity.getRid();
+                            storeToIdentity.put(storeId, storeIdentity);
+                        } catch (IGCException e) {
+                            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                                    this.getClass().getName(),
+                                    methodName,
+                                    e);
+                        }
+                    }
+                }
+
             }
+
         }
         return fields;
     }

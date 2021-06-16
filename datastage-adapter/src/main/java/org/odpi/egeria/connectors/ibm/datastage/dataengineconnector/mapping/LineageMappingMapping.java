@@ -8,6 +8,7 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataSt
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.interfaces.ColumnLevelLineage;
@@ -168,6 +169,40 @@ class LineageMappingMapping extends BaseMapping {
                                 outputStage);
                     }
                 }
+            }
+        } catch (IGCException e) {
+            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                    this.getClass().getName(),
+                    methodName,
+                    e);
+        }
+        return lineageMappings;
+    }
+
+    /**
+     * Creates LineageMappings at the job-level (only).
+     * - {@code INPUTs -> Job (data source(s) -> process)}
+     * - {@code Job -> OUTPUTs (process -> data target(s)}
+     *
+     * @param job the job for which to create the LineageMappings
+     * @return {@code Set<LineageMapping>}
+     */
+    Set<LineageMapping> getForJob(DataStageJob job) {
+        final String methodName = "getForJob";
+        Set<LineageMapping> lineageMappings = new HashSet<>();
+        List<String> inputs = job.getInputStores();
+        List<String> outputs = job.getOutputStores();
+        try {
+            String jobQN = getFullyQualifiedName(job.getJobObject());
+            for (String rid : inputs) {
+                Identity input = cache.getStoreIdentityFromRid(rid);
+                LineageMapping lineageMapping = getLineageMapping(input.toString(), jobQN);
+                lineageMappings.add(lineageMapping);
+            }
+            for (String rid : outputs) {
+                Identity output = cache.getStoreIdentityFromRid(rid);
+                LineageMapping lineageMapping = getLineageMapping(jobQN, output.toString());
+                lineageMappings.add(lineageMapping);
             }
         } catch (IGCException e) {
             DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,

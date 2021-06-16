@@ -37,7 +37,8 @@ public class DataStageJob {
     private final Map<String, StageColumn> columnMap;
     private final Map<String, StageVariable> varMap;
     private final Map<String, Set<String>> stageToVarsMap;
-    private final Set<String> storesForJob;
+    private final List<String> inputStoreRIDs;
+    private final List<String> outputStoreRIDs;
     private final List<String> inputStageRIDs;
     private final List<String> outputStageRIDs;
 
@@ -61,18 +62,21 @@ public class DataStageJob {
         this.columnMap = new TreeMap<>();
         this.varMap = new TreeMap<>();
         this.stageToVarsMap = new TreeMap<>();
-        this.storesForJob = new TreeSet<>();
+        this.inputStoreRIDs = new ArrayList<>();
+        this.outputStoreRIDs = new ArrayList<>();
         this.inputStageRIDs = new ArrayList<>();
         this.outputStageRIDs = new ArrayList<>();
 
         log.debug("Retrieving job details for: {}", job.getId());
 
-        getStageDetailsForJob();
-        getLinkDetailsForJob();
-        getStageVariablesForJob();
-        classifyStages(stageMap.values());
-        getStageColumnDetailsForLinks();
-        classifyFields(cache);
+        if (cache.getMode() == LineageMode.GRANULAR) {
+            getStageDetailsForJob();
+            getLinkDetailsForJob();
+            getStageVariablesForJob();
+            classifyStages(stageMap.values());
+            getStageColumnDetailsForLinks();
+        }
+        getDataAssets(cache);
 
     }
 
@@ -135,12 +139,33 @@ public class DataStageJob {
     public Dsjob getJobObject() { return job; }
 
     /**
+     * Retrieve a list of the input data stores for this job.
+     *
+     * @return {@code List<String>}
+     */
+    public List<String> getInputStores() {
+        return inputStoreRIDs;
+    }
+
+    /**
+     * Retrieve a list of the output data stores for this job.
+     *
+     * @return {@code List<String>}
+     */
+    public List<String> getOutputStores() {
+        return outputStoreRIDs;
+    }
+
+    /**
      * Retrieve the set of data store RIDs that are used by this job.
      *
      * @return {@code Set<String>}
      */
     public Set<String> getStoreRids() {
-        return new TreeSet<>(storesForJob);
+        Set<String> set = new TreeSet<>();
+        set.addAll(inputStoreRIDs);
+        set.addAll(outputStoreRIDs);
+        return set;
     }
 
     /**
@@ -407,7 +432,7 @@ public class DataStageJob {
      *
      * @param cache cache and connectivity to IGC environment
      */
-    private void classifyFields(DataStageCache cache) {
+    private void getDataAssets(DataStageCache cache) {
         if (!getType().equals(JobType.SEQUENCE)) {
             mapDataStoreDetailsForJob(cache, "reads_from_(design)", job.getReadsFromDesign());
             mapDataStoreDetailsForJob(cache, "writes_to_(design)", job.getWritesToDesign());
@@ -430,7 +455,11 @@ public class DataStageJob {
                 List<InformationAsset> allCandidates = igcRestClient.getAllPages(propertyName, candidates);
                 for (InformationAsset candidate : allCandidates) {
                     String storeId = candidate.getId();
-                    storesForJob.add(storeId);
+                    if (propertyName.equals("reads_from_(design)")) {
+                        inputStoreRIDs.add(storeId);
+                    } else if (propertyName.equals("writes_to_(design)")) {
+                        outputStoreRIDs.add(storeId);
+                    }
                     cache.getFieldsForStore(candidate);
                 }
             } catch (IGCException e) {

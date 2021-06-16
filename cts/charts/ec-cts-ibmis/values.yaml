@@ -16,6 +16,7 @@ egeria:
   server: myserver
 
 connector:
+  version: "2.10"
   url: "http://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=org.odpi.egeria&a=egeria-connector-ibm-information-server-package&v=RELEASE&c=jar-with-dependencies"
 
 image:

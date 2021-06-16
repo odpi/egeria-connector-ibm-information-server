@@ -29,5 +29,6 @@ data:
   IBMIGC_SERVER: {{ .Values.ibmigc.proxyserver }}
 
   # Used for downloads
+  CONNECTOR_JAR: egeria-connector-ibm-information-server-package-{{  .Values.connector.version }}-jar-with-dependencies.jar
   CONNECTOR_URL: {{  .Values.connector.url }}
   CTS_REPORT_NAME: {{ .Release.Name }}

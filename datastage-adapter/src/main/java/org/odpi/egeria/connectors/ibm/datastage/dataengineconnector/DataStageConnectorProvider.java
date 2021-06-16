@@ -20,6 +20,8 @@ import java.util.List;
  * <br><br>
  * The permitted configuration options include:
  * <ul>
+ *     <li>mode - a String that must match one of the LineageMode enumeration names to define the mode in which
+ *          connector should operate (defaults to "GRANULAR").</li>
  *     <li>pageSize - an integer giving the number of results to include in each page of processing</li>
  *     <li>includeVirtualAssets - a boolean that indicates whether to include the creation of schemas for virtual
  *          assets (when true) or not (when false). By default this will be enabled (true) to ensure that virtual
@@ -45,6 +47,7 @@ public class DataStageConnectorProvider extends DataEngineConnectorProviderBase 
     private static final String CONNECTOR_TYPE_NAME = "DataStage Data Engine Connector";
     private static final String CONNECTOR_TYPE_DESC = "DataStage Data Engine Connector that processes job information from the IBM DataStage ETL engine.";
 
+    static final String MODE = "mode";
     static final String PAGE_SIZE = "pageSize";
     static final String INCLUDE_VIRTUAL_ASSETS = "includeVirtualAssets";
     static final String CREATE_DATA_STORE_SCHEMAS = "createDataStoreSchemas";
@@ -69,6 +72,7 @@ public class DataStageConnectorProvider extends DataEngineConnectorProviderBase 
         connectorType.setConnectorProviderClassName(this.getClass().getName());
 
         List<String> recognizedConfigurationProperties = new ArrayList<>();
+        recognizedConfigurationProperties.add(MODE);
         recognizedConfigurationProperties.add(PAGE_SIZE);
         recognizedConfigurationProperties.add(INCLUDE_VIRTUAL_ASSETS);
         recognizedConfigurationProperties.add(CREATE_DATA_STORE_SCHEMAS);
