@@ -735,6 +735,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         if (igcGuid == null) {
             raiseEntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN, methodName, guid, "<null>", repositoryName);
         }
+        if (!igcGuid.getMetadataCollectionId().equals(metadataCollectionId)) {
+            raiseEntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN, methodName, guid, igcGuid.getRid(), repositoryName);
+        }
 
         EntitySummary summary = null;
         String igcType = igcGuid.getAssetType();
@@ -784,6 +787,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(guid);
         if (igcGuid == null) {
             raiseEntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN, methodName, guid, "<null>", repositoryName);
+        }
+        if (!igcGuid.getMetadataCollectionId().equals(metadataCollectionId)) {
+            raiseEntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN, methodName, guid, igcGuid.getRid(), repositoryName);
         }
 
         return igcRepositoryHelper.getEntityDetail(new ObjectCache(), userId, igcGuid);
@@ -865,6 +871,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             IGCEntityGuid igcGuid = IGCEntityGuid.fromGuid(entityGUID);
             if (igcGuid == null) {
                 raiseEntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN, methodName, entityGUID, "<null>", repositoryName);
+            }
+            if (!igcGuid.getMetadataCollectionId().equals(metadataCollectionId)) {
+                raiseEntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN, methodName, entityGUID, igcGuid.getRid(), repositoryName);
             }
             String rid = igcGuid.getRid();
             String prefix = igcGuid.getGeneratedPrefix();
@@ -1859,6 +1868,9 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         // Translate the key properties of the GUID into IGC-retrievables
         IGCRelationshipGuid igcRelationshipGuid = IGCRelationshipGuid.fromGuid(guid);
         if (igcRelationshipGuid == null) {
+            raiseRelationshipNotKnownException(IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN, methodName, guid, repositoryName);
+        }
+        if (!igcRelationshipGuid.getMetadataCollectionId().equals(metadataCollectionId)) {
             raiseRelationshipNotKnownException(IGCOMRSErrorCode.RELATIONSHIP_NOT_KNOWN, methodName, guid, repositoryName);
         }
         String proxyOneRid = igcRelationshipGuid.getRid1();
