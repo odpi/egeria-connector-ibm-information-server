@@ -296,21 +296,22 @@ public class DataStageConnector extends DataEngineConnectorBase {
                         cacheHierarchyRelationshipsFromProcessDetails(stageLevel);
                         processes.add(stageLevel);
                     }
+
+                    // Then load sequences, re-using the PortAliases constructed for the jobs
+                    // TODO: this probably will NOT work for nested sequences?
+                    for (DataStageJob detailedSeq : seqList) {
+                        List<Process> sequencedJobs = getProcessesForSequence(detailedSeq);
+                        for (Process sequenced : sequencedJobs) {
+                            cacheHierarchyRelationshipsFromProcessDetails(sequenced);
+                            processes.add(sequenced);
+                        }
+                    }
                 }
                 Process jobProcess = getProcessForJob(detailedJob);
                 if (jobProcess != null) {
                     cacheHierarchyRelationshipsFromProcessDetails(jobProcess);
                     processes.add(jobProcess);
                 }
-            }
-        }
-        // Then load sequences, re-using the PortAliases constructed for the jobs
-        // TODO: this probably will NOT work for nested sequences?
-        for (DataStageJob detailedSeq : seqList) {
-            List<Process> sequencedJobs = getProcessesForSequence(detailedSeq);
-            for (Process sequenced : sequencedJobs) {
-                cacheHierarchyRelationshipsFromProcessDetails(sequenced);
-                processes.add(sequenced);
             }
         }
 
