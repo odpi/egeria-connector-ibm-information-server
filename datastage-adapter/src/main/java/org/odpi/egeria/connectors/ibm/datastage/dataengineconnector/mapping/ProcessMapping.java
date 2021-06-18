@@ -60,34 +60,6 @@ public class ProcessMapping extends BaseMapping {
 
                 addTransformationProjectDetails(jobObj, process);
                 ItemList<SequenceJob> sequencedBy = job.getJobObject().getSequencedByJobs();
-                if (sequencedBy != null) {
-                    // Setup a parent process relationship to any sequences that happen to call this job
-                    // as only APPEND parents (not OWNED), since removal of the sequence does not result in removal
-                    // of the job itself
-                    try {
-                        List<ParentProcess> parents = new ArrayList<>();
-                        List<SequenceJob> allSequences = igcRestClient.getAllPages("sequenced_by_jobs", sequencedBy);
-                        for (SequenceJob sequenceJob : allSequences) {
-                            ParentProcess parent = new ParentProcess();
-                            String sequenceJobQN = getFullyQualifiedName(sequenceJob);
-                            if (sequenceJobQN != null) {
-                                parent.setQualifiedName(sequenceJobQN);
-                                parent.setProcessContainmentType(ProcessContainmentType.APPEND);
-                                parents.add(parent);
-                            } else {
-                                log.error("Unable to determine identity for sequence -- not including: {}", sequenceJob);
-                            }
-                        }
-                        if (!parents.isEmpty()) {
-                            process.setParentProcesses(parents);
-                        }
-                    } catch (IGCException e) {
-                        DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                                this.getClass().getName(),
-                                methodName,
-                                e);
-                    }
-                }
 
                 if (cache.getMode() == LineageMode.JOB_LEVEL) {
 
@@ -99,6 +71,35 @@ public class ProcessMapping extends BaseMapping {
                     }
 
                 } else if (cache.getMode() == LineageMode.GRANULAR) {
+
+                    if (sequencedBy != null) {
+                        // Setup a parent process relationship to any sequences that happen to call this job
+                        // as only APPEND parents (not OWNED), since removal of the sequence does not result in removal
+                        // of the job itself
+                        try {
+                            List<ParentProcess> parents = new ArrayList<>();
+                            List<SequenceJob> allSequences = igcRestClient.getAllPages("sequenced_by_jobs", sequencedBy);
+                            for (SequenceJob sequenceJob : allSequences) {
+                                ParentProcess parent = new ParentProcess();
+                                String sequenceJobQN = getFullyQualifiedName(sequenceJob);
+                                if (sequenceJobQN != null) {
+                                    parent.setQualifiedName(sequenceJobQN);
+                                    parent.setProcessContainmentType(ProcessContainmentType.APPEND);
+                                    parents.add(parent);
+                                } else {
+                                    log.error("Unable to determine identity for sequence -- not including: {}", sequenceJob);
+                                }
+                            }
+                            if (!parents.isEmpty()) {
+                                process.setParentProcesses(parents);
+                            }
+                        } catch (IGCException e) {
+                            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
+                                    this.getClass().getName(),
+                                    methodName,
+                                    e);
+                        }
+                    }
 
                     PortAliasMapping portAliasMapping = new PortAliasMapping(cache);
                     process.setPortAliases(Stream.concat(
