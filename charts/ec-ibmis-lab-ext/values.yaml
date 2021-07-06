@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the Egeria project.
+---
+logging:
+  level: INFO
+
+imageDefaults:
+  registry: docker.io
+  namespace: odpi
+  tag: "2.11"
+  pullPolicy: IfNotPresent
+
+egeria:
+  user: admin
+  cohort: cocoCohort
+  server: ibm
+
+connector:
+  version: "2.10"
+  url: "http://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=org.odpi.egeria&a=egeria-connector-ibm-information-server-package&v=RELEASE&c=jar-with-dependencies"
+
+image:
+  egeria:
+    name: egeria
+    pullPolicy: IfNotPresent
+
+  configure:
+    name: egeria-configure
+    pullPolicy: IfNotPresent
+
+  # NOTE: this image is "bring your own". Furthermore, the tag will be automatically built based on the
+  # name used for the Helm chart release + "-samples". So for example, if you deploy the Helm chart with
+  # a name of "v11.7.0.2" then the image tag used for deploying the IGC container will be "v11.7.0.2-samples"
+  # (if you wish to override this, change the "ibm-infosvr.yaml" definition directly)
+  infosvr:
+    registry: "localhost:5000"
+    namespace: ibm
+    name: infosvr
+    tag: v11710sp2-samples
+
+ibm:
+  user: isadmin
+  password: isadmin
+  igc: igc
+  datastage: datastage
+
+odpi-egeria-lab:
+  imageDefaults:
+    pullPolicy: IfNotPresent
+  kafka:
+    securityContext:
+      enabled: false
+    zookeeper:
+      persistence:
+        enabled: false
+    persistence:
+      enabled: false

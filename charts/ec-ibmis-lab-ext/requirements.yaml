@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the Egeria project.
+---
+dependencies:
+  - name: odpi-egeria-lab
+    version: 1.0.2
+    repository: https://odpi.github.io/egeria-charts

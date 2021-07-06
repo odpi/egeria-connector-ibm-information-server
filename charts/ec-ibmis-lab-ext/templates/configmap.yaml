@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the Egeria project.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+  labels:
+    app.kubernetes.io/name: {{ include "myapp.name" . }}
+    helm.sh/chart: {{ include "myapp.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  # General cluster configuration - for core egeria, kafka - these must be used
+  EGERIA_USER: {{ .Values.egeria.user }}
+  EGERIA_COHORT: {{ .Values.egeria.cohort }}
+  KAFKA_ENDPOINT: {{ .Release.Name }}-kafka:9092
+
+  # Used by IBM Information Server
+  STRICT_SSL: "false"
+  LOGGING_LEVEL_ROOT: {{ .Values.logging.level }}
+  PROXY_ENDPOINT: https://{{ .Release.Name }}-infosvr-proxy:9443
+  IBM_HOST: infosvr
+  IBM_PORT: "9446"
+  IBM_KAFKA_ENDPOINT: infosvr:59092
+  IBM_USER: {{ .Values.ibm.user }}
+  IBM_PASS: {{ .Values.ibm.password }}
+  IBM_IGC_SERVER: {{ .Values.ibm.igc }}
+  IBM_DATASTAGE_SERVER: {{ .Values.ibm.datastage }}
+  OMAS_SERVER: "ibm_omas"
+
+  # Used for downloads
+  CONNECTOR_JAR: egeria-connector-ibm-information-server-package-{{  .Values.connector.version }}-jar-with-dependencies.jar
+  CONNECTOR_URL: {{  .Values.connector.url }}

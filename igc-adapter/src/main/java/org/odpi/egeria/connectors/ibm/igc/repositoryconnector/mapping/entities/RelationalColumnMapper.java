@@ -10,7 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 /**
  * Defines the mapping to the OMRS "RelationalColumn" entity.
  */
-public class RelationalColumnMapper extends SchemaAttributeMapper {
+public class RelationalColumnMapper extends TabularColumnMapper {
 
     private static class Singleton {
         private static final RelationalColumnMapper INSTANCE = new RelationalColumnMapper();

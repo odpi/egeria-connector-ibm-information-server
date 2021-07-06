@@ -3,8 +3,6 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.TypeEmbeddedAttributeMapper_TabularColumn;
-import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttributeForSchemaMapper_RecordField;
 
 /**
  * Defines the mapping to the OMRS "TabularColumn" entity.
@@ -12,26 +10,26 @@ import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationsh
 public class TabularColumnMapper extends SchemaAttributeMapper {
 
     private static class Singleton {
-        private static final TabularColumnMapper INSTANCE = new TabularColumnMapper();
+        private static final TabularColumnMapper INSTANCE = new TabularColumnMapper(
+                SUPERTYPE_SENTINEL,
+                SUPERTYPE_SENTINEL,
+                "TabularColumn"
+        );
     }
     public static TabularColumnMapper getInstance(IGCVersionEnum version) {
         return Singleton.INSTANCE;
     }
 
-    protected TabularColumnMapper() {
+    protected TabularColumnMapper(String igcAssetTypeName,
+                                  String igcAssetTypeDisplayName,
+                                  String omrsEntityTypeName) {
 
-        // Start by calling the superclass's constructor to initialise the Mapper
+        // Pass-through to the superclass's constructor to initialise the Mapper
         super(
-                "data_file_field",
-                "Data File Field",
-                "TabularColumn"
+                igcAssetTypeName,
+                igcAssetTypeDisplayName,
+                omrsEntityTypeName
         );
-
-        // The list of relationships that should be mapped
-        addRelationshipMapper(AttributeForSchemaMapper_RecordField.getInstance(null));
-
-        // The list of classifications that should be mapped
-        addClassificationMapper(TypeEmbeddedAttributeMapper_TabularColumn.getInstance(null));
 
     }
 
