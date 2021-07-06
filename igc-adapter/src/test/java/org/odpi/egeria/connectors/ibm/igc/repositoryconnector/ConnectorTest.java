@@ -1496,7 +1496,7 @@ public class ConnectorTest {
 
         Set<String> proxyOneTypes = new HashSet<>();
         proxyOneTypes.add("RelationalColumn");
-        proxyOneTypes.add("TabularColumn");
+        proxyOneTypes.add("TabularFileColumn");
 
         Set<String> proxyTwoTypes = new HashSet<>();
         proxyTwoTypes.add(MockConstants.EGERIA_GLOSSARY_TERM_TYPE_NAME);
@@ -2349,7 +2349,7 @@ public class ConnectorTest {
         );
         relationshipExpectations.add(
                 new RelationshipExpectation(2, 5,
-                        "AttributeForSchema", "TabularSchemaType", "TabularColumn",
+                        "AttributeForSchema", "TabularSchemaType", "TabularFileColumn",
                         MockConstants.DATA_FILE_RECORD_QN, null)
         );
 
@@ -2373,7 +2373,7 @@ public class ConnectorTest {
 
         EntityDetail detail = testEntityDetail(
                 "data_file_field",
-                "TabularColumn",
+                "TabularFileColumn",
                 null,
                 MockConstants.DATA_FILE_FIELD_RID,
                 expectedValues
@@ -2391,23 +2391,23 @@ public class ConnectorTest {
         List<RelationshipExpectation> relationshipExpectations = new ArrayList<>();
         relationshipExpectations.add(
                 new RelationshipExpectation(0, 1,
-                        "AttachedNoteLog", "TabularColumn", "NoteLog",
+                        "AttachedNoteLog", "TabularFileColumn", "NoteLog",
                         MockConstants.DATA_FILE_FIELD_QN, "gen!NL@" + MockConstants.DATA_FILE_FIELD_QN)
         );
         relationshipExpectations.add(
                 new RelationshipExpectation(1, 2,
-                        "SemanticAssignment", "TabularColumn", "GlossaryTerm",
+                        "SemanticAssignment", "TabularFileColumn", "GlossaryTerm",
                         MockConstants.DATA_FILE_FIELD_QN, expectedTermQN)
         );
         relationshipExpectations.add(
                 new RelationshipExpectation(2, 3,
-                        "AttributeForSchema", "TabularSchemaType", "TabularColumn",
+                        "AttributeForSchema", "TabularSchemaType", "TabularFileColumn",
                         MockConstants.DATA_FILE_RECORD_QN, MockConstants.DATA_FILE_FIELD_QN)
         );
 
         testRelationshipsForEntity(
                 "data_file_field",
-                "TabularColumn",
+                "TabularFileColumn",
                 null,
                 MockConstants.DATA_FILE_FIELD_RID,
                 MockConstants.EGERIA_PAGESIZE,
@@ -3174,7 +3174,7 @@ public class ConnectorTest {
         ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "anchorGUID", repositoryHelper.getExactMatchRegex(guid.toString()), methodName);
         testFindEntitiesByProperty(
                 "d81a0425-4e9b-4f31-bc1c-e18c3566da10",
-                "TabularColumn",
+                "TabularFileColumn",
                 ip,
                 MatchCriteria.ALL,
                 MockConstants.EGERIA_PAGESIZE,

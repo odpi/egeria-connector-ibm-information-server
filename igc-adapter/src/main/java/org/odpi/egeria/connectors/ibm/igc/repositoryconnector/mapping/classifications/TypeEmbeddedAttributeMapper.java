@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  * Singleton to map the OMRS "TypeEmbeddedAttribute" classification.
  * @see TypeEmbeddedAttributeMapper_RelationalColumn
  * @see TypeEmbeddedAttributeMapper_RelationalTable
- * @see TypeEmbeddedAttributeMapper_TabularColumn
+ * @see TypeEmbeddedAttributeMapper_TabularFileColumn
  */
 public class TypeEmbeddedAttributeMapper extends ClassificationMapping {
 
@@ -45,7 +45,7 @@ public class TypeEmbeddedAttributeMapper extends ClassificationMapping {
         addMappedOmrsProperty("dataType");
         addSubType(TypeEmbeddedAttributeMapper_RelationalTable.getInstance(null));
         addSubType(TypeEmbeddedAttributeMapper_RelationalColumn.getInstance(null));
-        addSubType(TypeEmbeddedAttributeMapper_TabularColumn.getInstance(null));
+        addSubType(TypeEmbeddedAttributeMapper_TabularFileColumn.getInstance(null));
     }
 
     protected TypeEmbeddedAttributeMapper(String igcAssetType,
