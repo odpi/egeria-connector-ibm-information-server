@@ -9,8 +9,8 @@ metadata:
     helm.sh/chart: {{ include "myapp.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/component: ibm-igc-service
-  name: {{ .Release.Name }}-ibm-igc-service
+    app.kubernetes.io/component: infosvr-proxy
+  name: {{ .Release.Name }}-infosvr-proxy
 
 spec:
   ports:
@@ -25,19 +25,19 @@ spec:
   selector:
     app.kubernetes.io/name: {{ include "myapp.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: ibm-igc-service
+    app.kubernetes.io/component: infosvr-proxy
 ...
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-ibm-igc
+  name: {{ .Release.Name }}-infosvr
   labels:
     app.kubernetes.io/name: {{ include "myapp.name" . }}
     helm.sh/chart: {{ include "myapp.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/component: ibm-igc-service
+    app.kubernetes.io/component: infosvr-proxy
 
 spec:
   replicas: 1
@@ -45,17 +45,17 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "myapp.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/component: ibm-igc-service
+      app.kubernetes.io/component: infosvr-proxy
   strategy: {}
   template:
     metadata:
       labels:
         app.kubernetes.io/name: {{ include "myapp.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-        app.kubernetes.io/component: ibm-igc-service
+        app.kubernetes.io/component: infosvr-proxy
     spec:
-# Fix the hostname to what the image requires of itself and define the secrets to use
-# for pulling the container image from a private repository
+      # Fix the hostname to what the image requires of itself and define the secrets to use
+      # for pulling the container image from a private repository
       hostname: infosvr
       imagePullSecrets:
         - name: regcred
@@ -92,10 +92,10 @@ spec:
             - configMapRef:
                 name: {{ .Release.Name }}-configmap
           env:
-            - name: "LOADER_PATH"
-              value: "/opt/egeria/connectors"
-            - name: "LOGGING_LEVEL_ORG_ODPI_EGERIA_CONNECTORS_IBM_IGC"
-              value: "DEBUG"
+              - name: "LOADER_PATH"
+                value: "/opt/egeria/connectors"
+              - name: "LOGGING_LEVEL_ORG_ODPI_EGERIA_CONNECTORS_IBM_IGC"
+                value: "DEBUG"
           ports:
             - containerPort: 9443
           readinessProbe:
@@ -115,12 +115,12 @@ spec:
             - mountPath: /opt/egeria/connectors
               name: egeria-igc-connector-volume
               readOnly: true
-        - name: ibm-igc
-          image: "{{ if (.Values.image.ibmigc.registry | default .Values.imageDefaults.registry) }}{{ .Values.image.ibmigc.registry | default .Values.imageDefaults.registry }}/{{ end }}\
-                  {{ if (.Values.image.ibmigc.namespace | default .Values.imageDefaults.namespace) }}{{ .Values.image.ibmigc.namespace | default .Values.imageDefaults.namespace }}/{{ end }}\
-                  {{ .Values.image.ibmigc.name }}\
-                  :{{ .Release.Name }}-samples"
-          imagePullPolicy: {{ .Values.image.ibmigc.pullPolicy | default .Values.imageDefaults.pullPolicy }}
+        - name: infosvr
+          image: "{{ if (.Values.image.infosvr.registry | default .Values.imageDefaults.registry) }}{{ .Values.image.infosvr.registry | default .Values.imageDefaults.registry }}/{{ end }}\
+                  {{ if (.Values.image.infosvr.namespace | default .Values.imageDefaults.namespace) }}{{ .Values.image.infosvr.namespace | default .Values.imageDefaults.namespace }}/{{ end }}\
+                  {{ .Values.image.infosvr.name }}\
+                  :{{ .Values.image.infosvr.tag }}"
+          imagePullPolicy: {{ .Values.image.infosvr.pullPolicy | default .Values.imageDefaults.pullPolicy }}
           securityContext:
             privileged: true
           ports:
@@ -151,5 +151,4 @@ spec:
               memory: "8Gi"
               cpu: "6000m"
 
-status: {}
 ...
