@@ -1,0 +1,86 @@
+# SPDX-License-Identifier: CC-BY-4.0
+# Copyright Contributors to the ODPi Egeria project.
+
+site_name: IBM Information Server Connectors
+site_description: Egeria proxy connectors for modules of IBM Information Server.
+copyright: "License: <a href='https://creativecommons.org/licenses/by/4.0/'>CC BY 4.0</a>, &copy; 2018-2021 contributors to the Egeria project."
+repo_name: odpi/egeria-connector-ibm-information-server
+repo_url: https://github.com/odpi/egeria-connector-ibm-information-server
+site_url: https://odpi.github.io/egeria-connector-ibm-information-server/
+edit_uri: ""
+
+nav:
+  - About: index.md
+  - Getting started:
+      - Setup: getting-started/common.md
+      - IGC Adapter: getting-started/igc.md
+      - DataStage Adapter: getting-started/datastage.md
+      - Explore: getting-started/explore.md
+  - How they work:
+      - IGC Adapter: how-it-works/igc.md
+      - DataStage Adapter: how-it-works/datastage.md
+  - Conformance:
+      - Testing overview: cts/index.md
+      - CTS results: cts/results.md
+  - Reference:
+      - JavaDocs: reference/javadoc.md
+      - Extending adapters: reference/extending.md
+
+theme:
+  name: material
+  language: en
+  custom_dir: overrides
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+  palette:
+    - scheme: default
+      accent: cyan
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      accent: cyan
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+  favicon: assets/favicon.ico
+  logo: assets/images/egeria-header.png
+
+extra_css:
+  - assets/stylesheets/egeria.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/odpi/egeria
+      name: Egeria on GitHub
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/u/odpi
+      name: Egeria on Docker
+    - icon: fontawesome/brands/medium
+      link: https://medium.com/tag/egeria
+      name: Egeria on Medium
+    - icon: fontawesome/brands/slack
+      link: https://lfaifoundation.slack.com/archives/C01F40J2XA8
+      name: Egeria on Slack
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - footnotes
+  - abbr
+  - pymdownx.snippets
+  - pymdownx.caret
+  - pymdownx.highlight
+  - pymdownx.details
+  - pymdownx.tabbed
+  - pymdownx.superfences
+  - toc:
+      permalink: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg

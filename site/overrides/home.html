@@ -1,0 +1,310 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<!-- Copyright Contributors to the ODPi Egeria project. -->
+
+<!--
+  Copyright (c) 2016-2021 Martin Donath <martin.donath@squidfunk.com>
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to
+  deal in the Software without restriction, including without limitation the
+  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+  sell copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+  IN THE SOFTWARE.
+-->
+
+{% extends "main.html" %}
+
+{% block tabs %}
+{{ super() }}
+<style>
+    .md-header {
+        position: initial;
+    }
+
+    .md-main__inner {
+        margin: 0;
+    }
+
+    .md-content {
+        display: none;
+    }
+
+    .tx-container {
+        padding-top: 1rem;
+        background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1123 258'><path d='M1124,2c0,0 0,256 0,256l-1125,0l0,-48c0,0 16,5 55,5c116,0 197,-92 325,-92c121,0 114,46 254,46c140,0 214,-167 572,-166Z' style='fill: white' /></svg>") no-repeat bottom, linear-gradient(to bottom, var(--md-primary-fg-color), var(--goreleaser-primary-color) 99%, #fff 99%)
+    }
+
+    .tx-hero {
+        margin: 0 .8rem;
+        color: var(--md-primary-bg-color)
+    }
+
+    .tx-hero h1 {
+        margin-bottom: 1rem;
+        color: currentColor;
+        font-weight: 700
+    }
+
+    .tx-hero__content {
+        padding-bottom: 6rem
+    }
+
+    .tx-hero .md-button {
+        margin-top: .5rem;
+        margin-right: .5rem;
+        color: var(--md-primary-bg-color)
+    }
+
+    .tx-hero .md-button--primary {
+        background-color: var(--md-primary-bg-color);
+        color: var(--goreleaser-primary-color);
+        border-color: var(--md-primary-bg-color)
+    }
+
+    .tx-hero .md-button:focus,
+    .tx-hero .md-button:hover {
+        background-color: var(--md-accent-fg-color);
+        color: var(--md-default-bg-color);
+        border-color: var(--md-accent-fg-color)
+    }
+
+    .feature-item h2 svg {
+        height: 30px;
+        float: left;
+        margin-right: 10px;
+        transform: translateY(10%);
+    }
+
+    .top-hr {
+        margin-top: 42px;
+    }
+
+    .topic-item {
+        font-family: 'Lato', sans-serif;
+        font-weight: 150;
+        box-sizing: border-box;
+        padding: 0 15px;
+        word-break: break-word
+
+    }
+    .feature-item {
+        font-family: 'Lato', sans-serif;
+        font-weight: 300;
+        box-sizing: border-box;
+        padding: 0 15px;
+        word-break: break-word
+    }
+
+    .feature-item h2 {
+        color: #333;
+        font-weight: 300;
+        font-size: 25px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: normal;
+        margin-bottom: 10px;
+        font-family: inherit;
+    }
+
+    .feature-item p {
+        font-size: 16px;
+        line-height: 1.8em;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        color: #111;
+        margin: 0 0 10px;
+        display: block;
+    }
+
+    .feature-item-link {
+        font-family: 'Lato', sans-serif;
+        font-weight: 300;
+        box-sizing: border-box;
+        padding: 0 15px;
+        word-break: break-word
+    }
+
+    .feature-item-link p {
+        font-size: 16px;
+        line-height: 1.8em;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        color: #111;
+        margin: 0 0 10px;
+        display: block;
+    }
+
+
+    @media screen and (max-width:70em) {
+        .tx-hero h1 {
+            font-size: 1.4rem
+        }
+        .tx-hero__image {
+            text-align: center;
+        }
+        .tx-hero__image img {
+            max-width: 10rem;
+        }
+    }
+
+    @media screen and (min-width:70em) {
+        .md-sidebar--secondary {
+            display: none
+        }
+        .tx-hero {
+            display: flex;
+            align-items: stretch
+        }
+        .tx-hero__content {
+            max-width: 30rem;
+            margin-top: 3.5rem;
+            padding-bottom: 14vw
+        }
+        .tx-hero__image {
+            order: 1;
+            margin-left: auto;
+            margin-top: 3.5rem;
+        }
+        .tx-hero__image img {
+            max-width: 15rem;
+        }
+    }
+
+    @media screen and (min-width:76.25em) {
+        .md-sidebar--primary {
+            display: none
+        }
+        .tx-hero__image {
+            margin-left: auto;
+        }
+        .tx-hero__image img {
+            max-width: 20rem;
+        }
+
+        .top-hr {
+            width: 100%;
+            display: flex;
+            max-width: 61rem;
+            margin-right: auto;
+            margin-left: auto;
+            padding: 0 .2rem;
+        }
+
+        .bottom-hr {
+            margin-top: 10px;
+            width: 100%;
+            display: flex;
+            max-width: 61rem;
+            margin-right: auto;
+            margin-left: auto;
+            padding: 0 .2rem;
+        }
+
+        .feature-item {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .feature-item-link {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .feature-item-link:hover {
+            background-color: #76b3f4;
+            border-radius: 3px;
+        }
+
+    }
+</style>
+
+<section class="tx-container">
+    <div class="md-grid md-typeset">
+        <div class="tx-hero">
+            <div class="tx-hero__image">
+                powered by&nbsp;
+                <a href="https://www.ibm.com/products/infosphere-information-server-enterprise" target="_blank">
+                    <svg fill="#ffffff" width="81" height="32" xmlns="http://www.w3.org/2000/svg">
+                        <g fill-rule="evenodd">
+                            <path d="M0 32h15.689v-2.038H0zM0 27.721h15.689v-2.038H0zM4.483 23.442h6.724v-2.037H4.483zM4.483 19.164h6.724v-2.038H4.483zM4.483 14.885h6.724v-2.037H4.483zM4.482 10.606h6.724V8.568H4.482zM0 6.327h15.689V4.29H0zM0 2.049h15.689V.011H0zM17.93 29.963V32h16.504a8.521 8.521 0 0 0 5.54-2.037H17.93zM17.93 25.683v2.038h23.914a8.535 8.535 0 0 0 .85-2.038H17.93zM22.412 23.442h6.724v-2.037h-6.724zM40.124 17.126H22.412v2.038H41.77a8.62 8.62 0 0 0-1.645-2.038M22.413 12.848v2.036h17.786a8.612 8.612 0 0 0 1.644-2.037h-19.43zM42.693 6.327a8.447 8.447 0 0 0-.85-2.037H17.93v2.037h24.763zM39.974 2.049a8.521 8.521 0 0 0-5.54-2.037H17.93v2.037h22.044zM22.412 10.606h6.724V8.568h-6.724zM35.453 10.606h7.29a8.603 8.603 0 0 0 .248-2.038h-7.538v2.038zM35.453 21.405v2.037h7.538c0-.703-.09-1.384-.248-2.037h-7.29zM57.457 0H44.825v2.038h13.34zM44.826 32h11.21v-2.038h-11.21zM44.826 27.72h11.21v-2.038h-11.21zM49.309 23.439h6.727v-2.038h-6.727zM49.309 19.159h6.727v-2.038h-6.727zM69.488 32h11.21v-2.038h-11.21zM69.488 27.72h11.21v-2.038h-11.21zM69.488 23.439h6.726v-2.038h-6.726zM69.487 19.159h6.726v-2.038h-6.726zM69.488 14.879h6.726V12.84H63.606l-.707 2.038h5.903l.686-1.94zM61.916 12.84H49.31v2.039h6.726v-1.94l.686 1.94h5.903zM76.213 8.56H65.091l-.707 2.038h11.83zM68.06 0l-.706 2.038h13.344V0zM62.757 32l.72-2.038h-1.432zM61.254 27.72h3.015l.72-2.038h-4.455zM59.743 23.44h6.037l.72-2.039h-7.476zM58.232 19.159h9.06l.719-2.038h-10.5zM49.309 10.598h11.83l-.707-2.038H49.309zM65.868 6.318h14.83V4.28H66.576zM58.947 4.28H44.826v2.038h14.828z"></path>
+                        </g>
+                    </svg>
+                </a>
+            </div>
+            <div class="tx-hero__content">
+                <h1>{{ config.site_name }}</h1>
+                <h2>{{ config.site_description }}</h2>
+                <a href="{{ page.next_page.url | url }}" title="{{ page.next_page.title | striptags }}" class="md-button md-button--primary">
+                    Get started
+                </a>
+                <a href="{{ config.repo_url }}" title="{{ lang.t('source.link.title') }}" class="md-button">
+                    Go to GitHub
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+<div class="top-hr">
+    <div class="feature-item">
+        <h2>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 65 65"><circle cx="29.3" cy="29.3" r="29.3" fill="#0062ff"/><g fill="#fff"><path d="M42.2 16.1a13.46 13.46 0 0 0-19.1 0c-3.4 3.4-4.8 8.4-3.5 13h-.4a6.81 6.81 0 0 0-6.8 6.8c0 1.9.7 3.7 2 5.1l4.8 5.1v-3.4c3.2 0 5.9-2.2 6.6-5.3 2.1 1.3 4.5 1.9 6.9 1.9V46l9.6-10.2c2.6-2.7 4-6.4 4-10.1-.1-3.6-1.6-7.1-4.1-9.6zM41.3 35l-7.6 8.1v-5h-1.1a12.57 12.57 0 0 1-6.8-2v-.2c0-3.1-2.1-5.8-5.1-6.6-.3-1.2-.5-2.4-.5-3.6 0-6.8 5.6-12.4 12.4-12.4S45 18.9 45 25.7c0 3.5-1.3 6.8-3.7 9.3z"/><circle cx="32.6" cy="25.7" r="1.7"/><circle cx="38.2" cy="25.7" r="1.7"/><circle cx="27" cy="25.7" r="1.7"/></g></svg>
+            Client libraries
+        </h2>
+        <p>
+            Java client libraries for interacting with the REST APIs of both IBM
+            Information Governance Catalog and IBM Information Analyzer. Neither has any
+            dependency on Egeria, so could be used for other custom integration projects; they
+            are used as the base mechanism through which the Egeria adapters integrate with
+            IBM Information Server.
+        </p>
+    </div>
+    <div class="feature-item">
+        <h2>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 65 65"><circle cx="29.9" cy="29.9" r="29.9" fill="#0062ff"/><path d="M36.2 13.6c-2.3 0-4.6.9-6.3 2.5a9.1 9.1 0 0 0-6.3-2.5h-10v30.1h10c2.3 0 4.6.9 6.3 2.5a9.1 9.1 0 0 1 6.3-2.5h10V13.6h-10zm-6.3 31c-1.8-1.3-4-2.1-6.3-2.1h-8.8V14.8h8.8c2 0 3.9.8 5.4 2.1l.9.9v26.8zm12.5-9.7h-8.8v-1.3h8.8v1.3zm0-3.8h-8.8v-1.3h8.8v1.3zm0-3.7h-8.8v-1.3h8.8v1.3zm0-3.8h-8.8v-1.3h8.8v1.3z" fill="#fff"/></svg>
+            IGC Adapter
+        </h2>
+        <p>
+            Repository proxy adapter to connect IBM Information Governance Catalog with
+            an Egeria cohort. The adapter is built to be extensible, so if you have your own
+            custom OpenIGC objects or attributes you want to include you can simply implement
+            the additional logic by extending the base adapter (no need to fork and directly
+            modify the existing code).
+        </p>
+    </div>
+    <div class="feature-item">
+        <h2>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 65 65"><circle cx="30.1" cy="30.1" r="30.1" fill="#0062ff"/><path d="M38 33.1c-2.5 0-4.6 1.9-4.9 4.4h-5.9c-.1-1-.5-1.9-1.1-2.6l8.8-8.8c2.1 1.7 5.2 1.4 6.9-.7s1.4-5.2-.7-6.9-5.2-1.4-6.9.7c-.6.7-1 1.7-1.1 2.6h-6c-.3-2.7-2.7-4.7-5.4-4.4s-4.7 2.7-4.4 5.4 2.7 4.7 5.4 4.4c2.3-.2 4.2-2.1 4.4-4.4h6c.1 1 .5 1.9 1 2.6l-8.8 8.8c-2.1-1.7-5.2-1.4-6.9.7s-1.4 5.2.7 6.9 5.2 1.4 6.9-.7c.6-.7 1-1.7 1.1-2.6h6c.3 2.7 2.7 4.7 5.4 4.4s4.7-2.7 4.4-5.4c-.2-2.5-2.4-4.4-4.9-4.4zm-15.7-6.9a3.84 3.84 0 0 1-3.9-3.9 3.84 3.84 0 0 1 3.9-3.9 3.84 3.84 0 0 1 3.9 3.9c0 2.1-1.8 3.9-3.9 3.9zm11.8-3.9c0-2.2 1.8-3.9 3.9-3.9s3.9 1.8 3.9 3.9-1.8 3.9-3.9 3.9-3.9-1.7-3.9-3.9zM22.3 41.9a3.84 3.84 0 0 1-3.9-3.9 3.84 3.84 0 0 1 3.9-3.9 3.84 3.84 0 0 1 3.9 3.9c0 2.2-1.8 3.9-3.9 3.9z" fill="#fff"/></svg>
+            DataStage Adapter
+        </h2>
+        <p>
+            Data engine proxy adapter to connect IBM DataStage with Egeria via its data engine
+            OMAS. This allows you to integrate DataStage's lineage information with a broader
+            end-to-end data processing landscape through Egeria's Open Lineage Services.
+        </p>
+    </div>
+<!--    <div class="feature-item">
+        <h2>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 65 65"><circle cx="29.6" cy="29.6" r="29.6" fill="#00bad6"/><g fill="#fff"><ellipse cx="29.3" cy="11.4" rx="6.9" ry="2.9"/><path d="M36.4 12.5c-.4 1.5-3.4 2.7-7.1 2.7s-6.8-1.2-7.1-2.7v11.4c0 1.7 3.2 3 7.2 3s7.2-1.4 7.2-3l-.2-11.4z"/><ellipse cx="18.5" cy="30.6" rx="6.9" ry="2.9"/><path d="M25.6 31.6c-.4 1.5-3.4 2.7-7.1 2.7s-6.8-1.2-7.1-2.7V43c0 1.7 3.2 3 7.1 3s7.1-1.3 7.1-3V31.6z"/><ellipse cx="40.7" cy="30.6" rx="6.9" ry="2.9"/><path d="M47.8 31.6c-.4 1.5-3.4 2.7-7.1 2.7s-6.8-1.2-7.1-2.7V43c0 1.7 3.2 3 7.2 3s7.2-1.3 7.2-3l-.2-11.4zM26.5 37h6.2v3.5h-6.2zm-5-13.3l-3.3 3.2h.5c1.2 0 2.5.1 3.7.5l.9-.9c-1.1-.5-1.9-1.3-1.9-2l.1-.8zm18.7 3.2h.4l-3.4-3.4v1c0 .7-.6 1.4-1.7 1.9l.9.9c1.2-.3 2.5-.5 3.8-.4z"/></g></svg>
+            Extensible
+        </h2>
+        <p>
+            The adapters are built to be extensible, so if you have your own custom OpenIGC
+            objects or attributes you want to include you can simply implement the additions
+            by extending the base adapters (rather than forking and modifying code).
+        </p>
+    </div> -->
+</div>
+
+{% endblock %}
+
+<!-- Content -->
+{% block content %}{% endblock %}
