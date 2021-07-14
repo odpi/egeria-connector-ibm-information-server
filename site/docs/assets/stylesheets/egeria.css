@@ -1,0 +1,18 @@
+/* SPDX-License-Identifier: CC-BY-4.0 */
+/* Copyright Contributors to the ODPi Egeria project. */
+
+:root {
+    --goreleaser-primary-color:   rgb(0, 98, 255);
+    --md-primary-fg-color:        rgb(0, 174, 185);
+    --md-primary-fg-color--light: rgb(0, 174, 185);
+    --md-primary-fg-color--dark:  rgb(0, 174, 185);
+}
+
+.md-announce {
+    height: 20px;
+}
+
+.md-announce__inner {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
