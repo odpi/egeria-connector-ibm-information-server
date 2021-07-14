@@ -15,6 +15,7 @@ import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollec
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.search.SearchProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.typedefs.PrimitiveDefCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.repositoryconnector.OMRSRepositoryHelper;
+import org.odpi.openmetadata.repositoryservices.ffdc.exception.EntityNotKnownException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.FunctionNotSupportedException;
 import org.odpi.openmetadata.repositoryservices.ffdc.exception.RepositoryErrorException;
 import org.slf4j.Logger;
@@ -638,6 +639,27 @@ public abstract class InstanceMapping {
                     methodName);
         } else {
             throw new RepositoryErrorException(errorCode.getMessageDefinition(params),
+                    InstanceMapping.class.getName(),
+                    methodName,
+                    cause);
+        }
+    }
+
+    /**
+     * Throw a new EntityNotKnownException using the provided details.
+     * @param errorCode the error
+     * @param methodName of the caller
+     * @param cause of the underlying problem
+     * @param params any additional details for the error
+     * @throws EntityNotKnownException always
+     */
+    protected static void raiseEntityNotKnownException(IGCOMRSErrorCode errorCode, String methodName, Exception cause, String ...params) throws EntityNotKnownException {
+        if (cause == null) {
+            throw new EntityNotKnownException(errorCode.getMessageDefinition(params),
+                    InstanceMapping.class.getName(),
+                    methodName);
+        } else {
+            throw new EntityNotKnownException(errorCode.getMessageDefinition(params),
                     InstanceMapping.class.getName(),
                     methodName,
                     cause);

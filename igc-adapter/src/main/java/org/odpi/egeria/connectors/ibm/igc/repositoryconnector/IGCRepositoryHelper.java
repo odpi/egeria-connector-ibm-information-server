@@ -1246,7 +1246,7 @@ public class IGCRepositoryHelper {
         log.debug("{} with guid = {}", methodName, guid);
 
         if (guid == null) {
-            raiseEntityNotKnownException(methodName, "<null>", "<null>", repositoryName);
+            raiseEntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN, methodName, "<null>", "<null>", repositoryName);
         } else {
             String igcType = guid.getAssetType();
 
@@ -1269,19 +1269,20 @@ public class IGCRepositoryHelper {
      * @param igcType the IGC object type
      * @param methodName the name of the method applying the mapping
      * @return EntityDetail
-     * @throws RepositoryErrorException if there is no mapping for the type
+     * @throws RepositoryErrorException if there is any issue with the repository
+     * @throws EntityNotKnownException if there is no mapping for the type
      */
     private EntityDetail getEntityDetailFromMapInstance(ObjectCache cache,
                                                         EntityMappingInstance mappingInstance,
                                                         String prefix,
                                                         String igcType,
-                                                        String methodName) throws RepositoryErrorException {
+                                                        String methodName) throws RepositoryErrorException, EntityNotKnownException {
 
         EntityDetail detail = null;
         if (mappingInstance != null) {
             detail = EntityMapping.getEntityDetail(cache, mappingInstance);
         } else {
-            raiseRepositoryErrorException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, methodName, (prefix == null ? "" : prefix) + igcType, repositoryName);
+            raiseEntityNotKnownException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, methodName, (prefix == null ? "" : prefix) + igcType, repositoryName);
         }
         return detail;
 
@@ -2646,12 +2647,13 @@ public class IGCRepositoryHelper {
 
     /**
      * Raise an EntityNotKnownException using the provided parameters.
+     * @param errorCode the error code for the exception
      * @param methodName the method raising the exception
      * @param params any additional parameters for the formatting of the error message
      * @throws EntityNotKnownException always
      */
-    private void raiseEntityNotKnownException(String methodName, String ...params) throws EntityNotKnownException {
-        throw new EntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN.getMessageDefinition(params),
+    private void raiseEntityNotKnownException(IGCOMRSErrorCode errorCode, String methodName, String ...params) throws EntityNotKnownException {
+        throw new EntityNotKnownException(errorCode.getMessageDefinition(params),
                 this.getClass().getName(),
                 methodName);
     }

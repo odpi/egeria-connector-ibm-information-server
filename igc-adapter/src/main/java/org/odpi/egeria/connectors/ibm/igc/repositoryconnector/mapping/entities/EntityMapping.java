@@ -703,8 +703,9 @@ public abstract class EntityMapping extends InstanceMapping {
      * @param entityMap the instantiation of a mapping to carry out
      * @return EntityDetail
      * @throws RepositoryErrorException if any issue interacting with IGC
+     * @throws EntityNotKnownException if the entity cannot be found
      */
-    public static EntityDetail getEntityDetail(ObjectCache cache, EntityMappingInstance entityMap) throws RepositoryErrorException {
+    public static EntityDetail getEntityDetail(ObjectCache cache, EntityMappingInstance entityMap) throws RepositoryErrorException, EntityNotKnownException {
 
         final String methodName = "getEntityDetail";
         EntityMapping mapping = entityMap.getMapping();
@@ -724,13 +725,13 @@ public abstract class EntityMapping extends InstanceMapping {
 
         EntityDetail preliminary = entityMap.getOmrsDetail(cache);
 
-        if(entityMap.getIgcEntity() == null) {
+        if (entityMap.getIgcEntity() == null) {
             // Igc entity was not found, raise exception providing as much details as possible
-            raiseRepositoryErrorException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN,
+            raiseEntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN,
                     methodName,
                     null,
-                    preliminary !=null ? preliminary.getGUID() : "",
-                    entityMap.getIgcEntityRid() !=null ? entityMap.getIgcEntityRid() : "",
+                    preliminary != null ? preliminary.getGUID() : "",
+                    entityMap.getIgcEntityRid() != null ? entityMap.getIgcEntityRid() : "",
                     entityMap.getRepositoryConnector().getRepositoryName());
         }
 
