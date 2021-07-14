@@ -1,0 +1,34 @@
+apiVersion: v1
+data:
+  CONNECTOR_JAR: egeria-connector-ibm-information-server-package-2.11-SNAPSHOT-jar-with-dependencies.jar
+  CONNECTOR_URL: https://oss.sonatype.org/content/repositories/snapshots/org/odpi/egeria/egeria-connector-ibm-information-server-package/2.11-SNAPSHOT/egeria-connector-ibm-information-server-package-2.11-20210706.113450-5-jar-with-dependencies.jar
+  CTS_REPORT_NAME: v11710sp2
+  EGERIA_COHORT: coco
+  EGERIA_SERVER: myserver
+  EGERIA_USER: myuser
+  IBMIGC_HOST: infosvr
+  IBMIGC_KAFKA_ENDPOINT: infosvr:59092
+  IBMIGC_PASS: isadmin
+  IBMIGC_PORT: "9446"
+  IBMIGC_SERVER: ibmigc
+  IBMIGC_USER: isadmin
+  IGCPROXY_ENDPOINT: https://v11710sp2-ibm-igc-service:9443
+  KAFKA_ENDPOINT: v11710sp2-kafka:9092
+  LOGGING_LEVEL_ROOT: INFO
+  STRICT_SSL: "false"
+kind: ConfigMap
+metadata:
+  annotations:
+    meta.helm.sh/release-name: v11710sp2
+    meta.helm.sh/release-namespace: default
+  creationTimestamp: "2021-07-14T21:47:18Z"
+  labels:
+    app.kubernetes.io/instance: v11710sp2
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: ec-cts-ibmis
+    helm.sh/chart: ec-cts-ibmis-0.1
+  name: v11710sp2-configmap
+  namespace: default
+  resourceVersion: "35219540"
+  selfLink: /api/v1/namespaces/default/configmaps/v11710sp2-configmap
+  uid: a8163535-21ff-4333-9d9b-7ec42deaa9fa
