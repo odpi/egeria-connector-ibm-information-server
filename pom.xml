@@ -592,7 +592,6 @@
                         <exclude>cts/results/**/*.registrystore</exclude>
                         <exclude>**/resources/ia/*.xml</exclude>
                         <exclude>**/resources/openigc/*.xml</exclude>
-                        <exclude>docs/getting-started/reveal.js/**</exclude>
                         <exclude>site/docs/index.md</exclude>
                     </excludes>
                     <licenseFamilies>

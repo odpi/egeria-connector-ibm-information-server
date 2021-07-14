@@ -24,34 +24,9 @@ using Egeria:
 - [IBM IGC REST Client Library](igc-clientlibrary) abstracts integration with Information Governance Catalog's REST API through a Java client.
 - [IBM IA REST Client Library](ia-clientlibrary) abstracts integration with Information Analyzer's REST API through a Java client.
 
-## Quick links
+## [Documentation](https://odpi.github.io/egeria-connector-ibm-information-server)
 
-- See our [Getting Started](https://odpi.github.io/egeria-connector-ibm-information-server/getting-started/index.html) guide for
-  step-by-step instructions on using these connectors to integrate IBM Information Server with Egeria.
-- See the [CTS Results](cts/README.md) for details on its conformance and rough performance numbers.
-
-## How it works
-
-There are currently two connectors:
-
-- A repository proxy connector that integrates IBM Information Governance Catalog with Egeria.
-- A data engine proxy connector that integrates IBM DataStage lineage information with Egeria.
-
-Both involve integrating into the Open Connector Framework (OCF) and implementing
-certain methods that adhere to the interfaces required by each connector type. These then communicate with IBM Information
-Server via IBM Information Server's own REST APIs to read information from an Information Server environment.
-
-This requires an existing IBM Information Server environment to already be running elsewhere: the connectors simply
-connect to this existing environment and "proxy" any requests from Egeria into a series of native REST API calls against
-the environment.
-
-![Overview](docs/overview.png)
-
-> Overview of the connector implementations
-
-Note that currently both connectors operate only in a read-only manner: no write operations (creates or updates) are
-implemented against IBM Information Server. Furthermore, [only a subset of the open metadata types are currently
-implemented](docs/mappings/README.md); however, the [connector is extensible](docs/extending/README.md).
+[https://odpi.github.io/egeria-connector-ibm-information-server](https://odpi.github.io/egeria-connector-ibm-information-server)
 
 ----
 License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/),
