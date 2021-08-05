@@ -453,7 +453,7 @@ public class DataStageCache {
                         }
                     }
                 } catch (IGCException e) {
-                    log.error("IGCException occurred while trying to cache job: {}", "", e);
+                    log.error("IGCException occurred while trying to cache job: {}", jobRid, e);
                 }
             }
             try {
