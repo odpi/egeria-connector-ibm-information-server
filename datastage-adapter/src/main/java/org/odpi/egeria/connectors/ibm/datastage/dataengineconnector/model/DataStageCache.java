@@ -8,7 +8,9 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.Dat
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.ProcessMapping;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
@@ -434,31 +436,33 @@ public class DataStageCache {
         final String methodName = "cacheChangedJobs";
         // This could consume significant resources (memory), which should be controlled through the proxy's
         // "batchWindowInSeconds" parameter (reducing it to a smaller number), if needed.
-        try {
+
             for (Dsjob job : jobs.getItems()) {
                 String jobRid = job.getId();
-                if (!ridToJob.containsKey(jobRid)) {
-                    log.debug("Detecting lineage on job: {}", jobRid);
-                    // Detect lineage on each job to ensure its details are fully populated before proceeding
-                    boolean lineageDetected = igcRestClient.detectLineage(jobRid);
-                    if (lineageDetected) {
-                        // We then need to re-retrieve the job's details, as they may have changed since lineage
-                        // detection (following call will be a no-op if the job is already in the cache)
-                        getJobByRid(jobRid);
-                    } else {
-                        log.warn("Unable to detect lineage for job -- not including: {}", jobRid);
+                try {
+                    if (!ridToJob.containsKey(jobRid)) {
+                        log.debug("Detecting lineage on job: {}", jobRid);
+                        // Detect lineage on each job to ensure its details are fully populated before proceeding
+                        boolean lineageDetected = igcRestClient.detectLineage(jobRid);
+                        if (lineageDetected) {
+                            // We then need to re-retrieve the job's details, as they may have changed since lineage
+                            // detection (following call will be a no-op if the job is already in the cache)
+                            getJobByRid(jobRid);
+                        } else {
+                            log.warn("Unable to detect lineage for job -- not including: {}", jobRid);
+                        }
                     }
+                } catch (IGCException e) {
+                    log.error("IGCException occurred while trying to cache job: {}", "", e);
                 }
             }
-            if (jobs.hasMorePages()) {
-                ItemList<Dsjob> nextPage = igcRestClient.getNextPage(null, jobs);
-                cacheChangedJobs(nextPage);
-            }
-        } catch (IGCException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+            try {
+                if (jobs.hasMorePages()) {
+                    ItemList<Dsjob> nextPage = igcRestClient.getNextPage(null, jobs);
+                    cacheChangedJobs(nextPage);
+                }
+            } catch (IGCParsingException | IGCConnectivityException e) {
+                log.error("IGCException occurred while trying retrieve next page of jobs", e);
         }
 
     }
