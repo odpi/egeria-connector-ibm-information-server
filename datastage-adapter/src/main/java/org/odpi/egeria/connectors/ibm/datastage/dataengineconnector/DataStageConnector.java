@@ -5,13 +5,17 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.DataFileMapping;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.DatabaseSchemaMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.ProcessMapping;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.RelationalTableMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.SchemaTypeMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -20,6 +24,8 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.odpi.openmetadata.accessservices.dataengine.model.*;
+import org.odpi.openmetadata.accessservices.dataengine.model.DataFile;
+import org.odpi.openmetadata.accessservices.dataengine.model.DatabaseSchema;
 import org.odpi.openmetadata.accessservices.dataengine.model.Process;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.*;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
@@ -38,6 +44,8 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
     private static final String SYNC_RULE_PREFIX = "Job metadata will be synced through Egeria";
     private static final String SYNC_RULE_DESC = "GENERATED -- DO NOT UPDATE: last synced at ";
+    public static final String DATABASE_TABLE = "database_table";
+    public static final String DATA_FILE_RECORD = "data_file_record";
 
     private final SimpleDateFormat syncDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
@@ -244,6 +252,9 @@ public class DataStageConnector extends DataEngineConnectorBase {
         log.debug("Looking for changed SchemaTypes...");
         Map<String, SchemaType> schemaTypeMap = new HashMap<>();
 
+        if (mode == LineageMode.JOB_LEVEL) {
+            return Collections.emptyList();
+        }
         initializeCache(from, to);
 
         // Iterate through each job looking for any virtual assets -- these must be created first
@@ -256,21 +267,81 @@ public class DataStageConnector extends DataEngineConnectorBase {
                         log.debug(" ... Creating a SchemaType ...");
                         SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(dataStageCache);
                         SchemaType deSchemaType = schemaTypeMapping.getForDataStore(dataStageCache.getStoreIdentityFromRid(storeRid));
-                        if (log.isDebugEnabled()) {
-                            try {
-                                log.debug(" ... created: {}", objectMapper.writeValueAsString(deSchemaType));
-                            } catch (JsonProcessingException e) {
-                                log.error("Unable to serialise to JSON: {}", deSchemaType, e);
-                            }
-                        }
+                        logEntityCreated(deSchemaType);
                         schemaTypeMap.put(storeRid, deSchemaType);
                     }
                 }
             }
         }
-
         return new ArrayList<>(schemaTypeMap.values());
+    }
 
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<? super Referenceable> getChangedDataStores(Date from, Date to) {
+
+        log.debug("Looking for changed DataStores...");
+        Map<String, ? super Referenceable> dataStoreMap = new HashMap<>();
+
+        initializeCache(from, to);
+
+        // Iterate through each job looking for any virtual assets -- these must be created first
+        for (DataStageJob job : dataStageCache.getAllJobs()) {
+            for (String storeRid : job.getStoreRids()) {
+                log.debug(" ... considering store: {}", storeRid);
+                if (!dataStoreMap.containsKey(storeRid)) {
+                    if ((IGCRestClient.isVirtualAssetRid(storeRid) && includeVirtualAssets)) {
+                        Identity storeIdentity = dataStageCache.getStoreIdentityFromRid(storeRid);
+                        Identity parentIdentity = storeIdentity.getParentIdentity();
+                        String type = storeIdentity.getAssetType();
+                        switch (type) {
+                            case DATABASE_TABLE:
+                                log.debug(" ... Creating a DatabaseSchema ...");
+                                DatabaseSchemaMapping databaseSchemaMapping = new DatabaseSchemaMapping(dataStageCache);
+                                DatabaseSchema dbSchema = databaseSchemaMapping.getForDataStore(parentIdentity);
+                                logEntityCreated(dbSchema);
+
+                                log.debug(" ... Creating a RelationalTable ...");
+                                RelationalTableMapping relationalTableMapping = new RelationalTableMapping(dataStageCache);
+                                VirtualTable table = relationalTableMapping.getForDataStore(storeIdentity);
+                                table.setDatabaseSchema(dbSchema);
+                                logEntityCreated(table);
+
+                                dataStoreMap.put(storeRid, table);
+                                break;
+                            case DATA_FILE_RECORD:
+                                log.debug(" ... Creating a SchemaType ...");
+                                SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(dataStageCache);
+                                SchemaType schemaType = schemaTypeMapping.getForDataStore(storeIdentity);
+                                logEntityCreated(schemaType);
+
+                                log.debug(" ... Creating a File ...");
+                                DataFileMapping dataFileMapping = new DataFileMapping(dataStageCache);
+                                DataFile dataFile = dataFileMapping.getForDataStore(parentIdentity);
+                                dataFile.setSchema(schemaType);
+                                logEntityCreated(dataFile);
+
+                                dataStoreMap.put(storeRid, dataFile);
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+        return new ArrayList<>(dataStoreMap.values());
+    }
+
+    private void logEntityCreated(Referenceable table) {
+        if (log.isDebugEnabled()) {
+            try {
+                log.debug(" ... created: {}", objectMapper.writeValueAsString(table));
+            } catch (JsonProcessingException e) {
+                log.error("Unable to serialise to JSON: {}", table, e);
+            }
+        }
     }
 
     /**
@@ -396,6 +467,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * Translate a single Process to represent the DataStage job itself.
      *
      * @param job the job object for which to load a process
+     *
      * @return Process
      */
     private Process getProcessForJob(DataStageJob job) {
@@ -542,7 +614,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param params any parameters for formatting the error message
      * @throws ConnectorCheckedException always
      */
-    private void raiseConnectorCheckedException(DataStageErrorCode errorCode, String methodName, String ...params) throws ConnectorCheckedException {
+    private void raiseConnectorCheckedException(DataStageErrorCode errorCode, String methodName, String... params) throws ConnectorCheckedException {
         throw new ConnectorCheckedException(errorCode.getMessageDefinition(params),
                 this.getClass().getName(),
                 methodName);
@@ -554,13 +626,16 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
     /**
      * Throws an OCFRuntimeException using the provided parameters.
-     * @param errorCode the error
-     * @param className of the caller
+     *
+     * @param errorCode  the error
+     * @param className  of the caller
      * @param methodName of the caller
-     * @param cause of the underlying error, if any
+     * @param cause      of the underlying error, if any
+     *
      * @throws OCFRuntimeException always
      */
-    public static void raiseRuntimeError(DataStageErrorCode errorCode, String className, String methodName, Exception cause) throws OCFRuntimeException {
+    public static void raiseRuntimeError(DataStageErrorCode errorCode, String className, String methodName, Exception cause) throws
+                                                                                                                             OCFRuntimeException {
         if (cause == null) {
             throw new OCFRuntimeException(errorCode.getMessageDefinition(),
                     className,
