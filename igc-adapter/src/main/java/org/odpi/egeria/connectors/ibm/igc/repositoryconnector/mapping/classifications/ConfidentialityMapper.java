@@ -53,14 +53,17 @@ public class ConfidentialityMapper extends ClassificationMapping {
                 "Referenceable",
                 "Confidentiality"
         );
-        addLiteralPropertyMapping("status", GovernanceClassificationStatusMapper.getInstance(null).getEnumMappingByIgcValue(""));
+        addLiteralPropertyMapping("statusIdentifier", null);
         addLiteralPropertyMapping("confidence", 100);
         addLiteralPropertyMapping("steward", null);
+        addLiteralPropertyMapping("stewardTypeName", null);
+        addLiteralPropertyMapping("stewardPropertyName", null);
         addLiteralPropertyMapping("source", null);
         addLiteralPropertyMapping("notes", null);
         addLiteralPropertyMapping("confidentialityLevel", null);
 
         // Explicitly null-out any deprecated properties
+        addLiteralPropertyMapping("status", null);
         addLiteralPropertyMapping("level", null);
 
         addMappedOmrsProperty("levelIdentifier");
