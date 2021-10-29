@@ -31,11 +31,21 @@ public class ConnectorTypeMapper extends ReferenceableMapper {
         addSimplePropertyMapping("name", "displayName");
         addSimplePropertyMapping("short_description", "description");
         addSimplePropertyMapping("type", "connectorProviderClassName");
+        addSimplePropertyMapping("library", "connectorFrameworkName");
+
+        addLiteralPropertyMapping("supportedAssetTypeName", null);
+        addLiteralPropertyMapping("expectedDataFormat", null);
+        addLiteralPropertyMapping("connectorInterfaceLanguage", null);
+        addLiteralPropertyMapping("targetTechnologySource", null);
+        addLiteralPropertyMapping("targetTechnologyName", null);
 
         ArrayPropertyValue emptyArray = new ArrayPropertyValue();
         addLiteralPropertyMapping("recognizedAdditionalProperties", emptyArray);
         addLiteralPropertyMapping("recognizedSecuredProperties", emptyArray);
         addLiteralPropertyMapping("recognizedConfigurationProperties", emptyArray);
+        addLiteralPropertyMapping("connectorInterfaces", emptyArray);
+        addLiteralPropertyMapping("targetTechnologyInterfaces", emptyArray);
+        addLiteralPropertyMapping("targetTechnologyVersions", emptyArray);
 
         // The list of relationships that should be mapped
         addRelationshipMapper(ConnectionConnectorTypeMapper.getInstance(null));
