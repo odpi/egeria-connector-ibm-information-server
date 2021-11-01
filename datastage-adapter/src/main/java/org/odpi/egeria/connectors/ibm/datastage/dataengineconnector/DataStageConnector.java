@@ -467,7 +467,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * Translate a single Process to represent the DataStage job itself.
      *
      * @param job the job object for which to load a process
-     *
      * @return Process
      */
     private Process getProcessForJob(DataStageJob job) {
@@ -614,7 +613,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param params any parameters for formatting the error message
      * @throws ConnectorCheckedException always
      */
-    private void raiseConnectorCheckedException(DataStageErrorCode errorCode, String methodName, String... params) throws ConnectorCheckedException {
+    private void raiseConnectorCheckedException(DataStageErrorCode errorCode, String methodName, String ...params) throws ConnectorCheckedException {
         throw new ConnectorCheckedException(errorCode.getMessageDefinition(params),
                 this.getClass().getName(),
                 methodName);
@@ -626,16 +625,13 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
     /**
      * Throws an OCFRuntimeException using the provided parameters.
-     *
-     * @param errorCode  the error
-     * @param className  of the caller
+     * @param errorCode the error
+     * @param className of the caller
      * @param methodName of the caller
-     * @param cause      of the underlying error, if any
-     *
+     * @param cause of the underlying error, if any
      * @throws OCFRuntimeException always
      */
-    public static void raiseRuntimeError(DataStageErrorCode errorCode, String className, String methodName, Exception cause) throws
-                                                                                                                             OCFRuntimeException {
+    public static void raiseRuntimeError(DataStageErrorCode errorCode, String className, String methodName, Exception cause) throws OCFRuntimeException {
         if (cause == null) {
             throw new OCFRuntimeException(errorCode.getMessageDefinition(),
                     className,
