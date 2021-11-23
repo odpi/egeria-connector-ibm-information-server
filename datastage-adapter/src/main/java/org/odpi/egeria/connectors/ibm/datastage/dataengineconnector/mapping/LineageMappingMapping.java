@@ -7,7 +7,12 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.Dat
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataItem;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Link;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.StageVariable;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
@@ -196,12 +201,14 @@ class LineageMappingMapping extends BaseMapping {
             String jobQN = getFullyQualifiedName(job.getJobObject());
             for (String rid : inputs) {
                 Identity input = cache.getStoreIdentityFromRid(rid);
-                LineageMapping lineageMapping = getLineageMapping(input.toString(), jobQN);
+                String inputQualifiedName = this.getFullyQualifiedName(input, null);
+                LineageMapping lineageMapping = getLineageMapping(inputQualifiedName, jobQN);
                 lineageMappings.add(lineageMapping);
             }
             for (String rid : outputs) {
                 Identity output = cache.getStoreIdentityFromRid(rid);
-                LineageMapping lineageMapping = getLineageMapping(jobQN, output.toString());
+                String outputQualifiedName = this.getFullyQualifiedName(output, null);
+                LineageMapping lineageMapping = getLineageMapping(jobQN, outputQualifiedName);
                 lineageMappings.add(lineageMapping);
             }
         } catch (IGCException e) {
