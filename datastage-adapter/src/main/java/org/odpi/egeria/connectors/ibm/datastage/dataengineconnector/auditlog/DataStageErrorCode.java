@@ -39,6 +39,10 @@ public enum DataStageErrorCode implements ExceptionMessageSet {
             "An unknown runtime error occurred, and the system is unable to proceed with its processing",
             "The system was unable to complete processing of a given action due to a connectivity-related problem.",
             "Check the system logs and diagnose or report the problem."),
+    CONNECTION_ERROR(500, "DATA-ENGINE-IBM-DATASTAGE-500-004 ",
+            "Unable to process the request due to unexpected connectivity error.",
+            "The system was unable to process the request due to IGC connectivity error.",
+            "Check IGC connectivity, credentials and system logs to diagnose or report the problem."),
     ;
 
     private ExceptionMessageDefinition messageDefinition;

@@ -13,6 +13,7 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.Sche
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
@@ -95,11 +96,11 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
         EndpointProperties endpointProperties = connectionProperties.getEndpoint();
         if (endpointProperties == null) {
-            raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, "<null>");
+            raiseConnectorCheckedException(methodName, "<null>");
         } else {
             String address = endpointProperties.getAddress();
             if (address == null || address.length() == 0) {
-                raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, address);
+                raiseConnectorCheckedException(methodName, address);
             } else {
 
                 String igcUser = connectionProperties.getUserId();
@@ -151,10 +152,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
                         dataEngine.setName(address);
 
                     } else {
-                        raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, address);
+                        raiseConnectorCheckedException(methodName, address);
                     }
                 } catch (IGCException e) {
-                    raiseConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE, methodName, address);
+                    raiseConnectorCheckedException(methodName, address);
                 }
 
             }
@@ -166,13 +167,14 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void disconnect() {
+    public synchronized void disconnect() throws ConnectorCheckedException {
+        throwsOCFException_(ConnectorCheckedException.class);
         final String methodName = "disconnect";
         try {
             // Close the session on the IGC REST client
             this.igcRestClient.disconnect();
         } catch (IGCException e) {
-            raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            throwOCFException(new ConnectorCheckedException(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition(),this.getClass().getName(), methodName, e));
         }
     }
 
@@ -186,7 +188,11 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public synchronized Date getChangesLastSynced() {
+    public synchronized Date getChangesLastSynced()  throws ConnectorCheckedException, PropertyServerException {
+
+        throwsOCFException_(ConnectorCheckedException.class);
+        throwsOCFException_(PropertyServerException.class);
+
         InformationGovernanceRule jobSyncRule = getJobSyncRule();
         Date lastSync = null;
         if (jobSyncRule != null) {
@@ -205,7 +211,11 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void setChangesLastSynced(Date time) {
+    public synchronized void setChangesLastSynced(Date time) throws ConnectorCheckedException, PropertyServerException {
+
+        throwsOCFException_(ConnectorCheckedException.class);
+        throwsOCFException_(PropertyServerException.class);
+
         final String methodName = "setChangesLastSynced";
         InformationGovernanceRule exists = getJobSyncRule();
         String newDescription = SYNC_RULE_DESC + syncDateFormat.format(time);
@@ -224,10 +234,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 success = igcRestClient.update(igcUpdate);
             }
         } catch (IGCException e) {
-            raiseRuntimeError(DataStageErrorCode.SYNC_TIME_UPDATE_FAILURE, methodName, e);
+            propagateIgcRestClientException(this.getClass().getName(), methodName, e);
         }
         if (!success) {
-            raiseRuntimeError(DataStageErrorCode.SYNC_TIME_UPDATE_FAILURE, methodName, null);
+            throwOCFException(new ConnectorCheckedException(DataStageErrorCode.SYNC_TIME_UPDATE_FAILURE.getMessageDefinition(), this.getClass().getName(), methodName));
         }
     }
 
@@ -235,7 +245,11 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public synchronized Date getOldestChangeSince(Date time) {
+    public synchronized Date getOldestChangeSince(Date time) throws ConnectorCheckedException, PropertyServerException {
+
+        throwsOCFException_(PropertyServerException.class);
+        throwsOCFException_(ConnectorCheckedException.class);
+
         Dsjob oldest = getOldestJobSince(time);
         if (oldest != null) {
             return oldest.getModifiedOn();
@@ -247,7 +261,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public List<SchemaType> getChangedSchemaTypes(Date from, Date to) {
+    public List<SchemaType> getChangedSchemaTypes(Date from, Date to) throws ConnectorCheckedException, PropertyServerException {
+
+        throwsOCFException_(PropertyServerException.class);
+        throwsOCFException_(ConnectorCheckedException.class);
 
         log.debug("Looking for changed SchemaTypes...");
         Map<String, SchemaType> schemaTypeMap = new HashMap<>();
@@ -281,7 +298,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public List<? super Referenceable> getChangedDataStores(Date from, Date to) {
+    public List<? super Referenceable> getChangedDataStores(Date from, Date to) throws ConnectorCheckedException, PropertyServerException  {
+
+        throwsOCFException_(PropertyServerException.class);
+        throwsOCFException_(ConnectorCheckedException.class);
 
         log.debug("Looking for changed DataStores...");
         Map<String, ? super Referenceable> dataStoreMap = new HashMap<>();
@@ -348,7 +368,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public List<Process> getChangedProcesses(Date from, Date to) {
+    public List<Process> getChangedProcesses(Date from, Date to) throws ConnectorCheckedException, PropertyServerException {
+
+        throwsOCFException_(ConnectorCheckedException.class);
+        throwsOCFException_(PropertyServerException.class);
 
         initializeCache(from, to);
 
@@ -409,7 +432,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public List<ProcessHierarchy> getChangedProcessHierarchies(Date from, Date to) {
+    public List<ProcessHierarchy> getChangedProcessHierarchies(Date from, Date to)  {
         // Output list of changed process hierarchies from the cached information
         return processHierarchies;
     }
@@ -549,7 +572,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
             ItemList<InformationGovernanceRule> results = igcRestClient.search(igcSearch);
             return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
         } catch (IGCException e) {
-            raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            propagateIgcRestClientException(this.getClass().getName(), methodName, e);
         }
         return null;
     }
@@ -601,47 +624,80 @@ public class DataStageConnector extends DataEngineConnectorBase {
             ItemList<Dsjob> results = igcRestClient.search(igcSearch);
             return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
         } catch (IGCException e) {
-            raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            propagateIgcRestClientException(this.getClass().getName(), methodName, e);
         }
         return null;
     }
 
     /**
      * Throws a ConnectorCheckedException using the provided parameters.
-     * @param errorCode the error code for the exception
      * @param methodName the name of the method throwing the exception
      * @param params any parameters for formatting the error message
      * @throws ConnectorCheckedException always
      */
-    private void raiseConnectorCheckedException(DataStageErrorCode errorCode, String methodName, String ...params) throws ConnectorCheckedException {
-        throw new ConnectorCheckedException(errorCode.getMessageDefinition(params),
+    private void raiseConnectorCheckedException(String methodName, String... params) throws ConnectorCheckedException {
+        throw new ConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(params),
                 this.getClass().getName(),
                 methodName);
     }
 
-    private void raiseRuntimeError(DataStageErrorCode errorCode, String methodName, Exception cause) throws OCFRuntimeException {
-        raiseRuntimeError(errorCode, this.getClass().getName(), methodName, cause);
+    /**
+     * Generic helper method that allows checked exceptions to be passed as unchecked by misleading the compiler. This helps with more flexible coding style.
+     * This does not mean that the responsibility to properly define what errors are thrown is removed instead it is moved to single place that is the top caller method.
+     *
+     * @param e the actual OCF exception to be thrown.
+     * @param <T> type variable
+     * @return no return, only throws back e
+     * @throws T always one of the known OCF Exceptions
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Exception> OCFRuntimeException throwOCFException(OCFCheckedExceptionBase e) throws T {
+        throw (T) e;
     }
 
     /**
-     * Throws an OCFRuntimeException using the provided parameters.
-     * @param errorCode the error
-     * @param className of the caller
-     * @param methodName of the caller
-     * @param cause of the underlying error, if any
-     * @throws OCFRuntimeException always
+     *  Generic helper method that "enforces" specific exception type defined by parameter clazz to be thrown.
+     *  Using this method we can compensate for the fact that error previously thrown line unchecked (@See throwOCFException) now should be explicitly declared in the method signature.
+     *  This way the consumer of the connector API will know and implement error handling.
+     *
+     * @param clazz the class instance to be thrown
+     * @param <T> type variable
+     * @throws T exception instance defined by the type variable
      */
-    public static void raiseRuntimeError(DataStageErrorCode errorCode, String className, String methodName, Exception cause) throws OCFRuntimeException {
-        if (cause == null) {
-            throw new OCFRuntimeException(errorCode.getMessageDefinition(),
-                    className,
-                    methodName);
-        } else {
-            throw new OCFRuntimeException(errorCode.getMessageDefinition(),
-                    className,
-                    methodName,
-                    cause);
-        }
+    @SuppressWarnings({"unused", "RedundantThrows"})
+    private static <T extends Exception> void throwsOCFException_(Class<T> clazz) throws T {
     }
 
+    /**
+     * Utility method that centrally controls how runtime exceptions coming form IGC REST API will be propagated as OCF known exception.
+     * Ideally, known exceptions will be mapped to one of the OCF checked exceptions: ConnectorCheckedException or PropertyServerException, worst case they are propagated as OCFRuntimeException.
+     * With this, exceptions are categorized and aligned with the connector API interfaces (contracts).
+     *
+     * @param className the name of the class where IGCException originally occurred
+     * @param methodName the name of the method where IGCException originally occurred
+     * @param cause the original IGCException (or its subclasses)
+     *
+     * @throws OCFRuntimeException (or one of PropertyServerException, ConnectorCheckedException)
+     */
+    public static void propagateIgcRestClientException(String className, String methodName, IGCException cause) {
+        if (cause == null) {
+            // this should never be the case - we should always pass the original IGC exception; still this adds some extra resilience
+            throw new OCFRuntimeException(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition(),
+                    className,
+                    methodName);
+        } else if (cause instanceof IGCConnectivityException) {
+            // IGCConnectivityException  get mapped to the OCF PropertyServerException and can be retried if the usage context allows it
+            // In future this part can be extended with specific cases for the rest of the IGCException sub-classes.
+            throw throwOCFException(new PropertyServerException(DataStageErrorCode.CONNECTION_ERROR.getMessageDefinition(),
+                    className,
+                    methodName,
+                    cause));
+        } else {
+            // we map all the generic IGCExceptions to ConnectorCheckedException with unknown runtime error code for the consumer.
+            throw throwOCFException(new ConnectorCheckedException(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition(),
+                    className,
+                    methodName,
+                    cause));
+        }
+    }
 }

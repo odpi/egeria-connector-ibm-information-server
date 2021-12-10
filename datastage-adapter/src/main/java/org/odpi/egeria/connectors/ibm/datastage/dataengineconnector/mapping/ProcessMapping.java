@@ -94,10 +94,7 @@ public class ProcessMapping extends BaseMapping {
                                 process.setParentProcesses(parents);
                             }
                         } catch (IGCException e) {
-                            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                                    this.getClass().getName(),
-                                    methodName,
-                                    e);
+                            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
                         }
                     }
 
@@ -172,10 +169,7 @@ public class ProcessMapping extends BaseMapping {
                     log.error("Unable to determine identity for job -- not including: {}", job.getJobObject());
                 }
             } catch (IGCException e) {
-                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                        this.getClass().getName(),
-                        methodName,
-                        e);
+                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
             }
         }
         return process;
@@ -207,10 +201,7 @@ public class ProcessMapping extends BaseMapping {
                     process = null;
                 }
             } catch (IGCException e) {
-                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                        this.getClass().getName(),
-                        methodName,
-                        e);
+                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
             }
         }
         return process;
@@ -248,10 +239,7 @@ public class ProcessMapping extends BaseMapping {
                 lineageMappings.addAll(lineageMappingMapping.getForLinkInStage(linkObjFull, job, stage.getId(), linkRids, stageQN, portType == PortType.INPUT_PORT));
             }
         } catch (IGCException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
         }
     }
 
@@ -296,10 +284,7 @@ public class ProcessMapping extends BaseMapping {
                 log.debug("No stage variables present in stage -- skipping: {}", stageQN);
             }
         } catch (IGCException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
         }
     }
 
@@ -343,10 +328,7 @@ public class ProcessMapping extends BaseMapping {
                 log.error("Unable to determine identity for stage -- not including: {}", stage);
             }
         } catch (IGCException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
         }
     }
 

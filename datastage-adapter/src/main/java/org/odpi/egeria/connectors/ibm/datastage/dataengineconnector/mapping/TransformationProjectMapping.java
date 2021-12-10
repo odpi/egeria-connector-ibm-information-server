@@ -55,10 +55,7 @@ public class TransformationProjectMapping extends BaseMapping{
         try {
             return getFullyQualifiedName(reference);
         } catch (IGCConnectivityException | IGCParsingException | IGCIOException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
         }
         return null;
     }

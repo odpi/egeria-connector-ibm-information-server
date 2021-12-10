@@ -4,7 +4,6 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model;
 
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnector;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConstants;
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.ProcessMapping;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
@@ -202,10 +201,7 @@ public class DataStageCache {
                     log.warn("No job found with RID: {}", rid);
                 }
             } catch (IGCException e) {
-                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                        this.getClass().getName(),
-                        methodName,
-                        e);
+                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(),methodName,e);
             }
         }
         return job;
@@ -240,10 +236,7 @@ public class DataStageCache {
                     storeIdentity = store.getIdentity(igcRestClient, igcCache);
                     storeToIdentity.put(rid, storeIdentity);
                 } catch (IGCException e) {
-                    DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                            this.getClass().getName(),
-                            methodName,
-                            e);
+                    DataStageConnector.propagateIgcRestClientException(this.getClass().getName(),methodName,e);
                 }
             } else {
                 // For virtual assets, we must retrieve the full object (search by RID is not possible)
@@ -251,10 +244,7 @@ public class DataStageCache {
                     Reference virtualStore = igcRestClient.getAssetById(rid, igcCache);
                     storeToIdentity.put(rid, virtualStore.getIdentity(igcRestClient, igcCache));
                 } catch (IGCException e) {
-                    DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                            this.getClass().getName(),
-                            methodName,
-                            e);
+                    DataStageConnector.propagateIgcRestClientException(this.getClass().getName(),methodName,e);
                 }
             }
 
@@ -286,10 +276,7 @@ public class DataStageCache {
                             ItemList<Classificationenabledgroup> ilFields = igcRestClient.search(igcSearch);
                             fields = igcRestClient.getAllPages(null, ilFields);
                         } catch (IGCException e) {
-                            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                                    this.getClass().getName(),
-                                    methodName,
-                                    e);
+                            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(),methodName,e);
                         }
                     }
                 } else {
@@ -310,10 +297,7 @@ public class DataStageCache {
                             log.warn("Unhandled case for type: {}", virtualStore.getType());
                         }
                     } catch (IGCException e) {
-                        DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                                this.getClass().getName(),
-                                methodName,
-                                e);
+                        DataStageConnector.propagateIgcRestClientException(this.getClass().getName(),methodName,e);
                     }
                 }
                 // Add them to the cache once they've been retrieved
@@ -325,10 +309,7 @@ public class DataStageCache {
                             String storeId = storeIdentity.getRid();
                             storeToIdentity.put(storeId, storeIdentity);
                         } catch (IGCException e) {
-                            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                                    this.getClass().getName(),
-                                    methodName,
-                                    e);
+                            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(),methodName,e);
                         }
                     }
                 }
@@ -360,10 +341,7 @@ public class DataStageCache {
                     fullFields.add(fullField);
                 }
             } catch (IGCException e) {
-                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                        this.getClass().getName(),
-                        methodName,
-                        e);
+                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(),methodName,e);
             }
         }
         return fullFields == null ? Collections.emptyList() : fullFields;
@@ -416,10 +394,7 @@ public class DataStageCache {
         try {
             cacheChangedJobs(igcRestClient.search(igcSearch));
         } catch (IGCException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(),methodName,e);
         }
 
     }
@@ -455,10 +430,7 @@ public class DataStageCache {
                 cacheChangedJobs(nextPage);
             }
         } catch (IGCException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(),methodName,e);
         }
 
     }

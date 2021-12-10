@@ -86,10 +86,7 @@ public class SchemaTypeMapping extends BaseMapping {
                     log.error("Unable to determine identity of link: {}", link);
                 }
             } catch (IGCException e) {
-                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                        this.getClass().getName(),
-                        methodName,
-                        e);
+                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
             }
         }
         return schemaType;
@@ -119,10 +116,7 @@ public class SchemaTypeMapping extends BaseMapping {
                     AttributeMapping attributeMapping = new AttributeMapping(cache);
                     schemaType.setAttributeList(attributeMapping.getForDataStoreFields(fields, fullyQualifiedStageName));
                 } catch (IGCException e) {
-                    DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                            this.getClass().getName(),
-                            methodName,
-                            e);
+                    DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
                 }
             } else {
                 log.error("Unable to determine identity of store: {}", storeIdentity);
@@ -153,10 +147,7 @@ public class SchemaTypeMapping extends BaseMapping {
                 AttributeMapping attributeMapping = new AttributeMapping(cache);
                 schemaType.setAttributeList(attributeMapping.getForStageVariables(stageVariables, job, fullyQualifiedStageName));
             } catch (IGCException e) {
-                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                        this.getClass().getName(),
-                        methodName,
-                        e);
+                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
             }
         }
         return schemaType;

@@ -71,10 +71,7 @@ class AttributeMapping extends BaseMapping {
                     }
                 }
             } catch (IGCException e) {
-                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                        this.getClass().getName(),
-                        methodName,
-                        e);
+                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
             }
         }
         return attributes;
@@ -116,10 +113,7 @@ class AttributeMapping extends BaseMapping {
                     }
                 }
             } catch (IGCException e) {
-                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                        this.getClass().getName(),
-                        methodName,
-                        e);
+                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
             }
         }
         return attributes;
@@ -163,10 +157,7 @@ class AttributeMapping extends BaseMapping {
                     }
                 }
             } catch (IGCException e) {
-                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                        this.getClass().getName(),
-                        methodName,
-                        e);
+                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
             }
         }
         return attributes;

@@ -122,10 +122,7 @@ class LineageMappingMapping extends BaseMapping {
                 }
             }
         } catch (IGCException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
         }
         return lineageMappings;
     }
@@ -176,10 +173,7 @@ class LineageMappingMapping extends BaseMapping {
                 }
             }
         } catch (IGCException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
         }
         return lineageMappings;
     }
@@ -212,10 +206,7 @@ class LineageMappingMapping extends BaseMapping {
                 lineageMappings.add(lineageMapping);
             }
         } catch (IGCException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
         }
         return lineageMappings;
     }
@@ -298,10 +289,7 @@ class LineageMappingMapping extends BaseMapping {
                         log.error("Unable to determine identity for field -- not including: {}", fieldObj);
                     }
                 } catch (IGCException e) {
-                    DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                            this.getClass().getName(),
-                            methodName,
-                            e);
+                    DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
                 }
             }
         } else {
@@ -351,10 +339,7 @@ class LineageMappingMapping extends BaseMapping {
                         log.error("Unable to determine identity for stage variable -- not including: {}", varObj);
                     }
                 } catch (IGCException e) {
-                    DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                            this.getClass().getName(),
-                            methodName,
-                            e);
+                    DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
                 }
             }
         } else {

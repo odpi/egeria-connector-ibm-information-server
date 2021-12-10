@@ -184,10 +184,7 @@ public class DataStageJob {
                 link = (Link) igcRestClient.getAssetById(rid);
                 linkMap.put(rid, link);
             } catch (IGCException e) {
-                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                        this.getClass().getName(),
-                        methodName,
-                        e);
+                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
             }
         }
         return link;
@@ -222,10 +219,7 @@ public class DataStageJob {
                         log.error("Unable to find object by RID: {}", rid);
                     }
                 } catch (IGCException e) {
-                    DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                            this.getClass().getName(),
-                            methodName,
-                            e);
+                    DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
                 }
             } else {
                 toReturn = variable;
@@ -260,10 +254,7 @@ public class DataStageJob {
                     log.error("Unable to find stage with RID: {} -- found asset of type {} instead.", rid, thing == null ? "<null>" : thing.getType());
                 }
             } catch (IGCException e) {
-                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                        this.getClass().getName(),
-                        methodName,
-                        e);
+                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
             }
         }
         if (stageVarRids != null && !stageVarRids.isEmpty()) {
@@ -299,10 +290,7 @@ public class DataStageJob {
             }
             buildMap(stageMap, allStages);
         } catch (IGCException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
         }
     }
 
@@ -322,10 +310,7 @@ public class DataStageJob {
             ItemList<Link> links = igcRestClient.search(igcSearch);
             buildMap(linkMap, igcRestClient.getAllPages(null, links));
         } catch (IGCException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
         }
     }
 
@@ -345,10 +330,7 @@ public class DataStageJob {
             ItemList<StageVariable> vars = igcRestClient.search(igcSearch);
             buildStageVariableMaps(igcRestClient.getAllPages(null, vars));
         } catch (IGCException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
         }
     }
 
@@ -418,10 +400,7 @@ public class DataStageJob {
                 return igcRestClient.getAllPages(null, stageCols);
             }
         } catch (IGCException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
         }
         return null;
     }
@@ -463,10 +442,7 @@ public class DataStageJob {
                     cache.getFieldsForStore(candidate);
                 }
             } catch (IGCException e) {
-                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                        this.getClass().getName(),
-                        methodName,
-                        e);
+                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
             }
         }
     }

@@ -62,10 +62,7 @@ class PortImplementationMapping extends BaseMapping {
                     log.error("Unable to determine identity for link -- not including: {}", link);
                 }
             } catch (IGCException e) {
-                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                        this.getClass().getName(),
-                        methodName,
-                        e);
+                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
             }
         }
         return portImplementation;
@@ -94,10 +91,7 @@ class PortImplementationMapping extends BaseMapping {
                 SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache);
                 portImplementation.setSchemaType(schemaTypeMapping.getForDataStoreFields(fields, storeIdentity, stage, fullyQualifiedStageName));
             } catch (IGCException e) {
-                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                        this.getClass().getName(),
-                        methodName,
-                        e);
+                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
             }
         }
         return portImplementation;

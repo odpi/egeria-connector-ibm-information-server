@@ -89,10 +89,7 @@ class PortAliasMapping extends BaseMapping {
                                     }
                                 }
                             } catch (IGCException e) {
-                                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                                        this.getClass().getName(),
-                                        methodName,
-                                        e);
+                                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
                             }
                         } else {
                             log.warn("Unable to find existing process to use for alias: {}", jobId);
@@ -129,10 +126,7 @@ class PortAliasMapping extends BaseMapping {
                 portAliases.add(portAlias);
             }
         } catch (IGCException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+            DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
         }
     }
 
