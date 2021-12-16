@@ -28,6 +28,7 @@ import org.odpi.openmetadata.accessservices.dataengine.model.*;
 import org.odpi.openmetadata.accessservices.dataengine.model.DataFile;
 import org.odpi.openmetadata.accessservices.dataengine.model.DatabaseSchema;
 import org.odpi.openmetadata.accessservices.dataengine.model.Process;
+import org.odpi.openmetadata.frameworks.auditlog.messagesets.ExceptionMessageDefinition;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.*;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
 import org.odpi.openmetadata.frameworks.connectors.properties.EndpointProperties;
@@ -96,11 +97,11 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
         EndpointProperties endpointProperties = connectionProperties.getEndpoint();
         if (endpointProperties == null) {
-            raiseConnectorCheckedException(methodName, "<null>");
+            raiseConnectorCheckedException(this.getClass(), methodName, null, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition());
         } else {
             String address = endpointProperties.getAddress();
             if (address == null || address.length() == 0) {
-                raiseConnectorCheckedException(methodName, address);
+                raiseConnectorCheckedException(this.getClass(), methodName, null, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
             } else {
 
                 String igcUser = connectionProperties.getUserId();
@@ -152,10 +153,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
                         dataEngine.setName(address);
 
                     } else {
-                        raiseConnectorCheckedException(methodName, address);
+                        raiseConnectorCheckedException(this.getClass(), methodName, null, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
                     }
                 } catch (IGCException e) {
-                    raiseConnectorCheckedException(methodName, address);
+                    raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
                 }
 
             }
@@ -168,13 +169,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
      */
     @Override
     public synchronized void disconnect() throws ConnectorCheckedException {
-        throwsOCFException_(ConnectorCheckedException.class);
         final String methodName = "disconnect";
         try {
             // Close the session on the IGC REST client
             this.igcRestClient.disconnect();
         } catch (IGCException e) {
-            throwOCFException(new ConnectorCheckedException(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition(),this.getClass().getName(), methodName, e));
+            raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition());
         }
     }
 
@@ -189,22 +189,25 @@ public class DataStageConnector extends DataEngineConnectorBase {
      */
     @Override
     public synchronized Date getChangesLastSynced()  throws ConnectorCheckedException, PropertyServerException {
-
-        throwsOCFException_(ConnectorCheckedException.class);
-        throwsOCFException_(PropertyServerException.class);
-
-        InformationGovernanceRule jobSyncRule = getJobSyncRule();
-        Date lastSync = null;
-        if (jobSyncRule != null) {
-            String description = jobSyncRule.getShortDescription();
-            String dateString = description.substring(SYNC_RULE_DESC.length());
-            try {
-                lastSync = syncDateFormat.parse(dateString);
-            } catch (ParseException e) {
-                log.error("Unable to parse date and time of last sync from rule '{}' ({}) using format: {}", description, dateString, syncDateFormat.toPattern(), e);
+        final String methodName = "getChangesLastSynced";
+        try {
+            InformationGovernanceRule jobSyncRule = getJobSyncRule();
+            Date lastSync = null;
+            if (jobSyncRule != null) {
+                String description = jobSyncRule.getShortDescription();
+                String dateString = description.substring(SYNC_RULE_DESC.length());
+                try {
+                    lastSync = syncDateFormat.parse(dateString);
+                } catch (ParseException e) {
+                    log.error("Unable to parse date and time of last sync from rule '{}' ({}) using format: {}", description, dateString, syncDateFormat.toPattern(), e);
+                    raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition());
+                }
             }
+            return lastSync;
+        } catch (IGCException e) {
+            handleIGCException(this.getClass().getName(), this.getClass().getEnclosingMethod().getName(), e);
         }
-        return lastSync;
+        return null;
     }
 
     /**
@@ -213,14 +216,11 @@ public class DataStageConnector extends DataEngineConnectorBase {
     @Override
     public synchronized void setChangesLastSynced(Date time) throws ConnectorCheckedException, PropertyServerException {
 
-        throwsOCFException_(ConnectorCheckedException.class);
-        throwsOCFException_(PropertyServerException.class);
-
         final String methodName = "setChangesLastSynced";
-        InformationGovernanceRule exists = getJobSyncRule();
-        String newDescription = SYNC_RULE_DESC + syncDateFormat.format(time);
         boolean success = false;
         try {
+            InformationGovernanceRule exists = getJobSyncRule();
+            String newDescription = SYNC_RULE_DESC + syncDateFormat.format(time);
             if (exists == null) {
                 // Create the entry
                 IGCCreate igcCreate = new IGCCreate("information_governance_rule");
@@ -234,10 +234,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 success = igcRestClient.update(igcUpdate);
             }
         } catch (IGCException e) {
-            propagateIgcRestClientException(this.getClass().getName(), methodName, e);
+            handleIGCException(this.getClass().getName(), methodName, e);
         }
         if (!success) {
-            throwOCFException(new ConnectorCheckedException(DataStageErrorCode.SYNC_TIME_UPDATE_FAILURE.getMessageDefinition(), this.getClass().getName(), methodName));
+            raiseConnectorCheckedException(this.getClass(),methodName, null, DataStageErrorCode.SYNC_TIME_UPDATE_FAILURE.getMessageDefinition());
         }
     }
 
@@ -246,13 +246,14 @@ public class DataStageConnector extends DataEngineConnectorBase {
      */
     @Override
     public synchronized Date getOldestChangeSince(Date time) throws ConnectorCheckedException, PropertyServerException {
-
-        throwsOCFException_(PropertyServerException.class);
-        throwsOCFException_(ConnectorCheckedException.class);
-
+        final String methodName = "getOldestChangeSince";
+        try {
         Dsjob oldest = getOldestJobSince(time);
-        if (oldest != null) {
-            return oldest.getModifiedOn();
+            if (oldest != null) {
+                return oldest.getModifiedOn();
+            }
+        } catch (IGCException e) {
+            handleIGCException(this.getClass().getName(), methodName, e);
         }
         return null;
     }
@@ -263,32 +264,34 @@ public class DataStageConnector extends DataEngineConnectorBase {
     @Override
     public List<SchemaType> getChangedSchemaTypes(Date from, Date to) throws ConnectorCheckedException, PropertyServerException {
 
-        throwsOCFException_(PropertyServerException.class);
-        throwsOCFException_(ConnectorCheckedException.class);
-
+        final String methodName = "getChangedSchemaTypes";
         log.debug("Looking for changed SchemaTypes...");
         Map<String, SchemaType> schemaTypeMap = new HashMap<>();
 
         if (mode == LineageMode.JOB_LEVEL) {
             return Collections.emptyList();
         }
-        initializeCache(from, to);
 
-        // Iterate through each job looking for any virtual assets -- these must be created first
-        for (DataStageJob job : dataStageCache.getAllJobs()) {
-            for (String storeRid : job.getStoreRids()) {
-                log.debug(" ... considering store: {}", storeRid);
-                if (!schemaTypeMap.containsKey(storeRid)) {
-                    if ( (IGCRestClient.isVirtualAssetRid(storeRid) && includeVirtualAssets)
-                            || (!IGCRestClient.isVirtualAssetRid(storeRid) && createDataStoreSchemas) ) {
-                        log.debug(" ... Creating a SchemaType ...");
-                        SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(dataStageCache);
-                        SchemaType deSchemaType = schemaTypeMapping.getForDataStore(dataStageCache.getStoreIdentityFromRid(storeRid));
-                        logEntityCreated(deSchemaType);
-                        schemaTypeMap.put(storeRid, deSchemaType);
+        try {
+            initializeCache(from, to);
+            // Iterate through each job looking for any virtual assets -- these must be created first
+            for (DataStageJob job : dataStageCache.getAllJobs()) {
+                for (String storeRid : job.getStoreRids()) {
+                    log.debug(" ... considering store: {}", storeRid);
+                    if (!schemaTypeMap.containsKey(storeRid)) {
+                        if ((IGCRestClient.isVirtualAssetRid(storeRid) && includeVirtualAssets)
+                                || (!IGCRestClient.isVirtualAssetRid(storeRid) && createDataStoreSchemas)) {
+                            log.debug(" ... Creating a SchemaType ...");
+                            SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(dataStageCache);
+                            SchemaType deSchemaType = schemaTypeMapping.getForDataStore(dataStageCache.getStoreIdentityFromRid(storeRid));
+                            logEntityCreated(deSchemaType);
+                            schemaTypeMap.put(storeRid, deSchemaType);
+                        }
                     }
                 }
             }
+        } catch (IGCException e) {
+            handleIGCException(this.getClass().getName(), methodName, e);
         }
         return new ArrayList<>(schemaTypeMap.values());
     }
@@ -300,56 +303,57 @@ public class DataStageConnector extends DataEngineConnectorBase {
     @Override
     public List<? super Referenceable> getChangedDataStores(Date from, Date to) throws ConnectorCheckedException, PropertyServerException  {
 
-        throwsOCFException_(PropertyServerException.class);
-        throwsOCFException_(ConnectorCheckedException.class);
-
+        final String methodName = "getChangedDataStores";
         log.debug("Looking for changed DataStores...");
         Map<String, ? super Referenceable> dataStoreMap = new HashMap<>();
 
-        initializeCache(from, to);
+        try {
+            initializeCache(from, to);
+            // Iterate through each job looking for any virtual assets -- these must be created first
+            for (DataStageJob job : dataStageCache.getAllJobs()) {
+                for (String storeRid : job.getStoreRids()) {
+                    log.debug(" ... considering store: {}", storeRid);
+                    if (!dataStoreMap.containsKey(storeRid)) {
+                        if ((IGCRestClient.isVirtualAssetRid(storeRid) && includeVirtualAssets)) {
+                            Identity storeIdentity = dataStageCache.getStoreIdentityFromRid(storeRid);
+                            Identity parentIdentity = storeIdentity.getParentIdentity();
+                            String type = storeIdentity.getAssetType();
+                            switch (type) {
+                                case DATABASE_TABLE:
+                                    log.debug(" ... Creating a DatabaseSchema ...");
+                                    DatabaseSchemaMapping databaseSchemaMapping = new DatabaseSchemaMapping(dataStageCache);
+                                    DatabaseSchema dbSchema = databaseSchemaMapping.getForDataStore(parentIdentity);
+                                    logEntityCreated(dbSchema);
 
-        // Iterate through each job looking for any virtual assets -- these must be created first
-        for (DataStageJob job : dataStageCache.getAllJobs()) {
-            for (String storeRid : job.getStoreRids()) {
-                log.debug(" ... considering store: {}", storeRid);
-                if (!dataStoreMap.containsKey(storeRid)) {
-                    if ((IGCRestClient.isVirtualAssetRid(storeRid) && includeVirtualAssets)) {
-                        Identity storeIdentity = dataStageCache.getStoreIdentityFromRid(storeRid);
-                        Identity parentIdentity = storeIdentity.getParentIdentity();
-                        String type = storeIdentity.getAssetType();
-                        switch (type) {
-                            case DATABASE_TABLE:
-                                log.debug(" ... Creating a DatabaseSchema ...");
-                                DatabaseSchemaMapping databaseSchemaMapping = new DatabaseSchemaMapping(dataStageCache);
-                                DatabaseSchema dbSchema = databaseSchemaMapping.getForDataStore(parentIdentity);
-                                logEntityCreated(dbSchema);
+                                    log.debug(" ... Creating a RelationalTable ...");
+                                    RelationalTableMapping relationalTableMapping = new RelationalTableMapping(dataStageCache);
+                                    VirtualTable table = relationalTableMapping.getForDataStore(storeIdentity);
+                                    table.setDatabaseSchema(dbSchema);
+                                    logEntityCreated(table);
 
-                                log.debug(" ... Creating a RelationalTable ...");
-                                RelationalTableMapping relationalTableMapping = new RelationalTableMapping(dataStageCache);
-                                VirtualTable table = relationalTableMapping.getForDataStore(storeIdentity);
-                                table.setDatabaseSchema(dbSchema);
-                                logEntityCreated(table);
+                                    dataStoreMap.put(storeRid, table);
+                                    break;
+                                case DATA_FILE_RECORD:
+                                    log.debug(" ... Creating a SchemaType ...");
+                                    SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(dataStageCache);
+                                    SchemaType schemaType = schemaTypeMapping.getForDataStore(storeIdentity);
+                                    logEntityCreated(schemaType);
 
-                                dataStoreMap.put(storeRid, table);
-                                break;
-                            case DATA_FILE_RECORD:
-                                log.debug(" ... Creating a SchemaType ...");
-                                SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(dataStageCache);
-                                SchemaType schemaType = schemaTypeMapping.getForDataStore(storeIdentity);
-                                logEntityCreated(schemaType);
+                                    log.debug(" ... Creating a File ...");
+                                    DataFileMapping dataFileMapping = new DataFileMapping(dataStageCache);
+                                    DataFile dataFile = dataFileMapping.getForDataStore(parentIdentity);
+                                    dataFile.setSchema(schemaType);
+                                    logEntityCreated(dataFile);
 
-                                log.debug(" ... Creating a File ...");
-                                DataFileMapping dataFileMapping = new DataFileMapping(dataStageCache);
-                                DataFile dataFile = dataFileMapping.getForDataStore(parentIdentity);
-                                dataFile.setSchema(schemaType);
-                                logEntityCreated(dataFile);
-
-                                dataStoreMap.put(storeRid, dataFile);
-                                break;
+                                    dataStoreMap.put(storeRid, dataFile);
+                                    break;
+                            }
                         }
                     }
                 }
             }
+        } catch (IGCException e) {
+            handleIGCException(this.getClass().getName(), methodName, e);
         }
         return new ArrayList<>(dataStoreMap.values());
     }
@@ -370,47 +374,47 @@ public class DataStageConnector extends DataEngineConnectorBase {
     @Override
     public List<Process> getChangedProcesses(Date from, Date to) throws ConnectorCheckedException, PropertyServerException {
 
-        throwsOCFException_(ConnectorCheckedException.class);
-        throwsOCFException_(PropertyServerException.class);
-
-        initializeCache(from, to);
-
+        final String methodName = "getChangedProcesses";
         List<Process> processes = new ArrayList<>();
-
         List<DataStageJob> seqList = new ArrayList<>();
-        // Translate changed jobs first, to build up appropriate PortAliases list
-        for (DataStageJob detailedJob : dataStageCache.getAllJobs()) {
-            if (detailedJob.getType().equals(DataStageJob.JobType.SEQUENCE)) {
-                seqList.add(detailedJob);
-            } else {
-                if (mode == LineageMode.GRANULAR) {
-                    // Only translate stage-level details for granular mode
-                    List<Process> stageLevelProcesses = getProcessesForEachStage(detailedJob);
-                    for (Process stageLevel : stageLevelProcesses) {
-                        cacheHierarchyRelationshipsFromProcessDetails(stageLevel);
-                        processes.add(stageLevel);
-                    }
 
-                    // Then load sequences, re-using the PortAliases constructed for the jobs
-                    // TODO: this probably will NOT work for nested sequences?
-                    for (DataStageJob detailedSeq : seqList) {
-                        List<Process> sequencedJobs = getProcessesForSequence(detailedSeq);
-                        for (Process sequenced : sequencedJobs) {
-                            cacheHierarchyRelationshipsFromProcessDetails(sequenced);
-                            processes.add(sequenced);
+        try {
+            initializeCache(from, to);
+            // Translate changed jobs first, to build up appropriate PortAliases list
+            for (DataStageJob detailedJob : dataStageCache.getAllJobs()) {
+                if (detailedJob.getType().equals(DataStageJob.JobType.SEQUENCE)) {
+                    seqList.add(detailedJob);
+                } else {
+                    if (mode == LineageMode.GRANULAR) {
+                        // Only translate stage-level details for granular mode
+                        List<Process> stageLevelProcesses = getProcessesForEachStage(detailedJob);
+                        for (Process stageLevel : stageLevelProcesses) {
+                            cacheHierarchyRelationshipsFromProcessDetails(stageLevel);
+                            processes.add(stageLevel);
+                        }
+
+                        // Then load sequences, re-using the PortAliases constructed for the jobs
+                        // TODO: this probably will NOT work for nested sequences?
+                        for (DataStageJob detailedSeq : seqList) {
+                            List<Process> sequencedJobs = getProcessesForSequence(detailedSeq);
+                            for (Process sequenced : sequencedJobs) {
+                                cacheHierarchyRelationshipsFromProcessDetails(sequenced);
+                                processes.add(sequenced);
+                            }
                         }
                     }
-                }
-                Process jobProcess = getProcessForJob(detailedJob);
-                if (jobProcess != null) {
-                    cacheHierarchyRelationshipsFromProcessDetails(jobProcess);
-                    processes.add(jobProcess);
+                    Process jobProcess = getProcessForJob(detailedJob);
+                    if (jobProcess != null) {
+                        cacheHierarchyRelationshipsFromProcessDetails(jobProcess);
+                        processes.add(jobProcess);
+                    }
                 }
             }
+        } catch (IGCException e) {
+            handleIGCException(this.getClass().getName(), methodName, e);
         }
 
         return processes;
-
     }
 
     private void cacheHierarchyRelationshipsFromProcessDetails(Process process) {
@@ -452,7 +456,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param from the date and time from which to cache changes (exclusive)
      * @param to the date and time up to which to cache changes (inclusive)
      */
-    private void initializeCache(Date from, Date to) {
+    private void initializeCache(Date from, Date to) throws IGCException {
         DataStageCache forComparison = new DataStageCache(from, to, mode, limitToProjects, limitToLineageEnabledJobs);
         if (dataStageCache == null || !dataStageCache.equals(forComparison)) {
             // Initialize the cache, if it is empty, or reset it if it differs from the dates and times we've been given
@@ -468,7 +472,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param job the job for which to translate detailed stages
      * @return {@code List<Process>}
      */
-    private List<Process> getProcessesForEachStage(DataStageJob job) {
+    private List<Process> getProcessesForEachStage(DataStageJob job) throws IGCException {
         List<Process> processes = new ArrayList<>();
         log.debug("Translating processes for each stage...");
         for (Stage stage : job.getAllStages()) {
@@ -492,7 +496,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param job the job object for which to load a process
      * @return Process
      */
-    private Process getProcessForJob(DataStageJob job) {
+    private Process getProcessForJob(DataStageJob job) throws IGCException {
         log.debug("Load process for job...");
         Process process = dataStageCache.getProcessByRid(job.getJobObject().getId());
         if (process != null) {
@@ -500,7 +504,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 // TODO: fill in the LineageMapping at this process level
             }
             try {
-                if (log.isDebugEnabled()) { log.debug(" ... process: {}", objectMapper.writeValueAsString(process)); }
+                log.debug(" ... process: {}", objectMapper.writeValueAsString(process));
             } catch (JsonProcessingException e) {
                 log.error("Unable to serialise to JSON: {}", process, e);
             }
@@ -517,7 +521,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param job the job object for which to load a process
      * @return {@code List<Process>}
      */
-    private List<Process> getProcessesForSequence(DataStageJob job) {
+    private List<Process> getProcessesForSequence(DataStageJob job) throws IGCException {
         log.debug("Load process for sequence...");
         List<Process> processes = new ArrayList<>();
         // Create a copy of the map, as the next step could update it by caching additional job details
@@ -561,20 +565,18 @@ public class DataStageConnector extends DataEngineConnectorBase {
      *
      * @return InformationGovernanceRule
      */
-    private InformationGovernanceRule getJobSyncRule() {
+    private InformationGovernanceRule getJobSyncRule() throws IGCException {
+
         final String methodName = "getJobSyncRule";
         IGCSearch igcSearch = new IGCSearch("information_governance_rule");
         igcSearch.addProperty(DataStageConstants.SHORT_DESCRIPTION);
         IGCSearchCondition condition = new IGCSearchCondition(DataStageConstants.NAME, "=", getJobSyncRuleName());
         IGCSearchConditionSet conditionSet = new IGCSearchConditionSet(condition);
         igcSearch.addConditions(conditionSet);
-        try {
-            ItemList<InformationGovernanceRule> results = igcRestClient.search(igcSearch);
-            return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
-        } catch (IGCException e) {
-            propagateIgcRestClientException(this.getClass().getName(), methodName, e);
-        }
-        return null;
+
+        ItemList<InformationGovernanceRule> results = igcRestClient.search(igcSearch);
+        return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
+
     }
 
     /**
@@ -596,7 +598,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param time from which to consider changes
      * @return Dsjob
      */
-    private Dsjob getOldestJobSince(Date time) {
+    private Dsjob getOldestJobSince(Date time) throws  IGCException {
         final String methodName = "getOldestJobSince";
         long startFrom = 0;
         if (time != null) {
@@ -620,84 +622,51 @@ public class DataStageConnector extends DataEngineConnectorBase {
         IGCSearchSorting sorting = new IGCSearchSorting("modified_on", true);
         igcSearch.addSortingCriteria(sorting);
         igcSearch.setPageSize(2); // No need to get any more than 2 results, as we will only take the top result anyway
-        try {
-            ItemList<Dsjob> results = igcRestClient.search(igcSearch);
-            return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
-        } catch (IGCException e) {
-            propagateIgcRestClientException(this.getClass().getName(), methodName, e);
-        }
-        return null;
+
+        ItemList<Dsjob> results = igcRestClient.search(igcSearch);
+        return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
     }
 
     /**
      * Throws a ConnectorCheckedException using the provided parameters.
-     * @param methodName the name of the method throwing the exception
-     * @param params any parameters for formatting the error message
+     * @param clazz
+     * @param cause
+     * @param exceptionMessageDefinition
      * @throws ConnectorCheckedException always
      */
-    private void raiseConnectorCheckedException(String methodName, String... params) throws ConnectorCheckedException {
-        throw new ConnectorCheckedException(DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(params),
-                this.getClass().getName(),
-                methodName);
-    }
-
-    /**
-     * Generic helper method that allows checked exceptions to be passed as unchecked by misleading the compiler. This helps with more flexible coding style.
-     * This does not mean that the responsibility to properly define what errors are thrown is removed instead it is moved to single place that is the top caller method.
-     *
-     * @param e the actual OCF exception to be thrown.
-     * @param <T> type variable
-     * @return no return, only throws back e
-     * @throws T always one of the known OCF Exceptions
-     */
-    @SuppressWarnings("unchecked")
-    public static <T extends Exception> OCFRuntimeException throwOCFException(OCFCheckedExceptionBase e) throws T {
-        throw (T) e;
-    }
-
-    /**
-     *  Generic helper method that "enforces" specific exception type defined by parameter clazz to be thrown.
-     *  Using this method we can compensate for the fact that error previously thrown line unchecked (@See throwOCFException) now should be explicitly declared in the method signature.
-     *  This way the consumer of the connector API will know and implement error handling.
-     *
-     * @param clazz the class instance to be thrown
-     * @param <T> type variable
-     * @throws T exception instance defined by the type variable
-     */
-    @SuppressWarnings({"unused", "RedundantThrows"})
-    private static <T extends Exception> void throwsOCFException_(Class<T> clazz) throws T {
-    }
-
-    /**
-     * Utility method that centrally controls how runtime exceptions coming form IGC REST API will be propagated as OCF known exception.
-     * Ideally, known exceptions will be mapped to one of the OCF checked exceptions: ConnectorCheckedException or PropertyServerException, worst case they are propagated as OCFRuntimeException.
-     * With this, exceptions are categorized and aligned with the connector API interfaces (contracts).
-     *
-     * @param className the name of the class where IGCException originally occurred
-     * @param methodName the name of the method where IGCException originally occurred
-     * @param cause the original IGCException (or its subclasses)
-     *
-     * @throws OCFRuntimeException (or one of PropertyServerException, ConnectorCheckedException)
-     */
-    public static void propagateIgcRestClientException(String className, String methodName, IGCException cause) {
-        if (cause == null) {
-            // this should never be the case - we should always pass the original IGC exception; still this adds some extra resilience
-            throw new OCFRuntimeException(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition(),
-                    className,
+    private void raiseConnectorCheckedException(Class clazz, String methodName, Exception cause, ExceptionMessageDefinition exceptionMessageDefinition) throws ConnectorCheckedException {
+        if(cause == null) {
+            throw new ConnectorCheckedException(exceptionMessageDefinition,
+                    clazz.getName(),
                     methodName);
-        } else if (cause instanceof IGCConnectivityException) {
-            // IGCConnectivityException  get mapped to the OCF PropertyServerException and can be retried if the usage context allows it
-            // In future this part can be extended with specific cases for the rest of the IGCException sub-classes.
-            throw throwOCFException(new PropertyServerException(DataStageErrorCode.CONNECTION_ERROR.getMessageDefinition(),
-                    className,
-                    methodName,
-                    cause));
         } else {
-            // we map all the generic IGCExceptions to ConnectorCheckedException with unknown runtime error code for the consumer.
-            throw throwOCFException(new ConnectorCheckedException(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition(),
+            throw new ConnectorCheckedException(exceptionMessageDefinition,
+                    clazz.getName(),
+                    methodName,
+                    cause);
+        }
+    }
+
+    /**
+     * Helper method that takes details of where the original IGCException is caught, maps and rethrows it further as one of the OCF checked exceptions.
+     *
+     * @param className The name of the class where original IGCException is caught
+     * @param methodName The name of the method where original IGCException is caught
+     * @param e Instance of IGCException (or subclasses)
+     * @throws ConnectorCheckedException
+     * @throws PropertyServerException
+     */
+    public static void handleIGCException(String className, String methodName, IGCException e) throws ConnectorCheckedException, PropertyServerException {
+        if(e instanceof IGCConnectivityException) {
+            throw new PropertyServerException(DataStageErrorCode.CONNECTION_ERROR.getMessageDefinition(),
                     className,
                     methodName,
-                    cause));
+                    e);
+        } else {
+            throw new ConnectorCheckedException(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition(),
+                    className,
+                    methodName,
+                    e);
         }
     }
 }

@@ -2,8 +2,6 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnector;
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
@@ -44,34 +42,31 @@ class AttributeMapping extends BaseMapping {
      * @param fullyQualifiedStageName to ensure each attribute is unique
      * @return {@code List<Attribute>}
      */
-    List<Attribute> getForLink(Link link, DataStageJob job, String fullyQualifiedStageName) {
+    List<Attribute> getForLink(Link link, DataStageJob job, String fullyQualifiedStageName) throws IGCException {
         final String methodName = "getForLink";
         log.debug("Creating new AttributeMapping from job and link...");
         List<Attribute> attributes = new ArrayList<>();
         if (link != null) {
             ItemList<DataItem> stageColumns = link.getStageColumns();
-            try {
-                List<DataItem> allStageColumns = igcRestClient.getAllPages("stage_columns", stageColumns);
-                int index = 0;
-                for (DataItem stageColumn : allStageColumns) {
-                    log.debug("... calculating from detailed stage column: {}", stageColumn);
-                    String colId = stageColumn.getId();
-                    ColumnLevelLineage stageColumnObj = job.getColumnLevelLineageByRid(colId);
-                    String stageColumnQN = getFullyQualifiedName(stageColumnObj);
-                    if (stageColumnQN != null) {
-                        Attribute attribute = new Attribute();
-                        attribute.setQualifiedName(getFullyQualifiedName(stageColumnObj, fullyQualifiedStageName));
-                        attribute.setDisplayName(stageColumnObj.getName());
-                        attribute.setDataType(stageColumnObj.getOdbcType());
-                        attribute.setPosition(index);
-                        attributes.add(attribute);
-                        index++;
-                    } else {
-                        log.error("Unable to determine identity for linked column -- not including it: {}", stageColumn);
-                    }
+
+            List<DataItem> allStageColumns = igcRestClient.getAllPages("stage_columns", stageColumns);
+            int index = 0;
+            for (DataItem stageColumn : allStageColumns) {
+                log.debug("... calculating from detailed stage column: {}", stageColumn);
+                String colId = stageColumn.getId();
+                ColumnLevelLineage stageColumnObj = job.getColumnLevelLineageByRid(colId);
+                String stageColumnQN = getFullyQualifiedName(stageColumnObj);
+                if (stageColumnQN != null) {
+                    Attribute attribute = new Attribute();
+                    attribute.setQualifiedName(getFullyQualifiedName(stageColumnObj, fullyQualifiedStageName));
+                    attribute.setDisplayName(stageColumnObj.getName());
+                    attribute.setDataType(stageColumnObj.getOdbcType());
+                    attribute.setPosition(index);
+                    attributes.add(attribute);
+                    index++;
+                } else {
+                    log.error("Unable to determine identity for linked column -- not including it: {}", stageColumn);
                 }
-            } catch (IGCException e) {
-                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
             }
         }
         return attributes;
@@ -84,12 +79,11 @@ class AttributeMapping extends BaseMapping {
      * @param fullyQualifiedStageName the qualified name of the stage to ensure each attribute is unique
      * @return {@code List<Attribute>}
      */
-    List<Attribute> getForDataStoreFields(List<Classificationenabledgroup> fields, String fullyQualifiedStageName) {
+    List<Attribute> getForDataStoreFields(List<Classificationenabledgroup> fields, String fullyQualifiedStageName) throws IGCException {
         final String methodName = "getForDataStoreFields";
         log.debug("Creating new AttributeMapping from job and fields...");
         List<Attribute> attributes = new ArrayList<>();
         if (fields != null && !fields.isEmpty()) {
-            try {
                 for (Classificationenabledgroup field : fields) {
                     String fieldQN = getFullyQualifiedName(field);
                     if (fieldQN != null) {
@@ -112,9 +106,6 @@ class AttributeMapping extends BaseMapping {
                         log.error("Unable to determine identity for field -- not including it: {}", field);
                     }
                 }
-            } catch (IGCException e) {
-                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
-            }
         }
         return attributes;
     }
@@ -125,7 +116,7 @@ class AttributeMapping extends BaseMapping {
      * @param fields the data store fields containing detail for the Attributes
      * @return {@code List<Attribute>}
      */
-    List<Attribute> getForDataStoreFields(List<Classificationenabledgroup> fields) {
+    List<Attribute> getForDataStoreFields(List<Classificationenabledgroup> fields) throws IGCException {
         return getForDataStoreFields(fields, null);
     }
 
@@ -137,27 +128,24 @@ class AttributeMapping extends BaseMapping {
      * @param fullyQualifiedStageName (always empty)
      * @return {@code List<Attribute>}
      */
-    List<Attribute> getForStageVariables(List<StageVariable> stageVariables, DataStageJob job, String fullyQualifiedStageName) {
+    List<Attribute> getForStageVariables(List<StageVariable> stageVariables, DataStageJob job,
+                                         String fullyQualifiedStageName) throws IGCException {
         final String methodName = "getForStageVariables";
         log.debug("Creating new AttributeMapping from stage variables...");
         List<Attribute> attributes = new ArrayList<>();
         if (stageVariables != null && !stageVariables.isEmpty()) {
-            try {
-                for (StageVariable var : stageVariables) {
-                    ColumnLevelLineage stageVar = job.getColumnLevelLineageByRid(var.getId());
-                    String varQN = getFullyQualifiedName(stageVar, fullyQualifiedStageName);
-                    if (varQN != null) {
-                        Attribute attribute = new Attribute();
-                        attribute.setQualifiedName(varQN);
-                        attribute.setDisplayName(var.getName());
-                        attribute.setDataType(var.getOdbcType());
-                        attributes.add(attribute);
-                    } else {
-                        log.error("Unable to determine identity for variable -- not including it: {}", var);
-                    }
+            for (StageVariable var : stageVariables) {
+                ColumnLevelLineage stageVar = job.getColumnLevelLineageByRid(var.getId());
+                String varQN = getFullyQualifiedName(stageVar, fullyQualifiedStageName);
+                if (varQN != null) {
+                    Attribute attribute = new Attribute();
+                    attribute.setQualifiedName(varQN);
+                    attribute.setDisplayName(var.getName());
+                    attribute.setDataType(var.getOdbcType());
+                    attributes.add(attribute);
+                } else {
+                    log.error("Unable to determine identity for variable -- not including it: {}", var);
                 }
-            } catch (IGCException e) {
-                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
             }
         }
         return attributes;

@@ -2,8 +2,6 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnector;
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
@@ -44,25 +42,22 @@ class PortImplementationMapping extends BaseMapping {
      * @param fullyQualifiedStageName to ensure each schema is unique
      * @return PortImplementation
      */
-    PortImplementation getForLink(Link link, DataStageJob job, PortType portType, String fullyQualifiedStageName) {
+    PortImplementation getForLink(Link link, DataStageJob job, PortType portType, String fullyQualifiedStageName) throws IGCException {
         final String methodName = "getForLink";
         PortImplementation portImplementation = null;
         if (link != null) {
             portImplementation = new PortImplementation();
-            try {
-                String linkQN = getFullyQualifiedName(link, fullyQualifiedStageName);
-                if (linkQN != null) {
-                    log.debug("Constructing PortImplementation for: {}", linkQN);
-                    portImplementation.setQualifiedName(linkQN);
-                    portImplementation.setDisplayName(link.getName());
-                    portImplementation.setPortType(portType);
-                    SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache);
-                    portImplementation.setSchemaType(schemaTypeMapping.getForLink(link, job, fullyQualifiedStageName));
-                } else {
-                    log.error("Unable to determine identity for link -- not including: {}", link);
-                }
-            } catch (IGCException e) {
-                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
+
+            String linkQN = getFullyQualifiedName(link, fullyQualifiedStageName);
+            if (linkQN != null) {
+                log.debug("Constructing PortImplementation for: {}", linkQN);
+                portImplementation.setQualifiedName(linkQN);
+                portImplementation.setDisplayName(link.getName());
+                portImplementation.setPortType(portType);
+                SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache);
+                portImplementation.setSchemaType(schemaTypeMapping.getForLink(link, job, fullyQualifiedStageName));
+            } else {
+                log.error("Unable to determine identity for link -- not including: {}", link);
             }
         }
         return portImplementation;
@@ -77,22 +72,21 @@ class PortImplementationMapping extends BaseMapping {
      * @param fullyQualifiedStageName the qualified name of the stage to ensure each schema is unique
      * @return PortImplementation
      */
-    PortImplementation getForDataStoreFields(List<Classificationenabledgroup> fields, Stage stage, PortType portType, String fullyQualifiedStageName) {
+    PortImplementation getForDataStoreFields(List<Classificationenabledgroup> fields, Stage stage,
+                                             PortType portType, String fullyQualifiedStageName) throws IGCException {
         final String methodName = "getForDataStoreFields";
         PortImplementation portImplementation = null;
         if (stage != null && fields != null && !fields.isEmpty()) {
             portImplementation = new PortImplementation();
-            try {
-                Identity storeIdentity = getParentIdentity(fields.get(0));
-                String storeName = getParentDisplayName(fields.get(0));
-                portImplementation.setQualifiedName(getFullyQualifiedName(storeIdentity, fullyQualifiedStageName));
-                portImplementation.setDisplayName(storeName);
-                portImplementation.setPortType(portType);
-                SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache);
-                portImplementation.setSchemaType(schemaTypeMapping.getForDataStoreFields(fields, storeIdentity, stage, fullyQualifiedStageName));
-            } catch (IGCException e) {
-                DataStageConnector.propagateIgcRestClientException(this.getClass().getName(), methodName, e);
-            }
+
+            Identity storeIdentity = getParentIdentity(fields.get(0));
+            String storeName = getParentDisplayName(fields.get(0));
+            portImplementation.setQualifiedName(getFullyQualifiedName(storeIdentity, fullyQualifiedStageName));
+            portImplementation.setDisplayName(storeName);
+            portImplementation.setPortType(portType);
+            SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache);
+            portImplementation.setSchemaType(schemaTypeMapping.getForDataStoreFields(fields, storeIdentity, stage, fullyQualifiedStageName));
+
         }
         return portImplementation;
     }
@@ -106,7 +100,7 @@ class PortImplementationMapping extends BaseMapping {
      * @param fullyQualifiedStageName the qualified name of the stage to ensure the schema is unique
      * @return PortImplementation
      */
-    PortImplementation getForStageVariables(List<StageVariable> stageVariables, DataStageJob job, Stage stage, String fullyQualifiedStageName) {
+    PortImplementation getForStageVariables(List<StageVariable> stageVariables, DataStageJob job, Stage stage, String fullyQualifiedStageName) throws IGCException {
         PortImplementation portImplementation = null;
         if (stage != null) {
             portImplementation = new PortImplementation();
