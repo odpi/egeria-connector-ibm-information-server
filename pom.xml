@@ -96,7 +96,7 @@
         <!-- Versions of dependent libraries -->
         <jackson.version>2.13.0</jackson.version>
         <slf4j.version>1.7.32</slf4j.version>
-        <spring.version>5.3.12</spring.version>
+        <spring.version>5.3.14</spring.version>
         <junit.platform.version>1.5.2</junit.platform.version>
         <junit.jupiter.version>5.6.2</junit.jupiter.version>
         <junit.version>4.12</junit.version>
@@ -606,7 +606,7 @@
                         <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
                             <licenseFamilyCategory>SPDX</licenseFamilyCategory>
                             <licenseFamilyName>SPDX-License-Identifier: Apache-2.0</licenseFamilyName>
-                            <notes></notes>
+                            <notes/>
                             <patterns>
                                 <pattern>SPDX-License-Identifier: Apache-2.0</pattern>
                             </patterns>
@@ -614,7 +614,7 @@
                         <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
                             <licenseFamilyCategory>SPDX</licenseFamilyCategory>
                             <licenseFamilyName>SPDX-License-Identifier: CC-BY-4.0</licenseFamilyName>
-                            <notes></notes>
+                            <notes/>
                             <patterns>
                                 <pattern>SPDX-License-Identifier: CC-BY-4.0</pattern>
                             </patterns>
