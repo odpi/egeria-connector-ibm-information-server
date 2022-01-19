@@ -723,17 +723,18 @@ public abstract class EntityMapping extends InstanceMapping {
         // Handle any super-generic mappings first
         entityMap.initializeEntityDetail();
 
-        EntityDetail preliminary = entityMap.getOmrsDetail(cache);
 
         if (entityMap.getIgcEntity() == null) {
             // Igc entity was not found, raise exception providing as much details as possible
             raiseEntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN,
                     methodName,
                     null,
-                    preliminary != null ? preliminary.getGUID() : "",
+                    null,
                     entityMap.getIgcEntityRid() != null ? entityMap.getIgcEntityRid() : "",
                     entityMap.getRepositoryConnector().getRepositoryName());
         }
+
+        EntityDetail preliminary = entityMap.getOmrsDetail(cache);
 
         if (preliminary != null) {
             // Then handle any generic mappings and classifications
