@@ -729,7 +729,7 @@ public abstract class EntityMapping extends InstanceMapping {
             raiseEntityNotKnownException(IGCOMRSErrorCode.ENTITY_NOT_KNOWN,
                     methodName,
                     null,
-                    null,
+                    "",
                     entityMap.getIgcEntityRid() != null ? entityMap.getIgcEntityRid() : "",
                     entityMap.getRepositoryConnector().getRepositoryName());
         }
