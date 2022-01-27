@@ -111,7 +111,7 @@
         <woodstox.version>6.2.6</woodstox.version>
         <xmlapi.version>2.0.2</xmlapi.version>
         <stax.version>1.0.1</stax.version>
-        <maven-compiler.version>3.8.1</maven-compiler.version>
+        <maven-compiler.version>3.9.0</maven-compiler.version>
         <maven-javadoc-plugin.version>3.3.1</maven-javadoc-plugin.version>
         <maven-shade.version>3.2.1</maven-shade.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
