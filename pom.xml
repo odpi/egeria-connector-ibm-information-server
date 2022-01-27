@@ -102,7 +102,7 @@
         <junit.version>4.12</junit.version>
         <surefire.plugin.version>3.0.0-M5</surefire.plugin.version>
         <logback.version>1.2.6</logback.version>
-        <testng.version>7.4.0</testng.version>
+        <testng.version>7.5</testng.version>
         <mock-server.version>5.11.2</mock-server.version>
         <sleepycat.version>18.3.12</sleepycat.version>
         <rhino.version>1.7.13</rhino.version>
