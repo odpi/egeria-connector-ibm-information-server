@@ -106,7 +106,7 @@
         <mock-server.version>5.11.2</mock-server.version>
         <sleepycat.version>18.3.12</sleepycat.version>
         <rhino.version>1.7.13</rhino.version>
-        <netty.version>4.1.69.Final</netty.version>
+        <netty.version>4.1.73.Final</netty.version>
         <httpclient.version>4.5.13</httpclient.version>
         <woodstox.version>6.2.6</woodstox.version>
         <xmlapi.version>2.0.2</xmlapi.version>
