@@ -6,16 +6,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.DataFileMapping;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.DatabaseMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.DatabaseSchemaMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.ProcessMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.RelationalTableMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.SchemaTypeMapping;
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.*;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.LineageMode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Dsjob;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationGovernanceRule;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -24,10 +29,19 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
-import org.odpi.openmetadata.accessservices.dataengine.model.*;
 import org.odpi.openmetadata.accessservices.dataengine.model.DataFile;
+import org.odpi.openmetadata.accessservices.dataengine.model.Database;
 import org.odpi.openmetadata.accessservices.dataengine.model.DatabaseSchema;
+import org.odpi.openmetadata.accessservices.dataengine.model.LineageMapping;
+import org.odpi.openmetadata.accessservices.dataengine.model.ParentProcess;
 import org.odpi.openmetadata.accessservices.dataengine.model.Process;
+import org.odpi.openmetadata.accessservices.dataengine.model.ProcessHierarchy;
+import org.odpi.openmetadata.accessservices.dataengine.model.Referenceable;
+import org.odpi.openmetadata.accessservices.dataengine.model.RelationalTable;
+import org.odpi.openmetadata.accessservices.dataengine.model.SchemaType;
+import org.odpi.openmetadata.accessservices.dataengine.model.SoftwareServerCapability;
+import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
+import org.odpi.openmetadata.frameworks.connectors.ffdc.OCFRuntimeException;
 import org.odpi.openmetadata.frameworks.auditlog.messagesets.ExceptionMessageDefinition;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.*;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
@@ -38,7 +52,13 @@ import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class DataStageConnector extends DataEngineConnectorBase {
 
@@ -301,14 +321,16 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public List<? super Referenceable> getChangedDataStores(Date from, Date to) throws ConnectorCheckedException, PropertyServerException  {
+    public List<? super Referenceable> getChangedDataStores(Date from, Date to) throws ConnectorCheckedException, PropertyServerException {
 
         final String methodName = "getChangedDataStores";
         log.debug("Looking for changed DataStores...");
         Map<String, ? super Referenceable> dataStoreMap = new HashMap<>();
 
         try {
+
             initializeCache(from, to);
+
             // Iterate through each job looking for any virtual assets -- these must be created first
             for (DataStageJob job : dataStageCache.getAllJobs()) {
                 for (String storeRid : job.getStoreRids()) {
@@ -320,6 +342,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
                             String type = storeIdentity.getAssetType();
                             switch (type) {
                                 case DATABASE_TABLE:
+                                    Identity databaseLevelIdentity = parentIdentity.getParentIdentity();
+                                    log.debug(" ... Creating a Database ...");
+                                    DatabaseMapping databaseMapping = new DatabaseMapping(dataStageCache);
+                                    Database database = databaseMapping.getForDataStore(databaseLevelIdentity);
+                                    logEntityCreated(database);
+
                                     log.debug(" ... Creating a DatabaseSchema ...");
                                     DatabaseSchemaMapping databaseSchemaMapping = new DatabaseSchemaMapping(dataStageCache);
                                     DatabaseSchema dbSchema = databaseSchemaMapping.getForDataStore(parentIdentity);
@@ -327,11 +355,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
                                     log.debug(" ... Creating a RelationalTable ...");
                                     RelationalTableMapping relationalTableMapping = new RelationalTableMapping(dataStageCache);
-                                    VirtualTable table = relationalTableMapping.getForDataStore(storeIdentity);
-                                    table.setDatabaseSchema(dbSchema);
+                                    RelationalTable table = relationalTableMapping.getForDataStore(storeIdentity);
                                     logEntityCreated(table);
 
-                                    dataStoreMap.put(storeRid, table);
+                                    database.setDatabaseSchema(dbSchema);
+                                    database.setTables(Collections.singletonList(table));
+                                    dataStoreMap.put(storeRid, database);
                                     break;
                                 case DATA_FILE_RECORD:
                                     log.debug(" ... Creating a SchemaType ...");
@@ -352,6 +381,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                     }
                 }
             }
+
         } catch (IGCException e) {
             handleIGCException(this.getClass().getName(), methodName, e);
         }
