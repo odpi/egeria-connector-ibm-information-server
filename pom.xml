@@ -94,7 +94,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Versions of dependent libraries -->
-        <jackson.version>2.13.0</jackson.version>
+        <jackson.version>2.13.1</jackson.version>
         <slf4j.version>1.7.32</slf4j.version>
         <spring.version>5.3.12</spring.version>
         <junit.platform.version>1.5.2</junit.platform.version>
