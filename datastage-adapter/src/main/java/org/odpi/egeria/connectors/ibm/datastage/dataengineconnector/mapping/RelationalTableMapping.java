@@ -4,7 +4,7 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
-import org.odpi.openmetadata.accessservices.dataengine.model.VirtualTable;
+import org.odpi.openmetadata.accessservices.dataengine.model.RelationalTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,15 +19,15 @@ public class RelationalTableMapping  extends BaseMapping{
     }
 
     /**
-     * Creates a VirtualTable for the provided data store and field information.
+     * Creates a RelationalTable for the provided data store and field information.
      *
      * @param storeIdentity the store identity for which to create the virtual table
-     * @return VirtualTable
+     * @return RelationalTable
      */
-    public VirtualTable getForDataStore(Identity storeIdentity) {
-        VirtualTable relationalTable = null;
+    public RelationalTable getForDataStore(Identity storeIdentity) {
+        RelationalTable relationalTable = null;
         if (storeIdentity != null) {
-            relationalTable = new VirtualTable();
+            relationalTable = new RelationalTable();
             String relationalTableQN = getFullyQualifiedName(storeIdentity, null);
             if (relationalTableQN != null) {
                 log.debug("Constructing RelationalTable for data store: {}", relationalTableQN);

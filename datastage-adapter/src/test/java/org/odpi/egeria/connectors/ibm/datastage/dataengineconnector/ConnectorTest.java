@@ -9,6 +9,7 @@ import org.odpi.openmetadata.accessservices.dataengine.model.Process;
 import org.odpi.openmetadata.frameworks.connectors.ConnectorBroker;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectionCheckedException;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
+import org.odpi.openmetadata.frameworks.connectors.ffdc.PropertyServerException;
 import org.odpi.openmetadata.frameworks.connectors.properties.beans.Connection;
 import org.odpi.openmetadata.frameworks.connectors.properties.beans.Endpoint;
 import org.odpi.openmetadata.http.HttpHelper;
@@ -124,7 +125,7 @@ public class ConnectorTest {
     }
 
     @Test
-    public void testLastSync() {
+    public void testLastSync() throws ConnectorCheckedException, PropertyServerException {
         // First query is empty result
         Date changesLastSynced = dataStageConnector.getChangesLastSynced();
         assertNull(changesLastSynced);
@@ -137,7 +138,7 @@ public class ConnectorTest {
     }
 
     @Test
-    public void testChangedSchemas() {
+    public void testChangedSchemas() throws ConnectorCheckedException, PropertyServerException {
         List<SchemaType> schemaTypes = dataStageConnector.getChangedSchemaTypes(null, now);
         assertFalse(schemaTypes.isEmpty());
         assertEquals(schemaTypes.size(), 1);
@@ -146,7 +147,7 @@ public class ConnectorTest {
     }
 
     @Test
-    public void testProcesses() {
+    public void testProcesses() throws ConnectorCheckedException, PropertyServerException{
         List<Process> processes = dataStageConnector.getChangedProcesses(null, now);
         assertFalse(processes.isEmpty());
         for (Process process : processes) {
@@ -166,7 +167,7 @@ public class ConnectorTest {
     }
 
     @AfterSuite
-    public void stopConnector() {
+    public void stopConnector() throws ConnectorCheckedException {
         dataStageConnector.disconnect();
     }
 
