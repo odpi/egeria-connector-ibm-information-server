@@ -42,7 +42,7 @@ spec:
           imagePullPolicy: {{ .Values.image.configure.pullPolicy | default .Values.imageDefaults.pullPolicy }}
           env:
             - name: SERVICE
-              value: {{ .Release.Name }}-kafka
+              value: lab-kafka
         - name: wait-for-ibm-igc
           image: "{{ if (.Values.image.configure.registry | default .Values.imageDefaults.registry) }}{{ .Values.image.configure.registry | default .Values.imageDefaults.registry }}/{{ end }}\
                   {{ if (.Values.image.configure.namespace | default .Values.imageDefaults.namespace) }}{{ .Values.image.configure.namespace | default .Values.imageDefaults.namespace }}/{{ end }}\
@@ -102,29 +102,12 @@ spec:
                 ${PROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBM_IGC_SERVER}/instance
                 &&
                 curl -f -k -w "\n  (%{http_code} - %{url_effective})\n" --silent --basic admin:admin -X POST
-                ${PROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${OMAS_SERVER}/local-repository/mode/local-graph-repository
-                &&
-                curl -f -k -w "\n  (%{http_code} - %{url_effective})\n" --silent --basic admin:admin -X POST
-                ${PROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${OMAS_SERVER}/server-url-root?url=${PROXY_ENDPOINT}
-                &&
-                curl -f -k -w "\n  (%{http_code} - %{url_effective})\n" --silent --basic admin:admin -X POST
-                --header "Content-Type: application/json"
-                ${PROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${OMAS_SERVER}/event-bus
-                --data '{"producer": {"bootstrap.servers": "'"${KAFKA_ENDPOINT}"'"}, "consumer": {"bootstrap.servers": "'"${KAFKA_ENDPOINT}"'"} }'
-                &&
-                curl -f -k -w "\n  (%{http_code} - %{url_effective})\n" --silent --basic admin:admin -X POST
-                ${PROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${OMAS_SERVER}/access-services/data-engine
-                &&
-                curl -f -k -w "\n  (%{http_code} - %{url_effective})\n" --silent --basic admin:admin -X POST
-                ${PROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${OMAS_SERVER}/instance
-                &&
-                curl -f -k -w "\n  (%{http_code} - %{url_effective})\n" --silent --basic admin:admin -X POST
                 ${PROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBM_DATASTAGE_SERVER}/local-repository/mode/in-memory-repository
                 &&
                 curl -f -k -w "\n  (%{http_code} - %{url_effective})\n" --silent --basic admin:admin -X POST
                 --header "Content-Type: application/json"
                 ${PROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBM_DATASTAGE_SERVER}/data-engine-proxy-service/configuration
-                --data '{"class":"DataEngineProxyConfig","accessServiceRootURL":"'"${PROXY_ENDPOINT}"'","accessServiceServerName":"'"${OMAS_SERVER}"'","eventsClientEnabled":true,"dataEngineConnection":{"class":"Connection","connectorType":{"class":"ConnectorType","connectorProviderClassName":"org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnectorProvider"},"endpoint":{"class":"Endpoint","address":"'"${IBM_HOST}:${IBM_PORT}"'","protocol":"https"},"userId":"'"${IBM_USER}"'","clearPassword":"'"${IBM_PASS}"'","configurationProperties":{"limitToProjects":["minimal"]}},"pollIntervalInSeconds":60}'
+                --data '{"class":"DataEngineProxyConfig","accessServiceRootURL":"'"${OMAS_ENDPOINT}"'","accessServiceServerName":"'"${OMAS_SERVER}"'","eventsClientEnabled":true,"dataEngineConnection":{"class":"Connection","connectorType":{"class":"ConnectorType","connectorProviderClassName":"org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnectorProvider"},"endpoint":{"class":"Endpoint","address":"'"${IBM_HOST}:${IBM_PORT}"'","protocol":"https"},"userId":"'"${IBM_USER}"'","clearPassword":"'"${IBM_PASS}"'","configurationProperties":{"limitToProjects":["minimal"],"mode":"JOB_LEVEL","limitToLineageEnabledJobs":true,"createDataStoreSchemas":false,"includeVirtualAssets":false}},"pollIntervalInSeconds":60}'
                 &&
                 curl -f -k -w "\n  (%{http_code} - %{url_effective})\n" --silent --basic admin:admin -X POST
                 ${PROXY_ENDPOINT}/open-metadata/admin-services/users/${EGERIA_USER}/servers/${IBM_DATASTAGE_SERVER}/instance

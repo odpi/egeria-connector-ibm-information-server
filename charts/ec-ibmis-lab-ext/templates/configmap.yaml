@@ -14,7 +14,8 @@ data:
   # General cluster configuration - for core egeria, kafka - these must be used
   EGERIA_USER: {{ .Values.egeria.user }}
   EGERIA_COHORT: {{ .Values.egeria.cohort }}
-  KAFKA_ENDPOINT: {{ .Release.Name }}-kafka:9092
+  #KAFKA_ENDPOINT: {{ .Release.Name }}-kafka:9092
+  KAFKA_ENDPOINT: lab-kafka:9092
 
   # Used by IBM Information Server
   STRICT_SSL: "false"
@@ -27,7 +28,8 @@ data:
   IBM_PASS: {{ .Values.ibm.password }}
   IBM_IGC_SERVER: {{ .Values.ibm.igc }}
   IBM_DATASTAGE_SERVER: {{ .Values.ibm.datastage }}
-  OMAS_SERVER: "ibm_omas"
+  OMAS_SERVER: cocoMDS1
+  OMAS_ENDPOINT: https://lab-datalake:9443
 
   # Used for downloads
   CONNECTOR_JAR: egeria-connector-ibm-information-server-package-{{  .Values.connector.version }}-jar-with-dependencies.jar

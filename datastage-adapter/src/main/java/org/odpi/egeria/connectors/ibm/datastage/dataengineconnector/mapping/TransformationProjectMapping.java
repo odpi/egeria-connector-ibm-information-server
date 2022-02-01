@@ -6,6 +6,7 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageCon
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCIOException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
@@ -34,7 +35,7 @@ public class TransformationProjectMapping extends BaseMapping{
      * @param igcObj the asset for which to obtain the transformation project
      * @return Collection
      */
-    public Collection getTransformationProject(InformationAsset igcObj) {
+    public Collection getTransformationProject(InformationAsset igcObj) throws IGCException {
         if (igcObj == null) {
             return null;
         }
@@ -42,7 +43,7 @@ public class TransformationProjectMapping extends BaseMapping{
         for (Reference reference : igcObj.getContext()) {
             if (TRANSFORMATION_PROJECT_KEY.equals(reference.getType())) {
                 Collection transformationProject = new Collection();
-                String qualifiedName = getQualifiedName(methodName, reference);
+                String qualifiedName = getQualifiedName(reference);
                 transformationProject.setQualifiedName(qualifiedName);
                 transformationProject.setName(reference.getName());
                 return transformationProject;
@@ -51,15 +52,7 @@ public class TransformationProjectMapping extends BaseMapping{
         return null;
     }
 
-    private String getQualifiedName(String methodName, Reference reference) {
-        try {
-            return getFullyQualifiedName(reference);
-        } catch (IGCConnectivityException | IGCParsingException | IGCIOException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
-        }
-        return null;
+    private String getQualifiedName(Reference reference) throws IGCException {
+        return getFullyQualifiedName(reference);
     }
 }

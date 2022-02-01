@@ -26,6 +26,8 @@ jobs:
           restore-keys: ${{ runner.os }}-maven-java16
       - name: Build with Maven
         run: mvn -DargLine="-XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:GCTimeRatio=99" -B clean verify --file pom.xml
+        env:
+          MAVEN_OPTS: --add-opens=java.base/sun.security.x509=ALL-UNNAMED
       - name: Upload assemblies
         uses: actions/upload-artifact@v2
         with:

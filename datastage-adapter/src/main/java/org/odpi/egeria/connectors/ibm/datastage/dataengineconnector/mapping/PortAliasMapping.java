@@ -2,8 +2,6 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping;
 
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConnector;
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
@@ -43,7 +41,7 @@ class PortAliasMapping extends BaseMapping {
      * @param portType the type of port to map (input or output)
      * @return {@code List<PortAlias>}
      */
-    List<PortAlias> getForStages(List<Stage> stages, PortType portType) {
+    List<PortAlias> getForStages(List<Stage> stages, PortType portType) throws IGCException {
         Set<PortAlias> portAliases = new HashSet<>();
         for (Stage stage : stages) {
             if (portType.equals(PortType.INPUT_PORT)) {
@@ -61,7 +59,7 @@ class PortAliasMapping extends BaseMapping {
      * @param sequence the sequence for which to create PortAliases
      * @return {@code List<PortAlias>}
      */
-    List<PortAlias> getForSequence(DataStageJob sequence) {
+    List<PortAlias> getForSequence(DataStageJob sequence) throws IGCException {
         Set<PortAlias> portAliases = new HashSet<>();
         final String methodName = "PortAliasMapping";
         if (sequence.getType().equals(DataStageJob.JobType.SEQUENCE)) {
@@ -76,24 +74,19 @@ class PortAliasMapping extends BaseMapping {
                             List<PortAlias> jobPortAliases = jobProcess.getPortAliases();
                             // Create a new PortAlias at the sequence level, for each underlying PortAlias of jobs
                             // that are executed, that delegateTo the underlying job's PortAlias
-                            try {
-                                for (PortAlias delegateTo : jobPortAliases) {
-                                    String stageQN = getFullyQualifiedName(stage, delegateTo.getQualifiedName());
-                                    if (stageQN != null) {
-                                        PortAlias sequencePortAlias = getSkeletonPortAlias(stageQN, stage.getName() + "_" + delegateTo.getDisplayName());
-                                        sequencePortAlias.setPortType(delegateTo.getPortType());
-                                        sequencePortAlias.setDelegatesTo(delegateTo.getQualifiedName());
-                                        portAliases.add(sequencePortAlias);
-                                    } else {
-                                        log.error("Unable to determine identity for stage -- not including: {}", stage);
-                                    }
+      
+                            for (PortAlias delegateTo : jobPortAliases) {
+                                String stageQN = getFullyQualifiedName(stage, delegateTo.getQualifiedName());
+                                if (stageQN != null) {
+                                    PortAlias sequencePortAlias = getSkeletonPortAlias(stageQN, stage.getName() + "_" + delegateTo.getDisplayName());
+                                    sequencePortAlias.setPortType(delegateTo.getPortType());
+                                    sequencePortAlias.setDelegatesTo(delegateTo.getQualifiedName());
+                                    portAliases.add(sequencePortAlias);
+                                } else {
+                                    log.error("Unable to determine identity for stage -- not including: {}", stage);
                                 }
-                            } catch (IGCException e) {
-                                DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                                        this.getClass().getName(),
-                                        methodName,
-                                        e);
                             }
+
                         } else {
                             log.warn("Unable to find existing process to use for alias: {}", jobId);
                         }
@@ -104,36 +97,32 @@ class PortAliasMapping extends BaseMapping {
         return new ArrayList<>(portAliases);
     }
 
-    private void addInputPortAliases(Set<PortAlias> portAliases, Stage stage) {
+    private void addInputPortAliases(Set<PortAlias> portAliases, Stage stage) throws IGCException {
         addPortAliases(portAliases, stage, "reads_from_(design)", stage.getReadsFromDesign(), PortType.INPUT_PORT);
     }
 
-    private void addOutputPortAliases(Set<PortAlias> portAliases, Stage stage) {
+    private void addOutputPortAliases(Set<PortAlias> portAliases, Stage stage) throws IGCException {
         addPortAliases(portAliases, stage, "writes_to_(design)", stage.getWritesToDesign(), PortType.OUTPUT_PORT);
     }
 
-    private void addPortAliases(Set<PortAlias> portAliases, Stage stage, String propertyName, ItemList<InformationAsset> relations, PortType portType) {
+    private void addPortAliases(Set<PortAlias> portAliases, Stage stage, String propertyName,
+                                ItemList<InformationAsset> relations, PortType portType) throws IGCException {
         final String methodName = "addPortAliases";
-        try {
-            List<InformationAsset> allRelations = igcRestClient.getAllPages(propertyName, relations);
-            int index = 0;
-            for (InformationAsset relation : allRelations) {
-                index++;
-                Identity storeIdentity = cache.getStoreIdentityFromRid(relation.getId());
-                String fullyQualifiedStageName = getFullyQualifiedName(stage);
-                // Use the index to at least make each PortAlias qualifiedName for this stage unique (without risking
-                // overlapping with the PortImplementation qualifiedNames that we need to delegateTo)
-                PortAlias portAlias = getSkeletonPortAlias(fullyQualifiedStageName + "_" + index, stage.getName());
-                portAlias.setPortType(portType);
-                portAlias.setDelegatesTo(getFullyQualifiedName(storeIdentity, fullyQualifiedStageName));
-                portAliases.add(portAlias);
-            }
-        } catch (IGCException e) {
-            DataStageConnector.raiseRuntimeError(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR,
-                    this.getClass().getName(),
-                    methodName,
-                    e);
+
+        List<InformationAsset> allRelations = igcRestClient.getAllPages(propertyName, relations);
+        int index = 0;
+        for (InformationAsset relation : allRelations) {
+            index++;
+            Identity storeIdentity = cache.getStoreIdentityFromRid(relation.getId());
+            String fullyQualifiedStageName = getFullyQualifiedName(stage);
+            // Use the index to at least make each PortAlias qualifiedName for this stage unique (without risking
+            // overlapping with the PortImplementation qualifiedNames that we need to delegateTo)
+            PortAlias portAlias = getSkeletonPortAlias(fullyQualifiedStageName + "_" + index, stage.getName());
+            portAlias.setPortType(portType);
+            portAlias.setDelegatesTo(getFullyQualifiedName(storeIdentity, fullyQualifiedStageName));
+            portAliases.add(portAlias);
         }
+
     }
 
     private PortAlias getSkeletonPortAlias(String qualifiedName, String displayName) {
