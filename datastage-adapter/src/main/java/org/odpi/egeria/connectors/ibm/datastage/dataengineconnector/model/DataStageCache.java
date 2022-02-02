@@ -394,7 +394,7 @@ public class DataStageCache {
                             log.warn("Unable to detect lineage for job -- not including: {}", jobRid);
                         }
                     } catch (IGCException e) {
-                        log.error("Failed to detect lineage for job -- not including: {}, check system log for error details.", jobRid, e);
+                        log.error("Failed to detect lineage for job -- not including: {}, check system log for exception details.", jobRid, e);
                     }
                 }
         }
