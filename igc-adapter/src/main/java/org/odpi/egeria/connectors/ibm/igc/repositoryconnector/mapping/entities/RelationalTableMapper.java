@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.AnchorsMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.TypeEmbeddedAttributeMapper_RelationalTable;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttributeForSchemaMapper_TableSchema;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.NestedSchemaAttributeMapper;
@@ -55,7 +56,7 @@ public class RelationalTableMapper extends SchemaElementMapper {
 
         // The list of classifications that should be mapped
         addClassificationMapper(TypeEmbeddedAttributeMapper_RelationalTable.getInstance(null));
-
+        addClassificationMapper(AnchorsMapper.getInstance(null));
     }
 
 }
