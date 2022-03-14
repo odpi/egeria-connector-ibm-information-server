@@ -727,7 +727,7 @@ public class ConnectorTest {
         assertTrue(AttributeMapping.compareInstanceProperty(ev1, ev2) < 0);
         assertTrue(AttributeMapping.compareInstanceProperty(ev2, ev1) > 0);
         assertEquals(AttributeMapping.compareInstanceProperty(ev1, ev1), 0);
-        
+
     }
 
     private void testComparator(Object first, Object second, PrimitiveDefCategory category) {
@@ -1886,18 +1886,26 @@ public class ConnectorTest {
         int length = getIntegerValue(detail.getProperties(), "length");
         assertEquals(length, 120);
 
-        testTypeEmbeddedAttributeWithStringDataType(detail.getClassifications());
+        testColumnClassifications(detail.getClassifications());
 
     }
 
-    private void testTypeEmbeddedAttributeWithStringDataType(List<Classification> classifications) {
+    private void testColumnClassifications(List<Classification> classifications) {
         assertNotNull(classifications);
         assertFalse(classifications.isEmpty());
-        assertEquals(classifications.size(), 1);
-        Classification first = classifications.get(0);
-        assertEquals(first.getType().getTypeDefName(), "TypeEmbeddedAttribute");
-        String dataType = getStringValue(first.getProperties(), "dataType");
-        assertEquals(dataType, "STRING");
+        assertEquals(classifications.size(), 2);
+        for (Classification classification : classifications) {
+            String classificationType = classification.getType().getTypeDefName();
+            if (classificationType.equalsIgnoreCase("TypeEmbeddedAttribute")) {
+                String dataType = getStringValue(classification.getProperties(), "dataType");
+                assertEquals(dataType, "STRING");
+            } else if (classificationType.equalsIgnoreCase("Anchors")) {
+                String anchorGUID = getStringValue(classification.getProperties(), "anchorGUID");
+                assertNotNull(anchorGUID);
+            } else {
+                fail("Only TypeEmbeddedAttribute and Anchors classifications should be present");
+            }
+        }
     }
 
     @Test
@@ -2379,7 +2387,7 @@ public class ConnectorTest {
                 expectedValues
         );
 
-        testTypeEmbeddedAttributeWithStringDataType(detail.getClassifications());
+        testColumnClassifications(detail.getClassifications());
 
     }
 
@@ -2435,7 +2443,7 @@ public class ConnectorTest {
         List<Classification> classifications = detail.getClassifications();
         assertNotNull(classifications);
         assertFalse(classifications.isEmpty());
-        assertEquals(classifications.size(), 2);
+        assertEquals(classifications.size(), 3);
         Classification first = classifications.get(0);
         assertEquals(first.getType().getTypeDefName(), "SpineObject");
         assertTrue(first.getVersion() > 1);
