@@ -153,7 +153,7 @@ public class SchemaTypeMapper extends SchemaElementMapper {
                                                String repositoryName,
                                                IGCRestClient igcRestClient,
                                                IGCSearchConditionSet igcSearchConditionSet,
-                                               String searchCriteria) throws FunctionNotSupportedException {
+                                               String searchCriteria) throws FunctionNotSupportedException, RepositoryErrorException {
 
         super.addComplexStringSearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, searchCriteria);
 
