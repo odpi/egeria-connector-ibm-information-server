@@ -26,6 +26,7 @@ public class GlossaryMapper extends ReferenceableMapper {
     private static class Singleton {
         private static final GlossaryMapper INSTANCE = new GlossaryMapper();
     }
+
     public static GlossaryMapper getInstance(IGCVersionEnum version) {
         return Singleton.INSTANCE;
     }
@@ -60,22 +61,34 @@ public class GlossaryMapper extends ReferenceableMapper {
      * Utility method to check if the provided IGC object should be treated as a Glossary (true) or not (false).
      *
      * @param igcRestClient connectivity to the IGC environment
-     * @param cache a cache of information that may already have been retrieved about the provided object
-     * @param igcObject the IGC object to check
+     * @param cache         a cache of information that may already have been retrieved about the provided object
+     * @param igcObject     the IGC object to check
+     *
      * @return boolean
+     *
      * @throws RepositoryErrorException if any issue interacting with IGC
      */
     public static boolean isGlossary(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) throws RepositoryErrorException {
         final String methodName = "isGlossary";
-        String assetType = IGCRestConstants.getAssetTypeForSearch(igcObject.getType());
-        if (assetType.equals("category")) {
-            try {
-                Identity catIdentity = igcObject.getIdentity(igcRestClient, cache);
-                Identity parentIdentity = catIdentity.getParentIdentity();
-                return parentIdentity == null && !catIdentity.getName().equals("Classifications");
-            } catch (IGCException e) {
-                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
-            }
+        try {
+            return isGlossary(igcObject.getIdentity(igcRestClient, cache));
+        } catch (IGCException e) {
+            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+        }
+        return false;
+    }
+
+    /**
+     * Utility method to check if the provided IGC object should be treated as a Glossary (true) or not (false).
+     * @param identity the identity of the asset
+     *
+     * @return boolean
+     *
+     */
+    public static boolean isGlossary(Identity identity) {
+        if ("category".equals(IGCRestConstants.getAssetTypeForSearch(identity.getAssetType()))) {
+            Identity parentIdentity = identity.getParentIdentity();
+            return parentIdentity == null && !identity.getName().equals("Classifications");
         }
         return false;
     }

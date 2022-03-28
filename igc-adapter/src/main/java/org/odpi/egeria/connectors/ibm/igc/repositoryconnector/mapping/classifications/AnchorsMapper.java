@@ -12,6 +12,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSMetadataCollection;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities.GlossaryMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.model.IGCEntityGuid;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.Classification;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
@@ -21,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Singleton to map the OMRS "Anchors" classification.
@@ -28,12 +30,15 @@ import java.util.List;
 public class AnchorsMapper extends ClassificationMapping {
 
     private static final Logger log = LoggerFactory.getLogger(AnchorsMapper.class);
-    private static final String ADD_ANCHOR_GUID_PROPERTY_TO_ELEMENT =
-            "Add anchorGUID property with value '{}' to classification {} of element {}";
 
+    private static final String ADD_ANCHOR_GUID_PROPERTY_TO_ELEMENT = "Add anchorGUID property with value '{}' to classification {} of element {}";
     private static final String ANCHOR_GUID = "anchorGUID";
     private static final String REFERENCEABLE = "Referenceable";
     private static final String ANCHORS = "Anchors";
+    private static final String TERM = "term";
+    private static final String CATEGORY = "category";
+    private static final String DATABASE_SCHEMA = "database_schema";
+    private static final String DATA_FILE = "data_file";
 
     private static AnchorsMapper ANCHORS_MAPPER;
 
@@ -80,11 +85,13 @@ public class AnchorsMapper extends ClassificationMapping {
 
         try {
             Identity identity = fromIgcObject.getIdentity(igcRestClient, cache);
-            Identity assetIdentity = getParentAssetIdentity(identity);
-            if (assetIdentity == null) {
+            Optional<Identity> identityOptional = getAnchorIdentity(identity);
+            if (identityOptional.isEmpty()) {
                 return;
             }
-            IGCEntityGuid assetGuid = igcRepositoryHelper.getEntityGuid(assetIdentity.getAssetType(), null, assetIdentity.getRid());
+            Identity anchorIdentity = identityOptional.get();
+            String ridPrefix = GlossaryMapper.isGlossary(anchorIdentity) ? GlossaryMapper.IGC_RID_PREFIX : null;
+            IGCEntityGuid assetGuid = igcRepositoryHelper.getEntityGuid(anchorIdentity.getAssetType(), ridPrefix, anchorIdentity.getRid());
 
             Classification classification = getAnchorsClassification(igcomrsRepositoryConnector, fromIgcObject, userId, methodName, assetGuid);
             classifications.add(classification);
@@ -93,7 +100,6 @@ public class AnchorsMapper extends ClassificationMapping {
         } catch (IGCException e) {
             raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
         }
-
     }
 
     /**
@@ -119,26 +125,61 @@ public class AnchorsMapper extends ClassificationMapping {
     }
 
     /**
+     * Retrieve the Asset or Glossary level object's identity from the provided identity.
+     *
+     * @param identity the identity from which to retrieve the asset level identity
+     *
+     * @return Identity or null, if there is no asset-level identity
+     */
+    private Optional<Identity> getAnchorIdentity(Identity identity) {
+        switch (identity.getAssetType()) {
+            case TERM:
+                // return the parent category
+                return Optional.of(identity.getParentIdentity());
+            case CATEGORY:
+                return getGlossaryIdentity(identity);
+            default:
+                return getParentAssetIdentity(identity);
+        }
+    }
+
+    /**
+     * Retrieve the Glossary level object's identity from the provided identity.
+     *
+     * @param identity the identity from which to retrieve the asset level identity
+     *
+     * @return Identity or null, if there is no asset-level identity
+     */
+    private Optional<Identity> getGlossaryIdentity(Identity identity) {
+        Identity parentIdentity = identity.getUltimateParentIdentity();
+        if (GlossaryMapper.isGlossary(parentIdentity)) {
+            return Optional.of(parentIdentity);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    /**
      * Retrieve the Asset-level object's identity from the provided identity.
      *
      * @param identity the identity from which to retrieve the asset level identity
      *
      * @return Identity or null, if there is no asset-level identity
      */
-    private Identity getParentAssetIdentity(Identity identity) {
+    private Optional<Identity> getParentAssetIdentity(Identity identity) {
         Identity parent = identity.getParentIdentity();
         if (parent != null) {
             String type = parent.getAssetType();
-            // Once we reach database_schema/data_file/category level we have the asset, so return this identity
-            if (type.equals("database_schema") || type.equals("data_file") || type.equals("category")) {
-                return parent;
+            // Once we reach database_schema/data_file we have the asset, so return this identity
+            if (type.equals(DATABASE_SCHEMA) || type.equals(DATA_FILE)) {
+                return Optional.of(parent);
             } else {
                 // Otherwise continue to recurse
-                return getParentAssetIdentity(parent);
+                return getAnchorIdentity(parent);
             }
         } else {
             // If we get to a point where there is no parent, there is no asset, so return null
-            return null;
+            return Optional.empty();
         }
     }
 }
