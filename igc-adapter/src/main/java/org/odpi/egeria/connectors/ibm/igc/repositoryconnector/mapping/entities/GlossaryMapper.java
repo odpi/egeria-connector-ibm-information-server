@@ -70,10 +70,15 @@ public class GlossaryMapper extends ReferenceableMapper {
      */
     public static boolean isGlossary(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) throws RepositoryErrorException {
         final String methodName = "isGlossary";
-        try {
-            return isGlossary(igcObject.getIdentity(igcRestClient, cache));
-        } catch (IGCException e) {
-            raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+        String assetType = IGCRestConstants.getAssetTypeForSearch(igcObject.getType());
+        if (assetType.equals("category")) {
+            try {
+                Identity catIdentity = igcObject.getIdentity(igcRestClient, cache);
+                Identity parentIdentity = catIdentity.getParentIdentity();
+                return parentIdentity == null && !catIdentity.getName().equals("Classifications");
+            } catch (IGCException e) {
+                raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
+            }
         }
         return false;
     }
@@ -86,7 +91,8 @@ public class GlossaryMapper extends ReferenceableMapper {
      *
      */
     public static boolean isGlossary(Identity identity) {
-        if ("category".equals(IGCRestConstants.getAssetTypeForSearch(identity.getAssetType()))) {
+        String assetType = IGCRestConstants.getAssetTypeForSearch(identity.getAssetType());
+        if ("category".equals(assetType)) {
             Identity parentIdentity = identity.getParentIdentity();
             return parentIdentity == null && !identity.getName().equals("Classifications");
         }
