@@ -8,6 +8,5 @@ updates:
     schedule:
       interval: daily
     open-pull-requests-limit: 100
-    reviewers:
-      - cmgrote
+    reviewers: []
 ...
