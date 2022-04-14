@@ -12,6 +12,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditionSet;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.AnchorsMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.PrimaryCategoryMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.SpineAttributeMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.*;
@@ -64,6 +65,7 @@ public class GlossaryTermMapper extends ReferenceableMapper {
         addClassificationMapper(SpineObjectMapper.getInstance(null));
         addClassificationMapper(SpineAttributeMapper.getInstance(null));
         addClassificationMapper(PrimaryCategoryMapper.getInstance(null));
+        addClassificationMapper(AnchorsMapper.getInstance(null));
     }
 
     /**
