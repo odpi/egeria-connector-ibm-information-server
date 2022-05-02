@@ -142,9 +142,9 @@ public class DataStageConnector extends DataEngineConnectorBase {
                         limitToProjects.addAll((List<String>)projects);
                     }
                     Object labels = proxyProperties.getOrDefault(DataStageConnectorProvider.LIMIT_TO_LABELS, null);
-                    if (projects instanceof String) {
+                    if (labels instanceof String) {
                         limitToLabels.add((String)labels);
-                    } else if (projects != null) {
+                    } else if (labels != null) {
                         limitToLabels.addAll((List<String>)labels);
                     }
                     limitToLineageEnabledJobs = (Boolean) proxyProperties.getOrDefault(DataStageConnectorProvider.LIMIT_TO_LINEAGE_ENABLED_JOBS, limitToLineageEnabledJobs);
