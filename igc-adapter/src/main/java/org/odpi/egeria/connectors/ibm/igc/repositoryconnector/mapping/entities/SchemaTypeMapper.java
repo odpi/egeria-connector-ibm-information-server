@@ -14,6 +14,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCOMRSRepositoryConnector;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.IGCRepositoryHelper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.EntityMappingInstance;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.AnchorsMapper;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstanceProperties;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyCategory;
 import org.odpi.openmetadata.repositoryservices.connectors.stores.metadatacollectionstore.properties.instances.InstancePropertyValue;
@@ -57,6 +58,8 @@ public class SchemaTypeMapper extends SchemaElementMapper {
         addLiteralPropertyMapping("versionNumber", null);
         addLiteralPropertyMapping("encodingStandard", null);
 
+        // The list of classifications that should be mapped
+        addClassificationMapper(AnchorsMapper.getInstance(null));
     }
 
     /**
@@ -150,7 +153,7 @@ public class SchemaTypeMapper extends SchemaElementMapper {
                                                String repositoryName,
                                                IGCRestClient igcRestClient,
                                                IGCSearchConditionSet igcSearchConditionSet,
-                                               String searchCriteria) throws FunctionNotSupportedException {
+                                               String searchCriteria) throws FunctionNotSupportedException, RepositoryErrorException {
 
         super.addComplexStringSearchCriteria(repositoryHelper, repositoryName, igcRestClient, igcSearchConditionSet, searchCriteria);
 

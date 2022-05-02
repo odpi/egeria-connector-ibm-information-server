@@ -957,8 +957,11 @@ public abstract class EntityMapping extends InstanceMapping {
             }
 
             // Then trim the results to the total size requested
-            List<Relationship> limited;
+            List<Relationship> limited = new ArrayList<>();
             if (pageSize > 0) {
+                if(fromRelationshipElement >= omrsRelationships.size()){
+                    return limited;
+                }
                 limited = omrsRelationships.subList(fromRelationshipElement, Math.min(fromRelationshipElement + pageSize, omrsRelationships.size()));
             } else {
                 limited = omrsRelationships.subList(fromRelationshipElement, omrsRelationships.size());

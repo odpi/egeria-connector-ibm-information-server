@@ -26,6 +26,7 @@ public class GlossaryMapper extends ReferenceableMapper {
     private static class Singleton {
         private static final GlossaryMapper INSTANCE = new GlossaryMapper();
     }
+
     public static GlossaryMapper getInstance(IGCVersionEnum version) {
         return Singleton.INSTANCE;
     }
@@ -60,9 +61,11 @@ public class GlossaryMapper extends ReferenceableMapper {
      * Utility method to check if the provided IGC object should be treated as a Glossary (true) or not (false).
      *
      * @param igcRestClient connectivity to the IGC environment
-     * @param cache a cache of information that may already have been retrieved about the provided object
-     * @param igcObject the IGC object to check
+     * @param cache         a cache of information that may already have been retrieved about the provided object
+     * @param igcObject     the IGC object to check
+     *
      * @return boolean
+     *
      * @throws RepositoryErrorException if any issue interacting with IGC
      */
     public static boolean isGlossary(IGCRestClient igcRestClient, ObjectCache cache, Reference igcObject) throws RepositoryErrorException {
@@ -76,6 +79,22 @@ public class GlossaryMapper extends ReferenceableMapper {
             } catch (IGCException e) {
                 raiseRepositoryErrorException(IGCOMRSErrorCode.UNKNOWN_RUNTIME_ERROR, methodName, e);
             }
+        }
+        return false;
+    }
+
+    /**
+     * Utility method to check if the provided IGC object should be treated as a Glossary (true) or not (false).
+     * @param identity the identity of the asset
+     *
+     * @return boolean
+     *
+     */
+    public static boolean isGlossary(Identity identity) {
+        String assetType = IGCRestConstants.getAssetTypeForSearch(identity.getAssetType());
+        if ("category".equals(assetType)) {
+            Identity parentIdentity = identity.getParentIdentity();
+            return parentIdentity == null && !identity.getName().equals("Classifications");
         }
         return false;
     }

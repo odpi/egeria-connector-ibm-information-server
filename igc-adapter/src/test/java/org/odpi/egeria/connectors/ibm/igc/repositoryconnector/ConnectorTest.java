@@ -727,7 +727,7 @@ public class ConnectorTest {
         assertTrue(AttributeMapping.compareInstanceProperty(ev1, ev2) < 0);
         assertTrue(AttributeMapping.compareInstanceProperty(ev2, ev1) > 0);
         assertEquals(AttributeMapping.compareInstanceProperty(ev1, ev1), 0);
-        
+
     }
 
     private void testComparator(Object first, Object second, PrimitiveDefCategory category) {
@@ -1886,18 +1886,26 @@ public class ConnectorTest {
         int length = getIntegerValue(detail.getProperties(), "length");
         assertEquals(length, 120);
 
-        testTypeEmbeddedAttributeWithStringDataType(detail.getClassifications());
+        testColumnClassifications(detail.getClassifications());
 
     }
 
-    private void testTypeEmbeddedAttributeWithStringDataType(List<Classification> classifications) {
+    private void testColumnClassifications(List<Classification> classifications) {
         assertNotNull(classifications);
         assertFalse(classifications.isEmpty());
-        assertEquals(classifications.size(), 1);
-        Classification first = classifications.get(0);
-        assertEquals(first.getType().getTypeDefName(), "TypeEmbeddedAttribute");
-        String dataType = getStringValue(first.getProperties(), "dataType");
-        assertEquals(dataType, "STRING");
+        assertEquals(classifications.size(), 2);
+        for (Classification classification : classifications) {
+            String classificationType = classification.getType().getTypeDefName();
+            if (classificationType.equalsIgnoreCase("TypeEmbeddedAttribute")) {
+                String dataType = getStringValue(classification.getProperties(), "dataType");
+                assertEquals(dataType, "STRING");
+            } else if (classificationType.equalsIgnoreCase("Anchors")) {
+                String anchorGUID = getStringValue(classification.getProperties(), "anchorGUID");
+                assertNotNull(anchorGUID);
+            } else {
+                fail("Only TypeEmbeddedAttribute and Anchors classifications should be present");
+            }
+        }
     }
 
     @Test
@@ -2379,7 +2387,7 @@ public class ConnectorTest {
                 expectedValues
         );
 
-        testTypeEmbeddedAttributeWithStringDataType(detail.getClassifications());
+        testColumnClassifications(detail.getClassifications());
 
     }
 
@@ -2435,7 +2443,7 @@ public class ConnectorTest {
         List<Classification> classifications = detail.getClassifications();
         assertNotNull(classifications);
         assertFalse(classifications.isEmpty());
-        assertEquals(classifications.size(), 2);
+        assertEquals(classifications.size(), 3);
         Classification first = classifications.get(0);
         assertEquals(first.getType().getTypeDefName(), "SpineObject");
         assertTrue(first.getVersion() > 1);
@@ -2460,7 +2468,7 @@ public class ConnectorTest {
         List<Classification> classifications = detail.getClassifications();
         assertNotNull(classifications);
         assertFalse(classifications.isEmpty());
-        assertEquals(classifications.size(), 1);
+        assertEquals(classifications.size(), 2);
         Classification first = classifications.get(0);
         assertEquals(first.getType().getTypeDefName(), "SubjectArea");
         assertTrue(first.getVersion() > 1);
@@ -3137,75 +3145,6 @@ public class ConnectorTest {
                 null,
                 2,
                 2);
-
-    }
-
-    @Test
-    public void testFindSchemaElementByAnchorGUID() {
-
-        final String methodName = "testFindSchemaElementByAnchorGUID";
-
-        String ridForSchema = "b1c497ce.c1fb060b.001mts4re.7331jdi.nnod24.3aci569ca741v10qq7pbb";
-        IGCEntityGuid guid = new IGCEntityGuid(metadataCollectionId, "database_schema", ridForSchema);
-
-        InstanceProperties ip = new InstanceProperties();
-        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "anchorGUID", repositoryHelper.getExactMatchRegex(guid.toString()), methodName);
-
-        testFindEntitiesByProperty(
-                "aa8d5470-6dbc-4648-9e2f-045e5df9d2f9",
-                "RelationalColumn",
-                ip,
-                MatchCriteria.ALL,
-                MockConstants.EGERIA_PAGESIZE,
-                8
-        );
-
-        testFindEntitiesByProperty(
-                "ce7e72b8-396a-4013-8688-f9d973067425",
-                "RelationalTable",
-                ip,
-                MatchCriteria.ALL,
-                MockConstants.EGERIA_PAGESIZE,
-                1
-        );
-
-        guid = new IGCEntityGuid(metadataCollectionId, "data_file", MockConstants.DATA_FILE_RID);
-        ip = new InstanceProperties();
-        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "anchorGUID", repositoryHelper.getExactMatchRegex(guid.toString()), methodName);
-        testFindEntitiesByProperty(
-                "d81a0425-4e9b-4f31-bc1c-e18c3566da10",
-                "TabularFileColumn",
-                ip,
-                MatchCriteria.ALL,
-                MockConstants.EGERIA_PAGESIZE,
-                3
-        );
-
-        testFindEntitiesByProperty(
-                "248975ec-8019-4b8a-9caf-084c8b724233",
-                "TabularSchemaType",
-                ip,
-                MatchCriteria.ALL,
-                MockConstants.EGERIA_PAGESIZE,
-                1
-        );
-
-        ip = new InstanceProperties();
-        ip = repositoryHelper.addStringPropertyToInstance(sourceName, ip, "anchorGUID", repositoryHelper.getContainsRegex(guid.toString()), methodName);
-        InstanceProperties finalIpNonExact = ip;
-        assertThrows(FunctionNotSupportedException.class, () -> igcomrsMetadataCollection.findEntitiesByProperty(
-                MockConstants.EGERIA_USER,
-                "d81a0425-4e9b-4f31-bc1c-e18c3566da10",
-                finalIpNonExact,
-                MatchCriteria.ALL,
-                0,
-                null,
-                null,
-                null,
-                null,
-                null,
-                MockConstants.EGERIA_PAGESIZE
-        ));
 
     }
 
