@@ -81,6 +81,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private boolean includeVirtualAssets = true;
     private boolean createDataStoreSchemas = false;
     private List<String> limitToProjects;
+    private List<String> limitToLabels;
     private boolean limitToLineageEnabledJobs = false;
 
     private LineageMode mode = LineageMode.GRANULAR;
@@ -90,6 +91,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      */
     public DataStageConnector() {
         limitToProjects = new ArrayList<>();
+        limitToLabels = new ArrayList<>();
     }
 
     /**
@@ -138,6 +140,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
                         limitToProjects.add((String)projects);
                     } else if (projects != null) {
                         limitToProjects.addAll((List<String>)projects);
+                    }
+                    Object labels = proxyProperties.getOrDefault(DataStageConnectorProvider.LIMIT_TO_LABELS, null);
+                    if (projects instanceof String) {
+                        limitToLabels.add((String)labels);
+                    } else if (projects != null) {
+                        limitToLabels.addAll((List<String>)labels);
                     }
                     limitToLineageEnabledJobs = (Boolean) proxyProperties.getOrDefault(DataStageConnectorProvider.LIMIT_TO_LINEAGE_ENABLED_JOBS, limitToLineageEnabledJobs);
                     Object lineageMode = proxyProperties.getOrDefault(DataStageConnectorProvider.MODE, null);
@@ -487,7 +495,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param to the date and time up to which to cache changes (inclusive)
      */
     private void initializeCache(Date from, Date to) throws IGCException {
-        DataStageCache forComparison = new DataStageCache(from, to, mode, limitToProjects, limitToLineageEnabledJobs);
+        DataStageCache forComparison = new DataStageCache(from, to, mode, limitToProjects, limitToLabels, limitToLineageEnabledJobs);
         if (dataStageCache == null || !dataStageCache.equals(forComparison)) {
             // Initialize the cache, if it is empty, or reset it if it differs from the dates and times we've been given
             dataStageCache = forComparison;
