@@ -656,6 +656,11 @@ public class DataStageConnector extends DataEngineConnectorBase {
             conditionSet.addCondition(cIncludeForLineage);
             conditionSet.setMatchAnyCondition(false);
         }
+        if(limitToLabels.size() > 0){
+            IGCSearchCondition cLabels = new IGCSearchCondition("labels.name", limitToLabels);
+            conditionSet.addCondition(cLabels);
+            conditionSet.setMatchAnyCondition(false);
+        }
         igcSearch.addConditions(conditionSet);
         IGCSearchSorting sorting = new IGCSearchSorting("modified_on", true);
         igcSearch.addSortingCriteria(sorting);
