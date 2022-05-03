@@ -626,7 +626,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private String getJobSyncRuleName() {
         String ruleName = SYNC_RULE_PREFIX + " (" + mode.getName() + ")";
         if (limitToProjects.size() > 0) {
-            ruleName += " for projects: [" + String.join(",", limitToProjects) + "]";
+            ruleName += " projects: [" + String.join(",", limitToProjects) + "]";
+        }
+        if (limitToLabels.size() > 0) {
+            ruleName += " labels: [" + String.join(",", limitToLabels) + "]";
         }
         return ruleName;
     }
