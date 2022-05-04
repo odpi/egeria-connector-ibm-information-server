@@ -626,7 +626,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private String getJobSyncRuleName() {
         String ruleName = SYNC_RULE_PREFIX + " (" + mode.getName() + ")";
         if (limitToProjects.size() > 0) {
-            ruleName += " for projects: [" + String.join(",", limitToProjects) + "]";
+            ruleName += " projects: [" + String.join(",", limitToProjects) + "]";
+        }
+        if (limitToLabels.size() > 0) {
+            ruleName += " labels: [" + String.join(",", limitToLabels) + "]";
         }
         return ruleName;
     }
@@ -654,6 +657,11 @@ public class DataStageConnector extends DataEngineConnectorBase {
         if(limitToLineageEnabledJobs) {
             IGCSearchCondition cIncludeForLineage = new IGCSearchCondition("include_for_lineage","=","true");
             conditionSet.addCondition(cIncludeForLineage);
+            conditionSet.setMatchAnyCondition(false);
+        }
+        if(limitToLabels.size() > 0){
+            IGCSearchCondition cLabels = new IGCSearchCondition("labels.name", limitToLabels);
+            conditionSet.addCondition(cLabels);
             conditionSet.setMatchAnyCondition(false);
         }
         igcSearch.addConditions(conditionSet);
