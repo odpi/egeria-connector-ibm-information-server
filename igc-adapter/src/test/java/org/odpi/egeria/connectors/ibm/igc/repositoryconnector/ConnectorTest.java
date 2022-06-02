@@ -23,6 +23,7 @@ import org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants;
 import org.odpi.openmetadata.adapters.eventbus.topic.inmemory.InMemoryOpenMetadataTopicConnector;
 import org.odpi.openmetadata.adapters.repositoryservices.ConnectorConfigurationFactory;
 import org.odpi.openmetadata.adminservices.configuration.properties.OpenMetadataExchangeRule;
+import org.odpi.openmetadata.frameworks.auditlog.ComponentDevelopmentStatus;
 import org.odpi.openmetadata.frameworks.connectors.Connector;
 import org.odpi.openmetadata.frameworks.connectors.ConnectorBroker;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectionCheckedException;
@@ -124,7 +125,7 @@ public class ConnectorTest {
         List<OMRSAuditLogStore> auditLogDestinations = new ArrayList<>();
         auditLogDestinations.add((OMRSAuditLogStore)auditLogConnector);
         OMRSAuditLogDestination destination = new OMRSAuditLogDestination("TestServer", "Test", "ODPi", auditLogDestinations);
-        OMRSAuditLog auditLog = new OMRSAuditLog(destination, -1, "ConnectorTest", "Testing of the connector", null);
+        OMRSAuditLog auditLog = new OMRSAuditLog(destination, -1, ComponentDevelopmentStatus.IN_DEVELOPMENT, "Testing of the connector", null,null);
         contentManager = new OMRSRepositoryContentManager(MockConstants.EGERIA_USER, auditLog);
         eventManager = new OMRSRepositoryEventManager("Mock Outbound EventManager",
                 new OMRSRepositoryEventExchangeRule(OpenMetadataExchangeRule.SELECTED_TYPES, Collections.emptyList()),
@@ -727,7 +728,7 @@ public class ConnectorTest {
         assertTrue(AttributeMapping.compareInstanceProperty(ev1, ev2) < 0);
         assertTrue(AttributeMapping.compareInstanceProperty(ev2, ev1) > 0);
         assertEquals(AttributeMapping.compareInstanceProperty(ev1, ev1), 0);
-        
+
     }
 
     private void testComparator(Object first, Object second, PrimitiveDefCategory category) {
