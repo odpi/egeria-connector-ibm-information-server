@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.AnchorsMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.TypeEmbeddedAttributeMapper_TabularFileColumn;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttributeForSchemaMapper_RecordField;
 
@@ -32,7 +33,7 @@ public class TabularFileColumnMapper extends TabularColumnMapper {
 
         // The list of classifications that should be mapped
         addClassificationMapper(TypeEmbeddedAttributeMapper_TabularFileColumn.getInstance(null));
-
+        addClassificationMapper(AnchorsMapper.getInstance(null));
     }
 
 }

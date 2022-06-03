@@ -39,6 +39,7 @@ public class DataStageCache {
     private Date to;
     private LineageMode mode;
     private List<String> limitToProjects;
+    private List<String> limitToLabels;
     private boolean limitToLineageEnabled;
 
     /**
@@ -50,7 +51,7 @@ public class DataStageCache {
      * @param limitToProjects limit the cached jobs to only those in the provided list of projects
      * @param limitToLineageEnabledJobs limit the processing to those jobs for which lineage is enabled
      */
-    public DataStageCache(Date from, Date to, LineageMode mode, List<String> limitToProjects, boolean limitToLineageEnabledJobs) {
+    public DataStageCache(Date from, Date to, LineageMode mode, List<String> limitToProjects, List<String> limitToLabels, boolean limitToLineageEnabledJobs) {
         this.igcCache = new ObjectCache();
         this.ridToJob = new HashMap<>();
         this.ridToProcess = new HashMap<>();
@@ -60,6 +61,7 @@ public class DataStageCache {
         this.to = to;
         this.mode = mode;
         this.limitToProjects = (limitToProjects == null ? Collections.emptyList() : limitToProjects);
+        this.limitToLabels = limitToLabels;
         this.limitToLineageEnabled = limitToLineageEnabledJobs;
     }
 
@@ -356,6 +358,11 @@ public class DataStageCache {
             conditionSet.addCondition(cProject);
             conditionSet.setMatchAnyCondition(false);
         }
+        if(limitToLabels.size() > 0){
+            IGCSearchCondition cLabels = new IGCSearchCondition("labels.name", limitToLabels);
+            conditionSet.addCondition(cLabels);
+            conditionSet.setMatchAnyCondition(false);
+        }
         if (limitToLineageEnabled) {
             IGCSearchCondition cIncludeForLineage = new IGCSearchCondition("include_for_lineage","=","true");
             conditionSet.addCondition(cIncludeForLineage);
@@ -363,7 +370,7 @@ public class DataStageCache {
         }
         log.info(" ... searching for changed jobs > {} and <= {}, limited to projects: {}, limited to lineage enabled: {}", fromTime, toTime, limitToProjects, limitToLineageEnabled);
         igcSearch.addConditions(conditionSet);
-
+        log.debug(" ... search query object: {}", igcSearch);
         cacheChangedJobs(igcRestClient.search(igcSearch));
 
     }
