@@ -354,16 +354,20 @@ public class DataStageConnector extends DataEngineConnectorBase {
                                     log.debug(" ... Creating a Database ...");
                                     DatabaseMapping databaseMapping = new DatabaseMapping(dataStageCache);
                                     Database database = databaseMapping.getForDataStore(databaseLevelIdentity);
+                                    database.setIncomplete(IGCRestClient.isVirtualAssetRid(databaseLevelIdentity.getRid()));
                                     logEntityCreated(database);
 
                                     log.debug(" ... Creating a DatabaseSchema ...");
                                     DatabaseSchemaMapping databaseSchemaMapping = new DatabaseSchemaMapping(dataStageCache);
                                     DatabaseSchema dbSchema = databaseSchemaMapping.getForDataStore(parentIdentity);
+                                    dbSchema.setIncomplete(IGCRestClient.isVirtualAssetRid(parentIdentity.getRid()));
+
                                     logEntityCreated(dbSchema);
 
                                     log.debug(" ... Creating a RelationalTable ...");
                                     RelationalTableMapping relationalTableMapping = new RelationalTableMapping(dataStageCache);
                                     RelationalTable table = relationalTableMapping.getForDataStore(storeIdentity);
+                                    table.setIncomplete(true);
                                     logEntityCreated(table);
 
                                     database.setDatabaseSchema(dbSchema);
@@ -380,6 +384,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                                     DataFileMapping dataFileMapping = new DataFileMapping(dataStageCache);
                                     DataFile dataFile = dataFileMapping.getForDataStore(parentIdentity);
                                     dataFile.setSchema(schemaType);
+                                    dataFile.setIncomplete(true);
                                     logEntityCreated(dataFile);
 
                                     dataStoreMap.put(storeRid, dataFile);
