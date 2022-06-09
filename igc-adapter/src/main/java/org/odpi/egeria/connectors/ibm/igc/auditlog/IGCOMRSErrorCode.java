@@ -71,6 +71,11 @@ public enum IGCOMRSErrorCode implements ExceptionMessageSet {
             "This repository does not retain historical metadata, so cannot support historical queries.",
             "No action required, this is a limitation of the technology. To search such history, the metadata of interest" +
                     " must be synchronized to a cohort repository that can support history."),
+    NEIGHBORHOOD_LEVEL_UNSUPPORTED(501, "OMRS-IGC-REPOSITORY-501-002 ",
+            "Repository {0} is not able to service entity neighborhood with level great than 1",
+            "This repository is not based on a graph database, so is not optimized for getting sub graphs.",
+            "No action required, this is a limitation of the technology. To obtain neighborhood with grater level you should iterate through" +
+                    " must be synchronized to a cohort repository that can support history."),
     NO_RELATIONSHIP_PROPERTIES(501, "OMRS-IGC-REPOSITORY-501-003 ",
             "Repository {0} does not support properties on relationships",
             "This repository does not store properties on relationships, so they cannot be updated or searched.",

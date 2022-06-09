@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Provides the OMRSMetadataCollection implementation for IBM InfoSphere Information Governance Catalog ("IGC").
@@ -910,6 +911,79 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
 
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public InstanceGraph getEntityNeighborhood(String               userId,
+                                               String               entityGUID,
+                                               List<String>         entityTypeGUIDs,
+                                               List<String>         relationshipTypeGUIDs,
+                                               List<InstanceStatus> limitResultsByStatus,
+                                               List<String>         limitResultsByClassification,
+                                               Date                 asOfTime,
+                                               int                  level)
+            throws
+            InvalidParameterException,
+            RepositoryErrorException,
+            EntityNotKnownException,
+            TypeErrorException,
+            PropertyErrorException,
+            FunctionNotSupportedException,
+            UserNotAuthorizedException
+    {
+        final String methodName = new Object(){}.getClass().getEnclosingClass().getName();
+
+        //throw exceptions for unsupported functionalities: asOfTime and level>1
+        if (asOfTime != null) {
+            raiseFunctionNotSupportedException(IGCOMRSErrorCode.NO_HISTORY, methodName);
+        }else if( level != 1 ) {
+            throw new FunctionNotSupportedException(
+                    IGCOMRSErrorCode.NEIGHBORHOOD_LEVEL_UNSUPPORTED.getMessageDefinition(repositoryName),
+                    this.getClass().getName(),
+                    methodName);
+        }
+
+        List<EntityDetail> entities = new ArrayList<>();
+        List<Relationship> relationships = new ArrayList<>();
+        InstanceGraph subGraph = new InstanceGraph();
+
+            List<Relationship> allRelationships = null;
+            try {
+                allRelationships = this.getRelationshipsForEntity(userId,
+                        entityGUID,
+                        null,
+                        0,
+                        limitResultsByStatus,
+                        null,
+                        null,
+                        null,
+                        0);
+
+                if( allRelationships !=null && allRelationships.size() > 0 && relationshipTypeGUIDs != null && relationshipTypeGUIDs.size() > 0 ){
+                    List<Relationship> filteredList = allRelationships.stream()
+                            .filter(rel -> relationshipTypeGUIDs.stream()
+                                    .anyMatch(relGUID ->
+                                            rel.getType().getTypeDefGUID().equals(relGUID)))
+                            .collect(Collectors.toList());
+                    relationships.addAll(filteredList);
+                } else {
+                    relationships.addAll(allRelationships);
+                }
+
+            } catch (PagingErrorException e) {
+                throw new RuntimeException(e);
+            }
+
+        for ( Relationship relationship : relationships) {
+                entities.add(getEntityDetail(userId, relationship.getEntityTwoProxy().getGUID()));
+        }
+        subGraph.setEntities(entities);
+        subGraph.setRelationships(relationships);
+        return subGraph;
+    }
+
     /**
      * Find entities by their qualified name property (only).
      *
@@ -1228,7 +1302,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         return entityDetails.isEmpty() ? null : entityDetails;
 
     }
-    
+
     /**
      * Return a list of entities that match the supplied properties according to the match criteria.  The results
      * can be returned over many pages.
