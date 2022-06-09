@@ -125,7 +125,7 @@ public class ConnectorTest {
         List<OMRSAuditLogStore> auditLogDestinations = new ArrayList<>();
         auditLogDestinations.add((OMRSAuditLogStore)auditLogConnector);
         OMRSAuditLogDestination destination = new OMRSAuditLogDestination("TestServer", "Test", "ODPi", auditLogDestinations);
-        OMRSAuditLog auditLog = new OMRSAuditLog(destination, -1, ComponentDevelopmentStatus.IN_DEVELOPMENT, "Testing of the connector", null,null);
+        OMRSAuditLog auditLog = new OMRSAuditLog(destination, -1, ComponentDevelopmentStatus.IN_DEVELOPMENT, "ConnectorTest", "Testing of the connector", null);
         contentManager = new OMRSRepositoryContentManager(MockConstants.EGERIA_USER, auditLog);
         eventManager = new OMRSRepositoryEventManager("Mock Outbound EventManager",
                 new OMRSRepositoryEventExchangeRule(OpenMetadataExchangeRule.SELECTED_TYPES, Collections.emptyList()),
