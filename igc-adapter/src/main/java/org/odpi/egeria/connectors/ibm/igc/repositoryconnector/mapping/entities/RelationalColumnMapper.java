@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.AnchorsMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.PrimaryKeyMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.TypeEmbeddedAttributeMapper_RelationalColumn;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.*;
@@ -39,7 +40,7 @@ public class RelationalColumnMapper extends TabularColumnMapper {
         // The list of classifications that should be mapped
         addClassificationMapper(PrimaryKeyMapper.getInstance(null));
         addClassificationMapper(TypeEmbeddedAttributeMapper_RelationalColumn.getInstance(null));
-
+        addClassificationMapper(AnchorsMapper.getInstance(null));
     }
 
 }
