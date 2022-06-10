@@ -95,6 +95,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Versions of dependent libraries -->
         <jackson.version>2.13.0</jackson.version>
+        <commons-collections4.version>4.4</commons-collections4.version>
         <slf4j.version>1.7.32</slf4j.version>
         <spring.version>5.3.12</spring.version>
         <junit.platform.version>1.5.2</junit.platform.version>
@@ -182,6 +183,11 @@
                 <artifactId>jackson-dataformat-xml</artifactId>
                 <version>${jackson.version}</version>
                 <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>${commons-collections4.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.woodstox</groupId>
