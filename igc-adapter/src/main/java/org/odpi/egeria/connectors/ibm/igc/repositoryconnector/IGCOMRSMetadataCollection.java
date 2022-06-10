@@ -2,6 +2,7 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.odpi.egeria.connectors.ibm.igc.auditlog.IGCOMRSErrorCode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestConstants;
@@ -9,6 +10,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classification;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
@@ -949,36 +951,62 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
         List<Relationship> relationships = new ArrayList<>();
         InstanceGraph subGraph = new InstanceGraph();
 
-            List<Relationship> allRelationships = null;
-            try {
-                allRelationships = this.getRelationshipsForEntity(userId,
-                        entityGUID,
-                        null,
-                        0,
-                        limitResultsByStatus,
-                        null,
-                        null,
-                        null,
-                        0);
+        List<Relationship> filteredRelationshipList = null;
+        try {
+            List<Relationship> allRelationships = this.getRelationshipsForEntity(userId,
+                    entityGUID,
+                    null,
+                    0,
+                    limitResultsByStatus,
+                    null,
+                    null,
+                    null,
+                    0);
 
-                if( allRelationships !=null && allRelationships.size() > 0 && relationshipTypeGUIDs != null && relationshipTypeGUIDs.size() > 0 ){
-                    List<Relationship> filteredList = allRelationships.stream()
-                            .filter(rel -> relationshipTypeGUIDs.stream()
-                                    .anyMatch(relGUID ->
-                                            rel.getType().getTypeDefGUID().equals(relGUID)))
-                            .collect(Collectors.toList());
-                    relationships.addAll(filteredList);
-                } else {
-                    relationships.addAll(allRelationships);
-                }
-
-            } catch (PagingErrorException e) {
-                throw new RuntimeException(e);
+            if( allRelationships !=null && allRelationships.size() > 0 && relationshipTypeGUIDs != null && relationshipTypeGUIDs.size() > 0 ){
+                filteredRelationshipList = allRelationships.stream()
+                        .filter(rel -> relationshipTypeGUIDs.stream()
+                                .anyMatch(relGUID ->
+                                        rel.getType().getTypeDefGUID().equals(relGUID)))
+                        .collect(Collectors.toList());
+            } else {
+                filteredRelationshipList = allRelationships;
             }
 
-        for ( Relationship relationship : relationships) {
-                entities.add(getEntityDetail(userId, relationship.getEntityTwoProxy().getGUID()));
+        } catch (PagingErrorException e) {
+            throw new RuntimeException(e);
         }
+
+        for ( Relationship relationship : filteredRelationshipList) {
+
+            EntityDetail entity = null;
+
+            if(entityGUID.equals(relationship.getEntityTwoProxy().getGUID())){
+                if(CollectionUtils.isEmpty(entityTypeGUIDs)){
+                    entity = getEntityDetail(userId, relationship.getEntityOneProxy().getGUID());
+                }else if( entityTypeGUIDs.contains(relationship.getEntityOneProxy().getType().getTypeDefGUID())) {
+                    entity = getEntityDetail(userId, relationship.getEntityOneProxy().getGUID());
+                }
+            }else{
+                if(CollectionUtils.isEmpty(entityTypeGUIDs)){
+                    entity = getEntityDetail(userId, relationship.getEntityTwoProxy().getGUID());
+                }else if( entityTypeGUIDs.contains(relationship.getEntityTwoProxy().getType().getTypeDefGUID())) {
+                    entity = getEntityDetail(userId, relationship.getEntityTwoProxy().getGUID());
+                }
+            }
+
+            if( entity != null ){
+                if( CollectionUtils.isEmpty(limitResultsByClassification) ){
+                    entities.add(entity);
+                } else if ( CollectionUtils.isNotEmpty(entity.getClassifications())) {
+                    if( entity.getClassifications().stream().anyMatch( c -> limitResultsByClassification.contains(c.getType().getTypeDefGUID())) ){
+                        entities.add(entity);
+                    }
+                }
+                relationships.add(relationship);
+            }
+        }
+
         subGraph.setEntities(entities);
         subGraph.setRelationships(relationships);
         return subGraph;
