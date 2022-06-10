@@ -998,12 +998,14 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             if( entity != null ){
                 if( CollectionUtils.isEmpty(limitResultsByClassification) ){
                     entities.add(entity);
+                    relationships.add(relationship);
                 } else if ( CollectionUtils.isNotEmpty(entity.getClassifications())) {
                     if( entity.getClassifications().stream().anyMatch( c -> limitResultsByClassification.contains(c.getType().getTypeDefName())) ){
                         entities.add(entity);
+                        relationships.add(relationship);
                     }
                 }
-                relationships.add(relationship);
+
             }
         }
 
