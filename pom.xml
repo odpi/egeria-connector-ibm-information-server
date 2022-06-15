@@ -97,7 +97,7 @@
         <jackson.version>2.13.0</jackson.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <slf4j.version>1.7.32</slf4j.version>
-        <spring.version>5.3.12</spring.version>
+        <spring.version>5.3.21</spring.version>
         <junit.platform.version>1.5.2</junit.platform.version>
         <junit.jupiter.version>5.6.2</junit.jupiter.version>
         <junit.version>4.12</junit.version>
