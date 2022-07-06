@@ -2,12 +2,21 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.DataStageConstants;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.ProcessMapping;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.services.ReportService;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.*;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Classificationenabledgroup;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DataFileRecord;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.DatabaseTable;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Dsjob;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationAsset;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.View;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
@@ -18,8 +27,16 @@ import org.odpi.openmetadata.accessservices.dataengine.model.Process;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Utility class to cache DataStage information for use by multiple steps in the Data Engine processing.
@@ -42,6 +59,8 @@ public class DataStageCache {
     private List<String> limitToLabels;
     private boolean limitToLineageEnabled;
 
+    private ReportService reportService;
+
     /**
      * Create a new cache for changes between the times provided.
      *
@@ -49,6 +68,7 @@ public class DataStageCache {
      * @param to the date and time until which to cache changes
      * @param mode the mode of operation for the connector, indicating the level of detail to include for lineage
      * @param limitToProjects limit the cached jobs to only those in the provided list of projects
+     * @param limitToLabels limit to labels
      * @param limitToLineageEnabledJobs limit the processing to those jobs for which lineage is enabled
      */
     public DataStageCache(Date from, Date to, LineageMode mode, List<String> limitToProjects, List<String> limitToLabels, boolean limitToLineageEnabledJobs) {
@@ -73,6 +93,48 @@ public class DataStageCache {
     public void initialize(IGCRestClient igcRestClient) throws IGCException {
         this.igcRestClient = igcRestClient;
         getChangedJobs();
+    }
+
+    public boolean initializeWithReportJobs(IGCRestClient igcRestClient, List<String> reportRids, boolean detectLineage) throws IGCException {
+        this.igcRestClient = igcRestClient;
+        this.reportService = new ReportService(igcRestClient);
+        if(CollectionUtils.isNotEmpty(reportRids)) {
+            List<String> jobsFromReports = reportService.getJobsFromReports(reportRids);
+            cacheReportJobs(jobsFromReports, detectLineage);
+            return true;
+        }
+        return false;
+    }
+
+    private void cacheReportJobs(List<String> jobRids, boolean detectLineage) throws IGCConnectivityException, IGCParsingException {
+        for(String jobRid : jobRids) {
+            Dsjob dsjob = (Dsjob) igcRestClient.getAssetById(jobRid);
+            cacheReportJob(dsjob, detectLineage);
+        }
+    }
+
+    private void cacheReportJob(Dsjob dsjob, boolean detectLineage) {
+        String jobRid = dsjob.getId();
+        if (!ridToJob.containsKey(jobRid)) {
+            try {
+                log.debug("Detecting lineage on dsjob: {}", jobRid);
+                // Detect lineage on each dsjob to ensure its details are fully populated before proceeding
+                boolean lineageDetected = true;
+                if(detectLineage) {
+                    lineageDetected = igcRestClient.detectLineage(jobRid);
+                }
+                if(lineageDetected) {
+                    // We then need to re-retrieve the dsjob's details, as they may have changed since lineage
+                    // detection (following call will be a no-op if the dsjob is already in the cache)
+                    DataStageJob job = new DataStageJob(this, dsjob);
+                    this.ridToJob.put(jobRid, job);
+                } else {
+                    log.warn("Unable to detect lineage for dsjob -- not including: {}", jobRid);
+                }
+            } catch (IGCException e) {
+                log.error("Failed to detect lineage for dsjob -- not including: {}, check system log for exception details.", jobRid, e);
+            }
+        }
     }
 
     /**
@@ -353,12 +415,12 @@ public class DataStageCache {
             conditionSet.addCondition(cFrom);
             conditionSet.setMatchAnyCondition(false);
         }
-        if (limitToProjects.size() > 0) {
+        if (!limitToProjects.isEmpty()) {
             IGCSearchCondition cProject = new IGCSearchCondition("transformation_project.name", limitToProjects);
             conditionSet.addCondition(cProject);
             conditionSet.setMatchAnyCondition(false);
         }
-        if(limitToLabels.size() > 0){
+        if(!limitToLabels.isEmpty()){
             IGCSearchCondition cLabels = new IGCSearchCondition("labels.name", limitToLabels);
             conditionSet.addCondition(cLabels);
             conditionSet.setMatchAnyCondition(false);
