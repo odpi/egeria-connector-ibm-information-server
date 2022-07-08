@@ -41,6 +41,7 @@ import org.odpi.openmetadata.governanceservers.dataengineproxy.connectors.DataEn
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -67,9 +68,24 @@ public class DataStageReportsConnector extends DataEngineConnectorBase {
     private boolean createDataStoreSchemas = false;
     private boolean detectLineage = false;
     private final List<String> limitToReportRids = new ArrayList<>();
-    private boolean cacheInitialized;
 
     private LineageMode mode = LineageMode.GRANULAR;
+
+    @Override
+    public void loadCache() throws PropertyServerException, ConnectorCheckedException {
+        String methodName = "loadCache";
+        Date now = Date.from(Instant.now());
+        try {
+            initializeCache(now, now);
+        } catch (IGCException e) {
+            handleIGCException(this.getClass().getName(), methodName, e);
+        }
+    }
+
+    @Override
+    public boolean requiresPolling() {
+        return false;
+    }
 
     /**
      * {@inheritDoc}
@@ -199,7 +215,6 @@ public class DataStageReportsConnector extends DataEngineConnectorBase {
         }
 
         try {
-            initializeCache(from, to);
             // Iterate through each job looking for any virtual assets -- these must be created first
             for (DataStageJob job : dataStageCache.getAllJobs()) {
                 for (String storeRid : job.getStoreRids()) {
@@ -234,9 +249,6 @@ public class DataStageReportsConnector extends DataEngineConnectorBase {
         Map<String, ? super Referenceable> dataStoreMap = new HashMap<>();
 
         try {
-
-            initializeCache(from, to);
-
             // Iterate through each job looking for any virtual assets -- these must be created first
             for (DataStageJob job : dataStageCache.getAllJobs()) {
                 for (String storeRid : job.getStoreRids()) {
@@ -315,7 +327,6 @@ public class DataStageReportsConnector extends DataEngineConnectorBase {
         List<DataStageJob> seqList = new ArrayList<>();
 
         try {
-            initializeCache(from, to);
             // Translate changed jobs first, to build up appropriate PortAliases list
             for (DataStageJob detailedJob : dataStageCache.getAllJobs()) {
                 if (detailedJob.getType().equals(DataStageJob.JobType.SEQUENCE)) {
@@ -393,12 +404,9 @@ public class DataStageReportsConnector extends DataEngineConnectorBase {
      * @param to the date and time up to which to cache changes (inclusive)
      */
     private void initializeCache(Date from, Date to) throws IGCException {
-        if(!cacheInitialized) {
-            this.dataStageCache = new DataStageCache(from, to, mode, new ArrayList<>(), new ArrayList<>(), false);
-            dataStageCache.initializeWithReportJobs(igcRestClient, limitToReportRids, detectLineage);
-            processHierarchies = new ArrayList<>();
-            cacheInitialized = true;
-        }
+        this.dataStageCache = new DataStageCache(from, to, mode, new ArrayList<>(), new ArrayList<>(), false);
+        dataStageCache.initializeWithReportJobs(igcRestClient, limitToReportRids, detectLineage);
+        processHierarchies = new ArrayList<>();
     }
 
     /**

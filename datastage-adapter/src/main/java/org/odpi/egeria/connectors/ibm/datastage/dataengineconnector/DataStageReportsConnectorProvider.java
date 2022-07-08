@@ -56,11 +56,8 @@ public class DataStageReportsConnectorProvider extends DataEngineConnectorProvid
     static final String PAGE_SIZE = "pageSize";
     static final String INCLUDE_VIRTUAL_ASSETS = "includeVirtualAssets";
     static final String CREATE_DATA_STORE_SCHEMAS = "createDataStoreSchemas";
-    static final String LIMIT_TO_PROJECTS = "limitToProjects";
     static final String DETECT_LINEAGE = "detectLineage";
     static final String LIMIT_TO_REPORT_RIDS = "limitToReportRids";
-    static final String LIMIT_TO_LINEAGE_ENABLED_JOBS = "limitToLineageEnabledJobs";
-    static final String LIMIT_TO_LABELS = "limitToLabels";
 
     /**
      * Constructor used to initialize the ConnectorProviderBase with the Java class name of the specific
