@@ -16,7 +16,7 @@
 
     <groupId>org.odpi.egeria</groupId>
     <artifactId>egeria-connector-ibm-information-server</artifactId>
-    <version>3.3-SNAPSHOT</version>
+    <version>3.9-SNAPSHOT</version>
 
     <url>https://odpi.github.io/Egeria</url>
 
@@ -85,8 +85,8 @@
     </modules>
 
     <properties>
-        <open-metadata.version>3.5-SNAPSHOT</open-metadata.version>
-        <connector.version>3.3-SNAPSHOT</connector.version>
+        <open-metadata.version>3.9-SNAPSHOT</open-metadata.version>
+        <connector.version>3.9-SNAPSHOT</connector.version>
         <!-- Level of Java  -->
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
@@ -95,6 +95,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Versions of dependent libraries -->
         <jackson.version>2.13.0</jackson.version>
+        <commons-collections4.version>4.4</commons-collections4.version>
         <slf4j.version>1.7.32</slf4j.version>
         <spring.version>5.3.12</spring.version>
         <junit.platform.version>1.5.2</junit.platform.version>
@@ -103,7 +104,7 @@
         <surefire.plugin.version>3.0.0-M5</surefire.plugin.version>
         <logback.version>1.2.6</logback.version>
         <testng.version>7.4.0</testng.version>
-        <mock-server.version>5.11.2</mock-server.version>
+        <mock-server.version>5.13.2</mock-server.version>
         <sleepycat.version>18.3.12</sleepycat.version>
         <rhino.version>1.7.13</rhino.version>
         <netty.version>4.1.69.Final</netty.version>
@@ -182,6 +183,11 @@
                 <artifactId>jackson-dataformat-xml</artifactId>
                 <version>${jackson.version}</version>
                 <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>${commons-collections4.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.woodstox</groupId>
