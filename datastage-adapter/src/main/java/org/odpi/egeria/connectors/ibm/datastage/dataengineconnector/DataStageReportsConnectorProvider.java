@@ -10,11 +10,11 @@ import java.util.List;
 
 /**
  * In the Open Connector Framework (OCF), a ConnectorProvider is a factory for a specific type of connector.
- * The DataStageConnectorProvider is the connector provider for the DataStageConnector.
- * It extends DataEngineConnectorProvider which in turn extends the OCF ConnectorProviderBase.
+ * The DataStageReportsConnectorProvider is the connector provider for the DataStageReportsConnector.
+ * It extends DataEngineConnectorProviderBase which in turn extends the OCF ConnectorProviderBase.
  * ConnectorProviderBase supports the creation of connector instances.
  * <br><br>
- * The DataStageConnectorProvider must initialize ConnectorProviderBase with the Java class
+ * The DataStageReportsConnectorProvider must initialize ConnectorProviderBase with the Java class
  * name of the OMRS Connector implementation (by calling super.setConnectorClassName(className)).
  * Then the connector provider will work.
  * <br><br>
@@ -33,17 +33,8 @@ import java.util.List;
  *          or targets by DataStage exist in lineage. If an IGC proxy is also being used in the cohort, this should
  *          be left at the default value (false) to ensure that the IGC proxy remains the home metadata collection of
  *          data store entities and is responsible for notifications of their changes, etc.</li>
- *     <li>limitToProjects - a list of projects to which any lineage information should be limited. When not specified,
- *          all projects will be included. When specified, only jobs within those projects will be included.</li>
- *
- *     <li> limitToLabels - a list of labels assigned to job to which lineage information will be limited.
- *     When this is empty all jobs will be included.
- *     When labels are specified only jobs assigned with some of the labels in this list will be included</li>
- *
- *     <li>
- *         limitToLineageEnabledJobs - a boolean that indicates if the connector should only process lineage-enabled jobs.
- *         If this is set to 'true' then only jobs having 'include_for_lineage' set to 'true' will be processed for lineage information. Default is 'false'.
- *     </li>
+ *     <li>startAssetRIDs - a list of assets that will be considered starting points in loading the lineage. Reports
+ *     will be generated based on them and the reports will be used to load entities and jobs.</li>
  * </ul>
  */
 public class DataStageReportsConnectorProvider extends DataEngineConnectorProviderBase {
@@ -57,10 +48,10 @@ public class DataStageReportsConnectorProvider extends DataEngineConnectorProvid
     static final String INCLUDE_VIRTUAL_ASSETS = "includeVirtualAssets";
     static final String CREATE_DATA_STORE_SCHEMAS = "createDataStoreSchemas";
     static final String DETECT_LINEAGE = "detectLineage";
-    static final String LIMIT_TO_REPORT_RIDS = "limitToReportRids";
+    static final String START_ASSET_RIDS = "startAssetRIDs";
 
     /**
-     * Constructor used to initialize the ConnectorProviderBase with the Java class name of the specific
+     * Constructor used to initialize the DataEngineConnectorProviderBase with the Java class name of the specific
      * OMRS Connector implementation.
      */
     public DataStageReportsConnectorProvider() {
@@ -82,7 +73,7 @@ public class DataStageReportsConnectorProvider extends DataEngineConnectorProvid
         recognizedConfigurationProperties.add(INCLUDE_VIRTUAL_ASSETS);
         recognizedConfigurationProperties.add(CREATE_DATA_STORE_SCHEMAS);
         recognizedConfigurationProperties.add(DETECT_LINEAGE);
-        recognizedConfigurationProperties.add(LIMIT_TO_REPORT_RIDS);
+        recognizedConfigurationProperties.add(START_ASSET_RIDS);
         connectorType.setRecognizedConfigurationProperties(recognizedConfigurationProperties);
 
         super.connectorTypeBean = connectorType;

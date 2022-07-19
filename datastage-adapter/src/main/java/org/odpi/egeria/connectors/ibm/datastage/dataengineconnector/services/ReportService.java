@@ -15,6 +15,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * This class provides the means to retrieve a list of job RIDs that are involved in lineage with the given asset RIDs.
+ * Starting with the given asset RIDs the service obtains through the IGC REST client a report correlated with the asset.
+ * The report contains all assets and jobs RIDs involved in lineage. The service will provide a list of unique job RIDs.
+ */
 public class ReportService {
 
     public static final String JOB = "Job";
@@ -33,22 +38,28 @@ public class ReportService {
         this.igcRestClient = igcRestClient;
     }
 
-    public List<String> getJobsFromReports(List<String> reportRids) {
-        Set<String> uniqueJobRids = new HashSet<>();
-        if(CollectionUtils.isEmpty(reportRids)) {
+    /**
+     * Gets jobs RIDs using the given asset RIDs (which will be used to generated the correlated reports).
+     *
+     * @param assetRIDs the report RIDs
+     * @return the unique RIDs of jobs from reports
+     */
+    public List<String> getJobsFromReports(List<String> assetRIDs) {
+        Set<String> uniqueJobRIDs = new HashSet<>();
+        if(CollectionUtils.isEmpty(assetRIDs)) {
             return Collections.emptyList();
         }
 
-        for(String reportRid : reportRids) {
-            String report = igcRestClient.getReport(reportRid);
+        for(String assetRID : assetRIDs) {
+            String report = igcRestClient.getReport(assetRID);
             if(StringUtils.isNotEmpty(report)) {
-                uniqueJobRids.addAll(getUniqueJobRids(report));
+                uniqueJobRIDs.addAll(getUniqueJobRIDs(report));
             }
         }
-        return new ArrayList<>(uniqueJobRids);
+        return new ArrayList<>(uniqueJobRIDs);
     }
 
-    private Set<String> getUniqueJobRids(String report) {
+    private Set<String> getUniqueJobRIDs(String report) {
 
         String[] splitByDownstream = StringUtils.splitByWholeSeparator(report, DOWNSTREAM);
         String downstreamAndUpstream = splitByDownstream[1];
@@ -60,24 +71,24 @@ public class ReportService {
         List<ReportRow> downstreamLineageRows = getLineageFlows(downstream);
         List<ReportRow> upstreamLineageRows = getLineageFlows(upstream);
 
-        Set<String> uniqueJobRids =  getJobRidsFromRows(downstreamLineageRows);
-        uniqueJobRids.addAll(getJobRidsFromRows(upstreamLineageRows));
+        Set<String> uniqueJobRids =  getJobRIDsFromRows(downstreamLineageRows);
+        uniqueJobRids.addAll(getJobRIDsFromRows(upstreamLineageRows));
         return uniqueJobRids;
     }
 
-    private Set<String> getJobRidsFromRows(List<ReportRow> reportRows) {
-        Set<String> uniqueJobRids = new HashSet<>();
+    private Set<String> getJobRIDsFromRows(List<ReportRow> reportRows) {
+        Set<String> uniqueJobRIDs = new HashSet<>();
         for(ReportRow row : reportRows) {
             String sourceType = row.getSourceType();
             if(StringUtils.isNotEmpty(sourceType) && sourceType.contains(JOB)) {
-                uniqueJobRids.add(row.getSourceId());
+                uniqueJobRIDs.add(row.getSourceId());
             }
             String targetType = row.getTargetType();
             if(StringUtils.isNotEmpty(targetType) && targetType.contains(JOB)) {
-                uniqueJobRids.add(row.getTargetId());
+                uniqueJobRIDs.add(row.getTargetId());
             }
         }
-        return uniqueJobRids;
+        return uniqueJobRIDs;
     }
 
     private List<ReportRow> getLineageFlows(String stream) {

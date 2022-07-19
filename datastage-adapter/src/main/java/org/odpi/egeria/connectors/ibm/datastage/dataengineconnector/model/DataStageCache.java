@@ -95,11 +95,11 @@ public class DataStageCache {
         getChangedJobs();
     }
 
-    public boolean initializeWithReportJobs(IGCRestClient igcRestClient, List<String> reportRids, boolean detectLineage) throws IGCException {
+    public boolean initializeWithReportJobs(IGCRestClient igcRestClient, List<String> assetRIDs, boolean detectLineage) throws IGCException {
         this.igcRestClient = igcRestClient;
         this.reportService = new ReportService(igcRestClient);
-        if(CollectionUtils.isNotEmpty(reportRids)) {
-            List<String> jobsFromReports = reportService.getJobsFromReports(reportRids);
+        if(CollectionUtils.isNotEmpty(assetRIDs)) {
+            List<String> jobsFromReports = reportService.getJobsFromReports(assetRIDs);
             cacheReportJobs(jobsFromReports, detectLineage);
             return true;
         }

@@ -67,7 +67,7 @@ public class DataStageReportsConnector extends DataEngineConnectorBase {
     private boolean includeVirtualAssets = true;
     private boolean createDataStoreSchemas = false;
     private boolean detectLineage = false;
-    private final List<String> limitToReportRids = new ArrayList<>();
+    private final List<String> startAssetRIDs = new ArrayList<>();
 
     private LineageMode mode = LineageMode.GRANULAR;
 
@@ -130,11 +130,11 @@ public class DataStageReportsConnector extends DataEngineConnectorBase {
                     createDataStoreSchemas = (Boolean) proxyProperties.getOrDefault(DataStageConnectorProvider.CREATE_DATA_STORE_SCHEMAS, false);
                     detectLineage = (Boolean) proxyProperties.getOrDefault(DataStageReportsConnectorProvider.DETECT_LINEAGE, false);
 
-                    Object reportRids = proxyProperties.getOrDefault(DataStageReportsConnectorProvider.LIMIT_TO_REPORT_RIDS, null);
+                    Object reportRids = proxyProperties.getOrDefault(DataStageReportsConnectorProvider.START_ASSET_RIDS, null);
                     if (reportRids instanceof String) {
-                        limitToReportRids.add((String)reportRids);
+                        startAssetRIDs.add((String)reportRids);
                     } else if (reportRids != null) {
-                        limitToReportRids.addAll((List<String>)reportRids);
+                        startAssetRIDs.addAll((List<String>)reportRids);
                     }
                     Object lineageMode = proxyProperties.getOrDefault(DataStageConnectorProvider.MODE, null);
                     if (lineageMode != null) {
@@ -405,7 +405,7 @@ public class DataStageReportsConnector extends DataEngineConnectorBase {
      */
     private void initializeCache(Date from, Date to) throws IGCException {
         this.dataStageCache = new DataStageCache(from, to, mode, new ArrayList<>(), new ArrayList<>(), false);
-        dataStageCache.initializeWithReportJobs(igcRestClient, limitToReportRids, detectLineage);
+        dataStageCache.initializeWithReportJobs(igcRestClient, startAssetRIDs, detectLineage);
         processHierarchies = new ArrayList<>();
     }
 
