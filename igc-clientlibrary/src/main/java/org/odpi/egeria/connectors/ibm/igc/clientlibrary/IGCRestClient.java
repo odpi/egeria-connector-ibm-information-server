@@ -756,7 +756,7 @@ public class IGCRestClient {
             result = cache.get(rid);
         }
         if (result == null) {
-            String url = EP_ASSET + "/" + getEncodedPathVariable(rid);
+            String url = EP_ASSET + "/" + getEncodedPathVariable(rid) + "?referencePageSize=" + defaultPageSize;
             String response = makeRequest(url, HttpMethod.GET, null, null);
             result = readJSONIntoPOJO(response);
         }
