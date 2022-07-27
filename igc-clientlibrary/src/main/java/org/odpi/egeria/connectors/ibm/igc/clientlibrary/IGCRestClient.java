@@ -2,16 +2,6 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.igc.clientlibrary;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -23,7 +13,10 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.cache.ObjectCache;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCIOException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCParsingException;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.*;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.DynamicPropertyReader;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Paging;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Reference;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeDetails;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeHeader;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.types.TypeProperty;
@@ -35,7 +28,12 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.AbstractResource;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.Base64Utils;
@@ -47,6 +45,28 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Library of methods to connect to and interact with an IBM Information Governance Catalog environment
@@ -103,6 +123,7 @@ public class IGCRestClient {
     private static final String EP_LOGOUT  = EP_BASE_API + "/logout";
     private static final String EP_BUNDLES = EP_BASE_API + "/bundles";
     private static final String EP_BUNDLE_ASSETS = EP_BUNDLES + "/assets";
+    private static final String REPORT_ENDPOINT = EP_BASE_API + "/flows/report";
 
     /**
      * Default constructor used by the IGCRestClient.
@@ -735,7 +756,7 @@ public class IGCRestClient {
             result = cache.get(rid);
         }
         if (result == null) {
-            String url = EP_ASSET + "/" + getEncodedPathVariable(rid);
+            String url = EP_ASSET + "/" + getEncodedPathVariable(rid) + "?referencePageSize=" + defaultPageSize;
             String response = makeRequest(url, HttpMethod.GET, null, null);
             result = readJSONIntoPOJO(response);
         }
@@ -1675,5 +1696,35 @@ public class IGCRestClient {
         return populated;
 
     }
+
+    public String getReport(String rid) {
+
+        Map<String, Object> request = new HashMap<>();
+        request.put("assetId", rid);
+        request.put("markTruncation", false);
+        request.put("flowTypes", Collections.singletonList("DESIGN"));
+        int times = 5;
+        HttpStatus statusCode;
+        do {
+            try {
+                String body = new ObjectMapper().writeValueAsString(request);
+                ResponseEntity<String> response = makeRequest(baseURL + REPORT_ENDPOINT, HttpMethod.POST,
+                        MediaType.APPLICATION_JSON, body, true);
+
+                statusCode = response.getStatusCode();
+
+                if (statusCode.equals(HttpStatus.OK)) {
+                    return response.getBody();
+                }
+                times--;
+                log.error("Report with RID {} cannot be retrieved because the IGC response status is: {}", rid, statusCode);
+            } catch (IGCConnectivityException | JsonProcessingException e) {
+                log.error("Report with RID {} cannot be retrieved because of the following exception: '{}'", rid, e.getMessage());
+                times--;
+            }
+        } while(times > 0);
+        return "";
+    }
+
 
 }
