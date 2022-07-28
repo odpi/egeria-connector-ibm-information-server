@@ -3,6 +3,7 @@
 package org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.entities;
 
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.classifications.AnchorsMapper;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AssetSchemaTypeMapper_DatabaseSchema;
 import org.odpi.egeria.connectors.ibm.igc.repositoryconnector.mapping.relationships.AttributeForSchemaMapper_TableSchema;
 
@@ -34,6 +35,8 @@ public class RelationalDBSchemaTypeMapper extends ComplexSchemaTypeMapper {
         addRelationshipMapper(AssetSchemaTypeMapper_DatabaseSchema.getInstance(null));
         addRelationshipMapper(AttributeForSchemaMapper_TableSchema.getInstance(null));
 
+        // The list of classifications that should be mapped
+        addClassificationMapper(AnchorsMapper.getInstance(null));
     }
 
 }

@@ -138,6 +138,9 @@ public class AnchorsMapper extends ClassificationMapping {
                 return Optional.of(identity.getParentIdentity());
             case CATEGORY:
                 return getGlossaryIdentity(identity);
+            // return the database schema itself - needed for setting the anchor on the RelationalDBSchemaType
+            case DATABASE_SCHEMA:
+                return Optional.of(identity);
             default:
                 return getParentAssetIdentity(identity);
         }
@@ -169,9 +172,9 @@ public class AnchorsMapper extends ClassificationMapping {
     private Optional<Identity> getParentAssetIdentity(Identity identity) {
         Identity parent = identity.getParentIdentity();
         if (parent != null) {
-            String type = parent.getAssetType();
+            String parentAssetType = parent.getAssetType();
             // Once we reach database_schema/data_file we have the asset, so return this identity
-            if (type.equals(DATABASE_SCHEMA) || type.equals(DATA_FILE)) {
+            if (parentAssetType.equals(DATABASE_SCHEMA) || parentAssetType.equals(DATA_FILE)) {
                 return Optional.of(parent);
             } else {
                 // Otherwise continue to recurse
