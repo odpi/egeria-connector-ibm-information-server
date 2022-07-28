@@ -27,6 +27,10 @@ public class DataContentForDataSetMapper extends RelationshipMapping {
                 "supportedDataSets"
         );
         setContainedType(ContainedType.TWO);
+
+        // Mapping to default
+        addLiteralPropertyMapping("queryId", null);
+        addLiteralPropertyMapping("query", null);
     }
 
 }
