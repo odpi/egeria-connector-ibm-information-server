@@ -29,6 +29,9 @@ public class DataSetMapper extends AssetMapper {
                 omrsEntityTypeName
         );
 
+        // Mapping to default
+        addLiteralPropertyMapping("formula", null);
+
     }
 
 }
