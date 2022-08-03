@@ -6,8 +6,6 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.Dat
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.LineageMode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Dsjob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationGovernanceRule;
@@ -24,7 +22,6 @@ import org.odpi.openmetadata.accessservices.dataengine.model.ProcessHierarchy;
 import org.odpi.openmetadata.accessservices.dataengine.model.Referenceable;
 import org.odpi.openmetadata.accessservices.dataengine.model.SchemaType;
 import org.odpi.openmetadata.accessservices.dataengine.model.SoftwareServerCapability;
-import org.odpi.openmetadata.frameworks.auditlog.messagesets.ExceptionMessageDefinition;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.PropertyServerException;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
@@ -48,7 +45,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
     private static final String SYNC_RULE_PREFIX = "Job metadata will be synced through Egeria";
     private static final String SYNC_RULE_DESC = "GENERATED -- DO NOT UPDATE: last synced at ";
-
 
     private final SimpleDateFormat syncDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
@@ -94,15 +90,15 @@ public class DataStageConnector extends DataEngineConnectorBase {
         super.start();
         final String methodName = "start";
 
-        log.info("Initializing DataStageDataEngineConnector...");
+        log.info("Initializing " + this.getClass().getSimpleName() + "...");
 
         EndpointProperties endpointProperties = connectionProperties.getEndpoint();
         if (endpointProperties == null) {
-            raiseConnectorCheckedException(this.getClass(), methodName, null, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition());
+            ConnectorHelper.raiseConnectorCheckedException(this.getClass(), methodName, null, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition());
         } else {
             String address = endpointProperties.getAddress();
             if (address == null || address.length() == 0) {
-                raiseConnectorCheckedException(this.getClass(), methodName, null, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
+                ConnectorHelper.raiseConnectorCheckedException(this.getClass(), methodName, null, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
             } else {
 
                 String igcUser = connectionProperties.getUserId();
@@ -137,33 +133,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
                     }
                 }
 
-                IGCVersionEnum igcVersion;
                 try {
-                    // Create new REST API client (opens a new session)
-                    this.igcRestClient = new IGCRestClient("https://" + address, igcUser, igcPass);
-                    if (this.igcRestClient.start()) {
-
-                        // Set the version based on the IGC client's auto-determination of the IGC environment's version
-                        igcVersion = this.igcRestClient.getIgcVersion();
-                        // Set the default page size to whatever is provided as part of config parameters (default to 100)
-                        if (igcPage != null) {
-                            this.igcRestClient.setDefaultPageSize(igcPage);
-                        } else {
-                            this.igcRestClient.setDefaultPageSize(100);
-                        }
-
-                        // Create a new SoftwareServerCapability representing this Data Engine
-                        dataEngine = new SoftwareServerCapability();
-                        dataEngine.setEngineType("IBM InfoSphere DataStage");
-                        dataEngine.setEngineVersion(igcVersion.getVersionString());
-                        dataEngine.setQualifiedName("ibm-datastage@" + address);
-                        dataEngine.setName(address);
-
-                    } else {
-                        raiseConnectorCheckedException(this.getClass(), methodName, null, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
-                    }
+                    igcRestClient = new IGCRestClient("https://" + address, igcUser, igcPass);
+                    dataEngine = new SoftwareServerCapability();
+                    ConnectorHelper.connectIGC(this.getClass(), igcRestClient, dataEngine, address, igcPage);
                 } catch (IGCException e) {
-                    raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
+                    ConnectorHelper.raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
                 }
 
             }
@@ -181,7 +156,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
             // Close the session on the IGC REST client
             this.igcRestClient.disconnect();
         } catch (IGCException e) {
-            raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition());
+            ConnectorHelper.raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition());
         }
     }
 
@@ -207,12 +182,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
                     lastSync = syncDateFormat.parse(dateString);
                 } catch (ParseException e) {
                     log.error("Unable to parse date and time of last sync from rule '{}' ({}) using format: {}", description, dateString, syncDateFormat.toPattern(), e);
-                    raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition());
+                    ConnectorHelper.raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition());
                 }
             }
             return lastSync;
         } catch (IGCException e) {
-            handleIGCException(this.getClass().getName(), this.getClass().getEnclosingMethod().getName(), e);
+            ConnectorHelper.handleIGCException(this.getClass().getName(), this.getClass().getEnclosingMethod().getName(), e);
         }
         return null;
     }
@@ -241,10 +216,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 success = igcRestClient.update(igcUpdate);
             }
         } catch (IGCException e) {
-            handleIGCException(this.getClass().getName(), methodName, e);
+            ConnectorHelper.handleIGCException(this.getClass().getName(), methodName, e);
         }
         if (!success) {
-            raiseConnectorCheckedException(this.getClass(),methodName, null, DataStageErrorCode.SYNC_TIME_UPDATE_FAILURE.getMessageDefinition());
+            ConnectorHelper.raiseConnectorCheckedException(this.getClass(),methodName, null, DataStageErrorCode.SYNC_TIME_UPDATE_FAILURE.getMessageDefinition());
         }
     }
 
@@ -260,7 +235,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 return oldest.getModifiedOn();
             }
         } catch (IGCException e) {
-            handleIGCException(this.getClass().getName(), methodName, e);
+            ConnectorHelper.handleIGCException(this.getClass().getName(), methodName, e);
         }
         return null;
     }
@@ -282,10 +257,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
         try {
 
             initializeCache(from, to);
-            schemaTypeMap = MappingHelper.mapChangedSchemaTypes(dataStageCache, includeVirtualAssets, createDataStoreSchemas);
+            schemaTypeMap = ConnectorHelper.mapChangedSchemaTypes(dataStageCache, includeVirtualAssets, createDataStoreSchemas);
 
         } catch (IGCException e) {
-            handleIGCException(this.getClass().getName(), methodName, e);
+            ConnectorHelper.handleIGCException(this.getClass().getName(), methodName, e);
         }
         return new ArrayList<>(schemaTypeMap.values());
     }
@@ -304,10 +279,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
         try {
 
             initializeCache(from, to);
-            dataStoreMap = MappingHelper.mapChangedDataStores(dataStageCache, includeVirtualAssets);
+            dataStoreMap = ConnectorHelper.mapChangedDataStores(dataStageCache, includeVirtualAssets);
 
         } catch (IGCException e) {
-            handleIGCException(this.getClass().getName(), methodName, e);
+            ConnectorHelper.handleIGCException(this.getClass().getName(), methodName, e);
         }
         return new ArrayList<>(dataStoreMap.values());
     }
@@ -323,10 +298,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
         try {
             initializeCache(from, to);
-            processes = MappingHelper.mapChangedProcesses(dataStageCache, processHierarchies, mode);
+            processes = ConnectorHelper.mapChangedProcesses(dataStageCache, processHierarchies, mode);
 
         } catch (IGCException e) {
-            handleIGCException(this.getClass().getName(), methodName, e);
+            ConnectorHelper.handleIGCException(this.getClass().getName(), methodName, e);
         }
 
         return processes;
@@ -441,46 +416,4 @@ public class DataStageConnector extends DataEngineConnectorBase {
         return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
     }
 
-    /**
-     * Throws a ConnectorCheckedException using the provided parameters.
-     * @param clazz
-     * @param cause
-     * @param exceptionMessageDefinition
-     * @throws ConnectorCheckedException always
-     */
-    private void raiseConnectorCheckedException(Class clazz, String methodName, Exception cause, ExceptionMessageDefinition exceptionMessageDefinition) throws ConnectorCheckedException {
-        if(cause == null) {
-            throw new ConnectorCheckedException(exceptionMessageDefinition,
-                    clazz.getName(),
-                    methodName);
-        } else {
-            throw new ConnectorCheckedException(exceptionMessageDefinition,
-                    clazz.getName(),
-                    methodName,
-                    cause);
-        }
-    }
-
-    /**
-     * Helper method that takes details of where the original IGCException is caught, maps and rethrows it further as one of the OCF checked exceptions.
-     *
-     * @param className The name of the class where original IGCException is caught
-     * @param methodName The name of the method where original IGCException is caught
-     * @param e Instance of IGCException (or subclasses)
-     * @throws ConnectorCheckedException
-     * @throws PropertyServerException
-     */
-    public static void handleIGCException(String className, String methodName, IGCException e) throws ConnectorCheckedException, PropertyServerException {
-        if(e instanceof IGCConnectivityException) {
-            throw new PropertyServerException(DataStageErrorCode.CONNECTION_ERROR.getMessageDefinition(),
-                    className,
-                    methodName,
-                    e);
-        } else {
-            throw new ConnectorCheckedException(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition(),
-                    className,
-                    methodName,
-                    e);
-        }
-    }
 }

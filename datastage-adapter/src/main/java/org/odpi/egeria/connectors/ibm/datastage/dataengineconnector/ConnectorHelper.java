@@ -5,6 +5,7 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.DataFileMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.DatabaseMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.DatabaseSchemaMapping;
@@ -15,6 +16,8 @@ import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataSt
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.LineageMode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
+import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Dsjob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
@@ -28,6 +31,10 @@ import org.odpi.openmetadata.accessservices.dataengine.model.ProcessHierarchy;
 import org.odpi.openmetadata.accessservices.dataengine.model.Referenceable;
 import org.odpi.openmetadata.accessservices.dataengine.model.RelationalTable;
 import org.odpi.openmetadata.accessservices.dataengine.model.SchemaType;
+import org.odpi.openmetadata.accessservices.dataengine.model.SoftwareServerCapability;
+import org.odpi.openmetadata.frameworks.auditlog.messagesets.ExceptionMessageDefinition;
+import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
+import org.odpi.openmetadata.frameworks.connectors.ffdc.PropertyServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,12 +46,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- *  Utility class that helps to extract Data Engine OMAS beans from DataStageCache.
- *  It centralises mapping logic promoting reuse between different connector implementations.
+ *  Utility class that helps to centralise mapping logic and common code promoting reuse between different connector implementations.
  */
-public class MappingHelper {
+public class ConnectorHelper {
 
-    private static final Logger log = LoggerFactory.getLogger(MappingHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(ConnectorHelper.class);
 
     public static final String DATABASE_TABLE = "database_table";
     public static final String DATA_FILE_RECORD = "data_file_record";
@@ -289,4 +295,76 @@ public class MappingHelper {
         }
     }
 
+
+    /**
+     * Helper method that takes details of where the original IGCException is caught, maps and rethrows it further as one of the OCF checked exceptions.
+     *
+     * @param className The name of the class where original IGCException is caught
+     * @param methodName The name of the method where original IGCException is caught
+     * @param e Instance of IGCException (or subclasses)
+     * @throws ConnectorCheckedException
+     * @throws PropertyServerException
+     */
+    public static void handleIGCException(String className, String methodName, IGCException e) throws ConnectorCheckedException, PropertyServerException {
+        if (e instanceof IGCConnectivityException) {
+            throw new PropertyServerException(DataStageErrorCode.CONNECTION_ERROR.getMessageDefinition(),
+                    className,
+                    methodName,
+                    e);
+        } else {
+            throw new ConnectorCheckedException(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition(),
+                    className,
+                    methodName,
+                    e);
+        }
+    }
+
+    /**
+     * Throws a ConnectorCheckedException using the provided parameters.
+     * @param clazz
+     * @param cause
+     * @param exceptionMessageDefinition
+     * @throws ConnectorCheckedException always
+     */
+    static void raiseConnectorCheckedException(Class clazz, String methodName, Exception cause, ExceptionMessageDefinition exceptionMessageDefinition) throws ConnectorCheckedException {
+        if(cause == null) {
+            throw new ConnectorCheckedException(exceptionMessageDefinition,
+                    clazz.getName(),
+                    methodName);
+        } else {
+            throw new ConnectorCheckedException(exceptionMessageDefinition,
+                    clazz.getName(),
+                    methodName,
+                    cause);
+        }
+    }
+
+    static void connectIGC(Class connectorClass, IGCRestClient client, SoftwareServerCapability dataEngine, String address, Integer igcPage) throws ConnectorCheckedException {
+        IGCVersionEnum igcVersion;
+        try {
+            // Create new REST API client (opens a new session)
+
+            if (client.start()) {
+
+                // Set the version based on the IGC client's auto-determination of the IGC environment's version
+                igcVersion = client.getIgcVersion();
+                // Set the default page size to whatever is provided as part of config parameters (default to 100)
+                if (igcPage != null) {
+                    client.setDefaultPageSize(igcPage);
+                } else {
+                    client.setDefaultPageSize(100);
+                }
+
+                dataEngine.setEngineType("IBM InfoSphere DataStage");
+                dataEngine.setEngineVersion(igcVersion.getVersionString());
+                dataEngine.setQualifiedName("ibm-datastage@" + address);
+                dataEngine.setName(address);
+
+            } else {
+                raiseConnectorCheckedException(connectorClass, "connectIGC", null, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
+            }
+        } catch (IGCException e) {
+            raiseConnectorCheckedException(connectorClass, "connectIGC", e, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
+        }
+    }
 }
