@@ -2,26 +2,13 @@
 /* Copyright Contributors to the ODPi Egeria project. */
 package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.auditlog.DataStageErrorCode;
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.DataFileMapping;
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.DatabaseMapping;
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.DatabaseSchemaMapping;
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.ProcessMapping;
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.RelationalTableMapping;
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mapping.SchemaTypeMapping;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageCache;
-import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.DataStageJob;
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.model.LineageMode;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCRestClient;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.IGCVersionEnum;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCConnectivityException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.errors.IGCException;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Dsjob;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.InformationGovernanceRule;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.base.Stage;
-import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.ItemList;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearch;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchCondition;
@@ -29,21 +16,14 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
-import org.odpi.openmetadata.accessservices.dataengine.model.DataFile;
-import org.odpi.openmetadata.accessservices.dataengine.model.Database;
-import org.odpi.openmetadata.accessservices.dataengine.model.DatabaseSchema;
 import org.odpi.openmetadata.accessservices.dataengine.model.LineageMapping;
-import org.odpi.openmetadata.accessservices.dataengine.model.ParentProcess;
 import org.odpi.openmetadata.accessservices.dataengine.model.Process;
 import org.odpi.openmetadata.accessservices.dataengine.model.ProcessHierarchy;
 import org.odpi.openmetadata.accessservices.dataengine.model.Referenceable;
-import org.odpi.openmetadata.accessservices.dataengine.model.RelationalTable;
 import org.odpi.openmetadata.accessservices.dataengine.model.SchemaType;
 import org.odpi.openmetadata.accessservices.dataengine.model.SoftwareServerCapability;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
-import org.odpi.openmetadata.frameworks.connectors.ffdc.OCFRuntimeException;
-import org.odpi.openmetadata.frameworks.auditlog.messagesets.ExceptionMessageDefinition;
-import org.odpi.openmetadata.frameworks.connectors.ffdc.*;
+import org.odpi.openmetadata.frameworks.connectors.ffdc.PropertyServerException;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
 import org.odpi.openmetadata.frameworks.connectors.properties.EndpointProperties;
 import org.odpi.openmetadata.governanceservers.dataengineproxy.connectors.DataEngineConnectorBase;
@@ -58,7 +38,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class DataStageConnector extends DataEngineConnectorBase {
 
@@ -66,13 +45,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
     private static final String SYNC_RULE_PREFIX = "Job metadata will be synced through Egeria";
     private static final String SYNC_RULE_DESC = "GENERATED -- DO NOT UPDATE: last synced at ";
-    public static final String DATABASE_TABLE = "database_table";
-    public static final String DATA_FILE_RECORD = "data_file_record";
 
     private final SimpleDateFormat syncDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     private IGCRestClient igcRestClient;
-    private ObjectMapper objectMapper;
     private SoftwareServerCapability dataEngine;
 
     private DataStageCache dataStageCache;
@@ -101,7 +77,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
     public void initialize(String               connectorInstanceId,
                            ConnectionProperties connectionProperties) {
         super.initialize(connectorInstanceId, connectionProperties);
-        this.objectMapper = new ObjectMapper();
         this.dataStageCache = null;
     }
 
@@ -115,15 +90,15 @@ public class DataStageConnector extends DataEngineConnectorBase {
         super.start();
         final String methodName = "start";
 
-        log.info("Initializing DataStageDataEngineConnector...");
+        log.info("Initializing " + this.getClass().getSimpleName() + "...");
 
         EndpointProperties endpointProperties = connectionProperties.getEndpoint();
         if (endpointProperties == null) {
-            raiseConnectorCheckedException(this.getClass(), methodName, null, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition());
+            ConnectorHelper.raiseConnectorCheckedException(this.getClass(), methodName, null, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition());
         } else {
             String address = endpointProperties.getAddress();
             if (address == null || address.length() == 0) {
-                raiseConnectorCheckedException(this.getClass(), methodName, null, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
+                ConnectorHelper.raiseConnectorCheckedException(this.getClass(), methodName, null, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
             } else {
 
                 String igcUser = connectionProperties.getUserId();
@@ -158,33 +133,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
                     }
                 }
 
-                IGCVersionEnum igcVersion;
                 try {
-                    // Create new REST API client (opens a new session)
-                    this.igcRestClient = new IGCRestClient("https://" + address, igcUser, igcPass);
-                    if (this.igcRestClient.start()) {
-
-                        // Set the version based on the IGC client's auto-determination of the IGC environment's version
-                        igcVersion = this.igcRestClient.getIgcVersion();
-                        // Set the default page size to whatever is provided as part of config parameters (default to 100)
-                        if (igcPage != null) {
-                            this.igcRestClient.setDefaultPageSize(igcPage);
-                        } else {
-                            this.igcRestClient.setDefaultPageSize(100);
-                        }
-
-                        // Create a new SoftwareServerCapability representing this Data Engine
-                        dataEngine = new SoftwareServerCapability();
-                        dataEngine.setEngineType("IBM InfoSphere DataStage");
-                        dataEngine.setEngineVersion(igcVersion.getVersionString());
-                        dataEngine.setQualifiedName("ibm-datastage@" + address);
-                        dataEngine.setName(address);
-
-                    } else {
-                        raiseConnectorCheckedException(this.getClass(), methodName, null, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
-                    }
+                    igcRestClient = new IGCRestClient("https://" + address, igcUser, igcPass);
+                    dataEngine = new SoftwareServerCapability();
+                    ConnectorHelper.connectIGC(this.getClass(), igcRestClient, dataEngine, address, igcPage);
                 } catch (IGCException e) {
-                    raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
+                    ConnectorHelper.raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
                 }
 
             }
@@ -202,7 +156,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
             // Close the session on the IGC REST client
             this.igcRestClient.disconnect();
         } catch (IGCException e) {
-            raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition());
+            ConnectorHelper.raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition());
         }
     }
 
@@ -228,12 +182,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
                     lastSync = syncDateFormat.parse(dateString);
                 } catch (ParseException e) {
                     log.error("Unable to parse date and time of last sync from rule '{}' ({}) using format: {}", description, dateString, syncDateFormat.toPattern(), e);
-                    raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition());
+                    ConnectorHelper.raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition());
                 }
             }
             return lastSync;
         } catch (IGCException e) {
-            handleIGCException(this.getClass().getName(), this.getClass().getEnclosingMethod().getName(), e);
+            ConnectorHelper.handleIGCException(this.getClass().getName(), this.getClass().getEnclosingMethod().getName(), e);
         }
         return null;
     }
@@ -262,10 +216,10 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 success = igcRestClient.update(igcUpdate);
             }
         } catch (IGCException e) {
-            handleIGCException(this.getClass().getName(), methodName, e);
+            ConnectorHelper.handleIGCException(this.getClass().getName(), methodName, e);
         }
         if (!success) {
-            raiseConnectorCheckedException(this.getClass(),methodName, null, DataStageErrorCode.SYNC_TIME_UPDATE_FAILURE.getMessageDefinition());
+            ConnectorHelper.raiseConnectorCheckedException(this.getClass(),methodName, null, DataStageErrorCode.SYNC_TIME_UPDATE_FAILURE.getMessageDefinition());
         }
     }
 
@@ -281,7 +235,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
                 return oldest.getModifiedOn();
             }
         } catch (IGCException e) {
-            handleIGCException(this.getClass().getName(), methodName, e);
+            ConnectorHelper.handleIGCException(this.getClass().getName(), methodName, e);
         }
         return null;
     }
@@ -301,25 +255,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
         }
 
         try {
+
             initializeCache(from, to);
-            // Iterate through each job looking for any virtual assets -- these must be created first
-            for (DataStageJob job : dataStageCache.getAllJobs()) {
-                for (String storeRid : job.getStoreRids()) {
-                    log.debug(" ... considering store: {}", storeRid);
-                    if (!schemaTypeMap.containsKey(storeRid)) {
-                        if ((IGCRestClient.isVirtualAssetRid(storeRid) && includeVirtualAssets)
-                                || (!IGCRestClient.isVirtualAssetRid(storeRid) && createDataStoreSchemas)) {
-                            log.debug(" ... Creating a SchemaType ...");
-                            SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(dataStageCache);
-                            SchemaType deSchemaType = schemaTypeMapping.getForDataStore(dataStageCache.getStoreIdentityFromRid(storeRid));
-                            logEntityCreated(deSchemaType);
-                            schemaTypeMap.put(storeRid, deSchemaType);
-                        }
-                    }
-                }
-            }
+            schemaTypeMap = ConnectorHelper.mapChangedSchemaTypes(dataStageCache, includeVirtualAssets, createDataStoreSchemas);
+
         } catch (IGCException e) {
-            handleIGCException(this.getClass().getName(), methodName, e);
+            ConnectorHelper.handleIGCException(this.getClass().getName(), methodName, e);
         }
         return new ArrayList<>(schemaTypeMap.values());
     }
@@ -338,72 +279,12 @@ public class DataStageConnector extends DataEngineConnectorBase {
         try {
 
             initializeCache(from, to);
-
-            // Iterate through each job looking for any virtual assets -- these must be created first
-            for (DataStageJob job : dataStageCache.getAllJobs()) {
-                for (String storeRid : job.getStoreRids()) {
-                    log.debug(" ... considering store: {}", storeRid);
-                    if (!dataStoreMap.containsKey(storeRid)) {
-                        if ((IGCRestClient.isVirtualAssetRid(storeRid) && includeVirtualAssets)) {
-                            Identity storeIdentity = dataStageCache.getStoreIdentityFromRid(storeRid);
-                            Identity parentIdentity = storeIdentity.getParentIdentity();
-                            String type = storeIdentity.getAssetType();
-                            switch (type) {
-                                case DATABASE_TABLE:
-                                    Identity databaseLevelIdentity = parentIdentity.getParentIdentity();
-                                    log.debug(" ... Creating a Database ...");
-                                    DatabaseMapping databaseMapping = new DatabaseMapping(dataStageCache);
-                                    Database database = databaseMapping.getForDataStore(databaseLevelIdentity);
-                                    logEntityCreated(database);
-
-                                    log.debug(" ... Creating a DatabaseSchema ...");
-                                    DatabaseSchemaMapping databaseSchemaMapping = new DatabaseSchemaMapping(dataStageCache);
-                                    DatabaseSchema dbSchema = databaseSchemaMapping.getForDataStore(parentIdentity);
-                                    logEntityCreated(dbSchema);
-
-                                    log.debug(" ... Creating a RelationalTable ...");
-                                    RelationalTableMapping relationalTableMapping = new RelationalTableMapping(dataStageCache);
-                                    RelationalTable table = relationalTableMapping.getForDataStore(storeIdentity);
-                                    logEntityCreated(table);
-
-                                    database.setDatabaseSchema(dbSchema);
-                                    database.setTables(Collections.singletonList(table));
-                                    dataStoreMap.put(storeRid, database);
-                                    break;
-                                case DATA_FILE_RECORD:
-                                    log.debug(" ... Creating a SchemaType ...");
-                                    SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(dataStageCache);
-                                    SchemaType schemaType = schemaTypeMapping.getForDataStore(storeIdentity);
-                                    logEntityCreated(schemaType);
-
-                                    log.debug(" ... Creating a File ...");
-                                    DataFileMapping dataFileMapping = new DataFileMapping(dataStageCache);
-                                    DataFile dataFile = dataFileMapping.getForDataStore(parentIdentity);
-                                    dataFile.setSchema(schemaType);
-                                    logEntityCreated(dataFile);
-
-                                    dataStoreMap.put(storeRid, dataFile);
-                                    break;
-                            }
-                        }
-                    }
-                }
-            }
+            dataStoreMap = ConnectorHelper.mapChangedDataStores(dataStageCache, includeVirtualAssets);
 
         } catch (IGCException e) {
-            handleIGCException(this.getClass().getName(), methodName, e);
+            ConnectorHelper.handleIGCException(this.getClass().getName(), methodName, e);
         }
         return new ArrayList<>(dataStoreMap.values());
-    }
-
-    private void logEntityCreated(Referenceable table) {
-        if (log.isDebugEnabled()) {
-            try {
-                log.debug(" ... created: {}", objectMapper.writeValueAsString(table));
-            } catch (JsonProcessingException e) {
-                log.error("Unable to serialise to JSON: {}", table, e);
-            }
-        }
     }
 
     /**
@@ -414,60 +295,16 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
         final String methodName = "getChangedProcesses";
         List<Process> processes = new ArrayList<>();
-        List<DataStageJob> seqList = new ArrayList<>();
 
         try {
             initializeCache(from, to);
-            // Translate changed jobs first, to build up appropriate PortAliases list
-            for (DataStageJob detailedJob : dataStageCache.getAllJobs()) {
-                if (detailedJob.getType().equals(DataStageJob.JobType.SEQUENCE)) {
-                    seqList.add(detailedJob);
-                } else {
-                    if (mode == LineageMode.GRANULAR) {
-                        // Only translate stage-level details for granular mode
-                        List<Process> stageLevelProcesses = getProcessesForEachStage(detailedJob);
-                        for (Process stageLevel : stageLevelProcesses) {
-                            cacheHierarchyRelationshipsFromProcessDetails(stageLevel);
-                            processes.add(stageLevel);
-                        }
+            processes = ConnectorHelper.mapChangedProcesses(dataStageCache, processHierarchies, mode);
 
-                        // Then load sequences, re-using the PortAliases constructed for the jobs
-                        // TODO: this probably will NOT work for nested sequences?
-                        for (DataStageJob detailedSeq : seqList) {
-                            List<Process> sequencedJobs = getProcessesForSequence(detailedSeq);
-                            for (Process sequenced : sequencedJobs) {
-                                cacheHierarchyRelationshipsFromProcessDetails(sequenced);
-                                processes.add(sequenced);
-                            }
-                        }
-                    }
-                    Process jobProcess = getProcessForJob(detailedJob);
-                    if (jobProcess != null) {
-                        cacheHierarchyRelationshipsFromProcessDetails(jobProcess);
-                        processes.add(jobProcess);
-                    }
-                }
-            }
         } catch (IGCException e) {
-            handleIGCException(this.getClass().getName(), methodName, e);
+            ConnectorHelper.handleIGCException(this.getClass().getName(), methodName, e);
         }
 
         return processes;
-    }
-
-    private void cacheHierarchyRelationshipsFromProcessDetails(Process process) {
-        List<ParentProcess> parents = process.getParentProcesses();
-        if (parents != null) {
-            // Store these in-memory to pass along to the getChangedProcessHierarchies() method
-            for (ParentProcess parent : parents) {
-                ProcessHierarchy hierarchy = new ProcessHierarchy();
-                hierarchy.setChildProcess(process.getQualifiedName());
-                hierarchy.setParentProcess(parent.getQualifiedName());
-                hierarchy.setProcessContainmentType(parent.getProcessContainmentType());
-                processHierarchies.add(hierarchy);
-            }
-            process.setParentProcesses(null);
-        }
     }
 
     /**
@@ -502,100 +339,6 @@ public class DataStageConnector extends DataEngineConnectorBase {
             dataStageCache.initialize(igcRestClient);
             processHierarchies = new ArrayList<>();
         }
-    }
-
-    /**
-     * Translate the detailed stages of the provided DataStage job into Processes.
-     *
-     * @param job the job for which to translate detailed stages
-     * @return {@code List<Process>}
-     */
-    private List<Process> getProcessesForEachStage(DataStageJob job) throws IGCException {
-        List<Process> processes = new ArrayList<>();
-        log.debug("Translating processes for each stage...");
-        for (Stage stage : job.getAllStages()) {
-            ProcessMapping processMapping = new ProcessMapping(dataStageCache);
-            Process process = processMapping.getForStage(stage, job);
-            if (process != null) {
-                try {
-                    log.debug(" ... process: {}", objectMapper.writeValueAsString(process));
-                } catch (JsonProcessingException e) {
-                    log.error("Unable to serialise to JSON: {}", process, e);
-                }
-                processes.add(process);
-            }
-        }
-        return processes;
-    }
-
-    /**
-     * Translate a single Process to represent the DataStage job itself.
-     *
-     * @param job the job object for which to load a process
-     * @return Process
-     */
-    private Process getProcessForJob(DataStageJob job) throws IGCException {
-        log.debug("Load process for job...");
-        Process process = dataStageCache.getProcessByRid(job.getJobObject().getId());
-        if (process != null) {
-            if (mode == LineageMode.JOB_LEVEL) {
-                // TODO: fill in the LineageMapping at this process level
-            }
-            try {
-                log.debug(" ... process: {}", objectMapper.writeValueAsString(process));
-            } catch (JsonProcessingException e) {
-                log.error("Unable to serialise to JSON: {}", process, e);
-            }
-        }
-        return process;
-    }
-
-    /**
-     * Translate a DataStage sequence into a Process, as well as any other jobs that the sequence calls which are not
-     * already included as changes (executing a job from a sequence does not cause the job to be updated, so will not
-     * appear at job-level as a separate change, but needs to be included to update the process hierarchy
-     * relationships).
-     *
-     * @param job the job object for which to load a process
-     * @return {@code List<Process>}
-     */
-    private List<Process> getProcessesForSequence(DataStageJob job) throws IGCException {
-        log.debug("Load process for sequence...");
-        List<Process> processes = new ArrayList<>();
-        // Create a copy of the map, as the next step could update it by caching additional job details
-        // necessary for the port aliases
-        Set<String> alreadyOutputProcesses = dataStageCache.getCachedProcessRids();
-        Process process = dataStageCache.getProcessByRid(job.getJobObject().getId());
-        if (process != null) {
-            log.debug(" ... examining {} jobs run by the sequence", job.getAllStages().size());
-            for (Stage stage : job.getAllStages()) {
-                Dsjob runsJob = stage.getRunsSequencesJobs();
-                String rid = runsJob.getId();
-                if (rid != null && !alreadyOutputProcesses.contains(rid)) {
-                    log.debug(" ...... found a job not already included in our changes: {}", rid);
-                    // For any remaining, add them to the list of processes
-                    Process sequencedProcess = dataStageCache.getProcessByRid(rid);
-                    if (sequencedProcess != null) {
-                        try {
-                            if (log.isDebugEnabled()) { log.debug(" ...... adding process: {}", objectMapper.writeValueAsString(sequencedProcess)); }
-                        } catch (JsonProcessingException e) {
-                            log.error("Unable to serialise to JSON: {}", sequencedProcess, e);
-                        }
-                        processes.add(sequencedProcess);
-                    } else {
-                        log.error(" ... job could not be found or cached, something went wrong: {}", rid);
-                    }
-                }
-            }
-            // And then finally add the sequence itself
-            processes.add(process);
-            try {
-                if (log.isDebugEnabled()) { log.debug(" ... process: {}", objectMapper.writeValueAsString(process)); }
-            } catch (JsonProcessingException e) {
-                log.error("Unable to serialise to JSON: {}", process, e);
-            }
-        }
-        return processes;
     }
 
     /**
@@ -673,46 +416,4 @@ public class DataStageConnector extends DataEngineConnectorBase {
         return (results == null || results.getPaging().getNumTotal() == 0) ? null : results.getItems().get(0);
     }
 
-    /**
-     * Throws a ConnectorCheckedException using the provided parameters.
-     * @param clazz
-     * @param cause
-     * @param exceptionMessageDefinition
-     * @throws ConnectorCheckedException always
-     */
-    private void raiseConnectorCheckedException(Class clazz, String methodName, Exception cause, ExceptionMessageDefinition exceptionMessageDefinition) throws ConnectorCheckedException {
-        if(cause == null) {
-            throw new ConnectorCheckedException(exceptionMessageDefinition,
-                    clazz.getName(),
-                    methodName);
-        } else {
-            throw new ConnectorCheckedException(exceptionMessageDefinition,
-                    clazz.getName(),
-                    methodName,
-                    cause);
-        }
-    }
-
-    /**
-     * Helper method that takes details of where the original IGCException is caught, maps and rethrows it further as one of the OCF checked exceptions.
-     *
-     * @param className The name of the class where original IGCException is caught
-     * @param methodName The name of the method where original IGCException is caught
-     * @param e Instance of IGCException (or subclasses)
-     * @throws ConnectorCheckedException
-     * @throws PropertyServerException
-     */
-    public static void handleIGCException(String className, String methodName, IGCException e) throws ConnectorCheckedException, PropertyServerException {
-        if(e instanceof IGCConnectivityException) {
-            throw new PropertyServerException(DataStageErrorCode.CONNECTION_ERROR.getMessageDefinition(),
-                    className,
-                    methodName,
-                    e);
-        } else {
-            throw new ConnectorCheckedException(DataStageErrorCode.UNKNOWN_RUNTIME_ERROR.getMessageDefinition(),
-                    className,
-                    methodName,
-                    e);
-        }
-    }
 }
