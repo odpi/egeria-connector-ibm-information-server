@@ -94,34 +94,36 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Versions of dependent libraries -->
-        <jackson.version>2.13.0</jackson.version>
+        <jackson.version>2.13.3</jackson.version>
+        <jackson-databind.version>2.13.3</jackson-databind.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
-        <slf4j.version>1.7.32</slf4j.version>
-        <spring.version>5.3.12</spring.version>
+        <slf4j.version>1.7.36</slf4j.version>
+        <spring.version>5.3.22</spring.version>
         <junit.platform.version>1.5.2</junit.platform.version>
         <junit.jupiter.version>5.6.2</junit.jupiter.version>
         <junit.version>4.12</junit.version>
-        <surefire.plugin.version>3.0.0-M5</surefire.plugin.version>
-        <logback.version>1.2.6</logback.version>
-        <testng.version>7.4.0</testng.version>
+        <surefire.plugin.version>3.0.0-M7</surefire.plugin.version>
+        <logback.version>1.2.11</logback.version>
+        <testng.version>7.6.1</testng.version>
         <mock-server.version>5.13.2</mock-server.version>
         <sleepycat.version>18.3.12</sleepycat.version>
-        <rhino.version>1.7.13</rhino.version>
-        <netty.version>4.1.69.Final</netty.version>
+        <rhino.version>1.7.14</rhino.version>
+        <netty.version>4.1.79.Final</netty.version>
         <httpclient.version>4.5.13</httpclient.version>
-        <woodstox.version>6.2.6</woodstox.version>
+        <woodstox.version>6.3.0</woodstox.version>
         <xmlapi.version>2.0.2</xmlapi.version>
         <stax.version>1.0.1</stax.version>
-        <maven-compiler.version>3.8.1</maven-compiler.version>
-        <maven-javadoc-plugin.version>3.3.1</maven-javadoc-plugin.version>
+        <maven-compiler.version>3.10.1</maven-compiler.version>
+        <maven-javadoc-plugin.version>3.4.0</maven-javadoc-plugin.version>
         <maven-shade.version>3.2.1</maven-shade.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
-        <maven-antrun.version>3.0.0</maven-antrun.version>
-        <spotbugs.version>4.4.2</spotbugs.version>
-        <jacoco-plugin.version>0.8.7</jacoco-plugin.version>
+        <maven-antrun.version>3.1.0</maven-antrun.version>
+        <maven-assembly.version>3.4.2</maven-assembly.version>
+        <spotbugs.version>4.7.1</spotbugs.version>
+        <jacoco-plugin.version>0.8.8</jacoco-plugin.version>
         <!-- Configuration of sonar code scanning-->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <!--suppress UnresolvedMavenProperty -->
@@ -158,7 +160,7 @@
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-clients</artifactId>
-                <version>3.0.0</version>
+                <version>3.2.1</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -176,7 +178,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
+                <version>${jackson-databind.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -276,7 +278,7 @@
             <dependency>
                 <groupId>com.flipkart.zjsonpatch</groupId>
                 <artifactId>zjsonpatch</artifactId>
-                <version>0.4.11</version>
+                <version>0.4.12</version>
                 <exclusions>
                     <!-- Ensure Jackson remains in line with rest of Egeria (not overridden by zjsonpatch embedded version) -->
                     <exclusion>
@@ -462,7 +464,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
@@ -477,12 +479,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-pmd-plugin</artifactId>
-                    <version>3.15.0</version>
+                    <version>3.17.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
-                    <version>6.4.1</version>
+                    <version>7.1.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -567,7 +569,7 @@
             <plugin>
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
-                <version>0.13</version>
+                <version>0.14</version>
                 <configuration>
                     <useDefaultExcludes>true</useDefaultExcludes>
                     <useMavenDefaultExcludes>true</useMavenDefaultExcludes>
@@ -672,7 +674,7 @@
             <!-- Note test scope dependencies can't be reliably checked -->
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>analyze</id>
@@ -767,7 +769,7 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.8</version>
+                        <version>1.6.13</version>
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>ossrh</serverId>
@@ -811,7 +813,7 @@
                                 <plugin>
                                     <groupId>com.h3xstream.findsecbugs</groupId>
                                     <artifactId>findsecbugs-plugin</artifactId>
-                                    <version>1.11.0</version> <!-- Auto-update to the latest stable -->
+                                    <version>1.12.0</version> <!-- Auto-update to the latest stable -->
                                 </plugin>
                             </plugins>
                         </configuration>
