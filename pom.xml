@@ -106,7 +106,7 @@
         <surefire.plugin.version>3.0.0-M7</surefire.plugin.version>
         <logback.version>1.2.11</logback.version>
         <testng.version>7.6.1</testng.version>
-        <mock-server.version>5.13.2</mock-server.version>
+        <mock-server.version>5.14.0</mock-server.version>
         <sleepycat.version>18.3.12</sleepycat.version>
         <rhino.version>1.7.14</rhino.version>
         <netty.version>4.1.79.Final</netty.version>
