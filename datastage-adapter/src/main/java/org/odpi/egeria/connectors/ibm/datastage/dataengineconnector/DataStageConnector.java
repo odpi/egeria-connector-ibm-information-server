@@ -16,12 +16,12 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchConditio
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
+import org.odpi.openmetadata.accessservices.dataengine.model.Engine;
 import org.odpi.openmetadata.accessservices.dataengine.model.LineageMapping;
 import org.odpi.openmetadata.accessservices.dataengine.model.Process;
 import org.odpi.openmetadata.accessservices.dataengine.model.ProcessHierarchy;
 import org.odpi.openmetadata.accessservices.dataengine.model.Referenceable;
 import org.odpi.openmetadata.accessservices.dataengine.model.SchemaType;
-import org.odpi.openmetadata.accessservices.dataengine.model.SoftwareServerCapability;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.PropertyServerException;
 import org.odpi.openmetadata.frameworks.connectors.properties.ConnectionProperties;
@@ -49,7 +49,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
     private final SimpleDateFormat syncDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     private IGCRestClient igcRestClient;
-    private SoftwareServerCapability dataEngine;
+    private Engine dataEngine;
 
     private DataStageCache dataStageCache;
     private List<ProcessHierarchy> processHierarchies;
@@ -135,7 +135,7 @@ public class DataStageConnector extends DataEngineConnectorBase {
 
                 try {
                     igcRestClient = new IGCRestClient("https://" + address, igcUser, igcPass);
-                    dataEngine = new SoftwareServerCapability();
+                    dataEngine = new Engine();
                     ConnectorHelper.connectIGC(this.getClass(), igcRestClient, dataEngine, address, igcPage);
                 } catch (IGCException e) {
                     ConnectorHelper.raiseConnectorCheckedException(this.getClass(), methodName, e, DataStageErrorCode.CONNECTION_FAILURE.getMessageDefinition(address));
@@ -164,7 +164,18 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public SoftwareServerCapability getDataEngineDetails() { return dataEngine; }
+    public Engine getDataEngineDetails() { return dataEngine; }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getProcessingStateSyncKey() {
+        String labels = String.join(", ", limitToLabels);
+        String projects = String.join(", ", limitToProjects);
+        return "by projects, mode = " + mode.getName() + ", limitToLabels = [" + labels + "], limitToProjects = [" + projects + "], " +
+                "limitToLineageEnabledJobs = " + limitToLineageEnabledJobs;
+    }
 
     /**
      * {@inheritDoc}

@@ -16,7 +16,7 @@
 
     <groupId>org.odpi.egeria</groupId>
     <artifactId>egeria-connector-ibm-information-server</artifactId>
-    <version>3.11-SNAPSHOT</version>
+    <version>3.13-SNAPSHOT</version>
 
     <url>https://odpi.github.io/Egeria</url>
 
@@ -85,8 +85,8 @@
     </modules>
 
     <properties>
-        <open-metadata.version>3.11-SNAPSHOT</open-metadata.version>
-        <connector.version>3.11-SNAPSHOT</connector.version>
+        <open-metadata.version>3.13-SNAPSHOT</open-metadata.version>
+        <connector.version>3.13-SNAPSHOT</connector.version>
         <!-- Level of Java  -->
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
