@@ -30,6 +30,7 @@ public class TeamMapper extends ActorProfileMapper {
         addSimplePropertyMapping("group_name", "description");
 
         addLiteralPropertyMapping("teamType", null);
+        addLiteralPropertyMapping("identifier", null);
 
         // The classes to use for mapping any relationships
         addRelationshipMapper(ContactThroughMapper_Team.getInstance(null));

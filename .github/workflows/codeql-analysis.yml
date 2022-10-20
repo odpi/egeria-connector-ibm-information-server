@@ -10,10 +10,10 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [master]
+    branches: [main]
   schedule:
     - cron: '0 20 * * 0'
 
@@ -62,7 +62,7 @@ jobs:
       #    and modify them (or add more) to build your code if your project
       #    uses a compiled language
       - run: |
-          mvn clean package -f pom.xml -B -V -e -Dfindbugs.skip -Dcheckstyle.skip -Dpmd.skip=true -Denforcer.skip -DskipTests -Dmaven.test.skip.exec -Dlicense.skip=true -Drat.skip=true
+          mvn -DargLine="-Xmx4096m" clean package -f pom.xml -B -V -e -Dfindbugs.skip -Dcheckstyle.skip -Dpmd.skip=true -Denforcer.skip -DskipTests -Dmaven.test.skip.exec -Dlicense.skip=true -Drat.skip=true
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v1
+        uses: github/codeql-action/analyze@v2

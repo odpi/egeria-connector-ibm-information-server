@@ -39,6 +39,8 @@ public class AssetMapper extends ReferenceableMapper {
         addLiteralPropertyMapping("ownerType", null);
         addLiteralPropertyMapping("zoneMembership", null);
         addLiteralPropertyMapping("latestChange", null);
+        addLiteralPropertyMapping("versionIdentifier", null);
+
 
         // Term assignment can be done on any subtypes
         addRelationshipMapper(SemanticAssignmentMapper.getInstance(null));

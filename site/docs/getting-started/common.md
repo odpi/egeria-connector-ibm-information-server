@@ -35,10 +35,10 @@ The server chassis is: `server-chassis-spring-{version}.jar`
 ## 3. Configure security
 
 To get an initial environment up-and-running just download the `truststore.p12`
-file from: [https://github.com/odpi/egeria/raw/master/truststore.p12](https://github.com/odpi/egeria/raw/master/truststore.p12).
+file from: [https://github.com/odpi/egeria/raw/main/truststore.p12](https://github.com/odpi/egeria/raw/main/truststore.p12).
 
 ??? question "Transport-level security"
-    The [truststore.p12](https://github.com/odpi/egeria/raw/master/truststore.p12)
+    The [truststore.p12](https://github.com/odpi/egeria/raw/main/truststore.p12)
     file provides a local truststore for Java. This allows the self-signed certificate embedded
     within the server chassis (by default) to be trusted.
 

@@ -48,6 +48,7 @@ public class DataFileMapper extends DataStoreMapper {
         // The list of properties that should be mapped
         addSimplePropertyMapping("path", "pathName");
         addComplexOmrsProperty("fileType");
+        addLiteralPropertyMapping("fileName", null);
 
         // The list of relationships that should be mapped
         addRelationshipMapper(AssetSchemaTypeMapper_FileRecord.getInstance(null));
