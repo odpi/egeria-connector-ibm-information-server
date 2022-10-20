@@ -40,7 +40,7 @@
     <scm>
         <connection>scm:git:git://github.com/odpi/egeria-connector-ibm-information-server.git</connection>
         <developerConnection>scm:git:ssh://github.com:odpi/egeria-connector-ibm-information-server.git</developerConnection>
-        <url>http://github.com/odpi/egeria-connector-ibm-information-server/tree/master</url>
+        <url>http://github.com/odpi/egeria-connector-ibm-information-server/tree/main</url>
     </scm>
 
     <issueManagement>

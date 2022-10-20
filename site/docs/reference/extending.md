@@ -474,7 +474,7 @@ connectors' mapping class. Ensure this class is in the sub-package relevant to t
     - Define a `private static class Singleton` that captures a `static final INSTANCE` of your class.
     - Define a `public static getInstance()` method that returns this `Singleton.INSTANCE`, and is passed an
       `IGCVersionEnum`. While typically unused, if you want to have different logic depending on the version of IGC being
-      used, this enum allows you to do so (for an example, see the base connectors' [DataClassMapper](https://github.com/odpi/egeria-connector-ibm-information-server/blob/master/igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/DataClassMapper.java){ target=code })
+      used, this enum allows you to do so (for an example, see the base connectors' [DataClassMapper](https://github.com/odpi/egeria-connector-ibm-information-server/blob/main/igc-adapter/src/main/java/org/odpi/egeria/connectors/ibm/igc/repositoryconnector/mapping/entities/DataClassMapper.java){ target=code })
     - Define a `private` (or `protected`) no-args constructor that first calls the no-args constructor of the parent class.
     - Add your extra logic or mappings (in the example above, the `addSimplePropertyMapping()` maps our custom attribute
       to the `usage` OMRS property).

@@ -6,7 +6,7 @@
 All version numbers below refer to the version of the connector that was tested, against the
 release of Egeria with precisely the same version number.
 
-## [2.11](https://github.com/odpi/egeria-connector-ibm-information-server/tree/master/cts/results/2.11){ target=cts }
+## [2.11](https://github.com/odpi/egeria-connector-ibm-information-server/tree/main/cts/results/2.11){ target=cts }
 
 ??? success "The 2.11 release is conformant with the mandatory profiles, with some limitations"
     Note that in v11.7.0.2 and above there is no longer support for searching against the
@@ -27,7 +27,7 @@ release of Egeria with precisely the same version number.
 | v11.7.1.0 SP1 | Metadata sharing^[2](#fn:2)^, Relationship search |
 | v11.7.1.0 SP2 | Metadata sharing^[2](#fn:2)^, Relationship search |
 
-## [2.10](https://github.com/odpi/egeria-connector-ibm-information-server/tree/master/cts/results/2.10){ target=cts }
+## [2.10](https://github.com/odpi/egeria-connector-ibm-information-server/tree/main/cts/results/2.10){ target=cts }
 
 ??? success "The 2.10 release is conformant with the mandatory profiles, with some limitations"
     Note that in v11.7.0.2 and above there is no longer support for searching against the
@@ -48,7 +48,7 @@ release of Egeria with precisely the same version number.
 | v11.7.1.0 SP1 | Metadata sharing^[2](#fn:2)^, Relationship search |
 | v11.7.1.0 SP2 | Metadata sharing^[2](#fn:2)^, Relationship search |
 
-## [2.5](https://github.com/odpi/egeria-connector-ibm-information-server/tree/master/cts/results/2.5){ target=cts }
+## [2.5](https://github.com/odpi/egeria-connector-ibm-information-server/tree/main/cts/results/2.5){ target=cts }
 
 ??? success "The 2.5 release is conformant with the mandatory profiles, with some limitations"
     Note that in v11.7.0.2 and above there is no longer support for searching against the
@@ -72,7 +72,7 @@ release of Egeria with precisely the same version number.
 | v11.7.1.0 SP1 | Metadata sharing^[2](#fn:2),[3](#fn:3)^, Relationship search |
 | v11.7.1.0 SP2 | Metadata sharing^[2](#fn:2),[3](#fn:3)^, Relationship search |
 
-## [2.2](https://github.com/odpi/egeria-connector-ibm-information-server/tree/master/cts/results/2.2){ target=cts }
+## [2.2](https://github.com/odpi/egeria-connector-ibm-information-server/tree/main/cts/results/2.2){ target=cts }
 
 ??? success "The 2.2 release is conformant with the mandatory profiles, with some limitations"
     Note that in v11.7.0.2 and above there is no longer support for searching against the
@@ -93,7 +93,7 @@ release of Egeria with precisely the same version number.
 | v11.7.1.0 SP1 | Metadata sharing^[2](#fn:2)^, Relationship search |
 | v11.7.1.0 SP2 | Metadata sharing^[2](#fn:2)^, Relationship search |
 
-## [2.1](https://github.com/odpi/egeria-connector-ibm-information-server/tree/master/cts/results/2.1){ target=cts }
+## [2.1](https://github.com/odpi/egeria-connector-ibm-information-server/tree/main/cts/results/2.1){ target=cts }
 
 ??? success "The 2.1 release is conformant with the mandatory profiles, with some limitations"
     Note that in v11.7.0.2 and above there is no longer support for searching against the
@@ -114,7 +114,7 @@ release of Egeria with precisely the same version number.
 | v11.7.1.0 SP1 | Metadata sharing^[2](#fn:2)^, Relationship search |
 | v11.7.1.0 SP2 | Metadata sharing^[2](#fn:2)^, Relationship search |
 
-## [2.0](https://github.com/odpi/egeria-connector-ibm-information-server/tree/master/cts/results/2.0){ target=cts }
+## [2.0](https://github.com/odpi/egeria-connector-ibm-information-server/tree/main/cts/results/2.0){ target=cts }
 
 ??? success "The 2.0 release is conformant with the mandatory profiles, with some limitations"
     Note that in v11.7.0.2 and above there is no longer support for searching against the
@@ -135,7 +135,7 @@ release of Egeria with precisely the same version number.
 | v11.7.1.0 SP1 | Metadata sharing^[2](#fn:2)^, Relationship search |
 | v11.7.1.0 SP2 | Metadata sharing^[2](#fn:2)^, Relationship search |
 
-## [1.8](https://github.com/odpi/egeria-connector-ibm-information-server/tree/master/cts/results/1.8){ target=cts }
+## [1.8](https://github.com/odpi/egeria-connector-ibm-information-server/tree/main/cts/results/1.8){ target=cts }
 
 ??? failure "The 1.8 release is not conformant"
     The CTS in release 1.8 of Egeria included some changes that were [not handling regular
@@ -155,7 +155,7 @@ release of Egeria with precisely the same version number.
 | v11.7.1.0 SP1 | None |
 | v11.7.1.0 SP2 | None |
 
-## [1.6](https://github.com/odpi/egeria-connector-ibm-information-server/tree/master/cts/results/1.6){ target=cts }
+## [1.6](https://github.com/odpi/egeria-connector-ibm-information-server/tree/main/cts/results/1.6){ target=cts }
 
 ??? success "The 1.6 release is conformant with the mandatory profiles, with some limitations"
     Note that in v11.7.0.2 and above there is no longer support for searching against the
@@ -176,7 +176,7 @@ release of Egeria with precisely the same version number.
 | v11.7.1.0 SP1 | Metadata sharing^[2](#fn:2)^, Relationship search |
 | v11.7.1.0 SP2 | Metadata sharing^[2](#fn:2)^, Relationship search |
 
-## [1.5](https://github.com/odpi/egeria-connector-ibm-information-server/tree/master/cts/results/1.5){ target=cts }
+## [1.5](https://github.com/odpi/egeria-connector-ibm-information-server/tree/main/cts/results/1.5){ target=cts }
 
 ??? success "The 1.5 release is conformant with the mandatory profiles, with some limitations"
     Note that in v11.7.0.2 and above there is no longer support for searching against the
@@ -197,7 +197,7 @@ release of Egeria with precisely the same version number.
 | v11.7.1.0 SP1 | Metadata sharing^[2](#fn:2)^, Relationship search |
 | v11.7.1.0 SP2 | Metadata sharing^[2](#fn:2)^, Relationship search |
 
-## [1.4](https://github.com/odpi/egeria-connector-ibm-information-server/tree/master/cts/results/1.4){ target=cts }
+## [1.4](https://github.com/odpi/egeria-connector-ibm-information-server/tree/main/cts/results/1.4){ target=cts }
 
 ??? success "The 1.4 release is conformant with the mandatory profiles, with some limitations"
     Note that in v11.7.0.2 and above there is no longer support for searching against the
@@ -224,7 +224,7 @@ release of Egeria with precisely the same version number.
 | v11.7.1.0 SP1 | Metadata sharing^[2](#fn:2)^, Relationship search |
 | v11.7.1.0 SP2 | Metadata sharing^[2](#fn:2)^, Relationship search |
 
-## [1.3](https://github.com/odpi/egeria-connector-ibm-information-server/tree/master/cts/results/1.3){ target=cts }
+## [1.3](https://github.com/odpi/egeria-connector-ibm-information-server/tree/main/cts/results/1.3){ target=cts }
 
 ??? success "The 1.3 release is conformant with the mandatory profiles, with some limitations"
     Note that in v11.7.0.2 and above there is no longer support for searching against the
@@ -248,7 +248,7 @@ release of Egeria with precisely the same version number.
 | v11.7.1.0 SP1 | Metadata sharing, Relationship search |
 | v11.7.1.0 SP2 | Metadata sharing, Relationship search |
 
-## [1.2](https://github.com/odpi/egeria-connector-ibm-information-server/tree/master/cts/results/1.2){ target=cts }
+## [1.2](https://github.com/odpi/egeria-connector-ibm-information-server/tree/main/cts/results/1.2){ target=cts }
 
 ??? success "The 1.2 release is conformant with the mandatory profiles, with some limitations"
     Note that in v11.7.0.2 and above there is no longer support for searching against the

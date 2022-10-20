@@ -7,7 +7,7 @@ These sample Postman collections illustrate configuring and using the IBM Inform
 for ODPi Egeria.
 
 Each should be used with the
-[environment defined in the Egeria Core samples](https://github.com/odpi/egeria/blob/master/open-metadata-resources/open-metadata-samples/postman-rest-samples/README.md),
+[environment defined in the Egeria Core samples](https://github.com/odpi/egeria/blob/main/open-metadata-resources/open-metadata-samples/postman-rest-samples/README.md),
 which has all of the needed variables defined within it.
 
 # Egeria-IBM-IGC-config.postman_collection.json
@@ -37,7 +37,7 @@ in v11.7.x or manually in v11.5.x).
 Prerequisites:
 
 - an existing IBM IGC environment, running v11.5.0.1 or later
-- [samples loaded for Coco Pharmaceuticals](https://github.com/odpi/egeria/blob/master/open-metadata-resources/open-metadata-deployment/sample-data/coco-pharmaceuticals/README.md)
+- [samples loaded for Coco Pharmaceuticals](https://github.com/odpi/egeria/blob/main/open-metadata-resources/open-metadata-deployment/sample-data/coco-pharmaceuticals/README.md)
 - column analysis run against the tables in the Coco Pharmaceuticals sample databases
 - connector configured (eg. using `Egeria-IBM-IGC-config.postman_collection.json` above)
 
