@@ -17,8 +17,8 @@ The IBM DataStage Data Engine Proxy Connector works through a combination of the
 - IBM IGC's REST API, itself abstracted through the [IGC REST Client Library](../igc-clientlibrary)
 - An Information Governance Rule in IGC named `Job metadata will be periodically synced through ODPi Egeria's Data Engine OMAS`
   and whose description provides the precise date and time at which synchronization last occurred
-- Egeria's [Data Engine Proxy Services Governance Server](https://github.com/odpi/egeria/tree/master/open-metadata-implementation/governance-servers/data-engine-proxy-services)
-    - which in turn makes use of an Egeria [Data Engine OMAS](https://github.com/odpi/egeria/tree/master/open-metadata-implementation/access-services/data-engine)
+- Egeria's [Data Engine Proxy Services Governance Server](https://github.com/odpi/egeria/tree/main/open-metadata-implementation/governance-servers/data-engine-proxy-services)
+    - which in turn makes use of an Egeria [Data Engine OMAS](https://github.com/odpi/egeria/tree/main/open-metadata-implementation/access-services/data-engine)
 
 ## Getting started
 
@@ -189,7 +189,7 @@ time to synchronize).
 
 If you have a completely empty environment, you may want to load some sample metadata to further explore.
 
-Lineage samples are provided under [sample-data/minimal](https://github.com/odpi/egeria-samples/tree/master/sample-data/minimal)
+Lineage samples are provided under [sample-data/minimal](https://github.com/odpi/egeria-samples/tree/main/sample-data/minimal)
 of the samples repository.
 
 These samples are provided as a set of content that can be automatically loaded to Information Server (IGC and DataStage)

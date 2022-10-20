@@ -7,7 +7,7 @@ name: "Build"
 
 on:
   push:
-    branches: [master, release-*]
+    branches: [main, release-*]
   workflow_dispatch:
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
       # Build and publish - but only for main
       - name: Build with Maven (Publish snapshots to maven central)
-        if: ${{ github.repository == 'odpi/egeria-connector-ibm-information-server' && github.ref == 'refs/heads/master'}}
+        if: ${{ github.repository == 'odpi/egeria-connector-ibm-information-server' && github.ref == 'refs/heads/main'}}
         # See https://github.com/actions/toolkit/issues/231 requires parms using . to be quoted
         run: 'mvn -B -DuseMavenCentral clean deploy'
         # Needed for publishing -- note we push to a staging area, login to oss.sonatype.org to
@@ -43,7 +43,7 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.OSSRH_GPG_PASSPHRASE }}
           # Build and publish - but only for main
       - name: Build with Maven (no snapshots published)
-        if: ${{ github.repository != 'odpi/egeria-connector-ibm-information-server' || github.ref != 'refs/heads/master'}}
+        if: ${{ github.repository != 'odpi/egeria-connector-ibm-information-server' || github.ref != 'refs/heads/main'}}
         run: mvn -B clean verify
       # Mostly for verification - not published to the release itself for now
       - name: Upload assemblies

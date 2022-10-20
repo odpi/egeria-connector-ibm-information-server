@@ -167,9 +167,9 @@ automatically being communicated out to the rest of the cohort.
 
 If you have a completely empty IGC environment, you may want to load some sample metadata to further explore.
 
-Samples are provided under [egeria/open-metadata-resources/open-metadata-deployment/sample-data/](https://github.com/odpi/egeria/tree/master/open-metadata-resources/open-metadata-deployment/sample-data).
+Samples are provided under [egeria/open-metadata-resources/open-metadata-deployment/sample-data/](https://github.com/odpi/egeria/tree/main/open-metadata-resources/open-metadata-deployment/sample-data).
 
-For example, there you will find a [Coco Pharmaceuticals](https://github.com/odpi/egeria/tree/master/open-metadata-resources/open-metadata-deployment/sample-data/coco-pharmaceuticals)
+For example, there you will find a [Coco Pharmaceuticals](https://github.com/odpi/egeria/tree/main/open-metadata-resources/open-metadata-deployment/sample-data/coco-pharmaceuticals)
 set of samples. These samples are provided as a set of content that can be automatically loaded to IGC using Ansible,
 and a number of publicly-available Ansible roles. (See instructions via the link itself.)
 
