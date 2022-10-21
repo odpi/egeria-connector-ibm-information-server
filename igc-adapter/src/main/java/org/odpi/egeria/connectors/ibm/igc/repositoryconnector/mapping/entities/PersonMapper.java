@@ -42,6 +42,7 @@ public class PersonMapper extends ActorProfileMapper {
         addLiteralPropertyMapping("employeeType", null);
         addLiteralPropertyMapping("preferredLanguage", null);
         addLiteralPropertyMapping("initials", null);
+        addLiteralPropertyMapping("pronouns", null);
 
         // The classes to use for mapping any relationships
         addRelationshipMapper(AttachedNoteLogMapper.getInstance(null));
