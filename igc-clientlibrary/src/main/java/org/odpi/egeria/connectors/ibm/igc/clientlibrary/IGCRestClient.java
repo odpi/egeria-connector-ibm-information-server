@@ -1596,7 +1596,7 @@ public class IGCRestClient {
                 DynamicPropertyReader reader = new DynamicPropertyReader(getPOJOForType(type), property);
                 typeAndPropertyToAccessor.put(key, reader);
             } catch (IllegalArgumentException e) {
-                log.warn("Unable to setup an accessor for property '{}' on type '{}' - this property will be entirely ignored. If this is a custom property, see https://github.com/odpi/egeria-connector-ibm-information-server/tree/master/igc-clientlibrary#using-your-own-asset-types for how to add your own properties.", property, type, e);
+                log.warn("Unable to setup an accessor for property '{}' on type '{}' - this property will be entirely ignored. If this is a custom property, see https://github.com/odpi/egeria-connector-ibm-information-server/tree/main/igc-clientlibrary#using-your-own-asset-types for how to add your own properties.", property, type, e);
                 typeAndPropertyToAccessor.put(key, null); // add a null accessor to avoid trying to build one again
             }
         }
