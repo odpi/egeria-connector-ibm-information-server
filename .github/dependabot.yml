@@ -8,4 +8,13 @@ updates:
     schedule:
       interval: daily
     open-pull-requests-limit: 100
+  - package-ecosystem: "github-actions"
+     directory: "/"
+     schedule:
+       interval: monthly
+       time: "03:00"
+       timezone: "Etc/UTC"
+     open-pull-requests-limit: 10
+     reviewers:
+     - planetf1
 ...
