@@ -118,7 +118,7 @@ public class ConnectorTest {
 
     @Test
     public void testEngineDetails() {
-        SoftwareServerCapability dataEngine = dataStageConnector.getDataEngineDetails();
+        Engine dataEngine = dataStageConnector.getDataEngineDetails();
         assertNotNull(dataEngine);
         assertEquals(dataEngine.getEngineType(), "IBM InfoSphere DataStage");
         assertEquals(dataEngine.getQualifiedName(), "ibm-datastage@" + MockConstants.IGC_ENDPOINT);

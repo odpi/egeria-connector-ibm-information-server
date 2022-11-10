@@ -25,13 +25,13 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.model.common.Identity;
 import org.odpi.openmetadata.accessservices.dataengine.model.DataFile;
 import org.odpi.openmetadata.accessservices.dataengine.model.Database;
 import org.odpi.openmetadata.accessservices.dataengine.model.DatabaseSchema;
+import org.odpi.openmetadata.accessservices.dataengine.model.Engine;
 import org.odpi.openmetadata.accessservices.dataengine.model.ParentProcess;
 import org.odpi.openmetadata.accessservices.dataengine.model.Process;
 import org.odpi.openmetadata.accessservices.dataengine.model.ProcessHierarchy;
 import org.odpi.openmetadata.accessservices.dataengine.model.Referenceable;
 import org.odpi.openmetadata.accessservices.dataengine.model.RelationalTable;
 import org.odpi.openmetadata.accessservices.dataengine.model.SchemaType;
-import org.odpi.openmetadata.accessservices.dataengine.model.SoftwareServerCapability;
 import org.odpi.openmetadata.frameworks.auditlog.messagesets.ExceptionMessageDefinition;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.PropertyServerException;
@@ -339,7 +339,7 @@ public class ConnectorHelper {
         }
     }
 
-    static void connectIGC(Class connectorClass, IGCRestClient client, SoftwareServerCapability dataEngine, String address, Integer igcPage) throws ConnectorCheckedException {
+    static void connectIGC(Class connectorClass, IGCRestClient client, Engine dataEngine, String address, Integer igcPage) throws ConnectorCheckedException {
         IGCVersionEnum igcVersion;
         try {
             // Create new REST API client (opens a new session)
