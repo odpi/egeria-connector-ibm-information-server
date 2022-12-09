@@ -201,6 +201,7 @@ public class DataStageReportsConnector extends DataEngineConnectorBase {
     public List<Process> getChangedProcesses(Date from, Date to) throws ConnectorCheckedException, PropertyServerException {
 
         final String methodName = "getChangedProcesses";
+        log.debug("Looking for changed Processes...");
         List<Process> processes = new ArrayList<>();
 
         try {
@@ -240,9 +241,10 @@ public class DataStageReportsConnector extends DataEngineConnectorBase {
      * @param to the date and time up to which to cache changes (inclusive)
      */
     private void initializeCache(Date from, Date to) throws IGCException {
-        this.dataStageCache = new DataStageCache(from, to, mode, new ArrayList<>(), new ArrayList<>(), false);
-        dataStageCache.initializeWithReportJobs(igcRestClient, startAssetRIDs, detectLineage);
-        processHierarchies = new ArrayList<>();
+        if (dataStageCache == null) {
+            dataStageCache = new DataStageCache(from, to, mode, new ArrayList<>(), new ArrayList<>(), false, includeVirtualAssets);
+            dataStageCache.initializeWithReportJobs(igcRestClient, startAssetRIDs, detectLineage);
+            processHierarchies = new ArrayList<>();
+        }
     }
-
 }
