@@ -343,7 +343,8 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * @param to the date and time up to which to cache changes (inclusive)
      */
     private void initializeCache(Date from, Date to) throws IGCException {
-        DataStageCache forComparison = new DataStageCache(from, to, mode, limitToProjects, limitToLabels, limitToLineageEnabledJobs);
+        DataStageCache forComparison = new DataStageCache(from, to, mode, limitToProjects, limitToLabels, limitToLineageEnabledJobs,
+                includeVirtualAssets);
         if (dataStageCache == null || !dataStageCache.equals(forComparison)) {
             // Initialize the cache, if it is empty, or reset it if it differs from the dates and times we've been given
             dataStageCache = forComparison;
