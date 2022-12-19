@@ -44,6 +44,7 @@ import java.util.Set;
 public class DataStageCache {
 
     private static final Logger log = LoggerFactory.getLogger(DataStageCache.class);
+    private final boolean includeVirtualAssets;
 
     private Map<String, DataStageJob> ridToJob;
     private Map<String, Process> ridToProcess;
@@ -64,14 +65,16 @@ public class DataStageCache {
     /**
      * Create a new cache for changes between the times provided.
      *
-     * @param from the date and time from which to cache changes
-     * @param to the date and time until which to cache changes
-     * @param mode the mode of operation for the connector, indicating the level of detail to include for lineage
-     * @param limitToProjects limit the cached jobs to only those in the provided list of projects
-     * @param limitToLabels limit to labels
+     * @param from                      the date and time from which to cache changes
+     * @param to                        the date and time until which to cache changes
+     * @param mode                      the mode of operation for the connector, indicating the level of detail to include for lineage
+     * @param limitToProjects           limit the cached jobs to only those in the provided list of projects
+     * @param limitToLabels             limit to labels
      * @param limitToLineageEnabledJobs limit the processing to those jobs for which lineage is enabled
+     * @param includeVirtualAssets      limit the processing to real assets
      */
-    public DataStageCache(Date from, Date to, LineageMode mode, List<String> limitToProjects, List<String> limitToLabels, boolean limitToLineageEnabledJobs) {
+    public DataStageCache(Date from, Date to, LineageMode mode, List<String> limitToProjects, List<String> limitToLabels, boolean limitToLineageEnabledJobs,
+                          boolean includeVirtualAssets) {
         this.igcCache = new ObjectCache();
         this.ridToJob = new HashMap<>();
         this.ridToProcess = new HashMap<>();
@@ -83,6 +86,7 @@ public class DataStageCache {
         this.limitToProjects = (limitToProjects == null ? Collections.emptyList() : limitToProjects);
         this.limitToLabels = limitToLabels;
         this.limitToLineageEnabled = limitToLineageEnabledJobs;
+        this.includeVirtualAssets = includeVirtualAssets;
     }
 
     /**
@@ -294,7 +298,7 @@ public class DataStageCache {
                 // For non-virtual assets the most efficient way of retrieving this information is via a search (by RID)
                 storeIdentity = store.getIdentity(igcRestClient, igcCache);
                 storeToIdentity.put(rid, storeIdentity);
-            } else {
+            } else if (includeVirtualAssets) {
                 // For virtual assets, we must retrieve the full object (search by RID is not possible)
                 Reference virtualStore = igcRestClient.getAssetById(rid, igcCache);
                 storeToIdentity.put(rid, virtualStore.getIdentity(igcRestClient, igcCache));
@@ -327,7 +331,7 @@ public class DataStageCache {
                         ItemList<Classificationenabledgroup> ilFields = igcRestClient.search(igcSearch);
                         fields = igcRestClient.getAllPages(null, ilFields);
                     }
-                } else {
+                } else if (includeVirtualAssets) {
                     // For virtual assets, we must retrieve the full object and page through its fields (search by RID is not possible)
                     fields = new ArrayList<>();
                     Reference virtualStore = igcRestClient.getAssetById(rid, igcCache);
