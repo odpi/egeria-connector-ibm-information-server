@@ -61,11 +61,11 @@ public class ProcessMapping extends BaseMapping {
 
                 if (cache.getMode() == LineageMode.JOB_LEVEL) {
 
-                    // Setup job-level lineage mappings
-                    LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache);
-                    Set<LineageMapping> jobLevelLineage = lineageMappingMapping.getForJob(job);
+                    // Setup job-level data flows
+                    DataFlowMapping dataFlowMapping = new DataFlowMapping(cache);
+                    Set<DataFlow> jobLevelLineage = dataFlowMapping.getForJob(job);
                     if (jobLevelLineage != null && !jobLevelLineage.isEmpty()) {
-                        process.setLineageMappings(new ArrayList<>(jobLevelLineage));
+                        process.setDataFlows(new ArrayList<>(jobLevelLineage));
                     }
 
                 } else if (cache.getMode() == LineageMode.GRANULAR) {
@@ -99,16 +99,16 @@ public class ProcessMapping extends BaseMapping {
                             portAliasMapping.getForStages(job.getInputStages(), PortType.INPUT_PORT).stream(),
                             portAliasMapping.getForStages(job.getOutputStages(), PortType.OUTPUT_PORT).stream())
                             .collect(Collectors.toList()));
-                    Set<LineageMapping> lineageMappings = new HashSet<>();
+                    Set<DataFlow> dataFlows = new HashSet<>();
                     for (Link link : job.getAllLinks()) {
-                        LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache);
-                        Set<LineageMapping> crossStageLineageMappings = lineageMappingMapping.getForLink(link, job);
-                        if (crossStageLineageMappings != null && !crossStageLineageMappings.isEmpty()) {
-                            lineageMappings.addAll(crossStageLineageMappings);
+                        DataFlowMapping dataFlowMapping = new DataFlowMapping(cache);
+                        Set<DataFlow> crossStageDataFlows = dataFlowMapping.getForLink(link, job);
+                        if (crossStageDataFlows != null && !crossStageDataFlows.isEmpty()) {
+                            dataFlows.addAll(crossStageDataFlows);
                         }
                     }
-                    if (!lineageMappings.isEmpty()) {
-                        process.setLineageMappings(new ArrayList<>(lineageMappings));
+                    if (!dataFlows.isEmpty()) {
+                        process.setDataFlows(new ArrayList<>(dataFlows));
                     }
 
                 }
@@ -129,28 +129,28 @@ public class ProcessMapping extends BaseMapping {
         Process process = getSkeletonProcess(stage);
         if (process != null) {
             Set<PortImplementation> portImplementations = new HashSet<>();
-            Set<LineageMapping> lineageMappings = new HashSet<>();
+            Set<DataFlow> dataFlows = new HashSet<>();
 
             List<Link> allInputLinks = igcRestClient.getAllPages("input_links", stage.getInputLinks());
             List<Link> allOutputLinks = igcRestClient.getAllPages("output_links", stage.getOutputLinks());
             Set<String> allLinkRids = Stream.concat(allInputLinks.stream(), allOutputLinks.stream()).map(Link::getId).collect(Collectors.toSet());
             log.debug("Adding input links: {}", allInputLinks);
-            addImplementationDetails(job, stage, allInputLinks, allLinkRids, PortType.INPUT_PORT, portImplementations, lineageMappings);
+            addImplementationDetails(job, stage, allInputLinks, allLinkRids, PortType.INPUT_PORT, portImplementations, dataFlows);
 
             log.debug("Adding input stores: {}", stage.getReadsFromDesign());
-            addDataStoreDetails(job, stage, "reads_from_(design)", stage.getReadsFromDesign(), allLinkRids, PortType.INPUT_PORT, portImplementations, lineageMappings);
+            addDataStoreDetails(job, stage, "reads_from_(design)", stage.getReadsFromDesign(), allLinkRids, PortType.INPUT_PORT, portImplementations, dataFlows);
             log.debug("Adding output links: {}", allOutputLinks);
-            addImplementationDetails(job, stage, allOutputLinks, allLinkRids, PortType.OUTPUT_PORT, portImplementations, lineageMappings);
+            addImplementationDetails(job, stage, allOutputLinks, allLinkRids, PortType.OUTPUT_PORT, portImplementations, dataFlows);
             log.debug("Adding output stores: {}", stage.getWritesToDesign());
-            addDataStoreDetails(job, stage, "writes_to_(design)", stage.getWritesToDesign(), allLinkRids, PortType.OUTPUT_PORT, portImplementations, lineageMappings);
+            addDataStoreDetails(job, stage, "writes_to_(design)", stage.getWritesToDesign(), allLinkRids, PortType.OUTPUT_PORT, portImplementations, dataFlows);
             log.debug("Adding stage variables");
-            addStageVariableDetails(job, stage, portImplementations, lineageMappings);
+            addStageVariableDetails(job, stage, portImplementations, dataFlows);
 
             log.debug("Adding transformation project info ");
             addTransformationProjectDetails(stage, process);
 
             process.setPortImplementations(new ArrayList<>(portImplementations));
-            process.setLineageMappings(new ArrayList<>(lineageMappings));
+            process.setDataFlows(new ArrayList<>(dataFlows));
             // Stages are owned by the job that contains them, so setup an owned parent process relationship to the
             // job-level
             List<ParentProcess> parents = new ArrayList<>();
@@ -200,7 +200,7 @@ public class ProcessMapping extends BaseMapping {
     }
 
     /**
-     * Add implementation details of the job (ports and lineage mappings) to the provided lists, for the provided stage.
+     * Add implementation details of the job (ports and data flows) to the provided lists, for the provided stage.
      *
      * @param job the job within which the stage exists
      * @param stage the stage for which to add implementation details
@@ -208,7 +208,7 @@ public class ProcessMapping extends BaseMapping {
      * @param linkRids the RIDs of all links known by this stage (both input and output)
      * @param portType the type of port
      * @param portImplementations the list of PortImplementations to append to with implementation details
-     * @param lineageMappings the list of LineageMappings to append to with implementation details
+     * @param dataFlows the list of DataFlows to append to with implementation details
      */
     private void addImplementationDetails(DataStageJob job,
                                           Stage stage,
@@ -216,7 +216,7 @@ public class ProcessMapping extends BaseMapping {
                                           Set<String> linkRids,
                                           PortType portType,
                                           Set<PortImplementation> portImplementations,
-                                          Set<LineageMapping> lineageMappings) throws IGCException {
+                                          Set<DataFlow> dataFlows) throws IGCException {
         final String methodName = "addImplementationDetails";
 
         String stageQN = getFullyQualifiedName(stage);
@@ -226,9 +226,9 @@ public class ProcessMapping extends BaseMapping {
             log.debug("Adding implementation details for link: {}", linkObjFull);
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache);
             portImplementations.add(portImplementationMapping.getForLink(linkObjFull, job, portType, stageQN));
-            log.debug("Adding lineage mappings for link as {}: {}", portType.getName(), linkObjFull);
-            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache);
-            lineageMappings.addAll(lineageMappingMapping.getForLinkInStage(linkObjFull, job, stage.getId(), linkRids, stageQN, portType == PortType.INPUT_PORT));
+            log.debug("Adding data flows for link as {}: {}", portType.getName(), linkObjFull);
+            DataFlowMapping dataFlowMapping = new DataFlowMapping(cache);
+            dataFlows.addAll(dataFlowMapping.getForLinkInStage(linkObjFull, job, stage.getId(), linkRids, stageQN, portType == PortType.INPUT_PORT));
         }
 
     }
@@ -253,12 +253,12 @@ public class ProcessMapping extends BaseMapping {
      * @param job the job within which the stage exists
      * @param stage the stage for which to add stage variable details
      * @param portImplementations the set of PortImplementations to append to with implementation details
-     * @param lineageMappings the set of LineageMappings to append to with lineage mapping details
+     * @param dataFlows the set of DataFlows to append to with details
      */
     private void addStageVariableDetails(DataStageJob job,
                                          Stage stage,
                                          Set<PortImplementation> portImplementations,
-                                         Set<LineageMapping> lineageMappings) throws IGCException {
+                                         Set<DataFlow> dataFlows) throws IGCException {
         final String methodName = "addStageVariableDetails";
 
         String stageQN = getFullyQualifiedName(stage);
@@ -267,9 +267,9 @@ public class ProcessMapping extends BaseMapping {
             log.debug("Adding implementation details for stage variables of stage: {}", stageQN);
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache);
             portImplementations.add(portImplementationMapping.getForStageVariables(stageVarsForStage, job, stage, stageQN));
-            log.debug("Adding lineage mappings for stage variables of stage: {}", stageQN);
-            LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache);
-            lineageMappings.addAll(lineageMappingMapping.getForStageVariables(stageVarsForStage, job, stageQN));
+            log.debug("Adding data flows for stage variables of stage: {}", stageQN);
+            DataFlowMapping dataFlowMapping = new DataFlowMapping(cache);
+            dataFlows.addAll(dataFlowMapping.getForStageVariables(stageVarsForStage, job, stageQN));
         } else {
             log.debug("No stage variables present in stage -- skipping: {}", stageQN);
         }
@@ -277,7 +277,7 @@ public class ProcessMapping extends BaseMapping {
     }
 
     /**
-     * Add implementation details of the job (ports and lineage mappings) to the provided lists, for any data stores
+     * Add implementation details of the job (ports and data flows) to the provided lists, for any data stores
      * used by the specified stage.
      *
      * @param job the job within which the stage exists
@@ -287,7 +287,7 @@ public class ProcessMapping extends BaseMapping {
      * @param linkRids the RIDs of all links known by this stage (both input and output)
      * @param portType the type of port
      * @param portImplementations the list of PortImplementations to append to with implementation details
-     * @param lineageMappings the list of LineageMappings to append to with implementation details
+     * @param dataFlows the list of DataFlows to append to with implementation details
      */
     private void addDataStoreDetails(DataStageJob job,
                                      Stage stage,
@@ -296,7 +296,7 @@ public class ProcessMapping extends BaseMapping {
                                      Set<String> linkRids,
                                      PortType portType,
                                      Set<PortImplementation> portImplementations,
-                                     Set<LineageMapping> lineageMappings) throws  IGCException {
+                                     Set<DataFlow> dataFlows) throws  IGCException {
         final String methodName = "addDataStoreDetails";
         // Setup an x_PORT for any data stores that are used by design as sources / targets
 
@@ -308,9 +308,9 @@ public class ProcessMapping extends BaseMapping {
                 log.debug("Adding implementation details for fields: {}", fieldsForStore);
                 PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache);
                 portImplementations.add(portImplementationMapping.getForDataStoreFields(fieldsForStore, stage, portType, fullyQualifiedStageName));
-                log.debug("Adding lineage mappings for fields as {}: {}", portType.getName(), fieldsForStore);
-                LineageMappingMapping lineageMappingMapping = new LineageMappingMapping(cache);
-                lineageMappings.addAll(lineageMappingMapping.getForDataStoreFieldsInStage(fieldsForStore, job, stage.getId(), linkRids, portType.equals(PortType.INPUT_PORT), fullyQualifiedStageName));
+                log.debug("Adding data flows for fields as {}: {}", portType.getName(), fieldsForStore);
+                DataFlowMapping dataFlowMapping = new DataFlowMapping(cache);
+                dataFlows.addAll(dataFlowMapping.getForDataStoreFieldsInStage(fieldsForStore, job, stage.getId(), linkRids, portType.equals(PortType.INPUT_PORT), fullyQualifiedStageName));
             }
         } else {
             log.error("Unable to determine identity for stage -- not including: {}", stage);
