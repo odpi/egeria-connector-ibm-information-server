@@ -75,7 +75,7 @@ public class SchemaTypeMapping extends BaseMapping {
             String schemaTypeQN = getFullyQualifiedName(link, fullyQualifiedStageName);
             if (schemaTypeQN != null) {
                 log.debug("Constructing SchemaType for job & link: {}", schemaTypeQN);
-                schemaType.setQualifiedName(schemaTypeQN);
+                schemaType.setQualifiedName(schemaTypeQN + "::(schema)=" + link.getId());
                 schemaType.setDisplayName(link.getId());
                 schemaType.setAuthor(link.getModifiedBy());
                 AttributeMapping attributeMapping = new AttributeMapping(cache);
