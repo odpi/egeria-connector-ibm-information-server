@@ -161,9 +161,9 @@ public class ConnectorTest {
     }
 
     @Test
-    public void testLineageMappings() {
-        List<LineageMapping> lineageMappings = dataStageConnector.getChangedLineageMappings(null, now);
-        assertTrue(lineageMappings.isEmpty());
+    public void testDataFlows() {
+        List<DataFlow> dataFlows = dataStageConnector.getChangedDataFlows(null, now);
+        assertTrue(dataFlows.isEmpty());
     }
 
     @AfterSuite
