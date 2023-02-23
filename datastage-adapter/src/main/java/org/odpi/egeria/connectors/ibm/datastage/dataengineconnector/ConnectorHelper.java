@@ -210,7 +210,7 @@ public class ConnectorHelper {
         if (process != null) {
 /*
             if (mode == LineageMode.JOB_LEVEL) {
-                // TODO: fill in the LineageMapping at this process level
+                // TODO: fill in the DataFlow at this process level
             }
 */
             try {

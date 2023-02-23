@@ -17,7 +17,7 @@ import org.odpi.egeria.connectors.ibm.igc.clientlibrary.search.IGCSearchSorting;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCCreate;
 import org.odpi.egeria.connectors.ibm.igc.clientlibrary.update.IGCUpdate;
 import org.odpi.openmetadata.accessservices.dataengine.model.Engine;
-import org.odpi.openmetadata.accessservices.dataengine.model.LineageMapping;
+import org.odpi.openmetadata.accessservices.dataengine.model.DataFlow;
 import org.odpi.openmetadata.accessservices.dataengine.model.Process;
 import org.odpi.openmetadata.accessservices.dataengine.model.ProcessHierarchy;
 import org.odpi.openmetadata.accessservices.dataengine.model.Referenceable;
@@ -331,8 +331,8 @@ public class DataStageConnector extends DataEngineConnectorBase {
      * {@inheritDoc}
      */
     @Override
-    public List<LineageMapping> getChangedLineageMappings(Date from, Date to) {
-        // do nothing -- lineage mappings will always be handled by other methods
+    public List<DataFlow> getChangedDataFlows(Date from, Date to) {
+        // do nothing -- data flows will always be handled by other methods
         return Collections.emptyList();
     }
 
