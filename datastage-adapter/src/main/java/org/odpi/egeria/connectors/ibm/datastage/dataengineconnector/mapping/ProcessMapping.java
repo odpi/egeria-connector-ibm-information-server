@@ -225,7 +225,11 @@ public class ProcessMapping extends BaseMapping {
             Link linkObjFull = job.getLinkByRid(linkRef.getId());
             log.debug("Adding implementation details for link: {}", linkObjFull);
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache);
-            portImplementations.add(portImplementationMapping.getForLink(linkObjFull, job, portType, stageQN));
+            PortImplementation portImplementation = portImplementationMapping.getForLink(linkObjFull, job, portType, stageQN);
+            if(portImplementation != null) {
+                portImplementations.add(portImplementation);
+            }
+
             log.debug("Adding data flows for link as {}: {}", portType.getName(), linkObjFull);
             DataFlowMapping dataFlowMapping = new DataFlowMapping(cache);
             dataFlows.addAll(dataFlowMapping.getForLinkInStage(linkObjFull, job, stage.getId(), linkRids, stageQN, portType == PortType.INPUT_PORT));
@@ -307,7 +311,11 @@ public class ProcessMapping extends BaseMapping {
                 List<Classificationenabledgroup> fieldsForStore = cache.getFieldsForStore(storeRef);
                 log.debug("Adding implementation details for fields: {}", fieldsForStore);
                 PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache);
-                portImplementations.add(portImplementationMapping.getForDataStoreFields(fieldsForStore, stage, portType, fullyQualifiedStageName));
+                PortImplementation portImplementation = portImplementationMapping.getForDataStoreFields(fieldsForStore, stage, portType, fullyQualifiedStageName);
+                if(portImplementation != null) {
+                    portImplementations.add(portImplementation);
+                }
+
                 log.debug("Adding data flows for fields as {}: {}", portType.getName(), fieldsForStore);
                 DataFlowMapping dataFlowMapping = new DataFlowMapping(cache);
                 dataFlows.addAll(dataFlowMapping.getForDataStoreFieldsInStage(fieldsForStore, job, stage.getId(), linkRids, portType.equals(PortType.INPUT_PORT), fullyQualifiedStageName));
