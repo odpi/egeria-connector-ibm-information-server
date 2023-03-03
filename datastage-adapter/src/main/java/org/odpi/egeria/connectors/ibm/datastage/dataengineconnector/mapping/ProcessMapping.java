@@ -225,8 +225,9 @@ public class ProcessMapping extends BaseMapping {
             Link linkObjFull = job.getLinkByRid(linkRef.getId());
             log.debug("Adding implementation details for link: {}", linkObjFull);
             PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache);
-            if(portImplementationMapping != null) {
-                portImplementations.add(portImplementationMapping.getForLink(linkObjFull, job, portType, stageQN));
+            PortImplementation portImplementation = portImplementationMapping.getForLink(linkObjFull, job, portType, stageQN);
+            if(portImplementation != null) {
+                portImplementations.add(portImplementation);
             }
 
             log.debug("Adding data flows for link as {}: {}", portType.getName(), linkObjFull);
@@ -310,8 +311,9 @@ public class ProcessMapping extends BaseMapping {
                 List<Classificationenabledgroup> fieldsForStore = cache.getFieldsForStore(storeRef);
                 log.debug("Adding implementation details for fields: {}", fieldsForStore);
                 PortImplementationMapping portImplementationMapping = new PortImplementationMapping(cache);
-                if(portImplementationMapping != null) {
-                    portImplementations.add(portImplementationMapping.getForDataStoreFields(fieldsForStore, stage, portType, fullyQualifiedStageName));
+                PortImplementation portImplementation = portImplementationMapping.getForDataStoreFields(fieldsForStore, stage, portType, fullyQualifiedStageName);
+                if(portImplementation != null) {
+                    portImplementations.add(portImplementation);
                 }
 
                 log.debug("Adding data flows for fields as {}: {}", portType.getName(), fieldsForStore);
