@@ -592,7 +592,7 @@ public class IGCOMRSMetadataCollection extends OMRSMetadataCollectionBase {
             // If we were unable to verify everything, throw exception indicating it is not a supported TypeDef
             if (!gaps.isEmpty()) {
                 log.warn("Unable to verify type definition {} due to missing property mappings for: {}", typeDef.getName(), String.join(", ", gaps));
-                raiseTypeDefNotSupportedException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED, methodName, typeDef.getName(), repositoryName);
+                raiseTypeDefNotSupportedException(IGCOMRSErrorCode.TYPEDEF_NOT_MAPPED,methodName,typeDef.getName() + " : " + String.join(", ", gaps), repositoryName);
                 return false;
             } else {
                 // Everything checked out, so return true
