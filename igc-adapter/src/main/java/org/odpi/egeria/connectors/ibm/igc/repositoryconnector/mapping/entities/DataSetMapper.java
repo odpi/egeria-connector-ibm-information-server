@@ -31,6 +31,7 @@ public class DataSetMapper extends AssetMapper {
 
         // Mapping to default
         addLiteralPropertyMapping("formula", null);
+        addLiteralPropertyMapping("formulaType", null);
 
     }
 
