@@ -86,7 +86,7 @@
 
     <properties>
         <open-metadata.version>4.1-SNAPSHOT</open-metadata.version>
-        <connector.version>4.0-SNAPSHOT</connector.version>
+        <connector.version>4.1-SNAPSHOT</connector.version>
         <!-- Level of Java  -->
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
