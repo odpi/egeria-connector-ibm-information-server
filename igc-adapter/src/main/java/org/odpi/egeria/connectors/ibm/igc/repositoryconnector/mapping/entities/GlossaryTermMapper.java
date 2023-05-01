@@ -48,6 +48,8 @@ public class GlossaryTermMapper extends ReferenceableMapper {
         addSimplePropertyMapping("example", "examples");
         addSimplePropertyMapping("abbreviation", "abbreviation");
         addSimplePropertyMapping("usage", "usage");
+        // default value mappings
+        addLiteralPropertyMapping("publishVersionIdentifier", null);
 
         // The classes to use for mapping any relationships
         addRelationshipMapper(SemanticAssignmentMapper.getInstance(null));
