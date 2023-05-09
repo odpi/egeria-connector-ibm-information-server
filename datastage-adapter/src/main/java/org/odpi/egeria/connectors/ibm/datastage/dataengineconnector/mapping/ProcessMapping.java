@@ -47,8 +47,6 @@ public class ProcessMapping extends BaseMapping {
             Dsjob jobObj = job.getJobObject();
             process = getSkeletonProcess(jobObj);
             if (process != null) {
-                PortAliasMapping portAliasMapping = new PortAliasMapping(cache);
-                process.setPortAliases(portAliasMapping.getForSequence(job));
                 addTransformationProjectDetails(jobObj, process);
             }
         } else {
@@ -94,11 +92,6 @@ public class ProcessMapping extends BaseMapping {
 
                     }
 
-                    PortAliasMapping portAliasMapping = new PortAliasMapping(cache);
-                    process.setPortAliases(Stream.concat(
-                            portAliasMapping.getForStages(job.getInputStages(), PortType.INPUT_PORT).stream(),
-                            portAliasMapping.getForStages(job.getOutputStages(), PortType.OUTPUT_PORT).stream())
-                            .collect(Collectors.toList()));
                     Set<DataFlow> dataFlows = new HashSet<>();
                     for (Link link : job.getAllLinks()) {
                         DataFlowMapping dataFlowMapping = new DataFlowMapping(cache);
