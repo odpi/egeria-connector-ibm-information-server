@@ -23,7 +23,7 @@ import java.util.List;
 class PortImplementationMapping extends BaseMapping {
 
     private static final Logger log = LoggerFactory.getLogger(PortImplementationMapping.class);
-
+    public static final String LINK_PREFIX = "::(link)=";
     /**
      * Default constructor to pass in the cache for re-use.
      *
@@ -51,7 +51,7 @@ class PortImplementationMapping extends BaseMapping {
             String linkQN = getFullyQualifiedName(link, fullyQualifiedStageName);
             if (linkQN != null) {
                 log.debug("Constructing PortImplementation for: {}", linkQN);
-                portImplementation.setQualifiedName(linkQN);
+                portImplementation.setQualifiedName(linkQN + LINK_PREFIX + link.getName());
                 portImplementation.setDisplayName(link.getName());
                 portImplementation.setPortType(portType);
                 SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache);
@@ -81,7 +81,7 @@ class PortImplementationMapping extends BaseMapping {
 
             Identity storeIdentity = getParentIdentity(fields.get(0));
             String storeName = getParentDisplayName(fields.get(0));
-            portImplementation.setQualifiedName(getFullyQualifiedName(storeIdentity, fullyQualifiedStageName));
+            portImplementation.setQualifiedName(getFullyQualifiedName(storeIdentity, fullyQualifiedStageName) + LINK_PREFIX + storeName);
             portImplementation.setDisplayName(storeName);
             portImplementation.setPortType(portType);
             SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache);
@@ -104,7 +104,7 @@ class PortImplementationMapping extends BaseMapping {
         PortImplementation portImplementation = null;
         if (stage != null) {
             portImplementation = new PortImplementation();
-            portImplementation.setQualifiedName(fullyQualifiedStageName);
+            portImplementation.setQualifiedName(fullyQualifiedStageName + LINK_PREFIX + stage.getName());
             portImplementation.setDisplayName(stage.getName());
             portImplementation.setPortType(PortType.OTHER);
             SchemaTypeMapping schemaTypeMapping = new SchemaTypeMapping(cache);

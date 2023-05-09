@@ -19,6 +19,7 @@ import java.util.List;
 public class SchemaTypeMapping extends BaseMapping {
 
     private static final Logger log = LoggerFactory.getLogger(SchemaTypeMapping.class);
+    private static final String SCHEMA_PREFIX = "::(schema)=";
 
     /**
      * Default constructor to pass in the cache for re-use.
@@ -42,7 +43,7 @@ public class SchemaTypeMapping extends BaseMapping {
             String schemaTypeQN = getFullyQualifiedName(storeIdentity, null);
             if (schemaTypeQN != null) {
                 log.debug("Constructing SchemaType for data store & fields: {}", schemaTypeQN);
-                schemaType.setQualifiedName(schemaTypeQN);
+                schemaType.setQualifiedName(schemaTypeQN + SCHEMA_PREFIX + storeIdentity.getName());
                 schemaType.setDisplayName(storeIdentity.getName());
                 InformationAsset store = new InformationAsset();
                 store.setId(storeIdentity.getRid());
@@ -75,7 +76,7 @@ public class SchemaTypeMapping extends BaseMapping {
             String schemaTypeQN = getFullyQualifiedName(link, fullyQualifiedStageName);
             if (schemaTypeQN != null) {
                 log.debug("Constructing SchemaType for job & link: {}", schemaTypeQN);
-                schemaType.setQualifiedName(schemaTypeQN + "::(schema)=" + link.getId());
+                schemaType.setQualifiedName(schemaTypeQN + SCHEMA_PREFIX + link.getName());
                 schemaType.setDisplayName(link.getId());
                 schemaType.setAuthor(link.getModifiedBy());
                 AttributeMapping attributeMapping = new AttributeMapping(cache);
@@ -105,7 +106,7 @@ public class SchemaTypeMapping extends BaseMapping {
             String schemaTypeQN = getFullyQualifiedName(storeIdentity, fullyQualifiedStageName);
             if (schemaTypeQN != null) {
                 log.debug("Constructing SchemaType for store & fields, within stage: {}", schemaTypeQN);
-                schemaType.setQualifiedName(schemaTypeQN);
+                schemaType.setQualifiedName(schemaTypeQN + SCHEMA_PREFIX + stage.getName());
                 schemaType.setDisplayName(storeIdentity.getName());
                 schemaType.setAuthor((String) igcRestClient.getPropertyByName(stage, "modified_by"));
                 AttributeMapping attributeMapping = new AttributeMapping(cache);
@@ -132,7 +133,7 @@ public class SchemaTypeMapping extends BaseMapping {
         if (stage != null) {
             schemaType = new SchemaType();
             log.debug("Constructing SchemaType for stage variables of: {}", fullyQualifiedStageName);
-            schemaType.setQualifiedName(fullyQualifiedStageName);
+            schemaType.setQualifiedName(fullyQualifiedStageName + SCHEMA_PREFIX + stage.getName());
             schemaType.setDisplayName(stage.getName());
 
             schemaType.setAuthor((String) igcRestClient.getPropertyByName(stage, "modified_by"));
