@@ -48,6 +48,8 @@ public class GlossaryTermMapper extends ReferenceableMapper {
         addSimplePropertyMapping("example", "examples");
         addSimplePropertyMapping("abbreviation", "abbreviation");
         addSimplePropertyMapping("usage", "usage");
+        // default value mappings
+        addLiteralPropertyMapping("publishVersionIdentifier", null);
 
         // Mapping to default
         addLiteralPropertyMapping("publishVersionIdentifier", null);
