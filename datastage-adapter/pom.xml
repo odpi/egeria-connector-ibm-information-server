@@ -87,7 +87,6 @@
             <artifactId>http-helper</artifactId>
             <scope>provided</scope>
         </dependency>
-
     </dependencies>
 
     <build>

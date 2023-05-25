@@ -140,7 +140,7 @@ public class ConnectorHelper {
     public static List<Process>  mapChangedProcesses(DataStageCache cache, List<ProcessHierarchy> processHierarchies, LineageMode mode) throws IGCException {
         List<Process> processes = new ArrayList<>();
         List<DataStageJob> seqList = new ArrayList<>();
-        // Translate changed jobs first, to build up appropriate PortAliases list
+        // Translate changed jobs first, to build up appropriate process hierarchy list
         for (DataStageJob detailedJob : cache.getAllJobs()) {
             if (detailedJob.getType().equals(DataStageJob.JobType.SEQUENCE)) {
                 seqList.add(detailedJob);
@@ -235,7 +235,7 @@ public class ConnectorHelper {
         log.debug("Load process for sequence...");
         List<Process> processes = new ArrayList<>();
         // Create a copy of the map, as the next step could update it by caching additional job details
-        // necessary for the port aliases
+        // necessary for the process hierarchies
         Set<String> alreadyOutputProcesses = cache.getCachedProcessRids();
         Process process = cache.getProcessByRid(job.getJobObject().getId());
         if (process != null) {

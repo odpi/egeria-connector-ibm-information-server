@@ -4,8 +4,10 @@ package org.odpi.egeria.connectors.ibm.datastage.dataengineconnector;
 
 import org.odpi.egeria.connectors.ibm.datastage.dataengineconnector.mocks.MockConnection;
 import org.odpi.egeria.connectors.ibm.information.server.mocks.MockConstants;
-import org.odpi.openmetadata.accessservices.dataengine.model.*;
+import org.odpi.openmetadata.accessservices.dataengine.model.DataFlow;
+import org.odpi.openmetadata.accessservices.dataengine.model.Engine;
 import org.odpi.openmetadata.accessservices.dataengine.model.Process;
+import org.odpi.openmetadata.accessservices.dataengine.model.SchemaType;
 import org.odpi.openmetadata.frameworks.connectors.ConnectorBroker;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectionCheckedException;
 import org.odpi.openmetadata.frameworks.connectors.ffdc.ConnectorCheckedException;
@@ -15,14 +17,21 @@ import org.odpi.openmetadata.frameworks.connectors.properties.beans.Endpoint;
 import org.odpi.openmetadata.http.HttpHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertThrows;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Test the connector(s) using the mocked server resources.
@@ -152,11 +161,6 @@ public class ConnectorTest {
         assertFalse(processes.isEmpty());
         for (Process process : processes) {
             assertNotNull(process.getQualifiedName());
-            List<PortImplementation> portImplementations = process.getPortImplementations();
-            List<PortAlias> portAliases = process.getPortAliases();
-            boolean hasOneOrTheOther = ((portImplementations == null || portImplementations.isEmpty()) && (portAliases != null && !portAliases.isEmpty()))
-                    || ((portImplementations != null && !portImplementations.isEmpty()) && (portAliases == null || portAliases.isEmpty()));
-            assertTrue(hasOneOrTheOther);
         }
     }
 

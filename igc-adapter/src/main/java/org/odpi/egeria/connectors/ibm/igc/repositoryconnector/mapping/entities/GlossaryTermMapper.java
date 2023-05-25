@@ -51,6 +51,9 @@ public class GlossaryTermMapper extends ReferenceableMapper {
         // default value mappings
         addLiteralPropertyMapping("publishVersionIdentifier", null);
 
+        // Mapping to default
+        addLiteralPropertyMapping("publishVersionIdentifier", null);
+
         // The classes to use for mapping any relationships
         addRelationshipMapper(SemanticAssignmentMapper.getInstance(null));
         addRelationshipMapper(TermAnchorMapper.getInstance(null));
